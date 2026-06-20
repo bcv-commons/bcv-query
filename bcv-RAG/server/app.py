@@ -1,0 +1,86 @@
+"""FastAPI app. Mounts REST routes under /api and MCP at /mcp."""
+from __future__ import annotations
+
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+
+from indexer.env import load_env
+from server.cors import allowed_origins
+from server.ratelimit import limiter
+from server.routes import ask as ask_route
+from server.routes import chunks as chunks_route
+from server.routes import concordance as concordance_route
+from server.routes import cross_references as xref_route
+from server.routes import entities as entities_route
+from server.routes import health as health_route
+from server.routes import search as search_route
+from server.routes import topics as topics_route
+from server.routes import trees as trees_route
+from server.routes import corpus as corpus_route
+from server.routes import study as study_route
+from server.mcp import server as mcp_server
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    load_env()
+    yield
+
+
+app = FastAPI(title="bcv-query API", version="2.0.0", lifespan=lifespan)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins(),
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+    allow_credentials=False,
+)
+
+# REST surface
+app.include_router(health_route.router, prefix="/api")
+app.include_router(chunks_route.router, prefix="/api")
+app.include_router(search_route.router, prefix="/api")
+app.include_router(ask_route.router, prefix="/api")
+app.include_router(trees_route.router, prefix="/api")
+app.include_router(topics_route.router, prefix="/api")
+app.include_router(entities_route.router, prefix="/api")
+app.include_router(xref_route.router, prefix="/api")
+app.include_router(concordance_route.router, prefix="/api")
+app.include_router(corpus_route.router, prefix="/api")
+app.include_router(study_route.router, prefix="/api")
+
+# MCP surface (mounted at /mcp; not under /api)
+app.include_router(mcp_server.router)
+
+
+@app.get("/")
+def root() -> dict:
+    return {
+        "name": "bcv-query",
+        "version": "2.0.0",
+        "endpoints": {
+            "rest": [
+                "/api/health",
+                "/api/search",
+                "/api/ask",
+                "/api/study",
+                "/api/chunk/{id}",
+                "/api/trees", "/api/tree/{name}",
+                "/api/topics", "/api/topic/{id}",
+                "/api/entities", "/api/entity/{id}",
+                "/api/cross-references/{bbcccvvv}",
+                "/api/concordance/{word}",
+                "/api/books", "/api/clauses", "/api/passage", "/api/context",
+            ],
+            "mcp": "/mcp",
+        },
+        "docs": {"openapi": "/docs", "redoc": "/redoc"},
+    }

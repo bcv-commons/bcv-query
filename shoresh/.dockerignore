@@ -1,0 +1,20 @@
+# Built/derivable data — rebuilt inside the image at build time
+spine/spine.db
+spine/spine.db-*
+spine/data/
+lxx/lxx.db
+lxx/lxx.db-*
+lxx/data/
+
+# clause vectors live on the /data volume, never in the image
+data/
+clauses_*.npy
+clauses_*.sqlite
+
+# local cruft
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.DS_Store
+.env

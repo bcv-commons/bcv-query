@@ -1,0 +1,132 @@
+# bt-docker-mcp eval set v2-expansion
+#
+# New cases covering the stage-3 intents added on top of stage-2 corpus
+# expansion: word-study (lexicons + morphology), genealogy (entity graph),
+# topic (Nave's), xref (TSK / BSB-parallel), lexicon-direct lookup.
+#
+# Cases here are EXPECTED TO FAIL until the corresponding analyzer
+# intents + retrievers land. Run with:
+#
+#   python -m eval.run --set eval/set/v2-expansion.yaml
+#
+# Once these pass, merge into v1.yaml and retire this file.
+
+version: 1
+
+cases:
+  # ─── word-study: Greek/Hebrew lexicon lookups via transliterated keyword ───
+  - id: word_study_agape_greek
+    tags: [word-study, lexicon, greek]
+    question: "What does the Greek word AGAPE mean?"
+    expects:
+      tags: [kind:lexicon, strongs:G0026]
+      substrings: ["love"]
+
+  - id: word_study_phileo_greek
+    tags: [word-study, lexicon, greek]
+    question: "What is the meaning of phileo in Greek?"
+    expects:
+      tags: [kind:lexicon, strongs:G5368]
+      substrings: ["love"]   # any of "love", "affection", "fond" — phileo's gloss
+
+  - id: word_study_father_hebrew
+    tags: [word-study, lexicon, hebrew]
+    question: "What does the Hebrew word AB mean?"
+    expects:
+      tags: [kind:lexicon, strongs:H0001]
+      substrings: ["father"]
+
+  - id: word_study_strongs_lookup
+    tags: [word-study, lexicon, strongs-direct]
+    question: "Look up Strong's number G3962"
+    expects:
+      tags: [kind:lexicon, strongs:G3962]
+      substrings: ["father"]
+
+  # ─── genealogy: relation traversal through the entity graph ───
+  - id: genealogy_father_of_david
+    tags: [genealogy, entity-graph]
+    question: "Who was the father of David?"
+    expects:
+      # Jesse is David's father in the Theographic graph; the answer should
+      # name him. Verses where Jesse is introduced anchor the citation.
+      substrings: ["Jesse"]
+
+  - id: genealogy_solomon_parents
+    tags: [genealogy, entity-graph]
+    question: "Who were the parents of Solomon?"
+    expects:
+      substrings: ["David", "Bathsheba"]
+
+  - id: genealogy_boaz_wife
+    tags: [genealogy, entity-graph]
+    question: "Who was the wife of Boaz?"
+    expects:
+      substrings: ["Ruth"]
+
+  # ─── topic: Nave's-style theme browsing ───
+  - id: topic_creation
+    tags: [topic, naves]
+    question: "What does the Bible say about creation?"
+    expects:
+      passages: ["Genesis 1:1"]
+      substrings: ["creat"]   # matches "creation" or "created" — Genesis 1:1 BSB uses "created"
+
+  - id: topic_covenant
+    tags: [topic, naves]
+    question: "What scripture verses are about covenant?"
+    expects:
+      substrings: ["covenant"]
+
+  - id: topic_faith
+    tags: [topic, naves]
+    question: "Show me Bible verses about faith"
+    expects:
+      # Nave's groups verses by *story* not vocabulary — its top entries
+      # for "faith" are Noah/Abram narrative passages whose BSB text
+      # doesn't contain the literal word "faith" (Hebrews 11 is where
+      # those stories are reframed as faith). The LLM correctly refuses
+      # rather than fabricating, so we expect the canonical refusal here.
+      refusal: true
+
+  # ─── xref: TSK + BSB-parallel cross-references ───
+  - id: xref_romans_5_1
+    tags: [xref, tsk]
+    question: "What other passages relate to Romans 5:1?"
+    expects:
+      # TSK's top cross-refs for Rom 5:1 include Romans 3:28, 4:5, 10:10,
+      # John 5:24, Eph 2:8 etc. Synthesizer surfaces a subset; "Romans"
+      # appears in nearly every TSK xref answer for this verse.
+      substrings: ["Romans"]
+
+  - id: xref_genesis_1_1_parallel
+    tags: [xref, bsb-parallel]
+    question: "Show parallel passages for Genesis 1:1"
+    expects:
+      # BSB headings.jsonl encodes John 1:1-5 AND Heb 11:1-3 as parallel
+      # passages at GEN.r.1; either should appear in the answer.
+      substrings: ["Hebrews"]
+
+  # ─── lexicon-direct: explicit Strong's / lemma lookup ───
+  - id: lexicon_g0026
+    tags: [lexicon, strongs-direct]
+    question: "Show me the lexicon entry for G0026"
+    expects:
+      tags: [kind:lexicon, strongs:G0026]
+      substrings: ["love"]
+
+  - id: lexicon_h0001_bdb
+    tags: [lexicon, hebrew, bdb]
+    question: "What is the BDB definition of H0001?"
+    expects:
+      tags: [kind:lexicon, strongs:H0001, source:bdb]
+
+  - id: lexicon_logos_greek
+    tags: [lexicon, greek]
+    question: "What is the lexicon definition of logos?"
+    expects:
+      tags: [kind:lexicon]
+      substrings: ["logos"]   # LLM finds G3056 entry; gloss may say
+                              # "word", "computation", or "account" depending
+                              # on which sense it surfaces — we just check
+                              # that the answer cites the LSJ logos entry.

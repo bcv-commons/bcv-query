@@ -1,0 +1,43 @@
+# Build context = repo ROOT (build with: docker build -f bcv-RAG/Dockerfile .).
+# The Dockerfile only COPYs bcv-RAG/{indexer,ingest,query,server,corpus,
+# resource_paths.py, */requirements.txt} and resources/. Everything else is
+# excluded so the context stays small (~5 GB → ~30 MB).
+
+# version control / tooling
+.git
+.github
+.gitignore
+**/.claude
+**/.codex
+**/.agents
+**/.wrangler
+**/node_modules
+
+# other services / examples / docs — not part of the bcv-RAG image
+shoresh/
+example/
+internal-docs/
+
+# virtualenvs / caches / build junk
+**/.venv
+**/venv
+**/.cache
+**/.pytest_cache
+**/__pycache__
+**/*.pyc
+**/.DS_Store
+
+# big generated/data files (built locally or volume-mounted, never shipped)
+**/*.db
+**/*.db-journal
+**/*.db-wal
+**/*.db-shm
+**/*.npy
+
+# bcv-RAG bits not needed in the image
+bcv-RAG/scripts/
+bcv-RAG/tools/
+bcv-RAG/ingest/_staging/
+bcv-RAG/Dockerfile
+bcv-RAG/README.md
+bcv-RAG/.dockerignore

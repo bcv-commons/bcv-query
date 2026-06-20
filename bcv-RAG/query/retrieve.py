@@ -1,0 +1,1200 @@
+"""Hybrid retrieval — FTS5 + passage + tag + (v2) vector ANN, fused via RRF.
+
+Vector retrieval is OPTIONAL: if sqlite-vec isn't loaded or no `query_vec`
+is supplied, the v1 retrievers still run on their own.
+"""
+from __future__ import annotations
+
+import logging
+import os
+import re
+import sqlite3
+from dataclasses import dataclass
+
+import httpx
+
+from .analyzer import QueryAnalysis
+from lang import canon, to_web
+
+logger = logging.getLogger(__name__)
+
+CORPUS_URL = os.environ.get("CORPUS_URL", "").rstrip("/")  # legacy; local engine preferred
+
+
+@dataclass
+class Hit:
+    chunk_id: str
+    score: float
+    retrievers: list[str]
+
+
+# ---------- candidate filtering ----------
+# Only passages act as a HARD filter on the candidate set. Tags are treated
+# as ranking BOOSTS (via tag_search → RRF) — that way an analyzer mis-guess
+# can never exclude relevant content; it just doesn't help.
+
+def _docs_overlapping_passages(db: sqlite3.Connection, passages: list[tuple[int, int]]) -> set[str] | None:
+    """Set of doc_ids whose passage ranges overlap any of `passages`. None = no filter."""
+    if not passages:
+        return None
+    where = " OR ".join("(start_bbcccvvv <= ? AND end_bbcccvvv >= ?)" for _ in passages)
+    params: list[int] = []
+    for s, e in passages:
+        params.extend([e, s])  # query end >= ref.start AND query start <= ref.end
+    rows = db.execute(f"SELECT DISTINCT doc_id FROM passage_refs WHERE {where}", params).fetchall()
+    return {r[0] for r in rows}
+
+
+def _docs_by_source(db: sqlite3.Connection, source: str | None) -> set[str] | None:
+    """Restrict candidate docs to one source. None / 'all' = no filter.
+
+    'door43'  = chunks NOT carrying `resource:aquifer`
+    'aquifer' = chunks carrying `resource:aquifer`
+    """
+    if not source or source == "all":
+        return None
+    if source == "aquifer":
+        rows = db.execute(
+            "SELECT DISTINCT doc_id FROM tags WHERE tag = 'resource:aquifer'"
+        ).fetchall()
+        return {r[0] for r in rows}
+    if source == "door43":
+        rows = db.execute(
+            "SELECT id FROM documents "
+            "WHERE id NOT IN (SELECT doc_id FROM tags WHERE tag = 'resource:aquifer')"
+        ).fetchall()
+        return {r[0] for r in rows}
+    raise ValueError(f"unknown source filter: {source!r} (expected 'door43', 'aquifer', or 'all')")
+
+
+def _intersect_filters(*filters: set[str] | None) -> set[str] | None:
+    """Intersect multiple optional doc-id filters. None means 'no constraint'."""
+    out: set[str] | None = None
+    for f in filters:
+        if f is None:
+            continue
+        out = f if out is None else (out & f)
+    return out
+
+
+# v2 content taxonomy — the kinds existing retrievers know how to rank
+# against. Defense-in-depth filter: v3 expansion content (lexicons,
+# morphology, …) is already excluded from `chunks_fts` by the per-kind
+# FTS routing in `indexer.build` (see schema.sql + V3_KIND_TO_FTS), so
+# fts_search is naturally clean. This filter remains useful for:
+#   - title_search (documents_fts is not yet partitioned per kind, so v3
+#     doc titles can still leak via title-FTS — e.g., a lexicon entry's
+#     "LSJ — ἀγάπη …" title matching a stemmed English keyword)
+#   - vector_search once stage 3 embeds v3 content
+# TODO(stage-3): drop this gate when intent-routed retrievers land.
+_V2_KIND_TAGS: tuple[str, ...] = (
+    "kind:scripture", "kind:translator-note", "kind:question",
+    "kind:term", "kind:methodology", "kind:study-note",
+    "kind:book-intro", "kind:map", "kind:image",
+    # Section headings & full-Bible BSB are v3 expansion content; stage-3
+    # retrievers will reach them via chunks_fts_section_heading and
+    # chunks_fts_bible respectively.
+)
+
+
+def _docs_v2_only(db: sqlite3.Connection) -> set[str]:
+    """Doc-ids tagged with a v2 taxonomy `kind:*` value, EXCLUDING Aquifer.
+
+    Aquifer shares v2 kinds (study-note/term/question/…) but is isolated to its
+    own retriever (aquifer_search) — subtract it here so its large multilingual
+    corpus never enters the primary fts/title/passage/vec retrievers (which all
+    intersect this set as their doc_filter). Without this it leaks via every
+    generic retriever and crowds out Door43 primary content.
+    """
+    try:
+        placeholders = ",".join("?" * len(_V2_KIND_TAGS))
+        rows = db.execute(
+            f"SELECT DISTINCT doc_id FROM tags WHERE tag IN ({placeholders})",
+            _V2_KIND_TAGS,
+        ).fetchall()
+        aquifer = {r[0] for r in db.execute(
+            "SELECT doc_id FROM tags WHERE tag = 'resource:aquifer'").fetchall()}
+        return {r[0] for r in rows} - aquifer
+    except sqlite3.OperationalError:
+        return set()
+
+
+# ---------- retrievers ----------
+
+def fts_search(db: sqlite3.Connection, query: str, *,
+               doc_filter: set[str] | None = None, limit: int = 50) -> list[Hit]:
+    """FTS5 match on chunks_fts, optionally constrained to a doc_id whitelist."""
+    if not query.strip():
+        return []
+    sql = (
+        "SELECT chunks.id, rank "
+        "FROM chunks_fts "
+        "JOIN chunks ON chunks_fts.rowid = chunks.rowid "
+        "WHERE chunks_fts MATCH ?"
+    )
+    params: list = [query]
+    if doc_filter is not None:
+        if not doc_filter:
+            return []
+        placeholders = ",".join("?" * len(doc_filter))
+        sql += f" AND chunks.doc_id IN ({placeholders})"
+        params.extend(doc_filter)
+    sql += " ORDER BY rank LIMIT ?"
+    params.append(limit)
+    try:
+        rows = db.execute(sql, params).fetchall()
+    except sqlite3.OperationalError as e:
+        # FTS5 syntax errors (e.g. user query contains reserved chars) — degrade gracefully.
+        print(f"fts_search: skipping due to {e!r}", flush=True)
+        return []
+    # FTS5 rank: lower is better; negate so larger = better for downstream UX.
+    return [Hit(chunk_id=r[0], score=-float(r[1]), retrievers=["fts"]) for r in rows]
+
+
+def passage_search(db: sqlite3.Connection, passages: list[tuple[int, int]], *,
+                   doc_filter: set[str] | None = None, limit: int = 50) -> list[Hit]:
+    """One Hit per overlapping doc — chunk_index=0 is the canonical chunk."""
+    if not passages:
+        return []
+    where = " OR ".join("(passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ?)" for _ in passages)
+    params: list = []
+    for s, e in passages:
+        params.extend([e, s])
+    sql = (
+        "SELECT DISTINCT chunks.id, passage_refs.start_bbcccvvv "
+        "FROM passage_refs "
+        "JOIN chunks ON chunks.doc_id = passage_refs.doc_id AND chunks.chunk_index = 0 "
+        f"WHERE {where}"
+    )
+    if doc_filter is not None:
+        if not doc_filter:
+            return []
+        placeholders = ",".join("?" * len(doc_filter))
+        sql += f" AND chunks.doc_id IN ({placeholders})"
+        params.extend(doc_filter)
+    sql += " ORDER BY passage_refs.start_bbcccvvv LIMIT ?"
+    params.append(limit)
+    rows = db.execute(sql, params).fetchall()
+    n = len(rows)
+    # Synthetic descending score so RRF treats earlier hits as higher rank.
+    return [Hit(chunk_id=r[0], score=1.0 - i / max(1, n), retrievers=["passage"]) for i, r in enumerate(rows)]
+
+
+def scripture_search(
+    db: sqlite3.Connection,
+    passages: list[tuple[int, int]],
+    query_vec: list[float] | None,
+    *,
+    fts_query: str = "",
+    limit: int = 25,
+) -> list[Hit]:
+    """Two-pass `kind:scripture` retrieval within the passage filter.
+
+    Pass 1 — vec-rank scripture chunks (when query_vec available).
+    Pass 2 — FTS5 rank scripture chunks against `fts_query` (when present).
+
+    Both passes feed RRF, so a verse that matches FTS keywords ("must be
+    blameless") OR is semantically close to the question ranks well even
+    when the embedding alone misses it. Without this dual signal, vec
+    ranking with text-embedding-3-small often prefers greeting/closing
+    verses over the actual answer-bearing verses on thematic questions.
+
+    Why this exists: when a passage filter is active, the actual verse text
+    is often the highest-value content — but commentary uses the user's
+    vocabulary directly while verses use biblical vocabulary, so naive
+    full-corpus retrieval lets commentary push scripture below top-K. This
+    retriever contributes an INDEPENDENT scripture-only ranking that RRF
+    then folds in alongside the general retrievers.
+    """
+    # Build the scripture doc-id filter. With explicit passages, restrict to
+    # docs overlapping them; without passages (thematic queries), restrict to
+    # ALL `kind:scripture` docs so vec/FTS still get a scripture-only ranking
+    # to RRF in. Without this fallback, thematic queries got their scripture
+    # chunks displaced once Voyage's higher-confidence vec started ranking
+    # commentary/study-notes above raw verse text.
+    if passages:
+        where_passage = " OR ".join(
+            "(passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ?)"
+            for _ in passages
+        )
+        params: list = []
+        for s, e in passages:
+            params.extend([e, s])
+        rows = db.execute(
+            f"""
+            SELECT DISTINCT passage_refs.doc_id
+            FROM passage_refs
+            JOIN tags ON tags.doc_id = passage_refs.doc_id AND tags.tag = 'kind:scripture'
+            WHERE {where_passage}
+            """,
+            params,
+        ).fetchall()
+    else:
+        # No passages → all kind:scripture docs.
+        rows = db.execute(
+            "SELECT DISTINCT doc_id FROM tags WHERE tag = 'kind:scripture'"
+        ).fetchall()
+    scripture_doc_ids = {r[0] for r in rows}
+    if not scripture_doc_ids:
+        return []
+
+    out: list[Hit] = []
+    # Pass 1 — vec-ranked scripture (broader limit; RRF handles dedup).
+    if query_vec:
+        for h in vector_search(db, query_vec, doc_filter=scripture_doc_ids, limit=limit):
+            out.append(Hit(chunk_id=h.chunk_id, score=h.score, retrievers=["scripture"]))
+    # Pass 2 — FTS5-ranked scripture. Catches "must" / "blameless" / etc.
+    # when vec ranking under-weights them.
+    if fts_query.strip():
+        for h in fts_search(db, fts_query, doc_filter=scripture_doc_ids, limit=limit):
+            out.append(Hit(chunk_id=h.chunk_id, score=h.score, retrievers=["scripture"]))
+    return out
+
+
+def title_search(
+    db: sqlite3.Connection,
+    query: str,
+    *,
+    doc_filter: set[str] | None = None,
+    limit: int = 20,
+) -> list[Hit]:
+    """FTS5 over document titles — pinpoint hits for entity / term lookups.
+
+    Why: chunk-body FTS saturates with noise on entity questions (every
+    narrative passage with the entity's name competes). Title FTS is
+    discriminative: TW articles, book intros, and named verses get titles
+    like "TW — Boaz" / "Aquifer — Titus 1:1" that pin the entity hit.
+    """
+    if not query.strip():
+        return []
+    sql = (
+        "SELECT documents.id "
+        "FROM documents_fts "
+        "JOIN documents ON documents_fts.rowid = documents.rowid "
+        "WHERE documents_fts MATCH ?"
+    )
+    params: list = [query]
+    if doc_filter is not None:
+        if not doc_filter:
+            return []
+        placeholders = ",".join("?" * len(doc_filter))
+        sql += f" AND documents.id IN ({placeholders})"
+        params.extend(doc_filter)
+    sql += " ORDER BY rank LIMIT ?"
+    params.append(limit)
+    try:
+        doc_rows = db.execute(sql, params).fetchall()
+    except sqlite3.OperationalError as e:
+        # FTS5 syntax errors on user input — degrade gracefully.
+        print(f"title_search: skipping due to {e!r}", flush=True)
+        return []
+    if not doc_rows:
+        return []
+
+    # Map matching doc_ids → their canonical (chunk_index=0) chunks.
+    doc_ids = [r[0] for r in doc_rows]
+    placeholders = ",".join("?" * len(doc_ids))
+    chunk_rows = db.execute(
+        f"SELECT id, doc_id FROM chunks WHERE doc_id IN ({placeholders}) AND chunk_index = 0",
+        doc_ids,
+    ).fetchall()
+    chunk_by_doc = {r[1]: r[0] for r in chunk_rows}
+    n = len(doc_ids)
+    hits: list[Hit] = []
+    for i, did in enumerate(doc_ids):
+        chunk_id = chunk_by_doc.get(did)
+        if chunk_id:
+            hits.append(Hit(chunk_id=chunk_id, score=1.0 - i / max(1, n), retrievers=["title"]))
+    return hits
+
+
+def vector_search(
+    db: sqlite3.Connection,
+    query_vec: list[float] | None,
+    *,
+    doc_filter: set[str] | None = None,
+    limit: int = 50,
+    overfetch: int = 4,
+) -> list[Hit]:
+    """KNN over chunks_vec using sqlite-vec. Returns [] if vec unavailable."""
+    if not query_vec:
+        return []
+    try:
+        # Existence check — fails fast if chunks_vec isn't there or sqlite-vec isn't loaded.
+        db.execute("SELECT count(*) FROM chunks_vec LIMIT 1")
+    except sqlite3.OperationalError:
+        return []
+
+    from indexer.embed import serialize_vector  # lazy: avoids importing on v1-only paths
+
+    qvec = serialize_vector(query_vec)
+    # sqlite-vec rejects LIMIT alongside `k = ?` on its virtual tables.
+    # Use `k` to bound the ANN scan; clamp client-side after fetch.
+    k = max(limit * overfetch, limit)
+    try:
+        if doc_filter is None:
+            rows = db.execute(
+                "SELECT chunk_id, distance FROM chunks_vec "
+                "WHERE embedding MATCH ? AND k = ? "
+                "ORDER BY distance",
+                (qvec, limit),
+            ).fetchall()
+        else:
+            if not doc_filter:
+                return []
+            placeholders = ",".join("?" * len(doc_filter))
+            # Outer SELECT can use LIMIT freely — only the chunks_vec MATCH is restricted.
+            rows = db.execute(
+                f"""
+                WITH knn AS (
+                    SELECT chunk_id, distance
+                    FROM chunks_vec
+                    WHERE embedding MATCH ? AND k = ?
+                )
+                SELECT knn.chunk_id, knn.distance
+                FROM knn
+                JOIN chunks ON chunks.id = knn.chunk_id
+                WHERE chunks.doc_id IN ({placeholders})
+                ORDER BY knn.distance
+                LIMIT ?
+                """,
+                [qvec, k, *doc_filter, limit],
+            ).fetchall()
+    except sqlite3.OperationalError as e:
+        print(f"vector_search: skipping due to {e!r}", flush=True)
+        return []
+
+    # cosine distance — lower is closer; negate so larger == more relevant.
+    return [Hit(chunk_id=r[0], score=-float(r[1]), retrievers=["vec"]) for r in rows]
+
+
+def tag_search(db: sqlite3.Connection, tags: list[str], *, limit: int = 50) -> list[Hit]:
+    if not tags:
+        return []
+    placeholders = ",".join("?" * len(tags))
+    # Aquifer is reachable ONLY via aquifer_search (its own FTS + tuned weight).
+    # Exclude it here so its book:/acai: tags don't leak it into primary tag
+    # retrieval and crowd out Door43 notes (it has no Strong's tags anyway).
+    sql = (
+        "SELECT DISTINCT chunks.id "
+        "FROM tags "
+        "JOIN chunks ON chunks.doc_id = tags.doc_id AND chunks.chunk_index = 0 "
+        f"WHERE tags.tag IN ({placeholders}) "
+        "AND chunks.doc_id NOT IN (SELECT doc_id FROM tags WHERE tag = 'resource:aquifer') "
+        "LIMIT ?"
+    )
+    params = list(tags) + [limit]
+    rows = db.execute(sql, params).fetchall()
+    n = len(rows)
+    return [Hit(chunk_id=r[0], score=1.0 - i / max(1, n), retrievers=["tag"]) for i, r in enumerate(rows)]
+
+
+# ---------- v3 retrievers (stage-3) ----------
+# These target the per-kind FTS tables and the entity/topic/xref auxiliary
+# tables populated in stage 2. Unlike the v2 retrievers, they ignore the
+# `v2_filter` — they explicitly seek out v3 expansion content. They return
+# empty lists when their structured inputs (Strong's tags, entity_query,
+# topic name, etc.) aren't populated by the analyzer, so it's safe to always
+# call them; intent-weighted RRF handles whether their hits surface.
+
+def _strongs_lemma_filter(tags: list[str]) -> tuple[list[str], list[str]]:
+    """Split analyzer-extracted tags into Strong's vs lemma subsets."""
+    strongs = [t for t in tags if t.startswith("strongs:")]
+    lemmas = [t for t in tags if t.startswith("lemma:")]
+    return strongs, lemmas
+
+
+def lexicon_search(
+    db: sqlite3.Connection,
+    *,
+    fts_query: str,
+    word_study_terms: list[str],
+    strongs_tags: list[str],
+    lemma_tags: list[str],
+    limit: int = 50,
+) -> list[Hit]:
+    """Lookup over chunks_fts_lexicon plus tag joins on strongs:/lemma:.
+
+    Three signal sources:
+      1. Strong's-number tags (strongest — exact lookup)
+      2. Lemma transliterations (also tag-based)
+      3. FTS over chunks_fts_lexicon for English keywords / paraphrased queries
+
+    Strong's hits get a synthetic high score so they outrank FTS noise.
+    """
+    hits: dict[str, float] = {}
+
+    # 1. Strong's tag exact match
+    if strongs_tags:
+        placeholders = ",".join("?" * len(strongs_tags))
+        rows = db.execute(
+            "SELECT DISTINCT chunks.id "
+            "FROM tags JOIN chunks ON chunks.doc_id = tags.doc_id "
+            "JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:lexicon' "
+            f"WHERE tags.tag IN ({placeholders}) "
+            "LIMIT ?",
+            [*strongs_tags, limit],
+        ).fetchall()
+        for i, (cid,) in enumerate(rows):
+            hits[cid] = max(hits.get(cid, 0.0), 1.0 - i / max(1, len(rows)))
+
+    # 2. Lemma tag match — exact preferred over ASCII-stripped prefix.
+    #
+    # LSJ/Abbott-Smith transliterations contain diacritics ("agapē"); after
+    # NFKD-normalize+strip in ingest, the tag is `lemma:agape` for those.
+    # But some legacy slugs may have lost a trailing vowel; we keep a prefix
+    # fallback for that case. Critically: the EXACT match must outrank the
+    # prefix match (e.g., `lemma:logos` should beat `lemma:logomacheō` for
+    # the user's "logos" query). Two-pass query handles ranking.
+    exact_candidates = list(lemma_tags)
+    prefix_candidates: list[str] = []
+    for w in word_study_terms:
+        slug = re.sub(r"[^a-z0-9]+", "", w.lower())
+        if not slug:
+            continue
+        exact_candidates.append(f"lemma:{slug}")
+        if len(slug) >= 4:
+            prefix_candidates.append(f"lemma:{slug[:max(3, len(slug)-1)]}")
+
+    # Pass 1: exact-match lemmas (highest tier — score 1.0 - i/n)
+    seen_via_exact: set[str] = set()
+    if exact_candidates:
+        placeholders = ",".join("?" * len(exact_candidates))
+        rows = db.execute(
+            "SELECT DISTINCT chunks.id FROM tags "
+            "JOIN chunks ON chunks.doc_id = tags.doc_id "
+            "JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:lexicon' "
+            f"WHERE tags.tag IN ({placeholders}) LIMIT ?",
+            [*exact_candidates, limit],
+        ).fetchall()
+        for i, (cid,) in enumerate(rows):
+            hits[cid] = max(hits.get(cid, 0.0), 0.95 - i / max(1, len(rows)) * 0.1)
+            seen_via_exact.add(cid)
+
+    # Pass 2: prefix-match (only fills slots NOT taken by exact match;
+    # capped at lower score so exact still wins.)
+    if prefix_candidates:
+        for prefix in prefix_candidates:
+            rows = db.execute(
+                "SELECT DISTINCT chunks.id FROM tags "
+                "JOIN chunks ON chunks.doc_id = tags.doc_id "
+                "JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:lexicon' "
+                "WHERE tags.tag LIKE ? LIMIT ?",
+                (prefix + "%", limit),
+            ).fetchall()
+            for i, (cid,) in enumerate(rows):
+                if cid in seen_via_exact:
+                    continue
+                hits[cid] = max(hits.get(cid, 0.0), 0.7 - i / max(1, len(rows)) * 0.2)
+
+    # 3. FTS over the lexicon body
+    if fts_query.strip():
+        try:
+            rows = db.execute(
+                "SELECT chunks.id, rank "
+                "FROM chunks_fts_lexicon "
+                "JOIN chunks ON chunks.rowid = chunks_fts_lexicon.rowid "
+                "WHERE chunks_fts_lexicon MATCH ? ORDER BY rank LIMIT ?",
+                (fts_query, limit),
+            ).fetchall()
+            n = len(rows)
+            for i, (cid, _rank) in enumerate(rows):
+                fts_score = 0.7 - i / max(1, n) * 0.5
+                hits[cid] = max(hits.get(cid, 0.0), fts_score)
+        except sqlite3.OperationalError as e:
+            print(f"lexicon_search: FTS5 skipped ({e!r})", flush=True)
+
+    ranked = sorted(hits.items(), key=lambda kv: kv[1], reverse=True)
+    return [Hit(chunk_id=cid, score=score, retrievers=["lexicon"]) for cid, score in ranked]
+
+
+def morphology_search(
+    db: sqlite3.Connection,
+    *,
+    strongs_tags: list[str],
+    lemma_tags: list[str],
+    passages: list[tuple[int, int]],
+    limit: int = 50,
+) -> list[Hit]:
+    """Tag- or passage-based lookup over chunks tagged kind:morphology
+    (verse-level word-by-word parses)."""
+    hits: dict[str, float] = {}
+
+    # Tag-based (find verses containing this Strong's / lemma)
+    tag_filters = [*strongs_tags, *lemma_tags]
+    if tag_filters:
+        placeholders = ",".join("?" * len(tag_filters))
+        rows = db.execute(
+            "SELECT DISTINCT chunks.id "
+            "FROM tags "
+            "JOIN chunks ON chunks.doc_id = tags.doc_id "
+            "JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:morphology' "
+            f"WHERE tags.tag IN ({placeholders}) "
+            "LIMIT ?",
+            [*tag_filters, limit],
+        ).fetchall()
+        for i, (cid,) in enumerate(rows):
+            hits[cid] = max(hits.get(cid, 0.0), 1.0 - i / max(1, len(rows)))
+
+    # Passage-based (find morphology for "John 1:1")
+    if passages:
+        where = " OR ".join("(passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ?)" for _ in passages)
+        params: list = []
+        for s, e in passages:
+            params.extend([e, s])
+        rows = db.execute(
+            "SELECT DISTINCT chunks.id "
+            "FROM chunks "
+            "JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id "
+            "JOIN tags ON tags.doc_id = chunks.doc_id AND tags.tag = 'kind:morphology' "
+            f"WHERE {where} LIMIT ?",
+            [*params, limit],
+        ).fetchall()
+        for i, (cid,) in enumerate(rows):
+            hits[cid] = max(hits.get(cid, 0.0), 0.9 - i / max(1, len(rows)))
+
+    ranked = sorted(hits.items(), key=lambda kv: kv[1], reverse=True)
+    return [Hit(chunk_id=cid, score=score, retrievers=["morphology"]) for cid, score in ranked]
+
+
+def entity_search(
+    db: sqlite3.Connection,
+    *,
+    entity_query: dict | None,
+    lang: str = "en",
+    limit: int = 30,
+) -> list[Hit]:
+    """Graph traversal over entities + entity_relations.
+
+    `entity_query`:
+      {"name": "David"}                          → David's term/scripture chunks
+      {"name": "David", "relation": "father-of"} → outbound: people David is
+                                                    father of (his children)
+      {"name": "David", "relation": "father-of-rev"} → inbound: David's father (Jesse)
+
+    Returns chunks for the resolved entities — a mix of TW term articles
+    (kind:term tagged term:<name> / acai:person:<Name>) and Bible chunks at
+    the entity's first mention. The mix surfaces both prose (TW: who Jesse
+    was) and verses (BSB: where Jesse appears).
+    """
+    if not entity_query or not entity_query.get("name"):
+        return []
+    name = entity_query["name"].strip()
+    relation = entity_query.get("relation")
+
+    # 1. Find matching entities by name (case-insensitive exact match preferred,
+    #    then case-insensitive prefix).
+    matches = db.execute(
+        "SELECT id, type, name FROM entities "
+        "WHERE LOWER(name) = LOWER(?) ORDER BY id LIMIT 8",
+        (name,),
+    ).fetchall()
+    if not matches:
+        matches = db.execute(
+            "SELECT id, type, name FROM entities "
+            "WHERE LOWER(name) LIKE LOWER(?) ORDER BY id LIMIT 8",
+            (name + "%",),
+        ).fetchall()
+    if not matches and canon(lang) != "eng":
+        # Strong's bridge: localized name → Strong's → English entity name.
+        # Lets non-English genealogy ("отец Давида", "uban Dauda") resolve
+        # against the English-only entities graph.
+        from query.name_bridge import localized_to_english
+        for en_name in localized_to_english(db, name, lang):
+            matches = db.execute(
+                "SELECT id, type, name FROM entities "
+                "WHERE LOWER(name) = LOWER(?) ORDER BY id LIMIT 8",
+                (en_name,),
+            ).fetchall()
+            if matches:
+                break
+    if not matches:
+        return []
+
+    target_entities: list[tuple[str, str, str]] = []  # (id, type, name)
+
+    if relation:
+        # Traverse one hop. 'father-of-rev' (etc.) means inbound to the matched
+        # entity ("who is the father OF X" — find someone with father-of edge to X).
+        reverse = relation.endswith("-rev")
+        rel = relation[:-4] if reverse else relation
+        for eid, _typ, _ename in matches:
+            if reverse:
+                rows = db.execute(
+                    "SELECT er.source_id, e.type, e.name "
+                    "FROM entity_relations er "
+                    "JOIN entities e ON e.id = er.source_id "
+                    "WHERE er.target_id = ? AND er.relation = ?",
+                    (eid, rel),
+                ).fetchall()
+            else:
+                rows = db.execute(
+                    "SELECT er.target_id, e.type, e.name "
+                    "FROM entity_relations er "
+                    "JOIN entities e ON e.id = er.target_id "
+                    "WHERE er.source_id = ? AND er.relation = ?",
+                    (eid, rel),
+                ).fetchall()
+            target_entities.extend(rows)
+        # Always include the original matches too — useful UX context
+        # ("you asked about David; here's both David and Jesse").
+        target_entities.extend(matches)
+    else:
+        target_entities = list(matches)
+
+    if not target_entities:
+        return []
+
+    # Dedup by entity id
+    seen: set[str] = set()
+    target_entities = [t for t in target_entities if not (t[0] in seen or seen.add(t[0]))]
+
+    hits: dict[str, float] = {}
+
+    # 2. For each target entity, gather chunks
+    rank_counter = 0
+    for eid, etype, ename in target_entities:
+        # 2a. TW term articles (kind:term) tagged with the entity's name slug
+        slug = re.sub(r"[^a-z0-9]+", "", ename.lower())
+        tag_candidates = [
+            f"term:{slug}",
+            f"acai:person:{ename}",
+            f"acai:place:{ename}",
+            f"acai:keyterm:{ename}",
+        ]
+        placeholders = ",".join("?" * len(tag_candidates))
+        rows = db.execute(
+            "SELECT DISTINCT chunks.id FROM tags "
+            "JOIN chunks ON chunks.doc_id = tags.doc_id "
+            f"WHERE tags.tag IN ({placeholders}) LIMIT 5",
+            tag_candidates,
+        ).fetchall()
+        for (cid,) in rows:
+            rank_counter += 1
+            hits[cid] = max(hits.get(cid, 0.0), 1.0 - rank_counter / 100.0)
+
+        # 2b. Bible/scripture chunks at the entity's passages (chunk_index=0)
+        rows = db.execute(
+            "SELECT DISTINCT chunks.id "
+            "FROM entity_passages ep "
+            "JOIN passage_refs pr ON pr.start_bbcccvvv <= ep.end_bbcccvvv "
+            "                     AND pr.end_bbcccvvv   >= ep.start_bbcccvvv "
+            "JOIN chunks ON chunks.doc_id = pr.doc_id AND chunks.chunk_index = 0 "
+            "JOIN tags k ON k.doc_id = chunks.doc_id "
+            "             AND k.tag IN ('kind:bible', 'kind:scripture') "
+            "WHERE ep.entity_id = ? "
+            "LIMIT 5",
+            (eid,),
+        ).fetchall()
+        for (cid,) in rows:
+            rank_counter += 1
+            hits[cid] = max(hits.get(cid, 0.0), 0.9 - rank_counter / 100.0)
+
+        if rank_counter >= limit:
+            break
+
+    ranked = sorted(hits.items(), key=lambda kv: kv[1], reverse=True)
+    return [Hit(chunk_id=cid, score=score, retrievers=["entity"]) for cid, score in ranked]
+
+
+def _consolidate_bible_hits(
+    db: sqlite3.Connection,
+    hits: dict[str, float],
+    gap: int = 2,
+) -> list[Hit]:
+    """Merge adjacent BSB verse hits into passage-level hits.
+
+    Verses within `gap` BBCCCVVV of each other are grouped together.
+    The group keeps the best score and the first chunk_id as representative.
+    """
+    placeholders = ",".join("?" * len(hits))
+    rows = db.execute(
+        f"SELECT chunks.id, passage_refs.start_bbcccvvv "
+        f"FROM chunks "
+        f"JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id "
+        f"WHERE chunks.id IN ({placeholders}) "
+        f"ORDER BY passage_refs.start_bbcccvvv",
+        list(hits.keys()),
+    ).fetchall()
+
+    if not rows:
+        ranked = sorted(hits.items(), key=lambda kv: kv[1], reverse=True)
+        return [Hit(chunk_id=cid, score=s, retrievers=["bible"]) for cid, s in ranked]
+
+    groups: list[tuple[str, float]] = []
+    grp_cid, grp_score, prev_bb = rows[0][0], hits[rows[0][0]], rows[0][1]
+
+    for cid, bb in rows[1:]:
+        if bb - prev_bb <= gap:
+            if hits[cid] > grp_score:
+                grp_score = hits[cid]
+                grp_cid = cid
+        else:
+            groups.append((grp_cid, grp_score))
+            grp_cid, grp_score = cid, hits[cid]
+        prev_bb = bb
+
+    groups.append((grp_cid, grp_score))
+    groups.sort(key=lambda kv: kv[1], reverse=True)
+    return [Hit(chunk_id=cid, score=score, retrievers=["bible"]) for cid, score in groups]
+
+
+def bible_search(
+    db: sqlite3.Connection,
+    *,
+    fts_query: str,
+    passages: list[tuple[int, int]],
+    limit: int = 15,
+    lang: str = "en",
+) -> list[Hit]:
+    """FTS over chunks_fts_bible + passage filter, with adjacent-verse
+    consolidation so multiple nearby verses merge into one passage-level hit.
+
+    Filtered to the query language (`lang:<lang>` tag): chunks_fts_bible now
+    holds multiple translations (BSB en, RV09 es, …), so without this an es
+    query would surface English verses and vice versa.
+    """
+    hits: dict[str, float] = {}
+    # index.db lang: tags use the short/web form (en, es, zh-Hant); map the
+    # canonical request tag to it so existing indexes match without a re-index.
+    lang_tag = f"lang:{to_web(canon(lang))}"
+
+    if passages:
+        where = " OR ".join("(passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ?)" for _ in passages)
+        params: list = []
+        for s, e in passages:
+            params.extend([e, s])
+        rows = db.execute(
+            "SELECT DISTINCT chunks.id "
+            "FROM chunks "
+            "JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id "
+            "JOIN tags ON tags.doc_id = chunks.doc_id AND tags.tag = 'kind:bible' "
+            "JOIN tags lt ON lt.doc_id = chunks.doc_id AND lt.tag = ? "
+            f"WHERE {where} ORDER BY passage_refs.start_bbcccvvv LIMIT ?",
+            [lang_tag, *params, limit],
+        ).fetchall()
+        for i, (cid,) in enumerate(rows):
+            hits[cid] = max(hits.get(cid, 0.0), 1.0 - i / max(1, len(rows)))
+
+    if fts_query.strip():
+        try:
+            rows = db.execute(
+                "SELECT chunks.id, rank "
+                "FROM chunks_fts_bible "
+                "JOIN chunks ON chunks.rowid = chunks_fts_bible.rowid "
+                "JOIN tags lt ON lt.doc_id = chunks.doc_id AND lt.tag = ? "
+                "WHERE chunks_fts_bible MATCH ? ORDER BY rank LIMIT ?",
+                (lang_tag, fts_query, limit),
+            ).fetchall()
+            n = len(rows)
+            for i, (cid, _rank) in enumerate(rows):
+                hits[cid] = max(hits.get(cid, 0.0), 0.7 - i / max(1, n) * 0.5)
+        except sqlite3.OperationalError as e:
+            print(f"bible_search: FTS5 skipped ({e!r})", flush=True)
+
+    if not hits:
+        return []
+
+    return _consolidate_bible_hits(db, hits)
+
+
+def aquifer_search(
+    db: sqlite3.Connection,
+    *,
+    fts_query: str,
+    lang: str = "en",
+    limit: int = 15,
+) -> list[Hit]:
+    """FTS over chunks_fts_aquifer — Aquifer study breadth (study notes,
+    dictionaries, key terms), isolated from the main chunks_fts so its large
+    multilingual corpus doesn't pollute primary BM25 statistics. Scoped to the
+    query language plus English (the universal study fallback)."""
+    if not fts_query.strip():
+        return []
+    try:
+        rows = db.execute(
+            "SELECT chunks.id, rank "
+            "FROM chunks_fts_aquifer "
+            "JOIN chunks ON chunks.rowid = chunks_fts_aquifer.rowid "
+            "JOIN tags lt ON lt.doc_id = chunks.doc_id AND lt.tag IN (?, 'lang:en') "
+            "WHERE chunks_fts_aquifer MATCH ? ORDER BY rank LIMIT ?",
+            (f"lang:{to_web(canon(lang))}", fts_query, limit),
+        ).fetchall()
+    except sqlite3.OperationalError as e:
+        print(f"aquifer_search: skipped ({e!r})", flush=True)
+        return []
+    n = len(rows)
+    return [Hit(chunk_id=cid, score=1.0 - i / max(1, n), retrievers=["aquifer"])
+            for i, (cid, _rank) in enumerate(rows)]
+
+
+def topic_search(
+    db: sqlite3.Connection,
+    *,
+    topic_query: str | None,
+    limit: int = 30,
+) -> list[Hit]:
+    """Nave's-style topic lookup: topic name → BBCCCVVV passages → BSB chunks."""
+    if not topic_query:
+        return []
+
+    # Resolve topic by exact-name (case-insensitive) match first; fall back to LIKE.
+    rows = db.execute(
+        "SELECT id FROM topics WHERE LOWER(name) = LOWER(?) LIMIT 5",
+        (topic_query,),
+    ).fetchall()
+    if not rows:
+        rows = db.execute(
+            "SELECT id FROM topics WHERE LOWER(name) LIKE LOWER(?) LIMIT 5",
+            (topic_query + "%",),
+        ).fetchall()
+    topic_ids = [r[0] for r in rows]
+    if not topic_ids:
+        return []
+
+    placeholders = ",".join("?" * len(topic_ids))
+    # Get up to `limit` BBCCCVVV pairs from topic_passages, then join to BSB chunks.
+    rows = db.execute(
+        f"""
+        SELECT DISTINCT chunks.id
+        FROM topic_passages tp
+        JOIN passage_refs pr ON pr.start_bbcccvvv <= tp.end_bbcccvvv
+                             AND pr.end_bbcccvvv   >= tp.start_bbcccvvv
+        JOIN chunks ON chunks.doc_id = pr.doc_id AND chunks.chunk_index = 0
+        JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:bible'
+        WHERE tp.topic_id IN ({placeholders})
+        ORDER BY tp.start_bbcccvvv LIMIT ?
+        """,
+        [*topic_ids, limit],
+    ).fetchall()
+    n = len(rows)
+    return [
+        Hit(chunk_id=r[0], score=1.0 - i / max(1, n), retrievers=["topic"])
+        for i, r in enumerate(rows)
+    ]
+
+
+def xref_search(
+    db: sqlite3.Connection,
+    *,
+    source_bbcccvvv: int | None,
+    limit: int = 30,
+) -> list[Hit]:
+    """Cross-reference followup: source verse → TSK/BSB-parallel target verses → BSB chunks."""
+    if source_bbcccvvv is None:
+        return []
+    # Ordering: bsb-parallel xrefs first (editorial-marked, deliberate
+    # parallels with no rank field), then TSK refs by rank ascending. Putting
+    # bsb-parallel at the bottom (the previous (rank IS NULL) sort) buried
+    # the most pedagogically valuable parallels behind TSK long-tail.
+    rows = db.execute(
+        """
+        SELECT DISTINCT chunks.id, xr.rank, xr.source_attribution
+        FROM cross_references xr
+        JOIN passage_refs pr ON pr.start_bbcccvvv <= xr.target_end_bbcccvvv
+                             AND pr.end_bbcccvvv   >= xr.target_start_bbcccvvv
+        JOIN chunks ON chunks.doc_id = pr.doc_id AND chunks.chunk_index = 0
+        JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:bible'
+        WHERE xr.source_bbcccvvv = ?
+        ORDER BY
+          CASE xr.source_attribution WHEN 'bsb-parallel' THEN 0 ELSE 1 END,
+          (xr.rank IS NULL),
+          xr.rank ASC
+        LIMIT ?
+        """,
+        (source_bbcccvvv, limit),
+    ).fetchall()
+    n = len(rows)
+    return [
+        Hit(chunk_id=r[0], score=1.0 - i / max(1, n), retrievers=["xref"])
+        for i, r in enumerate(rows)
+    ]
+
+
+# ---------- corpus (local Context-Fabric engine) ----------
+
+_corpus_book_map: dict[str, tuple[str, str]] | None = None
+
+
+def _ensure_book_map() -> dict[str, tuple[str, str]]:
+    """Build USFM → (corpus_book_name, corpus_id) from the local corpus engine."""
+    global _corpus_book_map
+    if _corpus_book_map:
+        return _corpus_book_map
+
+    from indexer.references import BOOK_NUMBERS
+
+    mapping: dict[str, tuple[str, str]] = {}
+    try:
+        from corpus import engine
+        for corpus_id, num_range in [("hebrew", (1, 40)), ("greek", (40, 100))]:
+            books = engine.list_books(corpus_id)
+            corpus_names = [b.name for b in books]
+
+            usfm_codes = sorted(
+                [(code, num) for code, num in BOOK_NUMBERS.items()
+                 if num_range[0] <= num < num_range[1]],
+                key=lambda x: x[1],
+            )
+            for (usfm, _num), corpus_name in zip(usfm_codes, corpus_names):
+                mapping[usfm] = (corpus_name, corpus_id)
+
+        logger.info("Loaded %d book mappings from corpus engine", len(mapping))
+    except Exception as e:
+        logger.warning("Failed to load book names from corpus engine: %s", e)
+
+    _corpus_book_map = mapping
+    return _corpus_book_map
+
+
+def _usfm_to_corpus(book_code: str) -> tuple[str, str]:
+    """Map USFM book code → (corpus_book_name, corpus_id)."""
+    book_map = _ensure_book_map()
+    if book_code in book_map:
+        return book_map[book_code]
+    raise ValueError(f"unknown book code for corpus mapping: {book_code}")
+
+
+def cfabric_search(
+    passages: list[tuple[int, int]],
+    *,
+    limit: int = 20,
+) -> list[Hit]:
+    """Retrieve syntactic context from the local corpus engine for passage-bearing queries."""
+    if not passages:
+        return []
+
+    from indexer.references import decode
+
+    hits: dict[str, float] = {}
+    seen_verses = 0
+
+    try:
+        from corpus import engine
+        for start, end in passages:
+            s_code, s_ch, s_v = decode(start)
+            e_code, e_ch, e_v = decode(end)
+            if s_code != e_code:
+                continue
+
+            try:
+                book_name, corpus = _usfm_to_corpus(s_code)
+            except ValueError:
+                continue
+
+            for v in range(s_v, e_v + 1):
+                if seen_verses >= limit:
+                    break
+
+                data = engine.get_context(
+                    book=book_name, chapter=s_ch, verse=v, corpus=corpus,
+                )
+                if "error" in data:
+                    continue
+
+                bbcccvvv = start + (v - s_v)
+                chunk_id = f"corpus:{bbcccvvv}"
+                score = 1.0 - seen_verses / max(1, limit)
+                hits[chunk_id] = score
+                seen_verses += 1
+
+    except Exception as e:
+        logger.warning("corpus engine error: %s", e)
+        return []
+
+    ranked = sorted(hits.items(), key=lambda kv: kv[1], reverse=True)
+    return [Hit(chunk_id=cid, score=score, retrievers=["cfabric"]) for cid, score in ranked]
+
+
+# ---------- fusion ----------
+
+def rrf(
+    hit_lists: list[list[Hit]],
+    *,
+    k: int = 60,
+    weights: list[float] | None = None,
+) -> list[Hit]:
+    """Reciprocal Rank Fusion across ranked retriever outputs, with optional per-list weights."""
+    if weights is None:
+        weights = [1.0] * len(hit_lists)
+    if len(weights) != len(hit_lists):
+        raise ValueError(f"weights length {len(weights)} != hit_lists length {len(hit_lists)}")
+    scores: dict[str, float] = {}
+    retrievers: dict[str, set[str]] = {}
+    for hits, weight in zip(hit_lists, weights):
+        if weight == 0:
+            continue
+        for rank, h in enumerate(hits, start=1):
+            scores[h.chunk_id] = scores.get(h.chunk_id, 0.0) + weight / (k + rank)
+            retrievers.setdefault(h.chunk_id, set()).update(h.retrievers)
+    fused = [
+        Hit(chunk_id=cid, score=score, retrievers=sorted(retrievers[cid]))
+        for cid, score in scores.items()
+    ]
+    fused.sort(key=lambda h: h.score, reverse=True)
+    return fused
+
+
+# ---------- top-level ----------
+
+# Per-intent RRF weights. Order:
+#   [fts, title, passage, scripture, tag, vec, lexicon, morphology, entity, bible, topic, xref, cfabric, aquifer]
+#
+# Title-search is gold for entity_lookup (Who/What is X?) and useful for
+# methodology (matching module names like "Metaphor"). For thematic and
+# passage-shaped queries, title hits over-weight TW term articles and push
+# narrative notes / per-verse content out of top-K, which kills queries
+# where the answer is in a TN body, not a TW title. Down-weight title there.
+#
+# v3 retrievers (lexicon, morphology, entity, bible, topic, xref) get
+# weight 0 for v2-shaped intents — they'd otherwise pollute results when
+# their structured inputs aren't actually relevant. They light up only
+# under the new intent classes that the analyzer routes to them.
+_INTENT_WEIGHTS: dict[str, list[float]] = {
+    #                    fts  titl pass scrp tag  vec   lex  mrph ent  bib  top  xrf  cfab aqf
+    "thematic":         [1.0, 0.5, 1.0, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5],
+    "entity_lookup":    [1.0, 2.5, 0.8, 0.0, 1.5, 1.0,  0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.2],
+    "passage_specific": [1.0, 0.6, 1.2, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 1.5, 0.2],
+    "passage_book":     [1.0, 0.6, 1.1, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.5, 0.2],
+    "methodology":      [1.0, 1.5, 1.0, 0.0, 1.0, 1.2,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "word_study":       [0.3, 0.5, 0.0, 0.0, 0.5, 0.5,  3.0, 1.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.2],
+    "morphology":       [0.3, 0.3, 0.5, 0.0, 0.5, 0.0,  1.0, 3.0, 0.0, 0.5, 0.0, 0.0, 2.5, 0.2],
+    "genealogy":        [0.5, 1.0, 0.0, 0.0, 1.0, 0.5,  0.0, 0.0, 3.0, 0.5, 0.0, 0.0, 0.0, 0.2],
+    "topic":            [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 3.0, 0.0, 0.0, 0.4],
+    "xref":             [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 3.0, 0.0, 0.2],
+}
+
+
+def retrieve(
+    db: sqlite3.Connection,
+    analysis: QueryAnalysis,
+    *,
+    top_k: int = 10,
+    query_vec: list[float] | None = None,
+    source_filter: str | None = None,
+    lang: str = "en",
+) -> list[Hit]:
+    """Run all configured retrievers, fuse via intent-weighted RRF, return top_k chunks.
+
+    `query_vec`     enables the vector retriever; if None, vector is skipped.
+    `source_filter` 'door43' / 'aquifer' / 'all'. Restricts candidate docs.
+
+    Note on passage filtering: a NARROW passage (specific verse(s), range
+    < 999 verses) acts as a hard `doc_filter` to constrain FTS/vec. A BROAD
+    passage (whole-book range from "according to Titus" / "the gospel of John")
+    is treated as a soft hint — it still drives `scripture_search` and
+    `passage_search`, but does NOT exclude content from FTS/vec. That way an
+    inferred book scope helps without crowding out cross-book term articles
+    or narrative notes that legitimately bear on the question.
+    """
+    # Strategy 1: concept expansion (always-on, <1ms)
+    from query.concept_expand import expand_concepts
+    concept_tags = expand_concepts(analysis.fts_query, analysis.tags, lang=lang)
+    if concept_tags:
+        analysis.tags.extend(concept_tags)
+
+    # Strategy 2: LXX bridge expansion (always-on when H-tags present, ~50ms)
+    from query.lxx_expand import expand_lxx
+    lxx_tags = expand_lxx(analysis.tags)
+    if lxx_tags:
+        analysis.tags.extend(lxx_tags)
+
+    # Strategy 3: morph pre-filter (only on morph-keyword queries, ~50-150ms)
+    from query.morph_prefilter import detect_morph_pattern, morph_passages, _extract_book_code
+    morph_pattern = detect_morph_pattern(analysis.fts_query)
+    morph_passage_filter = None
+    if morph_pattern:
+        book_code = _extract_book_code(analysis.passages)
+        morph_refs = morph_passages(morph_pattern, book=book_code)
+        if morph_refs:
+            analysis.passages.extend(morph_refs)
+            morph_passage_filter = _docs_overlapping_passages(db, morph_refs)
+
+    narrow = analysis.passages and any((e - s) < 999 for s, e in analysis.passages)
+    passages_filter = _docs_overlapping_passages(db, analysis.passages) if narrow else None
+    source = _docs_by_source(db, source_filter)
+    # Hide v3 expansion content (lexicons, morphology, …) from existing
+    # retrievers — see _V2_KIND_TAGS comment above. Stage 3 retrievers
+    # will reach v3 content via their own channels and intents.
+    v2_filter = _docs_v2_only(db)
+    doc_filter = _intersect_filters(passages_filter, source, v2_filter)
+    title_filter = _intersect_filters(source, v2_filter)
+
+    fts_hits   = fts_search(db, analysis.fts_query, doc_filter=doc_filter)
+    title_hits = title_search(db, analysis.fts_query, doc_filter=title_filter)
+    pas_hits   = passage_search(db, analysis.passages, doc_filter=v2_filter)
+    scrip_hits = scripture_search(db, analysis.passages, query_vec, fts_query=analysis.fts_query)
+    tag_hits   = tag_search(db, analysis.tags)
+    vec_hits   = vector_search(db, query_vec, doc_filter=doc_filter) if query_vec else []
+
+    # v3 retrievers — always called, but they short-circuit to [] when their
+    # specific inputs (Strong's tags, entity_query, topic name, xref source)
+    # aren't populated by the analyzer.
+    strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
+    lex_hits = lexicon_search(
+        db,
+        fts_query=analysis.fts_query,
+        word_study_terms=analysis.word_study_terms,
+        strongs_tags=strongs_tags,
+        lemma_tags=lemma_tags,
+    )
+    morph_hits = morphology_search(
+        db,
+        strongs_tags=strongs_tags,
+        lemma_tags=lemma_tags,
+        passages=analysis.passages,
+    )
+    ent_hits = entity_search(db, entity_query=analysis.entity_query, lang=lang)
+    bib_hits = bible_search(db, fts_query=analysis.fts_query, passages=analysis.passages, lang=lang)
+    aqf_hits = aquifer_search(db, fts_query=analysis.fts_query, lang=lang)
+    top_hits = topic_search(db, topic_query=analysis.topic_query)
+    xref_hits = xref_search(db, source_bbcccvvv=analysis.xref_source)
+    cfab_hits = cfabric_search(analysis.passages)
+
+    weights = _INTENT_WEIGHTS.get(analysis.intent, _INTENT_WEIGHTS["thematic"])
+    fused = rrf(
+        [fts_hits, title_hits, pas_hits, scrip_hits, tag_hits, vec_hits,
+         lex_hits, morph_hits, ent_hits, bib_hits, top_hits, xref_hits, cfab_hits,
+         aqf_hits],
+        weights=weights,
+    )
+
+    # Language gate. Content now exists in many languages (bibles + Aquifer
+    # study notes), reachable via every retriever, so drop cross-language hits:
+    #   • kind:bible — STRICT: only the query language (we have the bible in
+    #     that language; an English verse would be redundant/wrong).
+    #   • everything else — query language OR English (the universal study
+    #     fallback when query-language notes don't exist).
+    #   • lang-neutral content (no lang: tag — entities, cross-refs, …) is kept.
+    # Without this, foreign-language study notes crowd out the right results.
+    # Look up lang/kind tags ONLY for the candidate docs in `fused` (a few
+    # hundred), not the whole 455k-row tags table — the previous two EXCEPT
+    # scans dominated request latency. Semantics unchanged: foreign-language
+    # bibles dropped strictly; foreign-language non-bible dropped unless English;
+    # lang-neutral content (no lang: tag) kept.
+    cand_docs = {h.chunk_id.split(":", 1)[0] for h in fused}
+    if cand_docs:
+        is_bible: set[str] = set()
+        langs_by_doc: dict[str, set[str]] = {}
+        ph = ",".join("?" * len(cand_docs))
+        for did, tag in db.execute(
+            f"SELECT doc_id, tag FROM tags WHERE doc_id IN ({ph}) "
+            f"AND (tag='kind:bible' OR tag LIKE 'lang:%')", list(cand_docs)).fetchall():
+            if tag == "kind:bible":
+                is_bible.add(did)
+            else:
+                langs_by_doc.setdefault(did, set()).add(tag[len("lang:"):])
+
+        wl = to_web(canon(lang))   # index lang: tags are short/web form (en, es, …)
+
+        def _keep(did: str) -> bool:
+            dl = langs_by_doc.get(did)
+            if did in is_bible and (not dl or wl not in dl):
+                return False  # foreign-language bible (strict)
+            if dl and wl not in dl and "en" not in dl:
+                return False  # foreign-language non-bible (no English fallback)
+            return True
+
+        fused = [h for h in fused if _keep(h.chunk_id.split(":", 1)[0])]
+
+    return fused[:top_k]

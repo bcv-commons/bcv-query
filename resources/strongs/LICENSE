@@ -1,0 +1,29 @@
+strongs_words dataset — license & attribution
+=============================================
+
+This DATA is released under Creative Commons Attribution-ShareAlike 4.0
+International (CC BY-SA 4.0): https://creativecommons.org/licenses/by-sa/4.0/
+
+It is a derived dataset. You must attribute the upstream sources and keep
+share-alike derivatives under a compatible license. Each data file also records
+its own `source` / `license` in a `#` header line.
+
+Sources
+-------
+- Aligned surfaces (surfaces/, surfaces_by_method/, attestations/):
+  derived from Clear-Bible/Alignments (https://github.com/Clear-Bible/Alignments),
+  original-language texts SBLGNT and WLC-Macula. Per-source licenses apply.
+- Glosses (glosses/):
+  * method=lexicon, source=ubs-dict — UBS Hebrew/Greek dictionaries via
+    BibleAquifer (https://github.com/BibleAquifer), CC BY-SA 4.0.
+  * method=lexicon, source=stepbible — STEPBible-Data
+    (https://github.com/STEPBible/STEPBible-Data), CC BY 4.0.
+  * method=llm, source=inhouse-llm — generated for the bcv-query project,
+    anchored on the original-language lemma.
+
+Suggested attribution
+---------------------
+"strongs_words (bcv-query), CC BY-SA 4.0, derived from Clear-Bible/Alignments,
+UBS dictionaries (via BibleAquifer), and STEPBible-Data."
+
+The code that produces this dataset (bcv-query) is separately licensed MIT.

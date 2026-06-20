@@ -1,0 +1,22 @@
+# Strong's equivalence table — closes the OSHB(UHB) ↔ crosswalk assignment gap.
+#
+# When UHB and the OpenHebrewBible 002 crosswalk tag the same word with
+# different Strong's numbers, list (variant -> canonical) here. spine/reconcile.py
+# applies these to BOTH sequences before comparing, so direction only needs to be
+# consistent. Entries below are the high-frequency cases from the full-OT
+# reconciliation (see reconciliation/residual_pairs.csv), all known
+# Strong's variant/homograph pairs. A lexicon spot-check is still advisable.
+#
+# Columns (tab-separated):  variant   canonical   note
+#
+variant	canonical	note
+H3212	H1980	yalak/halak "to go" — suppletive forms (1026 occ)
+H3069	H3068	YHWH divine-name qere variant (≈420 occ)
+H2009	H2005	hinneh/hen "behold/lo" (215 occ)
+H0854	H0853	'et — preposition "with" vs direct-object marker (homograph, ≈340 occ)
+H0582	H0376	'enosh/'ish "man" (≈190 occ)
+H4714	H4713	Mitsrayim/Mitsri "Egypt/Egyptian" (21 occ)
+H0977	H0970	bachar/bachur "choose/young-man" (18 occ)
+H5922	H5921	'al "upon" — Aramaic vs Hebrew (9 occ)
+H8055	H8056	samach/sameach "rejoice/glad" (8 occ)
+# H2428	H2426	REVIEW — chayil vs chel: possibly distinct words, not equivalent

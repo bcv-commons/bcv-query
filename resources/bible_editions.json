@@ -1,0 +1,217 @@
+{
+  "_comment": "Bible edition registry. Each kind:bible chunk carries resource:<edition_id>. A displayed 'Bible' for a language may be a COMPOSITE of editions (e.g. an aligned NT + a plain-text OT from a different source/edition). 'aligned'=has Strong's word alignment; 'books'=ot|nt|full. The display/citation layer resolves resource:<id> here to cite the correct version per testament. See internal-docs/multilingual-unlock-plan.md.",
+  "editions": {
+    "bsb": {
+      "name": "Berean Standard Bible",
+      "abbrev": "BSB",
+      "lang": "eng",
+      "year": 2022,
+      "source": "BSB-publishing",
+      "license": "CC-BY/CC0",
+      "aligned": true,
+      "books": "full"
+    },
+    "rv09": {
+      "name": "Reina-Valera 1909",
+      "abbrev": "RV09",
+      "lang": "spa",
+      "year": 1909,
+      "source": "Clear-Bible",
+      "license": "PD",
+      "aligned": true,
+      "books": "full"
+    },
+    "avd": {
+      "name": "Arabic Van Dyck",
+      "abbrev": "AVD",
+      "lang": "arb",
+      "year": 1865,
+      "source": "Clear-Bible",
+      "license": "PD",
+      "aligned": true,
+      "books": "full"
+    },
+    "russyn": {
+      "name": "Russian Synodal",
+      "abbrev": "SYN",
+      "lang": "rus",
+      "year": 1876,
+      "source": "Clear-Bible",
+      "license": "PD",
+      "aligned": true,
+      "books": "full"
+    },
+    "irvhin": {
+      "name": "Indian Revised Version (Hindi)",
+      "abbrev": "IRV",
+      "lang": "hin",
+      "source": "Clear-Bible",
+      "license": "CC-BY-SA",
+      "aligned": true,
+      "books": "full"
+    },
+    "ohcb": {
+      "name": "Open Hausa Contemporary Bible",
+      "abbrev": "OHCB",
+      "lang": "hau",
+      "source": "Clear-Bible",
+      "license": "CC-BY-SA",
+      "aligned": true,
+      "books": "full"
+    },
+    "lsg": {
+      "name": "Louis Segond 1910",
+      "abbrev": "LSG",
+      "lang": "fra",
+      "year": 1910,
+      "source": "Clear-Bible",
+      "license": "PD",
+      "aligned": true,
+      "books": "nt"
+    },
+    "jfa11": {
+      "name": "João Ferreira de Almeida",
+      "abbrev": "JFA",
+      "lang": "por",
+      "year": 1911,
+      "source": "Clear-Bible",
+      "license": "PD",
+      "aligned": true,
+      "books": "nt"
+    },
+    "irvasm": {
+      "name": "Indian Revised Version (Assamese)",
+      "abbrev": "IRV",
+      "lang": "asm",
+      "source": "Clear-Bible",
+      "license": "CC-BY-SA",
+      "aligned": true,
+      "books": "nt"
+    },
+    "irvben": {
+      "name": "Indian Revised Version (Bengali)",
+      "abbrev": "IRV",
+      "lang": "ben",
+      "source": "Clear-Bible",
+      "license": "CC-BY-SA",
+      "aligned": true,
+      "books": "nt"
+    },
+    "lsg-ot": {
+      "name": "Louis Segond 1910",
+      "abbrev": "LSG",
+      "lang": "fra",
+      "year": 1910,
+      "source": "Aquifer",
+      "license": "PD",
+      "aligned": false,
+      "books": "ot"
+    },
+    "almeida": {
+      "name": "Almeida",
+      "abbrev": "ALM",
+      "lang": "por",
+      "source": "open-bibles",
+      "license": "PD",
+      "aligned": false,
+      "books": "ot"
+    },
+    "irvasm-ot": {
+      "name": "Indian Revised Version (Assamese)",
+      "abbrev": "IRV",
+      "lang": "asm",
+      "source": "Door43/unfoldingWord",
+      "license": "CC-BY-SA",
+      "aligned": false,
+      "books": "ot"
+    },
+    "irvben-ot": {
+      "name": "Indian Revised Version (Bengali)",
+      "abbrev": "IRV",
+      "lang": "ben",
+      "source": "Door43/unfoldingWord",
+      "license": "CC-BY-SA",
+      "aligned": false,
+      "books": "ot"
+    }
+  },
+  "_bibles_comment": "Composite displayed Bibles per language: which edition covers which testament. The OT-completed languages are composites; the rest are single full editions.",
+  "bibles": {
+    "eng": [
+      {
+        "books": "full",
+        "edition": "bsb"
+      }
+    ],
+    "spa": [
+      {
+        "books": "full",
+        "edition": "rv09"
+      }
+    ],
+    "arb": [
+      {
+        "books": "full",
+        "edition": "avd"
+      }
+    ],
+    "rus": [
+      {
+        "books": "full",
+        "edition": "russyn"
+      }
+    ],
+    "hin": [
+      {
+        "books": "full",
+        "edition": "irvhin"
+      }
+    ],
+    "hau": [
+      {
+        "books": "full",
+        "edition": "ohcb"
+      }
+    ],
+    "fra": [
+      {
+        "books": "ot",
+        "edition": "lsg-ot"
+      },
+      {
+        "books": "nt",
+        "edition": "lsg"
+      }
+    ],
+    "por": [
+      {
+        "books": "ot",
+        "edition": "almeida"
+      },
+      {
+        "books": "nt",
+        "edition": "jfa11"
+      }
+    ],
+    "asm": [
+      {
+        "books": "ot",
+        "edition": "irvasm-ot"
+      },
+      {
+        "books": "nt",
+        "edition": "irvasm"
+      }
+    ],
+    "ben": [
+      {
+        "books": "ot",
+        "edition": "irvben-ot"
+      },
+      {
+        "books": "nt",
+        "edition": "irvben"
+      }
+    ]
+  }
+}

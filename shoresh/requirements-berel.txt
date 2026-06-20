@@ -1,0 +1,4 @@
+# Additional deps for SEARCH_EMBEDDER=berel (opt-in)
+# Install with: pip install -r requirements.txt -r requirements-berel.txt
+torch>=2.2.0          # CPU wheel
+transformers>=4.40.0  # BEREL_3.0 (Hebrew) + SPhilBERTa (Greek)

@@ -1,0 +1,64 @@
+examples/
+examples/*
+
+.env
+
+# OS / editor
+.DS_Store
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Cached upstream downloads (Clear-Bible/Alignments release zips + extracts;
+# re-derivable by re-running scripts/build_aligned_all.py)
+.cache/
+
+# Generated data (re-derivable by re-running ingest + indexer.build)
+ingest/_staging/
+indexer/index.db
+indexer/index.db-journal
+indexer/index.db-wal
+indexer/index.db-shm
+indexer/*.db
+indexer/*.db-*
+
+# Tool outputs (re-derivable by re-running tools/map_data_sources.py)
+tools/output/
+
+# Eval run outputs (re-derivable by re-running eval.run)
+eval/runs/*.json
+
+# Build / packaging
+build/
+dist/
+*.egg
+*.tar.gz
+
+# Coverage / profiling
+.coverage
+.coverage.*
+htmlcov/
+*.prof
+
+# Backup / scratch files
+*.tmp
+*.bak
+*.orig
+
+# Inherited from original repo (still relevant while node_modules/.wrangler exist on disk)
+node_modules/
+.wrangler/
+.dev.vars
+*.log
+
+# Session / scratch
+.claude/
+.codex/
+.agents/
+temp/

@@ -1,0 +1,97 @@
+# === Internal (not for public repo) ===
+internal-docs/
+internal-scripts/
+
+# === OS / editor ===
+.DS_Store
+*.swp
+*~
+*#
+TAGS
+TSTAGS
+.idea/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.tar.gz
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.prof
+
+# === Environment / secrets ===
+.env
+
+# === Node (legacy, bcv-RAG) ===
+node_modules/
+.wrangler/
+.dev.vars
+*.log
+
+# === Claude / AI tooling ===
+.claude/
+.codex/
+.agents/
+claude_desktop_config.json
+
+# === bcv-RAG: generated data (re-derivable) ===
+bcv-RAG/examples/
+bcv-RAG/ingest/_staging/
+bcv-RAG/indexer/*.db
+bcv-RAG/indexer/*.db-*
+bcv-RAG/index.db
+bcv-RAG/index.db-*
+bcv-RAG/tools/output/
+bcv-RAG/eval/runs/*.json
+bcv-RAG/temp/
+
+# === strongs: standalone dataset, generated + PUBLISHED externally ===
+# (Hugging Face / data repo bcv-data/strongs). NOT consumed by the services, so
+# not shipped in the image and re-derivable via scripts/build_strongs_words*.py.
+# Keep only the authored card + license under version control; data stays out.
+resources/strongs/**
+!resources/strongs/README.md
+!resources/strongs/LICENSE
+
+# === bcv-corpus: generated / non-source ===
+bcv-corpus/frontend/
+bcv-corpus/quizzes/
+~/.text-fabric/
+
+# === Scratch / backup ===
+*.tmp
+*.bak
+*.orig
+example/
+temp-src/
+# local staging for the GitHub data-repo mirror (publish_strongs_words --github-mirror)
+out/
+
+# === Bible sources — USJ reference snapshot (kept locally, not committed) ===
+# The live pipeline writes USJ to bcv-RAG/ingest/_staging/ (also ignored)
+# via `python -m ingest.aligned_usfm`.
+sources/
+
+# spine: downloaded sources + run logs (re-derivable)
+shoresh/spine/data/
+shoresh/spine/reconciliation/run.log
+shoresh/spine/spine.db
+shoresh/spine/spine.db-*
+
+# LXX: downloaded source + parsed db (re-derivable)
+shoresh/lxx/data/
+shoresh/lxx/lxx.db
+shoresh/lxx/lxx.db-*
+
+# clause vectors (built at runtime onto the /data volume; local: SHORESH_DATA)
+shoresh/data/
+shoresh/**/clauses_*.npy
+shoresh/**/clauses_*.sqlite

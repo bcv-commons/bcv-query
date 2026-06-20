@@ -1,0 +1,14 @@
+# Railway deployment config. See docs/server.md for the full recipe
+# (volume setup, env vars, bootstrap, cron freshness).
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Dockerfile CMD already binds 0.0.0.0:${PORT}; restartPolicy + healthcheck
+# are the bits worth pinning explicitly.
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30

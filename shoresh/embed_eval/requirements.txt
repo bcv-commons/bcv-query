@@ -1,0 +1,6 @@
+# Embedding-spike deps (local, CPU). Install into a venv before running:
+#   pip install -r embed_eval/requirements.txt
+sentence-transformers>=2.7.0     # SPhilBERTa, multilingual-E5
+transformers>=4.40.0             # BEREL mean-pool wrapper (Plan C)
+torch>=2.2.0                     # CPU build is fine for the spike
+# voyageai>=0.2.0                # uncomment only for the optional Voyage reference arm

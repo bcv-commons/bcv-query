@@ -1,0 +1,73 @@
+{
+  "name": "The Bible Project",
+  "source": "bibleproject.com",
+  "description": "Configuration for importing BibleProject PDFs with path redirections and categorization rules",
+  "version": "1.0.0",
+  "path_redirections": [
+    {
+      "description": "Redirect SOTM Episode folders to Script References/Sermon on the Mount",
+      "pattern": "^SOTM-Episode-\\d+$",
+      "target": "Script-References/Sermon-on-the-Mount",
+      "enabled": true
+    },
+    {
+      "description": "Redirect SOTM Episode subdirectories to Script References/Sermon on the Mount",
+      "pattern": "^SOTM-Episode-\\d+/(.+)$",
+      "target": "Script-References/Sermon-on-the-Mount/$1",
+      "enabled": true
+    }
+  ],
+  "categorization_rules": [
+    {
+      "folder_pattern": "^Script-References/?$",
+      "type": "Script-References",
+      "series": "Script-References"
+    },
+    {
+      "folder_pattern": "^Script-References/Sermon-on-the-Mount/?$",
+      "type": "Script-References",
+      "series": "Sermon-on-the-Mount"
+    },
+    {
+      "folder_pattern": "^Script-References/word_studies/?$",
+      "type": "Script-References",
+      "series": "Word-Studies"
+    },
+    {
+      "folder_pattern": "^Study-Notes/?$",
+      "type": "Study-Notes",
+      "series": "Study-Notes"
+    },
+    {
+      "folder_pattern": "^Insight-Videos/([^/]+)/?$",
+      "type": "Insight-Video",
+      "series": "Insight: $1"
+    },
+    {
+      "folder_pattern": "^Deuterocanon-Apocrypha",
+      "type": "Deuterocanon-Transcript",
+      "series": "Deuterocanon-Apocrypha"
+    },
+    {
+      "folder_pattern": "^advent/?$",
+      "type": "Advent-Script-References",
+      "series": "Advent"
+    },
+    {
+      "folder_pattern": "^(The-Wilderness|Redemption|The-Exodus-Way|The-Mountain)/?",
+      "type": "Theme-Resource",
+      "series": "$1"
+    }
+  ],
+  "timestamp_sources": [
+    "Script-References",
+    "Visual-Commentary",
+    "Insight-Videos"
+  ],
+  "notes": [
+    "Path redirections are applied before downloading files",
+    "Patterns use regex syntax with capture groups",
+    "Target paths use $1, $2, etc. for captured groups",
+    "Redirections are processed in order listed"
+  ]
+}

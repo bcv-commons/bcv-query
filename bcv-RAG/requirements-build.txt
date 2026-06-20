@@ -1,0 +1,12 @@
+# Build-time-only dependencies for the offline data-build scripts in scripts/.
+# NOT installed in the Docker image — the server reads the committed *.tsv /
+# lexicon.db artifacts these scripts produce (no runtime dependency).
+#
+# Usage:
+#   python3 -m venv .venv-build && . .venv-build/bin/activate
+#   pip install -r requirements-build.txt
+#   python3 scripts/build_strongs_keyness.py   # etc.
+
+wordfreq>=3.1            # keyness denominators (build_strongs_keyness.py); langs: he, el, es, fr, pt, en
+# wordfreq[cjk]>=3.1     # add when zh distributional/keyness is needed (pulls jieba/mecab)
+# fasttext / gensim      # later: distributional candidate generation (Tier-4 lexicon)
