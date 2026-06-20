@@ -51,7 +51,7 @@ codes** (legacy 2-letter still accepted); and the **published `strongs` dataset*
 
 ## Publishing & open data
 
-Reusable datasets are published under the **[`bcv-data`](https://github.com/bcv-data)**
+Reusable datasets are published under the **[`bcv-commons`](https://github.com/bcv-commons)**
 org (same handle on GitHub and Hugging Face), independent of the services so
 data-only users never touch the code.
 
@@ -61,13 +61,13 @@ data-only users never touch the code.
 - **GitHub** carries a *shop window* — README (→ HF), LICENSE, and small samples —
   for discovery; it points to HF for the full data. No large files on plain git.
 
-**Live:** **[`bcv-data/strongs`](https://huggingface.co/datasets/bcv-data/strongs)** —
+**Live:** **[`bcv-commons/strongs`](https://huggingface.co/datasets/bcv-commons/strongs)** —
 Strong's→words, provenance-marked, 10 aligned + 12 gloss languages, four tiers
 (`glosses`, `surfaces`, `surfaces_by_method`, `attestations`) + Parquet mirrors.
 Card + build: [`resources/strongs/`](../resources/strongs); the dataset itself is
 git-ignored here (re-derivable, published externally).
 
-**Next:** **`bcv-data/bibles`** — the many Bible translations that don't yet have
+**Next:** **`bcv-commons/bibles`** — the many Bible translations that don't yet have
 a home, same pattern (build/normalize → card → HF + GitHub shop window).
 
 Conventions for any published dataset: anchored on Hebrew/Greek (Strong's + lemma,

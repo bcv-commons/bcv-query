@@ -57,9 +57,9 @@ everything is keyed by USFM book codes + Strong's numbers.
 
 - **Open data published.** The Strong's→words tables are now a standalone,
   provenance-marked open dataset for people who want *just the data* (not the
-  services): **[huggingface.co/datasets/bcv-data/strongs](https://huggingface.co/datasets/bcv-data/strongs)**
-  (full, with a browsable viewer) and **[github.com/bcv-data/strongs](https://github.com/bcv-data/strongs)**
-  (samples + pointer). It lives under the new **[`bcv-data`](https://github.com/bcv-data)**
+  services): **[huggingface.co/datasets/bcv-commons/strongs](https://huggingface.co/datasets/bcv-commons/strongs)**
+  (full, with a browsable viewer) and **[github.com/bcv-commons/strongs](https://github.com/bcv-commons/strongs)**
+  (samples + pointer). It lives under the new **[`bcv-commons`](https://github.com/bcv-commons)**
   org — a free-standing home for reusable Bible datasets; a `bibles` repo
   (translations) is next. Dataset card + build: [`resources/strongs/`](resources/strongs).
 - **Hosting moved to Hetzner.** The services are now self-hosted on a Hetzner
@@ -113,7 +113,7 @@ bcv-query/
 ├── bcv-RAG/             ← service 1: retrieval + Q&A  (its own README + docs/)
 ├── shoresh/             ← service 2: original languages (its own README + docs/)
 └── resources/           ← shared Strong's-keyed data (ISO 639-3 codes)
-    └── strongs/            the published open dataset → bcv-data/strongs
+    └── strongs/            the published open dataset → bcv-commons/strongs
                             (data git-ignored & re-derivable; card + LICENSE kept)
 ```
 

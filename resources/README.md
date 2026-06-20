@@ -42,4 +42,4 @@ read by build scripts.
 dataset** (Strong's→words, provenance-marked), **not** consumed by the services.
 Its data files are git-ignored and re-derivable (`bcv-RAG/scripts/build_strongs_words*.py`);
 only the card (`strongs/README.md`) + `LICENSE` are tracked. Published at
-**bcv-data/strongs** (Hugging Face + GitHub) — see its README.
+**bcv-commons/strongs** (Hugging Face + GitHub) — see its README.

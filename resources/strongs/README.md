@@ -40,9 +40,9 @@ Greek **Strong's number**, what words does each language actually use for it —
 **how was each word obtained**. No need to run or understand the services around
 it.
 
-**Home:** [huggingface.co/datasets/bcv-data/strongs](https://huggingface.co/datasets/bcv-data/strongs)
-(full data + viewer) · [github.com/bcv-data/strongs](https://github.com/bcv-data/strongs)
-(samples + pointer). Produced by the [bcv-query](https://github.com/bcv-data) project.
+**Home:** [huggingface.co/datasets/bcv-commons/strongs](https://huggingface.co/datasets/bcv-commons/strongs)
+(full data + viewer) · [github.com/bcv-commons/strongs](https://github.com/bcv-commons/strongs)
+(samples + pointer). Produced by the [bcv-query](https://github.com/bcv-commons) project.
 
 - **Anchored on the original languages only.** Every row is keyed on `strong`
   (`H####` / `G####`) + the original `lemma` (Hebrew/Greek). English is never the
@@ -74,19 +74,19 @@ not a column), so load a language at a time.
 # pandas — quickest peek
 import pandas as pd
 df = pd.read_csv(
-    "https://huggingface.co/datasets/bcv-data/strongs/resolve/main/surfaces/spa.tsv",
+    "https://huggingface.co/datasets/bcv-commons/strongs/resolve/main/surfaces/spa.tsv",
     sep="\t", comment="#")
 
 # datasets
 from datasets import load_dataset
-ds = load_dataset("bcv-data/strongs", data_files="surfaces/spa.tsv",
+ds = load_dataset("bcv-commons/strongs", data_files="surfaces/spa.tsv",
                   sep="\t", comment="#")
 ```
 
 Tiers are exposed as configs (`glosses`, `surfaces`, `surfaces_by_method`,
 `attestations`) — loading a whole config concatenates all languages. If Parquet
 mirrors are present they load natively (no `sep`/`comment` needed):
-`load_dataset("bcv-data/strongs", "surfaces")`.
+`load_dataset("bcv-commons/strongs", "surfaces")`.
 
 ## Two families
 
