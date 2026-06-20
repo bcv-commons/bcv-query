@@ -59,9 +59,9 @@ everything is keyed by USFM book codes + Strong's numbers.
   provenance-marked open dataset for people who want *just the data* (not the
   services): **[huggingface.co/datasets/bcv-commons/strongs](https://huggingface.co/datasets/bcv-commons/strongs)**
   (full, with a browsable viewer) and **[github.com/bcv-commons/strongs](https://github.com/bcv-commons/strongs)**
-  (samples + pointer). It lives under the new **[`bcv-commons`](https://github.com/bcv-commons)**
-  org — a free-standing home for reusable Bible datasets; a `bibles` repo
-  (translations) is next. Dataset card + build: [`resources/strongs/`](resources/strongs).
+  (samples + pointer). It lives under the **[`bcv-commons`](https://github.com/bcv-commons)**
+  org — home for the reusable Bible datasets and the services that produce them;
+  a `bibles` repo (translations) is next. Dataset card + build: [`resources/strongs/`](resources/strongs).
 - **Hosting moved to Hetzner.** The services are now self-hosted on a Hetzner
   server via Docker Compose (they previously ran on Railway; the Railway configs
   are still in the repo for portability). Hosting specifics are kept in
