@@ -1200,19 +1200,40 @@ class Branch:
 # tags. ALL branches are always retrieved; the per-intent featured set only
 # decides expanded-vs-collapsed — never on/off. This is the deliberate
 # reinterpretation of an _INTENT_WEIGHTS 0.0 as "collapsed", not "excluded".
+#
+# `key` is the language-neutral contract (stable across releases); clients with
+# their own i18n should localize from it. `label` is a default English string;
+# _branch_label() localizes it for the common UI languages, English otherwise.
 _BRANCH_SPEC: tuple[tuple[str, str, tuple[str, ...]], ...] = (
-    ("lexicon",     "Léxico / palabras",   ("lexicon",)),
-    ("study",       "Notas de estudio",    ("study-note", "book-intro")),
-    ("terms",       "Términos clave",      ("term", "translator-note", "question")),
-    ("verses",      "Versículos",          ("bible", "scripture")),
-    ("morphology",  "Morfología",          ("morphology",)),
-    ("methodology", "Metodología",         ("methodology",)),
-    ("media",       "Recursos",            ("video-transcript", "section-heading")),
-    ("other",       "Otros",               ()),  # catch-all for unmapped kinds
+    ("lexicon",     "Lexicon / words",   ("lexicon",)),
+    ("study",       "Study notes",       ("study-note", "book-intro")),
+    ("terms",       "Key terms",         ("term", "translator-note", "question")),
+    ("verses",      "Verses",            ("bible", "scripture")),
+    ("morphology",  "Morphology",        ("morphology",)),
+    ("methodology", "Methodology",       ("methodology",)),
+    ("media",       "Resources",         ("video-transcript", "section-heading")),
+    ("other",       "Other",             ()),  # catch-all for unmapped kinds
 )
 _KIND_TO_BRANCH = {k: key for key, _, kinds in _BRANCH_SPEC for k in kinds}
-_BRANCH_LABEL = {key: label for key, label, _ in _BRANCH_SPEC}
+_BRANCH_LABEL_EN = {key: label for key, label, _ in _BRANCH_SPEC}
 _BRANCH_ORDER = [key for key, _, _ in _BRANCH_SPEC]
+
+# Optional server-side localization of the default label, keyed by canonical
+# query language. Clients that localize from `key` ignore this; clients without
+# their own i18n get a sensible localized default (English fallback).
+_BRANCH_LABELS_I18N: dict[str, dict[str, str]] = {
+    "spa": {
+        "lexicon": "Léxico / palabras", "study": "Notas de estudio",
+        "terms": "Términos clave", "verses": "Versículos",
+        "morphology": "Morfología", "methodology": "Metodología",
+        "media": "Recursos", "other": "Otros",
+    },
+}
+
+
+def _branch_label(key: str, lang: str) -> str:
+    """Localized default label for a branch key (English fallback)."""
+    return _BRANCH_LABELS_I18N.get(canon(lang), {}).get(key, _BRANCH_LABEL_EN[key])
 
 # Which branches the auto-intent FEATURES (expands). Others come back collapsed
 # but populated and drill-down-addressable. Unknown intent → thematic.
@@ -1284,7 +1305,7 @@ def retrieve_branched(
         hits = buckets[key]
         if not hits and key not in featured:
             continue  # empty + not requested → omit
-        branches.append(Branch(key=key, label=_BRANCH_LABEL[key],
+        branches.append(Branch(key=key, label=_branch_label(key, lang),
                                featured=key in featured,
                                hits=hits[:per_branch], total=len(hits)))
     # Featured branches first; stable sort preserves spec order within a group.

@@ -1,5 +1,10 @@
 {
-  "_comment": "Per-language intent vocabulary for analyzer.py. en authored verbatim from the original module constants; other languages fall back to en. Regex skeletons stay in code (Plan A Tier-1).",
+  "_comment": "Per-language intent vocabulary for analyzer.py. en authored verbatim from the original module constants; other languages fall back to en. Regex skeletons stay in code (Plan A Tier-1). frame_words = interrogative scaffolding (real content words but query frame, not subject) that expand to off-target Strong's; see internal-docs/branch-denoising.md. Conservative: excludes polysemous content words like 'kind'.",
+  "frame_words": [
+    "different", "differing", "kinds", "sorts",
+    "speak", "speaks", "speaking", "talk", "talks", "say", "says", "said",
+    "mention", "mentions", "discuss", "discusses", "describe", "describes"
+  ],
   "stopwords": [
     "a",
     "about",

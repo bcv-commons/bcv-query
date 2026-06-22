@@ -1,5 +1,11 @@
 {
-  "_comment": "Spanish intent config for the analyzer. patterns override the English trigger regexes (analyzer.py); absent keys fall back to English. See internal-docs/multilingual-unlock-plan.md.",
+  "_comment": "Spanish intent config for the analyzer. patterns override the English trigger regexes (analyzer.py); absent keys fall back to English. See internal-docs/multilingual-unlock-plan.md. frame_words = interrogative scaffolding (real content words but query frame, not subject) that expand to off-target Strong's; see internal-docs/branch-denoising.md.",
+  "frame_words": [
+    "diferente", "diferentes", "tipo", "tipos", "clase", "clases",
+    "manera", "maneras", "forma", "formas", "ejemplo", "ejemplos",
+    "habla", "hablar", "dice", "decir", "dicen", "trata",
+    "menciona", "mencionar", "mencionan"
+  ],
   "stopwords": [
     "a",
     "acerca",

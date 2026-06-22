@@ -1,0 +1,84 @@
+# Branch de-noising eval set.
+#
+# Measures whether the lexicon branch of retrieve_branched leads with the
+# query's SUBJECT Strong's code and is free of FRAME-word noise codes — and
+# how frame-strip (filter_biblical_words strip_frames) changes that.
+#
+# Run: python -m eval.denoise            (frame-strip OFF vs ON, A/B)
+#
+# Per case:
+#   query         the natural-language question
+#   lang          ISO 639-3
+#   subject_codes Strong's that SHOULD lead / appear (zero-padded, no prefix-vs)
+#   noise_codes   frame-derived Strong's that should be ABSENT after frame-strip
+cases:
+  - id: amor
+    query: "¿De qué diferentes tipos de amor habla la Biblia?"
+    lang: spa
+    subject_codes: [G0026, H3039]
+    noise_codes:   [G2980, H1696, H8133]
+
+  - id: fe
+    query: "¿Qué dice la Biblia sobre la fe?"
+    lang: spa
+    subject_codes: [G4102]
+    noise_codes:   [H0559, H5002]
+
+  - id: perdon
+    query: "¿De qué manera habla la Biblia sobre el perdón?"
+    lang: spa
+    subject_codes: [G0859, H5545]
+    noise_codes:   [G2980, H3966]
+
+  # control: frame words present but they don't expand → frame-strip is a no-op,
+  # subject must stay clean (no regression).
+  - id: pecado
+    query: "¿Qué tipos de pecado menciona la Biblia?"
+    lang: spa
+    subject_codes: [G0265, H2403]
+    noise_codes:   []
+
+  # control: NO frame words → frame-strip must be a pure no-op.
+  - id: gracia
+    query: "¿Qué es la gracia?"
+    lang: spa
+    subject_codes: [G5485, H2580]
+    noise_codes:   []
+
+# Over-strip guards: queries where a frame-LIKE word is actually the SUBJECT
+# (must_survive in the fts) or is genuine frame (must_strip). Checked against
+# analyze().fts_query (frame-strip is universal via _fts_keywords). These caught
+# the English over-strips that got `example/ways/manner/type/types` trimmed.
+frame_guards:
+  - id: en_example_subject
+    query: "be an example to the believers"
+    lang: eng
+    must_survive: [example]        # 1 Tim 4:12 — example IS the subject
+  - id: en_ways_subject
+    query: "the ways of God are higher than our ways"
+    lang: eng
+    must_survive: [ways]
+  - id: en_typology
+    query: "types of the Messiah in the Old Testament"
+    lang: eng
+    must_survive: [types, messiah]
+  - id: en_correct_strip
+    query: "different kinds of spiritual gifts"
+    lang: eng
+    must_survive: [spiritual, gifts]
+    must_strip:   [different, kinds]
+  - id: en_say_frame
+    query: "What does the Bible say about faith?"
+    lang: eng
+    must_survive: [faith]
+    must_strip:   [say]
+  - id: en_speaking_tongues
+    query: "What does the Bible say about speaking in tongues?"
+    lang: eng
+    must_survive: [tongues]        # 'speaking' strips, but subject survives
+    must_strip:   [speaking, say]
+  - id: es_frame_strip
+    query: "¿De qué diferentes tipos de amor habla la Biblia?"
+    lang: spa
+    must_survive: [amor]
+    must_strip:   [diferentes, habla, tipos]

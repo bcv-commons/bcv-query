@@ -338,15 +338,14 @@ def _lang_stopwords(lang: str) -> frozenset[str]:
     article G3588 *and* content words like H6440 "face"), so the gloss-only
     gates can't drop them. An explicit per-language stopword list can.
 
-    Critically, this reads analyzer_lang/<lang>.json *directly* and does NOT
-    fall back to English (unlike analyzer._load_intent_lang, which chains to
-    en.json). A language with no config yet (fr/pt/ru/ar/hi/…) returns empty,
-    so filter_biblical_words keeps its language-neutral gloss-only behavior —
-    no regression, and we never apply English stops to, say, French ("or"=gold).
-    The gate activates for a language the moment its <lang>.json is authored.
+    Reads analyzer_lang/<lang>.json *directly*, NO cross-language fallback: a
+    language with no config (some of fr/pt/ru/…) returns empty so the gloss-only
+    gates still apply, and we never bleed English stops into, say, French
+    ("or"=gold). English is NOT special-cased — `eng.json` supplies its stops
+    just like any language (English now goes through filter_biblical_words too).
     """
     lang = canon(lang)
-    if not lang or lang == "eng":
+    if not lang:
         return frozenset()
     p = _LANG_DIR / f"{lang}.json"
     if not p.exists():
@@ -357,13 +356,43 @@ def _lang_stopwords(lang: str) -> frozenset[str]:
         return frozenset()
 
 
-def filter_biblical_words(raw_query: str, lang: str = "en") -> str:
+@lru_cache(maxsize=16)
+def _lang_frame_words(lang: str) -> frozenset[str]:
+    """Interrogative *frame* words for THIS language (NO English fallback).
+
+    Distinct from stopwords (function particles): frame words are real,
+    exact-gloss CONTENT words that nonetheless act as question scaffolding —
+    "¿de qué DIFERENTES TIPOS … HABLA la Biblia?". They are not the query's
+    subject, but they expand to off-target Strong's (habla→G2980 λαλέω "speak",
+    diferentes→H8133 "change"), flooding the lexicon branch with noise that no
+    downstream signal can cleanly trim (their codes are ordinary exact glosses).
+    Curated per language under the `frame_words` key, sibling to `stopwords`.
+    Empty for any language without the key → no behavior change. English is not
+    special-cased — `eng.json` supplies its frame_words like any language.
+    """
+    lang = canon(lang)
+    if not lang:
+        return frozenset()
+    p = _LANG_DIR / f"{lang}.json"
+    if not p.exists():
+        return frozenset()
+    try:
+        return frozenset(json.loads(p.read_text(encoding="utf-8")).get("frame_words", []))
+    except Exception:
+        return frozenset()
+
+
+def filter_biblical_words(raw_query: str, lang: str = "en", *, strip_frames: bool = True) -> str:
     """Keep only biblical content words; drop function words in any language.
 
     Three gates:
       0. Stopword — a word in the language's analyzer stopword list is dropped
          outright (handles function words that alignment noise maps to content
          Strong's, e.g. Spanish "la").
+      0b. Frame word — an interrogative scaffolding word (`frame_words` list,
+         e.g. Spanish "habla"/"diferentes") is dropped: it's a real content word
+         but the query's frame, not its subject, and expands to off-target
+         Strong's. Skipped when strip_frames=False (used by eval A/B).
       1. Length/exactness — a short word (≤3 chars, non-CJK) survives only if
          it has an exact (quality=2) gloss match. This drops articles caught
          as partial gloss fragments (Spanish "la" inside "la piedra"). Longer
@@ -382,12 +411,17 @@ def filter_biblical_words(raw_query: str, lang: str = "en") -> str:
         return raw_query
     funcs = _function_strongs()
     stops = _lang_stopwords(lang)
+    frames = _lang_frame_words(lang) if strip_frames else frozenset()
 
     words = re.findall(r"[一-鿿]|[\w]{2,}", raw_query.lower())
     kept: list[str] = []
     for w in words:
         # Gate 0: explicit per-language stopword
         if w in stops:
+            continue
+        # Gate 0b: interrogative frame word (real content word, but query
+        # scaffolding — expands to off-target Strong's; see _lang_frame_words)
+        if w in frames:
             continue
         is_cjk = bool(re.match(r"[一-鿿]", w))
         is_short = len(w) <= 3 and not is_cjk

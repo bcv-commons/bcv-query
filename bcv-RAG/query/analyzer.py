@@ -95,7 +95,13 @@ _WORDCHAR = r"[^\s\d_.,:;!?()\[\]{}«»\"'“”’/\\।॥–—…]"
 def _fts_keywords(text: str, lang: str = "en") -> list[str]:
     words = re.findall(rf"{_WORDCHAR}{{3,}}", text.lower())
     stop = _bundle(lang)["stopwords"]
-    return [w for w in words if w not in stop]
+    # Frame-strip (universal — closes the English gap): drop interrogative
+    # scaffolding words ("different/kinds/speak") that expand to off-target
+    # Strong's. Same per-language `frame_words` source filter_biblical_words
+    # uses (read directly, NO English fallback). See branch-denoising.md.
+    from query.concept_expand import _lang_frame_words  # lazy: avoid import cycle
+    frames = _lang_frame_words(lang)
+    return [w for w in words if w not in stop and w not in frames]
 
 
 # Short, recognizable entity-lookup patterns. Each captures the entity term in
