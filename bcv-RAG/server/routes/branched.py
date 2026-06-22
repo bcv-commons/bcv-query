@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from indexer.db import has_vec
 from query.analyzer import analyze
 from query.concept_expand import filter_biblical_words
+from query.lang_detect import resolve_lang
 from lang import canon
 from server.auth import require_password
 from server.branched import build_branches
@@ -52,7 +53,7 @@ def _embed(db: sqlite3.Connection, q: str) -> list[float] | None:
 def search_branched(
     request: Request,
     q: str,
-    lang: str = "en",
+    lang: str | None = None,   # absent/"auto" → detect from query text
     book: str | None = None,
     source: Literal["all", "door43", "aquifer"] = "all",
     per_branch: int = 8,
@@ -65,6 +66,7 @@ def search_branched(
     if per_branch < 1 or per_branch > 50:
         raise HTTPException(status_code=400, detail="per_branch must be 1..50")
 
+    lang = resolve_lang(q, lang)
     analysis = _prep(q, lang, book)
     query_vec = _embed(db, q) if semantic else None
     result = build_branches(
@@ -87,7 +89,7 @@ def search_branched(
 
 class AskBranchedRequest(BaseModel):
     question: str = Field(..., min_length=1)
-    lang: str = "en"
+    lang: str | None = None   # absent/"auto" → detect from question text
     book: str | None = None
     source: Literal["all", "door43", "aquifer"] = "all"
     per_branch: int = 8
@@ -102,17 +104,18 @@ def ask_branched(
     if req.per_branch < 1 or req.per_branch > 50:
         raise HTTPException(status_code=400, detail="per_branch must be 1..50")
 
-    analysis = _prep(req.question, req.lang, req.book)
+    lang = resolve_lang(req.question, req.lang)
+    analysis = _prep(req.question, lang, req.book)
     query_vec = _embed(db, req.question)
     result = build_branches(
         db, analysis, query_vec=query_vec, source_filter=req.source,
-        lang=req.lang, per_branch=req.per_branch, force=req.force,
+        lang=lang, per_branch=req.per_branch, force=req.force,
     )
 
     # One narrative over the FEATURED branches; the tree carries the rest.
     from query.synthesize import synthesize  # lazy: pulls openai SDK
     synth = synthesize(req.question, result["featured_cards"], db=db,
-                       analysis=analysis, lang=req.lang)
+                       analysis=analysis, lang=lang)
 
     return {
         "question": req.question,
@@ -121,7 +124,7 @@ def ask_branched(
         "citations": synth["citations"],
         "branches": result["branches"],
         "suggested_drilldown": result["suggested_drilldown"],
-        "lang": req.lang,
+        "lang": lang,
         "analysis": {
             "fts_query": analysis.fts_query,
             "intent": analysis.intent,

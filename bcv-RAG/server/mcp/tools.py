@@ -15,6 +15,7 @@ from indexer.db import has_vec
 from indexer.references import human, parse_references
 from query.analyzer import analyze
 from query.concept_expand import filter_biblical_words
+from query.lang_detect import resolve_lang
 from query.retrieve import retrieve
 from server.corpus_cards import resolve_corpus_hits
 from server.resolver import chunk_preview_from_card, resolve_chunk
@@ -167,7 +168,9 @@ def _search(args: dict, db: sqlite3.Connection) -> dict:
         "type": "object",
         "properties": {
             "query": {"type": "string", "description": "Free-form question or keyword search."},
-            "lang": {"type": "string", "default": "en"},
+            "lang": {"type": "string",
+                     "description": "ISO 639-3 (spa/fra/…). Omit or pass 'auto' to "
+                                    "detect the language from the query text."},
             "book": {"type": "string", "description": "USFM book code (e.g. 'TIT')."},
             "source": {"type": "string", "enum": ["all", "door43", "aquifer"], "default": "all"},
             "per_branch": {"type": "integer", "default": 8, "minimum": 1, "maximum": 50,
@@ -189,7 +192,7 @@ def _search_branched(args: dict, db: sqlite3.Connection) -> dict:
     q = args.get("query", "").strip()
     if not q:
         raise ValueError("'query' is required and non-empty")
-    lang = args.get("lang", "en")
+    lang = resolve_lang(q, args.get("lang"))   # absent/"auto" → detect
 
     analysis = analyze(q, lang=lang)
     if canon(lang) != "eng":
