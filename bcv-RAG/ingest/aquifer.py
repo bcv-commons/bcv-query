@@ -277,6 +277,49 @@ def _safe(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "-", s).strip("-")
 
 
+# Some upstream Aquifer articles carry an LLM *refusal* in their `title` field
+# (e.g. "Lo siento, no puedo proporcionar el texto exacto…"). The body is real
+# content; only the title is junk. Detect refusal-like titles (anchored at the
+# start, across the languages we ingest) and replace them with a reference label.
+_REFUSAL_TITLE_RE = re.compile(
+    r"^\s*(?:"
+    r"lo siento|no puedo|no estoy|"                      # es
+    r"i'?m sorry|i am sorry|i cannot|i can'?t|i am unable|as an ai|"  # en
+    r"sorry,?\s+(?:but\s+)?i|unfortunately,?\s+i|"       # en
+    r"je suis d[eé]sol[eé]|d[eé]sol[eé]|je ne peux|"     # fr
+    r"desculpe|n[aã]o posso|"                            # pt
+    r"извин|не могу|"                                    # ru
+    r"عذر|آسف|لا أستطيع|"                                # ar
+    r"मुझे खेद|मैं .{0,8}नहीं कर"                          # hi
+    r")",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_refusal(text: str) -> bool:
+    return bool(_REFUSAL_TITLE_RE.match(text))
+
+
+def _ref_label(passages: list[tuple[int, int]]) -> str:
+    """Human-ish 'GEN 25:19' / 'GEN 25:19–34' from BBCCCVVV passages, '' if none."""
+    if not passages:
+        return ""
+    def parts(n: int) -> tuple[str | None, int, int]:
+        return NUMBER_TO_CODE.get(n // 1_000_000), (n // 1_000) % 1_000, n % 1_000
+    s, e = passages[0]
+    bs, cs, vs = parts(s)
+    if not bs:
+        return ""
+    if e == s:
+        return f"{bs} {cs}:{vs}"
+    be, ce, ve = parts(e)
+    if be == bs and ce == cs:
+        return f"{bs} {cs}:{vs}–{ve}"
+    if be == bs:
+        return f"{bs} {cs}:{vs}–{ce}:{ve}"
+    return f"{bs} {cs}:{vs}–{be} {ce}:{ve}"
+
+
 def _yaml_escape(s: str) -> str:
     return s.replace("\\", "\\\\").replace('"', '\\"')
 
@@ -324,7 +367,9 @@ def _stage_articles(staging: Path, repo: str, articles: list[dict], lang: str) -
         body = _html_to_text(article.get("content") or "")
         if not body:
             continue  # pure-metadata article — nothing to embed or read
-        title_raw = (article.get("title") or "").strip() or f"Article {content_id}"
+        title_raw = (article.get("title") or "").strip()
+        if not title_raw or _looks_like_refusal(title_raw):
+            title_raw = _ref_label(passages) or f"Article {content_id}"
         title = f"Aquifer {repo} — {title_raw}"
         kind = _REPO_KIND.get(repo, _DEFAULT_KIND)
         tags = ["resource:aquifer", f"aquifer:{repo}", f"lang:{to_web(canon(lang))}", f"kind:{kind}",

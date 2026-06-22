@@ -12,6 +12,7 @@ from indexer.env import load_env
 from server.cors import allowed_origins
 from server.ratelimit import limiter
 from server.routes import ask as ask_route
+from server.routes import branched as branched_route
 from server.routes import chunks as chunks_route
 from server.routes import concordance as concordance_route
 from server.routes import cross_references as xref_route
@@ -49,6 +50,7 @@ app.include_router(health_route.router, prefix="/api")
 app.include_router(chunks_route.router, prefix="/api")
 app.include_router(search_route.router, prefix="/api")
 app.include_router(ask_route.router, prefix="/api")
+app.include_router(branched_route.router, prefix="/api")
 app.include_router(trees_route.router, prefix="/api")
 app.include_router(topics_route.router, prefix="/api")
 app.include_router(entities_route.router, prefix="/api")

@@ -1064,6 +1064,233 @@ _INTENT_WEIGHTS: dict[str, list[float]] = {
     "xref":             [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 3.0, 0.0, 0.2],
 }
 
+# Retriever execution order — index aligns with each _INTENT_WEIGHTS row and
+# with the list passed to rrf(). The single source of truth for both the flat
+# and branched paths.
+_RETRIEVER_ORDER = (
+    "fts", "title", "passage", "scripture", "tag", "vector", "lexicon",
+    "morphology", "entity", "bible", "topic", "xref", "cfabric", "aquifer",
+)
+
+
+def _gather_hits(
+    db: sqlite3.Connection,
+    analysis: QueryAnalysis,
+    *,
+    query_vec: list[float] | None,
+    source_filter: str | None,
+    lang: str,
+) -> list[list[Hit]]:
+    """Run query expansion, build filters, and execute every retriever once.
+
+    Returns the per-retriever hit lists in `_RETRIEVER_ORDER`. Shared by
+    `retrieve()` (weighted RRF → flat top-k) and `retrieve_branched()` (bucket
+    by kind → tree) so both pay the retriever cost once and see identical
+    candidates. NOTE: mutates `analysis.tags`/`analysis.passages` with the
+    expansions, exactly as the inline code did — callers pass a per-request
+    analysis, so this is single-shot.
+    """
+    # Strategy 1: concept expansion (always-on, <1ms)
+    from query.concept_expand import expand_concepts
+    concept_tags = expand_concepts(analysis.fts_query, analysis.tags, lang=lang)
+    if concept_tags:
+        analysis.tags.extend(concept_tags)
+
+    # Strategy 2: LXX bridge expansion (always-on when H-tags present, ~50ms)
+    from query.lxx_expand import expand_lxx
+    lxx_tags = expand_lxx(analysis.tags)
+    if lxx_tags:
+        analysis.tags.extend(lxx_tags)
+
+    # Strategy 3: morph pre-filter (only on morph-keyword queries, ~50-150ms)
+    from query.morph_prefilter import detect_morph_pattern, morph_passages, _extract_book_code
+    morph_pattern = detect_morph_pattern(analysis.fts_query)
+    if morph_pattern:
+        book_code = _extract_book_code(analysis.passages)
+        morph_refs = morph_passages(morph_pattern, book=book_code)
+        if morph_refs:
+            analysis.passages.extend(morph_refs)
+
+    narrow = analysis.passages and any((e - s) < 999 for s, e in analysis.passages)
+    passages_filter = _docs_overlapping_passages(db, analysis.passages) if narrow else None
+    source = _docs_by_source(db, source_filter)
+    # Hide v3 expansion content (lexicons, morphology, …) from existing
+    # retrievers — see _V2_KIND_TAGS comment above. Stage 3 retrievers
+    # will reach v3 content via their own channels and intents.
+    v2_filter = _docs_v2_only(db)
+    doc_filter = _intersect_filters(passages_filter, source, v2_filter)
+    title_filter = _intersect_filters(source, v2_filter)
+
+    strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
+    # Order MUST match _RETRIEVER_ORDER and the _INTENT_WEIGHTS columns.
+    return [
+        fts_search(db, analysis.fts_query, doc_filter=doc_filter),
+        title_search(db, analysis.fts_query, doc_filter=title_filter),
+        passage_search(db, analysis.passages, doc_filter=v2_filter),
+        scripture_search(db, analysis.passages, query_vec, fts_query=analysis.fts_query),
+        tag_search(db, analysis.tags),
+        vector_search(db, query_vec, doc_filter=doc_filter) if query_vec else [],
+        lexicon_search(db, fts_query=analysis.fts_query,
+                       word_study_terms=analysis.word_study_terms,
+                       strongs_tags=strongs_tags, lemma_tags=lemma_tags),
+        morphology_search(db, strongs_tags=strongs_tags, lemma_tags=lemma_tags,
+                          passages=analysis.passages),
+        entity_search(db, entity_query=analysis.entity_query, lang=lang),
+        bible_search(db, fts_query=analysis.fts_query, passages=analysis.passages, lang=lang),
+        topic_search(db, topic_query=analysis.topic_query),
+        xref_search(db, source_bbcccvvv=analysis.xref_source),
+        cfabric_search(analysis.passages),
+        aquifer_search(db, fts_query=analysis.fts_query, lang=lang),
+    ]
+
+
+def _language_gate(db: sqlite3.Connection, hits: list[Hit], lang: str) -> list[Hit]:
+    """Drop cross-language hits (shared by flat + branched paths).
+
+    Content now exists in many languages (bibles + Aquifer study notes),
+    reachable via every retriever:
+      • kind:bible — STRICT: only the query language (we have the bible in that
+        language; an English verse would be redundant/wrong).
+      • everything else — query language OR English (the universal study
+        fallback when query-language notes don't exist).
+      • lang-neutral content (no lang: tag — entities, cross-refs, …) is kept.
+    Look up lang/kind tags ONLY for the candidate docs (a few hundred), not the
+    whole tags table — those scans dominated request latency.
+    """
+    cand_docs = {h.chunk_id.split(":", 1)[0] for h in hits}
+    if not cand_docs:
+        return hits
+    is_bible: set[str] = set()
+    langs_by_doc: dict[str, set[str]] = {}
+    ph = ",".join("?" * len(cand_docs))
+    for did, tag in db.execute(
+        f"SELECT doc_id, tag FROM tags WHERE doc_id IN ({ph}) "
+        f"AND (tag='kind:bible' OR tag LIKE 'lang:%')", list(cand_docs)).fetchall():
+        if tag == "kind:bible":
+            is_bible.add(did)
+        else:
+            langs_by_doc.setdefault(did, set()).add(tag[len("lang:"):])
+
+    wl = to_web(canon(lang))   # index lang: tags are short/web form (en, es, …)
+
+    def _keep(did: str) -> bool:
+        dl = langs_by_doc.get(did)
+        if did in is_bible and (not dl or wl not in dl):
+            return False  # foreign-language bible (strict)
+        if dl and wl not in dl and "en" not in dl:
+            return False  # foreign-language non-bible (no English fallback)
+        return True
+
+    return [h for h in hits if _keep(h.chunk_id.split(":", 1)[0])]
+
+
+# ---------- branched retrieval ----------
+
+@dataclass
+class Branch:
+    """One drill-down node of the result tree."""
+    key: str            # stable drill-down parameter
+    label: str          # default display string (UI may localize)
+    featured: bool      # auto-intent expanded this branch?
+    hits: list[Hit]     # ranked, capped to per_branch
+    total: int          # hits available before the cap (for "+N more")
+
+
+# User-facing branch taxonomy: each branch groups one or more index `kind:`
+# tags. ALL branches are always retrieved; the per-intent featured set only
+# decides expanded-vs-collapsed — never on/off. This is the deliberate
+# reinterpretation of an _INTENT_WEIGHTS 0.0 as "collapsed", not "excluded".
+_BRANCH_SPEC: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    ("lexicon",     "Léxico / palabras",   ("lexicon",)),
+    ("study",       "Notas de estudio",    ("study-note", "book-intro")),
+    ("terms",       "Términos clave",      ("term", "translator-note", "question")),
+    ("verses",      "Versículos",          ("bible", "scripture")),
+    ("morphology",  "Morfología",          ("morphology",)),
+    ("methodology", "Metodología",         ("methodology",)),
+    ("media",       "Recursos",            ("video-transcript", "section-heading")),
+    ("other",       "Otros",               ()),  # catch-all for unmapped kinds
+)
+_KIND_TO_BRANCH = {k: key for key, _, kinds in _BRANCH_SPEC for k in kinds}
+_BRANCH_LABEL = {key: label for key, label, _ in _BRANCH_SPEC}
+_BRANCH_ORDER = [key for key, _, _ in _BRANCH_SPEC]
+
+# Which branches the auto-intent FEATURES (expands). Others come back collapsed
+# but populated and drill-down-addressable. Unknown intent → thematic.
+_FEATURED_BRANCHES: dict[str, tuple[str, ...]] = {
+    "thematic":         ("lexicon", "study", "terms"),
+    "word_study":       ("lexicon", "morphology", "terms"),
+    "morphology":       ("morphology", "lexicon", "verses"),
+    "entity_lookup":    ("terms", "study", "verses"),
+    "methodology":      ("methodology", "terms"),
+    "topic":            ("study", "terms", "verses"),
+    "xref":             ("verses", "study"),
+    "genealogy":        ("terms", "study"),
+    "passage_specific": ("verses", "study", "terms"),
+    "passage_book":     ("study", "verses", "terms"),
+}
+
+
+def _kinds_for_docs(db: sqlite3.Connection, doc_ids: set[str]) -> dict[str, str]:
+    """doc_id -> its kind:* value (first one wins; missing → '')."""
+    out: dict[str, str] = {}
+    if not doc_ids:
+        return out
+    ph = ",".join("?" * len(doc_ids))
+    for did, tag in db.execute(
+        f"SELECT doc_id, tag FROM tags WHERE doc_id IN ({ph}) AND tag LIKE 'kind:%'",
+        list(doc_ids)).fetchall():
+        out.setdefault(did, tag[len("kind:"):])
+    return out
+
+
+def retrieve_branched(
+    db: sqlite3.Connection,
+    analysis: QueryAnalysis,
+    *,
+    query_vec: list[float] | None = None,
+    source_filter: str | None = None,
+    lang: str = "en",
+    per_branch: int = 8,
+    force: list[str] | None = None,
+) -> list[Branch]:
+    """Branched retrieval: run every retriever once, then GROUP results by kind
+    into user-facing branches instead of fusing into one flat top-k.
+
+    Auto-intent (`analysis.intent`) decides which branches are *featured*
+    (expanded); the rest come back collapsed but populated, so a client can
+    drill into any branch — including ones the intent didn't feature — via
+    `force`. Within a branch, hits rank by UNWEIGHTED RRF, so a correctly
+    anchored hit (e.g. lexicon ἀγάπη for a 'thematic' query, whose flat intent
+    weight is 0.0) is never discarded — the entire point of branching.
+    """
+    hit_lists = _gather_hits(db, analysis, query_vec=query_vec,
+                             source_filter=source_filter, lang=lang)
+    # Unweighted fusion: every retriever counts equally so branch-native hits
+    # survive regardless of the flat intent weight that would zero them.
+    fused = _language_gate(db, rrf(hit_lists), lang)
+    kinds = _kinds_for_docs(db, {h.chunk_id.split(":", 1)[0] for h in fused})
+
+    buckets: dict[str, list[Hit]] = {key: [] for key in _BRANCH_ORDER}
+    for h in fused:  # fused is already ranked, so buckets stay ranked
+        kind = kinds.get(h.chunk_id.split(":", 1)[0], "")
+        buckets[_KIND_TO_BRANCH.get(kind, "other")].append(h)
+
+    featured = set(_FEATURED_BRANCHES.get(analysis.intent, _FEATURED_BRANCHES["thematic"]))
+    if force:
+        featured |= set(force)
+
+    branches: list[Branch] = []
+    for key in _BRANCH_ORDER:
+        hits = buckets[key]
+        if not hits and key not in featured:
+            continue  # empty + not requested → omit
+        branches.append(Branch(key=key, label=_BRANCH_LABEL[key],
+                               featured=key in featured,
+                               hits=hits[:per_branch], total=len(hits)))
+    # Featured branches first; stable sort preserves spec order within a group.
+    branches.sort(key=lambda b: not b.featured)
+    return branches
+
 
 def retrieve(
     db: sqlite3.Connection,
@@ -1087,114 +1314,9 @@ def retrieve(
     inferred book scope helps without crowding out cross-book term articles
     or narrative notes that legitimately bear on the question.
     """
-    # Strategy 1: concept expansion (always-on, <1ms)
-    from query.concept_expand import expand_concepts
-    concept_tags = expand_concepts(analysis.fts_query, analysis.tags, lang=lang)
-    if concept_tags:
-        analysis.tags.extend(concept_tags)
-
-    # Strategy 2: LXX bridge expansion (always-on when H-tags present, ~50ms)
-    from query.lxx_expand import expand_lxx
-    lxx_tags = expand_lxx(analysis.tags)
-    if lxx_tags:
-        analysis.tags.extend(lxx_tags)
-
-    # Strategy 3: morph pre-filter (only on morph-keyword queries, ~50-150ms)
-    from query.morph_prefilter import detect_morph_pattern, morph_passages, _extract_book_code
-    morph_pattern = detect_morph_pattern(analysis.fts_query)
-    morph_passage_filter = None
-    if morph_pattern:
-        book_code = _extract_book_code(analysis.passages)
-        morph_refs = morph_passages(morph_pattern, book=book_code)
-        if morph_refs:
-            analysis.passages.extend(morph_refs)
-            morph_passage_filter = _docs_overlapping_passages(db, morph_refs)
-
-    narrow = analysis.passages and any((e - s) < 999 for s, e in analysis.passages)
-    passages_filter = _docs_overlapping_passages(db, analysis.passages) if narrow else None
-    source = _docs_by_source(db, source_filter)
-    # Hide v3 expansion content (lexicons, morphology, …) from existing
-    # retrievers — see _V2_KIND_TAGS comment above. Stage 3 retrievers
-    # will reach v3 content via their own channels and intents.
-    v2_filter = _docs_v2_only(db)
-    doc_filter = _intersect_filters(passages_filter, source, v2_filter)
-    title_filter = _intersect_filters(source, v2_filter)
-
-    fts_hits   = fts_search(db, analysis.fts_query, doc_filter=doc_filter)
-    title_hits = title_search(db, analysis.fts_query, doc_filter=title_filter)
-    pas_hits   = passage_search(db, analysis.passages, doc_filter=v2_filter)
-    scrip_hits = scripture_search(db, analysis.passages, query_vec, fts_query=analysis.fts_query)
-    tag_hits   = tag_search(db, analysis.tags)
-    vec_hits   = vector_search(db, query_vec, doc_filter=doc_filter) if query_vec else []
-
-    # v3 retrievers — always called, but they short-circuit to [] when their
-    # specific inputs (Strong's tags, entity_query, topic name, xref source)
-    # aren't populated by the analyzer.
-    strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
-    lex_hits = lexicon_search(
-        db,
-        fts_query=analysis.fts_query,
-        word_study_terms=analysis.word_study_terms,
-        strongs_tags=strongs_tags,
-        lemma_tags=lemma_tags,
-    )
-    morph_hits = morphology_search(
-        db,
-        strongs_tags=strongs_tags,
-        lemma_tags=lemma_tags,
-        passages=analysis.passages,
-    )
-    ent_hits = entity_search(db, entity_query=analysis.entity_query, lang=lang)
-    bib_hits = bible_search(db, fts_query=analysis.fts_query, passages=analysis.passages, lang=lang)
-    aqf_hits = aquifer_search(db, fts_query=analysis.fts_query, lang=lang)
-    top_hits = topic_search(db, topic_query=analysis.topic_query)
-    xref_hits = xref_search(db, source_bbcccvvv=analysis.xref_source)
-    cfab_hits = cfabric_search(analysis.passages)
-
+    hit_lists = _gather_hits(db, analysis, query_vec=query_vec,
+                             source_filter=source_filter, lang=lang)
     weights = _INTENT_WEIGHTS.get(analysis.intent, _INTENT_WEIGHTS["thematic"])
-    fused = rrf(
-        [fts_hits, title_hits, pas_hits, scrip_hits, tag_hits, vec_hits,
-         lex_hits, morph_hits, ent_hits, bib_hits, top_hits, xref_hits, cfab_hits,
-         aqf_hits],
-        weights=weights,
-    )
-
-    # Language gate. Content now exists in many languages (bibles + Aquifer
-    # study notes), reachable via every retriever, so drop cross-language hits:
-    #   • kind:bible — STRICT: only the query language (we have the bible in
-    #     that language; an English verse would be redundant/wrong).
-    #   • everything else — query language OR English (the universal study
-    #     fallback when query-language notes don't exist).
-    #   • lang-neutral content (no lang: tag — entities, cross-refs, …) is kept.
-    # Without this, foreign-language study notes crowd out the right results.
-    # Look up lang/kind tags ONLY for the candidate docs in `fused` (a few
-    # hundred), not the whole 455k-row tags table — the previous two EXCEPT
-    # scans dominated request latency. Semantics unchanged: foreign-language
-    # bibles dropped strictly; foreign-language non-bible dropped unless English;
-    # lang-neutral content (no lang: tag) kept.
-    cand_docs = {h.chunk_id.split(":", 1)[0] for h in fused}
-    if cand_docs:
-        is_bible: set[str] = set()
-        langs_by_doc: dict[str, set[str]] = {}
-        ph = ",".join("?" * len(cand_docs))
-        for did, tag in db.execute(
-            f"SELECT doc_id, tag FROM tags WHERE doc_id IN ({ph}) "
-            f"AND (tag='kind:bible' OR tag LIKE 'lang:%')", list(cand_docs)).fetchall():
-            if tag == "kind:bible":
-                is_bible.add(did)
-            else:
-                langs_by_doc.setdefault(did, set()).add(tag[len("lang:"):])
-
-        wl = to_web(canon(lang))   # index lang: tags are short/web form (en, es, …)
-
-        def _keep(did: str) -> bool:
-            dl = langs_by_doc.get(did)
-            if did in is_bible and (not dl or wl not in dl):
-                return False  # foreign-language bible (strict)
-            if dl and wl not in dl and "en" not in dl:
-                return False  # foreign-language non-bible (no English fallback)
-            return True
-
-        fused = [h for h in fused if _keep(h.chunk_id.split(":", 1)[0])]
-
+    fused = rrf(hit_lists, weights=weights)
+    fused = _language_gate(db, fused, lang)
     return fused[:top_k]

@@ -14,6 +14,7 @@ from indexer import citations as citations_mod
 from indexer.db import has_vec
 from indexer.references import human, parse_references
 from query.analyzer import analyze
+from query.concept_expand import filter_biblical_words
 from query.retrieve import retrieve
 from server.corpus_cards import resolve_corpus_hits
 from server.resolver import chunk_preview_from_card, resolve_chunk
@@ -144,6 +145,83 @@ def _search(args: dict, db: sqlite3.Connection) -> dict:
             "intent": analysis.intent,
         },
         "hits": out_hits,
+    }
+
+
+@register_tool(
+    name="search_branched",
+    description=(
+        "Branched search: SAME retrieval as `search`, but results are GROUPED "
+        "by kind into featured/collapsed branches (Léxico/lexicon, study notes, "
+        "key terms, verses, morphology, …) instead of one flat ranked list. No "
+        "LLM, deterministic. Auto-intent FEATURES the branches most relevant to "
+        "the question (e.g. for a word-meaning question the lexicon branch is "
+        "featured and verses are collapsed); every other branch is still "
+        "returned collapsed and can be expanded by passing its key in `force` "
+        "(e.g. ['morphology']). Prefer this over `search` when a question spans "
+        "resource types or when the answer is a definition/word study that flat "
+        "ranking buries under verse quotes. `suggested_drilldown` lists the "
+        "collapsed branches that still have content."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "Free-form question or keyword search."},
+            "lang": {"type": "string", "default": "en"},
+            "book": {"type": "string", "description": "USFM book code (e.g. 'TIT')."},
+            "source": {"type": "string", "enum": ["all", "door43", "aquifer"], "default": "all"},
+            "per_branch": {"type": "integer", "default": 8, "minimum": 1, "maximum": 50,
+                           "description": "Max hits returned per branch."},
+            "force": {
+                "type": "array", "items": {"type": "string"},
+                "description": "Branch keys to force-expand even if the intent didn't "
+                               "feature them, e.g. ['lexicon','morphology'].",
+            },
+            "use_semantic": {
+                "type": "boolean", "default": False,
+                "description": "Opt-in: also rank by semantic vector similarity. Requires OPENAI_API_KEY on the server.",
+            },
+        },
+        "required": ["query"],
+    },
+)
+def _search_branched(args: dict, db: sqlite3.Connection) -> dict:
+    q = args.get("query", "").strip()
+    if not q:
+        raise ValueError("'query' is required and non-empty")
+    lang = args.get("lang", "en")
+
+    analysis = analyze(q, lang=lang)
+    if canon(lang) != "eng":
+        analysis.fts_query = filter_biblical_words(q, lang=lang)
+    if args.get("book"):
+        analysis.tags.append(f"book:{str(args['book']).upper()}")
+
+    query_vec = None
+    if args.get("use_semantic") and has_vec(db):
+        try:
+            from indexer.embed import embed_texts
+            query_vec = embed_texts([q], input_type="query")[0]
+        except Exception:
+            pass
+
+    from server.branched import build_branches
+    result = build_branches(
+        db, analysis, query_vec=query_vec, source_filter=args.get("source", "all"),
+        lang=lang, per_branch=int(args.get("per_branch", 8)),
+        force=args.get("force") or None,
+    )
+    return {
+        "query": q,
+        "lang": lang,
+        "analysis": {
+            "fts_query": analysis.fts_query,
+            "passages": [list(p) for p in analysis.passages],
+            "tags": analysis.tags,
+            "intent": analysis.intent,
+        },
+        "branches": result["branches"],
+        "suggested_drilldown": result["suggested_drilldown"],
     }
 
 
