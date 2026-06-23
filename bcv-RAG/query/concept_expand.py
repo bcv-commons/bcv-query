@@ -525,3 +525,31 @@ def expand_concepts(fts_query: str, existing_tags: list[str],
     # Across all words, keep the most distinctive tags overall
     candidates.sort(key=lambda m: -m[0])
     return [tag for _, tag in candidates[:max_total]]
+
+
+def term_strongs(text: str, lang: str = "eng", cap: int = 12) -> list[str]:
+    """Generous Strong's codes for a CONCEPT TERM — every exact (quality-2)
+    gloss code, valid in scripture and non-function, padded.
+
+    For *tagging* concept resources (e.g. Door43 TW articles) so multilingual
+    concept queries reach an English-only article via the bridge it already has
+    (`amor → strongs:G0026 → tag_search`). Unlike expand_concepts (the QUERY
+    side — keyness-ranked, capped at 4, which drops a low-keyness anchor like
+    G0026 ágape for "love"), this keeps the whole concept family: a TW article
+    covers the concept across words, so "love" → H0157/H0160/H2245/G0025/G0026/
+    G5368. Returns bare codes (no `strongs:` prefix) — caller adds it.
+    """
+    idx = _reverse_gloss(canon(lang))
+    if not idx:
+        return []
+    valid = _valid_strongs()
+    funcs = _function_strongs()
+    out: list[str] = []
+    for w in re.split(r"[^\w]+", text.lower()):
+        for code, q in idx.get(w, []):
+            if q != 2:
+                continue
+            norm = _normalize_code(code)
+            if (not valid or norm in valid) and norm not in funcs and norm not in out:
+                out.append(norm)
+    return out[:cap]

@@ -14,6 +14,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from indexer.env import load_env  # noqa: E402
+from indexer.references import NUMBER_TO_CODE  # noqa: E402
 from ingest import aquifer, door43  # noqa: E402
 from lang import canon  # noqa: E402
 
@@ -24,19 +25,27 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--source", action="append", choices=["door43", "aquifer"],
                     help="repeatable; default: door43 only. Use both for full coverage.")
-    ap.add_argument("--book", action="append", required=True,
+    ap.add_argument("--book", action="append",
                     help="USFM book code; repeatable (e.g. --book TIT --book RUT)")
+    ap.add_argument("--all-books", action="store_true",
+                    help="ingest all 66 books (BSB already covers scripture; this "
+                         "pulls the full TN/TQ/TW/TA + complete TW term-article set).")
     ap.add_argument("--lang", default="eng")
     ap.add_argument("--staging", type=Path, default=DEFAULT_STAGING,
                     help="root staging dir (a per-source subdir is created underneath)")
     args = ap.parse_args()
+    if not args.book and not args.all_books:
+        ap.error("pass --book <CODE> (repeatable) or --all-books")
     load_env()
 
     if canon(args.lang) != "eng":
         print("v1: English only", file=sys.stderr)
         return 2
 
-    book_codes = [b.upper() for b in args.book]
+    if args.all_books:
+        book_codes = [NUMBER_TO_CODE[n] for n in range(1, 67) if n in NUMBER_TO_CODE]
+    else:
+        book_codes = [b.upper() for b in args.book]
     sources = args.source or ["door43"]
 
     results: dict[str, dict] = {}

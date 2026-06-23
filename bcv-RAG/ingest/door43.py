@@ -378,8 +378,14 @@ def _ingest_referenced_tw(staging: Path, paths_to_passages: dict[str, list[tuple
                 continue
             category, term = path.split("/")[-2:]
             title = f"TW — {term.replace('-', ' ').title()} ({category})"
+            # Strong's anchors from the term's gloss family — so this English
+            # article is reachable from any language via the concept bridge
+            # (e.g. Spanish "amor" → strongs:G0026 → tag_search). See
+            # query.concept_expand.term_strongs / internal-docs/branch-denoising.md.
+            from query.concept_expand import term_strongs
             tags = ["resource:tw", "lang:en", "org:unfoldingWord",
                     f"category:{category}", f"term:{term}", "kind:term",
+                    *(f"strongs:{c}" for c in term_strongs(term.replace('-', ' '))),
                     *_book_tags_from_passages(ps)]
             out_path = out_dir / category / f"{term}.md"
             _write_md(out_path, title=title, tags=tags, passages=ps, body=text.strip())
@@ -470,11 +476,16 @@ def ingest_books(book_codes: list[str], staging: Path) -> dict[str, int]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--book", action="append", required=True, help="USFM book code (repeatable, e.g. --book TIT --book RUT)")
+    ap.add_argument("--book", action="append", help="USFM book code (repeatable, e.g. --book TIT --book RUT)")
+    ap.add_argument("--all-books", action="store_true",
+                    help="ingest all 66 books — full TN/TQ/TW/TA + the complete "
+                         "referenced TW term-article set (BSB already covers scripture).")
     ap.add_argument("--lang", default="en", help="language (only 'en' supported in v1)")
     ap.add_argument("--staging", type=Path,
                     default=Path(__file__).resolve().parent / "_staging" / "door43")
     args = ap.parse_args()
+    if not args.book and not args.all_books:
+        ap.error("pass --book <CODE> (repeatable) or --all-books")
 
     from indexer.env import load_env
     load_env()
@@ -483,9 +494,13 @@ def main() -> int:
     if canon(args.lang) != "eng":
         print("v1: English only", file=sys.stderr)
         return 2
-    counts = ingest_books([b.upper() for b in args.book], args.staging)
+    if args.all_books:
+        books = [NUMBER_TO_CODE[n] for n in range(1, 67) if n in NUMBER_TO_CODE]
+    else:
+        books = [b.upper() for b in args.book]
+    counts = ingest_books(books, args.staging)
     print(json.dumps({
-        "books": [b.upper() for b in args.book],
+        "books": books,
         "staged_files": counts,
         "staging_dir": str(args.staging),
     }, indent=2))

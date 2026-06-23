@@ -34,6 +34,14 @@ internal-docs/
 **/*.db-shm
 **/*.npy
 
+# resources/strongs/ is the PUBLISHED open dataset (bcv-commons/strongs) —
+# re-derivable, published to Hugging Face, and NOT read at runtime (verified:
+# no resource_path("strongs") anywhere). ~443 MB — never ship it in the image.
+resources/strongs/
+# topic_strongs.tsv: topic-anchoring foundation, not yet wired into runtime
+# (dormant). Re-include here once the gloss-bridge actually reads it. ~11 MB.
+resources/topic_strongs.tsv
+
 # bcv-RAG bits not needed in the image
 bcv-RAG/scripts/
 bcv-RAG/tools/

@@ -1296,6 +1296,25 @@ def retrieve_branched(
         kind = kinds.get(h.chunk_id.split(":", 1)[0], "")
         buckets[_KIND_TO_BRANCH.get(kind, "other")].append(h)
 
+    # Anchored term lookup. The lexicon/morphology branches have Strong's-anchored
+    # retrievers; the terms branch did not — it relied on tag_search, which is
+    # diluted by the hundreds of verses sharing a code, so a single dedicated
+    # term article (TW "Love" → strongs:G0026) gets buried below the cut. Pull
+    # kind:term docs by the query's Strong's anchors directly and lead with them.
+    strongs = [t for t in analysis.tags if t.startswith("strongs:")]
+    if strongs:
+        seen_terms = {h.chunk_id for h in buckets["terms"]}
+        ph = ",".join("?" * len(strongs))
+        rows = db.execute(
+            f"SELECT c.id, COUNT(*) AS m FROM tags t "
+            f"JOIN chunks c ON c.doc_id = t.doc_id "
+            f"JOIN tags k ON k.doc_id = c.doc_id AND k.tag = 'kind:term' "
+            f"WHERE t.tag IN ({ph}) GROUP BY c.id ORDER BY m DESC LIMIT 30", strongs).fetchall()
+        anchored = _language_gate(
+            db, [Hit(chunk_id=r[0], score=1.0, retrievers=["term_anchor"])
+                 for r in rows if r[0] not in seen_terms], lang)
+        buckets["terms"] = anchored + buckets["terms"]  # anchored articles lead
+
     featured = set(_FEATURED_BRANCHES.get(analysis.intent, _FEATURED_BRANCHES["thematic"]))
     if force:
         featured |= set(force)
