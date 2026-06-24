@@ -33,6 +33,8 @@ in Phase 0.
 | `strongs_gloss.tsv` | authoritative UBS/English glosses | `strong → gloss` |
 | `strongs_freq.tsv` | Strong's frequency + `is_function` flag | `strong` |
 | `strongs_keyness.tsv` | per-Strong's biblical-salience weight | `strong` |
+| `strongs_tw.tsv` | Strong's → unfoldingWord Translation-Words article(s), ranked by occurrence | `strong, tw_article, category, is_kt, lemma, n` |
+| `topic_strongs.tsv` | Nave's-style topic → Strong's | `topic_id, strong, verse_count` |
 
 Build-only intermediates (`strong_lemma.tsv`, `concepts/forms/tw_links.tsv`,
 `glosses_overview.tsv`) intentionally stay in `bcv-RAG/` — they are **git-tracked
