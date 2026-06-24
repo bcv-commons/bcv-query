@@ -1,7 +1,8 @@
 """Door43 / unfoldingWord ingest.
 
-v1 scope: English-only; ULT, UST, TN, TQ, TWL plus the TW articles and TA
-modules referenced from the requested books' TWL / TN. One or more books per run.
+v1 scope: English TN, TQ, TWL, TW, TA from unfoldingWord; plus native-language
+TW articles from Door43-Catalog for Spanish, French, Hindi, Portuguese, Russian,
+Bengali. One or more books per run.
 
 Output: per-row markdown files staged under
 `ingest/_staging/door43/<resource>/...`. Those staging files are then
@@ -58,9 +59,22 @@ _PARATEXT_FILE_NUM: dict[str, int] = {
 }
 
 RAW_BASE = "https://git.door43.org/unfoldingWord"
+CATALOG_RAW_BASE = "https://git.door43.org/Door43-Catalog"
+CATALOG_API_BASE = "https://git.door43.org/api/v1/repos/Door43-Catalog"
 DEFAULT_BRANCH = "master"
 TIMEOUT = 30.0
 PARALLEL_FETCHERS = 8
+
+# Door43-Catalog TW repos for non-English languages (canonical lang → repo name).
+# Covers all Door43-Catalog _tw repos that match our analyzer_lang/ configs.
+_LANG_TW_REPOS: dict[str, str] = {
+    "spa": "es-419_tw",
+    "fra": "fr_tw",
+    "hin": "hi_tw",
+    "por": "pt-br_tw",
+    "rus": "ru_tw",
+    "ben": "bn_tw",
+}
 
 # Per-book TSV/USFM resources. (repo_name, file_path_template).
 PER_BOOK_RESOURCES: dict[str, tuple[str, str]] = {
@@ -393,6 +407,78 @@ def _ingest_referenced_tw(staging: Path, paths_to_passages: dict[str, list[tuple
     return written
 
 
+def _fetch_tw_tree(repo: str, branch: str = DEFAULT_BRANCH) -> list[str]:
+    """Return all bible/{kt,other,names}/<term>.md paths from a Door43-Catalog TW repo."""
+    url = f"{CATALOG_API_BASE}/{repo}/git/trees/{branch}?recursive=true"
+    text = _fetch_text(url)
+    if text is None:
+        return []
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        return []
+    return [
+        t["path"] for t in data.get("tree", [])
+        if re.match(r"bible/(kt|other|names)/[a-z0-9-]+\.md$", t["path"])
+    ]
+
+
+def ingest_tw_lang(
+    canon_lang: str,
+    staging: Path,
+    tw_refs: dict[str, list[tuple[int, int]]] | None = None,
+) -> int:
+    """Fetch all TW articles for a non-English language from Door43-Catalog.
+
+    tw_refs — optional English TWL-derived passage map (path → passages) so
+    articles inherit book-coverage tags (e.g. TW Love → book:ROM, book:JHN).
+    The term file paths are identical across languages (bible/kt/love.md).
+    """
+    from lang import to_web
+    repo = _LANG_TW_REPOS.get(canon_lang)
+    if repo is None:
+        print(f"  no TW repo for {canon_lang}", file=sys.stderr)
+        return 0
+
+    lang_tag = to_web(canon_lang)   # "es", "fr", "hi", "pt", "ru", "bn"
+    paths = _fetch_tw_tree(repo)
+    if not paths:
+        print(f"  empty tree for {repo}", file=sys.stderr)
+        return 0
+
+    from query.concept_expand import term_strongs
+    out_dir = staging / "tw" / lang_tag
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    def fetch_one(path: str) -> tuple[str, str | None]:
+        url = f"{CATALOG_RAW_BASE}/{repo}/raw/branch/{DEFAULT_BRANCH}/{path}"
+        return path, _fetch_text(url)
+
+    written = 0
+    with ThreadPoolExecutor(max_workers=PARALLEL_FETCHERS) as pool:
+        futures = {pool.submit(fetch_one, p): p for p in paths}
+        for fut in as_completed(futures):
+            path = futures[fut]
+            _, text = fut.result()
+            if text is None:
+                continue
+            parts = path.split("/")
+            category, term_file = parts[-2], parts[-1]
+            term = term_file[:-3]   # strip .md
+            passages = (tw_refs or {}).get(f"bible/{category}/{term}", [])
+            title = f"TW — {term.replace('-', ' ').title()} ({category})"
+            tags = [
+                "resource:tw", f"lang:{lang_tag}", "org:Door43-Catalog",
+                f"category:{category}", f"term:{term}", "kind:term",
+                *(f"strongs:{c}" for c in term_strongs(term.replace("-", " "))),
+                *_book_tags_from_passages(passages),
+            ]
+            out_path = out_dir / category / f"{term}.md"
+            _write_md(out_path, title=title, tags=tags, passages=passages, body=text.strip())
+            written += 1
+    return written
+
+
 def _ingest_referenced_ta(staging: Path, paths_to_passages: dict[str, list[tuple[int, int]]]) -> int:
     """Fetch each TA module's body (and title.md if present)."""
     if not paths_to_passages:
@@ -452,8 +538,18 @@ def ingest_book(book_code: str, staging: Path) -> dict:
     return {"counts": counts, "tw_refs": tw_refs, "ta_refs": ta_refs}
 
 
-def ingest_books(book_codes: list[str], staging: Path) -> dict[str, int]:
-    """Ingest one or more books + their referenced TW/TA articles."""
+def ingest_books(
+    book_codes: list[str],
+    staging: Path,
+    extra_langs: list[str] | None = None,
+) -> dict[str, int]:
+    """Ingest one or more books + their referenced TW/TA articles.
+
+    extra_langs — canonical language codes (e.g. ["spa", "fra"]) for which
+    native-language TW articles are also fetched from Door43-Catalog. The
+    English TWL-derived passage map is reused so these articles inherit the
+    same book-coverage tags as their English counterparts.
+    """
     counts: dict[str, int] = {}
     tw_refs: dict[str, list[tuple[int, int]]] = {}
     ta_refs: dict[str, list[tuple[int, int]]] = {}
@@ -471,6 +567,12 @@ def ingest_books(book_codes: list[str], staging: Path) -> dict[str, int]:
     counts["ta_refs"] = len(ta_refs)
     counts["tw"] = _ingest_referenced_tw(staging, tw_refs)
     counts["ta"] = _ingest_referenced_ta(staging, ta_refs)
+
+    for lang in (extra_langs or []):
+        n = ingest_tw_lang(lang, staging, tw_refs)
+        counts[f"tw_{lang}"] = n
+        print(f"  tw/{lang}: {n} articles staged")
+
     return counts
 
 
