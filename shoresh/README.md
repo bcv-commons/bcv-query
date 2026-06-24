@@ -13,6 +13,7 @@ All under the service root. Deterministic endpoints have no external dependency.
 |----------|------|------|
 | `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine with morphology + gloss | $0 |
 | `GET /word/{strong}` | Concordance — every occurrence of a Strong's number | $0 |
+| `GET /tw/{strong}` | Translation-Words article(s) explaining a Strong's number, ranked (e.g. G0026 → bible/kt/love) | $0 |
 | `GET /gloss/{word}` | Reverse gloss — English word → Hebrew/Greek Strong's numbers | $0 |
 | `GET /concept/{word}` | Concept pivot — English → Strong's + sample occurrences | $0 |
 | `GET /morph?pattern=&book=&chapter=` | Morphology search — imperatives, participles, verbs, nouns | $0 |
@@ -23,6 +24,12 @@ All under the service root. Deterministic endpoints have no external dependency.
 | `GET /search?translate=gloss` | English→Hebrew via deterministic gloss lookup | $0 |
 | `GET /search?translate=llm` | English→Hebrew via LLM | ~$0.0001 |
 | `GET /search?enrich=true` | Add word-level breakdown per search result | $0 |
+
+`/tw` reads the shared **`resources/strongs_tw.tsv`** (built by
+`bcv-RAG/scripts/build_strongs_tw.py`). In a dev checkout it's found at the repo
+root automatically. For a deployed image, sync it into shoresh's build context
+first (shoresh builds from `shoresh/` only) — e.g. `cp resources/strongs_tw.tsv
+shoresh/data/` before `docker build`, or set `STRONGS_TW_TSV` to its path.
 
 ## Embedder configuration
 

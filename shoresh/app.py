@@ -113,6 +113,16 @@ def get_gloss(word: str) -> dict:
     return result
 
 
+@app.get("/tw/{strong}")
+def get_tw(strong: str) -> dict:
+    """Translation-Words article(s) explaining a Strong's number (G#### / H####),
+    ranked by occurrence. e.g. G0026 → bible/kt/love."""
+    result = data.tw_articles(strong)
+    if not result["articles"]:
+        raise HTTPException(404, f"no Translation-Words article for Strong's '{strong}'")
+    return result
+
+
 @app.get("/concept/{word}")
 def get_concept(word: str, limit: int = 5) -> dict:
     """English concept → Strong's numbers + top occurrences for each."""

@@ -15,6 +15,8 @@ book (OT books = Hebrew, NT books = Greek). Glosses come from the spine's
 """
 from __future__ import annotations
 
+import csv
+import os
 import sqlite3
 from functools import lru_cache
 from pathlib import Path
@@ -25,6 +27,28 @@ HERE = Path(__file__).resolve().parent
 LXX_DB = HERE / "lxx" / "lxx.db"
 SPINE_DB = HERE / "spine" / "spine.db"
 GLOSS_TSV = HERE / "spine" / "strongs_gloss.tsv"
+
+
+def _tw_tsv_path() -> Path:
+    """Locate strongs_tw.tsv (Strong's → Translation-Words article map).
+
+    Canonical copy is the shared `resources/strongs_tw.tsv` at the repo root
+    (built by bcv-RAG/scripts/build_strongs_tw.py). Resolution order:
+      1. $STRONGS_TW_TSV (explicit override)
+      2. repo-root resources/ — works in a dev checkout (shoresh is a sibling)
+      3. shoresh/data/strongs_tw.tsv — the prod copy synced into the image at
+         build time (data/ is gitignored, so this is NOT a tracked duplicate)
+    """
+    env = os.environ.get("STRONGS_TW_TSV")
+    if env:
+        return Path(env)
+    dev = HERE.parent / "resources" / "strongs_tw.tsv"
+    if dev.exists():
+        return dev
+    return HERE / "data" / "strongs_tw.tsv"
+
+
+TW_TSV = _tw_tsv_path()
 
 OT_BOOKS = {c for c, n in FILENUM.items() if n <= 39}
 NT_BOOKS = {c for c, n in FILENUM.items() if n >= 40}
@@ -67,9 +91,43 @@ def gloss_of(code: str) -> dict | None:
     return {"gloss": g[0], "translit": g[1]} if g else None
 
 
+@lru_cache(maxsize=1)
+def _tw_articles() -> dict[str, list[dict]]:
+    """{'G0026': [{tw_article, category, is_kt, lemma, n}, ...]} ranked by n.
+
+    From the shared strongs_tw.tsv. Empty if the file isn't present (the
+    endpoint then simply returns no matches).
+    """
+    out: dict[str, list[dict]] = {}
+    if not TW_TSV.exists():
+        return out
+    with TW_TSV.open(encoding="utf-8") as fh:
+        for row in csv.DictReader(fh, delimiter="\t"):
+            strong = (row.get("strong") or "").strip()
+            if not strong:
+                continue
+            out.setdefault(strong, []).append({
+                "tw_article": row.get("tw_article", ""),
+                "category": row.get("category", ""),
+                "is_kt": row.get("is_kt", "") == "1",
+                "lemma": row.get("lemma", ""),
+                "n": int(row.get("n") or 0),
+            })
+    # rows are already strong-then-n-desc, but sort defensively
+    for v in out.values():
+        v.sort(key=lambda a: -a["n"])
+    return out
+
+
+def tw_articles(strong: str) -> dict:
+    """Translation-Words article(s) explaining a Strong's number, ranked."""
+    articles = _tw_articles().get(strong.strip(), [])
+    return {"strong": strong, "count": len(articles), "articles": articles}
+
+
 def databases_status() -> dict:
     return {"lxx": LXX_DB.exists(), "spine": SPINE_DB.exists(),
-            "glosses": GLOSS_TSV.exists()}
+            "glosses": GLOSS_TSV.exists(), "tw_articles": TW_TSV.exists()}
 
 
 def _strong_code(word_lang: str, strong: int | None) -> str | None:
