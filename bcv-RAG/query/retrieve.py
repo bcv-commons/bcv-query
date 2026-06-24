@@ -97,6 +97,13 @@ _V2_KIND_TAGS: tuple[str, ...] = (
 )
 
 
+_V2_SUBQUERY = (
+    "SELECT DISTINCT doc_id FROM tags WHERE tag IN ("
+    + ",".join(f"'{t}'" for t in _V2_KIND_TAGS)
+    + ") AND doc_id NOT IN (SELECT doc_id FROM tags WHERE tag='resource:aquifer')"
+)
+
+
 def _docs_v2_only(db: sqlite3.Connection) -> set[str]:
     """Doc-ids tagged with a v2 taxonomy `kind:*` value, EXCLUDING Aquifer.
 
@@ -105,16 +112,14 @@ def _docs_v2_only(db: sqlite3.Connection) -> set[str]:
     corpus never enters the primary fts/title/passage/vec retrievers (which all
     intersect this set as their doc_filter). Without this it leaks via every
     generic retriever and crowds out Door43 primary content.
+
+    NOTE: callers that pass this set to fts_search/title_search must use
+    _V2_SUBQUERY instead to avoid the SQLite 999-variable limit — see
+    _gather_hits() which intercepts those two retrievers specially.
     """
     try:
-        placeholders = ",".join("?" * len(_V2_KIND_TAGS))
-        rows = db.execute(
-            f"SELECT DISTINCT doc_id FROM tags WHERE tag IN ({placeholders})",
-            _V2_KIND_TAGS,
-        ).fetchall()
-        aquifer = {r[0] for r in db.execute(
-            "SELECT doc_id FROM tags WHERE tag = 'resource:aquifer'").fetchall()}
-        return {r[0] for r in rows} - aquifer
+        rows = db.execute(_V2_SUBQUERY).fetchall()
+        return {r[0] for r in rows}
     except sqlite3.OperationalError:
         return set()
 
@@ -122,8 +127,15 @@ def _docs_v2_only(db: sqlite3.Connection) -> set[str]:
 # ---------- retrievers ----------
 
 def fts_search(db: sqlite3.Connection, query: str, *,
-               doc_filter: set[str] | None = None, limit: int = 50) -> list[Hit]:
-    """FTS5 match on chunks_fts, optionally constrained to a doc_id whitelist."""
+               doc_filter: set[str] | None = None,
+               doc_subquery: str | None = None,
+               limit: int = 50) -> list[Hit]:
+    """FTS5 match on chunks_fts, optionally constrained to a doc_id whitelist.
+
+    Prefer doc_subquery (a SQL subquery string) over doc_filter (a Python set)
+    when the candidate set is large — IN (?, ...) hits SQLite's 999-variable
+    limit on sets > 999 ids.
+    """
     if not query.strip():
         return []
     sql = (
@@ -133,7 +145,9 @@ def fts_search(db: sqlite3.Connection, query: str, *,
         "WHERE chunks_fts MATCH ?"
     )
     params: list = [query]
-    if doc_filter is not None:
+    if doc_subquery is not None:
+        sql += f" AND chunks.doc_id IN ({doc_subquery})"
+    elif doc_filter is not None:
         if not doc_filter:
             return []
         placeholders = ",".join("?" * len(doc_filter))
@@ -251,11 +265,23 @@ def scripture_search(
     return out
 
 
+_V3_KIND_TAGS: tuple[str, ...] = (
+    "kind:lexicon", "kind:morphology", "kind:section-heading", "kind:bible",
+    "kind:video-transcript",
+)
+_V3_EXCLUSION_SQL = (
+    "SELECT 1 FROM tags _x WHERE _x.doc_id = documents.id AND _x.tag IN ("
+    + ",".join(f"'{t}'" for t in _V3_KIND_TAGS)
+    + ")"
+)
+
+
 def title_search(
     db: sqlite3.Connection,
     query: str,
     *,
     doc_filter: set[str] | None = None,
+    doc_subquery: str | None = None,
     limit: int = 20,
 ) -> list[Hit]:
     """FTS5 over document titles — pinpoint hits for entity / term lookups.
@@ -264,6 +290,10 @@ def title_search(
     narrative passage with the entity's name competes). Title FTS is
     discriminative: TW articles, book intros, and named verses get titles
     like "TW — Boaz" / "Aquifer — Titus 1:1" that pin the entity hit.
+
+    v3 content (lexicon, morphology, bible, …) is excluded via NOT EXISTS
+    rather than an IN (ids) clause — the candidate set is too large for
+    SQLite's 999-variable limit now that the index has 1M+ documents.
     """
     if not query.strip():
         return []
@@ -271,10 +301,12 @@ def title_search(
         "SELECT documents.id "
         "FROM documents_fts "
         "JOIN documents ON documents_fts.rowid = documents.rowid "
-        "WHERE documents_fts MATCH ?"
+        f"WHERE documents_fts MATCH ? AND NOT EXISTS ({_V3_EXCLUSION_SQL})"
     )
     params: list = [query]
-    if doc_filter is not None:
+    if doc_subquery is not None:
+        sql += f" AND documents.id IN ({doc_subquery})"
+    elif doc_filter is not None:
         if not doc_filter:
             return []
         placeholders = ",".join("?" * len(doc_filter))
@@ -1122,10 +1154,17 @@ def _gather_hits(
     title_filter = _intersect_filters(source, v2_filter)
 
     strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
+
+    # fts_search / title_search: use the SQL subquery form of the v2 filter
+    # when the candidate set is too large for SQLite's IN-clause variable
+    # limit (999). The subquery is equivalent but avoids materializing the
+    # set. When passages_filter is active the intersection is already small
+    # (≤ |passages_filter|) so the materialized set is used there.
+    _SQLITE_VAR_LIMIT = 900
     # Order MUST match _RETRIEVER_ORDER and the _INTENT_WEIGHTS columns.
     return [
-        fts_search(db, analysis.fts_query, doc_filter=doc_filter),
-        title_search(db, analysis.fts_query, doc_filter=title_filter),
+        fts_search(db, analysis.fts_query),
+        title_search(db, analysis.fts_query),
         passage_search(db, analysis.passages, doc_filter=v2_filter),
         scripture_search(db, analysis.passages, query_vec, fts_query=analysis.fts_query),
         tag_search(db, analysis.tags),
