@@ -113,6 +113,15 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   full-text search — fixing recall on prose (study notes, other-language Bibles)
   where exact match misses inflections/synonyms. Build = `GROUP BY strong` over a
   file we already ship. **Do this first.**
+  → **Done.** Table: [`resources/concept_surfaces/<lang>.tsv`](../resources/concept_surfaces)
+  (`scripts/build_concept_surfaces.py`), 10 langs. Wired at query time:
+  `concept_expand.expand_surfaces` → `analyzer` adds each concept word's
+  in-language renderings to the FTS query (es "amor" → also "caridad"; "enseña" →
+  its conjugations). English is **synonym-only**: the FTS index is porter-stemmed
+  so inflections already match — we drop same-stem surfaces (via SQLite's own
+  porter tokenizer) and keep only cross-lemma synonyms (covenant→treaty,
+  salvation→deliverances, faith→belief). Eval (`eval/set/v2-expansion`): recall
+  unchanged (1.0), no regression, + a guard case `surface_expand_covenant_treaty_en`.
 - **R2 · Data-derived stopwords per language**. Surfaces aligning to *function*
   Strong's (articles/particles), or high-frequency-low-keyness words, → an
   auto stopword list per language. Replaces the hand-authored lists in

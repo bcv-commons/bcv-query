@@ -451,7 +451,15 @@ def analyze(question: str, lang: str = "en") -> QueryAnalysis:
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
     keywords = _fts_keywords(cleaned, lang)
-    fts_query = " OR ".join(keywords) if keywords else ""
+    # R1 — surface-family recall expansion: add every in-language rendering of
+    # each concept word (es "amor" → also "caridad"/"amado") so FTS reaches prose
+    # that uses a different synonym/inflection. Non-English only (English
+    # retrieval is tuned; see expand_surfaces). Surfaces are phrase-quoted so
+    # hyphen/apostrophe tokens don't break FTS5 syntax.
+    from query.concept_expand import expand_surfaces  # lazy: avoid import cycle
+    surface_terms = expand_surfaces(keywords, lang)
+    fts_terms = keywords + [f'"{t}"' for t in surface_terms]
+    fts_query = " OR ".join(fts_terms) if fts_terms else ""
 
     term_candidates = _extract_term_candidates(raw, lang)
     tags = [f"term:{t}" for t in term_candidates]

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import re
+import sqlite3
 from functools import lru_cache
 from pathlib import Path
 
@@ -48,6 +49,17 @@ _ALIGNED_MIN_SHARE = 0.05
 # quality 1. Bi-testamental words clear PRIMARY on both originals (es "espíritu"
 # → G4151 pneuma 0.58 AND H7307 ruach 0.40), so both expand.
 _ALIGNED_PRIMARY_SHARE = 0.10
+
+# R1 — Strong's → surface family (resources/concept_surfaces/<lang>.tsv), the
+# inverse of aligned_lex. Used to expand a query word to every in-language
+# rendering of its concept before FTS (recall on prose / other-language Bibles).
+_CONCEPT_SURFACES_DIR = resource_path("concept_surfaces")
+# Keep only surfaces that genuinely render the concept (surface→Strong's share);
+# higher than the reverse-index floor since these go straight into the FTS query.
+_SURFACE_MIN_SHARE = 0.15
+# A clean single word token (starts with a letter; allows internal '/-). Drops
+# alignment-noise surfaces like "1,000" / "-ring" that would break FTS syntax.
+_SURFACE_TOKEN = re.compile(r"[^\W\d_][\w'\-]*$")
 
 _FREQ_PATHS = [
     resource_path("strongs_freq.tsv"),
@@ -552,3 +564,141 @@ def term_strongs(text: str, lang: str = "eng", cap: int = 12) -> list[str]:
             if (not valid or norm in valid) and norm not in funcs and norm not in out:
                 out.append(norm)
     return out[:cap]
+
+
+# ---------- R1: surface-family recall expansion ----------
+
+@lru_cache(maxsize=8192)
+def _porter_stem(word: str) -> str:
+    """Porter stem via SQLite's OWN fts5 'porter' tokenizer — the exact engine the
+    chunks_fts index uses, so "redundant inflection" means precisely "the FTS
+    already matches it". No external stemmer dependency.
+
+    Returns the space-joined stem token(s) (single token for a single word).
+    """
+    db = sqlite3.connect(":memory:")
+    try:
+        db.execute("CREATE VIRTUAL TABLE s USING fts5(x, "
+                   "tokenize='porter unicode61 remove_diacritics 2')")
+        db.execute("INSERT INTO s(x) VALUES(?)", (word.lower(),))
+        db.execute("CREATE VIRTUAL TABLE v USING fts5vocab('s','row')")
+        terms = sorted(r[0] for r in db.execute("SELECT term FROM v"))
+    except sqlite3.OperationalError:
+        return word.lower()
+    finally:
+        db.close()
+    return " ".join(terms) or word.lower()
+
+@lru_cache(maxsize=8)
+def _concept_surfaces(lang: str) -> dict[str, list[tuple[str, float]]]:
+    """{strong_code: [(surface, share), ...]} from concept_surfaces/<lang>.tsv.
+
+    `share` is the surface→Strong's alignment confidence (carried from
+    aligned_lex). Empty if the file is absent (graceful degrade).
+    """
+    lang = canon(lang)
+    p = _CONCEPT_SURFACES_DIR / f"{lang}.tsv"
+    out: dict[str, list[tuple[str, float]]] = {}
+    if not p.exists():
+        return out
+    with p.open(encoding="utf-8") as fh:
+        si = fi = shi = None
+        for line in fh:
+            if line.startswith("#"):
+                continue
+            parts = line.rstrip("\n").split("\t")
+            if si is None:  # header
+                try:
+                    si, fi, shi = (parts.index("strong"), parts.index("surface"),
+                                   parts.index("share"))
+                except ValueError:
+                    return {}
+                continue
+            if len(parts) <= max(si, fi, shi):
+                continue
+            try:
+                share = float(parts[shi])
+            except ValueError:
+                continue
+            out.setdefault(parts[si], []).append((parts[fi], share))
+    return out
+
+
+def surface_family(strong: str, lang: str, *, floor: float = _SURFACE_MIN_SHARE) -> list[str]:
+    """In-language surface renderings of a concept (Strong's), share-filtered and
+    cleaned to FTS-safe single-word tokens. Ordered by the file (count desc)."""
+    fam: list[str] = []
+    for surface, share in _concept_surfaces(lang).get(_normalize_code(strong), []):
+        if share < floor:
+            continue
+        s = surface.lower()
+        if _SURFACE_TOKEN.match(s):
+            fam.append(s)
+    return fam
+
+
+def expand_surfaces(keywords: list[str], lang: str, *,
+                    max_per_word: int = 4, max_total: int = 12,
+                    floor: float = _SURFACE_MIN_SHARE) -> list[str]:
+    """Extra FTS terms: in-language surface renderings of each keyword's concept
+    (so "amor" also reaches "caridad"/"amado"). Broadens recall on prose where
+    exact match misses synonyms/inflections.
+
+    English is **synonym-only**: the chunks_fts index is porter-stemmed, so
+    inflections of the query word (love→loved/loving) already match — adding them
+    is redundant *and* perturbs the tuned English retrieval. So for English we
+    drop any surface that shares the query word's porter stem and keep only
+    cross-lemma synonyms (faith→belief, covenant→treaty) that stemming can't
+    merge. Non-English keeps inflections too (its porter stemming doesn't fit
+    those languages, so the renderings genuinely add coverage).
+
+    Returns NEW terms only (deduped against the input keywords), capped.
+    """
+    lang = canon(lang)
+    idx = _reverse_gloss(lang)
+    if not idx:
+        return []
+    valid = _valid_strongs()
+    funcs = _function_strongs()
+    is_eng = lang == "eng"
+
+    seen = {w.lower() for w in keywords}
+    out: list[str] = []
+    for w in keywords:
+        wl = w.lower()
+        w_stem = _porter_stem(wl) if is_eng else None
+        # query word → its exact (quality-2), scripture-valid, non-function codes
+        codes: list[str] = []
+        for code, q in _gloss_matches(wl, lang, idx):
+            if q != 2:
+                continue
+            norm = _normalize_code(code)
+            if (valid and norm not in valid) or norm in funcs:
+                continue
+            codes.append(norm)
+
+        added = 0
+        for code in codes:
+            fam = surface_family(code, lang, floor=floor)
+            # Mutual constraint: only expand through a code if the query word is
+            # ITSELF a primary rendering of it. Drops spurious word→code links
+            # whose family is off-concept (es "amor" picking up "enlosado").
+            if wl not in fam:
+                continue
+            for s in fam:
+                if s in seen:
+                    continue
+                # English: keep only cross-lemma synonyms — skip surfaces the
+                # porter FTS already matches as inflections of the query word.
+                if is_eng and _porter_stem(s) == w_stem:
+                    continue
+                seen.add(s)
+                out.append(s)
+                added += 1
+                if added >= max_per_word:
+                    break
+            if added >= max_per_word:
+                break
+        if len(out) >= max_total:
+            break
+    return out[:max_total]

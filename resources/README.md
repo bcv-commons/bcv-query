@@ -27,6 +27,7 @@ in Phase 0.
 |---|---|---|
 | `llm_strongs_glosses/<lang>.tsv` | LLM gap-fill glosses, 7 gloss-thin langs (see its README) | `strong → gloss` |
 | `aligned_lex/<lang>.tsv` | surface→Strong's from word alignment, 10 langs | `surface, strong, count, share` |
+| `concept_surfaces/<lang>.tsv` | Strong's → surface family (inverse of aligned_lex), 10 langs — query-time recall expansion (R1) | `strong, surface, count, share` |
 | `analyzer_lang/<lang>.json` | per-language analyzer intent configs, 10 langs | — |
 | `book_names.json` | localized Bible book names + aliases, 10 langs | USFM code → names |
 | `bible_editions.json` | edition registry (handles OT≠NT composites) | edition id → metadata |

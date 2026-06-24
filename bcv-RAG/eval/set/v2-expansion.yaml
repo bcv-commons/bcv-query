@@ -130,3 +130,15 @@ cases:
                               # "word", "computation", or "account" depending
                               # on which sense it surfaces — we just check
                               # that the answer cites the LSJ logos entry.
+
+  # ─── R1 surface-family expansion: English synonym-only recall ───
+  # "covenant" and "treaty" are the SAME Hebrew word (H1285 berith) but lexically
+  # distinct in English — no shared porter stem, and the treaty verses (e.g.
+  # 1KI 15:19) do NOT contain "covenant". So a "covenant" query reaches them ONLY
+  # via concept_surfaces expansion (covenant → treaty). Guards the English
+  # synonym path: if surface expansion regresses/disables, "treaty" disappears.
+  - id: surface_expand_covenant_treaty_en
+    tags: [surface-expansion, recall, english]
+    question: "What does the Bible say about a covenant between two kingdoms?"
+    expects:
+      substrings: ["treaty"]
