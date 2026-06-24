@@ -175,13 +175,21 @@ def fts_search(db: sqlite3.Connection, query: str, *,
     return [Hit(chunk_id=r[0], score=-float(r[1]), retrievers=["fts"]) for r in rows]
 
 
+_PASSAGE_MAX_WIDTH = 3000   # ~3 chapters; wider docs are not "about" a verse
+_PASSAGE_WIDTH_SCORE_CAP = 500  # width ≤ this gets full specificity credit
+
+
 def passage_search(db: sqlite3.Connection, passages: list[tuple[int, int]], *,
                    doc_filter: set[str] | None = None, limit: int = 50) -> list[Hit]:
     """One Hit per overlapping doc — chunk_index=0 is the canonical chunk.
 
     Excludes kind:bible (handled by bible_search) and kind:morphology (handled
-    by morphology_search) via NOT EXISTS rather than a large IN (doc_ids) — the
-    v2_filter approach exceeded SQLite's 999-variable limit at scale.
+    by morphology_search) via NOT EXISTS rather than a large IN (doc_ids).
+
+    Excludes docs whose passage range is wider than _PASSAGE_MAX_WIDTH — Bible-
+    spanning TA articles and video transcripts overlap every verse but add noise
+    for specific verse queries. Scores by passage specificity (narrower = higher)
+    so a verse-level note outranks a chapter-level note in RRF fusion.
     """
     if not passages:
         return []
@@ -190,10 +198,12 @@ def passage_search(db: sqlite3.Connection, passages: list[tuple[int, int]], *,
     for s, e in passages:
         params.extend([e, s])
     sql = (
-        "SELECT DISTINCT chunks.id, passage_refs.start_bbcccvvv "
+        "SELECT DISTINCT chunks.id, "
+        "  passage_refs.end_bbcccvvv - passage_refs.start_bbcccvvv AS width "
         "FROM passage_refs "
         "JOIN chunks ON chunks.doc_id = passage_refs.doc_id AND chunks.chunk_index = 0 "
         f"WHERE ({where}) "
+        f"AND (passage_refs.end_bbcccvvv - passage_refs.start_bbcccvvv) <= {_PASSAGE_MAX_WIDTH} "
         "AND NOT EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:bible') "
         "AND NOT EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:morphology')"
     )
@@ -203,12 +213,17 @@ def passage_search(db: sqlite3.Connection, passages: list[tuple[int, int]], *,
         placeholders = ",".join("?" * len(doc_filter))
         sql += f" AND chunks.doc_id IN ({placeholders})"
         params.extend(doc_filter)
-    sql += " ORDER BY passage_refs.start_bbcccvvv LIMIT ?"
+    sql += " ORDER BY width LIMIT ?"
     params.append(limit)
     rows = db.execute(sql, params).fetchall()
-    n = len(rows)
-    # Synthetic descending score so RRF treats earlier hits as higher rank.
-    return [Hit(chunk_id=r[0], score=1.0 - i / max(1, n), retrievers=["passage"]) for i, r in enumerate(rows)]
+    # Score: narrower passage = higher specificity. Width 0 (exact verse) → 1.0;
+    # width at cap → 0.5; linear interpolation.
+    return [
+        Hit(chunk_id=r[0],
+            score=1.0 - 0.5 * min(r[1], _PASSAGE_WIDTH_SCORE_CAP) / _PASSAGE_WIDTH_SCORE_CAP,
+            retrievers=["passage"])
+        for r in rows
+    ]
 
 
 def scripture_search(
