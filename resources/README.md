@@ -35,8 +35,11 @@ in Phase 0.
 | `strongs_keyness.tsv` | per-Strong's biblical-salience weight | `strong` |
 
 Build-only intermediates (`strong_lemma.tsv`, `concepts/forms/tw_links.tsv`,
-`glosses_overview.tsv`) intentionally stay in `bcv-RAG/` — not shipped, only
-read by build scripts.
+`glosses_overview.tsv`) intentionally stay in `bcv-RAG/` — they are **git-tracked
+but not baked into the image** (the Dockerfile does not COPY them, and they're
+not part of the published `strongs/` dataset). They're kept under version control
+so a clone has the build-chain inputs without regenerating the whole pipeline;
+they are read only by build scripts at build time, never at runtime.
 
 **`strongs/`** is different from the above: it's the **standalone published
 dataset** (Strong's→words, provenance-marked), **not** consumed by the services.

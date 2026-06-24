@@ -62,12 +62,22 @@ def main() -> int:
 
     db.execute("BEGIN")
 
-    # 1) DELETES (cascade clears chunks/tags/passage_refs; fires the per-row
-    #    chunks_ad FTS delete on chunks_fts(main) — safe under the threshold).
-    for (doc_id,) in db.execute("SELECT doc_id FROM d.deletes").fetchall():
-        db.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
+    # 1) Clear vectors for every chunk currently under a TOUCHED doc (deletes +
+    #    shipped docs that already exist). chunks_vec is a vec0 virtual table: it
+    #    has NO ON DELETE CASCADE (so deleting a doc would orphan its vectors) and
+    #    does NOT honor INSERT OR REPLACE. Clearing here keeps deletes clean and
+    #    lets the re-insert in step 4 be a plain INSERT with no collisions.
+    touched = [r[0] for r in db.execute(
+        "SELECT doc_id FROM d.deletes UNION SELECT id FROM d.documents").fetchall()]
+    for did in touched:
+        for (cid,) in db.execute("SELECT id FROM chunks WHERE doc_id = ?", (did,)).fetchall():
+            db.execute("DELETE FROM chunks_vec WHERE chunk_id = ?", (cid,))
 
-    # 2) ROW UPSERT: replace-in-place so re-deploys are idempotent. The chunks_ai
+    # 2) DELETES (cascade clears chunks/tags/passage_refs; fires the per-row
+    #    chunks_ad FTS delete on chunks_fts(main) — safe under the threshold).
+    db.execute("DELETE FROM documents WHERE id IN (SELECT doc_id FROM d.deletes)")
+
+    # 3) ROW UPSERT: replace-in-place so re-deploys are idempotent. The chunks_ai
     #    trigger will add new chunks to chunks_fts(main); harmless — rebuild_fts
     #    wipes and repopulates every partition next.
     db.execute("DELETE FROM documents WHERE id IN (SELECT id FROM d.documents)")
@@ -76,11 +86,12 @@ def main() -> int:
     db.execute("INSERT OR IGNORE INTO tags         SELECT * FROM d.tags")
     db.execute("INSERT OR IGNORE INTO passage_refs SELECT * FROM d.passage_refs")
 
-    # 3) VECTORS (idempotent: replace any stale vector for the same chunk_id).
-    db.execute(
-        "INSERT OR REPLACE INTO chunks_vec(chunk_id, embedding) "
-        "SELECT chunk_id, embedding FROM d.vec_delta"
-    )
+    # 4) VECTORS: clear any leftover rows for the shipped chunk_ids (e.g. an
+    #    extra-vec-id that already had a vector), then plain-INSERT. vec0 has no
+    #    INSERT OR REPLACE, so DELETE-then-INSERT is the idempotent idiom.
+    db.execute("DELETE FROM chunks_vec WHERE chunk_id IN (SELECT chunk_id FROM d.vec_delta)")
+    db.execute("INSERT INTO chunks_vec(chunk_id, embedding) "
+               "SELECT chunk_id, embedding FROM d.vec_delta")
 
     db.execute("COMMIT")
 
