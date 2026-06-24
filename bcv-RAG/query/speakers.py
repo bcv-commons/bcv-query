@@ -23,6 +23,13 @@ _SPEECH = (r"(?:say|says|said|saying|speak|speaks|spoke|teach|teaches|taught|"
            r"command|commands|commanded|declare|declares|declared|promis\w+|"
            r"replied|replies|answered|answers|asks|asked|preach\w*|tells|told)")
 
+# Bare role-words that ARE speakers in the FCBH data (Paul's "what does Scripture
+# say", "the prophets say") but double as stock thematic query framing — so
+# "what does scripture say about faith" must stay a thematic query, not a speaker
+# one. Named individuals ("Isaiah", "Agabus the prophet") are unaffected.
+_GENERIC_SPEAKERS = frozenset({"scripture", "scriptures", "prophet", "prophets",
+                               "psalmist", "prophetess"})
+
 
 @lru_cache(maxsize=1)
 def _load() -> tuple[dict[str, list[tuple[int, int]]], dict[str, bool]]:
@@ -91,6 +98,8 @@ def detect_speaker(text: str) -> str | None:
     hits = sorted((k for k in lookup if re.search(rf"\b{re.escape(k)}\b", low)),
                   key=len, reverse=True)
     for k in hits:
+        if k in _GENERIC_SPEAKERS:
+            continue
         kk = re.escape(k)
         if (re.search(rf"\b{kk}['’]s\b", low)                                  # "God's promises"
                 or re.search(rf"\b{kk}\s+{_SPEECH}\b", low)                    # "Jesus said"

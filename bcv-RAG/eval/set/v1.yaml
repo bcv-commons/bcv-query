@@ -57,10 +57,11 @@ cases:
   - id: devotion_to_god
     tags: [thematic, paraphrased]
     question: "What does it mean to be devoted to God?"
-    # UST + TN cover this theme richly; TW articles like "Godly" and
-    # "Zealous" are more on-topic than any specific ULT verse.
+    # TN covers this theme richly; TW articles like "Godly"/"Zealous" too.
+    # (Dropped UST: the Door43 Simplified Text is retired — ~262 docs vs TN's
+    # 211k — so requiring it tested for content that's effectively gone.)
     expects:
-      resources: [ust, tn]
+      resources: [tn]
 
   - id: faithfulness_difficult_times
     tags: [thematic, cross-book]
@@ -71,8 +72,10 @@ cases:
       # corpus. Voyage embeddings legitimately rank Titus 2's explicit
       # "faithful" content above Ruth's loyalty narrative for this paraphrased
       # query — it's a better answer, not a retrieval bug. Relaxed to require
-      # at least one scripture-tagged chunk from either book.
-      tags: [kind:scripture]
+      # at least one scripture chunk from either book. Now kind:bible: this
+      # thematic query surfaces the BSB verse (the current primary full-Bible
+      # translation); the retired Door43 kind:scripture no longer leads it.
+      tags: [kind:bible]
 
   # ─── Cross-resource queries — TW + TN + TA fan-out ───
   - id: godliness_meaning
