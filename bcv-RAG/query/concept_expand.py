@@ -27,7 +27,6 @@ from lang import canon
 
 _GLOSS_PATHS = [
     resource_path("strongs_gloss.tsv"),
-    Path(__file__).resolve().parent.parent.parent / "shoresh" / "spine" / "strongs_gloss.tsv",
 ]
 
 # Per-language LLM gap-fill glosses (source=llm), one file per language. Unioned

@@ -28,8 +28,8 @@ Switch back anytime by changing the env var and rebuilding clause vectors.
 ## Build sequence (local)
 
 ```bash
-# 1. start bcv-corpus locally:
-cd bcv-corpus && uv run bcv-corpus
+# 1. start the corpus engine (now part of bcv-RAG — the former bcv-corpus):
+cd bcv-RAG && uvicorn server.app:app --port 8000
 # 2. build embeddings:
 cd shoresh
 CORPUS_URL=http://localhost:8000 SHORESH_DATA=./data python3 -m search.build --lang hbo

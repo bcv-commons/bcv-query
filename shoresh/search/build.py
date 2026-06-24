@@ -1,14 +1,15 @@
 """Build the clause vector store — the one-off embed step.
 
-Fetches BHSA clauses from bcv-corpus, embeds them with the original-language
-model (BEREL for Hebrew), and writes `clauses_<lang>.npy` +
+Fetches BHSA clauses from the corpus engine, embeds them with the
+original-language model (BEREL for Hebrew), and writes `clauses_<lang>.npy` +
 `clauses_<lang>.sqlite` to DATA_DIR.
 
-Run locally against a local bcv-corpus instance, then upload the results to
-the Railway /data volume via the /upload endpoint:
+Run locally against the corpus engine (now part of bcv-RAG — the former
+bcv-corpus service), then upload the results to the /data volume via the
+/upload endpoint:
 
-    # 1. start bcv-corpus locally (in another terminal):
-    cd bcv-corpus && uv run bcv-corpus
+    # 1. start the corpus engine (in another terminal):
+    cd bcv-RAG && uvicorn server.app:app --port 8000
     # 2. build embeddings:
     cd shoresh
     CORPUS_URL=http://localhost:8000 SHORESH_DATA=./data python3 -m search.build --lang hbo

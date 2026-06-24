@@ -89,8 +89,9 @@ python -m lxx.parse --all && python -m spine.parse
 SHORESH_DATA=./data uvicorn app:app --port 8080
 ```
 
-Building the clause vectors needs the corpus engine running (locally via
-`bcv-corpus`, or pointed at a deployed bcv-RAG `/api`):
+Building the clause vectors needs the corpus engine running — it lives in
+bcv-RAG (the former `bcv-corpus` service), run locally or pointed at a deployed
+bcv-RAG `/api`:
 
 ```bash
 CORPUS_URL=http://localhost:8000 SHORESH_DATA=./data \

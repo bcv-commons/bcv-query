@@ -38,8 +38,9 @@ Switching: change env var → rebuild clause vectors → upload → redeploy.
 ## Build clause vectors
 
 ```bash
-# start bcv-corpus locally (or point at deployed bcv-RAG /api)
-cd bcv-corpus && uv run bcv-corpus
+# start the corpus engine: it lives in bcv-RAG (the former bcv-corpus service,
+# now its /api/passage + /api/context routes)
+cd bcv-RAG && uvicorn server.app:app --port 8000
 
 # build (in another terminal)
 cd shoresh

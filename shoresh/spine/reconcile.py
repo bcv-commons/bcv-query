@@ -6,10 +6,12 @@ content-Strong's sequence (BHSA gets Strong's from the `002` crosswalk
 CSV) and reports the match rate + the residual (Strong's numbers that
 don't line up). The residual feeds spine/strongs_equivalence.tsv.
 
-Requires: cfabric + a local BHSA (uses bcv-corpus's data), httpx.
-Run with bcv-corpus's venv:  bcv-corpus/.venv/bin/python spine/reconcile.py
+Requires: cfabric + a local BHSA (the text-fabric corpus the bcv-RAG corpus
+engine also uses), httpx. Point BHSA_LOC at your local text-fabric checkout if
+it isn't at the default ~/text-fabric-data location.
 """
 import csv
+import os
 import re
 import sys
 from collections import Counter
@@ -21,7 +23,12 @@ import httpx
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "data"
 OUT = HERE / "reconciliation"
-BHSA_LOC = "/Users/larsgson/text-fabric-data/github/ETCBC/bhsa/tf/2021"
+# Local BHSA text-fabric checkout. Defaults to the standard text-fabric path;
+# override with BHSA_LOC for a non-default location.
+BHSA_LOC = os.environ.get(
+    "BHSA_LOC",
+    str(Path.home() / "text-fabric-data/github/ETCBC/bhsa/tf/2021"),
+)
 CROSSWALK_URL = ("https://raw.githubusercontent.com/eliranwong/OpenHebrewBible/"
                  "master/002-BHS-with-Strong-no/BHS-with-Strong-no.csv")
 # pinned to match the spine parser (see spine/common.py and docs/spine-parser.md)

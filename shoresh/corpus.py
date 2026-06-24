@@ -1,9 +1,10 @@
-"""Client for bcv-corpus (BHSA + Nestle1904) over Railway private networking.
+"""Client for the corpus engine (BHSA + Nestle1904) over private networking.
 
-The structural anchor: bcv-corpus exposes the original-language text as a
-linguistic graph (morphology, clauses, phrases, sentences). shoresh reaches it
-at CORPUS_URL (`http://bcv-corpus.railway.internal:8080`) — $0, private, no
-public hop. Two views are proxied:
+The corpus engine — the former bcv-corpus service, now bcv-RAG's /api/passage +
+/api/context routes — exposes the original-language text as a linguistic graph
+(morphology, clauses, phrases, sentences). shoresh reaches it at CORPUS_URL
+(e.g. `http://bcv-corpus.railway.internal:8000`) — $0, private, no public hop.
+Two views are proxied:
 
   passage(book, ch, v)            -> /api/passage : verse words + morphology
   context(book, ch, v, word_idx)  -> /api/context : clause/phrase/sentence
