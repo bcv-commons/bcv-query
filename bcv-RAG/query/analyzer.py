@@ -518,7 +518,9 @@ def analyze(question: str, lang: str = "en") -> QueryAnalysis:
     # won't fire on "the faith of Abraham". When it does, strip the speaker name
     # from the FTS query (leaving the topic) and route to the speaker intent.
     from query.speakers import detect_speaker  # lazy: avoid import cost on cold paths
-    speaker = detect_speaker(raw)
+    # An explicit passage reference means "what does <verse> say" — a passage
+    # query, NOT "what did <speaker> say". Don't let speaker scoping hijack it.
+    speaker = None if passages else detect_speaker(raw)
     if speaker:
         name_toks = set(re.findall(r"\w+", speaker.lower()))
         kept = [t for t in fts_terms if t.strip('"').lower() not in name_toks]

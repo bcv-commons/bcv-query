@@ -16,13 +16,12 @@ from resource_paths import resource_path
 
 _TSV = resource_path("speaker_quotations") / "speaker_quotations.tsv"
 
-# Speech-frame cues that signal a "who-said" query (vs. merely mentioning a name).
-# Possessive ("Jesus's words") is handled separately.
-_FRAME = re.compile(
-    r"\b(say|says|said|saying|speak|spoke|spoken|teach|taught|teaches|"
-    r"command|commanded|promis\w*|declare[ds]?|tell|told|word[s]?|preach\w*)\b",
-    re.IGNORECASE,
-)
+# A speech verb. Detection requires the speaker to be the SUBJECT of one (or a
+# possessive / "words of X"), NOT merely co-occur with it — so "what does Titus
+# 1:1 say about God" does NOT make God the speaker, while "what did God say" does.
+_SPEECH = (r"(?:say|says|said|saying|speak|speaks|spoke|teach|teaches|taught|"
+           r"command|commands|commanded|declare|declares|declared|promis\w+|"
+           r"replied|replies|answered|answers|asks|asked|preach\w*|tells|told)")
 
 
 @lru_cache(maxsize=1)
@@ -91,14 +90,14 @@ def detect_speaker(text: str) -> str | None:
     # candidate names present in the query, longest first (prefer "holy spirit")
     hits = sorted((k for k in lookup if re.search(rf"\b{re.escape(k)}\b", low)),
                   key=len, reverse=True)
-    # 1) a possessive speaker wins outright ("God's promises" → God, even with
-    #    other names like Abraham present)
     for k in hits:
-        if re.search(rf"\b{re.escape(k)}['’]s\b", low):
+        kk = re.escape(k)
+        if (re.search(rf"\b{kk}['’]s\b", low)                                  # "God's promises"
+                or re.search(rf"\b{kk}\s+{_SPEECH}\b", low)                    # "Jesus said"
+                or re.search(rf"\b(?:did|does|do|will|would)\s+{kk}\s+{_SPEECH}\b", low)  # "what did Jesus say"
+                or re.search(rf"\b(?:words?|sayings?|teachings?|commands?|promises?|"
+                             rf"message|sermon)\s+(?:of|from|by)\s+{kk}\b", low)):  # "words of Paul"
             return _canonical_name(lookup[k])
-    # 2) otherwise a speech frame + a named speaker ("what did Jesus say")
-    if _FRAME.search(low) and hits:
-        return _canonical_name(lookup[hits[0]])
     return None
 
 
