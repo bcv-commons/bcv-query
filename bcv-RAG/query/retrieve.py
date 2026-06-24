@@ -10,6 +10,7 @@ import os
 import re
 import sqlite3
 from dataclasses import dataclass
+from threading import Lock
 
 import httpx
 
@@ -129,12 +130,18 @@ def _docs_v2_only(db: sqlite3.Connection) -> set[str]:
 def fts_search(db: sqlite3.Connection, query: str, *,
                doc_filter: set[str] | None = None,
                doc_subquery: str | None = None,
+               kind_tag: str | None = None,
                limit: int = 50) -> list[Hit]:
     """FTS5 match on chunks_fts, optionally constrained to a doc_id whitelist.
 
     Prefer doc_subquery (a SQL subquery string) over doc_filter (a Python set)
     when the candidate set is large — IN (?, ...) hits SQLite's 999-variable
     limit on sets > 999 ids.
+
+    kind_tag: add an EXISTS filter on the tags table for a single kind tag.
+    More efficient than doc_filter/doc_subquery for uniform kind restrictions
+    (e.g. 'kind:scripture') because it probes the (tag, doc_id) index once per
+    FTS hit rather than materializing the full set.
     """
     if not query.strip():
         return []
@@ -145,6 +152,9 @@ def fts_search(db: sqlite3.Connection, query: str, *,
         "WHERE chunks_fts MATCH ?"
     )
     params: list = [query]
+    if kind_tag is not None:
+        sql += " AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = ?)"
+        params.append(kind_tag)
     if doc_subquery is not None:
         sql += f" AND chunks.doc_id IN ({doc_subquery})"
     elif doc_filter is not None:
@@ -167,7 +177,12 @@ def fts_search(db: sqlite3.Connection, query: str, *,
 
 def passage_search(db: sqlite3.Connection, passages: list[tuple[int, int]], *,
                    doc_filter: set[str] | None = None, limit: int = 50) -> list[Hit]:
-    """One Hit per overlapping doc — chunk_index=0 is the canonical chunk."""
+    """One Hit per overlapping doc — chunk_index=0 is the canonical chunk.
+
+    Excludes kind:bible (handled by bible_search) and kind:morphology (handled
+    by morphology_search) via NOT EXISTS rather than a large IN (doc_ids) — the
+    v2_filter approach exceeded SQLite's 999-variable limit at scale.
+    """
     if not passages:
         return []
     where = " OR ".join("(passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ?)" for _ in passages)
@@ -178,7 +193,9 @@ def passage_search(db: sqlite3.Connection, passages: list[tuple[int, int]], *,
         "SELECT DISTINCT chunks.id, passage_refs.start_bbcccvvv "
         "FROM passage_refs "
         "JOIN chunks ON chunks.doc_id = passage_refs.doc_id AND chunks.chunk_index = 0 "
-        f"WHERE {where}"
+        f"WHERE ({where}) "
+        "AND NOT EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:bible') "
+        "AND NOT EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:morphology')"
     )
     if doc_filter is not None:
         if not doc_filter:
@@ -220,12 +237,24 @@ def scripture_search(
     retriever contributes an INDEPENDENT scripture-only ranking that RRF
     then folds in alongside the general retrievers.
     """
+    if not query_vec and not fts_query.strip():
+        return []
+    # Without passages or semantic, fts_search (main index) + bible_search
+    # already cover scripture FTS. scripture_search adds unique signal only
+    # when a passage filter is active (focused on specific verses) or when
+    # query_vec is set (scripture-only vector ranking outranks commentary).
+    if not query_vec and not passages:
+        return []
+
     # Build the scripture doc-id filter. With explicit passages, restrict to
     # docs overlapping them; without passages (thematic queries), restrict to
     # ALL `kind:scripture` docs so vec/FTS still get a scripture-only ranking
     # to RRF in. Without this fallback, thematic queries got their scripture
     # chunks displaced once Voyage's higher-confidence vec started ranking
     # commentary/study-notes above raw verse text.
+    _scripture_subquery = "SELECT DISTINCT doc_id FROM tags WHERE tag = 'kind:scripture'"
+
+    out: list[Hit] = []
     if passages:
         where_passage = " OR ".join(
             "(passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ?)"
@@ -243,24 +272,31 @@ def scripture_search(
             """,
             params,
         ).fetchall()
+        scripture_doc_ids: set[str] | None = {r[0] for r in rows}
+        if not scripture_doc_ids:
+            return []
+        # Passage filter is small enough for IN clause.
+        doc_kw: dict = {"doc_filter": scripture_doc_ids}
     else:
-        # No passages → all kind:scripture docs.
-        rows = db.execute(
-            "SELECT DISTINCT doc_id FROM tags WHERE tag = 'kind:scripture'"
-        ).fetchall()
-    scripture_doc_ids = {r[0] for r in rows}
-    if not scripture_doc_ids:
-        return []
+        # No passages → all kind:scripture docs. Use EXISTS via kind_tag to
+        # avoid materializing 148k IDs (would exceed SQLite's 999-var IN limit
+        # and also requires a full tags scan to build the set).
+        scripture_doc_ids = None
 
-    out: list[Hit] = []
     # Pass 1 — vec-ranked scripture (broader limit; RRF handles dedup).
     if query_vec:
-        for h in vector_search(db, query_vec, doc_filter=scripture_doc_ids, limit=limit):
+        vec_filter = scripture_doc_ids or set(
+            r[0] for r in db.execute(_scripture_subquery).fetchall()
+        )
+        for h in vector_search(db, query_vec, doc_filter=vec_filter, limit=limit):
             out.append(Hit(chunk_id=h.chunk_id, score=h.score, retrievers=["scripture"]))
-    # Pass 2 — FTS5-ranked scripture. Catches "must" / "blameless" / etc.
-    # when vec ranking under-weights them.
+    # Pass 2 — FTS5-ranked scripture.
     if fts_query.strip():
-        for h in fts_search(db, fts_query, doc_filter=scripture_doc_ids, limit=limit):
+        fts_kw: dict = (
+            {"doc_filter": scripture_doc_ids} if scripture_doc_ids is not None
+            else {"kind_tag": "kind:scripture"}
+        )
+        for h in fts_search(db, fts_query, **fts_kw, limit=limit):
             out.append(Hit(chunk_id=h.chunk_id, score=h.score, retrievers=["scripture"]))
     return out
 
@@ -412,7 +448,7 @@ def tag_search(db: sqlite3.Connection, tags: list[str], *, limit: int = 50) -> l
         "FROM tags "
         "JOIN chunks ON chunks.doc_id = tags.doc_id AND chunks.chunk_index = 0 "
         f"WHERE tags.tag IN ({placeholders}) "
-        "AND chunks.doc_id NOT IN (SELECT doc_id FROM tags WHERE tag = 'resource:aquifer') "
+        "AND NOT EXISTS (SELECT 1 FROM tags ax WHERE ax.doc_id = chunks.doc_id AND ax.tag = 'resource:aquifer') "
         "LIMIT ?"
     )
     params = list(tags) + [limit]
@@ -436,6 +472,37 @@ def _strongs_lemma_filter(tags: list[str]) -> tuple[list[str], list[str]]:
     return strongs, lemmas
 
 
+_lexicon_strongs_cache: dict[str, list[str]] | None = None  # strongs_tag → [chunk_id, ...]
+_lexicon_cache_lock = Lock()
+
+
+def _lexicon_strongs_map(db: sqlite3.Connection) -> dict[str, list[str]]:
+    """Lazy in-process cache: strongs tag → list of lexicon chunk IDs.
+
+    Built once per process from a single query (tags table is read-heavy and
+    the 1:1 strongs→lexicon-entry mapping is stable for the lifetime of the
+    index). Avoids the 1-2s per-request tags join caused by the single-column
+    idx_tags_tag index having to fetch doc_id from the main table row.
+    """
+    global _lexicon_strongs_cache
+    if _lexicon_strongs_cache is not None:
+        return _lexicon_strongs_cache
+    with _lexicon_cache_lock:
+        if _lexicon_strongs_cache is not None:  # double-checked
+            return _lexicon_strongs_cache
+        cache: dict[str, list[str]] = {}
+        for tag, cid in db.execute(
+            "SELECT t.tag, c.id "
+            "FROM tags t "
+            "JOIN chunks c ON c.doc_id = t.doc_id AND c.chunk_index = 0 "
+            "JOIN tags k ON k.doc_id = t.doc_id AND k.tag = 'kind:lexicon' "
+            "WHERE t.tag LIKE 'strongs:%'"
+        ).fetchall():
+            cache.setdefault(tag, []).append(cid)
+        _lexicon_strongs_cache = cache
+        return cache
+
+
 def lexicon_search(
     db: sqlite3.Connection,
     *,
@@ -456,19 +523,15 @@ def lexicon_search(
     """
     hits: dict[str, float] = {}
 
-    # 1. Strong's tag exact match
+    # 1. Strong's tag exact match — use in-process cache to avoid the slow
+    #    tags join (single-column idx_tags_tag forces 28k+ table row reads).
     if strongs_tags:
-        placeholders = ",".join("?" * len(strongs_tags))
-        rows = db.execute(
-            "SELECT DISTINCT chunks.id "
-            "FROM tags JOIN chunks ON chunks.doc_id = tags.doc_id "
-            "JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:lexicon' "
-            f"WHERE tags.tag IN ({placeholders}) "
-            "LIMIT ?",
-            [*strongs_tags, limit],
-        ).fetchall()
-        for i, (cid,) in enumerate(rows):
-            hits[cid] = max(hits.get(cid, 0.0), 1.0 - i / max(1, len(rows)))
+        strongs_map = _lexicon_strongs_map(db)
+        matched: list[str] = []
+        for tag in strongs_tags:
+            matched.extend(strongs_map.get(tag, []))
+        for i, cid in enumerate(matched[:limit]):
+            hits[cid] = max(hits.get(cid, 0.0), 1.0 - i / max(1, len(matched)))
 
     # 2. Lemma tag match — exact preferred over ASCII-stripped prefix.
     #
@@ -560,8 +623,8 @@ def morphology_search(
             "SELECT DISTINCT chunks.id "
             "FROM tags "
             "JOIN chunks ON chunks.doc_id = tags.doc_id "
-            "JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:morphology' "
             f"WHERE tags.tag IN ({placeholders}) "
+            "AND EXISTS (SELECT 1 FROM tags k WHERE k.doc_id = chunks.doc_id AND k.tag = 'kind:morphology') "
             "LIMIT ?",
             [*tag_filters, limit],
         ).fetchall()
@@ -569,6 +632,9 @@ def morphology_search(
             hits[cid] = max(hits.get(cid, 0.0), 1.0 - i / max(1, len(rows)))
 
     # Passage-based (find morphology for "John 1:1")
+    # Start from kind:morphology tags (29k rows) → join passage_refs for the
+    # passage filter. This is more selective than starting from passage_refs
+    # (591k rows) and checking EXISTS for morphology.
     if passages:
         where = " OR ".join("(passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ?)" for _ in passages)
         params: list = []
@@ -576,10 +642,10 @@ def morphology_search(
             params.extend([e, s])
         rows = db.execute(
             "SELECT DISTINCT chunks.id "
-            "FROM chunks "
-            "JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id "
-            "JOIN tags ON tags.doc_id = chunks.doc_id AND tags.tag = 'kind:morphology' "
-            f"WHERE {where} LIMIT ?",
+            "FROM tags k "
+            "JOIN chunks ON chunks.doc_id = k.doc_id "
+            "JOIN passage_refs ON passage_refs.doc_id = k.doc_id "
+            f"WHERE k.tag = 'kind:morphology' AND ({where}) LIMIT ?",
             [*params, limit],
         ).fetchall()
         for i, (cid,) in enumerate(rows):
@@ -800,10 +866,11 @@ def bible_search(
             "SELECT DISTINCT chunks.id "
             "FROM chunks "
             "JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id "
-            "JOIN tags ON tags.doc_id = chunks.doc_id AND tags.tag = 'kind:bible' "
-            "JOIN tags lt ON lt.doc_id = chunks.doc_id AND lt.tag = ? "
-            f"WHERE {where} ORDER BY passage_refs.start_bbcccvvv LIMIT ?",
-            [lang_tag, *params, limit],
+            f"WHERE ({where}) "
+            "AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:bible') "
+            "AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = ?) "
+            "ORDER BY passage_refs.start_bbcccvvv LIMIT ?",
+            [*params, lang_tag, limit],
         ).fetchall()
         for i, (cid,) in enumerate(rows):
             hits[cid] = max(hits.get(cid, 0.0), 1.0 - i / max(1, len(rows)))
@@ -814,9 +881,10 @@ def bible_search(
                 "SELECT chunks.id, rank "
                 "FROM chunks_fts_bible "
                 "JOIN chunks ON chunks.rowid = chunks_fts_bible.rowid "
-                "JOIN tags lt ON lt.doc_id = chunks.doc_id AND lt.tag = ? "
-                "WHERE chunks_fts_bible MATCH ? ORDER BY rank LIMIT ?",
-                (lang_tag, fts_query, limit),
+                "WHERE chunks_fts_bible MATCH ? "
+                "AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = ?) "
+                "ORDER BY rank LIMIT ?",
+                (fts_query, lang_tag, limit),
             ).fetchall()
             n = len(rows)
             for i, (cid, _rank) in enumerate(rows):
@@ -843,14 +911,18 @@ def aquifer_search(
     query language plus English (the universal study fallback)."""
     if not fts_query.strip():
         return []
+    lang_tag = f"lang:{to_web(canon(lang))}"
     try:
         rows = db.execute(
             "SELECT chunks.id, rank "
             "FROM chunks_fts_aquifer "
             "JOIN chunks ON chunks.rowid = chunks_fts_aquifer.rowid "
-            "JOIN tags lt ON lt.doc_id = chunks.doc_id AND lt.tag IN (?, 'lang:en') "
-            "WHERE chunks_fts_aquifer MATCH ? ORDER BY rank LIMIT ?",
-            (f"lang:{to_web(canon(lang))}", fts_query, limit),
+            "WHERE chunks_fts_aquifer MATCH ? "
+            "AND EXISTS ("
+            "  SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag IN (?, 'lang:en')"
+            ") "
+            "ORDER BY rank LIMIT ?",
+            (fts_query, lang_tag, limit),
         ).fetchall()
     except sqlite3.OperationalError as e:
         print(f"aquifer_search: skipped ({e!r})", flush=True)
@@ -887,16 +959,14 @@ def topic_search(
     placeholders = ",".join("?" * len(topic_ids))
     # Get up to `limit` BBCCCVVV pairs from topic_passages, then join to BSB chunks.
     rows = db.execute(
-        f"""
-        SELECT DISTINCT chunks.id
-        FROM topic_passages tp
-        JOIN passage_refs pr ON pr.start_bbcccvvv <= tp.end_bbcccvvv
-                             AND pr.end_bbcccvvv   >= tp.start_bbcccvvv
-        JOIN chunks ON chunks.doc_id = pr.doc_id AND chunks.chunk_index = 0
-        JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:bible'
-        WHERE tp.topic_id IN ({placeholders})
-        ORDER BY tp.start_bbcccvvv LIMIT ?
-        """,
+        "SELECT DISTINCT chunks.id "
+        "FROM topic_passages tp "
+        "JOIN passage_refs pr ON pr.start_bbcccvvv <= tp.end_bbcccvvv "
+        "                     AND pr.end_bbcccvvv >= tp.start_bbcccvvv "
+        "JOIN chunks ON chunks.doc_id = pr.doc_id AND chunks.chunk_index = 0 "
+        f"WHERE tp.topic_id IN ({placeholders}) "
+        "AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:bible') "
+        "ORDER BY tp.start_bbcccvvv LIMIT ?",
         [*topic_ids, limit],
     ).fetchall()
     n = len(rows)
@@ -1144,14 +1214,16 @@ def _gather_hits(
             analysis.passages.extend(morph_refs)
 
     narrow = analysis.passages and any((e - s) < 999 for s, e in analysis.passages)
-    passages_filter = _docs_overlapping_passages(db, analysis.passages) if narrow else None
     source = _docs_by_source(db, source_filter)
-    # v2_filter is only needed when passage_search or vector_search runs —
-    # fts_search/title_search now handle v3 exclusion via NOT EXISTS (no
-    # materialization). Materializing 250k ids costs ~2.5s on 11M-row tags;
-    # skip it on the common path (no narrow passage, no semantic).
-    needs_v2 = bool(analysis.passages) or bool(query_vec)
-    v2_filter = _docs_v2_only(db) if needs_v2 else None
+    # passages_filter and v2_filter are only needed by vector_search — all other
+    # retrievers handle kind filtering via NOT EXISTS. Building either filter
+    # materializes 100k-250k doc IDs and costs 0.5-2.5s; skip when no semantic.
+    if query_vec:
+        passages_filter = _docs_overlapping_passages(db, analysis.passages) if narrow else None
+        v2_filter = _docs_v2_only(db)
+    else:
+        passages_filter = None
+        v2_filter = None
     doc_filter = _intersect_filters(passages_filter, source, v2_filter)
 
     strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
@@ -1160,7 +1232,7 @@ def _gather_hits(
     return [
         fts_search(db, analysis.fts_query),
         title_search(db, analysis.fts_query),
-        passage_search(db, analysis.passages, doc_filter=v2_filter),
+        passage_search(db, analysis.passages),
         scripture_search(db, analysis.passages, query_vec, fts_query=analysis.fts_query),
         tag_search(db, analysis.tags),
         vector_search(db, query_vec, doc_filter=doc_filter) if query_vec else [],
