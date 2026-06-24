@@ -58,6 +58,7 @@ class QueryAnalysis:
     entity_query: dict | None = None                                # {'name': str, 'relation': str | None}
     topic_query: str | None = None                                  # canonical topic name
     xref_source: int | None = None                                  # source bbcccvvv for cross-reference followup
+    speaker: str | None = None                                      # S1: "what did Jesus say" → 'Jesus'
 
 
 # Per-language intent vocabulary (stopwords, topic_stopwords, relation_map) is
@@ -78,6 +79,27 @@ def _load_intent_lang(lang: str = "en") -> dict:
         if p.exists():
             return json.loads(p.read_text(encoding="utf-8"))
     return {"stopwords": [], "topic_stopwords": [], "relation_map": {}}
+
+
+_STOPWORDS_DIR = resource_path("stopwords")
+
+
+@lru_cache(maxsize=16)
+def _derived_stopwords(lang: str) -> frozenset[str]:
+    """R2 — data-derived function-word stopwords for a language (NO English
+    fallback: these are per-language by construction). Empty if absent."""
+    p = _STOPWORDS_DIR / f"{canon(lang)}.tsv"
+    if not p.exists():
+        return frozenset()
+    out: set[str] = set()
+    with p.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith(("#", "surface\t")):
+                continue
+            tok = line.split("\t", 1)[0].strip()
+            if tok:
+                out.add(tok)
+    return frozenset(out)
 
 
 _intent_en = _load_intent_lang("eng")
@@ -339,7 +361,11 @@ def _bundle(lang: str) -> dict:
     entity = ([re.compile(s, re.IGNORECASE) for s in pats["entity"]]
               if pats.get("entity") else _ENTITY_LOOKUP_PATTERNS)
     return {
-        "stopwords": frozenset(cfg.get("stopwords") or _intent_en["stopwords"]),
+        # Hand-authored list UNIONED with the R2 data-derived function-word
+        # stopwords for this language (resources/stopwords/<lang>.tsv) — adds the
+        # archaic/biblical particles the curated list misses (thence, unto, verily…).
+        "stopwords": frozenset(cfg.get("stopwords") or _intent_en["stopwords"])
+                     | _derived_stopwords(lang),
         "topic_stopwords": frozenset(cfg.get("topic_stopwords") or _intent_en["topic_stopwords"]),
         "relation_map": dict(cfg.get("relation_map") or _intent_en["relation_map"]),
         "entity": entity,
@@ -487,10 +513,23 @@ def analyze(question: str, lang: str = "en") -> QueryAnalysis:
         lang=lang,
     )
 
+    # S1: speaker scoping ("what did Jesus say about faith" → speaker='Jesus',
+    # topic='faith'). Detection requires a speech frame + a known speaker, so it
+    # won't fire on "the faith of Abraham". When it does, strip the speaker name
+    # from the FTS query (leaving the topic) and route to the speaker intent.
+    from query.speakers import detect_speaker  # lazy: avoid import cost on cold paths
+    speaker = detect_speaker(raw)
+    if speaker:
+        name_toks = set(re.findall(r"\w+", speaker.lower()))
+        kept = [t for t in fts_terms if t.strip('"').lower() not in name_toks]
+        fts_query = " OR ".join(kept) if kept else ""
+        intent = "speaker"
+
     return QueryAnalysis(
         raw=raw, fts_query=fts_query, passages=passages, tags=tags, intent=intent,
         word_study_terms=word_study_terms,
         entity_query=entity_query,
         topic_query=topic_query,
         xref_source=xref_source,
+        speaker=speaker,
     )

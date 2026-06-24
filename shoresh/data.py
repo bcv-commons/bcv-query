@@ -22,6 +22,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from spine.common import FILENUM
+from references import encode, decode
 
 HERE = Path(__file__).resolve().parent
 LXX_DB = HERE / "lxx" / "lxx.db"
@@ -49,6 +50,22 @@ def _tw_tsv_path() -> Path:
 
 
 TW_TSV = _tw_tsv_path()
+
+
+def _speaker_tsv_path() -> Path:
+    """Locate speaker_quotations.tsv (S1 — who speaks where). Same resolution as
+    _tw_tsv_path: $SPEAKER_QUOTATIONS_TSV → repo-root resources/ (dev) →
+    shoresh/data/ (prod copy synced into the image; data/ is gitignored)."""
+    env = os.environ.get("SPEAKER_QUOTATIONS_TSV")
+    if env:
+        return Path(env)
+    dev = HERE.parent / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
+    if dev.exists():
+        return dev
+    return HERE / "data" / "speaker_quotations.tsv"
+
+
+SPEAKER_TSV = _speaker_tsv_path()
 
 OT_BOOKS = {c for c, n in FILENUM.items() if n <= 39}
 NT_BOOKS = {c for c, n in FILENUM.items() if n >= 40}
@@ -125,9 +142,92 @@ def tw_articles(strong: str) -> dict:
     return {"strong": strong, "count": len(articles), "articles": articles}
 
 
+# ---------- S1: speaker / red-letter index ----------
+
+@lru_cache(maxsize=1)
+def _speakers() -> list[dict]:
+    """All quotation ranges: [{speaker, alt_speaker, start, end, quote_type,
+    delivery, divine}, ...] sorted by start. Empty if the file is absent."""
+    out: list[dict] = []
+    if not SPEAKER_TSV.exists():
+        return out
+    with SPEAKER_TSV.open(encoding="utf-8") as fh:
+        cols = None
+        for line in fh:
+            if line.startswith("#"):
+                continue
+            parts = line.rstrip("\n").split("\t")
+            if cols is None:  # header
+                cols = {c: i for i, c in enumerate(parts)}
+                continue
+            try:
+                out.append({
+                    "speaker": parts[cols["speaker"]],
+                    "alt_speaker": parts[cols["alt_speaker"]],
+                    "start": int(parts[cols["start_bbcccvvv"]]),
+                    "end": int(parts[cols["end_bbcccvvv"]]),
+                    "quote_type": parts[cols["quote_type"]],
+                    "delivery": parts[cols["delivery"]],
+                    "divine": parts[cols["divine"]] == "Y",
+                })
+            except (KeyError, ValueError, IndexError):
+                continue
+    return out
+
+
+@lru_cache(maxsize=1)
+def _speaker_index() -> dict[str, list[dict]]:
+    """{speaker_lower: [range, ...]}."""
+    idx: dict[str, list[dict]] = {}
+    for r in _speakers():
+        idx.setdefault(r["speaker"].lower(), []).append(r)
+    return idx
+
+
+def speaker_ranges(name: str, *, limit: int = 1000) -> dict:
+    """Every verse range a speaker speaks — for "what did Jesus say"."""
+    ranges = _speaker_index().get(name.strip().lower(), [])
+    return {
+        "speaker": name,
+        "count": len(ranges),
+        "divine": bool(ranges) and ranges[0]["divine"],
+        "ranges": [
+            {"start": decode(r["start"]), "end": decode(r["end"]),
+             "start_bbcccvvv": r["start"], "end_bbcccvvv": r["end"],
+             "quote_type": r["quote_type"]}
+            for r in ranges[:limit]
+        ],
+    }
+
+
+def speakers_at(book: str, chapter: int, vrs: int) -> dict:
+    """Who speaks at a verse — the speaker(s) whose quotation range covers it.
+    Powers red-letter annotation of `/verse`."""
+    try:
+        ref = encode(book, chapter, vrs)
+    except (ValueError, KeyError):
+        return {"book": book, "chapter": chapter, "verse": vrs, "speakers": []}
+    hits = [{"speaker": r["speaker"], "divine": r["divine"],
+             "start_bbcccvvv": r["start"], "end_bbcccvvv": r["end"]}
+            for r in _speakers() if r["start"] <= ref <= r["end"]]
+    return {"book": book.upper(), "chapter": chapter, "verse": vrs, "speakers": hits}
+
+
+def speakers_list() -> dict:
+    """All speakers with quotation-range counts (discovery)."""
+    counts: dict[str, dict] = {}
+    for r in _speakers():
+        c = counts.setdefault(r["speaker"], {"speaker": r["speaker"],
+                                             "divine": r["divine"], "count": 0})
+        c["count"] += 1
+    ordered = sorted(counts.values(), key=lambda c: -c["count"])
+    return {"count": len(ordered), "speakers": ordered}
+
+
 def databases_status() -> dict:
     return {"lxx": LXX_DB.exists(), "spine": SPINE_DB.exists(),
-            "glosses": GLOSS_TSV.exists(), "tw_articles": TW_TSV.exists()}
+            "glosses": GLOSS_TSV.exists(), "tw_articles": TW_TSV.exists(),
+            "speaker_quotations": SPEAKER_TSV.exists()}
 
 
 def _strong_code(word_lang: str, strong: int | None) -> str | None:

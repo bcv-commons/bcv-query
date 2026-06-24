@@ -123,6 +123,28 @@ def get_tw(strong: str) -> dict:
     return result
 
 
+@app.get("/speakers")
+def get_speakers() -> dict:
+    """All quotation speakers with range counts + divine (red-letter) flag."""
+    return data.speakers_list()
+
+
+@app.get("/speaker/{name}")
+def get_speaker(name: str, limit: int = 1000) -> dict:
+    """Every verse range a speaker speaks — "what did Jesus say". `divine` marks
+    red-letter speakers (God / Jesus / Holy Spirit)."""
+    result = data.speaker_ranges(name, limit=min(limit, 5000))
+    if not result["ranges"]:
+        raise HTTPException(404, f"no quotations found for speaker '{name}'")
+    return result
+
+
+@app.get("/speakers/at/{book}/{chapter}/{verse}")
+def get_speakers_at(book: str, chapter: int, verse: int) -> dict:
+    """Who speaks at a verse — the speaker(s) whose quotation covers it."""
+    return data.speakers_at(book, chapter, verse)
+
+
 @app.get("/concept/{word}")
 def get_concept(word: str, limit: int = 5) -> dict:
     """English concept → Strong's numbers + top occurrences for each."""

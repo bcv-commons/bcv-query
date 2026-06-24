@@ -1,0 +1,6 @@
+# source=derived from resources/aligned_lex/hau.tsv + strongs_freq.tsv (roadmap R2: function-word stopwords); license=inherits aligned_lex
+surface	codes	max_share
+arba’in	G5062	0.765
+bakwai	G2033	0.882
+goma	G1176,G1427	0.424
+kada	G3367	0.794

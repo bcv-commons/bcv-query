@@ -126,6 +126,12 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   Strong's (articles/particles), or high-frequency-low-keyness words, → an
   auto stopword list per language. Replaces the hand-authored lists in
   `analyzer_lang/<lang>.json` and retires the "needs native review" caveat.
+  → **Done.** [`resources/stopwords/<lang>.tsv`](../resources/stopwords)
+  (`scripts/build_stopwords.py`): a surface whose primary renderings (share ≥
+  0.10) are all function Strong's AND that occurs ≥10× → stopword. 10 langs,
+  ~1,671 words. The analyzer **unions** them with the hand lists, adding the
+  archaic/biblical particles they miss (thence, unto, verily). Composes with R1:
+  "verily I say unto you about grace" → `grace OR favour OR gratitude`.
 
 ### Phase 2 — headline ingests *(the biggest single leap)*
 
@@ -133,6 +139,15 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   **ingest, not a derivation** — open token-aligned datasets already label the
   speaker of each word (see the catalog). Enables "what did **Jesus** say about
   X" (red-letter = `speaker:Jesus`), "**God's** promises", speaker-scoped search.
+  → **Done.** Table: [`resources/speaker_quotations/`](../resources/speaker_quotations)
+  (`scripts/build_speaker_quotations.py`, Clear-Bible/speaker-quotations CC-BY-4.0):
+  5,938 verse-range spans, 959 speakers, 2,173 divine, BBCCCVVV-anchored. **shoresh**:
+  `/speaker/{name}`, `/speakers`, `/speakers/at/{b}/{c}/{v}` (data.py speaker
+  accessors). **bcv-RAG**: `query/speakers.py` (speech-frame detection — "what did
+  Jesus say" fires, "the faith of Abraham" doesn't), a `speaker` intent + the
+  `speaker_search` retriever that intersects a speaker's ranges with the topic FTS
+  ("what did Jesus say about faith" → Mark 11:22 "Have faith in God", Luke 18:42).
+  Existing intents unaffected (speaker weight 0.0 / returns []). Eval-gate before deploy.
 - **S2 · Semantic domains** (Louw-Nida Greek / SDBH Hebrew). Concept retrieval
   *broader than a single Strong's* — the right granularity for thematic queries.
   Open, token-aligned source exists (MACULA + UBS SDBH/SDGNT). Biggest concept

@@ -226,6 +226,72 @@ def passage_search(db: sqlite3.Connection, passages: list[tuple[int, int]], *,
     ]
 
 
+def _overlaps_any(start: int, end: int, ranges: list[tuple[int, int]]) -> bool:
+    """True if [start,end] overlaps any range in the sorted list."""
+    import bisect
+    # ranges sorted by start; find the last range starting <= end, walk back a few
+    i = bisect.bisect_right(ranges, (end, 10**12))
+    for s, e in reversed(ranges[:i]):
+        if e >= start:
+            return True
+        if e < start and s < start - 999_000:   # ranges are sorted by start; once
+            break                                # starts fall far below, stop
+    return False
+
+
+def speaker_search(db: sqlite3.Connection, *, speaker: str | None, fts_query: str,
+                   limit: int = 40) -> list[Hit]:
+    """S1 — Bible verses spoken by `speaker`, intersected with the topic.
+
+    "What did Jesus say about faith" = verses within Jesus's quotation ranges
+    (resources/speaker_quotations) that also match the topic FTS. With no topic,
+    returns the speaker's verses in canonical order (the whole red-letter set).
+    """
+    if not speaker:
+        return []
+    from query import speakers as speakers_mod
+    ranges = sorted(speakers_mod.speaker_passages(speaker))
+    if not ranges:
+        return []
+
+    if fts_query.strip():
+        rows = db.execute(
+            "SELECT chunks.id, passage_refs.start_bbcccvvv, passage_refs.end_bbcccvvv "
+            "FROM chunks_fts_bible "
+            "JOIN chunks ON chunks.rowid = chunks_fts_bible.rowid "
+            "JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id "
+            "WHERE chunks_fts_bible MATCH ? "
+            "ORDER BY rank LIMIT 3000",
+            (fts_query,),
+        ).fetchall()
+    else:
+        # whole speech: bible verses overlapping any speaker range (capped)
+        where = " OR ".join("(passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ?)"
+                            for _ in ranges[:400])
+        params: list = []
+        for s, e in ranges[:400]:
+            params.extend([e, s])
+        rows = db.execute(
+            "SELECT chunks.id, passage_refs.start_bbcccvvv, passage_refs.end_bbcccvvv "
+            "FROM passage_refs JOIN chunks ON chunks.doc_id = passage_refs.doc_id "
+            "AND chunks.chunk_index = 0 "
+            "WHERE EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:bible') "
+            f"AND ({where}) ORDER BY passage_refs.start_bbcccvvv LIMIT ?",
+            [*params, limit],
+        ).fetchall()
+        return [Hit(chunk_id=r[0], score=1.0 - i / max(1, len(rows)), retrievers=["speaker"])
+                for i, r in enumerate(rows)]
+
+    hits: list[str] = []
+    for cid, s, e in rows:
+        if _overlaps_any(s, e, ranges):
+            hits.append(cid)
+            if len(hits) >= limit:
+                break
+    return [Hit(chunk_id=cid, score=1.0 - i / max(1, len(hits)), retrievers=["speaker"])
+            for i, cid in enumerate(hits)]
+
+
 def scripture_search(
     db: sqlite3.Connection,
     passages: list[tuple[int, int]],
@@ -1126,9 +1192,7 @@ def cfabric_search(
         return []
     except Exception as e:
         logger.warning("corpus engine error: %s", e)
-
-    ranked = sorted(hits.items(), key=lambda kv: kv[1], reverse=True)
-    return [Hit(chunk_id=cid, score=score, retrievers=["cfabric"]) for cid, score in ranked]
+        return []
 
 
 # ---------- fusion ----------
@@ -1176,17 +1240,20 @@ def rrf(
 # their structured inputs aren't actually relevant. They light up only
 # under the new intent classes that the analyzer routes to them.
 _INTENT_WEIGHTS: dict[str, list[float]] = {
-    #                    fts  titl pass scrp tag  vec   lex  mrph ent  bib  top  xrf  cfab aqf
-    "thematic":         [1.0, 0.5, 1.0, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5],
-    "entity_lookup":    [1.0, 2.5, 0.8, 0.0, 1.5, 1.0,  0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.2],
-    "passage_specific": [1.0, 0.6, 1.2, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 1.5, 0.2],
-    "passage_book":     [1.0, 0.6, 1.1, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.5, 0.2],
-    "methodology":      [1.0, 1.5, 1.0, 0.0, 1.0, 1.2,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    "word_study":       [0.3, 0.5, 0.0, 0.0, 0.5, 0.5,  3.0, 1.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.2],
-    "morphology":       [0.3, 0.3, 0.5, 0.0, 0.5, 0.0,  1.0, 3.0, 0.0, 0.5, 0.0, 0.0, 2.5, 0.2],
-    "genealogy":        [0.5, 1.0, 0.0, 0.0, 1.0, 0.5,  0.0, 0.0, 3.0, 0.5, 0.0, 0.0, 0.0, 0.2],
-    "topic":            [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 3.0, 0.0, 0.0, 0.4],
-    "xref":             [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 3.0, 0.0, 0.2],
+    #                    fts  titl pass scrp tag  vec   lex  mrph ent  bib  top  xrf  cfab aqf  spkr
+    "thematic":         [1.0, 0.5, 1.0, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5, 0.0],
+    "entity_lookup":    [1.0, 2.5, 0.8, 0.0, 1.5, 1.0,  0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.2, 0.0],
+    "passage_specific": [1.0, 0.6, 1.2, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 1.5, 0.2, 0.0],
+    "passage_book":     [1.0, 0.6, 1.1, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.5, 0.2, 0.0],
+    "methodology":      [1.0, 1.5, 1.0, 0.0, 1.0, 1.2,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "word_study":       [0.3, 0.5, 0.0, 0.0, 0.5, 0.5,  3.0, 1.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.2, 0.0],
+    "morphology":       [0.3, 0.3, 0.5, 0.0, 0.5, 0.0,  1.0, 3.0, 0.0, 0.5, 0.0, 0.0, 2.5, 0.2, 0.0],
+    "genealogy":        [0.5, 1.0, 0.0, 0.0, 1.0, 0.5,  0.0, 0.0, 3.0, 0.5, 0.0, 0.0, 0.0, 0.2, 0.0],
+    "topic":            [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 3.0, 0.0, 0.0, 0.4, 0.0],
+    "xref":             [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 3.0, 0.0, 0.2, 0.0],
+    # S1 speaker scoping: the speaker retriever dominates; fts/bible/aquifer keep
+    # the topic in play for the synthesis context.
+    "speaker":          [0.5, 0.3, 0.0, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.3, 3.0],
 }
 
 # Retriever execution order — index aligns with each _INTENT_WEIGHTS row and
@@ -1195,6 +1262,7 @@ _INTENT_WEIGHTS: dict[str, list[float]] = {
 _RETRIEVER_ORDER = (
     "fts", "title", "passage", "scripture", "tag", "vector", "lexicon",
     "morphology", "entity", "bible", "topic", "xref", "cfabric", "aquifer",
+    "speaker",
 )
 
 
@@ -1270,6 +1338,7 @@ def _gather_hits(
         xref_search(db, source_bbcccvvv=analysis.xref_source),
         cfabric_search(analysis.passages),
         aquifer_search(db, fts_query=analysis.fts_query, lang=lang),
+        speaker_search(db, speaker=analysis.speaker, fts_query=analysis.fts_query),
     ]
 
 

@@ -28,6 +28,7 @@ in Phase 0.
 | `llm_strongs_glosses/<lang>.tsv` | LLM gap-fill glosses, 7 gloss-thin langs (see its README) | `strong → gloss` |
 | `aligned_lex/<lang>.tsv` | surface→Strong's from word alignment, 10 langs | `surface, strong, count, share` |
 | `concept_surfaces/<lang>.tsv` | Strong's → surface family (inverse of aligned_lex), 10 langs — query-time recall expansion (R1) | `strong, surface, count, share` |
+| `stopwords/<lang>.tsv` | data-derived function-word stopwords, 10 langs (R2) — unioned into the analyzer | `surface, codes, max_share` |
 | `analyzer_lang/<lang>.json` | per-language analyzer intent configs, 10 langs | — |
 | `book_names.json` | localized Bible book names + aliases, 10 langs | USFM code → names |
 | `bible_editions.json` | edition registry (handles OT≠NT composites) | edition id → metadata |
@@ -36,6 +37,7 @@ in Phase 0.
 | `strongs_keyness.tsv` | per-Strong's biblical-salience weight | `strong` |
 | `strongs_tw.tsv` | Strong's → unfoldingWord Translation-Words article(s), ranked by occurrence | `strong, tw_article, category, is_kt, lemma, n` |
 | `topic_strongs.tsv` | Nave's-style topic → Strong's | `topic_id, strong, verse_count` |
+| `speaker_quotations/` | who speaks where — quotations → speaker, verse-range, red-letter flag (S1) | `speaker, …, start_bbcccvvv, end_bbcccvvv, divine` |
 
 Build-only intermediates (`strong_lemma.tsv`, `concepts/forms/tw_links.tsv`,
 `glosses_overview.tsv`) intentionally stay in `bcv-RAG/` — they are **git-tracked
