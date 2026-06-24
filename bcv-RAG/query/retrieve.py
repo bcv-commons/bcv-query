@@ -1146,21 +1146,16 @@ def _gather_hits(
     narrow = analysis.passages and any((e - s) < 999 for s, e in analysis.passages)
     passages_filter = _docs_overlapping_passages(db, analysis.passages) if narrow else None
     source = _docs_by_source(db, source_filter)
-    # Hide v3 expansion content (lexicons, morphology, …) from existing
-    # retrievers — see _V2_KIND_TAGS comment above. Stage 3 retrievers
-    # will reach v3 content via their own channels and intents.
-    v2_filter = _docs_v2_only(db)
+    # v2_filter is only needed when passage_search or vector_search runs —
+    # fts_search/title_search now handle v3 exclusion via NOT EXISTS (no
+    # materialization). Materializing 250k ids costs ~2.5s on 11M-row tags;
+    # skip it on the common path (no narrow passage, no semantic).
+    needs_v2 = bool(analysis.passages) or bool(query_vec)
+    v2_filter = _docs_v2_only(db) if needs_v2 else None
     doc_filter = _intersect_filters(passages_filter, source, v2_filter)
-    title_filter = _intersect_filters(source, v2_filter)
 
     strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
 
-    # fts_search / title_search: use the SQL subquery form of the v2 filter
-    # when the candidate set is too large for SQLite's IN-clause variable
-    # limit (999). The subquery is equivalent but avoids materializing the
-    # set. When passages_filter is active the intersection is already small
-    # (≤ |passages_filter|) so the materialized set is used there.
-    _SQLITE_VAR_LIMIT = 900
     # Order MUST match _RETRIEVER_ORDER and the _INTENT_WEIGHTS columns.
     return [
         fts_search(db, analysis.fts_query),
