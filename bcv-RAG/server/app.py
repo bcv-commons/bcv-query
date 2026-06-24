@@ -29,6 +29,12 @@ from server.mcp import server as mcp_server
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_env()
+    # Eagerly open the shared DB connection and warm the lexicon strongs cache
+    # so the first user request doesn't pay the 1-2s startup cost.
+    from server.deps import get_shared_db
+    from query.retrieve import _lexicon_strongs_map
+    db = get_shared_db()
+    _lexicon_strongs_map(db)
     yield
 
 

@@ -1061,48 +1061,56 @@ def cfabric_search(
     passages: list[tuple[int, int]],
     *,
     limit: int = 20,
+    timeout: float = 0.8,
 ) -> list[Hit]:
-    """Retrieve syntactic context from the local corpus engine for passage-bearing queries."""
+    """Retrieve syntactic context from the local corpus engine for passage-bearing queries.
+
+    `timeout` caps the total wall time for all corpus calls in this retriever.
+    The corpus engine can be slow (cold cache, cold connection) and must not
+    block the entire request.
+    """
     if not passages:
         return []
 
+    import concurrent.futures
     from indexer.references import decode
 
-    hits: dict[str, float] = {}
-    seen_verses = 0
-
-    try:
-        from corpus import engine
+    def _run() -> list[Hit]:
+        hits: dict[str, float] = {}
+        seen_verses = 0
+        from corpus import engine  # noqa: PLC0415
         for start, end in passages:
             s_code, s_ch, s_v = decode(start)
             e_code, e_ch, e_v = decode(end)
             if s_code != e_code:
                 continue
-
             try:
                 book_name, corpus = _usfm_to_corpus(s_code)
             except ValueError:
                 continue
-
             for v in range(s_v, e_v + 1):
                 if seen_verses >= limit:
                     break
-
                 data = engine.get_context(
                     book=book_name, chapter=s_ch, verse=v, corpus=corpus,
                 )
                 if "error" in data:
                     continue
-
                 bbcccvvv = start + (v - s_v)
-                chunk_id = f"corpus:{bbcccvvv}"
-                score = 1.0 - seen_verses / max(1, limit)
-                hits[chunk_id] = score
+                hits[f"corpus:{bbcccvvv}"] = 1.0 - seen_verses / max(1, limit)
                 seen_verses += 1
+        ranked = sorted(hits.items(), key=lambda kv: kv[1], reverse=True)
+        return [Hit(chunk_id=cid, score=score, retrievers=["cfabric"]) for cid, score in ranked]
 
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+            future = ex.submit(_run)
+            return future.result(timeout=timeout)
+    except concurrent.futures.TimeoutError:
+        logger.warning("cfabric_search: timed out after %.1fs", timeout)
+        return []
     except Exception as e:
         logger.warning("corpus engine error: %s", e)
-        return []
 
     ranked = sorted(hits.items(), key=lambda kv: kv[1], reverse=True)
     return [Hit(chunk_id=cid, score=score, retrievers=["cfabric"]) for cid, score in ranked]
