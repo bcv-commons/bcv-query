@@ -1320,13 +1320,40 @@ def _get_retriever_pool() -> ThreadPoolExecutor | None:
 def _run_retrievers(db: sqlite3.Connection, tasks: list) -> list[list[Hit]]:
     """Run the per-retriever thunks (each takes a connection), preserving
     `_RETRIEVER_ORDER`. In parallel mode each thunk runs on a worker thread with
-    that thread's own connection; serially they all reuse the request `db`."""
+    that thread's own connection; serially they all reuse the request `db`.
+
+    Set RETRIEVER_TIMING=1 to emit a per-retriever wall-time line to stderr
+    (gated; zero cost otherwise). Pair with RETRIEVER_WORKERS=1 for clean serial
+    attribution when hunting the dominant retriever."""
     pool = _get_retriever_pool()
+    timing = os.environ.get("RETRIEVER_TIMING") == "1"
+    times: list[tuple[str, float]] = []
+
+    def maybe_time(name: str, fn):
+        if not timing:
+            return fn()
+        import time as _time
+        start = _time.perf_counter()
+        try:
+            return fn()
+        finally:
+            times.append((name, _time.perf_counter() - start))
+
     if pool is None:
-        return [task(db) for task in tasks]
-    path = _main_db_path(db)
-    futures = [pool.submit(lambda t=t: t(_thread_db(path))) for t in tasks]
-    return [f.result() for f in futures]
+        out = [maybe_time(name, lambda t=t: t(db))
+               for t, name in zip(tasks, _RETRIEVER_ORDER)]
+    else:
+        path = _main_db_path(db)
+        futures = [pool.submit(lambda t=t, n=name: maybe_time(n, lambda: t(_thread_db(path))))
+                   for t, name in zip(tasks, _RETRIEVER_ORDER)]
+        out = [f.result() for f in futures]
+
+    if timing and times:
+        import sys
+        ranked = ", ".join(f"{n}={e * 1000:.0f}ms"
+                           for n, e in sorted(times, key=lambda x: -x[1]))
+        print(f"[retriever-timing] {ranked}", file=sys.stderr, flush=True)
+    return out
 
 
 def _gather_hits(
@@ -1346,17 +1373,28 @@ def _gather_hits(
     expansions, exactly as the inline code did — callers pass a per-request
     analysis, so this is single-shot.
     """
+    import time as _time
+    _timing = os.environ.get("RETRIEVER_TIMING") == "1"
+    _prep: list[tuple[str, float]] = []
+
+    def _mark(name: str, start: float):
+        if _timing:
+            _prep.append((name, _time.perf_counter() - start))
+
     # Strategy 1: concept expansion (always-on, <1ms)
+    _s = _time.perf_counter()
     from query.concept_expand import expand_concepts
     concept_tags = expand_concepts(analysis.fts_query, analysis.tags, lang=lang)
     if concept_tags:
         analysis.tags.extend(concept_tags)
+    _mark("concept", _s); _s = _time.perf_counter()
 
     # Strategy 2: LXX bridge expansion (always-on when H-tags present, ~50ms)
     from query.lxx_expand import expand_lxx
     lxx_tags = expand_lxx(analysis.tags)
     if lxx_tags:
         analysis.tags.extend(lxx_tags)
+    _mark("lxx", _s); _s = _time.perf_counter()
 
     # Strategy 3: morph pre-filter (only on morph-keyword queries, ~50-150ms)
     from query.morph_prefilter import detect_morph_pattern, morph_passages, _extract_book_code
@@ -1366,6 +1404,7 @@ def _gather_hits(
         morph_refs = morph_passages(morph_pattern, book=book_code)
         if morph_refs:
             analysis.passages.extend(morph_refs)
+    _mark("morph", _s); _s = _time.perf_counter()
 
     narrow = analysis.passages and any((e - s) < 999 for s, e in analysis.passages)
     source = _docs_by_source(db, source_filter)
@@ -1380,6 +1419,11 @@ def _gather_hits(
     doc_filter = _intersect_filters(passages_filter, source)
 
     strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
+    _mark("filters", _s)
+    if _timing and _prep:
+        import sys
+        line = ", ".join(f"{n}={e * 1000:.0f}ms" for n, e in _prep)
+        print(f"[gather-prep] {line}  (tags={len(analysis.tags)})", file=sys.stderr, flush=True)
 
     # Order MUST match _RETRIEVER_ORDER and the _INTENT_WEIGHTS columns. Each
     # thunk takes a connection so it can run on its own worker thread (see
@@ -1618,9 +1662,20 @@ def retrieve(
     inferred book scope helps without crowding out cross-book term articles
     or narrative notes that legitimately bear on the question.
     """
+    import time as _time
+    _timing = os.environ.get("RETRIEVER_TIMING") == "1"
+    _s = _time.perf_counter()
     hit_lists = _gather_hits(db, analysis, query_vec=query_vec,
                              source_filter=source_filter, lang=lang)
+    _gh = _time.perf_counter()
     weights = _INTENT_WEIGHTS.get(analysis.intent, _INTENT_WEIGHTS["thematic"])
     fused = rrf(hit_lists, weights=weights)
+    _rrf = _time.perf_counter()
     fused = _language_gate(db, fused, lang)
+    _lg = _time.perf_counter()
+    if _timing:
+        import sys
+        print(f"[retrieve-stages] gather={(_gh - _s) * 1000:.0f}ms "
+              f"rrf={(_rrf - _gh) * 1000:.0f}ms langgate={(_lg - _rrf) * 1000:.0f}ms "
+              f"cands={len(fused)}", file=sys.stderr, flush=True)
     return fused[:top_k]

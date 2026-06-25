@@ -445,20 +445,21 @@ def lxx_bridge(strong: str, limit: int = 50) -> dict:
         (hnum, *sorted(NT_BOOKS))).fetchall()
     scon.close()
 
-    from collections import Counter
+    from collections import Counter, defaultdict
     greek_counts: Counter = Counter()
     sample_verses: dict[int, list[str]] = {}
-    seen_verses: set[tuple] = set()
-    total_hebrew = len(hwords)
 
+    # Group Hebrew occurrences by verse in ONE pass. The previous version
+    # rescanned all of `hwords` per verse (two O(n) comprehensions inside the
+    # per-verse loop → O(verses × occurrences)), which made frequent lemmas
+    # multi-second on the wire (H0430 "God" ≈ 2.4s, H3068 "LORD" far worse).
+    # Insertion order == first-occurrence order, so iteration order (and thus
+    # the output) is unchanged. Now O(occurrences).
+    by_verse: dict[tuple, list[int]] = defaultdict(list)
     for hw in hwords:
-        vkey = (hw["book"], hw["chapter"], hw["verse"])
-        if vkey in seen_verses:
-            continue
-        seen_verses.add(vkey)
+        by_verse[(hw["book"], hw["chapter"], hw["verse"])].append(hw["idx"])
 
-        hcount = sum(1 for h in hwords
-                     if (h["book"], h["chapter"], h["verse"]) == vkey)
+    for vkey, idxs in by_verse.items():
         grows = lcon.execute(
             "SELECT idx, strong FROM lxx_words "
             "WHERE book=? AND chapter=? AND verse=? "
@@ -467,11 +468,11 @@ def lxx_bridge(strong: str, limit: int = 50) -> dict:
             vkey).fetchall()
         if not grows:
             continue
-        hidxs = sorted(h["idx"] for h in hwords
-                       if (h["book"], h["chapter"], h["verse"]) == vkey)
+        hcount = len(idxs)
+        hidxs = sorted(idxs)
         gidxs = [(g["idx"], g["strong"]) for g in grows]
         total_g = len(gidxs)
-        for hi, hidx in enumerate(hidxs):
+        for hidx in hidxs:
             frac = hidx / max(1, hcount + total_g)
             target_gidx = int(frac * total_g)
             target_gidx = min(target_gidx, total_g - 1)
@@ -495,6 +496,6 @@ def lxx_bridge(strong: str, limit: int = 50) -> dict:
     return {
         "hebrew_strong": strong,
         **(gloss_of(strong) or {}),
-        "hebrew_verses": len(seen_verses),
+        "hebrew_verses": len(by_verse),
         "greek_translations": translations,
     }

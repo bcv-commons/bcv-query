@@ -1,7 +1,10 @@
 """GET /api/search — keyword + structured + semantic retrieval."""
 from __future__ import annotations
 
+import os
 import sqlite3
+import sys
+import time
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -38,6 +41,10 @@ def search(
     if top_k < 1 or top_k > 50:
         raise HTTPException(status_code=400, detail="top_k must be 1..50")
 
+    _timing = os.environ.get("RETRIEVER_TIMING") == "1"
+    _stage: dict[str, float] = {}
+    _s = time.perf_counter()
+
     analysis = analyze(q, lang=lang)
     if canon(lang) != "eng":
         analysis.fts_query = filter_biblical_words(q, lang=lang)
@@ -45,6 +52,8 @@ def search(
         analysis.tags.append(f"kind:{kind}")
     if book:
         analysis.tags.append(f"book:{book.upper()}")
+    if _timing:
+        _stage["analyze"] = time.perf_counter() - _s; _s = time.perf_counter()
 
     query_vec = None
     if semantic and has_vec(db):
@@ -53,8 +62,12 @@ def search(
             query_vec = embed_texts([q], input_type="query")[0]
         except Exception as e:
             print(f"  search: embed failed ({type(e).__name__}: {e}); proceeding without vec", flush=True)
+    if _timing:
+        _stage["embed"] = time.perf_counter() - _s; _s = time.perf_counter()
 
     hits = retrieve(db, analysis, top_k=top_k, query_vec=query_vec, source_filter=source, lang=lang)
+    if _timing:
+        _stage["retrieve"] = time.perf_counter() - _s; _s = time.perf_counter()
 
     local_hits = [h for h in hits if not h.chunk_id.startswith("corpus:")]
     corpus_hits = [h for h in hits if h.chunk_id.startswith("corpus:")]
@@ -76,6 +89,11 @@ def search(
         preview["score"] = round(float(h.score), 6)
         preview["retrievers"] = h.retrievers
         enriched.append(preview)
+
+    if _timing:
+        _stage["enrich"] = time.perf_counter() - _s
+        print("[stage-timing] " + ", ".join(f"{k}={v * 1000:.0f}ms" for k, v in _stage.items()),
+              file=sys.stderr, flush=True)
 
     return {
         "query": q,
