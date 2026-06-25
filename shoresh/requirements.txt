@@ -6,3 +6,8 @@ python-dotenv>=1.0.0
 
 # clause search — vectors loaded from /data volume at startup
 numpy>=1.26.0
+
+# corpus engine (relocated from bcv-RAG): BHSA/Nestle1904 via Context-Fabric.
+# The compiled corpus is a MOUNTED volume ($HOME/text-fabric-data), not baked.
+context-fabric>=0.5.0
+text-fabric>=12.0.0

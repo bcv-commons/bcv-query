@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 WORKDIR /app
 
 COPY requirements.txt ./
@@ -24,6 +24,10 @@ RUN if [ "$SEARCH_EMBEDDER" = "berel" ]; then \
         AutoModel.from_pretrained('bowphs/SPhilBerta')"; \
     fi
 
+# Corpus engine (relocated from bcv-RAG) reads the precompiled text-fabric corpus
+# from $HOME/text-fabric-data — a MOUNTED volume (host /opt/corpus-data), NOT
+# baked (baking the cfabric loadAll OOMs the build; see internal-docs/build-on-hetzner.md).
+ENV HOME=/root
 ENV PORT=8080
 EXPOSE 8080
 HEALTHCHECK CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"
