@@ -121,6 +121,25 @@ def main() -> int:
                 why += f" NOT-STRIPPED:{leaked}"
             print(f"{g['id']:<22} {'✓ ok' if ok else '✗ FAIL':<8} {fts!r}{why}")
         print(f"guards: {gpass}/{len(guards)} pass")
+
+    # Speaker-detection guards (S1): analyze().speaker must match expect_speaker
+    # (null = must NOT route to a speaker). Exercises the full pipeline incl. the
+    # passage-gate and the generic-speaker exclusion — the two over-triggers the
+    # v1 eval surfaced (Scripture-as-speaker; name-as-object).
+    sguards = yaml.safe_load(args.set.read_text()).get("speaker_guards", [])
+    if args.ids:
+        sguards = [g for g in sguards if g["id"] in args.ids]
+    if sguards:
+        print(f"\n{'speaker guard':<24} {'result':<8} intent / speaker (want)")
+        spass = 0
+        for g in sguards:
+            a = analyze(g["query"], lang=g.get("lang", "eng"))
+            expected = g.get("expect_speaker")  # None → must not fire
+            ok = (a.speaker == expected)
+            spass += ok
+            print(f"{g['id']:<24} {'✓ ok' if ok else '✗ FAIL':<8} "
+                  f"{a.intent} / {a.speaker!r} (want {expected!r})")
+        print(f"speaker guards: {spass}/{len(sguards)} pass")
     return 0
 
 

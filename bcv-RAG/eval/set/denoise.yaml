@@ -82,3 +82,27 @@ frame_guards:
     lang: spa
     must_survive: [amor]
     must_strip:   [diferentes, habla, tipos]
+
+# Speaker-detection guards (S1) — checked against analyze().speaker / .intent.
+# Positive: a genuine "who-said" query routes to the speaker intent. Negative:
+# stock framing must NOT (these caught two real over-triggers — "Scripture" is an
+# FCBH speaker, and a name as the OBJECT of "say about X" is not the speaker).
+speaker_guards:
+  - id: spk_jesus_positive
+    query: "what did Jesus say about faith"
+    expect_speaker: Jesus
+  - id: spk_god_possessive
+    query: "God's promises to Abraham"
+    expect_speaker: God
+  - id: spk_teach_positive
+    query: "what did Jesus teach about prayer"
+    expect_speaker: Jesus
+  - id: spk_scripture_negative      # "Scripture" is a speaker, but stock framing
+    query: "what does scripture say about being faithful"
+    expect_speaker: null
+  - id: spk_object_negative          # name is the OBJECT, not the speaker
+    query: "what does Titus 1:1 say about being a servant of God"
+    expect_speaker: null
+  - id: spk_about_negative           # "the faith of Abraham" — about him, not his speech
+    query: "the faith of Abraham"
+    expect_speaker: null

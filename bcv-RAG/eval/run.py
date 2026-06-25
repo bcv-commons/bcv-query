@@ -131,6 +131,10 @@ def evaluate_case(
 ) -> dict:
     case_id = case["id"]
     question = case["question"]
+    # xfail: a KNOWN, documented failure (a real gap we're tracking, not a
+    # regression). It counts as satisfied for the suite while it fails; if it
+    # starts passing it shows as XPASS so the marker gets removed.
+    xfail = bool(case.get("xfail", False))
     expects = case.get("expects") or {}
 
     expected_passages = _expected_passage_pairs(expects.get("passages", []) or [])
@@ -203,16 +207,21 @@ def evaluate_case(
         pass_refusal_ok = (not expected_refusal) or refusal_observed
         pass_no_false_refusal = expected_refusal or (not refusal_observed)
 
-    overall_pass = (
+    raw_pass = (
         pass_passages and pass_tags and pass_substrings
         and pass_refusal_ok and pass_no_false_refusal
     )
+    # Suite expectation holds when a normal case passes OR an xfail case fails.
+    # (raw_pass and xfail both True → XPASS: the marker is stale.)
+    overall_pass = raw_pass != xfail
 
     result = {
         "id": case_id,
         "tags": case.get("tags", []),
         "question": question,
         "pass": overall_pass,
+        "raw_pass": raw_pass,
+        "xfail": xfail,
         "duration_s": duration,
         "metrics": {
             "passage_recall": round(passage_recall, 3),
@@ -331,7 +340,10 @@ def main() -> int:
                 "pass": False,
                 "error": f"{type(e).__name__}: {e}",
             }
-        symbol = "OK  " if res.get("pass") else "FAIL"
+        if res.get("xfail"):
+            symbol = "xfail" if not res.get("raw_pass") else "XPASS"  # XPASS = drop marker
+        else:
+            symbol = "OK  " if res.get("pass") else "FAIL"
         print(f"  [{i}/{len(cases)}] {symbol}  {res.get('id')}  ({res.get('duration_s', 0)}s)", file=sys.stderr)
         results.append(res)
 

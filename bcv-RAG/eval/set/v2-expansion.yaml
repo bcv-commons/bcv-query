@@ -142,3 +142,14 @@ cases:
     question: "What does the Bible say about a covenant between two kingdoms?"
     expects:
       substrings: ["treaty"]
+
+  # ─── S1 speaker scoping: red-letter retrieval ───
+  # "What did Jesus say about faith" intersects Jesus's quotation ranges
+  # (resources/speaker_quotations) with the topic "faith" — surfacing Mark 11:22
+  # ("Have faith in God"), Jesus's own words. A plain "faith" query would NOT
+  # specifically lead with Jesus's red-letter verses. Guards the speaker retriever.
+  - id: speaker_jesus_faith
+    tags: [speaker, red-letter, s1]
+    question: "What did Jesus say about faith?"
+    expects:
+      passages: ["Mark 11:22"]

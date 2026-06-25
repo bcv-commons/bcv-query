@@ -1243,8 +1243,11 @@ _INTENT_WEIGHTS: dict[str, list[float]] = {
     #                    fts  titl pass scrp tag  vec   lex  mrph ent  bib  top  xrf  cfab aqf  spkr
     "thematic":         [1.0, 0.5, 1.0, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5, 0.0],
     "entity_lookup":    [1.0, 2.5, 0.8, 0.0, 1.5, 1.0,  0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.2, 0.0],
-    "passage_specific": [1.0, 0.6, 1.2, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 1.5, 0.2, 0.0],
-    "passage_book":     [1.0, 0.6, 1.1, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.5, 0.2, 0.0],
+    # bible (the verse TEXT) leads passage queries: "what does <verse> SAY" wants
+    # the verse first, not commentary about it. Was 0.5 — study notes (passage,
+    # 1.2) buried the BSB verse at rank ~163. See eval tit_1_1_servant.
+    "passage_specific": [1.0, 0.6, 1.2, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 2.0, 0.0, 0.5, 1.5, 0.2, 0.0],
+    "passage_book":     [1.0, 0.6, 1.1, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 0.5, 0.2, 0.0],
     "methodology":      [1.0, 1.5, 1.0, 0.0, 1.0, 1.2,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     "word_study":       [0.3, 0.5, 0.0, 0.0, 0.5, 0.5,  3.0, 1.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.2, 0.0],
     "morphology":       [0.3, 0.3, 0.5, 0.0, 0.5, 0.0,  1.0, 3.0, 0.0, 0.5, 0.0, 0.0, 2.5, 0.2, 0.0],
