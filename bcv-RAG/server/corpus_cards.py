@@ -1,58 +1,71 @@
 """Resolve cfabric retriever hits into displayable search result cards.
 
-Calls the local corpus engine for each corpus:BBCCCVVV hit and formats
-the syntactic hierarchy into a human-readable excerpt.
+The corpus engine now lives in **shoresh** (migration PR-2). For each
+corpus:BBCCCVVV hit we call shoresh's word-context endpoint over private
+networking (SHORESH_URL) and format the syntactic hierarchy into a readable
+excerpt. Hits shoresh can't resolve (or when SHORESH_URL is unset) are dropped.
 """
 from __future__ import annotations
 
 import logging
+import os
+
+import httpx
 
 from indexer.references import decode, human
-from query.retrieve import Hit, _usfm_to_corpus
+from query.retrieve import Hit
 
 logger = logging.getLogger(__name__)
 
+SHORESH_URL = os.environ.get("SHORESH_URL", "").rstrip("/")
+_TIMEOUT = 5.0
+
 
 def resolve_corpus_hits(hits: list[Hit]) -> dict[str, dict]:
-    """Fetch syntactic data from the corpus engine for corpus:* hits."""
-    if not hits:
+    """Fetch syntactic data from shoresh for corpus:* hits."""
+    if not hits or not SHORESH_URL:
         return {}
 
     results: dict[str, dict] = {}
 
     try:
-        from corpus import engine
-        for h in hits:
-            bbcccvvv = int(h.chunk_id.split(":")[1])
-            code, chapter, verse = decode(bbcccvvv)
+        with httpx.Client(base_url=SHORESH_URL, timeout=_TIMEOUT) as client:
+            for h in hits:
+                bbcccvvv = int(h.chunk_id.split(":")[1])
+                code, chapter, verse = decode(bbcccvvv)
 
-            try:
-                book_name, corpus = _usfm_to_corpus(code)
-            except ValueError:
-                continue
+                try:
+                    # word 0's clause/phrase/sentence context — shoresh maps the
+                    # USFM book to its corpus internally.
+                    resp = client.get(f"/structure/{code}/{chapter}/{verse}/word/0")
+                    if resp.status_code != 200:
+                        continue
+                    payload = resp.json()
+                except Exception as e:
+                    logger.warning("shoresh corpus call failed for %s: %s", h.chunk_id, e)
+                    continue
 
-            data = engine.get_context(
-                book=book_name, chapter=chapter, verse=verse, corpus=corpus,
-            )
-            if "error" in data:
-                continue
+                data = payload.get("data", {})
+                corpus = payload.get("corpus", "")
+                if not data:
+                    continue
 
-            passage_str = human(bbcccvvv)
-            excerpt = _format_context(data, corpus)
+                passage_str = human(bbcccvvv)
+                excerpt = _format_context(data, corpus)
 
-            results[h.chunk_id] = {
-                "chunk_id": h.chunk_id,
-                "title": f"Syntactic analysis: {passage_str}",
-                "kind": "corpus-syntax",
-                "passage": passage_str,
-                "tags": [f"corpus:{corpus}", f"book:{code}"],
-                "excerpt": excerpt,
-                "primary_path": None,
-                "permalink": None,
-            }
+                results[h.chunk_id] = {
+                    "chunk_id": h.chunk_id,
+                    "title": f"Syntactic analysis: {passage_str}",
+                    "kind": "corpus-syntax",
+                    "passage": passage_str,
+                    "tags": [f"corpus:{corpus}", f"book:{code}"],
+                    "excerpt": excerpt,
+                    "primary_path": None,
+                    "permalink": None,
+                }
 
     except Exception as e:
-        logger.warning("corpus engine error during card resolution: %s", e)
+        logger.warning("corpus card resolution error: %s", e)
 
     return results
 
