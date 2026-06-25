@@ -9,6 +9,8 @@ import logging
 import os
 import re
 import sqlite3
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from threading import Lock
 
@@ -1258,6 +1260,75 @@ _RETRIEVER_ORDER = (
 )
 
 
+# ---------- parallel retriever execution ----------
+# The retrievers are independent and read-only, and long thematic queries are
+# dominated by the FTS family (the HNSW vector path is now ~20ms). So they run
+# concurrently across a small thread pool, making wall-clock ≈ the slowest
+# retriever instead of their sum.
+#
+# sqlite3 connections are NOT thread-safe, so each worker thread owns its own
+# connection to index.db, created once and cached on the thread so its page
+# cache stays warm across requests — the same reason the request path shares a
+# single connection (see server/deps.py). usearch HNSW search is thread-safe and
+# the index is shared read-only, so vector_search needs no special handling.
+#
+# Set RETRIEVER_WORKERS=1 (or 0) to fall back to serial execution on the request
+# connection — useful for debugging or memory-constrained hosts.
+_RETRIEVER_WORKERS = int(os.environ.get("RETRIEVER_WORKERS", str(len(_RETRIEVER_ORDER))))
+_retriever_pool: ThreadPoolExecutor | None = None
+_retriever_pool_lock = Lock()
+_thread_local = threading.local()
+
+
+def _main_db_path(db: sqlite3.Connection) -> str:
+    """Filesystem path backing the 'main' schema of `db`."""
+    for _seq, name, file in db.execute("PRAGMA database_list"):
+        if name == "main" and file:
+            return file
+    raise RuntimeError("could not resolve index.db path from connection")
+
+
+def _thread_db(path: str) -> sqlite3.Connection:
+    """Per-worker-thread read-only connection to `path`, created once and reused.
+
+    No retriever needs sqlite-vec anymore (vector search is HNSW), so these are
+    plain connections (load_vec=False). query_only guards against accidental
+    writes; the large page cache matches the request connection."""
+    db = getattr(_thread_local, "db", None)
+    if db is None:
+        from indexer.db import open_db
+        db = open_db(path, load_vec=False)
+        db.execute("PRAGMA query_only = ON")
+        db.execute("PRAGMA cache_size = -65536")  # 64 MB, matches server/deps.py
+        _thread_local.db = db
+    return db
+
+
+def _get_retriever_pool() -> ThreadPoolExecutor | None:
+    """Lazily build the shared retriever thread pool. None disables parallelism."""
+    global _retriever_pool
+    if _RETRIEVER_WORKERS <= 1:
+        return None
+    if _retriever_pool is None:
+        with _retriever_pool_lock:
+            if _retriever_pool is None:
+                _retriever_pool = ThreadPoolExecutor(
+                    max_workers=_RETRIEVER_WORKERS, thread_name_prefix="retriever")
+    return _retriever_pool
+
+
+def _run_retrievers(db: sqlite3.Connection, tasks: list) -> list[list[Hit]]:
+    """Run the per-retriever thunks (each takes a connection), preserving
+    `_RETRIEVER_ORDER`. In parallel mode each thunk runs on a worker thread with
+    that thread's own connection; serially they all reuse the request `db`."""
+    pool = _get_retriever_pool()
+    if pool is None:
+        return [task(db) for task in tasks]
+    path = _main_db_path(db)
+    futures = [pool.submit(lambda t=t: t(_thread_db(path))) for t in tasks]
+    return [f.result() for f in futures]
+
+
 def _gather_hits(
     db: sqlite3.Connection,
     analysis: QueryAnalysis,
@@ -1310,28 +1381,31 @@ def _gather_hits(
 
     strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
 
-    # Order MUST match _RETRIEVER_ORDER and the _INTENT_WEIGHTS columns.
-    return [
-        fts_search(db, analysis.fts_query),
-        title_search(db, analysis.fts_query),
-        passage_search(db, analysis.passages),
-        scripture_search(db, analysis.passages, query_vec, fts_query=analysis.fts_query),
-        tag_search(db, analysis.tags),
-        vector_search(db, query_vec, doc_filter=doc_filter,
-                      kind_scope="v2") if query_vec else [],
-        lexicon_search(db, fts_query=analysis.fts_query,
-                       word_study_terms=analysis.word_study_terms,
-                       strongs_tags=strongs_tags, lemma_tags=lemma_tags),
-        morphology_search(db, strongs_tags=strongs_tags, lemma_tags=lemma_tags,
-                          passages=analysis.passages),
-        entity_search(db, entity_query=analysis.entity_query, lang=lang),
-        bible_search(db, fts_query=analysis.fts_query, passages=analysis.passages, lang=lang),
-        topic_search(db, topic_query=analysis.topic_query),
-        xref_search(db, source_bbcccvvv=analysis.xref_source),
-        cfabric_search(analysis.passages),
-        aquifer_search(db, fts_query=analysis.fts_query, lang=lang),
-        speaker_search(db, speaker=analysis.speaker, fts_query=analysis.fts_query),
+    # Order MUST match _RETRIEVER_ORDER and the _INTENT_WEIGHTS columns. Each
+    # thunk takes a connection so it can run on its own worker thread (see
+    # _run_retrievers); cfabric_search ignores it (it's an HTTP call to shoresh).
+    tasks = [
+        lambda c: fts_search(c, analysis.fts_query),
+        lambda c: title_search(c, analysis.fts_query),
+        lambda c: passage_search(c, analysis.passages),
+        lambda c: scripture_search(c, analysis.passages, query_vec, fts_query=analysis.fts_query),
+        lambda c: tag_search(c, analysis.tags),
+        lambda c: vector_search(c, query_vec, doc_filter=doc_filter,
+                                kind_scope="v2") if query_vec else [],
+        lambda c: lexicon_search(c, fts_query=analysis.fts_query,
+                                 word_study_terms=analysis.word_study_terms,
+                                 strongs_tags=strongs_tags, lemma_tags=lemma_tags),
+        lambda c: morphology_search(c, strongs_tags=strongs_tags, lemma_tags=lemma_tags,
+                                    passages=analysis.passages),
+        lambda c: entity_search(c, entity_query=analysis.entity_query, lang=lang),
+        lambda c: bible_search(c, fts_query=analysis.fts_query, passages=analysis.passages, lang=lang),
+        lambda c: topic_search(c, topic_query=analysis.topic_query),
+        lambda c: xref_search(c, source_bbcccvvv=analysis.xref_source),
+        lambda c: cfabric_search(analysis.passages),
+        lambda c: aquifer_search(c, fts_query=analysis.fts_query, lang=lang),
+        lambda c: speaker_search(c, speaker=analysis.speaker, fts_query=analysis.fts_query),
     ]
+    return _run_retrievers(db, tasks)
 
 
 def _language_gate(db: sqlite3.Connection, hits: list[Hit], lang: str) -> list[Hit]:
