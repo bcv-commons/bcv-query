@@ -32,8 +32,7 @@ from pathlib import Path
 
 import httpx
 
-MIN_FREQ = 3        # skip codes that barely occur (thin, noisy bridges)
-MAX_FREQ = 1500     # match LXX_BRIDGE_MAX_FREQ — generic lemmas are skipped at query time
+DEFAULT_MIN_FREQ = 3   # below this, bridges are too thin to clear MIN_GREEK_COUNT anyway
 GREEK_PER_HEBREW = 4
 MIN_GREEK_COUNT = 3
 
@@ -43,7 +42,9 @@ def _norm(code: str) -> str:
     return f"{m.group(1)}{int(m.group(2)):04d}" if m else code
 
 
-def _hebrew_codes(freq_path: Path) -> list[str]:
+def _hebrew_codes(freq_path: Path, min_freq: int, max_freq: int) -> list[str]:
+    """Hebrew codes with spine frequency in [min_freq, max_freq); max_freq<=0
+    means no upper bound (the full table — now cheap since shoresh is O(n))."""
     out: list[str] = []
     with freq_path.open(encoding="utf-8") as fh:
         next(fh, None)
@@ -54,7 +55,7 @@ def _hebrew_codes(freq_path: Path) -> list[str]:
                     c = int(p[1])
                 except ValueError:
                     continue
-                if MIN_FREQ <= c < MAX_FREQ:
+                if c >= min_freq and (max_freq <= 0 or c < max_freq):
                     out.append(_norm(p[0]))
     return out
 
@@ -85,13 +86,17 @@ def main() -> None:
     ap.add_argument("--out", default="resources/lxx_bridge.tsv")
     ap.add_argument("--shoresh", default=os.environ.get("SHORESH_URL", "").rstrip("/"))
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--min-freq", type=int, default=DEFAULT_MIN_FREQ)
+    ap.add_argument("--max-freq", type=int, default=0,
+                    help="exclusive upper frequency bound; <=0 = no cap (full table)")
     args = ap.parse_args()
     if not args.shoresh:
         sys.exit("set SHORESH_URL or pass --shoresh")
 
-    codes = _hebrew_codes(Path(args.freq))
+    codes = _hebrew_codes(Path(args.freq), args.min_freq, args.max_freq)
+    cap = "no cap" if args.max_freq <= 0 else f"<{args.max_freq}"
     print(f"building LXX bridge for {len(codes)} Hebrew codes "
-          f"(freq [{MIN_FREQ},{MAX_FREQ})) via {args.shoresh}")
+          f"(freq >={args.min_freq}, {cap}) via {args.shoresh}")
 
     results: dict[str, list[tuple[str, int]]] = {}
     done = 0

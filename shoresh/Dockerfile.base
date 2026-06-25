@@ -1,0 +1,40 @@
+# shoresh-base — the heavy, slow-changing layers, baked into a TAGGED image so
+# they are pinned (an image's layers are never reclaimed by BuildKit build-cache
+# GC, unlike inline build cache). The app image (Dockerfile) builds FROM this, so
+# editing app code never re-downloads model weights or re-parses the corpus.
+#
+# REBUILD THIS BASE only when requirements*.txt or the spine/ or lxx/ packages
+# change:
+#   docker build -f Dockerfile.base --build-arg SEARCH_EMBEDDER=berel \
+#     -t shoresh-base:latest .
+FROM python:3.13-slim
+WORKDIR /app
+ENV HOME=/root
+ENV PYTHONPATH=/app
+
+COPY requirements.txt ./
+ARG SEARCH_EMBEDDER=cloudflare
+RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-berel.txt ./
+RUN if [ "$SEARCH_EMBEDDER" = "berel" ]; then \
+      pip install --no-cache-dir -r requirements-berel.txt; \
+    fi
+
+# Bake native model weights (~1.5 GB). In the base image these are pinned and
+# never re-downloaded by app-code rebuilds.
+RUN if [ "$SEARCH_EMBEDDER" = "berel" ]; then \
+      python -c "from transformers import AutoModel, AutoTokenizer; \
+        AutoTokenizer.from_pretrained('dicta-il/BEREL_3.0'); \
+        AutoModel.from_pretrained('dicta-il/BEREL_3.0'); \
+        AutoTokenizer.from_pretrained('bowphs/SPhilBerta'); \
+        AutoModel.from_pretrained('bowphs/SPhilBerta')"; \
+    fi
+
+# Parse OT/LXX source into spine.db / lxx.db (imports only the lxx + spine
+# packages + a network fetch). Built here once; the app image inherits the .db
+# files. (.dockerignore keeps the source data/.db out of the context, so parse
+# regenerates them.)
+COPY spine/ ./spine/
+COPY lxx/ ./lxx/
+RUN python -m lxx.parse --all
+RUN python -m spine.parse

@@ -30,39 +30,30 @@ SPINE_DB = HERE / "spine" / "spine.db"
 GLOSS_TSV = HERE / "spine" / "strongs_gloss.tsv"
 
 
-def _tw_tsv_path() -> Path:
-    """Locate strongs_tw.tsv (Strong's → Translation-Words article map).
+def _resources_dir() -> Path:
+    """The shared `resources/` root — single source of truth, same convention as
+    bcv-RAG. `$BCV_RESOURCES_DIR` (set in the image to /app/resources, where the
+    repo-root resources/ is baked) wins; otherwise the repo-root resources/ of a
+    dev checkout (shoresh is a sibling of resources/)."""
+    env = os.environ.get("BCV_RESOURCES_DIR")
+    return Path(env) if env else HERE.parent / "resources"
 
-    Canonical copy is the shared `resources/strongs_tw.tsv` at the repo root
-    (built by bcv-RAG/scripts/build_strongs_tw.py). Resolution order:
-      1. $STRONGS_TW_TSV (explicit override)
-      2. repo-root resources/ — works in a dev checkout (shoresh is a sibling)
-      3. shoresh/data/strongs_tw.tsv — the prod copy synced into the image at
-         build time (data/ is gitignored, so this is NOT a tracked duplicate)
-    """
+
+def _tw_tsv_path() -> Path:
+    """strongs_tw.tsv (Strong's → Translation-Words article map). `$STRONGS_TW_TSV`
+    overrides; else from the shared resources/ root (see `_resources_dir`)."""
     env = os.environ.get("STRONGS_TW_TSV")
-    if env:
-        return Path(env)
-    dev = HERE.parent / "resources" / "strongs_tw.tsv"
-    if dev.exists():
-        return dev
-    return HERE / "data" / "strongs_tw.tsv"
+    return Path(env) if env else _resources_dir() / "strongs_tw.tsv"
 
 
 TW_TSV = _tw_tsv_path()
 
 
 def _speaker_tsv_path() -> Path:
-    """Locate speaker_quotations.tsv (S1 — who speaks where). Same resolution as
-    _tw_tsv_path: $SPEAKER_QUOTATIONS_TSV → repo-root resources/ (dev) →
-    shoresh/data/ (prod copy synced into the image; data/ is gitignored)."""
+    """speaker_quotations.tsv (S1 — who speaks where). `$SPEAKER_QUOTATIONS_TSV`
+    overrides; else from the shared resources/ root."""
     env = os.environ.get("SPEAKER_QUOTATIONS_TSV")
-    if env:
-        return Path(env)
-    dev = HERE.parent / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
-    if dev.exists():
-        return dev
-    return HERE / "data" / "speaker_quotations.tsv"
+    return Path(env) if env else _resources_dir() / "speaker_quotations" / "speaker_quotations.tsv"
 
 
 SPEAKER_TSV = _speaker_tsv_path()

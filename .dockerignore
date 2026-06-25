@@ -13,10 +13,15 @@
 **/.wrangler
 **/node_modules
 
-# other services / examples / docs — not part of the bcv-RAG image
-shoresh/
+# examples / docs — not part of any image
 example/
 internal-docs/
+# NOTE: shoresh/ is intentionally NOT excluded — both bcv-RAG and shoresh build
+# from this repo-root context (shoresh via `-f shoresh/Dockerfile`) so the shared
+# single-source-of-truth resources/ is reachable. bcv-RAG's Dockerfile COPYs only
+# its own dirs, so including shoresh source here just adds a few MB of context it
+# ignores. shoresh's heavy bits (spine.db/lxx.db, clause .npy, BEREL models) are
+# already excluded below / built into shoresh-base.
 
 # virtualenvs / caches / build junk
 **/.venv
