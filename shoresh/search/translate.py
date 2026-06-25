@@ -4,7 +4,7 @@ Two strategies, matching the access-mode ladder from the roadmap:
 
 - **gloss** (Mode A, $0): deterministic lookup via the reverse gloss index.
   Splits the English query into words, maps each to Hebrew lemmas via
-  strongs_gloss.tsv, picks the highest-frequency lemma per word. Fast,
+  spine_glosses.tsv, picks the highest-frequency lemma per word. Fast,
   free, approximate — works well for concrete nouns/verbs, weaker for
   abstract concepts and phrases.
 

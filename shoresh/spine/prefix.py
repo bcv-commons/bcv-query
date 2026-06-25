@@ -34,7 +34,7 @@ STYLES = ("code_gloss", "gloss", "lemma", "lemma_gloss")
 
 HERE = Path(__file__).resolve().parent
 SPINE_DB = HERE / "spine.db"
-GLOSS_TSV = HERE / "strongs_gloss.tsv"
+GLOSS_TSV = HERE / "spine_glosses.tsv"
 BROAD_RANGE_VERSES = 5
 
 

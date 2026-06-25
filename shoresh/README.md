@@ -68,7 +68,7 @@ curl -X POST "$HOST/upload/clauses_hbo.sqlite?secret=$SECRET" --data-binary @dat
 |-------|------|--------|
 | `spine.db` | 41MB | UHB/UGNT, 443k words, 99.59% BHSA-reconciled |
 | `lxx.db` | — | Rahlfs 1935, 587k words, 54 books, 93% Strong's-tagged |
-| `strongs_gloss.tsv` | 465KB | STEPBible TBESH/TBESG (CC BY), 14,300 entries |
+| `spine_glosses.tsv` | 465KB | STEPBible TBESH/TBESG (CC BY), 14,300 entries |
 | `clauses_hbo.npy` | 344MB | 88,131 BHSA clauses, 1024d BGE-M3 vectors |
 | `clauses_grc.npy` | 31MB | 8,011 Nestle1904 sentences, 1024d BGE-M3 vectors |
 

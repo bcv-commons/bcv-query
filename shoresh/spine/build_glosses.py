@@ -4,7 +4,9 @@
 Source: STEPBible Translators Brief lexicons (TBESH Hebrew, TBESG Greek),
 CC BY — they carry a clean, primary-sense gloss per Strong's (unlike the
 1890 Strong's defs, which lead with etymology/qualifiers). Output:
-spine/strongs_gloss.tsv  (strong, gloss, translit).
+spine/spine_glosses.tsv  (strong, gloss, translit) — spine-scoped English
+glosses of the original languages; distinct from bcv-RAG's multilingual
+resources/strongs_gloss.tsv.
 
 Usage:  python -m spine.build_glosses
 """
@@ -17,7 +19,7 @@ from pathlib import Path
 import httpx
 
 HERE = Path(__file__).resolve().parent
-OUT = HERE / "strongs_gloss.tsv"
+OUT = HERE / "spine_glosses.tsv"
 BASE = "https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/"
 SRC = {
     "H": BASE + "TBESH%20-%20Translators%20Brief%20lexicon%20of%20Extended%20Strongs%20for%20Hebrew%20-%20STEPBible.org%20CC%20BY.txt",

@@ -11,7 +11,8 @@ number, so two deterministic, $0 views fall out:
 
 Strong's is stored as a bare int in both DBs; language is disambiguated by
 book (OT books = Hebrew, NT books = Greek). Glosses come from the spine's
-`strongs_gloss.tsv` (both languages).
+`spine_glosses.tsv` — spine-scoped English glosses of both original languages
+(distinct from bcv-RAG's multilingual `resources/strongs_gloss.tsv`).
 """
 from __future__ import annotations
 
@@ -27,7 +28,7 @@ from references import encode, decode
 HERE = Path(__file__).resolve().parent
 LXX_DB = HERE / "lxx" / "lxx.db"
 SPINE_DB = HERE / "spine" / "spine.db"
-GLOSS_TSV = HERE / "spine" / "strongs_gloss.tsv"
+GLOSS_TSV = HERE / "spine" / "spine_glosses.tsv"
 
 
 def _resources_dir() -> Path:

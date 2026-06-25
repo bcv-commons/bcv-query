@@ -19,8 +19,8 @@ Parser spec: [../docs/spine-parser.md](../docs/spine-parser.md).
 |---|---|
 | `parse.py` | **the spine parser** — UHB/UGNT → per-word records → `spine.db` |
 | `common.py` | shared constants/helpers (pinned tags, book maps, Strong's normalization) |
-| `build_glosses.py` | builds `strongs_gloss.tsv` from STEPBible TBESH/TBESG (CC BY) |
-| `strongs_gloss.tsv` | Strong's → concise English gloss (Lexical line); 100% coverage of the OT spine |
+| `build_glosses.py` | builds `spine_glosses.tsv` from STEPBible TBESH/TBESG (CC BY) |
+| `spine_glosses.tsv` | Strong's → concise English gloss (Lexical line); 100% coverage of the OT spine |
 | `prefix.py` | **the prefix builder** — `PrefixBuilder.build(passage_refs)` → Location + Lexical lines for a chunk |
 | `ablation.py` | easy thematic ablation (saturated — production model already nails distinct-verse + cross-lingual retrieval) |
 | `ablation_wordstudy.py` | **discriminating ablation** — original-language precision: clustering separation + word-study queries over confusable create-family verbs (ULT bodies, spine.db ground truth). Arms: body / code+gloss / gloss-only / **hebrew_lemma** / **lemma+gloss** (the last two = arm A, anchoring in the original language's own space) |
@@ -37,7 +37,7 @@ Parser spec: [../docs/spine-parser.md](../docs/spine-parser.md).
 - Parser **implemented** (`parse.py`) — fetches the pinned UHB `v2.1.32` /
   UGNT `v0.34`, parses to per-word records with fidelity assertions,
   writes `spine.db`. Spec: [`../docs/spine-parser.md`](../docs/spine-parser.md).
-- Gloss dictionary **built** (`strongs_gloss.tsv`) — **100% coverage** of
+- Gloss dictionary **built** (`spine_glosses.tsv`) — **100% coverage** of
   the OT spine's content words.
 - Prefix builder **implemented** (`prefix.py`) — Location + Lexical lines
   (no dedup; broad-range cap; gloss-only ablation flag). Genesis 1:1:
@@ -58,7 +58,7 @@ current dir to the import path):
 cd bcv-RAG
 PYTHONPATH=. python3 -m spine.parse           # build spine.db (OT+NT) — needs httpx
 PYTHONPATH=. python3 -m spine.parse --ot      # OT only
-PYTHONPATH=. python3 -m spine.build_glosses   # build strongs_gloss.tsv — needs httpx
+PYTHONPATH=. python3 -m spine.build_glosses   # build spine_glosses.tsv — needs httpx
 PYTHONPATH=. python3 -m spine.reconcile       # validate vs BHSA — needs cfabric + local BHSA
 
 # ablation — needs voyageai (pip install voyageai); set the model to match production:
