@@ -19,33 +19,14 @@ RUN pip install --no-cache-dir \
     -r /app/query/requirements.txt \
     -r /app/server/requirements.txt
 
-# Download + compile Context-Fabric corpora (BHSA + Nestle1904).
-# This is expensive (~5-10 min) and only depends on pip packages,
-# so it runs BEFORE copying app code to preserve Docker cache.
-ENV HOME=/root
-RUN python -c "\
-from tf.app import use; \
-use('ETCBC/bhsa', silent='deep'); \
-use('ETCBC/nestle1904', silent='deep')" \
- && echo '=== Corpus pre-download OK ==='
-
-RUN python -c "\
-import cfabric; \
-CF = cfabric.Fabric(locations='/root/text-fabric-data/github/ETCBC/bhsa/tf/2021', silent=True); \
-CF.loadAll(silent=True); \
-print('Compiled: BHSA')" \
- && echo '=== BHSA .cfm OK ==='
-
-RUN mv /root/text-fabric-data/github/ETCBC/nestle1904/tf/*/nodeId.tf \
-       /root/text-fabric-data/github/ETCBC/nestle1904/tf/nodeId.tf._skip 2>/dev/null; \
-    python -c "\
-import cfabric; \
-CF = cfabric.Fabric(locations='/root/text-fabric-data/github/ETCBC/nestle1904/tf/0.4.0', silent=True); \
-CF.loadAll(silent=True); \
-print('Compiled: Nestle1904')" \
- && mv /root/text-fabric-data/github/ETCBC/nestle1904/tf/nodeId.tf._skip \
-       /root/text-fabric-data/github/ETCBC/nestle1904/tf/*/nodeId.tf 2>/dev/null; \
-    echo '=== Nestle1904 .cfm OK ==='
+# Context-Fabric corpora (BHSA + Nestle1904) are NO LONGER baked into the image.
+# Baking compiled them at build time (cfabric loadAll), which OOMs on small hosts
+# (~7.6 GB box) and bloated the image by ~1.3 GB. They are now a read-only VOLUME
+# mounted at $HOME/text-fabric-data (HOME=/root, set below). The engine
+# (corpus/cf_engine.py) reads the precompiled .cfm from that mount.
+#   Provision once (extracted from a prior baked image into /opt/corpus-data) and
+#   bind-mount in docker-compose.yml:  - /opt/corpus-data:/root/text-fabric-data:ro
+# Removing the bake makes the image small and buildable natively on the server.
 
 COPY bcv-RAG/indexer /app/indexer
 COPY bcv-RAG/ingest  /app/ingest
