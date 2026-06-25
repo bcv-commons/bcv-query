@@ -4,20 +4,13 @@ Fetches BHSA clauses from the corpus engine, embeds them with the
 original-language model (BEREL for Hebrew), and writes `clauses_<lang>.npy` +
 `clauses_<lang>.sqlite` to DATA_DIR.
 
-Run locally against the corpus engine (now part of bcv-RAG — the former
-bcv-corpus service), then upload the results to the /data volume via the
-/upload endpoint:
+The Context-Fabric corpus engine is now in-process in shoresh (migration), so
+this reads clauses directly from the local engine — no CORPUS_URL / network hop.
+Needs the corpus volume mounted ($HOME/text-fabric-data). Run inside the shoresh
+container (or any env with the engine + corpus data), then the .npy/.sqlite land
+in DATA_DIR (/data):
 
-    # 1. start the corpus engine (in another terminal):
-    cd bcv-RAG && uvicorn server.app:app --port 8000
-    # 2. build embeddings:
-    cd shoresh
-    CORPUS_URL=http://localhost:8000 SHORESH_DATA=./data python3 -m search.build --lang hbo
-    # 3. upload to Railway:
-    curl -X POST "https://shoresh.up.railway.app/upload/clauses_hbo.npy?secret=$SECRET" \
-         --data-binary @data/clauses_hbo.npy
-    curl -X POST "https://shoresh.up.railway.app/upload/clauses_hbo.sqlite?secret=$SECRET" \
-         --data-binary @data/clauses_hbo.sqlite
+    SHORESH_DATA=/data python3 -m search.build --lang hbo
 """
 from __future__ import annotations
 
@@ -27,12 +20,9 @@ import sqlite3
 import sys
 from pathlib import Path
 
-import httpx
-
 from search.embedder import get_encoder
 from search.store import DATA_DIR
 
-CORPUS_URL = os.environ.get("CORPUS_URL", "").rstrip("/")
 CORPUS_OF = {"hbo": "hebrew", "grc": "greek"}
 
 BHSA_TO_USFM = {
@@ -51,26 +41,21 @@ BHSA_TO_USFM = {
 
 
 def fetch_clauses(corpus: str) -> list[dict]:
-    """All clauses of a corpus, gathered book by book (smaller responses)."""
+    """All clauses of a corpus, gathered book by book from the local engine."""
+    from corpus_engine import engine
     clauses: list[dict] = []
-    with httpx.Client(base_url=CORPUS_URL, timeout=120.0) as client:
-        books = client.get("/api/books", params={"corpus": corpus}).json()
-        for b in books:
-            name = b["name"]
-            rows = client.get("/api/clauses",
-                              params={"corpus": corpus, "book": name}).json()
-            rows = [r for r in rows if "error" not in r]
-            print(f"  {name}: {len(rows)} clauses", file=sys.stderr)
-            clauses.extend(rows)
+    for b in engine.list_books(corpus):
+        rows = engine.list_clauses(corpus, b.name)
+        rows = [r for r in rows if "error" not in r]
+        print(f"  {b.name}: {len(rows)} clauses", file=sys.stderr)
+        clauses.extend(rows)
     return clauses
 
 
 def build(lang: str) -> None:
     import numpy as np
-    if not CORPUS_URL:
-        sys.exit("CORPUS_URL not set — need bcv-corpus reachable to fetch clauses")
     corpus = CORPUS_OF[lang]
-    print(f"fetching {corpus} clauses from {CORPUS_URL} …", file=sys.stderr)
+    print(f"reading {corpus} clauses from the local corpus engine …", file=sys.stderr)
     clauses = fetch_clauses(corpus)
     print(f"embedding {len(clauses)} clauses with the {lang} model …", file=sys.stderr)
 

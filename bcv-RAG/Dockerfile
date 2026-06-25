@@ -19,20 +19,15 @@ RUN pip install --no-cache-dir \
     -r /app/query/requirements.txt \
     -r /app/server/requirements.txt
 
-# Context-Fabric corpora (BHSA + Nestle1904) are NO LONGER baked into the image.
-# Baking compiled them at build time (cfabric loadAll), which OOMs on small hosts
-# (~7.6 GB box) and bloated the image by ~1.3 GB. They are now a read-only VOLUME
-# mounted at $HOME/text-fabric-data (HOME=/root, set below). The engine
-# (corpus/cf_engine.py) reads the precompiled .cfm from that mount.
-#   Provision once (extracted from a prior baked image into /opt/corpus-data) and
-#   bind-mount in docker-compose.yml:  - /opt/corpus-data:/root/text-fabric-data:ro
-# Removing the bake makes the image small and buildable natively on the server.
+# The Context-Fabric corpus engine (BHSA + Nestle1904) was removed from bcv-RAG and
+# now lives in shoresh (migration). bcv-RAG's search path fetches syntactic data
+# from shoresh over SHORESH_URL (see server/corpus_cards.py) — no engine, no
+# text-fabric deps, and no corpus volume mount here anymore.
 
 COPY bcv-RAG/indexer /app/indexer
 COPY bcv-RAG/ingest  /app/ingest
 COPY bcv-RAG/query   /app/query
 COPY bcv-RAG/server  /app/server
-COPY bcv-RAG/corpus  /app/corpus
 COPY bcv-RAG/resource_paths.py /app/resource_paths.py
 COPY bcv-RAG/lang.py           /app/lang.py
 # Shared data resources (repo-root resources/, Strong's/BCVW-keyed) — consumed

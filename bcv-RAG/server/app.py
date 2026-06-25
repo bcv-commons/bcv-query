@@ -21,7 +21,6 @@ from server.routes import health as health_route
 from server.routes import search as search_route
 from server.routes import topics as topics_route
 from server.routes import trees as trees_route
-from server.routes import corpus as corpus_route
 from server.routes import study as study_route
 from server.mcp import server as mcp_server
 
@@ -62,7 +61,6 @@ app.include_router(topics_route.router, prefix="/api")
 app.include_router(entities_route.router, prefix="/api")
 app.include_router(xref_route.router, prefix="/api")
 app.include_router(concordance_route.router, prefix="/api")
-app.include_router(corpus_route.router, prefix="/api")
 app.include_router(study_route.router, prefix="/api")
 
 # MCP surface (mounted at /mcp; not under /api)
@@ -86,7 +84,6 @@ def root() -> dict:
                 "/api/entities", "/api/entity/{id}",
                 "/api/cross-references/{bbcccvvv}",
                 "/api/concordance/{word}",
-                "/api/books", "/api/clauses", "/api/passage", "/api/context",
             ],
             "mcp": "/mcp",
         },

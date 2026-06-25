@@ -1,3 +1,4 @@
 openai>=1.40
 voyageai>=0.2.4    # alt embedding provider (pip-optional; only when BTMCP_EMBEDDING_PROVIDER=voyage)
 httpx>=0.27.0      # HTTP client for bcv-corpus calls
+usearch>=2.12        # HNSW ANN index for fast vector search (replaces sqlite-vec brute-force)

@@ -366,10 +366,15 @@ def scripture_search(
 
     # Pass 1 — vec-ranked scripture (broader limit; RRF handles dedup).
     if query_vec:
-        vec_filter = scripture_doc_ids or set(
-            r[0] for r in db.execute(_scripture_subquery).fetchall()
-        )
-        for h in vector_search(db, query_vec, doc_filter=vec_filter, limit=limit):
+        # With explicit passages the scripture set is small (IN clause). For
+        # thematic queries it's ALL kind:scripture (~148k docs) — pass it as an
+        # in-SQLite subquery, never materialize it into a giant IN (that cost
+        # seconds and neared the SQL-variable limit; same fix as the v2 filter).
+        if scripture_doc_ids is not None:
+            vec_kw: dict = {"doc_filter": scripture_doc_ids}
+        else:
+            vec_kw = {"kind_scope": "scripture"}
+        for h in vector_search(db, query_vec, limit=limit, **vec_kw):
             out.append(Hit(chunk_id=h.chunk_id, score=h.score, retrievers=["scripture"]))
     # Pass 2 — FTS5-ranked scripture.
     if fts_query.strip():
@@ -457,64 +462,106 @@ def title_search(
     return hits
 
 
+# ---------- HNSW vector index (usearch) ----------
+# sqlite-vec is brute-force (linear scan over ~1.2M vectors ≈ 6-16s/query). We
+# serve vector search from a usearch HNSW index instead (~2ms/query, ~96% recall).
+# The index is built from the same float vectors (no re-embed), mmap-loaded here.
+_hnsw_index = None
+_hnsw_keys: list[str] | None = None
+_hnsw_failed = False
+
+
+def _load_hnsw():
+    """Lazily mmap the usearch HNSW index + its int-key→chunk_id map. Returns
+    (index, keys), or (None, None) if unavailable (vector search then degrades off)."""
+    global _hnsw_index, _hnsw_keys, _hnsw_failed
+    if _hnsw_index is not None:
+        return _hnsw_index, _hnsw_keys
+    if _hnsw_failed:
+        return None, None
+    import os
+    import pickle
+    path = os.environ.get("HNSW_INDEX_PATH", "/data/vec.usearch")
+    keys_path = os.environ.get("HNSW_KEYS_PATH", path.rsplit(".", 1)[0] + "_keys.pkl")
+    try:
+        from usearch.index import Index
+        idx = Index.restore(path, view=True)  # mmap — low RAM
+        with open(keys_path, "rb") as f:
+            keys = pickle.load(f)
+        _hnsw_index, _hnsw_keys = idx, keys
+        logger.info("loaded HNSW index: %d vectors from %s", len(keys), path)
+        return idx, keys
+    except Exception as e:
+        logger.warning("HNSW index unavailable (%s) — vector search disabled", e)
+        _hnsw_failed = True
+        return None, None
+
+
+def _vec_allowed_docs(db: sqlite3.Connection, docs: set[str],
+                      doc_filter: set[str] | None, kind_scope: str | None) -> set[str]:
+    """Subset of candidate `docs` passing a small doc_filter set and/or a kind_scope
+    predicate ('v2' = has a v2 kind & not Aquifer; 'scripture' = kind:scripture).
+    One scoped tags query over only the (few hundred) candidate docs — fast."""
+    allowed = set(docs)
+    if doc_filter is not None:
+        allowed &= doc_filter
+    if not (kind_scope and allowed):
+        return allowed
+    ph = ",".join("?" * len(allowed))
+    dl = list(allowed)
+    if kind_scope == "scripture":
+        # only docs carrying kind:scripture (fetch just that tag — not all tags)
+        allowed = {r[0] for r in db.execute(
+            f"SELECT DISTINCT doc_id FROM tags WHERE doc_id IN ({ph}) AND tag='kind:scripture'", dl)}
+    elif kind_scope == "v2":
+        kinds = ",".join("?" * len(_V2_KIND_TAGS))
+        has_v2 = {r[0] for r in db.execute(
+            f"SELECT DISTINCT doc_id FROM tags WHERE doc_id IN ({ph}) AND tag IN ({kinds})",
+            dl + list(_V2_KIND_TAGS))}
+        aquifer = {r[0] for r in db.execute(
+            f"SELECT DISTINCT doc_id FROM tags WHERE doc_id IN ({ph}) AND tag='resource:aquifer'", dl)}
+        allowed = has_v2 - aquifer
+    return allowed
+
+
 def vector_search(
     db: sqlite3.Connection,
     query_vec: list[float] | None,
     *,
     doc_filter: set[str] | None = None,
+    kind_scope: str | None = None,
     limit: int = 50,
-    overfetch: int = 4,
+    overfetch: int = 8,
 ) -> list[Hit]:
-    """KNN over chunks_vec using sqlite-vec. Returns [] if vec unavailable."""
+    """ANN over the usearch HNSW index (~2ms). Returns [] if the index is absent.
+
+    HNSW can't filter during the scan, so we over-fetch limit*overfetch nearest
+    neighbours and post-filter the candidates by doc_filter (a small id set) and/or
+    kind_scope ('v2' | 'scripture'). doc_id is the chunk_id prefix → no JOIN needed.
+    """
     if not query_vec:
         return []
-    try:
-        # Existence check — fails fast if chunks_vec isn't there or sqlite-vec isn't loaded.
-        db.execute("SELECT count(*) FROM chunks_vec LIMIT 1")
-    except sqlite3.OperationalError:
+    idx, keys = _load_hnsw()
+    if idx is None:
         return []
-
-    from indexer.embed import serialize_vector  # lazy: avoids importing on v1-only paths
-
-    qvec = serialize_vector(query_vec)
-    # sqlite-vec rejects LIMIT alongside `k = ?` on its virtual tables.
-    # Use `k` to bound the ANN scan; clamp client-side after fetch.
-    k = max(limit * overfetch, limit)
-    try:
-        if doc_filter is None:
-            rows = db.execute(
-                "SELECT chunk_id, distance FROM chunks_vec "
-                "WHERE embedding MATCH ? AND k = ? "
-                "ORDER BY distance",
-                (qvec, limit),
-            ).fetchall()
-        else:
-            if not doc_filter:
-                return []
-            placeholders = ",".join("?" * len(doc_filter))
-            # Outer SELECT can use LIMIT freely — only the chunks_vec MATCH is restricted.
-            rows = db.execute(
-                f"""
-                WITH knn AS (
-                    SELECT chunk_id, distance
-                    FROM chunks_vec
-                    WHERE embedding MATCH ? AND k = ?
-                )
-                SELECT knn.chunk_id, knn.distance
-                FROM knn
-                JOIN chunks ON chunks.id = knn.chunk_id
-                WHERE chunks.doc_id IN ({placeholders})
-                ORDER BY knn.distance
-                LIMIT ?
-                """,
-                [qvec, k, *doc_filter, limit],
-            ).fetchall()
-    except sqlite3.OperationalError as e:
-        print(f"vector_search: skipping due to {e!r}", flush=True)
+    if doc_filter is not None and not doc_filter:
         return []
-
-    # cosine distance — lower is closer; negate so larger == more relevant.
-    return [Hit(chunk_id=r[0], score=-float(r[1]), retrievers=["vec"]) for r in rows]
+    import numpy as np
+    filtered = doc_filter is not None or kind_scope is not None
+    need = max(limit * overfetch, limit) if filtered else limit
+    try:
+        m = idx.search(np.asarray(query_vec, dtype=np.float32), need)
+    except Exception as e:
+        logger.warning("HNSW search failed: %s", e)
+        return []
+    cand = [(keys[int(k)], float(d)) for k, d in zip(m.keys, m.distances)]
+    if filtered:
+        cand_docs = {cid.split(":", 1)[0] for cid, _ in cand}
+        allowed = _vec_allowed_docs(db, cand_docs, doc_filter, kind_scope)
+        cand = [(cid, d) for cid, d in cand if cid.split(":", 1)[0] in allowed]
+    cand = cand[:limit]
+    # usearch 'cos' distance — lower is closer; negate so larger == more relevant.
+    return [Hit(chunk_id=cid, score=-d, retrievers=["vec"]) for cid, d in cand]
 
 
 def tag_search(db: sqlite3.Connection, tags: list[str], *, limit: int = 50) -> list[Hit]:
@@ -1094,48 +1141,10 @@ def xref_search(
     ]
 
 
-# ---------- corpus (local Context-Fabric engine) ----------
-
-_corpus_book_map: dict[str, tuple[str, str]] | None = None
-
-
-def _ensure_book_map() -> dict[str, tuple[str, str]]:
-    """Build USFM → (corpus_book_name, corpus_id) from the local corpus engine."""
-    global _corpus_book_map
-    if _corpus_book_map:
-        return _corpus_book_map
-
-    from indexer.references import BOOK_NUMBERS
-
-    mapping: dict[str, tuple[str, str]] = {}
-    try:
-        from corpus import engine
-        for corpus_id, num_range in [("hebrew", (1, 40)), ("greek", (40, 100))]:
-            books = engine.list_books(corpus_id)
-            corpus_names = [b.name for b in books]
-
-            usfm_codes = sorted(
-                [(code, num) for code, num in BOOK_NUMBERS.items()
-                 if num_range[0] <= num < num_range[1]],
-                key=lambda x: x[1],
-            )
-            for (usfm, _num), corpus_name in zip(usfm_codes, corpus_names):
-                mapping[usfm] = (corpus_name, corpus_id)
-
-        logger.info("Loaded %d book mappings from corpus engine", len(mapping))
-    except Exception as e:
-        logger.warning("Failed to load book names from corpus engine: %s", e)
-
-    _corpus_book_map = mapping
-    return _corpus_book_map
-
-
-def _usfm_to_corpus(book_code: str) -> tuple[str, str]:
-    """Map USFM book code → (corpus_book_name, corpus_id)."""
-    book_map = _ensure_book_map()
-    if book_code in book_map:
-        return book_map[book_code]
-    raise ValueError(f"unknown book code for corpus mapping: {book_code}")
+# ---------- corpus (BHSA/Nestle1904 syntax — engine now lives in shoresh) ----------
+# The Context-Fabric engine was relocated to shoresh (migration). cfabric_search
+# below only mints corpus:* hits; the actual syntactic data is fetched from shoresh
+# in server/corpus_cards.py. No local engine or USFM↔corpus book map is needed here.
 
 
 def cfabric_search(
@@ -1289,16 +1298,15 @@ def _gather_hits(
 
     narrow = analysis.passages and any((e - s) < 999 for s, e in analysis.passages)
     source = _docs_by_source(db, source_filter)
-    # passages_filter and v2_filter are only needed by vector_search — all other
-    # retrievers handle kind filtering via NOT EXISTS. Building either filter
-    # materializes 100k-250k doc IDs and costs 0.5-2.5s; skip when no semantic.
+    # vector_search is HNSW now (post-filters candidates), so the v2 kind-filter is
+    # passed as kind_scope="v2" and resolved over the few hundred ANN candidates —
+    # no 100k-250k-doc materialization, no giant IN. Only the small passage/source
+    # filters are materialized + intersected.
     if query_vec:
         passages_filter = _docs_overlapping_passages(db, analysis.passages) if narrow else None
-        v2_filter = _docs_v2_only(db)
     else:
         passages_filter = None
-        v2_filter = None
-    doc_filter = _intersect_filters(passages_filter, source, v2_filter)
+    doc_filter = _intersect_filters(passages_filter, source)
 
     strongs_tags, lemma_tags = _strongs_lemma_filter(analysis.tags)
 
@@ -1309,7 +1317,8 @@ def _gather_hits(
         passage_search(db, analysis.passages),
         scripture_search(db, analysis.passages, query_vec, fts_query=analysis.fts_query),
         tag_search(db, analysis.tags),
-        vector_search(db, query_vec, doc_filter=doc_filter) if query_vec else [],
+        vector_search(db, query_vec, doc_filter=doc_filter,
+                      kind_scope="v2") if query_vec else [],
         lexicon_search(db, fts_query=analysis.fts_query,
                        word_study_terms=analysis.word_study_terms,
                        strongs_tags=strongs_tags, lemma_tags=lemma_tags),
