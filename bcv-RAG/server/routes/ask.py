@@ -145,7 +145,7 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
         citations_out.append(preview)
 
     citations_out = enrich_citations(citations_out)
-    study = word_study_card(concept_tags)  # S2 nudge: focus the query's concepts, not bridge expansions
+    study = word_study_card(concept_tags, req.question)  # S2 nudge: query's concepts, gloss-matched
 
     return {
         "question": req.question,

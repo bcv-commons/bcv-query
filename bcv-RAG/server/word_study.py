@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 
 import httpx
 
@@ -50,27 +51,39 @@ def _concept_strongs(tags: list[str]) -> list[str]:
     return [c for c, k in scored if k > 0]
 
 
-def word_study_card(tags: list[str]) -> dict | None:
+def word_study_card(tags: list[str], query: str = "") -> dict | None:
     """A word-study card for the query's primary concept Strong's, or None.
 
-    Tries the top concept candidates (by keyness) and returns the first that resolves
-    to a real lexical entry (has a semantic domain or senses)."""
+    Tries the top concept candidates (keyness order) and prefers the one whose gloss
+    is actually a word in the question — a strong signal that cuts through
+    concept_expand noise (e.g. "love your neighbor" emits both H0157 *love* and a
+    spurious H4960 *feast*; keyness ranks feast first, but only *love* is in the
+    query). Falls back to the first candidate that resolves to a real lexical entry."""
     if not SHORESH_URL:
         return None
     cands = _concept_strongs(tags)
     if not cands:
         return None
+    qtokens = set(re.findall(r"[a-z]{3,}", query.lower()))
+    fallback: dict | None = None
     try:
         with httpx.Client(base_url=SHORESH_URL, timeout=_TIMEOUT) as client:
-            for strong in cands[:3]:
+            for strong in cands[:4]:
                 try:
                     resp = client.get(f"/wordstudy/{strong}")
                 except Exception:
                     continue
-                if resp.status_code == 200:
-                    card = resp.json()
-                    if card.get("domains") or card.get("senses"):
-                        return card
+                if resp.status_code != 200:
+                    continue
+                card = resp.json()
+                if not (card.get("domains") or card.get("senses")):
+                    continue
+                if fallback is None:
+                    fallback = card
+                gloss = (card.get("gloss") or "").lower()
+                if gloss and (gloss in qtokens or any(t in qtokens for t in gloss.split())):
+                    return card  # gloss matches a query word — the right concept
     except Exception as exc:  # shoresh down / unreachable
         logger.debug("word_study unavailable: %s", exc)
-    return None
+        return None
+    return fallback
