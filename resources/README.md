@@ -38,6 +38,8 @@ in Phase 0.
 | `strongs_tw.tsv` | Strong's → unfoldingWord Translation-Words article(s), ranked by occurrence | `strong, tw_article, category, is_kt, lemma, n` |
 | `topic_strongs.tsv` | Nave's-style topic → Strong's | `topic_id, strong, verse_count` |
 | `speaker_quotations/` | who speaks where — quotations → speaker, verse-range, red-letter flag (S1) | `speaker, …, start_bbcccvvv, end_bbcccvvv, divine` |
+| `lxx_bridge.tsv` | Hebrew→Greek LXX bridge (from MACULA `greekstrong`); concept expansion across the Testaments | `hebrew_strong, greek_strong, count` |
+| `semantic_domains/<lang>.tsv` | Strong's → semantic domain (SDBG Greek / SDBH Hebrew, from MACULA); broaden a lexeme to its domain (S2) — see its README | `strong, domain_type, domain, label, count, share` |
 
 Build-only intermediates (`strong_lemma.tsv`, `concepts/forms/tw_links.tsv`,
 `glosses_overview.tsv`) intentionally stay in `bcv-RAG/` — they are **git-tracked
