@@ -123,6 +123,27 @@ def get_tw(strong: str) -> dict:
     return result
 
 
+@app.get("/domain/{code}")
+def get_domain(code: str, axis: str = "sdbg") -> dict:
+    """Every lexeme in a semantic domain, glossed — "every word in Love/Affection".
+    axis=sdbg (Louw-Nida; Greek + LXX-bridged Hebrew) | core | lex | ctx (native SDBH).
+    e.g. /domain/025003 → ἀγάπη, ἀγαπάω, … + the Hebrew the LXX renders into it."""
+    result = data.domain_lexemes(code, axis=axis)
+    if not result["lexemes"]:
+        raise HTTPException(404, f"no lexemes in domain '{code}' (axis={axis})")
+    return result
+
+
+@app.get("/wordstudy/{strong}")
+def get_wordstudy(strong: str) -> dict:
+    """Composite word-study card for a Strong's: gloss, semantic domain(s) +
+    co-domain siblings, senses (polysemy), and the cross-language equivalent."""
+    result = data.word_study(strong)
+    if not result.get("domains") and not result.get("senses") and not result.get("gloss"):
+        raise HTTPException(404, f"no lexical data for Strong's '{strong}'")
+    return result
+
+
 @app.get("/speakers")
 def get_speakers() -> dict:
     """All quotation speakers with range counts + divine (red-letter) flag."""

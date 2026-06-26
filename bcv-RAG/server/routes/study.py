@@ -23,6 +23,7 @@ from query.retrieve import retrieve
 from server.corpus_cards import resolve_corpus_hits
 from server.deps import get_db
 from server.original_words import enrich_citations
+from server.word_study import word_study_card
 from server.ratelimit import LIMIT_SEARCH, limiter
 from server.resolver import chunk_preview_from_card
 
@@ -180,6 +181,7 @@ def run_study(
 
     # Enrich with original-language words from shoresh
     citations_out = enrich_citations(citations_out)
+    study_card = word_study_card(analysis.tags)  # S2 discovery nudge (best-effort)
 
     # Build the strategies-applied summary
     strategies: list[str] = []
@@ -204,6 +206,7 @@ def run_study(
         "total": len(citations_out),
         "lang": lang,
         "strategies": strategies,
+        "word_study": study_card,
         "analysis": {
             "fts_query": analysis.fts_query,
             "passages": [list(p) for p in analysis.passages],

@@ -25,7 +25,11 @@ from collections import defaultdict
 from resource_paths import resource_path
 from query.concept_expand import _normalize_code, strong_keyness
 
-DOMAIN_EXPAND = os.environ.get("DOMAIN_EXPAND", "1") != "0"
+# DEFAULT-OFF: measured to have only marginal retrieval impact (it surfaces TW
+# concept articles already findable via title/tag, and a single RRF retriever can't
+# lift them past vec/commentary). Kept opt-in (DOMAIN_EXPAND=1) for experiments and
+# in case a future use surfaces — see internal-docs/macula-semantic-layer-plan.md §9.
+DOMAIN_EXPAND = os.environ.get("DOMAIN_EXPAND", "0") != "0"
 PRIMARY_SHARE = 0.5
 # A light backstop against grammatical mega-domains only — the real noise control
 # is the per-query/total caps below + the keyness ranking, so a concept domain like
@@ -102,3 +106,27 @@ def expand_domains(tags: list[str]) -> list[str]:
         if len(added) >= MAX_TOTAL:
             break
     return added[:MAX_TOTAL]
+
+
+def query_domains(tags: list[str]) -> dict[str, list[str]]:
+    """For the query's confident concept Strong's, return {sdbg_domain: [member
+    Strong's]} — the data a first-class domain retriever needs (rank docs by how
+    many of a domain's members they carry). Same gating as expand_domains."""
+    if not DOMAIN_EXPAND:
+        return {}
+    _load()
+    out: dict[str, list[str]] = {}
+    for t in tags:
+        if not t.startswith("strongs:"):
+            continue
+        code = _normalize_code(t.split(":", 1)[1])
+        pd = _primary.get(code)
+        if not pd or pd[1] < PRIMARY_SHARE or pd[0][:3] in _BROAD_SDBG or pd[0] in out:
+            continue
+        members = _members.get(pd[0], [])
+        if len(members) > MAX_DOMAIN_MEMBERS:
+            continue
+        mem = [m[0] for m in members if m[1] >= PRIMARY_SHARE]
+        if len(mem) >= 2:
+            out[pd[0]] = mem
+    return out

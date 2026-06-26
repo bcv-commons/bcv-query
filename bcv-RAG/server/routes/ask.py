@@ -17,6 +17,7 @@ from server.auth import require_password
 from server.corpus_cards import resolve_corpus_hits
 from server.deps import get_db
 from server.original_words import enrich_citations
+from server.word_study import word_study_card
 from server.ratelimit import LIMIT_ASK, limiter
 from server.resolver import chunk_preview_from_card
 
@@ -143,6 +144,7 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
         citations_out.append(preview)
 
     citations_out = enrich_citations(citations_out)
+    study = word_study_card(analysis.tags)  # S2 discovery nudge (best-effort)
 
     return {
         "question": req.question,
@@ -150,6 +152,7 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
         "citations": citations_out,
         "confidence": synth["confidence"],
         "lang": req.lang,
+        "word_study": study,
         "analysis": {
             "fts_query": analysis.fts_query,
             "passages": [list(p) for p in analysis.passages],

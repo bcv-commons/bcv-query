@@ -587,6 +587,39 @@ def tag_search(db: sqlite3.Connection, tags: list[str], *, limit: int = 50) -> l
     return [Hit(chunk_id=r[0], score=1.0 - i / max(1, n), retrievers=["tag"]) for i, r in enumerate(rows)]
 
 
+def domain_search(db: sqlite3.Connection, tags: list[str], *, limit: int = 50,
+                  max_members: int = 60) -> list[Hit]:
+    """First-class semantic-domain retriever (#9): map the query's concept
+    Strong's → their SDBG domain(s) → the domains' member lexemes, then rank docs
+    by HOW MANY distinct members they carry (= domain strength). A dedicated RRF
+    signal, so a doc strongly in the query's domain surfaces even without the exact
+    query word — and cross-language (the sdbg axis spans Greek + LXX-bridged Hebrew).
+    Unlike Strategy-4 tag-injection (which dilutes into tag_search), this is not
+    drowned out: it scores domain overlap on its own axis."""
+    from query.domain_expand import query_domains
+    doms = query_domains(tags)
+    if not doms:
+        return []
+    members: set[str] = set()
+    for ms in doms.values():
+        members.update(ms)
+    member_tags = [f"strongs:{m}" for m in sorted(members)][:max_members]
+    if not member_tags:
+        return []
+    ph = ",".join("?" * len(member_tags))
+    sql = (
+        "SELECT chunks.id, COUNT(DISTINCT tags.tag) AS ov "
+        "FROM tags JOIN chunks ON chunks.doc_id = tags.doc_id AND chunks.chunk_index = 0 "
+        f"WHERE tags.tag IN ({ph}) "
+        "AND NOT EXISTS (SELECT 1 FROM tags ax WHERE ax.doc_id = chunks.doc_id AND ax.tag = 'resource:aquifer') "
+        "GROUP BY chunks.id ORDER BY ov DESC LIMIT ?"
+    )
+    rows = db.execute(sql, member_tags + [limit]).fetchall()
+    n = len(rows)
+    return [Hit(chunk_id=r[0], score=1.0 - i / max(1, n), retrievers=["semdomain"])
+            for i, r in enumerate(rows)]
+
+
 # ---------- v3 retrievers (stage-3) ----------
 # These target the per-kind FTS tables and the entity/topic/xref auxiliary
 # tables populated in stage 2. Unlike the v2 retrievers, they ignore the
@@ -1231,23 +1264,25 @@ def rrf(
 # their structured inputs aren't actually relevant. They light up only
 # under the new intent classes that the analyzer routes to them.
 _INTENT_WEIGHTS: dict[str, list[float]] = {
-    #                    fts  titl pass scrp tag  vec   lex  mrph ent  bib  top  xrf  cfab aqf  spkr
-    "thematic":         [1.0, 0.5, 1.0, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5, 0.0],
-    "entity_lookup":    [1.0, 2.5, 0.8, 0.0, 1.5, 1.0,  0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.2, 0.0],
+    #                    fts  titl pass scrp tag  vec   lex  mrph ent  bib  top  xrf  cfab aqf  spkr sdom
+    "thematic":         [1.0, 0.5, 1.0, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5, 0.0, 0.8],
+    "entity_lookup":    [1.0, 2.5, 0.8, 0.0, 1.5, 1.0,  0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.2, 0.0, 0.0],
     # bible (the verse TEXT) leads passage queries: "what does <verse> SAY" wants
     # the verse first, not commentary about it. Was 0.5 — study notes (passage,
     # 1.2) buried the BSB verse at rank ~163. See eval tit_1_1_servant.
-    "passage_specific": [1.0, 0.6, 1.2, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 2.0, 0.0, 0.5, 1.5, 0.2, 0.0],
-    "passage_book":     [1.0, 0.6, 1.1, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 0.5, 0.2, 0.0],
-    "methodology":      [1.0, 1.5, 1.0, 0.0, 1.0, 1.2,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    "word_study":       [0.3, 0.5, 0.0, 0.0, 0.5, 0.5,  3.0, 1.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.2, 0.0],
-    "morphology":       [0.3, 0.3, 0.5, 0.0, 0.5, 0.0,  1.0, 3.0, 0.0, 0.5, 0.0, 0.0, 2.5, 0.2, 0.0],
-    "genealogy":        [0.5, 1.0, 0.0, 0.0, 1.0, 0.5,  0.0, 0.0, 3.0, 0.5, 0.0, 0.0, 0.0, 0.2, 0.0],
-    "topic":            [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 3.0, 0.0, 0.0, 0.4, 0.0],
-    "xref":             [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 3.0, 0.0, 0.2, 0.0],
+    "passage_specific": [1.0, 0.6, 1.2, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 2.0, 0.0, 0.5, 1.5, 0.2, 0.0, 0.0],
+    "passage_book":     [1.0, 0.6, 1.1, 0.0, 1.0, 1.0,  0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 0.5, 0.2, 0.0, 0.0],
+    "methodology":      [1.0, 1.5, 1.0, 0.0, 1.0, 1.2,  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    # sdom (semantic-domain retriever): word_study & thematic want concept breadth;
+    # topic too. Off for passage/entity/morph/speaker (structured, not concept-driven).
+    "word_study":       [0.3, 0.5, 0.0, 0.0, 0.5, 0.5,  3.0, 1.5, 0.0, 0.0, 0.0, 0.0, 2.0, 0.2, 0.0, 1.0],
+    "morphology":       [0.3, 0.3, 0.5, 0.0, 0.5, 0.0,  1.0, 3.0, 0.0, 0.5, 0.0, 0.0, 2.5, 0.2, 0.0, 0.0],
+    "genealogy":        [0.5, 1.0, 0.0, 0.0, 1.0, 0.5,  0.0, 0.0, 3.0, 0.5, 0.0, 0.0, 0.0, 0.2, 0.0, 0.0],
+    "topic":            [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 3.0, 0.0, 0.0, 0.4, 0.0, 0.5],
+    "xref":             [0.5, 0.5, 0.5, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 3.0, 0.0, 0.2, 0.0, 0.0],
     # S1 speaker scoping: the speaker retriever dominates; fts/bible/aquifer keep
     # the topic in play for the synthesis context.
-    "speaker":          [0.5, 0.3, 0.0, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.3, 3.0],
+    "speaker":          [0.5, 0.3, 0.0, 0.0, 0.5, 0.5,  0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.3, 3.0, 0.0],
 }
 
 # Retriever execution order — index aligns with each _INTENT_WEIGHTS row and
@@ -1256,7 +1291,7 @@ _INTENT_WEIGHTS: dict[str, list[float]] = {
 _RETRIEVER_ORDER = (
     "fts", "title", "passage", "scripture", "tag", "vector", "lexicon",
     "morphology", "entity", "bible", "topic", "xref", "cfabric", "aquifer",
-    "speaker",
+    "speaker", "semdomain",
 )
 
 
@@ -1457,6 +1492,7 @@ def _gather_hits(
         lambda c: cfabric_search(analysis.passages),
         lambda c: aquifer_search(c, fts_query=analysis.fts_query, lang=lang),
         lambda c: speaker_search(c, speaker=analysis.speaker, fts_query=analysis.fts_query),
+        lambda c: domain_search(c, analysis.tags),
     ]
     return _run_retrievers(db, tasks)
 

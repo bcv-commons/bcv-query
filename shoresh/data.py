@@ -16,8 +16,10 @@ book (OT books = Hebrew, NT books = Greek). Glosses come from the spine's
 """
 from __future__ import annotations
 
+import collections
 import csv
 import os
+import re
 import sqlite3
 from functools import lru_cache
 from pathlib import Path
@@ -95,9 +97,129 @@ def _glosses() -> dict[str, tuple[str, str]]:
     return out
 
 
+def _spine_code(code: str) -> str:
+    """Spine glosses key on UNPADDED codes (G26, H157); resources use padded
+    (G0026, H0157). Normalize to the spine form for lookups."""
+    m = re.match(r"^([GgHh])0*(\d+)", code.strip())
+    return f"{m.group(1).upper()}{int(m.group(2))}" if m else code
+
+
 def gloss_of(code: str) -> dict | None:
-    g = _glosses().get(code)
+    g = _glosses().get(code) or _glosses().get(_spine_code(code))
     return {"gloss": g[0], "translit": g[1]} if g else None
+
+
+# ---------- semantic domains (S2 / word-study) ----------
+
+@lru_cache(maxsize=1)
+def _domain_index() -> dict:
+    """{(domain_type, domain_code): [(strong, label, count, share)]} from the shared
+    resources/semantic_domains/{grc,hbo}.tsv (SDBG Greek + SDBH Hebrew + bridged sdbg)."""
+    idx: dict = collections.defaultdict(list)
+    base = _resources_dir() / "semantic_domains"
+    for lang in ("grc", "hbo"):
+        p = base / f"{lang}.tsv"
+        if not p.exists():
+            continue
+        with p.open(encoding="utf-8") as fh:
+            next(fh, None)
+            for line in fh:
+                parts = line.rstrip("\n").split("\t")
+                if len(parts) >= 6:
+                    s, dtype, code, label, count, share = parts[:6]
+                    idx[(dtype, code)].append((s, label, int(count), float(share)))
+    return idx
+
+
+def domain_lexemes(code: str, axis: str = "sdbg", limit: int = 200) -> dict:
+    """Every lexeme in a semantic domain, glossed — "every word in Love/Affection".
+    axis: sdbg (Louw-Nida, Greek + LXX-bridged Hebrew) | core | lex | ctx (native SDBH)."""
+    members = _domain_index().get((axis, code.strip()), [])
+    lexemes = []
+    for s, _label, count, share in sorted(members, key=lambda m: (-m[2], -m[3]))[:limit]:
+        g = gloss_of(s) or {}
+        lexemes.append({
+            "strong": s, "lang": "grc" if s.startswith("G") else "hbo",
+            "gloss": g.get("gloss"), "translit": g.get("translit"),
+            "count": count, "share": round(share, 3),
+        })
+    return {
+        "domain": code, "axis": axis,
+        "label": members[0][1] if members else None,
+        "count": len(members), "lexemes": lexemes,
+    }
+
+
+@lru_cache(maxsize=1)
+def _strong_domains() -> dict:
+    """strong -> [(axis, code, label, share)] (inverse of _domain_index)."""
+    out: dict = collections.defaultdict(list)
+    for (axis, code), members in _domain_index().items():
+        for s, label, _count, share in members:
+            out[s].append((axis, code, label, share))
+    return out
+
+
+@lru_cache(maxsize=1)
+def _strong_senses() -> dict:
+    out: dict = collections.defaultdict(list)
+    base = _resources_dir() / "senses"
+    for lang in ("grc", "hbo"):
+        p = base / f"{lang}.tsv"
+        if not p.exists():
+            continue
+        with p.open(encoding="utf-8") as fh:
+            next(fh, None)
+            for line in fh:
+                c = line.rstrip("\n").split("\t")
+                if len(c) >= 5:
+                    out[c[0]].append({"sense": c[1], "gloss": c[2],
+                                      "count": int(c[3]), "share": float(c[4])})
+    return out
+
+
+@lru_cache(maxsize=1)
+def _lxx_pairs() -> tuple:
+    """(forward H->[(G,count)], reverse G->[(H,count)]) from lxx_bridge.tsv."""
+    fwd: dict = collections.defaultdict(list)
+    rev: dict = collections.defaultdict(list)
+    p = _resources_dir() / "lxx_bridge.tsv"
+    if p.exists():
+        with p.open(encoding="utf-8") as fh:
+            next(fh, None)
+            for line in fh:
+                c = line.rstrip("\n").split("\t")
+                if len(c) >= 3:
+                    fwd[c[0]].append((c[1], int(c[2])))
+                    rev[c[1]].append((c[0], int(c[2])))
+    return fwd, rev
+
+
+def _norm_strong(s: str) -> str:
+    m = re.match(r"^([GgHh])0*(\d+)", s.strip())
+    return f"{m.group(1).upper()}{int(m.group(2)):04d}" if m else s.strip().upper()
+
+
+def word_study(strong: str) -> dict:
+    """Composite word-study: gloss + semantic domain(s) + co-domain siblings +
+    senses (polysemy) + cross-language equivalent — from the shared resources."""
+    code = _norm_strong(strong)
+    domains = [{"axis": a, "domain": d, "label": lab, "share": round(sh, 3)}
+               for a, d, lab, sh in sorted(_strong_domains().get(code, []), key=lambda x: -x[3])]
+    siblings = []
+    prim = next((d for d in domains if d["axis"] == "sdbg"), None)
+    if prim:
+        siblings = [lx for lx in domain_lexemes(prim["domain"], axis="sdbg", limit=8)["lexemes"]
+                    if lx["strong"] != code][:6]
+    fwd, rev = _lxx_pairs()
+    cross = ([{"strong": g, "count": c, **(gloss_of(g) or {})} for g, c in fwd.get(code, [])][:3]
+             or [{"strong": h, "count": c, **(gloss_of(h) or {})} for h, c in rev.get(code, [])][:3])
+    return {
+        "strong": code, **(gloss_of(code) or {}),
+        "tw": tw_articles(code).get("articles", []),  # nudge 1: study the concept
+        "domains": domains, "siblings": siblings,      # nudge 3: related words
+        "senses": _strong_senses().get(code, []), "cross_language": cross,
+    }
 
 
 @lru_cache(maxsize=1)
