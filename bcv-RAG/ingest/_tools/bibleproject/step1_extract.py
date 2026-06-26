@@ -663,7 +663,7 @@ class TBPMetadataExtractor:
 
 def main():
     """Main execution."""
-    # Vendored from larsgson/bible-study-assistant for self-contained
+    # Vendored from the bible-study-assistant project for self-contained
     # re-derivation of BibleProject chunks. Paths adapted to bt-docker-mcp's
     # staging layout: this script lives at ingest/_tools/bibleproject/, so
     # walk up three levels to the repo root and point at ingest/_staging/.

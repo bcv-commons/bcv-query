@@ -502,7 +502,7 @@ class TBPChunker:
 
 def main():
     """Main execution."""
-    # Vendored from larsgson/bible-study-assistant. Paths adapted to
+    # Vendored from the bible-study-assistant project. Paths adapted to
     # bt-docker-mcp's staging layout (see step1_extract.py for the same
     # rationale).
     script_dir = Path(__file__).parent

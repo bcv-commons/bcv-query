@@ -71,7 +71,7 @@ python scripts/incremental-deploy/export_delta.py \
 # 5. Deploy (server side, automated). Configure the target via env first:
 export BCV_HOST=user@your.server
 export BCV_DATA_DIR=/path/to/data        # the dir bind-mounted to /data
-export BCV_IMAGE=larsgson/bcv-rag:latest
+export BCV_IMAGE=bcv-commons/bcv-rag:latest
 scripts/incremental-deploy/deploy.sh /tmp/delta.db
 ```
 

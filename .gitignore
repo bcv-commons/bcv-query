@@ -95,3 +95,6 @@ shoresh/lxx/lxx.db-*
 shoresh/data/
 shoresh/**/clauses_*.npy
 shoresh/**/clauses_*.sqlite
+
+# per-host deploy config (paths only, no secrets) — the .example IS tracked
+deploy/deploy.local.env

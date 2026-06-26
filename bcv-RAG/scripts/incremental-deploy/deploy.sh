@@ -14,7 +14,7 @@
 # Configure via environment (no infra details are hardcoded). Example:
 #   export BCV_HOST=root@your.server.ip
 #   export BCV_DATA_DIR=/opt/bcv-query/data        # bind-mounted to /data in the container
-#   export BCV_IMAGE=larsgson/bcv-rag:latest
+#   export BCV_IMAGE=bcv-commons/bcv-rag:latest
 #   export BCV_DEPLOY_DIR=/opt/bcv-query/deploy     # scratch dir on the server (optional)
 #   export BCV_COMPOSE_DIR=/opt/bcv-query           # dir holding docker-compose.yml (optional)
 #   ./deploy.sh /tmp/delta.db
@@ -23,7 +23,7 @@ set -euo pipefail
 DELTA_LOCAL="${1:?usage: deploy.sh <delta.db>}"
 HOST="${BCV_HOST:?set BCV_HOST=user@host}"
 DATA="${BCV_DATA_DIR:?set BCV_DATA_DIR=/path/to/data (bind-mounted to /data)}"
-IMAGE="${BCV_IMAGE:-larsgson/bcv-rag:latest}"
+IMAGE="${BCV_IMAGE:-bcv-commons/bcv-rag:latest}"
 DEPLOY="${BCV_DEPLOY_DIR:-${DATA%/data}/deploy}"
 COMPOSE_DIR="${BCV_COMPOSE_DIR:-${DATA%/data}}"
 HERE="$(cd "$(dirname "$0")" && pwd)"

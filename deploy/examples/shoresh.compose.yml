@@ -1,0 +1,22 @@
+# Example compose for the shoresh service — copy to your stack dir (the one you
+# point SHORESH_STACK at) as `docker-compose.yml`, then create:
+#   • data/ — clause vectors etc.
+#   • the corpus-data path below — the precompiled text-fabric corpus, provisioned
+#     separately (NOT baked into the image; baking it OOMs the build).
+# The image is built locally by deploy/deploy.sh (shoresh-base holds the heavy
+# BEREL/parse layers). shoresh resolves resources/ from the baked image, so no
+# resource volume/env is needed. Health is provided by the Dockerfile HEALTHCHECK.
+services:
+  shoresh:
+    image: shoresh:latest
+    container_name: shoresh
+    restart: unless-stopped
+    ports:
+      - "8080:8080"                # or "127.0.0.1:8080:8080" + a reverse proxy
+    volumes:
+      - ./data:/data
+      - /opt/corpus-data:/root/text-fabric-data   # HOST PATH — precompiled TF corpus
+    environment:
+      - SEARCH_EMBEDDER=berel      # native BEREL/SPhilBerta embedders (baked in base)
+      - PORT=8080
+    # env_file: [.env]             # only if you use translate=llm (needs an API key)

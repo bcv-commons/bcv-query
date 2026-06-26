@@ -13,9 +13,10 @@
 **/.wrangler
 **/node_modules
 
-# examples / docs — not part of any image
+# examples / docs / deploy tooling — not part of any image
 example/
 internal-docs/
+deploy/
 # NOTE: shoresh/ is intentionally NOT excluded — both bcv-RAG and shoresh build
 # from this repo-root context (shoresh via `-f shoresh/Dockerfile`) so the shared
 # single-source-of-truth resources/ is reachable. bcv-RAG's Dockerfile COPYs only

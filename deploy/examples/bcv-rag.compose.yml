@@ -1,0 +1,28 @@
+# Example compose for the bcv-rag service — copy to your stack dir (the one you
+# point BCV_RAG_STACK at) as `docker-compose.yml`, then create alongside it:
+#   • .env   — secrets/config: GROQ_API_KEY, OPENAI_API_KEY (synthesis fallback),
+#              CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN (query embedding),
+#              BTMCP_EMBEDDING_MODEL=bge-m3, ASK password, etc.
+#   • data/  — holds index.db (built/uploaded separately; not in the image)
+# Adjust ports/limits for your host. The image is built locally by deploy/deploy.sh.
+services:
+  bcv-rag:
+    image: bcv-commons/bcv-rag:latest
+    container_name: bcv-rag
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:8081"      # bind to localhost; put a reverse proxy in front
+    volumes:
+      - ./data:/data               # index.db lives here
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # so bcv-rag can reach shoresh on the host
+    cpus: 3.0
+    mem_limit: 6g
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import os,urllib.request; urllib.request.urlopen('http://localhost:%s/api/health' % os.environ.get('PORT','8081'), timeout=5)\""]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 40s

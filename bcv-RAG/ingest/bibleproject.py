@@ -9,7 +9,7 @@ emits per-chunk markdown for `indexer.build` to absorb under
 
 The pre-built chunks come from the vendored pipeline at
 `ingest/_tools/bibleproject/` (scripts copied from
-larsgson/bible-study-assistant). Each source PDF is chunked three ways
+the bible-study-assistant project). Each source PDF is chunked three ways
 in parallel — by timestamp, by Bible-reference, by semantic-window —
 matching the bible-study-assistant project's design that we adopted.
 See docs/expansion-plan.md "Multi-strategy chunking (ingest principle
