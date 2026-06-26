@@ -181,7 +181,7 @@ def run_study(
 
     # Enrich with original-language words from shoresh
     citations_out = enrich_citations(citations_out)
-    study_card = word_study_card(analysis.tags)  # S2 discovery nudge (best-effort)
+    study_card = word_study_card(concept_tags)  # S2 nudge: focus the query's concepts, not bridge expansions
 
     # Build the strategies-applied summary
     strategies: list[str] = []

@@ -53,7 +53,8 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
         analysis.fts_query = filter_biblical_words(req.question, lang=req.lang)
 
     # Concept expansion (query words → Strong's tags)
-    analysis.tags.extend(expand_concepts(analysis.fts_query, analysis.tags, lang=req.lang))
+    concept_tags = expand_concepts(analysis.fts_query, analysis.tags, lang=req.lang)
+    analysis.tags.extend(concept_tags)
 
     # LXX bridge (Hebrew Strong's → Greek Strong's)
     try:
@@ -144,7 +145,7 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
         citations_out.append(preview)
 
     citations_out = enrich_citations(citations_out)
-    study = word_study_card(analysis.tags)  # S2 discovery nudge (best-effort)
+    study = word_study_card(concept_tags)  # S2 nudge: focus the query's concepts, not bridge expansions
 
     return {
         "question": req.question,
