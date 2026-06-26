@@ -66,6 +66,7 @@ def word_study_card(tags: list[str], query: str = "") -> dict | None:
         return None
     qtokens = set(re.findall(r"[a-z]{3,}", query.lower()))
     fallback: dict | None = None
+    thin_match: dict | None = None  # gloss matches but card has no related words
     try:
         with httpx.Client(base_url=SHORESH_URL, timeout=_TIMEOUT) as client:
             for strong in cands[:4]:
@@ -82,8 +83,11 @@ def word_study_card(tags: list[str], query: str = "") -> dict | None:
                     fallback = card
                 gloss = (card.get("gloss") or "").lower()
                 if gloss and (gloss in qtokens or any(t in qtokens for t in gloss.split())):
-                    return card  # gloss matches a query word — the right concept
+                    if card.get("siblings"):
+                        return card  # gloss matches AND has the related-words chain
+                    if thin_match is None:
+                        thin_match = card  # a love word, but rare (no siblings) — keep looking
     except Exception as exc:  # shoresh down / unreachable
         logger.debug("word_study unavailable: %s", exc)
         return None
-    return fallback
+    return thin_match or fallback
