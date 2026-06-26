@@ -1396,6 +1396,15 @@ def _gather_hits(
         analysis.tags.extend(lxx_tags)
     _mark("lxx", _s); _s = _time.perf_counter()
 
+    # Strategy 4: semantic-domain expansion (co-domain lexemes via shared SDBG
+    # axis; cross-language, tightly gated). Runs after concept+lxx so it can
+    # broaden from both H and G tags.
+    from query.domain_expand import expand_domains
+    domain_tags = expand_domains(analysis.tags)
+    if domain_tags:
+        analysis.tags.extend(domain_tags)
+    _mark("domain", _s); _s = _time.perf_counter()
+
     # Strategy 3: morph pre-filter (only on morph-keyword queries, ~50-150ms)
     from query.morph_prefilter import detect_morph_pattern, morph_passages, _extract_book_code
     morph_pattern = detect_morph_pattern(analysis.fts_query)
