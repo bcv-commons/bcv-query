@@ -167,8 +167,10 @@ def get_domain(code: str, axis: str = "sdbg") -> dict:
 
 @app.get("/wordstudy/{strong}")
 def get_wordstudy(strong: str) -> dict:
-    """Composite word-study card for a Strong's: gloss, semantic domain(s) +
-    co-domain siblings, senses (polysemy), and the cross-language equivalent."""
+    """Composite word-study card for a Strong's: gloss, keyness (how distinctively
+    biblical — score = zipf_bible − zipf_general; `proxy:true` flags the interim
+    English-anchored Greek estimate), semantic domain(s) + co-domain siblings,
+    senses (polysemy), and the cross-language equivalent."""
     result = data.word_study(strong)
     if not result.get("domains") and not result.get("senses") and not result.get("gloss"):
         raise HTTPException(404, f"no lexical data for Strong's '{strong}'")
@@ -216,7 +218,14 @@ def get_words(
 
     Response includes `total_pool` (how many words matched before sampling) and
     `count` (words returned). Each word carries: `node lex lexUtf8 language pos
-    stem tense rank sfx gloss ref clauseWords targetIndex`.
+    stem tense rank sfx gloss strong keyness ref clauseWords targetIndex`.
+
+    `strong` is the Strong's number (or null where the lex→Strong's bridge has no
+    mapping — rare lexemes). `keyness` = how distinctively biblical the word is
+    (`{score, anchor, proxy}`; score = zipf_bible − zipf_general, higher = more
+    distinctively scriptural; `proxy:true` flags the interim English-anchored Greek
+    estimate). Combine `rank` (frequency) with `keyness` (distinctiveness) to order a
+    vocabulary trainer by study priority.
     """
     if limit < 1 or limit > 500:
         raise HTTPException(400, "limit must be 1..500")
@@ -246,6 +255,11 @@ def get_words(
         )
     except Exception as exc:
         raise HTTPException(503, f"corpus unavailable: {exc}") from exc
+
+    # Attach keyness (how distinctively biblical) via the word's Strong's — lets a
+    # trainer prioritize by importance, not just frequency. He real; Gr proxy-flagged.
+    for w in result.get("words", []):
+        w["keyness"] = data.keyness_of(w["strong"]) if w.get("strong") else None
 
     return {"language": language, **result}
 

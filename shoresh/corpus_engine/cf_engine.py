@@ -103,6 +103,7 @@ class CFEngine:
         self._apis: dict[str, Api] = {}
         self._fabrics: dict[str, cfabric.Fabric] = {}
         self._rank_maps: dict[str, dict[str, int]] = {}
+        self._lex_strong: dict[str, dict[str, str]] = {}
         self._load_lock = threading.Lock()
 
     def _ensure_loaded(self, corpus: str) -> Api:
@@ -423,6 +424,29 @@ class CFEngine:
             })
         return out
 
+    def _lex_strong_map(self, corpus: str) -> dict[str, str]:
+        """{lex: strong} from resources/word_freq/{hbo,grc}_strong.tsv, memoized per
+        corpus. Built by `python -m corpus_engine.build_lex_strong`; lets /words
+        attach a Strong's (and thence keyness) per word. Empty if the file is absent."""
+        cached = self._lex_strong.get(corpus)
+        if cached is not None:
+            return cached
+        stem = {"hebrew": "hbo", "greek": "grc"}.get(corpus)
+        out: dict[str, str] = {}
+        if stem:
+            env = os.environ.get("BCV_RESOURCES_DIR")
+            base = Path(env) if env else Path(__file__).resolve().parents[2] / "resources"
+            path = base / "word_freq" / f"{stem}_strong.tsv"
+            if path.exists():
+                with path.open(encoding="utf-8") as fh:
+                    next(fh, None)
+                    for line in fh:
+                        p = line.rstrip("\n").split("\t")
+                        if len(p) == 2:
+                            out[p[0]] = p[1]
+        self._lex_strong[corpus] = out
+        return out
+
     @staticmethod
     def _load_freq_file(corpus: str) -> dict[str, int] | None:
         """Load resources/word_freq/{hbo,grc}.tsv → {lex: rank}, or None if absent.
@@ -515,6 +539,7 @@ class CFEngine:
         clause_otype = "clause" if corpus == "hebrew" else "sentence"
 
         rank_map = self._rank_map(api, corpus)
+        lex_strong = self._lex_strong_map(corpus)
 
         pos_set = set(pos) if pos else None
         stem_set = set(stem) if stem else None
@@ -583,6 +608,7 @@ class CFEngine:
 
             lex = lex_obj.v(w) if lex_obj else ""
             rank = rank_map.get(str(lex), 999999) if lex else 999999
+            strong = lex_strong.get(str(lex)) if lex else None
 
             clause_words: list[str] = []
             target_index = 0
@@ -610,6 +636,7 @@ class CFEngine:
                 "rank": rank,
                 "sfx": info.suffix,
                 "gloss": info.gloss,
+                "strong": strong,
                 "ref": ref,
                 "clauseWords": clause_words,
                 "targetIndex": target_index,

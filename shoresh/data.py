@@ -195,14 +195,42 @@ def _lxx_pairs() -> tuple:
     return fwd, rev
 
 
+@lru_cache(maxsize=1)
+def _keyness() -> dict:
+    """{strong: (keyness, anchor)} from strongs_keyness.tsv — how distinctively
+    biblical a word is (zipf_bible − zipf_general; high = covenant/cultic vocab,
+    ~0 = common everywhere). anchor 'he' = real modern-Hebrew denominator;
+    'en' = interim English-gloss proxy for Greek (see project_greek_keyness_diorisis)."""
+    out: dict = {}
+    p = _resources_dir() / "strongs_keyness.tsv"
+    if p.exists():
+        with p.open(encoding="utf-8") as fh:
+            next(fh, None)
+            for line in fh:
+                c = line.rstrip("\n").split("\t")
+                if len(c) >= 3:
+                    out[c[0]] = (float(c[1]), c[2])
+    return out
+
+
+def keyness_of(code: str) -> dict | None:
+    """Biblical-salience for a Strong's, or None. `proxy=True` flags the interim
+    English-anchored Greek estimate (not yet a real Koine denominator)."""
+    k = _keyness().get(_norm_strong(code))
+    if not k:
+        return None
+    return {"score": round(k[0], 2), "anchor": k[1], "proxy": k[1] == "en"}
+
+
 def _norm_strong(s: str) -> str:
     m = re.match(r"^([GgHh])0*(\d+)", s.strip())
     return f"{m.group(1).upper()}{int(m.group(2)):04d}" if m else s.strip().upper()
 
 
 def word_study(strong: str) -> dict:
-    """Composite word-study: gloss + semantic domain(s) + co-domain siblings +
-    senses (polysemy) + cross-language equivalent — from the shared resources."""
+    """Composite word-study: gloss + keyness (how distinctively biblical) +
+    semantic domain(s) + co-domain siblings + senses (polysemy) + cross-language
+    equivalent — from the shared resources."""
     code = _norm_strong(strong)
     domains = [{"axis": a, "domain": d, "label": lab, "share": round(sh, 3)}
                for a, d, lab, sh in sorted(_strong_domains().get(code, []), key=lambda x: -x[3])]
@@ -216,6 +244,7 @@ def word_study(strong: str) -> dict:
              or [{"strong": h, "count": c, **(gloss_of(h) or {})} for h, c in rev.get(code, [])][:3])
     return {
         "strong": code, **(gloss_of(code) or {}),
+        "keyness": keyness_of(code),                   # how distinctively biblical
         "tw": tw_articles(code).get("articles", []),  # nudge 1: study the concept
         "domains": domains, "siblings": siblings,      # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,

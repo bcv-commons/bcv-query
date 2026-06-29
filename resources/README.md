@@ -34,7 +34,9 @@ in Phase 0.
 | `bible_editions.json` | edition registry (handles OT≠NT composites) | edition id → metadata |
 | `strongs_gloss.tsv` | authoritative UBS/English glosses | `strong → gloss` |
 | `strongs_freq.tsv` | Strong's frequency + `is_function` flag | `strong` |
-| `strongs_keyness.tsv` | per-Strong's biblical-salience weight | `strong` |
+| `strongs_keyness.tsv` | per-Strong's biblical-salience weight (`bible − general` zipf; He real, Gr English-proxy) | `strong, keyness, anchor` |
+| `word_freq/{hbo,grc}.tsv` | corpus-internal lemma frequency **rank** for the `/words` trainer (lex-keyed, NOT Strong's; OT BHSA / NT Nestle1904) — built by `shoresh/corpus_engine/build_freq.py` | `lex, count, rank` |
+| `word_freq/{hbo,grc}_strong.tsv` | TF lexeme → Strong's bridge so `/words` can attach keyness (Gr from Nestle1904 `strong`; He via spine.db 3-tier resolver, ~96% freq-weighted) — built by `shoresh/corpus_engine/build_lex_strong.py` | `lex, strong` |
 | `strongs_tw.tsv` | Strong's → unfoldingWord Translation-Words article(s), ranked by occurrence | `strong, tw_article, category, is_kt, lemma, n` |
 | `topic_strongs.tsv` | Nave's-style topic → Strong's | `topic_id, strong, verse_count` |
 | `speaker_quotations/` | who speaks where — quotations → speaker, verse-range, red-letter flag (S1) | `speaker, …, start_bbcccvvv, end_bbcccvvv, divine` |
