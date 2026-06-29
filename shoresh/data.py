@@ -197,10 +197,12 @@ def _lxx_pairs() -> tuple:
 
 @lru_cache(maxsize=1)
 def _keyness() -> dict:
-    """{strong: (keyness, anchor)} from strongs_keyness.tsv — how distinctively
-    biblical a word is (zipf_bible − zipf_general; high = covenant/cultic vocab,
-    ~0 = common everywhere). anchor 'he' = real modern-Hebrew denominator;
-    'en' = interim English-gloss proxy for Greek (see project_greek_keyness_diorisis)."""
+    """{strong: (keyness, anchor, modern_he)} from strongs_keyness.tsv — how
+    distinctively biblical a word is (zipf_bible − zipf_general; high = covenant/cultic
+    vocab, ~0 = common everywhere). anchor 'he' = real modern-Hebrew denominator;
+    'en' = interim English-gloss proxy for Greek (see project_greek_keyness_diorisis).
+    modern_he = the lemma's raw modern-Hebrew frequency (zipf; 0 = extinct in modern
+    Hebrew), or None for Greek."""
     out: dict = {}
     p = _resources_dir() / "strongs_keyness.tsv"
     if p.exists():
@@ -209,17 +211,25 @@ def _keyness() -> dict:
             for line in fh:
                 c = line.rstrip("\n").split("\t")
                 if len(c) >= 3:
-                    out[c[0]] = (float(c[1]), c[2])
+                    mh = float(c[3]) if len(c) >= 4 and c[3] != "" else None
+                    out[c[0]] = (float(c[1]), c[2], mh)
     return out
 
 
 def keyness_of(code: str) -> dict | None:
     """Biblical-salience for a Strong's, or None. `proxy=True` flags the interim
-    English-anchored Greek estimate (not yet a real Koine denominator)."""
+    English-anchored Greek estimate. For Hebrew, `modern_he` is the lemma's raw
+    modern-Hebrew frequency (zipf) and `archaic` = absent from modern Hebrew — a
+    robust "extinct today" signal, reliable even for rare words where `score` is noisy."""
     k = _keyness().get(_norm_strong(code))
     if not k:
         return None
-    return {"score": round(k[0], 2), "anchor": k[1], "proxy": k[1] == "en"}
+    score, anchor, mh = k
+    out = {"score": round(score, 2), "anchor": anchor, "proxy": anchor == "en"}
+    if mh is not None:
+        out["modern_he"] = mh
+        out["archaic"] = mh == 0.0
+    return out
 
 
 def _norm_strong(s: str) -> str:
