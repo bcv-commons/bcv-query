@@ -423,18 +423,44 @@ class CFEngine:
             })
         return out
 
-    def _rank_map(self, api: Any, corpus: str) -> dict[str, int]:
-        """{lex: rank} where rank 0 = most frequent lexeme. Memoized per corpus —
-        computed once on first /words call, then reused (a full-corpus scan is too
-        costly to repeat per request).
+    @staticmethod
+    def _load_freq_file(corpus: str) -> dict[str, int] | None:
+        """Load resources/word_freq/{hbo,grc}.tsv → {lex: rank}, or None if absent.
+        Keep the stem mapping in sync with corpus_engine.build_freq.CORPUS_STEM."""
+        stem = {"hebrew": "hbo", "greek": "grc"}.get(corpus)
+        if not stem:
+            return None
+        env = os.environ.get("BCV_RESOURCES_DIR")
+        base = Path(env) if env else Path(__file__).resolve().parents[2] / "resources"
+        path = base / "word_freq" / f"{stem}.tsv"
+        if not path.exists():
+            return None
+        rank_map: dict[str, int] = {}
+        with path.open(encoding="utf-8") as fh:
+            next(fh, None)  # header
+            for line in fh:
+                parts = line.rstrip("\n").split("\t")
+                if len(parts) == 3:
+                    rank_map[parts[0]] = int(parts[2])
+        return rank_map or None
 
-        Uses freq_lex when available (BHSA); counts occurrences when not (Nestle1904,
-        which ships no frequency feature). Either way the rank reflects this exact
-        corpus, so it always joins cleanly to the words /words returns.
+    def _rank_map(self, api: Any, corpus: str) -> dict[str, int]:
+        """{lex: rank} where rank 0 = most frequent lexeme. Memoized per corpus.
+
+        Prefers the baked resources/word_freq/{hbo,grc}.tsv (cheap dict load, built
+        by `python -m corpus_engine.build_freq`). Falls back to scanning the corpus
+        if the file is absent — freq_lex when available (BHSA), else counting `lemma`
+        occurrences (Nestle1904, which ships no frequency feature). Either path
+        yields a corpus-internal rank that joins cleanly to the words /words returns.
         """
         cached = self._rank_maps.get(corpus)
         if cached is not None:
             return cached
+
+        baked = self._load_freq_file(corpus)
+        if baked is not None:
+            self._rank_maps[corpus] = baked
+            return baked
 
         feat_map = WORD_FEATURES.get(corpus, WORD_FEATURES["hebrew"])
         lex_feat = feat_map.get("lexeme", "lex")
