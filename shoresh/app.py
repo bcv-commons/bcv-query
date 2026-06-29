@@ -168,10 +168,10 @@ def get_domain(code: str, axis: str = "sdbg") -> dict:
 @app.get("/wordstudy/{strong}")
 def get_wordstudy(strong: str) -> dict:
     """Composite word-study card for a Strong's: gloss, keyness (how distinctively
-    biblical — score = zipf_bible − zipf_general; `proxy:true` flags the interim
-    English-anchored Greek estimate; Hebrew also carries `modern_he` raw modern-Hebrew
-    frequency + `archaic` = extinct in modern Hebrew), semantic domain(s) + co-domain
-    siblings, senses (polysemy), and the cross-language equivalent."""
+    biblical — score = zipf_bible − zipf_general; Hebrew carries `modern_he` +
+    `archaic` = extinct in modern Hebrew, Greek carries `koine_general` +
+    `scripture_only` = absent from secular/pagan Koine), semantic domain(s) +
+    co-domain siblings, senses (polysemy), and the cross-language equivalent."""
     result = data.word_study(strong)
     if not result.get("domains") and not result.get("senses") and not result.get("gloss"):
         raise HTTPException(404, f"no lexical data for Strong's '{strong}'")
@@ -223,12 +223,13 @@ def get_words(
 
     `strong` is the Strong's number (or null where the lex→Strong's bridge has no
     mapping — rare lexemes). `keyness` = how distinctively biblical the word is
-    (`{score, anchor, proxy}`; score = zipf_bible − zipf_general, higher = more
-    distinctively scriptural; `proxy:true` flags the interim English-anchored Greek
-    estimate). For Hebrew it also carries `modern_he` (the lemma's raw modern-Hebrew
-    frequency) and `archaic` (`modern_he == 0`, i.e. extinct in modern Hebrew — a
-    robust signal even for rare words where `score` is noisy). Combine `rank`
-    (frequency) with `keyness` (distinctiveness) to order a trainer by study priority.
+    (`{score, anchor}`; score = zipf_bible − zipf_general, higher = more distinctively
+    scriptural). Hebrew (anchor 'he') also carries `modern_he` + `archaic` (`== 0`,
+    extinct in modern Hebrew); Greek (anchor 'grc') carries `koine_general` +
+    `scripture_only` (`== 0`, absent from secular/pagan Koine — e.g. ἀγάπη elevated by
+    scripture). Both presence flags are robust even for rare words where `score` is
+    noisy. Combine `rank` (frequency) with `keyness` (distinctiveness) to order a
+    trainer by study priority.
     """
     if limit < 1 or limit > 500:
         raise HTTPException(400, "limit must be 1..500")

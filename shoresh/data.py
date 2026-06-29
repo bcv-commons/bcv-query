@@ -197,12 +197,11 @@ def _lxx_pairs() -> tuple:
 
 @lru_cache(maxsize=1)
 def _keyness() -> dict:
-    """{strong: (keyness, anchor, modern_he)} from strongs_keyness.tsv — how
-    distinctively biblical a word is (zipf_bible − zipf_general; high = covenant/cultic
-    vocab, ~0 = common everywhere). anchor 'he' = real modern-Hebrew denominator;
-    'en' = interim English-gloss proxy for Greek (see project_greek_keyness_diorisis).
-    modern_he = the lemma's raw modern-Hebrew frequency (zipf; 0 = extinct in modern
-    Hebrew), or None for Greek."""
+    """{strong: (keyness, anchor, modern_he, koine_general)} from strongs_keyness.tsv —
+    how distinctively biblical a word is (zipf_bible − zipf_general; high = covenant/cultic
+    vocab, ~0 = common everywhere). anchor 'he' = modern-Hebrew denominator; 'grc' =
+    pagan-Koine denominator (LAGT). modern_he / koine_general = the lemma's raw frequency
+    in that general corpus (zipf; 0 = absent from it); exactly one is set per row."""
     out: dict = {}
     p = _resources_dir() / "strongs_keyness.tsv"
     if p.exists():
@@ -212,23 +211,27 @@ def _keyness() -> dict:
                 c = line.rstrip("\n").split("\t")
                 if len(c) >= 3:
                     mh = float(c[3]) if len(c) >= 4 and c[3] != "" else None
-                    out[c[0]] = (float(c[1]), c[2], mh)
+                    kg = float(c[4]) if len(c) >= 5 and c[4] != "" else None
+                    out[c[0]] = (float(c[1]), c[2], mh, kg)
     return out
 
 
 def keyness_of(code: str) -> dict | None:
-    """Biblical-salience for a Strong's, or None. `proxy=True` flags the interim
-    English-anchored Greek estimate. For Hebrew, `modern_he` is the lemma's raw
-    modern-Hebrew frequency (zipf) and `archaic` = absent from modern Hebrew — a
-    robust "extinct today" signal, reliable even for rare words where `score` is noisy."""
+    """Biblical-salience for a Strong's, or None. For Hebrew (anchor 'he') carries
+    `modern_he` + `archaic` (absent from modern Hebrew). For Greek (anchor 'grc')
+    carries `koine_general` + `scripture_only` (absent from secular/pagan Koine). Both
+    presence flags are robust even for rare words where `score` is noisy."""
     k = _keyness().get(_norm_strong(code))
     if not k:
         return None
-    score, anchor, mh = k
+    score, anchor, mh, kg = k
     out = {"score": round(score, 2), "anchor": anchor, "proxy": anchor == "en"}
     if mh is not None:
         out["modern_he"] = mh
         out["archaic"] = mh == 0.0
+    if kg is not None:
+        out["koine_general"] = kg
+        out["scripture_only"] = kg == 0.0
     return out
 
 

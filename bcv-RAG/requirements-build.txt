@@ -7,6 +7,10 @@
 #   pip install -r requirements-build.txt
 #   python3 scripts/build_strongs_keyness.py   # etc.
 
-wordfreq>=3.1            # keyness denominators (build_strongs_keyness.py); langs: he, el, es, fr, pt, en
+wordfreq>=3.1            # Hebrew keyness denominator (build_strongs_keyness.py); langs: he, es, fr, pt, en
+pandas>=2.0             # Greek keyness: read the LAGT pagan-Koine parquet (build_strongs_keyness.py)
+pyarrow>=14             # parquet engine for pandas (LAGT)
+# Greek keyness also needs the Nestle1904 TF corpus (cfabric, for POS) + the LAGT
+# parquet (auto-downloaded from Zenodo record 13889714, or set $LAGT_PARQUET).
 # wordfreq[cjk]>=3.1     # add when zh distributional/keyness is needed (pulls jieba/mecab)
 # fasttext / gensim      # later: distributional candidate generation (Tier-4 lexicon)
