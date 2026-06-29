@@ -43,6 +43,7 @@ WORD_FEATURES = {
         "verbal_stem": "vs",
         "verbal_tense": "vt",
         "language": "language",
+        "suffix_feat": "prs",
     },
     "greek": {
         "text": "unicode",
@@ -421,6 +422,153 @@ class CFEngine:
             })
         return out
 
+    def _rank_map(self, api: Any, corpus: str) -> dict[str, int]:
+        """Precomputed {lex: rank} where rank 0 = most frequent lexeme."""
+        feat_map = WORD_FEATURES.get(corpus, WORD_FEATURES["hebrew"])
+        lex_feat = feat_map.get("lexeme", "lex")
+        wtype = WORD_TYPE.get(corpus, "word")
+        freq_obj = api.Fs("freq_lex")
+        lex_obj = api.Fs(lex_feat)
+        if freq_obj is None or lex_obj is None:
+            return {}
+        freq_by_lex: dict[str, int] = {}
+        for w in api.F.otype.s(wtype):
+            lex = lex_obj.v(w)
+            if not lex or lex in freq_by_lex:
+                continue
+            freq = freq_obj.v(w)
+            if freq is not None:
+                freq_by_lex[str(lex)] = int(freq)
+        sorted_lexemes = sorted(freq_by_lex.items(), key=lambda x: -x[1])
+        return {lex: rank for rank, (lex, _) in enumerate(sorted_lexemes)}
+
+    def list_words_filtered(
+        self,
+        corpus: str = "hebrew",
+        language: str | None = None,
+        pos: list[str] | None = None,
+        stem: list[str] | None = None,
+        tense: list[str] | None = None,
+        suffix: bool | None = None,
+        min_rank: int | None = None,
+        max_rank: int | None = None,
+        limit: int = 50,
+        random_sample: bool = False,
+    ) -> dict:
+        """Filtered word sample across the full corpus.
+
+        Returns {total_pool, words} where each word carries the full
+        WordInfo fields plus rank, ref, clauseWords, and targetIndex.
+        """
+        import random as _random
+        api = self._ensure_loaded(corpus)
+        feat_map = WORD_FEATURES.get(corpus, WORD_FEATURES["hebrew"])
+        wtype = WORD_TYPE.get(corpus, "word")
+        clause_otype = "clause" if corpus == "hebrew" else "sentence"
+
+        rank_map = self._rank_map(api, corpus)
+
+        pos_set = set(pos) if pos else None
+        stem_set = set(stem) if stem else None
+        tense_set = set(tense) if tense else None
+
+        sp_feat = feat_map.get("part_of_speech", "sp")
+        vs_feat = feat_map.get("verbal_stem", "vs")
+        vt_feat = feat_map.get("verbal_tense", "vt")
+        lex_feat = feat_map.get("lexeme", "lex")
+        lang_feat = feat_map.get("language", "language")
+        prs_feat = feat_map.get("suffix_feat", "")
+
+        sp_obj = api.Fs(sp_feat) if sp_feat else None
+        vs_obj = api.Fs(vs_feat) if vs_feat else None
+        vt_obj = api.Fs(vt_feat) if vt_feat else None
+        lex_obj = api.Fs(lex_feat) if lex_feat else None
+        lang_obj = api.Fs(lang_feat) if lang_feat else None
+        prs_obj = api.Fs(prs_feat) if prs_feat else None
+
+        matching: list[int] = []
+        for w in api.F.otype.s(wtype):
+            if language and lang_obj:
+                lv = lang_obj.v(w)
+                if not lv or str(lv) != language:
+                    continue
+            if pos_set and sp_obj:
+                sv = sp_obj.v(w)
+                if not sv or str(sv) not in pos_set:
+                    continue
+            if stem_set and vs_obj:
+                vv = vs_obj.v(w)
+                if not vv or str(vv) not in stem_set:
+                    continue
+            if tense_set and vt_obj:
+                tv = vt_obj.v(w)
+                if not tv or str(tv) not in tense_set:
+                    continue
+            if suffix is not None and prs_obj:
+                prs_val = prs_obj.v(w)
+                has_sfx = bool(prs_val) and str(prs_val) != "absent"
+                if has_sfx != suffix:
+                    continue
+            if (min_rank is not None or max_rank is not None) and lex_obj:
+                lex = lex_obj.v(w)
+                r = rank_map.get(str(lex), 999999) if lex else 999999
+                if min_rank is not None and r < min_rank:
+                    continue
+                if max_rank is not None and r > max_rank:
+                    continue
+            matching.append(w)
+
+        total_pool = len(matching)
+        if random_sample:
+            selected = _random.sample(matching, min(limit, total_pool))
+        else:
+            selected = matching[:limit]
+
+        words = []
+        for w in selected:
+            info = self._word_info(api, w, feat_map)
+            sec = api.T.sectionFromNode(w)
+            book = sec[0] if len(sec) > 0 else ""
+            ch = sec[1] if len(sec) > 1 else 0
+            vs = sec[2] if len(sec) > 2 else 0
+            ref = f"{book} {ch}:{vs}" if book else ""
+
+            lex = lex_obj.v(w) if lex_obj else ""
+            rank = rank_map.get(str(lex), 999999) if lex else 999999
+
+            clause_words: list[str] = []
+            target_index = 0
+            clause_nodes = api.L.u(w, otype=clause_otype)
+            if clause_nodes:
+                clause_node = clause_nodes[0]
+                cw_nodes = api.L.d(clause_node, otype=wtype)
+                text_obj = api.Fs(feat_map.get("text", "g_word_utf8"))
+                trailer_obj = api.Fs(feat_map.get("trailer", "trailer_utf8"))
+                for i, cw in enumerate(cw_nodes):
+                    t = (text_obj.v(cw) or "") if text_obj else ""
+                    tr = (trailer_obj.v(cw) or "") if trailer_obj else ""
+                    clause_words.append(str(t) + str(tr))
+                    if cw == w:
+                        target_index = i
+
+            words.append({
+                "node": int(w),
+                "lex": info.lexeme,
+                "lexUtf8": info.lexeme_utf8,
+                "language": info.language or (language or ""),
+                "pos": info.part_of_speech,
+                "stem": info.verbal_stem or "NA",
+                "tense": info.verbal_tense or "NA",
+                "rank": rank,
+                "sfx": info.suffix,
+                "gloss": info.gloss,
+                "ref": ref,
+                "clauseWords": clause_words,
+                "targetIndex": target_index,
+            })
+
+        return {"total_pool": total_pool, "count": len(words), "words": words}
+
     def get_lexeme_info(
         self,
         lexeme: str,
@@ -556,6 +704,14 @@ class CFEngine:
             val = feat_obj.v(w)
             return str(val) if val is not None else ""
 
+        prs_feat = feat_map.get("suffix_feat", "")
+        has_suffix = False
+        if prs_feat:
+            prs_obj = api.Fs(prs_feat)
+            if prs_obj is not None:
+                prs_val = prs_obj.v(w)
+                has_suffix = bool(prs_val) and str(prs_val) != "absent"
+
         return WordInfo(
             monad=w,
             text=_get("text"),
@@ -571,4 +727,5 @@ class CFEngine:
             verbal_stem=_get("verbal_stem"),
             verbal_tense=_get("verbal_tense"),
             language=_get("language"),
+            suffix=has_suffix,
         )

@@ -144,6 +144,81 @@ def get_wordstudy(strong: str) -> dict:
     return result
 
 
+@app.get("/words")
+def get_words(
+    language: str,
+    pos: str | None = None,
+    stem: str | None = None,
+    tense: str | None = None,
+    suffix: bool | None = None,
+    min_rank: int | None = None,
+    max_rank: int | None = None,
+    limit: int = 50,
+    random: bool = False,
+) -> dict:
+    """Filtered word sample from the corpus — the vocabulary trainer feed.
+
+    Returns up to `limit` words matching the given criteria, each with full
+    morphology, frequency rank, gloss, passage ref, and the surrounding clause
+    words with the target word's position marked.
+
+    **language** (required): `Hebrew` | `Aramaic` | `Greek`
+
+    **pos** — comma-separated part-of-speech codes.
+    Hebrew/Aramaic: `subs verb prep conj art prde prin advb nmpr intj nega inrg`
+    Greek: `verb noun adj adv prep conj det pron ptcl intj num`
+
+    **stem** — comma-separated verbal-stem codes (Hebrew/Aramaic only; ignored for Greek).
+    Values: `qal nif piel pual hif hof hit` etc.
+
+    **tense** — comma-separated tense/aspect codes.
+    Hebrew: `perf impf wayq impv infc infa ptca ptcp`
+    Greek: `aor pres fut perf imperf plup`
+
+    **suffix** — `true` = has pronominal suffix; `false` = no suffix (Hebrew/Aramaic only).
+
+    **min_rank** / **max_rank** — inclusive frequency-rank band. `0` = most frequent lexeme.
+
+    **limit** — number of results (default 50, max 500).
+
+    **random** — if `true`, randomly sample from the filtered pool (so repeated calls vary).
+
+    Response includes `total_pool` (how many words matched before sampling) and
+    `count` (words returned). Each word carries: `node lex lexUtf8 language pos
+    stem tense rank sfx gloss ref clauseWords targetIndex`.
+    """
+    if limit < 1 or limit > 500:
+        raise HTTPException(400, "limit must be 1..500")
+
+    lang_to_corpus = {"Hebrew": "hebrew", "Aramaic": "hebrew", "Greek": "greek"}
+    corpus = lang_to_corpus.get(language)
+    if corpus is None:
+        raise HTTPException(400, f"language must be Hebrew, Aramaic, or Greek (got '{language}')")
+
+    pos_list = [p.strip() for p in pos.split(",")] if pos else None
+    stem_list = [s.strip() for s in stem.split(",")] if stem else None
+    tense_list = [t.strip() for t in tense.split(",")] if tense else None
+
+    try:
+        from corpus_engine import engine
+        result = engine.list_words_filtered(
+            corpus=corpus,
+            language=language if corpus == "hebrew" else None,
+            pos=pos_list,
+            stem=stem_list,
+            tense=tense_list,
+            suffix=suffix,
+            min_rank=min_rank,
+            max_rank=max_rank,
+            limit=limit,
+            random_sample=random,
+        )
+    except Exception as exc:
+        raise HTTPException(503, f"corpus unavailable: {exc}") from exc
+
+    return {"language": language, **result}
+
+
 @app.get("/speakers")
 def get_speakers() -> dict:
     """All quotation speakers with range counts + divine (red-letter) flag."""

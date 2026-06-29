@@ -16,6 +16,7 @@ class WordInfo(BaseModel):
     verbal_stem: str = ""
     verbal_tense: str = ""
     language: str = ""
+    suffix: bool = False
 
 
 class VerseResult(BaseModel):
