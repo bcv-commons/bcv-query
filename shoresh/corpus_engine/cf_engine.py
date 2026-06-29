@@ -526,6 +526,7 @@ class CFEngine:
         max_rank: int | None = None,
         limit: int = 50,
         random_sample: bool = False,
+        order: str = "pool",
     ) -> dict:
         """Filtered word sample across the full corpus.
 
@@ -592,7 +593,27 @@ class CFEngine:
             matching.append(w)
 
         total_pool = len(matching)
-        if random_sample:
+
+        # order: how to pick `limit` words from the matching pool.
+        #   frequency → the most common DISTINCT lexemes first (the standard vocab-
+        #               learning order); one random example occurrence per lexeme
+        #   rare      → the least common distinct lexemes first
+        #   random    → a random sample of occurrences (repeat calls vary)
+        #   pool      → corpus order (default)
+        def _rk(node: int) -> int:
+            return rank_map.get(str(lex_obj.v(node)), 10**9) if lex_obj else 10**9
+
+        if order in ("frequency", "rare"):
+            # Dedupe to distinct lexemes — else the top of a frequency sort is just the
+            # same high-count word repeated. One random occurrence per lexeme = varied
+            # examples; order the lexemes by rank.
+            by_lex: dict[str, list[int]] = {}
+            for node in matching:
+                by_lex.setdefault(str(lex_obj.v(node)) if lex_obj else "", []).append(node)
+            reps = [_random.choice(occ) for occ in by_lex.values()]
+            reps.sort(key=_rk, reverse=(order == "rare"))
+            selected = reps[:limit]
+        elif order == "random" or random_sample:
             selected = _random.sample(matching, min(limit, total_pool))
         else:
             selected = matching[:limit]

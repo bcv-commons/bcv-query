@@ -20,3 +20,5 @@ services:
       - SEARCH_EMBEDDER=berel      # native BEREL/SPhilBerta embedders (baked in base)
       - PORT=8080
     # env_file: [.env]             # only if you use translate=llm (needs an API key)
+    mem_limit: 3g                  # runaway/flood guard (steady use ~1.3g) — OOM-restart
+    cpus: 2.0                      # cap CPU so a flood can't starve co-hosted services

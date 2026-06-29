@@ -20,6 +20,7 @@ so a scale-to-zero cold start doesn't load the model mid-request and 502.
 from __future__ import annotations
 
 import logging
+import math
 import os
 from contextlib import asynccontextmanager
 
@@ -189,6 +190,7 @@ def get_words(
     max_rank: int | None = None,
     limit: int = 50,
     random: bool = False,
+    order: str | None = None,
 ) -> dict:
     """Filtered word sample from the corpus — the vocabulary trainer feed.
 
@@ -217,9 +219,15 @@ def get_words(
 
     **random** — if `true`, randomly sample from the filtered pool (so repeated calls vary).
 
+    **order** — how to pick `limit` words from the matching pool:
+    `frequency` (most common first — the standard vocab-learning order), `rare`
+    (least common first), `random` (= the `random` flag), `pool` (corpus order,
+    default). `frequency` selects the actual N most-frequent words of the pool, not
+    a random sample — e.g. "the 250 most common Hebrew verbs".
+
     Response includes `total_pool` (how many words matched before sampling) and
     `count` (words returned). Each word carries: `node lex lexUtf8 language pos
-    stem tense rank sfx gloss strong keyness ref clauseWords targetIndex`.
+    stem tense rank sfx gloss strong keyness priority ref clauseWords targetIndex`.
 
     `strong` is the Strong's number (or null where the lex→Strong's bridge has no
     mapping — rare lexemes). `keyness` = how distinctively biblical the word is
@@ -230,10 +238,16 @@ def get_words(
     ἀγάπη elevated by scripture); biblical Aramaic (anchor 'arc') carries score only (no
     presence flag — modern Hebrew is the wrong denominator). Function words have no
     keyness. Both presence flags are robust even for rare words where `score` is noisy.
-    Combine `rank` (frequency) with `keyness` (distinctiveness) for trainer study-priority.
+
+    `priority` (0–100, higher = study sooner) is a ready-made study-priority score
+    combining `rank` (frequency, dominant) with `keyness` (distinctiveness, a bonus) —
+    a transparent heuristic; clients can re-derive their own from the raw fields.
     """
     if limit < 1 or limit > 500:
         raise HTTPException(400, "limit must be 1..500")
+    order = (order or ("random" if random else "pool")).lower()
+    if order not in ("pool", "random", "frequency", "rare"):
+        raise HTTPException(400, "order must be one of: frequency, rare, random, pool")
 
     lang_to_corpus = {"Hebrew": "hebrew", "Aramaic": "hebrew", "Greek": "greek"}
     corpus = lang_to_corpus.get(language)
@@ -257,14 +271,14 @@ def get_words(
             max_rank=max_rank,
             limit=limit,
             random_sample=random,
+            order=order,
         )
     except Exception as exc:
         raise HTTPException(503, f"corpus unavailable: {exc}") from exc
 
-    # Per word, via its Strong's: attach keyness (distinctiveness), and repair the
-    # gloss when the corpus's per-occurrence gloss is a dash/empty (Nestle1904 marks
-    # some tokens "-", incl. high-frequency words like ὁ) — fall back to the lemma's
-    # authoritative Strong's gloss so every word is trainable.
+    # Per word, via its Strong's: attach keyness (distinctiveness), repair dash/empty
+    # per-occurrence glosses (Nestle1904 marks some tokens "-", incl. ὁ) from the lemma's
+    # authoritative Strong's gloss, and compute a study-priority score.
     for w in result.get("words", []):
         strong = w.get("strong")
         w["keyness"] = data.keyness_of(strong) if strong else None
@@ -272,8 +286,21 @@ def get_words(
             g = data.gloss_of(strong)
             if g and g.get("gloss"):
                 w["gloss"] = g["gloss"]
+        w["priority"] = _study_priority(w.get("rank"), w["keyness"])
 
     return {"language": language, **result}
+
+
+def _study_priority(rank: int | None, keyness: dict | None) -> float:
+    """Study-priority 0–100 (higher = learn sooner). Frequency-dominant: a log map of
+    `rank` (rank 0 → 100, ~rank 10000 → 0) gives the standard vocab-learning order; a
+    distinctiveness bonus of up to +15 from `keyness` nudges distinctively-biblical words
+    up among similarly-frequent ones. A heuristic — re-derivable from rank + keyness."""
+    r = 9999 if rank is None else rank
+    freq = max(0.0, 100.0 * (1.0 - math.log10(r + 1) / 4.0))
+    score = (keyness or {}).get("score") or 0.0
+    bonus = max(0.0, min(score, 6.0)) / 6.0 * 15.0
+    return round(min(100.0, freq + bonus), 1)
 
 
 @app.get("/speakers")
