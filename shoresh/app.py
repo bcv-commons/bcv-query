@@ -108,7 +108,8 @@ def root() -> dict:
             "/structure/{book}/{chapter}/{verse}",
             "/structure/{book}/{chapter}/{verse}/word/{idx}",
             "/search?q=&lang=hbo&k=10&enrich=false&translate=gloss|llm",
-            "/words?language=Hebrew|Aramaic|Greek&pos=&stem=&tense=&suffix=&min_rank=&max_rank=&limit=&random=",
+            "/words?language=Hebrew|Aramaic|Greek&pos=&stem=&tense=&suffix=&min_rank=&max_rank=&limit=&random=&order=&gloss_lang=",
+            "/gloss-languages?language=Hebrew|Aramaic|Greek",
             "/domain/{code}?axis=sdbg|core|lex|ctx",
             "/wordstudy/{strong}",
             "/speakers",
@@ -184,6 +185,18 @@ def get_wordstudy(strong: str) -> dict:
     return result
 
 
+@app.get("/gloss-languages")
+def get_gloss_languages(language: str) -> dict:
+    """Gloss languages available for a source language — drives the trainer's language
+    dropdown. `English` is always present (inline from the corpus); others are the
+    `<Lang>.csv` files in resources/word_glosses/<src>/. Availability differs by source
+    (e.g. a Hebrew/Aramaic-only set won't appear for Greek)."""
+    src = {"Hebrew": "hbo", "Aramaic": "hbo", "Greek": "grc"}.get(language)
+    if src is None:
+        raise HTTPException(400, f"language must be Hebrew, Aramaic, or Greek (got '{language}')")
+    return {"language": language, "languages": data.gloss_languages(src)}
+
+
 @app.get("/words")
 def get_words(
     language: str,
@@ -196,6 +209,7 @@ def get_words(
     limit: int = 50,
     random: bool = False,
     order: str | None = None,
+    gloss_lang: str | None = None,
 ) -> dict:
     """Filtered word sample from the corpus — the vocabulary trainer feed.
 
@@ -247,6 +261,14 @@ def get_words(
     `priority` (0–100, higher = study sooner) is a ready-made study-priority score
     combining `rank` (frequency, dominant) with `keyness` (distinctiveness, a bonus) —
     a transparent heuristic; clients can re-derive their own from the raw fields.
+
+    **gloss_lang** — return each word's `gloss` already resolved in this language
+    (e.g. `Danish`); omitted or `English` keeps the inline corpus gloss. Resolution:
+    a verb uses its stem column (qal/nif/…), else the first non-empty stem; a non-verb
+    uses `default`, else the first non-empty column — returned as the FULL string
+    (synonyms intact, e.g. "sige, tænke"). When set, the pool is restricted to lexemes
+    that have a gloss in that language, and the response adds `gloss_lang` + `gloss_pool`
+    (distinct lexemes the language covers). See `/gloss-languages` for what's available.
     """
     if limit < 1 or limit > 500:
         raise HTTPException(400, "limit must be 1..500")
@@ -263,6 +285,19 @@ def get_words(
     stem_list = [s.strip() for s in stem.split(",")] if stem else None
     tense_list = [t.strip() for t in tense.split(",")] if tense else None
 
+    # Multilingual glosses (server-side): when gloss_lang is a non-English language,
+    # resolve each word's gloss from resources/word_glosses and restrict the pool to
+    # lexemes that have a gloss in it (so total_pool stays accurate). Omitted/English
+    # keeps the inline corpus gloss.
+    gloss_src = "hbo" if corpus == "hebrew" else "grc"
+    use_glang = bool(gloss_lang) and gloss_lang.strip().lower() != "english"
+    lex_filter = None
+    if use_glang:
+        if gloss_lang not in data.gloss_languages(gloss_src):
+            raise HTTPException(400, f"no '{gloss_lang}' glosses for {language} "
+                                     f"(available: {data.gloss_languages(gloss_src)})")
+        lex_filter = data.gloss_lexemes(gloss_src, gloss_lang)
+
     try:
         from corpus_engine import engine
         result = engine.list_words_filtered(
@@ -277,6 +312,7 @@ def get_words(
             limit=limit,
             random_sample=random,
             order=order,
+            lex_filter=lex_filter,
         )
     except Exception as exc:
         raise HTTPException(503, f"corpus unavailable: {exc}") from exc
@@ -287,13 +323,21 @@ def get_words(
     for w in result.get("words", []):
         strong = w.get("strong")
         w["keyness"] = data.keyness_of(strong) if strong else None
-        if strong and (w.get("gloss") or "").strip() in ("", "-"):
+        if use_glang:
+            g = data.resolve_word_gloss(gloss_src, gloss_lang, w.get("lex", ""), w.get("stem"))
+            if g:
+                w["gloss"] = g
+        elif strong and (w.get("gloss") or "").strip() in ("", "-"):
             g = data.gloss_of(strong)
             if g and g.get("gloss"):
                 w["gloss"] = g["gloss"]
         w["priority"] = _study_priority(w.get("rank"), w["keyness"])
 
-    return {"language": language, **result}
+    out = {"language": language, **result}
+    if use_glang:
+        out["gloss_lang"] = gloss_lang
+        out["gloss_pool"] = len(lex_filter)   # distinct lexemes this language glosses
+    return out
 
 
 def _study_priority(rank: int | None, keyness: dict | None) -> float:

@@ -42,6 +42,79 @@ def _resources_dir() -> Path:
     return Path(env) if env else HERE.parent / "resources"
 
 
+def _gloss_dir(src: str) -> Path:
+    """resources/word_glosses/<src>/ — per source-language (hbo / grc). Each <Lang>.csv
+    is keyed by `lex` (the value /words returns) with columns: lex, default, then one
+    column per verbal stem (qal, nif, piel, …)."""
+    return _resources_dir() / "word_glosses" / src
+
+
+def gloss_languages(src: str) -> list[str]:
+    """Available gloss languages for a source language — English (always, inline from
+    the corpus) plus every <Lang>.csv present. Drives the client's language dropdown."""
+    base = _gloss_dir(src)
+    extra = sorted(p.stem for p in base.glob("*.csv")) if base.exists() else []
+    return ["English"] + extra
+
+
+@lru_cache(maxsize=16)
+def _gloss_table(src: str, lang: str) -> tuple:
+    """({lex: {col: gloss}}, stem_cols, gloss_cols) from resources/word_glosses/<src>/
+    <lang>.csv. gloss_cols = every column except `lex` (default first); stem_cols = those
+    minus `default`. Empty if the file is absent."""
+    path = _gloss_dir(src) / f"{lang}.csv"
+    if not path.exists():
+        return {}, (), ()
+    rows: dict[str, dict] = {}
+    with path.open(encoding="utf-8-sig", newline="") as fh:
+        reader = csv.reader(fh)
+        header = next(reader, None)
+        if not header:
+            return {}, (), ()
+        cols = [c.strip() for c in header]
+        lex_i = cols.index("lex") if "lex" in cols else 0
+        # gloss columns = every NAMED column except `lex` (skip an unnamed leading
+        # index column, as in pandas-exported CSVs). default first, then the stems.
+        gloss_cols = tuple(c for i, c in enumerate(cols) if c and i != lex_i)
+        stem_cols = tuple(c for c in gloss_cols if c != "default")
+        for row in reader:
+            if len(row) <= lex_i or not row[lex_i].strip():
+                continue
+            rows[row[lex_i].strip()] = {
+                cols[i]: (row[i].strip() if i < len(row) else "") for i in range(len(cols))
+            }
+    return rows, stem_cols, gloss_cols
+
+
+def gloss_lexemes(src: str, lang: str) -> set:
+    """The `lex` keys that actually HAVE a (non-empty) gloss in this language — used to
+    filter /words. Files commonly list every lexeme with mostly-empty rows, so a row
+    must carry at least one non-empty gloss column to count."""
+    table, _stem_cols, gloss_cols = _gloss_table(src, lang)
+    return {lex for lex, row in table.items() if any(row.get(c) for c in gloss_cols)}
+
+
+def resolve_word_gloss(src: str, lang: str, lex: str, stem: str | None) -> str | None:
+    """The gloss for a word in `lang`, replicating the client rule exactly:
+    verb (stem != NA) → the word's stem column, else the first non-empty stem column;
+    non-verb → the `default` column, else the first non-empty column. Returns the FULL
+    gloss string unmodified (caller may split on '; ' / ', '), or None if no entry."""
+    table, stem_cols, gloss_cols = _gloss_table(src, lang)
+    row = table.get(lex)
+    if not row:
+        return None
+
+    def _first(cols):
+        for c in cols:
+            if row.get(c):
+                return row[c]
+        return None
+
+    if stem and stem != "NA":            # verb
+        return row.get(stem) or _first(stem_cols)
+    return row.get("default") or _first(gloss_cols)
+
+
 def _tw_tsv_path() -> Path:
     """strongs_tw.tsv (Strong's → Translation-Words article map). `$STRONGS_TW_TSV`
     overrides; else from the shared resources/ root (see `_resources_dir`)."""

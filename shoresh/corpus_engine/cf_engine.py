@@ -527,6 +527,7 @@ class CFEngine:
         limit: int = 50,
         random_sample: bool = False,
         order: str = "pool",
+        lex_filter: set | None = None,
     ) -> dict:
         """Filtered word sample across the full corpus.
 
@@ -591,6 +592,11 @@ class CFEngine:
                 if max_rank is not None and r > max_rank:
                     continue
             matching.append(w)
+
+        # Restrict to lexemes that have a gloss in the requested language (keeps
+        # total_pool accurate, so sampling/ordering only sees glossable words).
+        if lex_filter is not None:
+            matching = [w for w in matching if str(lex_obj.v(w)) in lex_filter] if lex_obj else []
 
         total_pool = len(matching)
 
