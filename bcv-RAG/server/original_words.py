@@ -66,3 +66,40 @@ def enrich_citations(citations: list[dict]) -> list[dict]:
     except Exception as e:
         logger.debug("shoresh enrichment failed: %s", e)
     return citations
+
+
+def enrich_participants(citations: list[dict], max_verses: int = 8) -> list[dict]:
+    """Add a `participants` key to each cited verse — the coreference chain (pronoun →
+    the entity it refers to), from shoresh /participants (MACULA, CC-BY). Resolves
+    "who is 'he/his/it' here" right in the study packet. Capped + best-effort; never
+    breaks answers."""
+    if not SHORESH_URL:
+        return citations
+    refs: list[tuple[int, tuple[str, int, int]]] = []
+    for i, c in enumerate(citations):
+        parsed = _parse_ref(c.get("passage") or "")
+        if parsed:
+            refs.append((i, parsed))
+    if not refs:
+        return citations
+    try:
+        with httpx.Client(base_url=SHORESH_URL, timeout=5.0) as client:
+            for idx, (book, ch, v) in refs[:max_verses]:
+                try:
+                    resp = client.get(f"/participants/{book}/{ch}/{v}")
+                    if resp.status_code != 200:
+                        continue
+                    parts = resp.json().get("participants", [])
+                    compact = [
+                        {"word": p["text"], "lemma": p.get("lemma", ""),
+                         "refers_to": (p["refers_to"].get("gloss") or p["refers_to"].get("lemma") or ""),
+                         "at": p["refers_to"].get("ref", "")}
+                        for p in parts if p.get("refers_to")
+                    ]
+                    if compact:
+                        citations[idx]["participants"] = compact[:12]
+                except Exception:
+                    continue
+    except Exception as e:
+        logger.debug("shoresh participants enrichment failed: %s", e)
+    return citations

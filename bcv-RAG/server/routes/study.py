@@ -22,7 +22,7 @@ from query.concept_expand import expand_concepts, filter_biblical_words
 from query.retrieve import retrieve
 from server.corpus_cards import resolve_corpus_hits
 from server.deps import get_db
-from server.original_words import enrich_citations
+from server.original_words import enrich_citations, enrich_participants
 from server.word_study import word_study_card
 from server.ratelimit import LIMIT_SEARCH, limiter
 from server.resolver import chunk_preview_from_card
@@ -179,8 +179,9 @@ def run_study(
         preview["retrievers"] = h.retrievers
         citations_out.append(preview)
 
-    # Enrich with original-language words from shoresh
+    # Enrich with original-language words + coreference chains (who is 'he') from shoresh
     citations_out = enrich_citations(citations_out)
+    citations_out = enrich_participants(citations_out)
     study_card = word_study_card(concept_tags, question)  # S2 nudge: query's concepts, gloss-matched
 
     # Build the strategies-applied summary

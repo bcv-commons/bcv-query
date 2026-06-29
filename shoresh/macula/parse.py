@@ -142,7 +142,9 @@ def build() -> None:
         print(f"  {lang}: {nw} tokens, {nf} frame-args, {nr} ref-pointers", file=sys.stderr)
     con.executescript("""
         CREATE INDEX ix_words_ref ON macula_words(book, chapter, verse, word);
+        CREATE INDEX ix_words_strong ON macula_words(strong);
         CREATE INDEX ix_frames_verb ON frames(verb_key);
+        CREATE INDEX ix_frames_arg ON frames(arg_key);
         CREATE INDEX ix_refs_src ON refs(src_key);
     """)
     con.commit()

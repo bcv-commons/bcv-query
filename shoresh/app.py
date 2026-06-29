@@ -116,6 +116,7 @@ def root() -> dict:
             "/speakers/at/{book}/{chapter}/{verse}",
             "/coref/{book}/{chapter}/{verse}/word/{idx}",
             "/frame/{book}/{chapter}/{verse}/word/{idx}",
+            "/framesearch?role=&arg_strong=&verb_strong=&book=",
             "/participants/{book}/{chapter}/{verse}",
         ],
         "docs": "../docs/original-language-anchoring.md",
@@ -327,6 +328,40 @@ def get_frame(book: str, chapter: int, verse: int, idx: int) -> dict:
     result = macula.frame(book, chapter, verse, idx)
     if not result.get("verb"):
         raise HTTPException(404, f"no verb frame at {book.upper()} {chapter}:{verse} word {idx}")
+    return result
+
+
+@app.get("/framesearch")
+def get_framesearch(
+    role: str | None = None,
+    arg_strong: str | None = None,
+    arg_lemma: str | None = None,
+    verb_strong: str | None = None,
+    verb_lemma: str | None = None,
+    book: str | None = None,
+    limit: int = 50,
+) -> dict:
+    """Search semantic frames — discovery, not just lookup. Find every clause matching
+    a role-filler / verb / book filter, each returned as a resolved frame (verb + roles).
+
+    Examples:
+    - `?arg_strong=H0430&role=A0` → every clause where **God is the agent** ("what God does")
+    - `?arg_strong=G2424&role=A1` → where **Jesus is the patient** ("what is done to Jesus")
+    - `?verb_strong=G0025` → the frames of **ἀγαπάω** (who loves whom)
+    - add `&book=GEN` to scope. Roles: A0 agent, A1 patient, A2, AA adjunct.
+
+    `arg_*`/`verb_*` take a Strong's (any form: H0430/G0026) or a lemma. Returns
+    `{total, count, results}`; `total` is the full match count, `results` up to `limit`.
+    CC BY 4.0 (MACULA frames)."""
+    if not macula.available():
+        raise HTTPException(503, "macula-spine.db not loaded")
+    if limit < 1 or limit > 200:
+        raise HTTPException(400, "limit must be 1..200")
+    result = macula.frame_search(role=role, arg_strong=arg_strong, arg_lemma=arg_lemma,
+                                 verb_strong=verb_strong, verb_lemma=verb_lemma,
+                                 book=book, limit=limit)
+    if result.get("error"):
+        raise HTTPException(400, result["error"])
     return result
 
 
