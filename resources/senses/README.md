@@ -7,8 +7,13 @@ i.e. **polysemy** (H7307 *ruach* → spirit / wind / breath / side; G3056 *logos
 
 **Senses disambiguate; domains group.** Use this to show or filter a lexeme's
 range of meanings; use `../semantic_domains/` to broaden a lexeme to its
-semantic field. Built by `bcv-RAG/scripts/build_senses.py` from **MACULA**
-(CC BY 4.0, Biblica + UBS MARBLE).
+semantic field. Built by `bcv-RAG/scripts/build_senses.py` from **MACULA**.
+
+> ⚠️ **Licensing — NOT CC BY 4.0.** Derived from **UBS MARBLE** (SDBG/SDBH) sense
+> data, which MACULA's LICENSE carries **"used with permission,"** *outside* its
+> CC BY 4.0 grant. Reference data under UBS terms — not safe to redistribute/use
+> commercially as CC-BY without your own UBS permission. See
+> `../semantic_domains/README.md`.
 
 ## Schema
 `<lang>.tsv` columns: `strong  sense  gloss  count  share`

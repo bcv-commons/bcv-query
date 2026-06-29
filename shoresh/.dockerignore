@@ -5,6 +5,8 @@ spine/data/
 lxx/lxx.db
 lxx/lxx.db-*
 lxx/data/
+macula/macula-spine.db
+macula/macula-spine.db-*
 
 # clause vectors live on the /data volume, never in the image
 data/

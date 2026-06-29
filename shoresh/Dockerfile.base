@@ -38,3 +38,9 @@ COPY spine/ ./spine/
 COPY lxx/ ./lxx/
 RUN python -m lxx.parse --all
 RUN python -m spine.parse
+
+# MACULA per-token semantics (frames / coreference) → macula-spine.db. Fetches the
+# CC-BY MACULA TSVs (LFS, ~250 MB transient); references.py is needed for ref→BCV.
+COPY references.py ./
+COPY macula/ ./macula/
+RUN python -m macula.parse

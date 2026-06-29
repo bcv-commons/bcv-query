@@ -5,8 +5,18 @@ retrieval can broaden a single Strong's to a whole semantic domain (e.g. "love"
 → the *Love/Affection* domain → every lexeme in it).
 
 Built by `bcv-RAG/scripts/build_semantic_domains.py` from **MACULA**
-(`Clear-Bible/macula-greek`, `Clear-Bible/macula-hebrew`). License **CC BY 4.0**
-(Biblica) — attribute **UBS MARBLE** (the SDBG/SDBH semantic data).
+(`Clear-Bible/macula-greek`, `Clear-Bible/macula-hebrew`).
+
+> ⚠️ **Licensing — NOT CC BY 4.0.** This table is derived from the **UBS MARBLE**
+> semantic data (SDBG = Louw-Nida; SDBH = de Blois, © 2000–2021 United Bible
+> Societies). MACULA's own LICENSE carries this data **"used with permission,"**
+> *separately from* its CC BY 4.0 grant — i.e. the CC-BY licence does **not** cover
+> the semantic-domain layer, and that permission was granted to Biblica, not
+> transitively to downstream users. Treat `semantic_domains/` and `senses/` as
+> reference data under UBS terms: usable here, **not** safe to redistribute or use
+> commercially as CC-BY without your own UBS permission. (The morphology, syntax,
+> Strong's, glosses, frames and referents from MACULA *are* genuinely CC BY 4.0 —
+> only the domain/sense layer is encumbered.)
 
 ## Files & schema
 `<lang>.tsv` columns: `strong  domain_type  domain  label  count  share`

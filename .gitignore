@@ -91,6 +91,10 @@ shoresh/lxx/data/
 shoresh/lxx/lxx.db
 shoresh/lxx/lxx.db-*
 
+# MACULA: parsed per-token semantics db (re-derivable via macula.parse)
+shoresh/macula/macula-spine.db
+shoresh/macula/macula-spine.db-*
+
 # clause vectors (built at runtime onto the /data volume; local: SHORESH_DATA)
 shoresh/data/
 shoresh/**/clauses_*.npy

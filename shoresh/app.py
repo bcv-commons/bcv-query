@@ -32,6 +32,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 import corpus
 import data
+from macula import data as macula
 from ratelimit import limiter
 
 logger = logging.getLogger("shoresh")
@@ -113,6 +114,9 @@ def root() -> dict:
             "/speakers",
             "/speaker/{name}",
             "/speakers/at/{book}/{chapter}/{verse}",
+            "/coref/{book}/{chapter}/{verse}/word/{idx}",
+            "/frame/{book}/{chapter}/{verse}/word/{idx}",
+            "/participants/{book}/{chapter}/{verse}",
         ],
         "docs": "../docs/original-language-anchoring.md",
     }
@@ -301,6 +305,38 @@ def _study_priority(rank: int | None, keyness: dict | None) -> float:
     score = (keyness or {}).get("score") or 0.0
     bonus = max(0.0, min(score, 6.0)) / 6.0 * 15.0
     return round(min(100.0, freq + bonus), 1)
+
+
+@app.get("/coref/{book}/{chapter}/{verse}/word/{idx}")
+def get_coref(book: str, chapter: int, verse: int, idx: int) -> dict:
+    """Coreference: who/what the word at this reference points to — "who is 'he/his'
+    here". Resolves MACULA referent (Greek) / participantref (Hebrew) / subjref token
+    pointers to the entity (lemma, gloss, Strong's). CC BY 4.0."""
+    if not macula.available():
+        raise HTTPException(503, "macula-spine.db not loaded")
+    return macula.coref(book, chapter, verse, idx)
+
+
+@app.get("/frame/{book}/{chapter}/{verse}/word/{idx}")
+def get_frame(book: str, chapter: int, verse: int, idx: int) -> dict:
+    """Semantic frame of the verb at this reference — PropBank roles (A0 agent, A1
+    patient, …) resolved to their argument tokens. E.g. GEN 1:1 בָּרָא → A0 God,
+    A1 heavens + earth. CC BY 4.0."""
+    if not macula.available():
+        raise HTTPException(503, "macula-spine.db not loaded")
+    result = macula.frame(book, chapter, verse, idx)
+    if not result.get("verb"):
+        raise HTTPException(404, f"no verb frame at {book.upper()} {chapter}:{verse} word {idx}")
+    return result
+
+
+@app.get("/participants/{book}/{chapter}/{verse}")
+def get_participants(book: str, chapter: int, verse: int) -> dict:
+    """Participant chain of a verse — every referring word and the entity it points
+    to (MACULA participant/referent links). CC BY 4.0."""
+    if not macula.available():
+        raise HTTPException(503, "macula-spine.db not loaded")
+    return macula.participants(book, chapter, verse)
 
 
 @app.get("/speakers")
