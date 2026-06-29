@@ -19,13 +19,27 @@ SHORESH_URL = os.environ.get("SHORESH_URL", "").rstrip("/")
 _REF_RE = re.compile(
     r"^(?P<book>[A-Z0-9]{3})\s+(?P<ch>\d+):(?P<v>\d+)$"
 )
+# Citations carry the DISPLAY name ("Genesis 1:1"), not USFM ("GEN 1:1") — reverse the
+# book-name map so enrichment fires on either form (this also repairs original_words).
+_NAME_RE = re.compile(r"^(?P<book>.+?)\s+(?P<ch>\d+):(?P<v>\d+)$")
+try:
+    from indexer.references import BOOK_NAMES
+    _NAME_TO_CODE = {name.lower(): code for code, name in BOOK_NAMES.items()}
+except Exception:
+    _NAME_TO_CODE = {}
 
 
 def _parse_ref(passage: str) -> tuple[str, int, int] | None:
-    m = _REF_RE.match(passage.strip())
-    if not m:
-        return None
-    return m.group("book"), int(m.group("ch")), int(m.group("v"))
+    p = (passage or "").strip()
+    m = _REF_RE.match(p)
+    if m:
+        return m.group("book"), int(m.group("ch")), int(m.group("v"))
+    m = _NAME_RE.match(p)
+    if m:
+        code = _NAME_TO_CODE.get(m.group("book").lower())
+        if code:
+            return code, int(m.group("ch")), int(m.group("v"))
+    return None
 
 
 def _compact_words(words: list[dict]) -> list[dict]:
