@@ -102,6 +102,7 @@ class CFEngine:
     def __init__(self) -> None:
         self._apis: dict[str, Api] = {}
         self._fabrics: dict[str, cfabric.Fabric] = {}
+        self._rank_maps: dict[str, dict[str, int]] = {}
         self._load_lock = threading.Lock()
 
     def _ensure_loaded(self, corpus: str) -> Api:
@@ -423,24 +424,45 @@ class CFEngine:
         return out
 
     def _rank_map(self, api: Any, corpus: str) -> dict[str, int]:
-        """Precomputed {lex: rank} where rank 0 = most frequent lexeme."""
+        """{lex: rank} where rank 0 = most frequent lexeme. Memoized per corpus —
+        computed once on first /words call, then reused (a full-corpus scan is too
+        costly to repeat per request).
+
+        Uses freq_lex when available (BHSA); counts occurrences when not (Nestle1904,
+        which ships no frequency feature). Either way the rank reflects this exact
+        corpus, so it always joins cleanly to the words /words returns.
+        """
+        cached = self._rank_maps.get(corpus)
+        if cached is not None:
+            return cached
+
         feat_map = WORD_FEATURES.get(corpus, WORD_FEATURES["hebrew"])
         lex_feat = feat_map.get("lexeme", "lex")
         wtype = WORD_TYPE.get(corpus, "word")
-        freq_obj = api.Fs("freq_lex")
         lex_obj = api.Fs(lex_feat)
-        if freq_obj is None or lex_obj is None:
+        if lex_obj is None:
+            self._rank_maps[corpus] = {}
             return {}
+        freq_obj = api.Fs("freq_lex")
         freq_by_lex: dict[str, int] = {}
-        for w in api.F.otype.s(wtype):
-            lex = lex_obj.v(w)
-            if not lex or lex in freq_by_lex:
-                continue
-            freq = freq_obj.v(w)
-            if freq is not None:
-                freq_by_lex[str(lex)] = int(freq)
+        if freq_obj is not None:
+            for w in api.F.otype.s(wtype):
+                lex = lex_obj.v(w)
+                if not lex or lex in freq_by_lex:
+                    continue
+                freq = freq_obj.v(w)
+                if freq is not None:
+                    freq_by_lex[str(lex)] = int(freq)
+        else:
+            for w in api.F.otype.s(wtype):
+                lex = lex_obj.v(w)
+                if lex:
+                    k = str(lex)
+                    freq_by_lex[k] = freq_by_lex.get(k, 0) + 1
         sorted_lexemes = sorted(freq_by_lex.items(), key=lambda x: -x[1])
-        return {lex: rank for rank, (lex, _) in enumerate(sorted_lexemes)}
+        rank_map = {lex: rank for rank, (lex, _) in enumerate(sorted_lexemes)}
+        self._rank_maps[corpus] = rank_map
+        return rank_map
 
     def list_words_filtered(
         self,

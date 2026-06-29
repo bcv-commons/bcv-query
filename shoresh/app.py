@@ -10,9 +10,12 @@ language word stores (lxx.db + spine.db):
   GET /word/{strong}                concordance for a Strong's number (e.g. G2316, H7225)
   GET /structure/{book}/{ch}/{v}    BHSA/Nestle1904 structure from bcv-corpus
   GET /search?q=&lang=hbo           clause-level original-language semantic search
+  GET /words?language=&pos=&...     filtered corpus word sampler (vocab-trainer feed)
 
-The /search store + model are loaded at startup (not per-request) so a
-scale-to-zero cold start doesn't load the model mid-request and 502.
+The service is reachable from the open internet (Caddy → uvicorn): CORS is open
+for the read-only word data, and every route carries a per-IP rate limit
+(ratelimit.py). The /search store + model are loaded at startup (not per-request)
+so a scale-to-zero cold start doesn't load the model mid-request and 502.
 """
 from __future__ import annotations
 
@@ -21,9 +24,14 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 import corpus
 import data
+from ratelimit import limiter
 
 logger = logging.getLogger("shoresh")
 
@@ -57,6 +65,23 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Per-IP rate limiting (blanket default from ratelimit.py) — shoresh is public.
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+# CORS: read-only public word data → open to any origin (browser vocab trainers,
+# etc.). GET-only, no credentials. Added last so it wraps the rate limiter and a
+# preflight OPTIONS still gets CORS headers. Override origins via SHORESH_CORS_ORIGINS
+# (comma-separated) to lock down to specific apps.
+_cors_origins = os.environ.get("SHORESH_CORS_ORIGINS", "*")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in _cors_origins.split(",")] if _cors_origins else ["*"],
+    allow_methods=["GET", "OPTIONS"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/health")
 def health() -> dict:
@@ -81,6 +106,12 @@ def root() -> dict:
             "/structure/{book}/{chapter}/{verse}",
             "/structure/{book}/{chapter}/{verse}/word/{idx}",
             "/search?q=&lang=hbo&k=10&enrich=false&translate=gloss|llm",
+            "/words?language=Hebrew|Aramaic|Greek&pos=&stem=&tense=&suffix=&min_rank=&max_rank=&limit=&random=",
+            "/domain/{code}?axis=sdbg|core|lex|ctx",
+            "/wordstudy/{strong}",
+            "/speakers",
+            "/speaker/{name}",
+            "/speakers/at/{book}/{chapter}/{verse}",
         ],
         "docs": "../docs/original-language-anchoring.md",
     }
