@@ -168,10 +168,10 @@ def get_domain(code: str, axis: str = "sdbg") -> dict:
 @app.get("/wordstudy/{strong}")
 def get_wordstudy(strong: str) -> dict:
     """Composite word-study card for a Strong's: gloss, keyness (how distinctively
-    biblical — score = zipf_bible − zipf_general; Hebrew carries `modern_he` +
-    `archaic` = extinct in modern Hebrew, Greek carries `koine_general` +
-    `scripture_only` = absent from secular/pagan Koine), semantic domain(s) +
-    co-domain siblings, senses (polysemy), and the cross-language equivalent."""
+    biblical — score = zipf_bible − zipf_general, content words only; Hebrew carries
+    `modern_he` + `archaic` = extinct in modern Hebrew, Greek carries `koine_general` +
+    `scripture_only` = absent from secular/pagan Koine, Aramaic = score only),
+    semantic domain(s) + co-domain siblings, senses (polysemy), and cross-language."""
     result = data.word_study(strong)
     if not result.get("domains") and not result.get("senses") and not result.get("gloss"):
         raise HTTPException(404, f"no lexical data for Strong's '{strong}'")
@@ -224,12 +224,13 @@ def get_words(
     `strong` is the Strong's number (or null where the lex→Strong's bridge has no
     mapping — rare lexemes). `keyness` = how distinctively biblical the word is
     (`{score, anchor}`; score = zipf_bible − zipf_general, higher = more distinctively
-    scriptural). Hebrew (anchor 'he') also carries `modern_he` + `archaic` (`== 0`,
-    extinct in modern Hebrew); Greek (anchor 'grc') carries `koine_general` +
-    `scripture_only` (`== 0`, absent from secular/pagan Koine — e.g. ἀγάπη elevated by
-    scripture). Both presence flags are robust even for rare words where `score` is
-    noisy. Combine `rank` (frequency) with `keyness` (distinctiveness) to order a
-    trainer by study priority.
+    scriptural; content words only). Hebrew (anchor 'he') also carries `modern_he` +
+    `archaic` (`== 0`, extinct in modern Hebrew); Greek (anchor 'grc') carries
+    `koine_general` + `scripture_only` (`== 0`, absent from secular/pagan Koine — e.g.
+    ἀγάπη elevated by scripture); biblical Aramaic (anchor 'arc') carries score only (no
+    presence flag — modern Hebrew is the wrong denominator). Function words have no
+    keyness. Both presence flags are robust even for rare words where `score` is noisy.
+    Combine `rank` (frequency) with `keyness` (distinctiveness) for trainer study-priority.
     """
     if limit < 1 or limit > 500:
         raise HTTPException(400, "limit must be 1..500")
@@ -260,10 +261,17 @@ def get_words(
     except Exception as exc:
         raise HTTPException(503, f"corpus unavailable: {exc}") from exc
 
-    # Attach keyness (how distinctively biblical) via the word's Strong's — lets a
-    # trainer prioritize by importance, not just frequency. He real; Gr proxy-flagged.
+    # Per word, via its Strong's: attach keyness (distinctiveness), and repair the
+    # gloss when the corpus's per-occurrence gloss is a dash/empty (Nestle1904 marks
+    # some tokens "-", incl. high-frequency words like ὁ) — fall back to the lemma's
+    # authoritative Strong's gloss so every word is trainable.
     for w in result.get("words", []):
-        w["keyness"] = data.keyness_of(w["strong"]) if w.get("strong") else None
+        strong = w.get("strong")
+        w["keyness"] = data.keyness_of(strong) if strong else None
+        if strong and (w.get("gloss") or "").strip() in ("", "-"):
+            g = data.gloss_of(strong)
+            if g and g.get("gloss"):
+                w["gloss"] = g["gloss"]
 
     return {"language": language, **result}
 

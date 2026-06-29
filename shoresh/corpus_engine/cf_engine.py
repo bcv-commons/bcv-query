@@ -618,12 +618,20 @@ class CFEngine:
                 cw_nodes = api.L.d(clause_node, otype=wtype)
                 text_obj = api.Fs(feat_map.get("text", "g_word_utf8"))
                 trailer_obj = api.Fs(feat_map.get("trailer", "trailer_utf8"))
-                for i, cw in enumerate(cw_nodes):
+                for cw in cw_nodes:
                     t = (text_obj.v(cw) or "") if text_obj else ""
                     tr = (trailer_obj.v(cw) or "") if trailer_obj else ""
-                    clause_words.append(str(t) + str(tr))
+                    s = str(t) + str(tr)
+                    # BHSA splits prefixes (article/prep) into their own nodes; assimilated
+                    # ones have no surface → empty string. Drop them so the clause renders
+                    # without invisible spans; keep targetIndex aligned to the kept tokens.
+                    if s == "":
+                        if cw == w:
+                            target_index = len(clause_words)
+                        continue
                     if cw == w:
-                        target_index = i
+                        target_index = len(clause_words)
+                    clause_words.append(s)
 
             words.append({
                 "node": int(w),

@@ -9,16 +9,24 @@ everywhere (about, says); a word absent from scripture is undefined → drop.
 The weight lives on the Strong's NUMBER, so it carries to every language via
 the gloss map (es "gracia" / fr "grâce" / zh "恩典" all inherit weight[G5485]).
 
+CONTENT WORDS ONLY (noun/verb/adj). Greek's denominator (LAGT) only lemmatizes those
+classes, so for symmetry the Hebrew side is restricted the same way (via the spine
+morph). Function words get no keyness — they're never word-study targets anyway.
+
 Anchors (see internal-docs/multilingual-endpoint-strategy.md, Strategy 2):
   H#### (OT/Hebrew) — anchor 'he':
       zipf in the spine OT  −  modern Hebrew general freq (wordfreq 'he',
       biblical lemma point-stripped via NFD).
+  H#### biblical Aramaic — anchor 'arc':
+      detected via the spine morph 'Ar,' prefix. No modern-Hebrew presence flag
+      (modern Hebrew is the wrong denominator for a different language); the score
+      keeps it only as a rough survival proxy.
   G#### (NT/Greek) — anchor 'grc':
       zipf in the Nestle1904 NT  −  general (pagan) Koine freq, from the LAGT
       corpus (Lemmatized Ancient Greek Texts, ~25M pagan tokens; the Christian +
       Jewish subsets are excluded so the denominator is genuinely non-biblical).
-      Both polytonic → NFC-casefold match, no monotonic conversion. This replaces
-      the old English-gloss carry-over proxy (e.g. ἀγάπη 0.17→3.01).
+      Both polytonic → accent-fold match, no monotonic conversion. This replaces
+      the old English-gloss carry-over proxy (e.g. ἀγάπη 0.17→2.99).
 
 BUILD-TIME ONLY. Requires `wordfreq`, `pandas`+`pyarrow`, the local spine.db, and
 the LAGT parquet (auto-downloaded, or point $LAGT_PARQUET at it). The server reads
@@ -81,32 +89,62 @@ def _zipf(count: int, total: int) -> float:
     return math.log10(count / total * 1e9)
 
 
-def hebrew_keyness() -> dict[str, tuple[float, float]]:
-    """H#### → (keyness, modern_he): spine OT zipf − modern Hebrew general zipf, and
-    the raw modern-Hebrew frequency itself (zipf scale). `modern_he == 0` means the
-    lemma is ABSENT from modern Hebrew — a robust "archaic / extinct in modern" signal
-    even for rare/hapax words where the continuous keyness score is noisy. Storing the
-    raw value (not a boolean) keeps it graded — clients pick their own threshold — and
-    lossless: zipf_bible = keyness + modern_he."""
+def hebrew_keyness() -> dict[str, tuple[float, float | None, str]]:
+    """H#### → (keyness, modern_he, anchor). keyness = spine OT zipf − modern Hebrew zipf.
+
+    Restricted to CONTENT words (noun/verb/adj, read from the spine morph) so the scope
+    matches the Greek side, where LAGT only lemmatizes those classes — a Hebrew preposition
+    and a Greek conjunction are now treated the same (no keyness).
+
+    Language split via the morph's `He,`/`Ar,` prefix:
+      Hebrew → anchor 'he', modern_he = raw modern-Hebrew freq (zipf; 0 = extinct in
+        modern Hebrew = archaic — robust even for rare words, and lossless: zipf_bible =
+        keyness + modern_he).
+      Biblical Aramaic → anchor 'arc', modern_he = None. Modern Hebrew is the wrong
+        denominator for a different language, so no archaic claim is exposed; the score
+        keeps modern Hebrew only as a rough survival proxy (much Aramaic vocab entered it)."""
+    import collections
     nt = sorted(NT_BOOKS)
     ph = ",".join("?" * len(nt))
     con = sqlite3.connect(SPINE_DB)
     total = con.execute(
         f"SELECT COUNT(*) FROM spine_words WHERE book NOT IN ({ph})", nt
     ).fetchone()[0]
-    # One representative lemma per Strong's (lemmas are stable within a code).
-    rows = con.execute(
-        f"SELECT strong, COUNT(*) c, lemma FROM spine_words "
-        f"WHERE strong IS NOT NULL AND book NOT IN ({ph}) GROUP BY strong", nt
-    ).fetchall()
+    counts: collections.Counter = collections.Counter()
+    lemma_of: dict[str, str] = {}
+    ar: collections.Counter = collections.Counter()
+    he: collections.Counter = collections.Counter()
+    nva: collections.Counter = collections.Counter()   # occurrences with a Noun/Verb/Adj head
+    for strong, lemma, morph in con.execute(
+        f"SELECT strong, lemma, morph FROM spine_words "
+        f"WHERE strong IS NOT NULL AND book NOT IN ({ph})", nt
+    ):
+        code = _norm("H", strong)
+        counts[code] += 1
+        if lemma and code not in lemma_of:
+            lemma_of[code] = lemma
+        if morph:                                   # e.g. "He,R:Ncfsa" / "Ar,Ncmsd:Td"
+            lang, _, rest = morph.partition(",")
+            (ar if lang == "Ar" else he)[code] += 1
+            if any(seg[:1] in ("N", "V", "A") for seg in rest.split(":")):
+                nva[code] += 1
+
     con.close()
 
-    out: dict[str, tuple[float, float]] = {}
-    for strong, c, lemma in rows:
+    out: dict[str, tuple[float, float | None, str]] = {}
+    for code, c in counts.items():
+        # content word = MAJORITY of occurrences have a Noun/Verb/Adj head. (Majority, not
+        # "any", so a stray mistag — e.g. 2/5876 of עַל as a noun — can't promote a
+        # function word.) Matches the Greek noun/verb/adj scope.
+        if nva[code] * 2 <= c:
+            continue
         zb = _zipf(c, total)
-        # Lemma absent from modern Hebrew → zipf 0.0 → archaic/biblical → high keyness.
+        lemma = lemma_of.get(code, "")
         zg = zipf_frequency(_strip_marks(lemma), "he") if lemma else 0.0
-        out[_norm("H", strong)] = (round(zb - zg, 2), round(zg, 2))
+        if ar[code] > he[code]:                      # biblical Aramaic
+            out[code] = (round(zb - zg, 2), None, "arc")
+        else:
+            out[code] = (round(zb - zg, 2), round(zg, 2), "he")
     return out
 
 
@@ -219,14 +257,16 @@ def main() -> None:
         print(f"ERROR: need {SPINE_DB}, {GRC_FREQ}, {GRC_STRONG}", file=sys.stderr)
         sys.exit(1)
 
-    heb = hebrew_keyness()        # code → (keyness, modern_he)
+    heb = hebrew_keyness()        # code → (keyness, modern_he, anchor 'he'|'arc')
     grk = greek_keyness()         # code → (keyness, koine_general)
-    print(f"hebrew: {len(heb)} codes (modern-he anchor)", file=sys.stderr)
-    print(f"greek:  {len(grk)} codes (pagan-Koine anchor)", file=sys.stderr)
+    n_arc = sum(1 for _, _, a in heb.values() if a == "arc")
+    print(f"hebrew: {len(heb)} content codes ({len(heb) - n_arc} he + {n_arc} arc)", file=sys.stderr)
+    print(f"greek:  {len(grk)} content codes (pagan-Koine anchor)", file=sys.stderr)
 
     # Two raw denominator columns: modern_he (He) and koine_general (Gr); each row
-    # fills exactly one. anchor disambiguates ('he' archaic vs 'grc' scripture_only).
-    rows = ([(c, k, "he", mh, None) for c, (k, mh) in heb.items()]
+    # fills at most one. anchor disambiguates ('he' archaic / 'grc' scripture_only /
+    # 'arc' Aramaic = no presence flag).
+    rows = ([(c, k, anchor, mh, None) for c, (k, mh, anchor) in heb.items()]
             + [(c, k, "grc", None, kg) for c, (k, kg) in grk.items()])
     rows.sort(key=lambda r: (-r[1], r[0]))
 
