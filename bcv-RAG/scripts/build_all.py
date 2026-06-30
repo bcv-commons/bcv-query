@@ -36,6 +36,7 @@ STEPS = [
     ("build_strongs_freq.py",        "strongs_freq.tsv (is_function)",     False),
     ("build_strong_lemma.py",        "strong_lemma.tsv",                   False),
     ("build_multilingual_glosses.py", "strongs_gloss.tsv (UBS download)",  True),
+    ("build_danish_strongs_gloss.py", "strongs_gloss.tsv += dan (BibleOL)", False),  # AFTER ^ regen
     ("build_strongs_keyness.py",     "strongs_keyness.tsv (wordfreq)",     False),
     ("build_tw_links.py",            "tw_links.tsv (TWL download)",        True),
     ("build_forms.py",               "forms.tsv",                          False),
