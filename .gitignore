@@ -104,3 +104,4 @@ shoresh/**/clauses_*.sqlite
 deploy/deploy.local.env
 bcv-RAG/data/
 resources/occurrences/
+resources/occurrences/context_emb.npz

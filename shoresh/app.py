@@ -173,13 +173,14 @@ def get_domain(code: str, axis: str = "sdbg") -> dict:
 
 
 @app.get("/wordstudy/{strong}")
-def get_wordstudy(strong: str) -> dict:
+def get_wordstudy(strong: str, gloss_lang: str = "English") -> dict:
     """Composite word-study card for a Strong's: gloss, keyness (how distinctively
     biblical — score = zipf_bible − zipf_general, content words only; Hebrew carries
     `modern_he` + `archaic` = extinct in modern Hebrew, Greek carries `koine_general` +
     `scripture_only` = absent from secular/pagan Koine, Aramaic = score only),
-    semantic domain(s) + co-domain siblings, senses (polysemy), and cross-language."""
-    result = data.word_study(strong)
+    semantic domain(s) + co-domain siblings, senses (polysemy), and cross-language.
+    `gloss_lang` localizes the lex_senses dominant-sense labels (per-stem gloss; e.g. German)."""
+    result = data.word_study(strong, gloss_lang)
     if not result.get("domains") and not result.get("senses") and not result.get("gloss"):
         raise HTTPException(404, f"no lexical data for Strong's '{strong}'")
     return result

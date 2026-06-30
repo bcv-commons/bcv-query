@@ -60,8 +60,22 @@ def _strong_bridge() -> dict[str, str]:
 def main() -> None:
     print(f"loading BHSA from {BHSA} …")
     api = cfabric.Fabric(locations=BHSA, silent="deep").loadAll(silent="deep")
-    F, T = api.F, api.T
+    F, T, L = api.F, api.T, api.L
     bridge = _strong_bridge()
+
+    # Hebrew clause text per word — the per-occurrence CONTEXT we cluster senses on (cached
+    # by clause node so a clause's text is built once, not once per word in it).
+    clause_text: dict[int, str] = {}
+
+    def _context(w: int) -> str:
+        cl = L.u(w, otype="clause")
+        if not cl:
+            return ""
+        c = cl[0]
+        if c not in clause_text:
+            clause_text[c] = "".join((F.g_word_utf8.v(cw) or "") + (F.trailer_utf8.v(cw) or "")
+                                     for cw in L.d(c, otype="word")).strip()
+        return clause_text[c]
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     if OUT.exists():
@@ -69,8 +83,8 @@ def main() -> None:
     con = sqlite3.connect(OUT)
     con.execute("""CREATE TABLE occurrence(
         node INTEGER PRIMARY KEY, ref INTEGER, book TEXT, chapter INTEGER, verse INTEGER,
-        lex TEXT, stem TEXT, sp TEXT, strong TEXT,
-        sense TEXT, sense_source TEXT, sense_conf REAL)""")
+        lex TEXT, stem TEXT, sp TEXT, strong TEXT, context TEXT,
+        gloss TEXT, sense TEXT, sense_source TEXT, sense_conf REAL)""")
 
     rows, skipped = [], 0
     for w in F.otype.s("word"):
@@ -85,9 +99,9 @@ def main() -> None:
         lex = F.lex.v(w)
         stem = F.vs.v(w)                      # 'qal'/'nif'/… or 'NA' for non-verbs
         rows.append((w, ref, usfm, ch, vs_, lex, ("" if stem == "NA" else stem),
-                     F.sp.v(w), bridge.get(lex, ""), None, None, None))
+                     F.sp.v(w), bridge.get(lex, ""), _context(w), None, None, None, None))
 
-    con.executemany("INSERT INTO occurrence VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+    con.executemany("INSERT INTO occurrence VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
     con.execute("CREATE INDEX ix_occ_ref ON occurrence(ref)")
     con.execute("CREATE INDEX ix_occ_lexstem ON occurrence(lex, stem)")
     con.execute("CREATE INDEX ix_occ_strong ON occurrence(strong)")

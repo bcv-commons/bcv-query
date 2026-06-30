@@ -34,24 +34,28 @@ def main() -> None:
 
     if revert:
         n = idx.execute("DELETE FROM tags WHERE tag LIKE 'lex:%' OR tag LIKE 'stem:%' "
-                        "OR tag LIKE 'lexstem:%'").rowcount
+                        "OR tag LIKE 'lexstem:%' OR tag LIKE 'sense:%'").rowcount
         idx.commit()
-        print(f"reverted {n} lex/stem/lexstem tags from {idx_path.name}")
+        print(f"reverted {n} lex/stem/lexstem/sense tags from {idx_path.name}")
         return
 
     if not OCC.exists():
         sys.exit(f"no sidecar: {OCC} (run build_lex_occurrences.py first)")
 
-    # 1. ref → distinct lex / stem / (lex,stem) from the sidecar
+    # 1. ref → distinct lex / stem / (lex,stem) / (lex,stem,sense) from the sidecar
     occ = sqlite3.connect(OCC)
     ref_lex = collections.defaultdict(set)
     ref_stem = collections.defaultdict(set)
     ref_ls = collections.defaultdict(set)
-    for ref, lex, stem in occ.execute("SELECT ref, lex, stem FROM occurrence WHERE lex!=''"):
+    ref_sense = collections.defaultdict(set)
+    for ref, lex, stem, sense in occ.execute(
+            "SELECT ref, lex, stem, sense FROM occurrence WHERE lex!=''"):
         ref_lex[ref].add(lex)
         if stem:
             ref_stem[ref].add(stem)
             ref_ls[ref].add(f"{lex}.{stem}")
+        if sense is not None:                       # sense:<lex>.<stem>.<n> (stem '' for non-verbs)
+            ref_sense[ref].add(f"{lex}.{stem}.{sense}")
     occ.close()
 
     # 2. single-verse morphology chunks → their verse ref
@@ -70,6 +74,8 @@ def main() -> None:
             inserts.append((doc_id, f"stem:{st}"))
         for ls in ref_ls.get(ref, ()):
             inserts.append((doc_id, f"lexstem:{ls}"))
+        for s in ref_sense.get(ref, ()):
+            inserts.append((doc_id, f"sense:{s}"))
         if len(inserts) > before:
             tagged += 1
 
@@ -78,9 +84,10 @@ def main() -> None:
     nlex = idx.execute("SELECT count(*) FROM tags WHERE tag LIKE 'lex:%'").fetchone()[0]
     nstem = idx.execute("SELECT count(*) FROM tags WHERE tag LIKE 'stem:%'").fetchone()[0]
     nls = idx.execute("SELECT count(*) FROM tags WHERE tag LIKE 'lexstem:%'").fetchone()[0]
+    nsense = idx.execute("SELECT count(*) FROM tags WHERE tag LIKE 'sense:%'").fetchone()[0]
     idx.close()
     print(f"{idx_path.name}: {len(chunks)} morphology chunks, {tagged} matched a verse "
-          f"→ tags now: {nlex} lex, {nstem} stem, {nls} lexstem")
+          f"→ tags now: {nlex} lex, {nstem} stem, {nls} lexstem, {nsense} sense")
 
 
 if __name__ == "__main__":

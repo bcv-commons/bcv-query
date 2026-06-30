@@ -6,6 +6,8 @@ JSON-serializable result dict that goes into the MCP `content` text body.
 """
 from __future__ import annotations
 
+import collections
+import functools
 import json
 import sqlite3
 from typing import Callable
@@ -305,16 +307,36 @@ def _passage_lookup(args: dict, db: sqlite3.Connection) -> dict:
     }
 
 
+@functools.lru_cache(maxsize=1)
+def _lex_sense_inventory() -> dict:
+    """{(lex, stem): [(sense, gloss, share)]} from resources/senses/hbo_lex.tsv — the
+    Hebrew-context-derived sense inventory (sense identity decided in Hebrew, gloss = label)."""
+    from resource_paths import resource_path
+    out: dict = collections.defaultdict(list)
+    p = resource_path("senses/hbo_lex.tsv")
+    if p.exists():
+        with open(p, encoding="utf-8") as fh:
+            next(fh, None)
+            for line in fh:
+                parts = line.rstrip("\n").split("\t")
+                if len(parts) == 6:
+                    lex, stem, sense, gloss, _count, share = parts
+                    out[(lex, stem)].append((sense, gloss, round(float(share), 3)))
+    return out
+
+
 @register_tool(
     name="morphology_concordance",
     description=(
-        "Concordance by BHSA lexeme + verbal stem (binyan): every verse where a Hebrew "
-        "lexeme occurs in a given stem. A PRECISE structured lookup (not fuzzy search) over "
-        "BHSA-derived lex/stem tags — so it separates senses Strong's can't. e.g. "
-        "lex='QDC[', stem='hif' → verses where קדשׁ is causative ('declare holy'), distinct "
-        "from stem='piel' ('consecrate'); and it distinguishes homographs a single Strong's "
-        "conflates. `lex` is the BHSA lex-id (get it from shoresh /words or /wordstudy). Omit "
-        "`stem` for all occurrences of the lexeme (any binyan)."
+        "Concordance by BHSA lexeme + verbal stem (binyan) + sense: every verse where a "
+        "Hebrew lexeme occurs in a given stem and/or sense. A PRECISE structured lookup (not "
+        "fuzzy search) over BHSA-derived tags — separating distinctions Strong's can't. "
+        "lex='QDC[', stem='hif' → verses where קדשׁ is causative, distinct from stem='piel'; "
+        "it distinguishes homographs a single Strong's conflates; and senses are derived from "
+        "HEBREW context (e.g. lex='>B/' sense='1' = 'father', sense='2' = a distinct usage). "
+        "The response lists the available `senses` for the lex+stem so you can drill in via "
+        "`sense`. `lex` is the BHSA lex-id (from shoresh /words or /wordstudy). Omit `stem`/"
+        "`sense` to broaden."
     ),
     input_schema={
         "type": "object",
@@ -323,6 +345,10 @@ def _passage_lookup(args: dict, db: sqlite3.Connection) -> dict:
             "stem": {
                 "type": "string",
                 "description": "Verbal stem / binyan, e.g. 'qal','nif','piel','hif'. Omit for any.",
+            },
+            "sense": {
+                "type": "string",
+                "description": "Sense number within the lex+stem (see `senses` in the response). Omit for all.",
             },
             "top_k": {"type": "integer", "default": 50, "minimum": 1, "maximum": 500},
             "lang": {"type": "string", "default": "en"},
@@ -335,8 +361,14 @@ def _morphology_concordance(args: dict, db: sqlite3.Connection) -> dict:
     if not lex:
         raise ValueError("'lex' is required (BHSA lex-id, e.g. 'QDC[')")
     stem = args.get("stem", "").strip()
+    sense = str(args.get("sense", "")).strip()
     top_k = int(args.get("top_k", 50))
-    tag = f"lexstem:{lex}.{stem}" if stem else f"lex:{lex}"
+    if sense:
+        tag = f"sense:{lex}.{stem}.{sense}"
+    elif stem:
+        tag = f"lexstem:{lex}.{stem}"
+    else:
+        tag = f"lex:{lex}"
     total = db.execute("SELECT count(*) FROM tags WHERE tag = ?", (tag,)).fetchone()[0]
     rows = db.execute(
         """
@@ -350,13 +382,19 @@ def _morphology_concordance(args: dict, db: sqlite3.Connection) -> dict:
         (tag, top_k),
     ).fetchall()
     cards = citations_mod.resolve_many(db, [r[0] for r in rows])
-    return {
+    inv = _lex_sense_inventory().get((lex, stem), [])
+    out = {
         "lex": lex,
         "stem": stem or None,
+        "sense": sense or None,
         "tag": tag,
         "total": total,
+        "senses": [{"sense": s, "gloss": g, "share": sh} for s, g, sh in inv],
         "verses": [chunk_preview_from_card(c, lang=args.get("lang", "en")) for c in cards],
     }
+    if sense:
+        out["sense_gloss"] = next((g for s, g, _sh in inv if s == sense), None)
+    return out
 
 
 @register_tool(

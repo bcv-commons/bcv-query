@@ -369,10 +369,52 @@ def _stem_senses(code: str) -> list[dict]:
     return out
 
 
-def word_study(strong: str) -> dict:
+@lru_cache(maxsize=1)
+def _lex_sense_table() -> dict:
+    """{lex: {stem: [{sense, gloss, share}]}} — the Hebrew-context-derived sense inventory
+    (resources/senses/hbo_lex.tsv). Sense identity decided in Hebrew usage; gloss is the
+    label. stem '' = non-verb."""
+    out: dict = collections.defaultdict(dict)
+    p = _resources_dir() / "senses" / "hbo_lex.tsv"
+    if p.exists():
+        with p.open(encoding="utf-8") as fh:
+            next(fh, None)
+            for line in fh:
+                c = line.rstrip("\n").split("\t")
+                if len(c) == 6:
+                    out[c[0]].setdefault(c[1], []).append(
+                        {"sense": c[2], "gloss": c[3], "share": round(float(c[5]), 3)})
+    return out
+
+
+def _lex_senses(code: str, lang: str = "English") -> list[dict]:
+    """Per-lexeme, per-stem Hebrew-context senses behind a Hebrew Strong's (homographs split,
+    binyan-aware). Each: {lex, stems: {qal: [{sense,gloss,share}], …}}. The DOMINANT sense's
+    label is the curated per-stem gloss in `lang` (multilingual — sense identity is Hebrew,
+    label is pluggable); sub-senses keep the English (cleaned-MACULA) label. Empty for Greek."""
+    if not code.startswith("H"):
+        return []
+    table = _lex_sense_table()
+    out = []
+    for lex in _strong_to_lex().get(code, []):
+        if lex not in table:
+            continue
+        stems = {}
+        for stem, senses in table[lex].items():
+            ss = [dict(s) for s in senses]
+            if lang != "English" and ss:                       # relabel the dominant sense
+                g = resolve_word_gloss("hbo", lang, lex, stem or None)
+                if g:
+                    ss[0] = {**ss[0], "gloss": g}
+            stems[stem] = ss
+        out.append({"lex": lex, "stems": stems})
+    return out
+
+
+def word_study(strong: str, gloss_lang: str = "English") -> dict:
     """Composite word-study: gloss + keyness (how distinctively biblical) +
     semantic domain(s) + co-domain siblings + senses (polysemy) + cross-language
-    equivalent — from the shared resources."""
+    equivalent — from the shared resources. `gloss_lang` localizes the lex_senses labels."""
     code = _norm_strong(strong)
     domains = [{"axis": a, "domain": d, "label": lab, "share": round(sh, 3)}
                for a, d, lab, sh in sorted(_strong_domains().get(code, []), key=lambda x: -x[3])]
@@ -390,7 +432,8 @@ def word_study(strong: str) -> dict:
         "tw": tw_articles(code).get("articles", []),  # nudge 1: study the concept
         "domains": domains, "siblings": siblings,      # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
-        "stems": _stem_senses(code),                   # lex-anchored: per-binyan senses + homographs
+        "stems": _stem_senses(code),                   # lex-anchored: per-binyan glosses + homographs
+        "lex_senses": _lex_senses(code, gloss_lang),   # Hebrew-context-derived senses (per lex, per stem)
     }
 
 
