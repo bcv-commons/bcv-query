@@ -29,6 +29,10 @@ RUBRICS = {
                "words, and flags divine / red-letter speech where applicable",
     "entity":  "gets the ENTITY facts right — correct identity (who / what) and correct relations "
                "(parentage / genealogy: the right father, mother, spouse, child)",
+    "passage": "grounded in the cited verse's ORIGINAL-LANGUAGE words — the actual Hebrew/Greek "
+               "terms behind the verse and what they mean",
+    "xref":    "draws on the right CROSS-REFERENCED verses — related passages that genuinely "
+               "illuminate the cited verse",
 }
 # Curated queries to give the thinner kinds enough samples (the yaml sets are concept-heavy).
 CURATED = {
@@ -38,6 +42,12 @@ CURATED = {
     "entity": ["father of David", "Who was Boaz?", "the wife of Boaz", "Who was Ruth?",
                "Who was the mother of Solomon?", "What is Babylon?", "who was the father of Solomon",
                "Who was Jesse?"],
+    "passage": ["What does John 3:16 say?", "Explain Genesis 1:1", "What does Romans 8:28 mean?",
+                "Explain John 1:1", "What does Philippians 4:13 say?", "What does Psalm 23:1 mean?",
+                "Explain Matthew 5:9", "What does Ephesians 2:8 say?"],
+    "xref": ["cross references for John 3:16", "verses related to Romans 8:28",
+             "cross references for Genesis 1:1", "what verses connect to John 1:1",
+             "cross references for Isaiah 53:5", "verses related to Psalm 23:1"],
 }
 
 

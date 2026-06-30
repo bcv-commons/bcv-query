@@ -53,6 +53,24 @@ def _compact_words(words: list[dict]) -> list[dict]:
     ]
 
 
+def verse_interlinear(book: str, ch: int, v: int) -> dict | None:
+    """{lang, words:[compact interlinear]} for a single verse via shoresh /verse, or None.
+    Reusable building block (the PassageStrategy card draws on it); best-effort."""
+    if not SHORESH_URL:
+        return None
+    try:
+        with httpx.Client(base_url=SHORESH_URL, timeout=3.0) as client:
+            resp = client.get(f"/verse/{book}/{ch}/{v}")
+            if resp.status_code != 200:
+                return None
+            spine = (resp.json() or {}).get("spine") or {}
+    except Exception as e:
+        logger.debug("verse_interlinear failed: %s", e)
+        return None
+    words = _compact_words(spine.get("words") or [])
+    return {"lang": spine.get("language", ""), "words": words} if words else None
+
+
 def enrich_citations(citations: list[dict]) -> list[dict]:
     """Add an `original_words` key to each citation that has a BCV passage."""
     if not SHORESH_URL:

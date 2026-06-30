@@ -271,8 +271,107 @@ class EntityStrategy(CardStrategy):
                 "drill": None}
 
 
-# The family registry — step 4 appends PassageStrategy / CrossRefStrategy / ...
-STRATEGIES: list[CardStrategy] = [ConceptStrategy(), SpeakerStrategy(), EntityStrategy()]
+# ── Passage ────────────────────────────────────────────────────────────────────────────────
+def _single_verse(analysis) -> int | None:
+    """The bbcccvvv of the cited verse when the query targets exactly ONE verse, else None."""
+    for s, e in (getattr(analysis, "passages", None) or []):
+        if s == e:
+            return s
+    return None
+
+
+class PassageStrategy(CardStrategy):
+    """Passage — the cited verse's interlinear original words (translit = gloss). Its own strategy:
+    confidence is near-DETERMINISTIC (an explicit verse ref), and the OPPOSITE gate from concept —
+    synthesis almost always wants the original words behind a cited verse. Single verse only
+    (a chapter/range has no one interlinear)."""
+    kind = "passage"
+
+    def confidence(self, analysis, db) -> float:
+        if getattr(analysis, "intent", "") not in ("passage_specific", "passage_book"):
+            return 0.0
+        return 1.0 if _single_verse(analysis) is not None else 0.0
+
+    def build(self, analysis, db, query, lang) -> dict | None:
+        from indexer.references import decode, human
+        from server.original_words import verse_interlinear
+        bb = _single_verse(analysis)
+        if bb is None:
+            return None
+        try:
+            code, ch, v = decode(bb)
+        except Exception:
+            return None
+        il = verse_interlinear(code, ch, v)
+        if not il:
+            return None
+        return {"ref": human(bb, bb), "lang": il["lang"], "words": il["words"]}
+
+    _FUNC_GLOSS = {"the", "a", "an", "[obj.]", "[obj]", "and"}   # pure structural noise (repeated)
+
+    @classmethod
+    def _line(cls, data: dict) -> str:
+        parts = [f"{w['translit'] or w['surface']}={w['gloss']}"
+                 for w in data["words"]
+                 if w.get("gloss") and w["gloss"].lower() not in cls._FUNC_GLOSS][:12]
+        return f"PASSAGE {data['ref']} ({data['lang']}) — " + " · ".join(parts)
+
+    def to_synthesis(self, data, analysis) -> str | None:
+        return self._line(data) if data else None
+
+    def to_ux(self, data, analysis) -> dict | None:
+        if not data:
+            return None
+        code = data["ref"].replace(" ", "").replace(":", "/")
+        return {"kind": self.kind, "headline": self._line(data), "anchor": data["ref"],
+                "drill": f"/verse/{code}"}
+
+
+# ── Cross-reference ──────────────────────────────────────────────────────────────────────────
+class CrossRefStrategy(CardStrategy):
+    """Cross-reference — the ranked TSK cross-refs for the cited verse (`cross_references` table).
+    Fires on xref intent with a single verse. Likely navigation-leaning; the eval slice decides
+    whether the ref list grounds the prose or is UX-only."""
+    kind = "xref"
+
+    def confidence(self, analysis, db) -> float:
+        return 1.0 if (getattr(analysis, "intent", "") == "xref"
+                       and _single_verse(analysis) is not None) else 0.0
+
+    def build(self, analysis, db, query, lang) -> dict | None:
+        from indexer.references import human
+        bb = _single_verse(analysis)
+        if bb is None:
+            return None
+        rows = db.execute(
+            "SELECT target_start_bbcccvvv, target_end_bbcccvvv FROM cross_references "
+            "WHERE source_bbcccvvv=? ORDER BY (rank IS NULL), rank ASC, target_start_bbcccvvv ASC "
+            "LIMIT 8", (bb,)).fetchall()
+        refs = []
+        for s, e in rows:
+            try:
+                refs.append(human(s, e))
+            except Exception:
+                pass
+        if not refs:
+            return None
+        return {"ref": human(bb, bb), "xrefs": refs}
+
+    @staticmethod
+    def _line(data: dict) -> str:
+        return f"CROSS-REFS {data['ref']} → " + ", ".join(data["xrefs"])
+
+    def to_synthesis(self, data, analysis) -> str | None:
+        return self._line(data) if data else None
+
+    def to_ux(self, data, analysis) -> dict | None:
+        if not data:
+            return None
+        return {"kind": self.kind, "headline": self._line(data), "anchor": data["ref"], "drill": None}
+
+
+STRATEGIES: list[CardStrategy] = [ConceptStrategy(), SpeakerStrategy(), EntityStrategy(),
+                                  PassageStrategy(), CrossRefStrategy()]
 
 
 def assemble(analysis, db, query: str = "", lang: str = "en") -> list[BuiltCard]:
