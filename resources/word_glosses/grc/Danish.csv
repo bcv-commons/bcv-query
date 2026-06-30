@@ -1,0 +1,5373 @@
+lex,default
+Αἰγύπτιος,egyptisk
+Αἰθίοψ,ethiopier
+Αἰνέας,Æneas
+Αἰνών,Ænon
+Αἴγυπτος,Egypten
+Αὐγοῦστος,Augustus
+Βάαλ,Ba'al
+Βέροια,Berøa
+Βαβυλών,Babylon
+Βαλάκ,Balak
+Βαλαάμ,Bileam
+Βαράκ,Barak
+Βαραββᾶς,Barabbas
+Βαραχίας,Barakias
+Βαρθολομαῖος,Bartholomæus
+Βαριησοῦς,Barjesus
+Βαριωνᾶ,Jonas' søn
+Βαρναβᾶς,Barnabas
+Βαρσαββᾶς,Barsabbas
+Βαρτιμαῖος,Bartimæus
+Βεελζεβούλ,Beelzebul
+Βελιάρ,Beliar
+Βενιαμίν,Benjamin
+Βερνίκη,Berenike
+Βεροιαῖος,fra Berøa
+Βηθανία,Betania
+Βηθλέεμ,Bethlehem
+Βηθσαϊδά,Betsajda
+Βηθφαγή,Betfage
+Βιθυνία,Bitynien
+Βλάστος,Blastus
+Βοανηργές,Boanerges
+Βόες,Boaz
+Γάδ,Gad
+Γάζα,Gaza
+Γάϊος,Gajus
+Γαββαθά,Gabbata
+Γαβριήλ,Gabriel
+Γαδαρηνός,gadarener
+Γαλάτης,galater
+Γαλατία,Galatien
+Γαλατικός,galatisk
+Γαλιλαία,Galilæa
+Γαλιλαῖος,galilæer
+Γαλλίων,Gallio
+Γαμαλιήλ,Gamaliel
+Γεδεών,Gideon
+Γεθσημανί,Getsemane
+Γεννησαρέτ,Genesaret
+Γολγοθᾶ,Golgata
+Γόμορρα,Gomorra
+Γώγ,Gog
+Δάμαρις,Damaris
+Δέρβη,Derbe
+Δίδυμος,Didymos
+Δαλμανουθά,Dalmanuta
+Δαλματία,Dalmatien
+Δαμασκηνός,damaskener
+Δαμασκός,Damaskus
+Δανιήλ,Daniel
+Δαυίδ,David
+Δεκάπολις,Dekapolis
+Δερβαῖος,fra Derbe
+Δημήτριος,Demetrios
+Δημᾶς,Demas
+Διονύσιος,Dionysios
+Διοτρέφης,Diotrefes
+Διόσκουροι,Tvillinger
+Δορκάς,Hind; Dorcas
+Δρούσιλλα,Drusilla
+Εὐνίκη,Eunike
+Εὐοδία,Euodia
+Εὐφράτης,Eufrat
+Εὔβουλος,Eubulos
+Εὔτυχος,Eutykos
+Εὕα,Eva
+Ζάρα,Zera
+Ζαβουλών,Zebulon
+Ζακχαῖος,"Zakæus,"
+Ζαχαρίας,Zakarias
+Ζεβεδαῖος,Zebedæus
+Ζεύς,Zeus
+Ζηνᾶς,Zenas
+Ζοροβαβέλ,Shealtiel
+Θάρα,Tera
+Θαδδαῖος,Thaddæus
+Θαμάρ,Tamar
+Θεσσαλονίκη,Thessalonika
+Θεσσαλονικεύς,fra Thessalonika
+Θευδᾶς,Theudas
+Θεόφιλος,Theofilus
+Θυάτειρα,Thyatira
+Θωμᾶς,Thomas
+Κάρπος,Karpos
+Κάϊν,Kain
+Κίς,Kish
+Καισάρεια,Caesarea
+Κανά,Kana
+Καναναῖος,Kananæer
+Κανδάκη,Kandake
+Καππαδοκία,Kappadokien
+Καφαρναούμ,Kapernaum
+Καϊάφας,Kajfas
+Καϊνάμ,Kenan
+Καῖσαρ,kejser
+Καῦδα,Kauda
+Κεγχρεαί,Kenkreæ
+Κεδρών,Kedronbækken
+Κηφᾶς,Kefas
+Κιλικία,Kilikien
+Κλήμης,Clemens
+Κλαυδία,Claudia
+Κλαύδιος,Claudius
+Κλεοπᾶς,Kleofas
+Κλωπᾶς,Klopas
+Κνίδος,Knidos
+Κολοσσαί,Kolossæ
+Κορίνθιος,korinther
+Κορνήλιος,Cornelius
+Κούαρτος,Kvartus
+Κρής,kreter
+Κρήσκης,Kreskens
+Κρήτη,Kreta
+Κρίσπος,Krispus
+Κυρήνη,Kyrene
+Κυρήνιος,Kvirinius
+Κυρηναῖος,fra Kyrene
+Κωσάμ,Kosam
+Κόρε,Kain
+Κόρινθος,Korinth
+Κύπριος,cypriotisk; fra Cypern
+Κύπρος,Cypern
+Κώς,Kos
+Λάζαρος,Lazarus
+Λάμεχ,Lemek
+Λίνος,Linus
+Λαοδίκεια,Laodikea
+Λαοδικεύς,Laodikea
+Λασαία,Lasæa
+Λευί,Levi
+Λευίτης,levit
+Λευιτικός,levitisk
+Λιβερτῖνος,frigiven
+Λιβύη,Libyen
+Λουκᾶς,Lukas
+Λούκιος,Lucius
+Λυδία,Lydia
+Λυκία,Lykien
+Λυκαονία,Lykaonien
+Λυκαονιστί,lykaonisk
+Λυσίας,Lysias
+Λυσανίας,Lysanias
+Λωΐς,Lois
+Λύδδα,Lydda
+Λύστρα,Lystra
+Λώτ,Lot
+Μάαθ,Mahat
+Μάλχος,Malkus
+Μάρθα,Martha
+Μίλητος,Milet
+Μαγδαληνή,Magdalene
+Μαγώγ,Magog
+Μαδιάμ,Midjan
+Μαθθάτ,Mattat
+Μαθθίας,Matthias
+Μαθθαῖος,Matthæus
+Μαθουσαλά,Metusalem
+Μακεδονία,Makedonien
+Μακεδών,makedonsk
+Μαλελεήλ,Mahalal'el
+Μαναήν,Manaen
+Μανασσῆ,Manasse
+Μαρία,Maria
+Ματθάν,Mattan
+Ματταθά,Mattata
+Ματταθίας,Mattathias
+Μελίτη,Malta
+Μελεά,Melea
+Μελχί,Mattat
+Μελχισέδεκ,Melkisedek
+Μεσοποταμία,Mesopotamien
+Μεσσίας,Messias
+Μιτυλήνη,Mitylene
+Μιχαήλ,Mikael
+Μνάσων,Mnason
+Μυσία,Mysien
+Μωϋσῆς,Moses
+Μόλοχ,Molok
+Μύρα,Myra
+Μᾶρκος,Markus
+Μῆδος,meder
+Νάρκισσος,Narkissos
+Νίγερ,Niger
+Ναΐν,Nain
+Ναασσών,Nakshon
+Ναγγαί,Naggaj
+Ναζαρά,Nazaret
+Ναζαρηνός,nazareisk; fra Nazaret
+Ναζωραῖος,Nazaret
+Ναθάμ,Natan
+Ναθαναήλ,fra Nazaret
+Ναιμάν,Na'aman
+Ναούμ,Nahum
+Ναχώρ,Nakor
+Νεφθαλίμ,Naftali
+Νηρί,Neri
+Νηρεύς,Nereus
+Νικάνωρ,Nikanor
+Νικολαΐτης,nikolaitter
+Νικόδημος,Nikodemus
+Νικόλαος,Nikolaos
+Νικόπολις,Nikopolis
+Νινευίτης,Nineve
+Νύμφα,Nymfa
+Νῶε,Noah
+Οὐρίας,Urias
+Οὐρβανός,Urbanus
+Πάρθος,parther
+Πάταρα,Patara
+Πάτμος,Patmos
+Πάφος,Pafos
+Πέργαμος,Pergamon
+Πέργη,Perge
+Πέτρος,Peter
+Παμφυλία,Pamfylien
+Παρμενᾶς,Parmenas
+Πατροβᾶς,Patrobas
+Παῦλος,Paulus
+Περσίς,Persis
+Πιλᾶτος,Pilatus
+Πισίδιος,Pisidien
+Πισιδία,Pisidien
+Ποντικός,fra Pontus
+Ποτίολοι,Puteoli
+Πούδης,Pudens
+Πρίσκα,Priskilla
+Πρόχορος,Prokoros
+Πτολεμαΐς,Ptolemais
+Πόντιος,Pontius
+Πόντος,Pontus
+Πόπλιος,Publius
+Πόρκιος,Porkius
+Πύρρος,ildfarvet
+Σάμος,Samos
+Σάπφιρα,Safira
+Σάρδεις,Sardes
+Σάρεπτα,Sarepta
+Σάρρα,Sara
+Σέργιος,Sergius
+Σήθ,Set
+Σήμ,Sem
+Σίμων,Simon
+Σαβαώθ,Hærskare
+Σαδδουκαῖος,saddukæer
+Σαδώκ,Sadok
+Σαλά,Sala
+Σαλήμ,Salem
+Σαλαθιήλ,Shealtiel
+Σαλαμίς,Salamis
+Σαλείμ,Salem
+Σαλμών,Salmon
+Σαλμώνη,Salmone
+Σαλώμη,Salome
+Σαμάρεια,Samaria
+Σαμαρίτης,samaritaner
+Σαμαρῖτις,samaritansk
+Σαμοθρᾴκη,Samothrake
+Σαμουήλ,Samuel
+Σαμψών,Samson
+Σαούλ,Saul
+Σαρών,Saron
+Σατανᾶς,Satan
+Σαῦλος,Saul
+Σεκοῦνδος,Sekundus
+Σελεύκεια,Seleukia
+Σεμεΐν,Shim'i
+Σερούχ,Serug
+Σιδών,Sidon
+Σιδώνιος,fra Sidon
+Σιλουανός,Silvanus
+Σιλωάμ,Siloa
+Σιλᾶς,Silas
+Σινᾶ,Sinaj
+Σιών,Zion
+Σκευᾶς,Skeuas
+Σκύθης,skyte
+Σμύρνα,Smyrna
+Σολομών,Solomon
+Σουσάννα,Susanna
+Σπανία,Spanien
+Στάχυς,Stakys
+Στέφανος,Stefanus
+Στεφανᾶς,Stefanas
+Στοϊκός,stoisk
+Συμεών,Simon
+Συντύχη,Syntyke
+Συράκουσαι,Syrakus
+Συρία,Syrien
+Συροφοινίκισσα,syrisk-fønikisk
+Συχάρ,Sykar
+Συχέμ,Sike
+Σωσίπατρος,Sosipatros
+Σωσθένης,Sosthenes
+Σόδομα,Sodoma
+Σύρος,syrer
+Σύρτις,Syrtebugten
+Σώπατρος,Sopatros
+Τέρτιος,Tertius
+Τέρτυλλος,Tertullus
+Τίμων,Timon
+Τίτιος,Titus
+Τίτος,Titus
+Ταβιθά,Tabitha
+Ταρσεύς,fra Tarsus
+Ταρσός,Tarsus
+Τιβέριος,Tiberius
+Τιβεριάς,Tiberias
+Τιμαῖος,Timæus
+Τιμόθεος,Timotheus
+Τραχωνῖτις,Trakonitis
+Τρυφῶσα,Tryfosa
+Τρόφιμος,Trofimos
+Τρύφαινα,Tryfæna
+Τρῳάς,Troas
+Τυχικός,Tykikos
+Τύραννος,Tyrannos
+Τύριος,indbygger i Tyrus
+Τύρος,Tyrus
+Φάλεκ,Peleg
+Φάρες,Peres
+Φίλητος,Filetus
+Φίλιπποι,Filippi
+Φίλιππος,Filip
+Φανουήλ,Fanuel
+Φαραώ,Farao
+Φαρισαῖος,farisæer
+Φιλήμων,Filemon
+Φιλαδέλφεια,Filadelfia
+Φιλιππήσιος,filipper
+Φιλόλογος,Filologos
+Φλέγων,Flegon
+Φοίβη,Føbe
+Φοινίκη,Fønikien
+Φορτουνᾶτος,Fortunatus
+Φοῖνιξ,Fønix
+Φρυγία,Frygien
+Φύγελος,Fygelos
+Φῆλιξ,Felix
+Φῆστος,Festus
+Χίος,Kios
+Χαλδαῖος,kaldæernes
+Χανάαν,Kana'an
+Χαναναῖος,kana'anæisk
+Χαρράν,Karan
+Χερούβ,keruber
+Χλόη,Kloe
+Χοραζίν,Korazin
+Χουζᾶς,Kuza
+Χριστιανός,kristen
+Χριστός,Kristus
+αἰγιαλός,kyst
+αἰδώς,ærefrygt; skam
+αἰνέω,roser
+αἰσθάνομαι,føler
+αἰσθητήριον,sanseredskab; forstand
+αἰσχροκερδής,grisk
+αἰσχροκερδῶς,glad
+αἰσχρολογία,skamløs snak
+αἰσχρός,skam
+αἰσχρότης,skændighed
+αἰσχύνη,skændsel
+αἰσχύνω,mishandler
+αἰτέω,beder
+αἰτία,årsag
+αἰτίωμα,beskyldning
+αἰφνίδιος,uventet
+αἰχμάλωτος,gjort til bytte
+αἰχμαλωσία,krigsfangenskab
+αἰχμαλωτίζω,gør til fange
+αἰχμαλωτεύω,gør til krigsfange
+αἰών,evighed
+αἰώνιος,evig
+αἱματεκχυσία,udgydelse
+αἱμορροέω,blødning
+αἱρέω,tager; griber
+αἱρετίζω,udvælger
+αἱρετικός,udvælgende
+αἴγειος,gede-
+αἴνεσις,bifald
+αἴνιγμα,gåde
+αἴρω,tager med; hæver; løfter
+αἴσθησις,fornemmelse
+αἴτημα,påstand
+αἴτιος,årsag
+αἵρεσις,erobring
+αἶνος,bifald
+αἷμα,blod
+αὐγάζω,udstråler
+αὐγή,lys
+αὐθάδης,selvbehagelig
+αὐθαίρετος,selvvalgt
+αὐθεντέω,bestemme over
+αὐλέω,blæser på fløjte
+αὐλή,gårdsplads; palads
+αὐλίζομαι,overnatter i det fri
+αὐλητής,fløjtespiller
+αὐλός,fløjte
+αὐξάνω,forøger; vokser
+αὐστηρός,sur
+αὐτάρκεια,nøjsomhed
+αὐτάρκης,nøjsom
+αὐτοκατάκριτος,domfældt af sig selv
+αὐτοῦ,sammesteds
+αὐτόματος,af egen drift
+αὐτόπτης,øjenvidne
+αὐτός,"denne, selv"
+αὐτόχειρ,egenhændigt
+αὐχμηρός,tør
+αὔξησις,vækst
+αὔριον,i morgen
+βάθος,dybde
+βάλλω,kaster
+βάπτισμα,dåb
+βάπτω,bader
+βάρβαρος,fremmed
+βάρος,overflod
+βάσανος,pinsel
+βάσις,fod
+βάτος (I),brombærbusk
+βάτος (II),mål for flydende varer
+βάτραχος,frø
+βάϊον,palmegren
+βέβαιος,fast
+βέβηλος,uindviet
+βέλος,pil
+βήρυλλος,beryl; ædelsten
+βία,kraft
+βίαιος,tvinger
+βίβλος,bog
+βίος,liv
+βίωσις,livet
+βαθμός,trin
+βαθύνω,gør dyb
+βαθύς,høj
+βαλλάντιον,pung; pengepung
+βαπτίζω,døber
+βαπτισμός,afvaskning
+βαπτιστής,Døber
+βαρέω,betynger
+βαρέως,med besvær
+βαρύς,tung
+βαρύτιμος,højtæret
+βασίλειος,kongelig
+βασίλισσα,dronning
+βασανίζω,forhører
+βασανισμός,tortur
+βασανιστής,bøddl
+βασιλεία,kongedømme; kongerige
+βασιλεύς,konge
+βασιλεύω,hersker
+βασιλικός,kongelig
+βασκαίνω,"bagtaler,"
+βαστάζω,bærer
+βατταλογέω,slandrer
+βδέλυγμα,skrækkelig
+βδελυκτός,afskyelig; modbydelig
+βδελύσσομαι,afskyer
+βεβαίωσις,stadfæstelse
+βεβαιόω,befæster
+βεβηλόω,vanhelliger
+βελτίων,bedre
+βελόνης,pil
+βιάζω,tvinger
+βιαστής,voldsmand
+βιβλίον,bog
+βιβλαρίδιον,lille bog
+βιβρώσκω,spiser
+βιωτικός,hørende til livet
+βιόω,lever
+βλάπτω,skader
+βλάσφημος,bagtalende; gudsbespottende
+βλέμμα,blik
+βλέπω,ser
+βλαβερός,skadelig
+βλαστάνω,fremspirer
+βλασφημέω,gudsbespotter
+βλασφημία,bagtalerisk
+βλητέος,skal fyldes
+βοάω,råber
+βοή,råb
+βοήθεια,hjælpetropper
+βοηθέω,kommer til hjælp
+βοηθός,hjælper
+βολή,kast
+βολίζω,udkaster blyloddet
+βορρᾶς,nordenvind
+βοτάνη,foder
+βουλή,råd
+βουλευτής,rådsherre
+βουλεύω,holder råd
+βουνός,høj; bakke
+βούλημα,vilje
+βούλομαι,vil
+βοῦς,tyr
+βρέφος,nyfødt
+βρέχω,regner
+βραβεύω,afgør
+βραβεῖον,kamppris
+βραδυπλοέω,sejler langsomt
+βραδύνω,forhaler
+βραδύς,langsom
+βραδύτης,langsomhed
+βραχίων,arm
+βραχύς,lille; kort
+βροντή,torden
+βροχή,regn
+βρυγμός,gnidsel
+βρόχος,slynge
+βρύχω,skærer tænder
+βρύω,fremspirer
+βρώσιμος,spiselig
+βρῶμα,spise
+βρῶσις,mad
+βυθίζω,borer i sænk
+βυθός,dyb; havdyb
+βυρσεύς,garver
+βωμός,alter
+βόθυνος,grav
+βόρβορος,dynd
+βόσκω,græsser
+βότρυς,drue
+βύσσινος,gjort af hør
+βύσσος,hør
+βῆμα,talerstol
+γάγγραινα,betændelse
+γάζα,skat
+γάλα,mælk
+γάμος,bryllupsfest
+γάρ,"nemlig, for, thi"
+γέ,jo
+γέεννα,Helvede
+γέλως,latter
+γέμω,er fuld
+γένεσις,oprindelse; slægt
+γέννημα,barn
+γένος,slægt
+γέρων,gammel mand
+γίνομαι,"sker, bliver"
+γαζοφυλάκιον,skatkammer; skat
+γαλήνη,vindstille
+γαμέω,gifter sig
+γαμίζω,bortgifter
+γαστήρ,bug
+γείτων,nabo
+γελάω,ler; griner
+γεμίζω,fylder
+γενέσια,fødselsdag
+γενεά,slægt
+γενεαλογέω,beregner slægten
+γενεαλογία,stamtavle
+γενετή,fødsel
+γεννάω,avler
+γεννητός,avlet
+γερουσία,de gamles råd
+γεωργέω,dyrker jorden
+γεωργός,landmand
+γεύομαι,smager
+γεώργιον,mark; ager
+γηράσκω,ældes
+γινώσκω,"forstår, ved"
+γλεῦκος,sød vin
+γλυκύς,sød
+γλωσσόκομον,pengekassen
+γλῶσσα,tunge
+γνήσιος,retmæssig
+γναφεύς,bleger; valker
+γνησίως,retmæssigt
+γνωρίζω,gør bekendt
+γνωστός,forståelig
+γνόφος,mulm
+γνώμη,forstand
+γνώστης,kender
+γνῶσις,viden
+γογγυσμός,knurren
+γογγυστής,knurrende
+γογγύζω,hvisker
+γονεύς,fader
+γονυπετέω,falder på knæ
+γράμμα,skrift
+γράφω,skriver
+γραμματεύς,skriftklog
+γραπτός,skrevet
+γραφή,skrift
+γραώδης,som en gammel kone
+γρηγορέω,er opmærksom
+γυμνάζω,træner nøgen
+γυμνασία,øvelse
+γυμνιτεύω,mangelfuldt klædt
+γυμνός,nøgen
+γυμνότης,nøgenhed
+γυνή,kvinde
+γυναικάριον,kvinde
+γυναικεῖος,kvindelig
+γωνία,hjørne
+γόης,klager
+γόμος,fragt
+γόνυ,knæ
+γῆ,jord
+γῆρας,alderdom
+δάκνω,bider
+δάκρυον,tåre
+δάκτυλος,finger
+δάμαλις,kvie
+δάνειον,pengelån
+δέ,"nemlig, for, thi"
+δέησις,bøn
+δέκα,ti
+δέκατος,10.; den tiende
+δένδρον,træ
+δέομαι,beder
+δέος,frygtsom
+δέρμα,skind
+δέρω,flår
+δέσμη,bundt
+δέσμιος,fængslet
+δέχομαι,tager
+δέω,binder
+δή,just
+δήποτε,engang
+δήπου,dog vel; selvfølgelig
+δίδραχμον,dobbeltdrachme
+δίδωμι,giver
+δίκαιος,retfærdig
+δίκη,retfærdighed
+δίκτυον,fiskenet
+δίλογος,talende tvetunget
+δίς,to gange
+δίστομος,tveægget; med dobbelt mund
+δίψος,tørst
+δίψυχος,tvesindet
+δαίμων,gud
+δαιμονίζομαι,er besat af en ond ånd
+δαιμονιώδης,djævelsk
+δαιμόνιον,ond ånd
+δακρύω,græder
+δακτύλιος,ring
+δαμάζω,tæmme
+δανίζω,låner
+δανιστής,pengeudlåner
+δαπάνη,udgift
+δαπανάω,gør udgift
+δείκνυμι,viser
+δειγματίζω,opstiller til eksempel
+δειλία,frygtsomhed
+δειλιάω,"forsager,"
+δειλός,frygtsom
+δεινῶς,frygteligt
+δειπνέω,spiser morgenmad
+δεισιδαίμων,som frygter guderne
+δεισιδαιμονία,frygt for guderne
+δεκαπέντε,15
+δεκατέσσαρες,14
+δεκατόω,pålægger tiende
+δεκτός,modtagelig
+δελεάζω,forsyner med lokkemad
+δεξιολάβος,slyngekaster
+δεξιός,højre
+δερμάτινος,af skind
+δεσμεύω,binder
+δεσμοφύλαξ,fangevogter
+δεσμωτήριον,fængsel
+δεσμός,bånd
+δεσμώτης,fange
+δεσπότης,herre
+δευτεραῖος,på den anden dag
+δεύτερος,anden
+δεῖ,er nødvendig
+δεῖγμα,prøve
+δεῖνα,en vis
+δεῖπνον,måltid
+δεῦρο,hid
+δεῦτε,kom her
+δηλόω,åbenbarer
+δημηγορέω,taler til folket
+δημιουργός,arbejder
+δημόσιος,offentlig
+δηνάριον,denar
+διΐστημι,sætter fra hinanden
+διά,"på grund af, gennem, igennem"
+διάβολος,djævel
+διάγνωσις,undersøgelse
+διάγω,fører igennem
+διάδημα,bånd; krone
+διάδοχος,afløser
+διάκονος,tjener
+διάκρισις,adskillelse
+διάλεκτος,samtale
+διάνοια,forstand
+διάστημα,mellemrum
+διάταγμα,befaling
+διάφορος,forskellig
+διέξοδος,gennemvej
+διέρχομαι,går igennem
+διήγησις,fortælling
+διαίρεσις,deling
+διαβάλλω,bagtaler
+διαβαίνω,går under
+διαβεβαιόομαι,forsikrer bestemt
+διαβλέπω,gennemskuer
+διαγίνομαι,er forbi
+διαγγέλλω,melder ved et bud
+διαγινώσκω,lærer nøje at kende
+διαγογγύζω,knurrer højt
+διαγρηγορέω,gennemvåger
+διαδέχομαι,overtager
+διαδίδωμι,overleverer
+διαζώννυμι,adskiller
+διαθήκη,testamente
+διαιρέω,adskiller
+διακαθαίρω,gennemrenser
+διακαθαρίζω,gennemrenser
+διακατελέγχομαι,afkræfter fuldstændig
+διακονέω,tjener
+διακονία,tjeneste
+διακούω,hører ud
+διακρίνω,afsondrerer
+διακωλύω,forhindrer
+διακόσιοι,tohundrede
+διαλέγομαι,afsondrer
+διαλαλέω,taler
+διαλείπω,ophører
+διαλλάσσω,omveksler
+διαλογίζομαι,rådslår
+διαλογισμός,overvejelse
+διαλύω,opløser
+διαμάχομαι,kæmper
+διαμένω,forbliver
+διαμαρτύρομαι,bevidner
+διαμερίζω,fordeler
+διαμερισμός,adskillelse
+διανέμω,fordeler
+διανεύω,tilnikker
+διανοίγω,åbenbarer
+διανυκτερεύω,tilbringer natten
+διανόημα,tanke; mening
+διανύω,fuldender ganske
+διαπεράω,går igennem
+διαπλέω,sejler over
+διαπονέομαι,er fortørnet
+διαπορέω,tvivler
+διαπορεύομαι,kommer forbi
+διαπρίω,gennemsaver
+διαπραγματεύομαι,erhverver ved handel
+διαρπάζω,sønderriver
+διαρρήγνυμι,sønderriver
+διασαφέω,gør tydelig
+διασείω,gennemryster
+διασκορπίζω,kaster fra hinanden
+διασπάω,sønderriver
+διασπείρω,udsår
+διασπορά,udstrøelse
+διαστέλλω,adskiller
+διαστολή,adskillelse
+διαστρέφω,forvrider
+διασῴζω,frelser
+διατάσσω,forordner
+διατίθημι,overdrager
+διαταγή,befaling
+διαταράσσω,forvirrer
+διατελέω,fuldender
+διατηρέω,bevarer
+διατρίβω,stykker
+διατροφή,nærer
+διαυγάζω,lyser igennem
+διαυγής,lyser igennem
+διαφέρω,bringer
+διαφεύγω,flygter
+διαφημίζω,gør kendt
+διαφθείρω,tilintetgør
+διαφθορά,tilintetgørelse
+διαφυλάσσω,bevogter
+διαχειρίζω,lægger hånd på
+διαχλευάζω,skæmter
+διαχωρίζω,afsondrer
+διδάσκαλος,lærer
+διδάσκω,underviser
+διδακτικός,belærende
+διδακτός,lærd
+διδασκαλία,lære
+διδαχή,lære
+διεγείρω,opvækker
+διενθυμέομαι,betænker
+διερμηνευτής,fortolker
+διερμηνεύω,forklarer
+διερωτάω,udspørger
+διετής,toårig
+διετία,to år
+διηγέομαι,forklarer
+διηνεκής,sammenhængende
+διθάλασσος,som ligger ved to have
+δικαίωμα,retfærdig
+δικαίως,dømmer
+δικαίωσις,retsligt forsvar
+δικαιοκρισία,retfærdig dom
+δικαιοσύνη,retfærdighed
+δικαιόω,retfærdiggør
+δικαστής,dommer
+διοδεύω,rejser igennem
+διοπετής,er faldet ned fra himlen
+διορύσσω,gennemgraver
+διπλοῦς,tvefoldig; dobbelt
+διπλόω,fordubler
+δισμυριάς,utallig
+διστάζω,tvivler
+δισχίλιοι,2000
+διχάζω,deler
+διχοστασία,adskillelse
+διχοτομέω,skærer i to
+διψάω,tørster
+διωγμός,forfølgning
+διϊκνέομαι,kommer igennem
+διϊσχυρίζομαι,støtter mig på noget
+διϋλίζω,renser
+διό,derfor
+διόπερ,hvorfor netop; netop derfor
+διόρθωμα,berigtigelse
+διόρθωσις,berigtigelse
+διότι,fordi
+διώκτης,forfølger
+διώκω,jager
+δογματίζω,fastsætter
+δοκέω,synes
+δοκίμιον,prøve
+δοκιμάζω,prøver
+δοκιμή,prøvelse
+δοκιμασία,prøvelse
+δοκός,bjelke
+δολιόω,handler svigefuldt
+δολόω,overlister
+δοξάζω,mener
+δουλαγωγέω,behandler som slave
+δουλεία,slaveri
+δουλεύω,træller
+δουλόω,trælbinder
+δοχή,modtagelse
+δούλη,slavinde
+δοῦλος (II),slave
+δράκων,drage
+δράσσομαι,fanger
+δρέπανον,segl
+δραχμή,drachme
+δρόμος,løb
+δυνάστης,magthaver
+δυναμόω,styrker
+δυνατέω,formår meget
+δυνατός,mægtig
+δυσβάστακτος,svær at bære
+δυσεντέριον,dysenteri
+δυσερμήνευτος,svær at fortolke
+δυσκόλως,gnaven
+δυσμή,nedgang
+δυσνόητος,er vanskelig at forstå
+δυσφημέω,vanære
+δυσφημία,vanære
+δωδέκατος,12.
+δωδεκάφυλον,de tolv stammer
+δωρέομαι,giver
+δωρεά,gave
+δωρεάν,gave
+δόγμα,mening
+δόκιμος,pålidelig
+δόλιος,listig
+δόλος,lokkemad
+δόμα,gave
+δόξα,"anselse, hæder"
+δόσις,gave
+δότης,giver
+δύναμαι,kan
+δύναμις,kraft
+δύνω,synker
+δύο,to
+δύσις,nedgang
+δύσκολος,svær
+δώδεκα,12
+δώρημα,gave
+δῆλος,åbenbar
+δῆμος,folk
+δῶμα,hus
+δῶρον,gave
+εἰ,hvis
+εἰ δὲ μή,hvis ikke
+εἰδέα,udseende
+εἰδωλεῖον,tempel for et gudebillede
+εἰδωλολάτρης,afgudsdyrker
+εἰδωλολατρία,afgudsdyrkelse
+εἰδωλόθυτος,ofret til guderne
+εἰκοσιτρεῖς,23
+εἰκών,billede
+εἰκῇ,uden formål; forgæves
+εἰλικρίνεια,renhed
+εἰλικρινής,soleklar
+εἰμί,er
+εἰρήνη,fred
+εἰρηνεύω,stifter fred
+εἰρηνικός,fredelig
+εἰρηνοποιέω,stifter fred
+εἰρηνοποιός,fred stiftende
+εἰς,til
+εἰσάγω,indfører
+εἰσέρχομαι,kommer ind
+εἰσακούω,lytter til
+εἰσδέχομαι,tager imod
+εἰσκαλέομαι,kalder ind
+εἰσπηδάω,løber ind
+εἰσπορεύομαι,kommer; rejser
+εἰστρέχω,løber ind
+εἰσφέρω,bringer ind
+εἴδωλον,billede
+εἴκοσι,23
+εἴκω,giver efter
+εἴπερ,hvis ellers
+εἴσειμι,går ind
+εἴσοδος,adgang
+εἴτε,hvad enten
+εἴωθα,vant til
+εἶδος,udseende
+εἶπον,taler
+εἶτα,derpå
+εἷς,en; et
+εὐάρεστος,behagelig
+εὐαγγέλιον,evangelium
+εὐαγγελίζω,prædiker
+εὐαγγελιστής,evangelist
+εὐαρέστως,behagelig
+εὐαρεστέω,finder behag i
+εὐγενής,ædelbåren
+εὐδία,godt vejr
+εὐδοκέω,er glad
+εὐδοκία,bifald
+εὐεργέτης,velgører
+εὐεργεσία,"god handling,"
+εὐεργετέω,handler ret
+εὐθέως,straks
+εὐθυδρομέω,styrer imod
+εὐθυμέω,er ved godt mod
+εὐθύμως,velsindet
+εὐθύνω,gør lige
+εὐθύς,ret
+εὐθύτης,retfærdighed
+εὐκαίρως,til rette tid
+εὐκαιρέω,har tid
+εὐκαιρία,passende tid
+εὐλάβεια,forsigtighed
+εὐλαβέομαι,iagttager
+εὐλαβής,frygtsom
+εὐλογέω,velsigner
+εὐλογία,velsignelse
+εὐλογητός,velsignet
+εὐμετάδοτος,som gerne meddeler
+εὐνοέω,bliver enig med
+εὐνουχίζω,kastrerer
+εὐνοῦχος,eunuk
+εὐοδόω,fører på en god vej
+εὐπειθής,følgagtig
+εὐπερίστατος,overrasker
+εὐποιΐα,velgørenhed
+εὐπορέω,har formue
+εὐπορία,let
+εὐπρέπεια,anstand
+εὐπροσωπέω,skaffer sig anseelse
+εὐπρόσδεκτος,kærkommen
+εὐρύχωρος,bred
+εὐσέβεια,gudsfrygt
+εὐσεβέω,er from
+εὐσεβής,som opfylder sine pligter mod guderne
+εὐσεβῶς,formt
+εὐσχήμων,anstændig
+εὐσχημοσύνη,god holdning
+εὐσχημόνως,anstændigt
+εὐτραπελία,smidighed
+εὐτόνως,stærkt spændt
+εὐφημία,andægtig tavshed
+εὐφορέω,er frugtbar
+εὐφραίνω,opmuntrer
+εὐφροσύνη,glæde
+εὐχάριστος,yndig
+εὐχή,bøn
+εὐχαριστέω,takker
+εὐχαριστία,taknemlighed
+εὐψυχέω,er ved godt mod
+εὐωδία,vellugt
+εὐώνυμος,berømt
+εὑρίσκω,finder
+εὔθετος,brugbar for
+εὔθυμος,velsindet
+εὔκαιρος,til rette tid
+εὔκοπος,nem
+εὔνοια,velvilje
+εὔσημος,med godt tegn
+εὔσπλαγχνος,medlidende
+εὔφημος,af god lyd
+εὔχομαι,beder
+εὔχρηστος,brugbar
+εὖ,godt
+εὖγε,godt
+ζάω,lever
+ζέω,koger
+ζήτημα,undersøgelse
+ζήτησις,undersøgelse
+ζεστός,hed
+ζευκτηρία,bånd
+ζεῦγος,åg
+ζηλεύω,kappes
+ζηλωτής,efterligner; tilhænger
+ζηλόω,kappes
+ζημία,tab
+ζημιόω,skader
+ζητέω,søger
+ζιζάνιον,ukrudt
+ζυγός,åg
+ζυμόω,bringer i gæring
+ζωή,liv
+ζωγρέω,fanger levende
+ζωννύω,ombælter
+ζόφος,mørke
+ζύμη,Surdej
+ζώνη,bælte
+ζῆλος,ivrig
+ζῳογονέω,vinder livet
+ζῳοποιέω,gør levende
+ζῷον,væsen
+θάλασσα,hav
+θάλπω,opflammer
+θάμβος,forbavselse
+θάνατος,død
+θάπτω,begraver
+θάρσος,mod
+θέατρον,skuespil
+θέλημα,vilje
+θέλησις,vilje
+θέλω,vil
+θέρμη,varme
+θέρος,sommer
+θήκη,gemmested
+θήρα,jagt
+θαμβέω,studser
+θανάσιμος,dødelig
+θανατηφόρος,dødbringende
+θανατόω,dræber
+θαρρέω,er modig
+θαρσέω,er ved godt mod
+θαυμάζω,beundrer
+θαυμάσιος,forunderlig
+θαυμαστός,beundringsværdig
+θαῦμα,under
+θεά,gudinde
+θεάομαι,ser
+θεατρίζω,gør latterlig
+θειότης,guddommelighed
+θειώδης,svovlgul
+θεμέλιος,grundsten
+θεμελιόω,grunder
+θεοδίδακτος,undervist af en gud
+θεομάχος,kæmpende mod guderne
+θεοσέβεια,gudsfrygt
+θεοσεβής,gudsfrygtig
+θεοστυγής,forhadt af gud
+θεράπων,tjener
+θερίζω,høster
+θεραπεία,tjeneste
+θεραπεύω,helbreder; tjener
+θερισμός,høst
+θεριστής,en der høster
+θερμαίνω,varmer
+θεωρέω,betragter
+θεωρία,beskuelse
+θεόπνευστος,begejstret af gud
+θεός,gud
+θεότης,guddom
+θεῖον,svovl
+θεῖος,svovl
+θηλάζω,dier
+θηρίον,dyr
+θηρεύω,jager vildt
+θηριομαχέω,kæmper med vilde dyr
+θησαυρίζω,indsamler
+θησαυρός,skatkammer
+θιγγάνω,berører
+θλίβω,presser
+θλῖψις,forfølgelse
+θνητός,dødelig
+θνῄσκω,dør
+θορυβάζω,larmer
+θορυβέω,larmer
+θρέμμα,opdræt
+θρίξ,hår
+θραύω,sønderbryder
+θρηνέω,klager; jamrer
+θρησκεία,gudsdyrkelse
+θρησκός,gudfrygtig
+θριαμβεύω,triumferer
+θροέω,larmer
+θρόμβος,klump
+θρόνος,trone
+θυγάτηρ,datter
+θυγάτριον,lille datter
+θυμίαμα,virak
+θυμιάω,røger
+θυμιατήριον,røgelsekar
+θυμομαχέω,kæmper hidsigt
+θυμός,liv
+θυμόω,gør vred
+θυρίς,lille vindue
+θυρεός,skjold
+θυρωρός,dørvogter
+θυσία,offer
+θυσιαστήριον,alter
+θόρυβος,larm
+θύελλα,stormvind
+θύρα,dør
+θύω,ofrer
+θύϊνος,fra et citrustræ
+θώραξ,brystpandser
+θῆλυς,kvindelig
+κάθημαι,sidder
+κάκωσις,fordærvelse
+κάλαμος,rør
+κάλυμμα,bedækning
+κάμηλος,kamel
+κάμινος,ovn
+κάμνω,anstrenger mig
+κάμπτω,bøjer
+κάρφος,gren
+κάτω,ned
+κέλευσμα,befaling
+κέντρον,brod
+κέραμος,tagsten
+κέρας,horn
+κέρδος,vinding
+κέρμα,lille mønt; skilling
+κήρυγμα,bekendtgørelse
+κίνδυνος,fare
+κίνησις,bevægelse
+κίχρημι,låner
+καί,og; også
+καίγε,selv
+καίπερ,selvom
+καίτοι,og dog
+καίτοιγε,og dog
+καίω,brænder
+καθά,ligesom
+καθάπερ,ligesom
+καθάπτω,berører
+καθέδρα,sæde
+καθέζομαι,sætter mig ned
+καθήκω,er passende
+καθίζω,sætter
+καθίημι,nedsender
+καθίστημι,sætter
+καθαίρεσις,nedrivning
+καθαίρω,gør ren
+καθαιρέω,nedtager
+καθαρίζω,renser
+καθαρισμός,renselse
+καθαρός,ren
+καθαρότης,renhed
+καθεξῆς,i rad
+καθεύδω,sover
+καθεῖς,ifølge
+καθηγητής,vejviser; lærer
+καθημερινός,på den dag i dag
+καθοπλίζω,bevæbner
+καθοράω,ser ned
+καθό,såvidt
+καθόλου,i det hele; almindeligt
+καθότι,hvorledes
+καθώς,ligesom
+καινός,ny
+καινότης,nyhed
+καιρός,passende tidspunkt
+κακία,ondskab
+κακοήθεια,slethed
+κακολογέω,bagtaler
+κακοπάθεια,lidelse
+κακοπαθέω,lider ulykke
+κακοποιέω,handler slet
+κακοποιός,slet handlende
+κακουχέω,behandler ilde
+κακοῦργος,handler slet
+κακός,ond
+κακόω,mishandler
+κακῶς,ondt
+καλάμη,hvedestrå
+καλέω,kalder
+καλλιέλαιος,rig på smuk olie
+καλοδιδάσκαλος,lærer i dyd og retskaffenhed
+καλοποιέω,handler smukt
+καλός,smuk
+καλύπτω,skjuler
+καλῶς,godt
+καμμύω,lukker
+κανών,rettesnor
+καπηλεύω,småhandler
+καπνός,røg
+καρδία,hjerte
+καρδιογνώστης,hjertekender
+καρποφορέω,bærer frugt
+καρποφόρος,frugtbærende
+καρπός,frugt
+καρτερέω,udholder
+κατά,ifølge
+κατάβασις,nedstigen
+κατάγνυμι,sønderbryder
+κατάγω,fører ned
+κατάδηλος,åbenbar
+κατάθεμα,forbandelse
+κατάκειμαι,ligger ned
+κατάκριμα,domfældelse
+κατάκρισις,dom
+κατάλαλος,"som bagtaler,"
+κατάλοιπος,øvrig
+κατάλυμα,herberg
+κατάνυξις,angst; kval
+κατάπαυσις,beroligelse
+κατάρα,forbandelse
+κατάρτισις,indrettening
+κατάσκοπος,undersøgende
+κατάστημα,stilling
+κατάσχεσις,besiddelse
+κατέναντι,overfor
+κατέρχομαι,går ned
+κατέχω,fastholder
+κατήγορος,anklager
+κατήφεια,ydmygelse
+καταβάλλω,nedkaster
+καταβαίνω,går ned
+καταβαρέω,nedtrykker
+καταβαρύνω,nedtrykker
+καταβολή,grundlæggen
+καταβραβεύω,fordømmer
+καταγγέλλω,forkynder
+καταγγελεύς,forkynder
+καταγελάω,udler
+καταγινώσκω,domfælder
+καταγωνίζομαι,nedkæmper
+καταδέω,fastbinder
+καταδίκη,fordømmer
+καταδικάζω,fordømmer
+καταδιώκω,forfølger
+καταδουλόω,undertvinger
+καταδυναστεύω,betvinger
+καταθεματίζω,bander
+καταισχύνω,gør til skamme
+κατακαίω,forbrænder
+κατακαλύπτω,tilhyller
+κατακαυχάομαι,foragter
+κατακλάω,sønderbryder
+κατακλίνω,lægger ned
+κατακλείω,tillukker
+κατακληρονομέω,κατακληρονομέω
+κατακλυσμός,oversvømmelse
+κατακλύζω,oversvømme
+κατακολουθέω,følger
+κατακρίνω,domfælder
+κατακρημνίζω,kaster
+κατακυριεύω,overvælder
+κατακόπτω,nedhugger
+καταλέγω,opregner
+καταλαλέω,bagtaler
+καταλαλιά,bagtalelse
+καταλαμβάνω,griber
+καταλείπω,forlader
+καταλιθάζω,stener
+καταλλάσσω,forliger
+καταλλαγή,omveksler
+καταλύω,opløser
+καταμένω,forbliver
+καταμανθάνω,lærer nøje
+καταμαρτυρέω,vidner imod én
+καταναλίσκω,forbruger
+καταναρκάω,besværer
+κατανεύω,tilnikker
+κατανοέω,bemærker
+καταντάω,kommer til
+κατανύσσομαι,fuldender
+καταξιόω,holder for værdig
+καταπέτασμα,forhæng
+καταπίνω,sluger
+καταπίπτω,falder ned
+καταπατέω,søndertræder
+καταπαύω,standser
+καταπλέω,sejler ind
+καταπονέω,overvælder
+καταποντίζω,nedsænker
+καταράομαι,forbander
+καταργέω,gør ugyldig; ugyldiggør
+καταριθμέω,optæller
+καταρτίζω,ordner; forbereder
+καταρτισμός,fuldkommengørelse
+κατασείω,ryster
+κατασκάπτω,undergraver
+κατασκήνωσις,lejr
+κατασκευάζω,bygger
+κατασκηνόω,opslår lejr
+κατασκιάζω,beskygger
+κατασκοπέω,undersøger
+κατασοφίζομαι,bruger list
+καταστέλλω,holder nede
+καταστολή,klædning
+καταστρέφω,drejer omkring
+καταστρηνιάω,opfører mig stolt imod én
+καταστροφή,underkastelse
+καταστρώννυμι,nedstrækker
+κατασφάζω,dræber
+κατασφραγίζω,forsegler
+κατασύρω,trækker ned
+κατατίθημι,sætter ned
+κατατομή,omskærelse
+κατατρέχω,løber ned
+καταφέρω,bærer hen
+καταφεύγω,flyer
+καταφθείρω,fordærver
+καταφιλέω,kysser ømt
+καταφρονέω,foragter
+καταφρονητής,foragte
+καταχέω,udgyder over
+καταχθόνιος,underjordisk
+καταχράομαι,udnytter
+καταψύχω,afkøler
+κατείδωλος,fuld af gudebilleder
+κατενώπιον,lige imod
+κατεξουσιάζω,undertrykker
+κατεργάζομαι,fuldbringer
+κατεσθίω,opæder
+κατευθύνω,styrer
+κατευλογέω,velsigner
+κατεφίστημι,vender sig imod
+κατηγορέω,anklager
+κατηγορία,anklage
+κατηχέω,belærer
+κατισχύω,formår
+κατιόω,ruster
+κατοίκησις,bolig
+κατοικέω,bebor
+κατοικία,bolig
+κατοικίζω,bebor
+κατοικητήριον,opholdssted
+κατοπτρίζω,spejler
+κατώτερος,lavere
+καυματίζω,forbrænder; afbrænder
+καυστηριάζω,brændemærker
+καυσόω,brænder op
+καυχάομαι,praler
+καύσων,hede
+καύχημα,praleri
+καύχησις,praleri
+καῦμα,brand
+καῦσις,brænden
+κείρω,afskærer håret
+κειρία,bånd
+κελεύω,befaler
+κενοδοξία,tom indbildning
+κενοφωνία,tom tale
+κεντυρίων,centurio
+κενόδοξος,indbilsk
+κενός,tom
+κενόω,udtømmer
+κενῶς,tom
+κεράμιον,lerfad
+κεράννυμι,blander (især vin)
+κεράτιον,bønne
+κεραία,accent; læsetegn
+κεραμεύς,pottemager
+κεραμικός,af ler
+κερδαίνω,vinder
+κερματιστής,vekselerer
+κεφάλαιον,hovedsag
+κεφαλή,hoved
+κεφαλίς,bogrulle
+κεφαλιόω,slår i hovedet
+κεῖμαι,ligger
+κημόω,tier
+κηπουρός,gartner
+κηρύσσω,forkynder
+κιβωτός,trækasse
+κιθάρα,cithar
+κιθαρίζω,spiller på citar
+κιθαρῳδός,som spiller på citar
+κινέω,bevæger
+κινδυνεύω,svæver i fare
+κιννάμωμον,kanel
+κλάδος,kvist
+κλάσις,brud
+κλάσμα,brudstykke
+κλάω,brækker
+κλέμμα,tyveri
+κλέος,rygte
+κλέπτης,tyv
+κλέπτω,stjæler
+κλίβανος,et kar af ler
+κλίμα,beliggenhed
+κλίνη,leje
+κλίνω,bøjer
+κλαίω,græder
+κλαυθμός,jamren
+κλείς,nøgle
+κλείω,lukker
+κληρονομέω,arver
+κληρονομία,arv
+κληρονόμος,arving
+κληρόω,vælger ved lod
+κλητός,udvalgt
+κλινάριον,lille seng
+κλινίδιον,lille seng
+κλισία,hytte
+κλοπή,tyveri
+κλυδωνίζομαι,bølger
+κλύδων,bølge
+κλῆμα,spire
+κλῆρος,lod
+κλῆσις,råb
+κνήθω,kradser
+κοίμησις,sover
+κοίτη,seng
+κοδράντης,quadrans; fjerde delen af en as
+κοιλία,underlivet
+κοιμάομαι,falder i søvn
+κοινωνέω,deler
+κοινωνία,fællesskab
+κοινωνικός,omgængelig
+κοινωνός,deltager
+κοινός,fælles
+κοινόω,gør uren
+κοιτών,soveværelse
+κολάζω,straffer
+κολακεία,smigreri
+κολαφίζω,slår
+κολλάω,sammenføjer
+κολλούριον,øjensalve
+κολλυβιστής,vekselerer
+κολοβόω,lemlæster
+κολυμβάω,svømmer
+κολυμβήθρα,dam
+κολωνία,koloni
+κομάω,er langhåret
+κομίζω,plejer
+κομψότερον,smykket
+κονιάω,kalker
+κονιορτός,støvsky
+κοπάζω,falder
+κοπή,slægter
+κοπετός,ligklage
+κοπιάω,slider
+κοπρία,gødning
+κοράσιον,lille pige
+κορέννυμι,mætter
+κορβᾶν,tempelblokken
+κοσμέω,ordner
+κοσμικός,verdslig; jordisk
+κοσμοκράτωρ,verdensstyrer
+κουστωδία,vagt
+κουφίζω,er let
+κοῦμ,kum; rejs dig
+κράβαττος,båre
+κράζω,råber
+κράσπεδον,rand
+κράτιστος,stærkest
+κράτος,styrke
+κρέας,kød
+κρίθινος,af byg
+κρίμα,fordømmelse
+κρίνον,lilie
+κρίνω,dømmer
+κρίσις,strid
+κραιπάλη,hovedpine
+κρανίον,hjerneskal
+κρατέω,tager; får fat på; bemægtiger mig
+κραταιός,vældig
+κραταιόω,gør stærk
+κραυγάζω,skriger
+κραυγή,skrig
+κρείττων,stærkere
+κρεμάννυμι,hænger op
+κρημνός,brink
+κριθή,byg
+κριτήριον,bedømme
+κριτής,dommer
+κριτικός,skikket til at bedømme
+κρούω,banker
+κρυπτός,skjult
+κρυσταλλίζω,gennemsigtig som krystal
+κρυφαῖος,skjult
+κρυφῇ,hemmeligt
+κρύπτη,skjult sted
+κρύπτω,skjuler
+κρύσταλλος,krystal
+κτάομαι,køber
+κτήτωρ,ejendomsbesidder
+κτίζω,bygger
+κτίσις,grundlæggelse
+κτίσμα,skabning
+κτίστης,anlægger; stifter
+κτῆμα,besiddelse
+κτῆνος,besiddelse
+κυβέρνησις,regeren
+κυβεία,terningspil
+κυβερνήτης,skibsstyrmand
+κυκλεύω,krummer
+κυκλόθεν,fra omkredsen; fra alle sider
+κυκλόω,krummer
+κυλίω,vælter; ruller
+κυλισμός,krum
+κυλλός,krum
+κυνάριον,lille hund
+κυρία,magt
+κυριακός,henhørende til Herren
+κυριεύω,ejer
+κυριότης,besiddelse
+κυρόω,stadfæster
+κωλύω,hindrer
+κωμόπολις,landsby
+κωφός,stum
+κόκκινος,skarlagenrød
+κόκκος,sennep
+κόλασις,straf
+κόλπος,barm
+κόμη,hår
+κόπος,udmattelse
+κόπριον,gødning
+κόπτω,slår
+κόραξ,ravn
+κόρος,tånde; mål
+κόσμιος,ordnet
+κόσμος,verden
+κόφινος,kurv
+κύκλῳ,kreds
+κύμβαλον,metalbækken
+κύμινον,kommen
+κύπτω,bøjer
+κύριος,herre
+κύων,hund
+κώμη,landsby
+κώνωψ,myg
+κἀγώ,og jeg
+κἀκεῖ,og der
+κἀκεῖθεν,derfra
+κἀκεῖνος,denne
+κἄν,og hvis
+κῆνσος,opkræver
+κῆπος,have
+κῆρυξ,udråber
+κῆτος,søuhyre
+κῦμα,bølge
+κῶλον,lem
+κῶμος,gilde
+λάθρᾳ,hemmeligt
+λάμπω,lyser
+λάρυγξ,svælg
+λάχανον,haveurter
+λέγω,taler; siger
+λέντιον,linned
+λέπρα,spedalskhed
+λέων,løve
+λήθη,forglemmelse
+λίαν,meget
+λίβανος,røgelse
+λίθινος,af sten; sten-
+λίθος,sten
+λίμνη,dam
+λίνον,hør
+λίτρα,libra; sølvmønt
+λίψ,sydvestvind
+λαγχάνω,får ved lod
+λακάω,sprænger
+λακτίζω,sparker
+λαλέω,taler; snakker
+λαλιά,snak
+λαμβάνω,tager
+λαμπάς,fakkel
+λαμπρός,lysende
+λαμπρότης,glans
+λαμπρῶς,lysende
+λανθάνω,er skjult
+λαξευτός,hugget af sten
+λατομέω,udhugger i sten
+λατρεία,tjeneste
+λατρεύω,tjener
+λαός,folk
+λαῖλαψ,stormvind
+λείπω,forlader
+λεγιών,legion
+λειτουργέω,gudstjeneste
+λειτουργία,offentlig tjeneste; kirketjeneste
+λειτουργικός,tjenende
+λειτουργός,tjener
+λεμά,hvorfor
+λεπίς,skal
+λεπρός,med udslæt
+λεπτός,tynd
+λευκαίνω,gør hvid
+λευκός,hvid
+λεῖμμα,levning
+λεῖος,glat
+ληνός,vinperse
+λιβανωτός,røgelse
+λιθάζω,stener
+λιθοβολέω,stener
+λιθόστρωτος,mosaikarbejde
+λικμάω,renser kornet
+λιμήν,havn
+λιμός,hungersnød
+λιπαρός,fed
+λοίδορος,skældende
+λογίζομαι,venstre
+λογεία,indsamling
+λογικός,fornuftig
+λογισμός,regning
+λογομαχέω,strider med ord
+λογομαχία,ordstrid
+λοιδορέω,skælder
+λοιδορία,skælden
+λοιμός (II),pest
+λοιπός,øvrig
+λουτρόν,bad
+λούω,vasker
+λυμαίνω,hungrer
+λυπέω,bedrøver
+λυσιτελέω,gavner
+λυτρωτής,forløser
+λυτρόω,frigiver mod løsepenge
+λυχνία,lysestage
+λόγιον,orakelsprog
+λόγιος,veltalende
+λόγος,ord
+λόγχη,lansespids
+λύκος,ulv
+λύπη,sorg; lidelse
+λύσις,løsladelse
+λύτρον,løsepenge
+λύτρωσις,forløsning
+λύχνος,lampe
+λύω,løser
+λῃστής,røver
+λῆμψις,indtægt
+λῆρος,tåbelig snak
+μάγος,troldmand
+μάκελλον,kødtorv
+μάλιστα,i høj grad
+μάμμη,bedstemoder
+μάννα,manna
+μάρμαρος,marmor
+μάρτυς,vidne
+μάστιξ,pisk
+μάταιος,unyttig
+μάτην,forgæves
+μάχαιρα,kniv
+μάχη,slag
+μάχομαι,kæmper
+μέγας,stor
+μέγεθος,storhed
+μέθη,overdreven drikken
+μέθυσος,beruset
+μέλας,sort
+μέλει,er vigtig
+μέλι,honning
+μέλλω,skal
+μέλος,led
+μέμφομαι,dadler
+μέν,men
+μέντοι,netop
+μένω,bliver
+μέριμνα,bekymring
+μέρος,part
+μέσος,midte
+μέτοχος,delagtig
+μέτρον,mål
+μέτωπον,pande
+μέχρι,indtil
+μή,ikke
+μήγε,hvis ikke
+μήν (I),sandelig
+μήν (II),mund
+μήπω,endnu ikke
+μήτε,og ikke
+μήτηρ,mor
+μήτι,hvis ikke
+μήτιγε,for slet ikke at tale om
+μήτρα,livmoder
+μίασμα,besudling
+μίγμα,blanding
+μίγνυμι,træffer
+μίλιον,den romerske mil
+μίσθιος,lønnet
+μίσθωμα,det lejede
+μαίνομαι,raser
+μαγεία,magi; trylleri
+μαγεύω,fortryller
+μαθήτρια,discipelinde
+μαθητής,elev
+μαθητεύω,er discipel; underviser
+μακάριος,velsignet
+μακαρίζω,priser lykkelig
+μακαρισμός,det at prise lykkelig
+μακράν,langt
+μακροθυμέω,er standhaftig
+μακροθυμία,langmodighed
+μακροθύμως,tålmodig
+μακροχρόνιος,længelevende
+μακρόθεν,fra det fjerne
+μακρός,lang
+μαλακία,blødhed
+μαλακός,blød
+μαμωνᾶς,mammon
+μανία,raseri
+μανθάνω,lærer
+μαντεύομαι,spår
+μαράνα θᾶ,Marana ta
+μαραίνω,udslukker
+μαργαρίτης,perle
+μαρτυρέω,vidner
+μαρτυρία,vidnesbyrd
+μαρτύριον,vidnesbyrd
+μαρτύρομαι,påkalder som vidne
+μασάομαι,spiser
+μαστίζω,pisker
+μαστιγόω,pisker
+μαστός,bryst
+ματαιολογία,dårlig
+ματαιολόγος,forfængeligt
+ματαιότης,letsindighed
+ματαιόω,ender i tomhed
+μεγάλως,stort
+μεγαλειότης,storhed
+μεγαλεῖος,stor
+μεγαλοπρεπής,ædelmodig
+μεγαλωσύνη,storhed
+μεγαλύνω,forstørrer
+μεγιστάν,stor
+μεθίστημι,omstiller
+μεθερμηνεύω,oversætter
+μεθοδεία,list
+μεθύσκω,beruser
+μεθύω,er beruset
+μελετάω,planlægger
+μεμβράνα,pergament
+μεμψίμοιρος,misfornøjet
+μενοῦν,javist
+μενοῦνγε,javist
+μερίζω,deler
+μερίς,portion; ret
+μεριμνάω,sørger
+μερισμός,deling
+μεριστής,deler
+μεσίτης,mægler
+μεσημβρία,sydpå
+μεσιτεύω,er i midten; mægler
+μεσονύκτιον,midnatlig
+μεσουράνημα,rummet mellem himmel og jord
+μεστός,fuld
+μεστόω,fylder
+μεσότοιχον,mellemvæg
+μεσόω,er i midten
+μετά,efter; med
+μετάγω,fører bort
+μετάθεσις,overgang
+μετάλημψις,deltagelse
+μετάνοια,anger
+μετέπειτα,derefter
+μετέχω,deler
+μεταίρω,μεταίρω
+μεταβάλλω,kaster om
+μεταβαίνω,går over
+μεταδίδωμι,meddeler
+μετακαλέω,kalder bort
+μετακινέω,forandrer
+μεταλαμβάνω,tager del i
+μεταλλάσσω,omveksler
+μεταμέλομαι,angrer
+μεταμορφόω,omformer
+μετανοέω,fortryder
+μεταξύ,i midten
+μεταπέμπω,sender bud efter
+μεταστρέφω,vender bort
+μετασχηματίζω,omformer
+μετατίθημι,omstiller
+μετατρέπω,vender bort
+μετεωρίζομαι,er nervøs
+μετοικίζω,bringer til en anden bolig
+μετοικεσία,ophold som fremmed
+μετοχή,deltagelse
+μετρέω,måler
+μετρίως,tilstrækkelig
+μετρητής,den målende
+μετριοπαθέω,holder måde i lidenskaber
+μηδέ,heller ikke
+μηδέποτε,ingensinde
+μηδέπω,ikke endnu
+μηδαμῶς,på ingen måde
+μηδείς,ingen
+μηκέτι,ikke længere
+μηκύνω,gør lang
+μηλωτή,fåreskind
+μηνύω,angiver
+μηρός,lår
+μητρολῴας,modermorder
+μιαίνω,besudler
+μιασμός,besmittelse
+μικρός,lille
+μιμέομαι,efterligner
+μιμητής,efterligner
+μιμνῄσκω,erindrer
+μισέω,hader
+μισθαποδοσία,betaling af skyldig løn
+μισθαποδότης,en der lønner
+μισθωτός,lejet
+μισθός,løn
+μισθόω,udlejer
+μνήμη,hukommelse
+μνεία,erindring
+μνημεῖον,grav
+μνημονεύω,husker
+μνημόσυνον,minde
+μνηστεύω,frier
+μνᾶ,mine
+μνῆμα,minde
+μογιλάλος,stum
+μοιχάω,begår ægteskabsbrud
+μοιχαλίς,ægteskabsbruder
+μοιχεία,ægteskabsbrud
+μοιχεύω,forfører
+μοιχός,horkarl
+μολυσμός,besudling
+μολύνω,besmudser
+μομφή,dadel; bebrejdelse
+μονή,ophold
+μονογενής,eneste søn
+μονόφθαλμος,med ét øje
+μονόω,gør alene
+μορφή,form; skikkelse
+μορφόω,danner; former
+μοσχοποιέω,gør en kalv
+μουσικός,musikalsk
+μυέω,indvier i mysterierne
+μυελός,marv
+μυκάομαι,drøner; brager
+μυκτηρίζω,rynker næse; spotter
+μυλικός,hørende til møllen
+μυρίζω,salver
+μυριάς,utallig
+μυστήριον,hemmelighed
+μυωπάζω,er nærsynet
+μωμάομαι,dadler; spotter
+μωρία,dårskab
+μωραίνω,er en tåbe
+μωρολογία,tåbelig tale
+μωρός,dum
+μόδιος,kornmål
+μόλις,næppe
+μόνος,alene
+μόρφωσις,form; skikkelse
+μόσχος,kalv
+μόχθος,anstrengelse; møje
+μύλινος,mølle; møllesten
+μύλος,mølle; møllesten
+μύριοι,overmåde
+μύρον,salve
+μώλωψ,blodstribe
+μᾶλλον,hellere; endnu
+μῆκος,længde
+μῦθος,fortælling
+μῶμος,dadel
+νάρδος,nardus
+νέκρωσις,hendøden
+νέος,ung
+νέφος,sky; tåge
+νή,sandelig
+νήθω,spinder
+νήπιος,umyndig
+νήφω,faster
+νίκη,sejr
+νίπτω,vasker
+ναί,ja
+ναυαγέω,lider skibbrud
+ναός,tempel
+ναύκληρος,skibsejer
+ναύτης,sømand
+ναῦς,skib
+νεανίας,yngling
+νεανίσκος,yngling
+νεκρός,død
+νεκρόω,dræber
+νεομηνία,nymåned
+νεφέλη,sky
+νεφρός,nyre
+νεωκόρος,tempelværge
+νεωτερικός,ungdommelig
+νεότης,ungdom
+νεόφυτος,nylig plantet
+νεύω,nikker
+νηπιάζω,er barn
+νησίον,lille ø
+νηστεία,fasten
+νηστεύω,faster
+νηφάλιος,fastende
+νικάω,sejrer
+νιπτήρ,vaskebækken
+νοέω,forstår
+νομή,græsgang
+νομίζω,mener
+νομίμως,overensstemmende med skik
+νομικός,lovlig
+νομοδιδάσκαλος,skriftklog
+νομοθέτης,lovgiver
+νομοθεσία,lovgivning
+νομοθετέω,giver love
+νοσέω,er syg
+νοσσίον,fugleunge
+νοσσιά,rede med unger
+νοσσός,dueunge
+νοσφίζω,stjæler
+νουθεσία,formaning
+νουθετέω,belærer
+νουνεχῶς,klog
+νοῦς,sind
+νυμφίος,brudgom
+νυμφών,brudekammer
+νυνί,nu
+νυστάζω,nikker i søvne; sover
+νυχθήμερον,dag og nat; døgn
+νωθρός,lad
+νόημα,tanke
+νόθος,uægte født
+νόμισμα,penge
+νόμος,lov
+νόσημα,sygdom
+νόσος,sygdom
+νότος,Sydvind
+νύμφη,brud
+νύξ,nat
+νύσσω,støder
+νῆσος,ø
+νῆστις,fastende
+νῖκος,sejr
+νῦν,nu
+νῶτος,ryg
+ξένος,fremmed
+ξέστης,kande
+ξενία,gæstevenskab
+ξενίζω,beværter
+ξενοδοχέω,er gæstgiver
+ξηραίνω,tørrer; udtørrer; gør tør
+ξηρός,tør
+ξυράω,klipper
+ξύλινος,af træ; træ-
+ξύλον,kors
+οἰκέτης,husslave
+οἰκέω,bor
+οἰκία,hus
+οἰκετεία,husslave
+οἰκεῖος,huslig
+οἰκητήριον,bolig
+οἰκιακός,huslig
+οἰκοδεσποτέω,er husfader
+οἰκοδεσπότης,husfader
+οἰκοδομέω,bygger
+οἰκοδομή,bygning;
+οἰκοδόμος,bygger
+οἰκονομέω,bestyrer huset
+οἰκονομία,husbestyrelse
+οἰκονόμος,husholder
+οἰκουμένη,den beboede jord
+οἰκτίρμων,medlidende
+οἰκτίρω,er medlidende
+οἰκτιρμός,medlidenhed
+οἰνοπότης,vindrikker
+οἰνοφλυγία,drukkenskab
+οἴκημα,fængsel
+οἴομαι,mener
+οἶδα,kender; ved
+οἶκος,hus
+οἶνος,vin
+οἷος,sådan som
+οὐ,ikke
+οὐά,nå
+οὐαί,ve
+οὐδέ,heller ikke; og ikke
+οὐδέποτε,heller ikke
+οὐδέπω,endnu ikke
+οὐδαμῶς,på ingen måde
+οὐδείς,ingen
+οὐκέτι,ikke længere
+οὐκοῦν,altså ikke
+οὐρά,hale
+οὐράνιος,himmelsk
+οὐρανόθεν,fra himlen
+οὐρανός,himmel
+οὐσία,formue
+οὐχί,slet ikke
+οὔπω,ikke endu
+οὔτε,heller ikke
+οὕτω,således
+οὖν,derfor
+οὖς,øre
+οὗ,hvor
+οὗτος,denne
+πάθημα,ulykke
+πάθος,lidelse
+πάλαι,for længe siden
+πάλη,brydekamp
+πάλιν,igen
+πάντοθεν,allestedsfra
+πάντοτε,altid
+πάντως,ganske
+πάντῃ,overalt
+πάρδαλις,panter
+πάρειμι,er tilstede
+πάρεσις,tilgivelse
+πάροδος,vej
+πάροικος,nabo
+πάροινος,fuld
+πάσχα,påske; påskelammet
+πάσχω,lider
+πέδη,fodlænke
+πέλαγος,sø; hav
+πέμπτος,5.
+πέμπω,sender
+πένης,fattig; trængende
+πένθος,sorg
+πέντε,5
+πέραν,hinsides
+πέρας,ende
+πέριξ,rundt om
+πέρυσι,ifjor
+πέτομαι,hveps
+πέτρα,sten
+πήγανον,rude
+πήγνυμι,fæster
+πήρα,rejsesæk
+πίμπλημι,fylder
+πίμπρημι,brænder
+πίναξ,bræt
+πίνω,drikker
+πίπτω,falder
+πίστις,tro
+παίζω,leger
+παίω,slår
+παγίς,slynge
+παγιδεύω,lokker i fælden
+παθητός,lidenskabelig
+παιδάριον,lille dreng
+παιδίον,barn
+παιδίσκη,ung slavinde
+παιδαγωγός,opdrager
+παιδεία,undervisning
+παιδευτής,opdrager
+παιδεύω,straffer
+παιδιόθεν,fra barndommen
+παλαιός,gammel
+παλαιότης,ælde
+παλαιόω,gør gammel
+παλιγγενεσία,opstandelse
+παμπληθεί,med hele mængden
+πανήγυρις,forsamling
+πανδοχεύς,gæstgiver
+πανδοχεῖον,værtshus
+πανοικεί,med hele huset
+πανοπλία,fuldstændig rustning
+πανουργία,list
+πανοῦργος,listig
+πανταχοῦ,overalt
+πανταχῇ,overalt
+παντελής,ganske fuldendt
+παντοκράτωρ,Almægtig
+παρά,"langs med, ved"
+παράβασις,overtrædelse
+παράγω,fører forbi
+παράδεισος,paradis
+παράδοξος,uformodet
+παράδοσις,overgivelse
+παράκειμαι,ligger
+παράκλησις,opmuntring
+παράκλητος,kaldt til hjælp
+παράλιος,kystlandet
+παράπτωμα,fejltagelse
+παράσημος,stemplet
+παρέρχομαι,kommer forbi
+παρέχω,skænker
+παρίημι,undlader
+παρίστημι,opstiller
+παραβάλλω,sammenligner
+παραβάτης,forbryder
+παραβαίνω,går frem
+παραβιάζομαι,anvender vold på noget
+παραβολή,lignelse
+παραγίνομαι,er tilstede
+παραγγέλλω,befaler
+παραγγελία,befaling
+παραδέχομαι,modtager
+παραδίδωμι,overgiver
+παραδειγματίζω,opstiller eksempel
+παραζηλόω,gør misundelig
+παραθήκη,det tillagte
+παραθαλάσσιος,ved havet
+παραθεωρέω,overser; foragter
+παραινέω,opmuntrer
+παραιτέομαι,beder
+παρακαλέω,tilkalder
+παρακαλύπτω,bedækker
+παρακοή,ulydighed
+παρακολουθέω,ledsager
+παρακούω,hører
+παρακύπτω,bukker mig
+παραλέγομαι,kommer forbi
+παραλαμβάνω,modtager
+παραλλαγή,veksel
+παραλογίζομαι,forregner mig
+παραλυτικός,paralytisk
+παραλύω,løser derved
+παραμένω,bliver hos én
+παραμυθέομαι,tiltaler
+παραμυθία,tiltale
+παραμύθιον,trøst
+παρανομέω,handler lovstridigt
+παρανομία,lovstridig handling
+παραπίπτω,falder derved
+παραπικραίνω,forbitrer
+παραπικρασμός,forbitrelse
+παραπλέω,sejler forbi
+παραπλήσιος,næsten lig
+παραπλησίως,lignende måde
+παραπορεύομαι,går ved siden
+παραρρέω,flyder
+παρασκευάζω,gør i stand
+παρασκευή,dagen før Sabbath
+παρατήρησις,iagttagelse
+παρατίθημι,fremsætter
+παρατείνω,udbreder
+παρατηρέω,vogter
+παρατυγχάνω,indtraffer
+παραυτίκα,straks; øjeblikkelig
+παραφέρω,bringer hen til
+παραφρονέω,er fra forstanden
+παραφρονία,afsindighed
+παραχειμάζω,overvintrer
+παραχειμασία,overvintring
+παραχρῆμα,straks
+παρείσακτος,hemmelig indført
+παρεισάγω,indfører hemmeligt
+παρεισέρχομαι,kommer til
+παρεισδύω,smiger sig
+παρεισφέρω,føjer
+παρεκτός,foruden
+παρεμβάλλω,indsættelse
+παρεμβολή,indsættelse
+παρενοχλέω,hedning
+παρεπίδημος,boende på et fremmed sted
+παρηγορία,trøst
+παρθένος,jomfru
+παρθενία,jumfru
+παροίχομαι,går forbi
+παροικέω,bor ved siden af
+παροικία,ophold
+παροιμία,ordsprog
+παρομοιάζω,ligner
+παροξυσμός,tilskyndelse
+παροξύνω,gør skarp
+παροργίζω,gør vred
+παροργισμός,fremkaldt
+παροτρύνω,tilskynder
+παρουσία,tilstedeværelse
+παροψίς,fad
+παρρησία,frihed
+παρρησιάζομαι,taler frimodigt
+παρόμοιος,næsten lig
+πατάσσω,slår
+πατέω,træder på
+πατήρ,far
+πατρίς,fædrelandsk
+πατριά,slægt
+πατριάρχης,stamfader
+πατρικός,faderlig; fra faderen
+πατρολῴας,fadermorder
+πατροπαράδοτος,overleveret fra fædrene
+πατρῷος,faderlig
+παχύνω,gør tyk
+παύω,stopper
+παῖς,barn
+πείθω,overtaler
+πεδινός,flad
+πεζεύω,går tilfods
+πεζῇ,til fods
+πειθαρχέω,adlyder
+πειθός,overtalende
+πεινάω,hungrer
+πειράζω,frister
+πειράομαι,forsøger
+πειρασμός,forførelse
+πεισμονή,overtalelse
+πελεκίζω,halshugger
+πενθέω,beklager
+πενθερά,svigermoder
+πενθερός,svigerfader
+πενιχρός,fattig
+πεντάκις,fem gange
+πεντήκοντα,50
+πεντακισχίλιοι,5000
+πεντακόσιοι,500
+πεντεκαιδέκατος,15
+πεντηκοστή,pinsedagen
+πεποίθησις,tillid
+περί,vedrørende; om; omkring
+περίεργος,med flid
+περίθεσις,halskæde
+περίκειμαι,ligger rundt om
+περίλυπος,meget bedrøvet
+περίοικος,nabo
+περίσσευμα,overflødighed
+περίχωρος,omegn
+περίψημα,smuds
+περαιτέρω,hinsides
+περιΐστημι,stiller omkring
+περιάγω,går omkring; fører omkring
+περιάπτω,hæfter
+περιέρχομαι,går omkring
+περιέχω,omgiver
+περιαιρέω,borttager rundt om
+περιαστράπτω,lyner rundt om
+περιβάλλω,kaster
+περιβλέπω,ser omkring
+περιβόλαιον,kaster om
+περιδέω,binder om
+περιεργάζομαι,iver
+περιζώννυμι,ombælter
+περικάθαρμα,renselse
+περικαλύπτω,bedækker
+περικεφαλαία,hjelm
+περικρατής,mægtig
+περικρύβω,gemmer sig
+περικυκλόω,omkredser
+περιλάμπω,skinner
+περιλείπομαι,efterlader
+περιμένω,venter
+περιοικέω,bor omkring
+περιοχή,afsnit
+περιούσιος,udvalgt
+περιπίπτω,falder over
+περιπατέω,går omkring
+περιπείρω,indføjer
+περιποίησις,erhvervelse
+περιποιέω,erhverver
+περιρήγνυμι,river af
+περισπάω,drager rundt om
+περισσεία,overflod
+περισσεύω,er i overflod
+περισσοῦ,rigelig
+περισσός,rigelig
+περισσῶς,i høj grad
+περιστερά,due
+περιτέμνω,omskærer
+περιτίθημι,lægger omkring
+περιτομή,omskærelse
+περιτρέπω,vender om
+περιτρέχω,løber omkring
+περιφέρω,bærer
+περιφρονέω,overlægger
+περπερεύομαι,storpraler
+πετεινός,fugl
+πετρώδης,stenig; klippefuld
+πεῖρα,forsøg
+πηγή,kilde
+πηδάλιον,ror
+πηλίκος,hvor stor?
+πηλός,ler
+πιάζω,sammentrykker
+πιέζω,trykker
+πιθανολογία,forførerisk tale
+πικρία,bitterhed
+πικραίνω,gør spids
+πικρός,spids
+πικρῶς,spidst
+πινακίδιον,lille tavle
+πιπράσκω,sælger
+πιστεύω,tror
+πιστικός,overbevisende
+πιστός,troende
+πιστόω,gør én tro
+πιότης,fedme; fedt
+πλάνη,vildfarelse
+πλάνος,omflakkende
+πλάξ,ethvert fladt legeme
+πλάσμα,billede
+πλάσσω,danner
+πλάτος,brede
+πλέγμα,fletværk
+πλέκω,fletter
+πλέω,sejler
+πλήκτης,kæmper
+πλήμμυρα,flod
+πλήν,undtagen
+πλήρης,fuld
+πλήρωμα,fylde
+πλήσσω,slår
+πλανάω,forfører
+πλανήτης,vandrer
+πλαστός,dannet
+πλατύνω,gør bred
+πλατύς,gade
+πλεονάζω,er overflødig
+πλεονέκτης,har mere
+πλεονεκτέω,er overlegen
+πλεονεξία,overflod
+πλευρά,siden på et legeme; ribben
+πληγή,slag
+πληθύνω,fylder
+πληροφορέω,opfylder
+πληροφορία,fuld overbevisning
+πληρόω,fylder
+πλησίον,nabo
+πλησμονή,opfyldelse
+πλοιάριον,båd
+πλουσίως,rig; velhavende
+πλουτέω,er rig
+πλουτίζω,gør rig
+πλούσιος,rig
+πλοῖον,skib
+πλοῦτος,rigdom
+πλόος,rejse
+πλύνω,vasker
+πλῆθος,mængde
+πνέω,puster
+πνίγω,kvæler
+πνευματικός,åndelig
+πνευματικῶς,besjælet
+πνεῦμα,ånd
+πνικτός,kvalt
+πνοή,ånde
+ποίημα,værk
+ποίησις,skabelse
+ποίμνη,græssende hjord
+ποίμνιον,græssende hjord
+ποδήρης,lang kjole
+ποιέω,gør
+ποιητής,skaber; digter
+ποικίλος,broget
+ποιμήν,hyrde
+ποιμαίνω,lader græsse
+πολίτευμα,stat
+πολίτης,borger
+πολεμέω,fører krig
+πολιτάρχης,hersker
+πολιτεία,statsindretning
+πολιτεύομαι,deltager som borger
+πολλάκις,ofte
+πολλαπλασίων,mangfoldig
+πολυλογία,megen tale
+πολυμερῶς,bestående af mange dele
+πολυποίκιλος,meget broget
+πολυτελής,udgifter
+πολυτρόπως,mangfoldig
+πολύς,megen
+πολύσπλαγχνος,meget medlidende
+πολύτιμος,kostbar
+πονηρία,ond tilstand
+πονηρός,ond
+πορεία,rejse
+πορεύομαι,rejser
+πορθέω,forstyrrer
+πορισμός,erhverv
+πορνεία,afgudsdyrkelse
+πορνεύω,forfører
+πορφυροῦς,purpurfarvet
+πορφυρόπωλις,purpurhandler
+πορφύρα,purpurmusling
+ποσάκις,hvor ofte
+ποτέ,til hvilken tid?
+ποτήριον,kop
+ποτίζω,lader drikke
+ποταμοφόρητος,bortreven af floder
+ποταμός,flod
+ποταπός,af hvilken beskaffenhed
+πού,hvor
+πούς,fod
+ποῖος,hvordan
+ποῦ,hvor
+πράκτωρ,ophavsmand
+πράσσω,gør
+πρέπω,passer sig
+πρίζω,saver
+πρίν,før
+πραΰς,blid; mild
+πραΰτης,mildheden
+πραγματεία,beskæftigelse
+πραγματευομαι,driver forretning
+πραιτώριον,vagtstyrke
+πρασιά,afdeling
+πραϋπαθία,mildheden
+πρεσβεία,sendebudskab
+πρεσβεύω,er ældre
+πρεσβυτέριον,de ældres råd
+πρεσβύτερος,ældste
+πρεσβύτης,gammel mand
+πρεσβῦτις,gammel kone
+πρηνής,hovedkulds
+προΐστημι,leder
+προάγω,leder frem
+προέρχομαι,kommer foran
+προέχω,overgår
+προαιρέω,tager frem
+προαιτιάομαι,anklager i forvejen
+προακούω,hører forud
+προαμαρτάνω,synder i forvejen
+προαύλιον,portrummet
+προβάλλω,kaster frem
+προβάτιον,får
+προβαίνω,går frem
+προβατικός,hørende til får
+προβιβάζω,bringer videre
+προβλέπω,forudser
+προγίνομαι,sker tidligere
+προγινώσκω,indser i forvejen
+προγράφω,skriver foran
+προδίδωμι,forudbetaler
+προδότης,forræder
+προελπίζω,håber forud
+προενάρχομαι,begynder forud
+προεπαγγέλλω,lover forud
+προετοιμάζω,bereder i forvejen
+προευαγγελίζομαι,prædiker forud
+προηγέομαι,går foran
+προθεσμία,fastsat; forudbestemt
+προθυμία,iver
+προθύμως,ivrigt
+προκαλέω,kalder frem
+προκαταγγέλλω,forkynder forud
+προκαταρτίζω,forbereder forud
+προκηρύσσω,lader udråbe i forvejen
+προκοπή,fremgang
+προκυρόω,stadfæster forud
+προκόπτω,rykker fremad
+προλέγω,udvælger
+προλαμβάνω,tager bort forud
+προμαρτύρομαι,vidner i forvejen
+προμελετάω,forbereder i forvejen
+προμεριμνάω,er forud bekymret
+προνοέω,bemærker
+προοράω,ser forud
+προορίζω,forudbestemmer
+προπάσχω,lider
+προπάτωρ,far
+προπέμπω,sender foran
+προπετής,faldende
+προπορεύομαι,går foran
+προσάββατον,dag før Sabbat
+προσάγω,bringer nær
+προσέρχομαι,går forud
+προσέχω,beskæftiger mig
+προσήλυτος,proselyt
+προσαίτης,forlanger
+προσαγορεύω,tiltaler
+προσαγωγή,adgang
+προσαιτέω,forlanger
+προσαναβαίνω,går op
+προσαναπληρόω,udfylder
+προσανατίθημι,rådfører
+προσαπειλέω,truer endnu
+προσδέομαι,lider mangel
+προσδέχομαι,venter
+προσδαπανάω,forbruger endnu
+προσδοκάω,venter
+προσδοκία,forventning
+προσεάω,lader komme hen til
+προσεργάζομαι,indbringer
+προσευχή,bøn
+προσεύχομαι,beder
+προσηλόω,fastnagler
+προσκαλέω,tilkalder
+προσκαρτέρησις,vedholdenhed
+προσκαρτερέω,holder ud
+προσκεφάλαιον,hovedpude
+προσκλίνω,bifald
+προσκληρόω,vælger
+προσκολλάω,limer; fæster
+προσκοπή,recognoscering
+προσκυλίω,vælter hen til
+προσκυνέω,tilbeder
+προσκυνητής,tilbeder
+προσκόπτω,støder på
+προσλαλέω,foresnakker
+προσλαμβάνω,tager
+προσμένω,venter
+προσορμίζω,lægger for anker
+προσοφείλω,er skyldig
+προσοχθίζω,harmes
+προσπήγνυμι,fæster; korsfæster
+προσπίπτω,falder i
+προσποιέω,føjer
+προσπορεύομαι,strækker mig ud
+προσρήσσω,vælter imod
+προστάσσω,befaler
+προστάτις,beskytter
+προστίθημι,stiller
+προστρέχω,løber foran
+προσφάγιον,tilmad
+προσφάτως,for nyligt
+προσφέρω,bærer
+προσφιλής,elsket
+προσφορά,offer
+προσφωνέω,råber
+προσψαύω,rører
+προσωπολήμπτης,"en, der ikke gør forskel"
+προσωπολημπτέω,gør forskel
+προσωπολημψία,partiskhed; favorisering
+προτίθημι,fremsætter
+προτείνω,udspænder
+προτρέπω,tilskynder
+προτρέχω,løber foran
+προφέρω,anfører
+προφήτης,profet
+προφητεία,forudsigelse
+προφητεύω,profeterer
+προφητικός,profetisk
+προφθάνω,kommer én iforkøbet
+προφῆτις,profetinde
+προχειρίζομαι,bestemmer
+προχειροτονέω,udvælger
+προϋπάρχω,er allerede
+πρωΐ,tidlig
+πρωΐα,tidlig om morgenen
+πρωτεύω,"har forrang, fortrin"
+πρωτοκαθεδρία,forsæde
+πρωτοκλισία,første sæde ved bordet
+πρωτοστάτης,leder
+πρωτοτόκια,førstefødselsret
+πρωτότοκος,førstefødt
+πρωϊνός,tidlig
+πρό,foran
+πρόβατον,får
+πρόγνωσις,viden
+πρόγονος,stamfader
+πρόδηλος,åbenbar
+πρόδρομος,løbende frem
+πρόθεσις,opstilling
+πρόθυμος,ivrig
+πρόκειμαι,ligger foran
+πρόκριμα,forudfattet mening
+πρόνοια,viden
+πρός,"mod, imod"
+πρόσκαιρος,timelig
+πρόσκλισις,bifald
+πρόσκομμα,anstød
+πρόσλημψις,modtagelse
+πρόσπεινος,meget sulten
+πρόσφατος,frisk; ny
+πρόσχυσις,påstrygning
+πρόσωπον,"ansigt, overflade"
+πρότερος,tidligere
+πρόφασις,undskyldning
+πρόϊμος,tidlig
+πρύμνα,bagstavn
+πρώτως,først
+πρᾶγμα,gerning
+πρᾶξις,handling
+πρῶτος,først
+πρῷρα,forstavn
+πτέρνα,hæl
+πτέρυξ,fjer; vinge
+πταίω,støder
+πτερύγιον,tinde
+πτηνός,bevinget
+πτοέω,sætter i frygt
+πτωχεία,tiggeri
+πτωχεύω,tigger
+πτωχός,fattig
+πτόησις,forskrækkelse
+πτύον,kasteskovl
+πτύρω,gør sky
+πτύσμα,spyt
+πτύσσω,folder
+πτύω,spytter
+πτῶμα,fald
+πτῶσις,fald
+πυγμή,næve
+πυκνός,tæt; fast
+πυκτεύω,kæmper med næven
+πυλών,port
+πυνθάνομαι,udforsker
+πυρά,ild
+πυρέσσω,får feber
+πυρετός,hede; feber
+πυρράζω,er ildrød
+πυρρός,ildfarvet
+πυρόω,brænder
+πωλέω,sælger
+πωρόω,forhærder
+πόθεν,hvorfra
+πόλεμος,krig
+πόλις,by
+πόμα,drik
+πόνος,arbejde
+πόρνη,hore
+πόρνος,horkarl
+πόρρω,fjernet
+πόρρωθεν,langt fra
+πόσις,drik
+πόσος,hvor stor
+πότε,en gang
+πότερον,hvilken af begge
+πότος,drikkelig
+πύθων,spådomsånd
+πύλη,dør
+πύργος,tårn
+πύρινος,af ild
+πύρωσις,varme
+πώποτε,nogensinde
+πώρωσις,forhærdelse
+πᾶς,"al, hel"
+πῆχυς,underarm (længdemål)
+πῦρ,ild
+πῶλος,føl
+πῶς,hvordan
+σάββατον,sabbat
+σάκκος,sæk
+σάλος,rystelse
+σάλπιγξ,trompet
+σάπφιρος,safir
+σάρδιον,sarder
+σάρκινος,af kød
+σάρξ,kød
+σάτον,kornmål
+σέβασμα,genstanden for ærefrygt
+σέβω,højagter
+σήμερον,i dag
+σήπω,gør rådden
+σής,møl
+σίδηρος,jern
+σίκερα,berusende drik
+σίναπι,sennep
+σαίνω,vakle
+σαβαχθάνι,Hvorfor har du forladt mig
+σαββατισμός,sabbatshvile
+σαγήνη,garn
+σαλεύω,ryster
+σαλπίζω,blæser
+σαλπιστής,trompeter
+σανίς,bræt
+σανδάλιον,sandal
+σαπρός,rådden
+σαργάνη,kurv
+σαρδόνυξ,sardonyks
+σαρκικός,kødelig
+σαρόω,fejer
+σβέννυμι,udslukker
+σείω,svinger
+σεαυτοῦ,din
+σεβάζομαι,tilbeder
+σεβαστός,ærværdig
+σεισμός,jordskælv
+σελήνη,måne
+σεληνιάζομαι,er månesyg
+σεμίδαλις,det fineste hvedemel
+σεμνός,ærefrygtindgydende
+σεμνότης,ærværdighed
+σημαίνω,betegner
+σημειόω,betegner
+σημεῖον,tegn
+σητόβρωτος,fortæret af møl
+σθενόω,styrker
+σιαγών,kæveben
+σιγάω,tier
+σιγή,tavshed
+σιδηροῦς,af jern
+σικάριος,snigmorder
+σιμικίνθιον,håndklæde
+σινδών,klædning
+σινιάζω,renser
+σιρικός,silke
+σιτίον,hvede
+σιτευτός,fodret
+σιτιστός,næret
+σιτομέτριον,proviant
+σιωπάω,tier
+σκάνδαλον,skandale
+σκάπτω,udgraver
+σκάφη,båd
+σκέλος,lår
+σκέπασμα,bedækning
+σκήνωμα,telt
+σκανδαλίζω,forarger
+σκευή,klædning
+σκεῦος,redskab
+σκηνή,telt
+σκηνοπηγία,løvsalsfest
+σκηνοποιός,en som opfører et telt
+σκηνόω,bor i
+σκιά,mørke
+σκιρτάω,hopper; springer; danser
+σκληροκαρδία,hårdhjertethed
+σκληροτράχηλος,hårdnakket
+σκληρός,hård
+σκληρότης,hårdhed
+σκληρύνω,forhærder
+σκολιός,krum; bøjet; fordrejet
+σκοπέω,skuer
+σκοπός,mål
+σκορπίζω,adspreder
+σκορπίος,skorpion
+σκοτία,mørke
+σκοτίζω,gør mør
+σκοτεινός,mørk
+σκοτόω,gør mørk
+σκυθρωπός,sørgmodig
+σκωληκόβρωτος,opædt af orme
+σκόλοψ,tilspidset legeme
+σκότος,mørke
+σκύβαλον,affald
+σκύλλω,plager
+σκώληξ,regnorm
+σκῆνος,telt
+σκῦλον,krigsbytte
+σμάραγδος,ædelsten
+σμαράγδινος,af smaragd
+σμυρνίζω,krydrer med myrrha
+σμύρνα,myrra
+σορός,ligkiste
+σουδάριον,svededug
+σοφία,visdom
+σοφίζω,underviser
+σοφός,klog
+σπάω,trækker
+σπένδω,udgyder drikoffer
+σπέρμα,sæd
+σπήλαιον,hule
+σπίλος,plet
+σπαράσσω,river
+σπαργανόω,indvikler
+σπαταλάω,lever yppigt
+σπείρω,sår
+σπεκουλάτωρ,fangevogter
+σπερμολόγος,sladrer; dagdrive
+σπεύδω,skynder
+σπεῖρα,kohorte
+σπιλάς,fjeld; klippe
+σπιλόω,besmudser
+σπλάγχνον,medlidenhed
+σπλαγχνίζομαι,forbarmer mig
+σποδός,aske
+σπορά,såning
+σπουδάζω,er ivrig
+σπουδή,hast
+σπουδαίως,ivrigt
+σπουδαῖος,ivrig
+σπυρίς,kurv
+σπόγγος,svamp
+σπόριμος,såmåned
+σπόρος,såning
+στάδιον,stadium
+στάμνος,lerkrukke
+στάσις,opstilling
+στάχυς,kornaks
+στέγη,tag
+στέγω,dækker
+στέλλω,stiller i orden
+στέμμα,krans
+στέφανος,krone
+στήκω,stående
+στίγμα,brændemærke
+στίλβω,glinser
+στατήρ,stater
+σταυρός,kors
+σταυρόω,korsfæster
+σταφυλή,vindrue
+στενάζω,sukker
+στεναγμός,sukke; stønnen
+στενοχωρέω,trænger
+στενοχωρία,nød
+στενός,snæver
+στερέωμα,grundlag
+στερεός,hård
+στερεόω,gør hård
+στεφανόω,omgiver
+στεῖρα,hovedbjelke
+στηρίζω,opstiller
+στηριγμός,fastståen
+στιβάς,leje af strå
+στιγμή,øjeblik
+στοά,søjle
+στοιχέω,følger
+στοιχεῖον,grundbetingelse
+στολή,dragt
+στράτευμα,hær
+στρέφω,drejer
+στρατεία,krigstog
+στρατεύω,gør krigstjeneste
+στρατηγός,hærfører
+στρατιά,krigshær
+στρατιώτης,soldat
+στρατολογέω,samler en hær
+στρατόπεδον,lejr
+στρεβλόω,drejer
+στρηνιάω,er heftig
+στρουθίον,lille fugl; spurv
+στρωννύω,breder
+στρῆνος,heftighed
+στυγητός,forhadt
+στυγνάζω,er sørgmodig
+στόμα,mund
+στόμαχος,strube
+στῆθος,bryst
+στῦλος,pille
+συγγένεια,slægtskab
+συγγενής,familie
+συγγενίς,familie
+συγγνώμη,tilgivelse
+συγκάθημαι,sidder sammen
+συγκάμπτω,bøjer
+συγκαθίζω,sætter sig blandt
+συγκακοπαθέω,lider ulykke med
+συγκακουχέομαι,lider med
+συγκαλέω,sammenkalder
+συγκαλύπτω,skjuler
+συγκατάθεσις,bifald
+συγκαταβαίνω,tiger ned
+συγκατατίθεμαι,sætter
+συγκαταψηφίζομαι,fordømmer med
+συγκεράννυμι,sammenblander
+συγκινέω,bevæger tilligemed
+συγκλείω,sammenslutter
+συγκληρονόμος,medarvende
+συγκοινωνέω,tager med del i noget
+συγκοινωνός,delagtig
+συγκομίζω,sammenbringer
+συγκρίνω,sammensætter
+συγκυρία,sammentræf
+συγκύπτω,slår sammen
+συγχέω,gyder
+συγχαίρω,glæder mig med én
+συγχράομαι,forbruger
+συζάω,lever sammen
+συζεύγνυμι,spænder sammen i åg
+συζητέω,søger
+συζητητής,skarpsindig disputator
+συζωοποιέω,lever med
+συκάμινος,morbærtræ
+συκομορέα,figenmorbærtræ
+συκοφαντέω,anklager falsk
+συκῆ,figentræ
+συλάω,borttager
+συλαγωγέω,gør til bytte
+συλλέγω,samler
+συλλαλέω,taler sammen
+συλλαμβάνω,tager
+συλλογίζομαι,drøfter
+συλλυπέω,bedrøver
+συμβάλλω,sammenbringer
+συμβαίνω,sker
+συμβασιλεύω,hersker sammen med
+συμβιβάζω,forener
+συμβουλεύω,giver råd
+συμβούλιον,råd
+συμμέτοχος,medandel
+συμμαθητής,meddiscipel
+συμμαρτυρέω,er medvidne
+συμμερίζω,deler med
+συμμιμητής,medefterligner
+συμπάρειμι,er tilstede med
+συμπάσχω,lider
+συμπέμπω,sender med
+συμπίνω,drikker med
+συμπίπτω,falder
+συμπαθέω,føler med
+συμπαθής,medfølende
+συμπαραγίνομαι,kommer med
+συμπαρακαλέω,hidkalder med
+συμπαραλαμβάνω,optager med
+συμπεριλαμβάνω,medomfatter
+συμπληρόω,falder
+συμπνίγω,kvæler; sammentrykker
+συμπολίτης,medborger
+συμπορεύομαι,går sammen med
+συμπρεσβύτερος,medpresbyter
+συμπόσιον,drikkelag
+συμφέρω,sammenbringer
+συμφυλέτης,landsmand
+συμφωνέω,samstemmer
+συμφωνία,harmoni
+συμφύω,vokse ind i hinanden
+συμφώνησις,overensstemmelse
+συμψηφίζω,regner sammen
+συνάγω,fører
+συνέδριον,forsamlingsted
+συνέκδημος,rejseledsager
+συνέπομαι,følger med
+συνέρχομαι,går sammen
+συνέχω,sammenholder
+συνήδομαι,glæder mig
+συνήθεια,samliv
+συνίημι,forstår; overvejer
+συνίστημι,bringer sammen
+συναίρω,sammenfatter
+συναγωγή,synagoge
+συναγωνίζομαι,kæmper med
+συναθλέω,hjælper
+συναθροίζω,forsamler
+συναιχμάλωτος,medfange
+συνακολουθέω,følger med
+συναλίζομαι,bringer sammen
+συνανάκειμαι,ligger og spiser
+συναναβαίνω,går op med
+συναναμίγνυμι,har fællesskab med
+συναναπαύομαι,finder ro hos
+συναντάω,møder
+συναντιλαμβάνομαι,hjælper
+συναπάγω,stræber efter
+συναποθνῄσκω,dør med
+συναποστέλλω,sender bort
+συναπόλλυμι,omkommer sammen
+συναρμολογέω,sammenføjer
+συναρπάζω,river sammen
+συναυξάνω,forøger
+συνδέω,sammenbinder
+συνδοξάζω,priser
+συνδρομή,sammenkomst
+συνείδησις,medviden
+συνεγείρω,vækker med
+συνεισέρχομαι,tager afsted
+συνεκλεκτός,udvalgt
+συνεπιμαρτυρέω,føjer vidnesbyrd
+συνεπιτίθημι,stiller
+συνεργέω,συνεργέω
+συνεργός,medarbejder
+συνεσθίω,spiser med
+συνετός,forstandig
+συνευδοκέω,samstemmer
+συνευωχέομαι,svirer
+συνεφίστημι,går løs på
+συνηλικιώτης,jævnaldrende
+συνθάπτω,begraver med
+συνθλάω,trykker sammen
+συνθλίβω,trykker
+συνθρύπτω,sønderbryder
+συνοδία,fælles rejse
+συνοδεύω,rejser med
+συνοικέω,bor sammen
+συνοικοδομέω,bygger med
+συνομιλέω,omgås med
+συνομορέω,støder op til
+συνοράω,overser
+συνοχή,sammenholden
+συντάσσω,sammenordner
+συντέλεια,afgift
+συντέμνω,sønderskærer
+συντίθημι,stiller
+συντελέω,fuldender
+συντηρέω,bevogter
+συντρέχω,løber sammen
+συντρίβω,gnider sammen
+συντυγχάνω,indtræffer
+συντόμως,afkortet
+συνυποκρίνομαι,efterligner med
+συνυπουργέω,hjælper sammen
+συνωδίνω,føler fødselssmerter
+συνωμοσία,sammensværgelse
+συσπαράσσω,river og slider
+συστέλλω,sammentrækker
+συστατικός,sammenstillende
+συσταυρόω,korsfæster med
+συστενάζω,sukker
+συστοιχέω,står med
+συστρέφω,vender
+συστρατιώτης,medsoldat
+συστροφή,sammentrængthed
+συσχηματίζω,danner
+σφάγιον,slagtedyr
+σφάζω,slagter
+σφαγή,offring
+σφοδρῶς,heftigt
+σφραγίζω,forsegler
+σφραγίς,segl
+σφόδρα,voldsomt
+σχίζω,adskiller
+σχίσμα,uenighed
+σχεδόν,nærved
+σχοινίον,line; snor
+σχολάζω,holder fri
+σχολή,frihed
+σχῆμα,stilling
+σωματικός,legemlig
+σωματικῶς,legemlig
+σωρεύω,ophober
+σωτήρ,frelser
+σωτήριος,frelsende
+σωτηρία,frelse
+σωφρονέω,er besindig
+σωφρονίζω,bringer til besindighed
+σωφρονισμός,formanen
+σωφροσύνη,mådehold
+σωφρόνως,med mådehold
+σός,din
+σύ,du
+σύγχυσις,forvirring
+σύζυγος,kammerat
+σύμβουλος,rådgiver
+σύμμορφος,af samme skikkelse
+σύμφημι,tillige
+σύμφορος,sammenbringer
+σύμφυτος,medfødt
+σύμφωνος,overensstemmende
+σύμψυχος,enig
+σύν,med
+σύνδεσμος,forbindelse
+σύνδουλος,medslave
+σύνειμι (I),vækker med
+σύνειμι (II),lever sammen
+σύνεσις,forstand
+σύντριμμα,ulykke
+σύντροφος,fosterbror
+σύρω,trækker
+σύσσημον,tegn
+σύσσωμος,forbundet
+σώφρων,besindig
+σῖτος,hvede
+σῦκον,figen
+σῴζω,frelser
+σῶμα,legeme
+τάγμα,hærafdeling
+τάλαντον,talent
+τάξις,ordnen
+τάραχος,forstyrrelse
+τάσσω,ordner
+τάφος,begravelse
+τάχα,hurtigt
+τάχος,hurtighed
+τέ,og
+τέκνον,barn
+τέκτων,tømmer
+τέλειος,fuldstændig
+τέλος,mål
+τέρας,under; varsel
+τέσσαρες,4
+τέταρτος,den fjerde
+τέχνη,kunstfærdighed
+τήκω,bringer til at smelte
+τήρησις,beskyttelse
+τίθημι,sætter
+τίκτω,føder
+τίλλω,udriver
+τίμιος,agtet
+τίνω,betaler
+τίς,hvem
+τίτλος,overskrift
+ταβέρνη,Tabernæ
+τακτός,ordnet
+ταλαίπωρος,møjsommelig
+ταλαιπωρέω,plager
+ταλαιπωρία,trængsel
+ταλαντιαῖος,talent værd
+ταλιθά,talita; lille pige
+ταμεῖον,forrådskammer
+ταπείνωσις,ydmygelse
+ταπεινοφροσύνη,ydmyghed
+ταπεινός,lav
+ταπεινόφρων,ydmyghed
+ταπεινόω,formindsker
+ταράσσω,rører
+ταραχή,forstyrrelse
+ταρταρόω,nedstyrter i Tartaros
+ταφή,begravelse
+ταχέως,hurtigt
+ταχινός,hurtigt
+ταχύς,hurtigt
+ταῦρος,tyr
+τεκμήριον,tegn
+τεκνίον,lille dreng
+τεκνογονέω,føder børn
+τεκνογονία,avlen af børn
+τεκνοτροφέω,opnærer børn
+τελέω,slutter
+τελείως,fuldstændig
+τελείωσις,fuldendelse
+τελειωτής,fuldbringer
+τελειότης,fuldendelse
+τελειόω,fuldender
+τελεσφορέω,bærer fuldkommen frugt
+τελευτάω,fuldender
+τελευτή,ende
+τελώνης,tolder
+τελώνιον,toldsted; toldhus
+τεσσαρεσκαιδέκατος,14.
+τεσσεράκοντα,40
+τεσσερακονταετής,40-årig
+τεταρταῖος,på fjerde dag
+τετράγωνος,firkantet
+τετράδιον,fire soldater
+τετράμηνος,varende i fire måneder
+τετράπους,firføddet
+τετραάρχης,tetrarc
+τετρααρχέω,er tetrarch
+τετρακισχίλιοι,4000
+τετρακόσιοι,400
+τετραπλοῦς,firdobbelt
+τεφρόω,gør til aske
+τεχνίτης,håndværker
+τεῖχος,mur
+τηλαυγῶς,glinsende
+τηλικοῦτος,så stor
+τηρέω,beskytter
+τιμάω,ærer
+τιμή,værdi
+τιμιότης,kostbarhed
+τιμωρέω,straffer
+τιμωρία,straf
+τοίνυν,altså
+τοιγαροῦν,derfor nu
+τοιοῦτος,sådan
+τοιόσδε,af en sådan slags
+τολμάω,tåler
+τολμηρός,fræk
+τολμητής,en dristig
+τομός,skarpere
+τοπάζιον,topas; ædelsten
+τοσοῦτος,så stor
+τοῖχος,mur
+τράγος,buk
+τράπεζα,bord
+τράχηλος,hals; nakke
+τρέμω,skælver
+τρέφω,nærer
+τρέχω,løber
+τρίβολος,tidsel
+τρίβος,sti
+τρίζω,svirrer
+τρίμηνος,tremånedlig
+τρίς,tre gange
+τρίστεγον,med tre stokværk
+τρίτος,den tredje
+τρίχινος,af hår
+τραπεζίτης,vekseler
+τραυματίζω,sårer
+τραχηλίζω,drejer
+τραχύς,ru; hånd
+τραῦμα,sår
+τρεῖς,3
+τριάκοντα,30
+τριακόσιοι,300
+τριετία,treårstid
+τρισχίλιοι,3000
+τροπή,venden
+τροποφορέω,tåler
+τροφή,fodrer
+τροφός,plejer
+τροχιά,vej
+τροχός,vognhjul
+τρυγάω,indhøster
+τρυγών,turteldue
+τρυμαλιά,nåleøje
+τρυφάω,lever yppigt
+τρυφή,luksus
+τρόμος,skræk
+τρόπος,vis
+τρύβλιον,skål
+τρώγω,gnasker
+τυγχάνω,opnår
+τυμπανίζω,slår
+τυπικώς,afbillede
+τυφλός,blind
+τυφλόω,gør blind
+τυφωνικός,hvirvelstorm
+τυφόω,gør indbildsk
+τόκος,rente
+τόξον,bue
+τόπος,sted
+τότε,dengang
+τύπος,afbillede
+τύπτω,slår
+τύφω,gør røg
+τὶς,nogen
+τὸ ἐναντίον,tværtimod
+τὸ ὄνομα,med navnet
+υἱοθεσία,antagelse i søns sted
+υἱός,søn
+φάγος,fråser; spiser
+φάντασμα,spøgelse; syn
+φάραγξ,dal; afgrund
+φάρμακος,heks
+φάσις,angivelse
+φάσκω,siger; påstår
+φάτνη,krybbe
+φέγγος,lys; glans
+φέρω,bærer
+φήμη,rygte
+φίλανδρος,elskende mand
+φίλαυτος,egenkærlig; egoistisk
+φίλημα,kys
+φίλος,"ven, venlig"
+φαίνω,gør syndelig
+φαιλόνης,rejsekappe
+φανέρωσις,åbenbarelse
+φανερός,åbenbar
+φανερόω,åbenbarer
+φανερῶς,åbenbar
+φαντάζω,bliver synlig
+φαντασία,syn
+φανός,fakkel
+φαρμακεία,trolddom
+φαῦλος,svag
+φείδομαι,skåner
+φειδομένως,sparsomt
+φεύγω,flygter
+φημί,siger
+φθάνω,kommer i forkøbet
+φθέγγομαι,råber
+φθαρτός,forgængelig
+φθείρω,fordærver
+φθινοπωρινός,efterårs-
+φθονέω,misunder
+φθορά,fordærvelse
+φθόγγος,stemme
+φθόνος,misundelse
+φιάλη,skål
+φιλάγαθος,elskende
+φιλάδελφος,elskende broder
+φιλάργυρος,gerrig; pengegerrig
+φιλέω,elsker
+φιλήδονος,som elsker
+φιλία,kærlighed
+φιλαδελφία,broderkærlighed
+φιλανθρωπία,menneskekærlighed
+φιλανθρώπως,menneskekærlig
+φιλαργυρία,pengegerrighed; havesyge
+φιλονεικία,kappestrid
+φιλοξενία,kærlighed
+φιλοπρωτεύω,vil gerne være den første
+φιλοσοφία,kærlighed til lærdom
+φιλοτιμέομαι,elsker og søger æren
+φιλοφρόνως,kærligsindet
+φιλόθεος,gudfrygtig
+φιλόνεικος,stridslysten
+φιλόξενος,elskende gæster
+φιλόσοφος,filosof
+φιλόστοργος,inderligt elskende
+φιλότεκνος,elskende børn
+φιμόω,tier
+φλογίζω,sætter i brand; brænder
+φλυαρέω,sladrer
+φλόξ,flamme
+φλύαρος,snak; sladder
+φοβέω,frygter
+φοβερός,frygtelig
+φονεύς,morder
+φονεύω,myrder
+φορέω,fører
+φορτίζω,laster
+φορτίον,last
+φοῖνιξ,palme; palmetræ
+φράζω,viser
+φράσσω,omgiver
+φρέαρ,brønd
+φρήν,sjæl
+φρίσσω,er ru
+φραγέλλιον,pisk
+φραγελλόω,pisker
+φραγμός,hegn
+φρεναπάτης,forfører sjælene
+φρεναπατάω,bedårer
+φρονέω,tænker
+φρονίμως,fornuftig
+φροντίζω,tænker
+φρουρέω,holder vagt
+φρυάσσω,er i oprør
+φρόνημα,sind
+φρόνησις,forstand
+φρόνιμος,fornuftig
+φρύγανον,riskvist
+φυγή,flugt
+φυλάσσω,bevogter
+φυλή,stamme
+φυλακή,vagt
+φυλακίζω,kaster i fængsel
+φυλακτήριον,besætning
+φυσίωσις,stolthed
+φυσικός,naturlig
+φυσικῶς,naturligt
+φυσιόω,opblæser
+φυτεία,plantning
+φυτεύω,planter
+φωλεός,smuthul
+φωνέω,kalder
+φωνή,lyd
+φωστήρ,skinnende
+φωσφόρος,lys givende
+φωτίζω,lyser
+φωτεινός,lys
+φωτισμός,oplysning
+φόβητρον,skrækkemiddel
+φόβος,frygt
+φόνος,mord
+φόρος,skat
+φύλαξ,vogter
+φύλλον,blad
+φύραμα,lermasse
+φύσις,natur
+φύω,vokser
+φῶς,lys
+χάλαζα,hagel
+χάραγμα,indgravet billede
+χάραξ,vold
+χάριν,derfor
+χάρις,nåde
+χάρισμα,gave
+χάρτης,papyrus; papir
+χάσμα,spalte
+χίλιοι,1000
+χαίρω,glæder mig
+χαλάω,løsner
+χαλεπός,tung; besværlig
+χαλιναγωγέω,fører
+χαλινός,tømme
+χαλκίον,kobbertøj
+χαλκεύς,kobbersmed
+χαλκηδών,kalkedon
+χαλκολίβανον,skinnende malm
+χαλκοῦς,af bronze
+χαλκός,penge; metal
+χαμαί,på jorden
+χαρά,glæde
+χαρίζομαι,tilgiver
+χαρακτήρ,kendetegn
+χαριτόω,viser nåde mod én
+χείμαρρος,bæk
+χείρ,hånd
+χείρων,ringere
+χειμάζω,opvækker storm
+χειμών,vintervejr
+χειραγωγέω,fører ved hånden
+χειραγωγός,ledende ved hånden
+χειροποίητος,kunstig
+χειροτονέω,udstrækker hånden
+χειρόγραφον,gældsbevis
+χεῖλος,kant
+χιλίαρχος,tribun
+χιλιάς,antal
+χιτών,underklædning
+χιών,sne
+χλαμύς,overklædning
+χλευάζω,skæmter
+χλιαρός,varm
+χλωρός,bleggrøn
+χολάω,gal
+χολή,galde
+χορηγέω,bekoster
+χορτάζω,mætter
+χορός,kordans
+χοϊκός,af grus
+χοῖνιξ,kornmål
+χοῖρος,gris
+χοῦς,støv
+χράομαι,bruger
+χρή,nødvendig
+χρήσιμος,brugbar
+χρίω,salver
+χρεία,nød
+χρεοφειλέτης,skyldner
+χρηματίζω,advarer
+χρηματισμός,profetisk udsagn
+χρηστεύομαι,opfører mig kærlighedsfuld
+χρηστολογία,ædelt sprog
+χρηστός,brugbar
+χρηστότης,godhjertighed
+χρονίζω,tøver
+χρονοτριβέω,hendriver tiden
+χρυσίον,"guld, lille stykke guld"
+χρυσοδακτύλιος,med gyldne ringe
+χρυσοῦς,gylden
+χρυσόλιθος,krysolit
+χρυσόπρασος,krysopras
+χρυσός,guld
+χρυσόω,forgylder
+χρόνος,tid
+χρώς,hud
+χρῄζω,behøver
+χρῆμα,formue
+χρῆσις,brug
+χρῖσμα,salve
+χωλός,lam; halt
+χωρέω,viger
+χωρίζω,sondrer
+χωρίον,plads
+χωρίς,uden
+χόρτασμα,foder
+χόρτος,foder
+χώρα,land
+χῆρος,enke
+χῶρος (II),nordvestvind
+ψάλλω,salme
+ψαλμός,salme
+ψευδάδελφος,falsk bror
+ψευδής,lyvende
+ψευδαπόστολος,falsk apostel
+ψευδοδιδάσκαλος,falsk lærer
+ψευδολόγος,løgn
+ψευδομαρτυρέω,falskt vidnesbyrd
+ψευδομαρτυρία,falsk vidnesbyrd
+ψευδοπροφήτης,falsk profet
+ψευδόμαρτυς,falskt vidne
+ψευδόχριστος,falsk Kristus
+ψευδώνυμος,opdigtet navn
+ψεύδομαι,bedrager
+ψεύστης,løgner
+ψεῦδος,løgn
+ψεῦσμα,løgn
+ψηλαφάω,berører
+ψηφίζω,tæller
+ψιθυρισμός,bagtalelse
+ψιθυριστής,bagtaler
+ψιχίον,"krumme, lille krumme"
+ψυχή,liv
+ψυχικός,åndelig; kødeligsindet
+ψυχρός,kold
+ψωμίζω,bespiser
+ψωμίον,"bid, lille bid"
+ψύχω,afkøler
+ψώχω,sønderriver
+ψῆφος,lille sten
+ψῦχος,kulde
+ἀΐδιος,evig
+ἀήρ,luft
+ἀβαρής,ubesværlig
+ἀββά,"abba, fader"
+ἀγάπη,kærlighed
+ἀγέλη,hjord; skare
+ἀγαθοεργέω,handler godt
+ἀγαθοποιΐα,god handlemåde
+ἀγαθοποιέω,handler godt
+ἀγαθοποιός,en der handler ret
+ἀγαθωσύνη,godhed
+ἀγαθός,god
+ἀγαλλίασις,heftig glæde
+ἀγαλλιάω,jubler
+ἀγανάκτησις,harme
+ἀγανακτέω,klager
+ἀγαπάω,modtager
+ἀγαπητός,elsket
+ἀγγέλλω,melder
+ἀγγαρεύω,afsender
+ἀγγελία,besked
+ἀγγεῖον,kar
+ἀγενής,uden slægt; uadelig
+ἀγενεαλόγητος,uden slægtregister
+ἀγκάλη,arm
+ἀγνοέω,kender ikke
+ἀγνωσία,ubekendtskab
+ἀγνόημα,uvidenhed; vildfarelse
+ἀγορά,marked
+ἀγοράζω,købe
+ἀγοραῖος,kræmmer
+ἀγράμματος,ulærd
+ἀγραυλέω,er på marken
+ἀγρεύω,jager
+ἀγριέλαιος,vildt olietræ
+ἀγρυπνέω,er søvnløs
+ἀγρυπνία,søvnløshed
+ἀγρός,mark
+ἀγωγή,transport
+ἀγωνία,kamp
+ἀγωνίζομαι,kæmper
+ἀγών,forsamling
+ἀδάπανος,uden udgift
+ἀδήλως,dunkel
+ἀδίκημα,uret; forbrydelse
+ἀδίκως,uretfærdigt
+ἀδελφή,søster
+ἀδελφός,bror
+ἀδελφότης,brorskab
+ἀδηλότης,uvished
+ἀδημονέω,er angst
+ἀδιάκριτος,uskelnelig
+ἀδιάλειπτος,uafbrudt
+ἀδιαλείπτως,uafbrudt
+ἀδικέω,synder
+ἀδικία,krænkelse
+ἀδμίν,Amminadab
+ἀδυνατέω,uformënde
+ἀδόκιμος,ugyldig
+ἀδύνατος,umulig
+ἀεί,altid
+ἀετός,ørn
+ἀθέμιτος,lovløs
+ἀθέτησις,afskaffelse
+ἀθανασία,udødelighed
+ἀθετέω,afskaffer
+ἀθλέω,kæmper
+ἀθροίζω,forsamler
+ἀθυμέω,mister modet
+ἀθῷος,ustraffet
+ἀκάθαρτος,uren
+ἀκάνθινος,tornet
+ἀκέραιος,ublandet
+ἀκαίρως,utidig
+ἀκαθαρσία,urenhed
+ἀκαιρέομαι,har mulighed for
+ἀκατάγνωστος,ustraffelig
+ἀκατάκριτος,udømt
+ἀκατάλυτος,uophørlig
+ἀκατάπαυστος,uden ende
+ἀκατάστατος,urolig
+ἀκατακάλυπτος,utilhyllet
+ἀκαταστασία,oprør
+ἀκλινής,fast
+ἀκμάζω,rigtige tid
+ἀκμήν,endnu
+ἀκοή,hørelse; rygte; sagn
+ἀκολουθέω,følger
+ἀκούω,hører
+ἀκρίβεια,grundighed
+ἀκρίς,græshoppe
+ἀκρασία,uafholdenhed
+ἀκρατής,uden styrke
+ἀκριβής,nøje
+ἀκριβόω,kender nøje
+ἀκριβῶς,nøjagtigt
+ἀκροατήριον,høresal
+ἀκροατής,læser
+ἀκροβυστία,forhud
+ἀκρογωνιαῖος,hjørnesten; grundsten
+ἀκροθίνιον,bytte
+ἀκυρόω,afkræfter
+ἀκωλύτως,uhindret
+ἀλάβαστρος,alabast
+ἀλάλητος,usigelig
+ἀλέκτωρ,hane
+ἀλήθεια,sandhed
+ἀλήθω,knuser
+ἀλίσγημα,besmittelse
+ἀλαζονεία,praleri
+ἀλαζών,praler
+ἀλαλάζω,skriger; råber
+ἀλείφω,salver
+ἀλεκτοροφωνία,hanegal
+ἀληθής,sand
+ἀληθεύω,er sandfærdig
+ἀληθινός,ægte
+ἀληθῶς,sand
+ἀλλά,men
+ἀλλάσσω,veksler
+ἀλλήλων,en anden
+ἀλλαχοῦ,fra et andet sted
+ἀλλαχόθεν,fra et andet sted
+ἀλληγορέω,taler billedligt
+ἀλλογενής,fremmed
+ἀλλοτριεπίσκοπος,går andres ret for nær
+ἀλλότριος,fremmed
+ἀλλόφυλος,fremmed
+ἀλοάω,tærsker
+ἀλυσιτελής,unyttig
+ἀλόη,aloe
+ἀλώπηξ,ræv
+ἀμάραντος,uvisnelig
+ἀμάρτυρος,uden vidner
+ἀμάω,mejer
+ἀμέθυστος,ædelsten
+ἀμέμπτως,ulastelig
+ἀμέριμνος,ubekymret
+ἀμήν,amen
+ἀμήτωρ,moderløs
+ἀμίαντος,uplettet
+ἀμαθής,uvidende
+ἀμαράντινος,uvisnelig
+ἀμελέω,er ubekymre
+ἀμετάθετος,uomsættelig
+ἀμετακίνητος,urokkelig
+ἀμεταμέλητος,ufortrydt
+ἀμετανόητος,som ikke føler nogen anger
+ἀμνός,lam; gimmerlam
+ἀμοιβή,veksel
+ἀμπελουργός,vingårdsmand
+ἀμπελών,vingård
+ἀμφίβληστρον,net
+ἀμφιέζω,påklæder
+ἀμφιέννυμι,påklæder
+ἀμφιβάλλω,kaster
+ἀμφότεροι,begge
+ἀμύνομαι,forsvarer
+ἀμώμητος,dadelfri
+ἀνά,i; på
+ἀνάβλεψις,syn til blinde
+ἀνάγαιον,rum ovenpå
+ἀνάγκη,tvang
+ἀνάγνωσις,genkendelse
+ἀνάγω,fører op
+ἀνάδειξις,udnævnelse af embeder
+ἀνάθεμα,tempelgave
+ἀνάθημα,tempelgave
+ἀνάκειμαι,ligger
+ἀνάκρισις,undersøgelse
+ἀνάλημψις,genoprettelse
+ἀνάλυσις,udløsning
+ἀνάμνησις,erindring
+ἀνάξιος,ikke god nok
+ἀνάπαυσις,ro
+ἀνάπηρος,lemlæstet
+ἀνάπτω,antænder
+ἀνάστασις,genopstandelse
+ἀνάχυσις,udgydelse
+ἀνάψυξις,forfriskning
+ἀνέγκλητος,udadlet
+ἀνέκλειπτος,uophørlig
+ἀνέλεος,ubarmhjertig
+ἀνένδεκτος,umulig
+ἀνέρχομαι,går op
+ἀνέχω,løfter
+ἀνήκω,det passer sig
+ἀνήμερος,utæmmet
+ἀνήρ,mand
+ἀνίημι,sender op
+ἀνίστημι,rejser sig
+ἀναίδεια,skamløshed
+ἀναίρεσις,ødelæggelse
+ἀναίτιος,uskyldig
+ἀναβάλλω,hæver
+ἀναβαίνω,går op
+ἀναβαθμός,trappe
+ἀναβιβάζω,sætter op på
+ἀναβλέπω,ser op
+ἀναβοάω,skriger op
+ἀναβολή,udsættelse
+ἀναγγέλλω,forkynder
+ἀναγεννάω,avler igen
+ἀναγινώσκω,læser
+ἀναγκάζω,tvinger
+ἀναγκαστῶς,af tvang
+ἀναγκαῖος,tvingende
+ἀναδέχομαι,venligt
+ἀναδίδωμι,giver op
+ἀναδείκνυμι,opviser
+ἀναζάω,bliver levende igen
+ἀναζητέω,opsøger
+ἀναζωπυρέω,genopliver
+ἀναζώννυμι,opgjorder
+ἀναθάλλω,fremspirer
+ἀναθεματίζω,sætter i band
+ἀναθεωρέω,betragter nøje
+ἀναιρέω,tager op
+ἀνακάμπτω,går op og ned
+ἀνακαίνωσις,fornyelse
+ἀνακαθίζω,sætter mig op
+ἀνακαινίζω,fornyer
+ἀνακαινόω,opfrisker
+ἀνακαλύπτω,afslører
+ἀνακεφαλαιόω,rekapitulerer
+ἀνακλίνω,ligger ved
+ἀνακράζω,skriger op
+ἀνακρίνω,undersøger
+ἀνακυλίω,bortvælter
+ἀνακύπτω,dukker op
+ἀναλίσκω,forbruger
+ἀναλαμβάνω,optager
+ἀναλογία,overensstemmelse
+ἀναλογίζομαι,overregner
+ἀναλύω,opløser
+ἀναμάρτητος,som ikke fejler
+ἀναμένω,venter
+ἀναμιμνῄσκω,erindrer
+ἀνανήφω,bliver ædru igen
+ἀνανεόω,fornyer
+ἀναντίρρητος,uimodsigelig
+ἀναντιρρήτως,indvending
+ἀναξίως,uværdig
+ἀναπέμπω,sender op
+ἀναπίπτω,falder tilbage
+ἀναπαύω,standser
+ἀναπείθω,overtaler
+ἀναπηδάω,løber ind
+ἀναπληρόω,opfylder
+ἀναπολόγητος,uforsvaret
+ἀναρίθμητος,utallig
+ἀνασείω,ryster op
+ἀνασκευάζω,sammenpakker
+ἀνασπάω,trækker op
+ἀναστατόω,oprører
+ἀνασταυρόω,korsfæster; spidde
+ἀναστενάζω,sukker
+ἀναστρέφω,drejer
+ἀναστροφή,levevis
+ἀνατάσσομαι,ordner
+ἀνατέλλω,står op; spire frem
+ἀνατίθημι,sætter på
+ἀνατολή,"opgang, øst"
+ἀνατρέπω,vender
+ἀνατρέφω,nærer
+ἀναφέρω,fører op
+ἀναφαίνω,lader lyse
+ἀναφωνέω,udråber
+ἀναχωρέω,viger tilbage
+ἀναψύχω,afkøler
+ἀνδρίζομαι,hærder
+ἀνδραποδιστής,menneskeraner
+ἀνδροφόνος,morder
+ἀνεκδιήγητος,uudsigelig
+ἀνεκλάλητος,uudsigelig
+ἀνεκτός,"udholdelig,"
+ἀνελεήμων,ubarmhjertig
+ἀνεμίζω,bevæger ved vind
+ἀνεξίκακος,tålmodig
+ἀνεξεραύνητος,uransagelig
+ἀνεξιχνίαστος,usporlig
+ἀνεπίλημπτος,ulastelig
+ἀνεπαίσχυντος,ikke behøver at skamme sig
+ἀνετάζω,udforsker
+ἀνευρίσκω,opfinder
+ἀνεψιός,fætter
+ἀνεύθετος,uegnet
+ἀνθίστημι,modstår
+ἀνθομολογέομαι,priser
+ἀνθρακιά,trækul
+ἀνθρωπάρεσκος,der søger at behage menneskene
+ἀνθρωποκτόνος,morder
+ἀνθρώπινος,menneskelig
+ἀνθύπατος,prokonsul
+ἀνοίγω,åbner
+ἀνοικοδομέω,genopbygger
+ἀνομία,lovløshed
+ἀνορθόω,sætte op
+ἀνοχή,overbærenhed
+ἀντάλλαγμα,giver som vederlag
+ἀντέχω,holder imod
+ἀντί,foran
+ἀντίδικος,modpart
+ἀντίθεσις,modsættelse
+ἀντίκειμαι,er modsat
+ἀντίλημψις,hjælpe
+ἀντίλυτρον,løsesum
+ἀντίτυπος,tilbagestødende
+ἀντίχριστος,antikrist
+ἀνταγωνίζομαι,kæmper mod én
+ἀνταναπληρόω,fylder
+ἀνταποδίδωμι,giver tilbage
+ἀνταποκρίνομαι,svarer derimo
+ἀνταπόδομα,gengældelse
+ἀνταπόδοσις,ἀνταπόδοσις
+ἀντιβάλλω,kaster imod
+ἀντιδιατίθημι,sætter sig imod
+ἀντικαθίστημι,stiller imod
+ἀντικαλέω,råber
+ἀντιλέγω,modsiger
+ἀντιλαμβάνω,tager derfor
+ἀντιλογία,modsigelse; ordstrid
+ἀντιλοιδορέω,svarer med skældsord
+ἀντιμετρέω,tilmåler
+ἀντιμισθία,gengæld
+ἀντιπέρα,hinsides
+ἀντιπίπτω,anfalder
+ἀντιπαρέρχομαι,går forbi overfor
+ἀντιστρατεύω,strid
+ἀντιτάσσω,opstiller imod
+ἀντλέω,øser
+ἀντοφθαλμέω,ser i ansigtet
+ἀνυπόκριτος,uden hykleri
+ἀνυπότακτος,ulydig
+ἀνωτερικός,inde i
+ἀνωφελής,frugtløs
+ἀνόητος,forunderlig; uforstandig
+ἀνόμως,lovløs
+ἀνόσιος,vanhellig
+ἀνώτερος,højere
+ἀξίνη,økse
+ἀξίως,ligegældende
+ἀξιόω,vurderer
+ἀπάγχω,kvæler
+ἀπάγω,leder
+ἀπάντησις,sammenkomst
+ἀπάρτι,aldeles
+ἀπάτη,bedrag
+ἀπάτωρ,faderløs
+ἀπέκδυσις,afklædning
+ἀπέναντι,modsat
+ἀπέραντος,ubegrænset
+ἀπέρχομαι,går bort
+ἀπέχω,er nok
+ἀπαίδευτος,udannet
+ἀπαίρω,bortfører
+ἀπαγγέλλω,melder
+ἀπαιτέω,affordrer
+ἀπαλγέω,er sløv
+ἀπαλλάσσω,bortfjerner
+ἀπαλλοτριόω,afhænder
+ἀπαντάω,møder
+ἀπαράβατος,uovertrædelig
+ἀπαρασκεύαστος,uforberedt
+ἀπαρνέομαι,afslår
+ἀπαρτισμός,fuldendelse
+ἀπαρχή,førstegrøde
+ἀπασπάζομαι,hilser
+ἀπατάω,skuffer
+ἀπαύγασμα,afglans
+ἀπείθεια,ulydighed
+ἀπείραστος,kan ikke fristes
+ἀπειθέω,er ulydig
+ἀπειθής,ulydig
+ἀπειλέω,truer
+ἀπειλή,trussel
+ἀπεκδέχομαι,venter
+ἀπεκδύομαι,afklæder mig
+ἀπελαύνω,bortdriver
+ἀπελεγμός,gendrivelse
+ἀπελεύθερος,frigiven
+ἀπελπίζω,fortvivler
+ἀπερίτμητος,ubeskåren
+ἀπερισπάστως,uforstyrret
+ἀπεῖπον,beretter
+ἀπιστέω,tvivler
+ἀπιστία,vantro
+ἀποβάλλω,bortkaster
+ἀποβαίνω,går bort
+ἀποβλέπω,vender mit blik imod
+ἀποβολή,tab
+ἀπογίνομαι,er fraværende
+ἀπογράφω,afskriver
+ἀπογραφή,indskrivelse
+ἀποδέχομαι,modtager
+ἀποδίδωμι,sælger
+ἀποδείκνυμι,fremviser
+ἀποδεκατεύω,kræver tiende
+ἀποδεκατόω,kræver tiende
+ἀποδημέω,er udenlands
+ἀποδιορίζω,afgrænser
+ἀποδοκιμάζω,forkaster
+ἀποδοχή,modtagelse
+ἀποθήκη,pakhus
+ἀποθησαυρίζω,opbevarer
+ἀποθλίβω,udtrykker
+ἀποθνῄσκω,dør
+ἀποκάλυψις,åbenbaring
+ἀποκαθιστάνω,giver tilbage
+ἀποκαλύπτω,åbenbarer
+ἀποκαραδοκία,forventning
+ἀποκατάστασις,genoprettelse
+ἀποκαταλλάσσω,udsoner igen
+ἀποκεφαλίζω,halshugger
+ἀποκλείω,tillukker
+ἀποκρίνομαι,svarer
+ἀποκρύπτω,skjuler
+ἀποκτείνω,dræber
+ἀποκυέω,føder
+ἀποκυλίω,bortvælter
+ἀποκόπτω,afskærer
+ἀπολαμβάνω,borttager
+ἀπολείπω,forlader
+ἀπολογέομαι,forsvarer mig
+ἀπολογία,forsvar
+ἀπολούω,afvasker
+ἀπολύτρωσις,løskøben
+ἀπολύω,løser
+ἀπομάσσω,afvisker
+ἀπονέμω,tildeler
+ἀπονίζω,bortvasker
+ἀποπίπτω,falder af
+ἀποπλέω,afsejler
+ἀποπλανάω,bringer bort fra
+ἀποπνίγω,kvæler
+ἀπορέω,er tvivlrådig
+ἀπορία,rådvildhed
+ἀπορίπτω,afkaster
+ἀπορφανίζω,adskiller
+ἀποσκίασμα,den kastede skygge
+ἀποσπάω,bortriver
+ἀποστάσιον,skilsmissebrev
+ἀποστέλλω,bortsender
+ἀποστασία,adskillelse
+ἀποστεγάζω,aftager taget
+ἀποστερέω,berøver
+ἀποστολή,afsendelse
+ἀποστοματίζω,udspørger
+ἀποστρέφω,drejer bort
+ἀποστυγέω,afskyr
+ἀποσυνάγωγος,udstødt af synagogen
+ἀποτάσσω,opstiller
+ἀποτίθημι,bortlægger
+ἀποτίνω,bøder
+ἀποτελέω,fuldender
+ἀποτινάσσω,bortkaster
+ἀποτολμάω,vover dristigt
+ἀποτομία,stejlhed
+ἀποτρέπω,bortvender
+ἀποτόμως,afskåret
+ἀπουσία,fraværelse
+ἀποφέρω,bortfører
+ἀποφεύγω,undgår
+ἀποφθέγγομαι,siger frit ud
+ἀποφορτίζομαι,losser
+ἀποχωρέω,går bort
+ἀποχωρίζω,adskiller
+ἀποψύχω,besvimer
+ἀπροσωπολήμπτως,upartisk
+ἀπρόσιτος,utilgængelig
+ἀπρόσκοπος,uforudset
+ἀπωθέω,fordriver
+ἀπό,fra
+ἀπόβλητος,bortkastet
+ἀπόδειξις,fremstilling
+ἀπόδεκτος,antagelig
+ἀπόδημος,udenlands
+ἀπόθεσις,aflæggelse
+ἀπόκειμαι,"ligger borte,"
+ἀπόκριμα,dom
+ἀπόκρισις,svar
+ἀπόκρυφος,skjult; hemmelig
+ἀπόλαυσις,nydelse
+ἀπόλλυμι,ødelægger
+ἀπόστολος,apostel
+ἀπόχρησις,forbrug
+ἀπώλεια,tab
+ἀρά,bøn
+ἀρέσκω,behager
+ἀρήν,lam
+ἀργέω,gør intet
+ἀργυροκόπος,sølvarbejder
+ἀργυροῦς,af sølv
+ἀργός,dovn
+ἀργύριον,sølvmønt
+ἀρεσκεία,behageligt
+ἀρεστός,behagelig
+ἀρετή,dygtighed
+ἀριθμέω,tæller
+ἀριθμός,antal
+ἀριστάω,spiser frokost
+ἀριστερός,venstre
+ἀρκέω,afværger
+ἀρκετός,tilstrækkelig
+ἀρνέομαι,nægter
+ἀρνίον,lam
+ἀροτριάω,pløjer
+ἀρραβών,håndpenge
+ἀρσενοκοίτης,"en mand, der ligger i med mænd"
+ἀρτέμων,bramsejl
+ἀρτιγέννητος,nylig født
+ἀρτύω,krydrer
+ἀρχάγγελος,ærkeengel
+ἀρχή,begyndelse
+ἀρχαῖος,oprindelig
+ἀρχηγός,fyrste
+ἀρχιερατικός,ypperstepræst
+ἀρχιερεύς,ypperstepræst
+ἀρχιποίμην,overhyrde
+ἀρχισυνάγωγος,leder af synagogen
+ἀρχιτέκτων,bygmester
+ἀρχιτελώνης,overtolder
+ἀρχιτρίκλινος,hofmarchal
+ἀσάλευτος,ubevæget
+ἀσέβεια,ugudelighed
+ἀσέλγεια,umådehold
+ἀσεβέω,handler ugudeligt
+ἀσεβής,forbryderisk
+ἀσθένεια,svaghed
+ἀσθένημα,svaghed
+ἀσθενέω,er syg
+ἀσθενής,er syg
+ἀσιτία,fasten
+ἀσκέω,øver
+ἀσκός,lædersæk
+ἀσμένως,glad
+ἀσπάζομαι,hilser
+ἀσπίς,giftig slange
+ἀσπασμός,hilsen
+ἀσσάριον,lille as
+ἀστήρ,stjerne
+ἀστήρικτος,ikke støttet
+ἀστατέω,er ustadig; vakler
+ἀστεῖος,fin
+ἀστοχέω,forfejler målet
+ἀστράπτω,lyner
+ἀστραπή,lyn
+ἀσφάλεια,sikkerhed
+ἀσφαλής,sikker
+ἀσφαλίζω,sikrer
+ἀσφαλῶς,sikkert
+ἀσχήμων,hæslig
+ἀσχημονέω,opfører mig uanstændigt
+ἀσχημοσύνη,hæslighed
+ἀσωτία,udskejelse
+ἀσύμφωνος,kke talende det samme sprog
+ἀσύνετος,uforstandig
+ἀσύνθετος,ubestandig
+ἀσώτως,usund
+ἀτάκτως,uordnet
+ἀτακτέω,er uordentlig
+ἀτενίζω,ser med ufravendt blik
+ἀτιμάζω,vanærer
+ἀτιμία,vanære
+ἀτμίς,damp
+ἀφίημι,afsender; tillader; forlader
+ἀφίστημι,bortfjerner
+ἀφαιρέω,adskiller
+ἀφανής,usynlig
+ἀφανίζω,gør usynlig
+ἀφανισμός,usynliggørelse
+ἀφεδρών,vandhus
+ἀφειδία,hårdhed
+ἀφελότης,jævnhed
+ἀφθαρσία,udødelighed
+ἀφθορία,udødelighed
+ἀφικνέομαι,kommr for øre
+ἀφιλάγαθος,fjende af det gode
+ἀφιλάργυρος,ikke glad for penge
+ἀφομοιόω,gør lig
+ἀφοράω,får klarhed over
+ἀφορίζω,afgrænser
+ἀφορμή,anledning
+ἀφρίζω,skummer
+ἀφροσύνη,ufornuft
+ἀφρός,skum
+ἀφυπνόω,sover ind
+ἀφυστερέω,berøver
+ἀφόβως,frygtløs
+ἀχάριστος,utaknemlig
+ἀχειροποίητος,ikke bygget med hænder
+ἀχλύς,tåge; mørke
+ἀχρειόω,gør uduelig
+ἀχρεῖος,uden nytte
+ἀψευδής,lyver ikke
+ἀόρατος,usynlig
+ἁγιάζω,indvier
+ἁγιασμός,indvielse; sakramente
+ἁγιωσύνη,hellighed
+ἁγιότης,hellighed
+ἁγνίζω,renser
+ἁγνεία,renhed
+ἁγνισμός,renselse
+ἁγνός,hellig
+ἁγνότης,renhed
+ἁγνῶς,ukendt
+ἁδρότης,fylde
+ἁλίζω,samler
+ἁλιεύς,fisker
+ἁλιεύω,fisker
+ἁλληλουϊά,Halleluja
+ἁλυκός,salt
+ἁμάρτημα,fejl
+ἁμαρτάνω,synd
+ἁμαρτία,synd
+ἁμαρτωλός,syndig
+ἁπαλός,blød
+ἁπλοῦς,simpelt
+ἁπλότης,enkelthed
+ἁπλῶς,simpelt
+ἁρμόζω,forbinder
+ἁρμός,sammenføining
+ἁρπάζω,bortriver
+ἁρπαγή,rov
+ἁρπαγμός,røveri
+ἁφή,led
+ἄβυσσος,umålelig
+ἄγαμος,ugift
+ἄγγελος,"budbringer, engel"
+ἄγγος,kar
+ἄγκιστρον,krog
+ἄγκυρα,anker
+ἄγναφος,ny
+ἄγνοια,ukyndighed
+ἄγνωστος,ubekendt
+ἄγρα,bytte
+ἄγριος,vild
+ἄγω,fører
+ἄδηλος,dunkel
+ἄδικος,uretdærdig
+ἄδολος,ren
+ἄζυμος,usyret
+ἄθεος,uden gud
+ἄθεσμος,lovløs
+ἄθλησις,kamp
+ἄκακος,uskyldig
+ἄκανθα,tidsel
+ἄκαρπος,ufrugtbar
+ἄκρατος,ublandet
+ἄκρον,øverst
+ἄκων,ufrivillig
+ἄλαλος,stum; ikke talende
+ἄλευρον,ἄλευρον
+ἄλλος,anden
+ἄλλως,anderledes
+ἄλογος,uden ord
+ἄλυπος,sorgfri
+ἄλφα,alfa
+ἄμαχος,ikke stridbar
+ἄμεμπτος,ulastelig
+ἄμετρος,umålelig
+ἄμμος,sand
+ἄμπελος,vin
+ἄμφοδον,gade
+ἄμωμον,dadelfri
+ἄμωμος,dadelfri
+ἄν,hvis
+ἄναλος,usaltet
+ἄνεμος,vind
+ἄνεσις,eftergivelse
+ἄνευ,uden
+ἄνηθον,dild
+ἄνθος,skud
+ἄνθραξ,kul
+ἄνθρωπος,mand
+ἄνιπτος,uvasket
+ἄνοια,uforstandighed
+ἄνοιξις,åbning
+ἄνομος,lovløs
+ἄντικρυς,lige over for
+ἄντλημα,udøselse
+ἄνυδρος,uden vand
+ἄνω,op
+ἄνωθεν,ovenfra
+ἄξιος,værdig
+ἄπειμι (I),er borte
+ἄπειμι (II),"går bort,"
+ἄπειρος,uerfaren
+ἄπιστος,vantro
+ἄπταιστος,ikke snublende
+ἄρα,så
+ἄραφος,uden sammensyninger; sømløs
+ἄργυρος,sølv
+ἄριστον,frokost
+ἄρκος,bjørn
+ἄροτρον,plov
+ἄρρητος,usagt
+ἄρρωστος,sygelig
+ἄρσην,mandlig
+ἄρτι,nu
+ἄρτιος,passende
+ἄρτος,brød
+ἄρχω,begynder
+ἄρχων,hersker
+ἄρωμα,salve
+ἄσβεστος,uslukket
+ἄσημος,utydelig
+ἄσιτος,fastende
+ἄσοφος,dum
+ἄσπιλος,uplettet
+ἄσπονδος,uforsonlig
+ἄστοργος,ukærlig
+ἄστρον,stjerne
+ἄτακτος,uordnet
+ἄτεκνος,barnløs
+ἄτερ,uden
+ἄτιμος,foragtet
+ἄτομος,udelelig
+ἄτοπος,forkert
+ἄφαντος,usynlig
+ἄφεσις,tilgivelse
+ἄφθαρτος,uforgængelig
+ἄφιξις,ankomst
+ἄφνω,pludselig
+ἄφρων,uforstandig
+ἄφωνος,stum
+ἄχρηστος,ubrugbar
+ἄχρι,indtil
+ἄχυρον,skal
+ἄψινθος,malurt
+ἄψυχος,livløs
+ἅγιος,hellig
+ἅλας,salt
+ἅλλομαι,hopper
+ἅλυσις,kæde
+ἅλων,tærskeplads
+ἅλωσις,erobring
+ἅμα,tillige
+ἅπαξ,en gang
+ἅπας,enhver
+ἅπτω,beører; berører
+ἅρμα,vogn
+ἅρπαξ,røver
+ἆρα,så
+Ἀαρών,Aron
+Ἀβαδδών,Abaddon
+Ἀβιά,Abija
+Ἀβιαθάρ,Ebjatar
+Ἀβιληνή,Abilene
+Ἀβιούδ,Abiud
+Ἀβραάμ,Abraham
+Ἀγρίππας,Agrippa
+Ἀδάμ,Adam
+Ἀδδί,Addi
+Ἀδρίας,Adriaterhavet
+Ἀδραμυττηνός,fra Adramyttion
+Ἀζώρ,Azor
+Ἀθηναῖος,Athensk
+Ἀθῆναι,Athen
+Ἀκύλας,Akvila
+Ἀλέξανδρος,Alexander
+Ἀλεξανδρεύς,Alexandrinsk
+Ἀλεξανδρῖνος,Alexandrinsk
+Ἀμιναδάβ,Amminadab
+Ἀμπλιᾶτος,Ampliatus
+Ἀμφίπολις,Amfipolis
+Ἀμώς,Amos
+Ἀνδρέας,Andreas
+Ἀνδρόνικος,Andronikos
+Ἀντιοχεύς,fra Antiokia
+Ἀντιπατρίς,Antipatris
+Ἀντιπᾶς,Antipas
+Ἀντιόχεια,Antiochia
+Ἀπελλῆς,Apelles
+Ἀπολλωνία,Apollonia
+Ἀπολλύων,Apollyon
+Ἀπολλῶς,Apollos
+Ἀππίου Φόρον,Appii
+Ἀπφία,Appia
+Ἀράμ,Ram
+Ἀρίσταρχος,Aristark
+Ἀραβία,Arabien
+Ἀρεοπαγίτης,medlem af Areopagosforsamlingen
+Ἀριμαθαία,Arimatæa
+Ἀριστόβουλος,Aristobul
+Ἀρνί,Ram
+Ἀρτεμᾶς,Artemas
+Ἀρφαξάδ,Arpakshad
+Ἀρχέλαος,Arkelaos
+Ἀσήρ,Asher
+Ἀσία,Asien
+Ἀσιάρχης,ypperstepræst
+Ἀσιανός,asiatisk
+Ἀσύγκριτος,Asynkritos
+Ἀττάλεια,Attalia
+Ἀχάζ,Akaz
+Ἀχίμ,Akim
+Ἀχαΐα,Akaja
+Ἀχαϊκός,Akaikos
+Ἁγάρ,Hagar
+Ἁκελδαμάχ,Hakeldama
+Ἁλφαῖος,Alfæus
+Ἁνανίας,Ananias
+Ἁρέτας,Aretas
+Ἁριμαθαία,Arimatæa
+Ἁρμαγεδών,Harmagedon
+Ἄζωτος,Ashdod
+Ἄραψ,araber
+Ἄρειος Πάγος,Areopagos
+Ἄρτεμις,Artemistempler
+Ἄρχιππος,Arkippos
+Ἅβελ,Abel
+Ἅγαβος,Agabos
+Ἅννα,Anna
+Ἅννας,Annas
+ἐάν,hvis
+ἐάνπερ,hvis
+ἐάω,tillader
+ἐγγίζω,er nær
+ἐγγράφω,skriver på
+ἐγγύς,nær
+ἐγείρω,oprejser
+ἐγκάθετος,spion
+ἐγκαίνια,indvielses fest
+ἐγκαινίζω,indvier
+ἐγκακέω,bliver træt
+ἐγκαλέω,anklager
+ἐγκαταλείπω,efterlader
+ἐγκατοικέω,bor med
+ἐγκαυχάομαι,praler
+ἐγκεντρίζω,gør delagtig i
+ἐγκομβόομαι,påklæder mig
+ἐγκοπή,indsnit
+ἐγκράτεια,selvbeherskelse
+ἐγκρίνω,optager ved valg i
+ἐγκρατής,fastholdende
+ἐγκρατεύομαι,behersker mig selv
+ἐγκρύπτω,skjuler i
+ἐγκόπτω,slår i
+ἐγχρίω,indsalver
+ἐγώ,jeg
+ἐδαφίζω,jævner
+ἐθίζω,vænner
+ἐθελοθρησκία,gudsdyrkelse
+ἐθνάρχης,konge
+ἐθνικός,hedensk
+ἐθνικῶς,hedensk
+ἐκ,"ud, ud af"
+ἐκβάλλω,kaster ud; udkaster
+ἐκβαίνω,udgang
+ἐκβολή,udkastning
+ἐκδέχομαι,modtager
+ἐκδίδωμι,udleverer
+ἐκδίκησις,straf
+ἐκδαπανάω,bruger
+ἐκδημέω,udvandrer
+ἐκδιηγέομαι,fortæller
+ἐκδικέω,straffer
+ἐκδιώκω,udjager
+ἐκδοχή,efterfølgelse
+ἐκδύω,aflægger
+ἐκεῖ,der
+ἐκεῖθεν,derfra
+ἐκεῖνος,denne
+ἐκεῖσε,derhen
+ἐκζήτησις,undersøgelse
+ἐκζητέω,forfølger
+ἐκθαμβέω,forskrækket
+ἐκθαυμάζω,beundrer
+ἐκκαίω,udbrænder
+ἐκκαθαίρω,udrenser
+ἐκκεντέω,gennemborer
+ἐκκλάω,afbryder
+ἐκκλίνω,bøjer af
+ἐκκλείω,udelukker
+ἐκκλησία,kirke
+ἐκκολυμβάω,svømmer ud af
+ἐκκομίζω,bringer
+ἐκκρεμάννυμι,hænger noget op
+ἐκκόπτω,udhugger
+ἐκλάμπω,fremskinner
+ἐκλέγω,udvælger
+ἐκλαλέω,udtaler
+ἐκλανθάνομαι,glemmer
+ἐκλείπω,forlader
+ἐκλεκτός,udvalgt
+ἐκλογή,udvalg
+ἐκλύω,udløser
+ἐκμάσσω,udvisker
+ἐκμυκτηρίζω,gør nar
+ἐκνήφω,kommer mig efter en rus
+ἐκνεύω,går sin vej
+ἐκπέμπω,sender bort
+ἐκπίπτω,falder ud
+ἐκπαδάω,løber ind
+ἐκπειράζω,udforsker
+ἐκπερισσῶς,i høj grad
+ἐκπετάννυμι,udbreder
+ἐκπλέω,sejler ud
+ἐκπλήρωσις,afslutning
+ἐκπλήσσω,forskrækker
+ἐκπληρόω,udfylder
+ἐκπνέω,udånder
+ἐκπορεύομαι,går ud
+ἐκπορνεύω,forfører til utugt
+ἐκπτύω,udspyer
+ἐκριζόω,udrydder
+ἐκστρέφω,drejer ud
+ἐκτένεια,anstrengelse
+ἐκτίθημι,udsætter
+ἐκταράσσω,foruroliger meget
+ἐκτείνω,udstrækker
+ἐκτελέω,fuldender
+ἐκτενής,udstrækker
+ἐκτενῶς,udstrakt
+ἐκτινάσσω,afryster
+ἐκτρέπω,afvender
+ἐκτρέφω,opdrager
+ἐκτός,udenfor
+ἐκφέρω,fører ud
+ἐκφεύγω,flygter
+ἐκφοβέω,udskrækker
+ἐκφύω,avler
+ἐκχέω,hælder
+ἐκχωρέω,går ud
+ἐκψύχω,udånder
+ἐλάσσων,kortere
+ἐλάχιστος,ringest
+ἐλέγχω,foragter
+ἐλαία,oliventræ
+ἐλαιών,olivenskov; oliebjerget
+ἐλαττονέω,får mindre
+ἐλαττόω,gør mindre
+ἐλαφρία,lethed; letsindighed
+ἐλαφρός,let
+ἐλαύνω,driver
+ἐλεάω,har medlidenhed
+ἐλεέω,har medlidenhed
+ἐλεήμων,medlidende
+ἐλεγμός,bebrejdelse
+ἐλεεινός,ynkværdig
+ἐλεημοσύνη,almisse
+ἐλευθερία,frihed
+ἐλευθερόω,frigør
+ἐλεφάντινος,af elfenben
+ἐλεύθερος,fri
+ἐλλογέω,regner med
+ἐλπίζω,håber
+ἐλπίς,håb
+ἐλωΐ,Eloí
+ἐμέω,opbrækker
+ἐμαυτοῦ,min
+ἐμβάλλω,kaster ind
+ἐμβάπτω,dypper i
+ἐμβαίνω,kommer ind
+ἐμβατεύω,træder
+ἐμβιβάζω,lader gå
+ἐμβλέπω,ser på
+ἐμβριμάομαι,fnyser
+ἐμμένω,bliver i
+ἐμμαίνομαι,raser i
+ἐμπίπλημι,fylder
+ἐμπίπρημι,opflammer
+ἐμπίπτω,falder ind
+ἐμπαίζω,spotter
+ἐμπαίκτης,spotter
+ἐμπαιγμονή,spottelse
+ἐμπαιγμός,spottelse
+ἐμπεριπατέω,vandrer
+ἐμπλέκω,indfletter
+ἐμπλοκή,fletning
+ἐμπνέω,blæser
+ἐμπορία,rejse
+ἐμπορεύομαι,går; rejser
+ἐμπτύω,spytter
+ἐμπόριον,handels-
+ἐμφανής,synlig
+ἐμφανίζω,åbenbar
+ἐμφυσάω,opblæser
+ἐμός,min
+ἐν,"i, på, med"
+ἐνάλιος,i havet
+ἐνάρχομαι,begynder
+ἐνέδρα,baghold
+ἐνέργεια,virksomhed
+ἐνέργημα,gerning
+ἐνέχω,er vred
+ἐνίστημι,sætter på
+ἐναγκαλίζομαι,tager i armene
+ἐναντίον,lige over for
+ἐναντίος,mod
+ἐνδέχομαι,er muligt
+ἐνδεής,manglende
+ἐνδείκνυμι,viser
+ἐνδημέω,er i landet
+ἐνδιδύσκω,ifører
+ἐνδοξάζομαι,herliggør
+ἐνδυναμόω,styrker
+ἐνδύνω,ifører
+ἐνδύω,tager på
+ἐνδώμησις,murværk
+ἐνεδρεύω,efterstræber
+ἐνειλέω,indvikler
+ἐνεργέω,arbejder
+ἐνεργής,ἐνεργής
+ἐνευλογέω,velsigner
+ἐνεός,stum
+ἐνθάδε,ἐνθάδε
+ἐνθυμέομαι,betænker
+ἐνθύμησις,overvejelse
+ἐνιαυτός,år
+ἐνισχύω,får kraft
+ἐννέα,ni
+ἐννεύω,tilvinke
+ἐνοικέω,bor
+ἐνορκίζω,tager i ed
+ἐνοχλέω,besværer
+ἐντέλλομαι,pålægger
+ἐνταφιάζω,jorder
+ἐνταφιασμός,indbalsamering
+ἐντεῦθεν,derfra
+ἐντολή,befaling
+ἐντρέπω,vender om
+ἐντρέφω,opnære
+ἐντροπή,skam
+ἐντρυφάω,svælger i
+ἐντυγχάνω,træffer
+ἐντυλίσσω,indvikler
+ἐντυπόω,indslår
+ἐντόπιος,lokal
+ἐντός,ind
+ἐνυβρίζω,behandler overmodigt
+ἐνυπνιάζομαι,drømmer
+ἐνωτίζομαι,hører
+ἐνύπνιον,drømmebillede
+ἐνώπιον,synlig
+ἐξάγω,udfører
+ἐξάλλομαι,springer ud
+ἐξάπινα,pludseligt
+ἐξέλκω,trækker ud
+ἐξέραμα,bræk
+ἐξέρχομαι,kommer ud
+ἐξίστημι,forbavses
+ἐξαίρω,hæver
+ἐξαίφνης,pludselig
+ἐξαγγέλλω,forkynder
+ἐξαγοράζω,opkøber
+ἐξαιρέω,fjener
+ἐξαιτέω,fordrer tilbage
+ἐξακολουθέω,følger efter
+ἐξαλείφω,indsalver
+ἐξανάστασις,opstandelse
+ἐξανίστημι,rejser sig op
+ἐξανατέλλω,vokser frem; fremspirer
+ἐξαπατάω,bedrager
+ἐξαπορέομαι,er fortvivlet
+ἐξαποστέλλω,afsender
+ἐξαρτίζω,gør fuldkommen
+ἐξαστράπτω,skinner; lyser
+ἐξαυτῆς,straks
+ἐξεγείρω,vækker
+ἐξεραυνάω,søger omhyggeligt
+ἐξετάζω,mønster
+ἐξηγέομαι,udlægger
+ἐξηχέω,toner
+ἐξισχύω,er meget stærk
+ἐξολεθρεύω,udrydder
+ἐξομολογέω,tilstår
+ἐξορκίζω,lader sværge; tager i ed
+ἐξορκιστής,besværger
+ἐξορύσσω,udgraver; udriver
+ἐξουδενέω,foragter
+ἐξουθενέω,ignorerer
+ἐξουσία,magt; autoritet
+ἐξουσιάζω,har tilladelse
+ἐξοχή,første mand
+ἐξυπνίζω,vækker af søvnen
+ἐξωθέω,støder
+ἐξώτερος,ydre
+ἐπάγγελμα,forkyndelse
+ἐπάγω,bringer
+ἐπάν,efter at; da
+ἐπάναγκες,nødvendigt
+ἐπάνω,ovenover
+ἐπάρατος,anklaget
+ἐπάρχειος,provins
+ἐπέκεινα,hinsides
+ἐπέρχομαι,kommer ind
+ἐπέχω,lægger på
+ἐπί,"på, til"
+ἐπίβλημα,overklædning
+ἐπίγειος,på landjorden
+ἐπίγνωσις,anerkendelse
+ἐπίθεσις,pålæggelse
+ἐπίκειμαι,ligger på
+ἐπίλοιπος,øvrig
+ἐπίλυσις,befrielse
+ἐπίνοια,tanke
+ἐπίορκος,falsk svoret
+ἐπίσημος,berømt; navnkundig
+ἐπίσκοπος,forstander
+ἐπίσταμαι,forstår
+ἐπίτροπος,forvalter
+ἐπαίρω,løfter
+ἐπαγγέλλομαι,lover
+ἐπαγγελία,tilsagn
+ἐπαγωνίζομαι,kæmper om
+ἐπαθροίζω,samler ved
+ἐπαινέω,roser
+ἐπαισχύνομαι,skammer mig
+ἐπαιτέω,fordrer
+ἐπακολουθέω,følger efter
+ἐπακούω,hører på
+ἐπακροάομαι,hører på
+ἐπανάγω,fører op
+ἐπανέρχομαι,kommer tilbage
+ἐπανίστημι,rejser sig imod
+ἐπαναμιμνῄσκω,erindrer atter om
+ἐπαναπαύομαι,udhviler mig på
+ἐπανόρθωσις,istandsættelse
+ἐπαρκέω,hjælper; tager sig af
+ἐπαρχεία,provins
+ἐπαφρίζω,skummer over
+ἐπαύριον,i morgen
+ἐπεί,siden
+ἐπεγείρω,opvækker igen
+ἐπειδή,da
+ἐπειδήπερ,siden
+ἐπεισαγωγή,indførelse
+ἐπεισελεύσεται,kommer ind
+ἐπεκτείνομαι,udstrækker
+ἐπενδύτης,overklædning
+ἐπενδύω,iklæder
+ἐπερωτάω,udspørger
+ἐπερώτημα,spørgsmål; tilsagn
+ἐπεῖδον,tager sig af
+ἐπηρεάζω,krænker
+ἐπιβάλλω,påkaster
+ἐπιβαίνω,betræder
+ἐπιβαρέω,besværer
+ἐπιβιβάζω,lader bestige
+ἐπιβλέπω,ser på
+ἐπιβουλή,efterstræbelse
+ἐπιγίνομαι,fremrykker
+ἐπιγαμβρεύω,liver besvogret
+ἐπιγινώσκω,betragter
+ἐπιγράφω,skriver på
+ἐπιγραφή,påskrift
+ἐπιδέχομαι,optager
+ἐπιδίδωμι,giver
+ἐπιδείκνυμι,foreviser
+ἐπιδημέω,er i landet
+ἐπιδιατάσσομαι,anordner endnu dertil
+ἐπιδιορθόω,sætter i orden
+ἐπιδύω,går ned
+ἐπιείκεια,billighed
+ἐπιεικής,passende
+ἐπιζητέω,opsøger
+ἐπιθανάτιος,dødsens
+ἐπιθυμέω,begærer
+ἐπιθυμία,lyst
+ἐπιθυμητής,tilhænger
+ἐπικάλυμμα,bedækning
+ἐπικαθίζω,sætter sig på
+ἐπικαλέω,tilkalder
+ἐπικαλύπτω,tildækker
+ἐπικατάρατος,anklaget
+ἐπικουρία,hjælp
+ἐπικρίνω,tilkender
+ἐπιλέγω,siger dertil
+ἐπιλαμβάνομαι,indtager
+ἐπιλανθάνομαι,glemmer
+ἐπιλείπω,slipper op
+ἐπιλησμονή,glemsomhed
+ἐπιλύω,befrier
+ἐπιμέλεια,omsorg; flittig
+ἐπιμένω,forbliver
+ἐπιμαρτυρέω,vidner
+ἐπιμελέομαι,forvalter
+ἐπιμελῶς,omhyggeligt
+ἐπινεύω,tilnikker
+ἐπιορκέω,sværger falsk
+ἐπιούσιος,til den følgende dag
+ἐπιπίπτω,falder på
+ἐπιπλήσσω,dadler
+ἐπιποθέω,ønsker
+ἐπιποθία,længsel
+ἐπιπορεύομαι,rejser hen til
+ἐπιπόθησις,længsel
+ἐπιπόθητος,ønsket
+ἐπιράπτω,syer på
+ἐπιρίπτω,kaster på
+ἐπισιτισμός,forsyning med levnedsmidler: fourageren
+ἐπισκέπτομαι,beser
+ἐπισκηνόω,går ind i et telt
+ἐπισκιάζω,overskygger
+ἐπισκοπέω,beser
+ἐπισκοπή,opsyn
+ἐπισπάομαι,bliver omskåret
+ἐπισπείρω,sår
+ἐπιστάτης,kyndig
+ἐπιστέλλω,skriver; fortæller i et brev
+ἐπιστήμων,forstandig; erfaren
+ἐπιστηρίζω,støtter på
+ἐπιστολή,brev
+ἐπιστομίζω,lægger om munden
+ἐπιστρέφω,vender tilbage
+ἐπιστροφή,omvendelse
+ἐπισυνάγω,forsamler
+ἐπισυναγωγή,forsamling
+ἐπισυντρέχω,løber sammen
+ἐπισφαλής,som let falder
+ἐπισχύω,gør stærk
+ἐπισωρεύω,ophober
+ἐπιτάσσω,giver ordre; bestemmer
+ἐπιτήδειος,nødvendig
+ἐπιτίθημι,sætter på
+ἐπιταγή,befaling
+ἐπιτελέω,fuldender
+ἐπιτιμάω,kritiserer; dadler
+ἐπιτιμία,straf
+ἐπιτρέπω,overgiver
+ἐπιτροπή,overladelse; betroelse
+ἐπιτυγχάνω,træffer
+ἐπιφάνεια,fremkomst
+ἐπιφέρω,påfører
+ἐπιφαίνω,tilsyneladelse
+ἐπιφανής,foreviser
+ἐπιφαύσκω,skinner
+ἐπιφωνέω,tilråber
+ἐπιφώσκω,skinner frem
+ἐπιχέω,påøser
+ἐπιχειρέω,lægger hånd på; griber
+ἐπιχορηγέω,forsyner
+ἐπιχορηγία,styrke
+ἐπιχρίω,indsmører
+ἐποικοδομέω,ligger grundvolden
+ἐπονομάζω,benævner
+ἐποπτεύω,ser på
+ἐπουράνιος,himmelsk
+ἐπόπτης,betragter
+ἐρήμωσις,ødelæggelse
+ἐρίζω,strides
+ἐρίφιον,ung buk
+ἐραυνάω,gransker
+ἐργάζομαι,arbejder
+ἐργάτης,arbejder
+ἐργασία,arbejde
+ἐρείδω,støtter
+ἐρεθίζω,ophidser
+ἐρεύγομαι,udspyer
+ἐρημία,ørken
+ἐρημόω,gør ensom
+ἐριθεία,tvist
+ἐρυθρός,rød
+ἐρωτάω,spørger
+ἐσθής,klædning
+ἐσθίω,spiser
+ἐσχάτως,yderst
+ἐσώτερος,inderst
+ἐφάλλομαι,springer på
+ἐφάπαξ,på engang
+ἐφήμερος,daglig
+ἐφίστημι,stiller
+ἐφευρετής,opfinder
+ἐφημερία,skifte
+ἐφικνέομαι,kommer til
+ἐφφαθά,Luk dig op
+ἐχθές,igår
+ἐχθρός,fjende
+ἑαυτοῦ,sig selv
+ἑβδομήκοντα,70
+ἑβδομηκοντάκις,70 gange
+ἑδραίωμα,støtte
+ἑδραῖος,fast
+ἑκάστοτε,hvergang
+ἑκατοντάρχης,centurion
+ἑκατονταετής,hundredårig
+ἑκατονταπλασίων,100 fold
+ἑκατόν,hundrede
+ἑκουσίως,frivillig
+ἑκούσιος,frivillig
+ἑκών,ugerne
+ἑλίσσω,drejer
+ἑλκόω,sårer
+ἑνδέκατος,11.
+ἑνότης,enhed
+ἑξήκοντα,60
+ἑξακόσιοι,600
+ἑξῆς,derefter
+ἑορτάζω,holder fest
+ἑορτή,fest
+ἑπτά,syv
+ἑπτάκις,7 gange
+ἑπτακισχίλιοι,7000
+ἑρμηνεία,forklaring
+ἑρμηνεύω,udtyder
+ἑρπετόν,kryb
+ἑσπέρα,aften
+ἑτέρως,anderledes
+ἑταῖρος,hjælper
+ἑτεροδιδασκαλέω,lærer falsk; lærer anderledes
+ἑτεροζυγέω,er spændt i åget med andre
+ἑτερόγλωσσος,som taler fremmed sprog
+ἑτοίμως,beredt
+ἑτοιμάζω,forbereder
+ἑτοιμασία,færdighed
+ἔα,ah!
+ἔγγυος,sikkerhed
+ἔγερσις,opvækkelse
+ἔγκλημα,beskyldning
+ἔγκυος,svanger
+ἔδαφος,grundlag
+ἔθνος,folk
+ἔθος,vane
+ἔκβασις,udgang
+ἔκγονος,avlet; født
+ἔκδηλος,meget åbenbar
+ἔκδικος,lovløs
+ἔκδοτος,udleveret
+ἔκθαμβος,forskrækket
+ἔκθετος,udsat
+ἔκπαλαι,allerede længe
+ἔκστασις,bortfjernelse
+ἔκτρωμα,abort
+ἔκφοβος,forskrækket
+ἔλαιον,olivenolie
+ἔλεγξις,bevis
+ἔλεγχος,bebrejdelse
+ἔλεος,medlidenhed
+ἔλευσις,komme; ankomst
+ἔμπορος,rejsende
+ἔμπροσθεν,foran
+ἔμφοβος,frygtet
+ἔμφυτος,medfødt
+ἔναντι,tilstede
+ἔνατος,niende
+ἔνδειγμα,angivelse
+ἔνδειξις,bevis
+ἔνδικος,retmæssig
+ἔνδοξος,berømt
+ἔνδυμα,dragt
+ἔνδυσις,indgang
+ἔνειμι,er i
+ἔνθεν,ἐνθάδε
+ἔνι,er i
+ἔννοια,tanke
+ἔννομος,lovmæssig
+ἔννυχος,natlig
+ἔνοχος,holdt
+ἔνταλμα,befaling
+ἔντευξις,beskæftigelse
+ἔντιμος,æret
+ἔντρομος,skælvende
+ἔξειμι,går ud
+ἔξεστι(ν),"tilladt, muligt"
+ἔξοδος,udgangssted
+ἔξυπνος,vækket af søvnen
+ἔξω,uden for
+ἔξωθεν,udenfra
+ἔοικα,er lig; ligner
+ἔπαινος,bifald
+ἔπαυλις,landsted
+ἔπειμι,næste dag
+ἔπειτα,derefter
+ἔπος,ord
+ἔργον,arbejde
+ἔρημος,ørken; øde
+ἔριον,uld
+ἔρις,strid
+ἔριφος,bud
+ἔρχομαι,kommer
+ἔσοπτρον,spejl
+ἔσχατος,sidst
+ἔσω,indre
+ἔσωθεν,indenfra
+ἔτι,endnu
+ἔτος,år
+ἔχθρα,fjendskab
+ἔχιδνα,hugorm
+ἔχω,har
+ἕβδομος,den syvende
+ἕκαστος,hver
+ἕκτος,sjette
+ἕλκος,sår
+ἕλκω,trækker
+ἕνδεκα,11
+ἕνεκα,på grund af
+ἕξ,seks
+ἕξις,besiddelse
+ἕτερος,anden
+ἕτοιμος,klar
+ἕως,indtil
+Ἐλαμίτης,elamit
+Ἐλεάζαρ,Eleazar
+Ἐλιέζερ,Eliezer
+Ἐλιακίμ,Eljakim
+Ἐλιούδ,Eliud
+Ἐλισάβετ,Elisabeth
+Ἐλισαῖος,Elisas
+Ἐλμαδάμ,Elmadam
+Ἐλύμας,Elymas
+Ἐμμανουήλ,Immanuel
+Ἐμμαοῦς,Emmaus
+Ἐνώς,Enosh
+Ἐπαίνετος,Epainetos
+Ἐπαφρόδιτος,Epafroditus
+Ἐπαφρᾶς,Epafras
+Ἐπικούρειος,epikuræisk
+Ἐφέσιος,"efesisk, fra Efesos"
+Ἐφραίμ,Efraim
+Ἑβραΐς,hebraisk
+Ἑβραϊστί,på hebraisk
+Ἑβραῖος,hebræer
+Ἑζεκίας,Hizkija
+Ἑλλάς,Grækenland
+Ἑλληνίς,græsk
+Ἑλληνικός,på græsk
+Ἑλληνιστής,hellenist
+Ἑλληνιστί,på hebraisk
+Ἑμμώρ,Hamor
+Ἑνώχ,Enok
+Ἑρμογένης,Hermogenes
+Ἑρμᾶς,Hermes
+Ἑρμῆς,Hermes
+Ἑσλί,Esli
+Ἑσρώμ,Hesron
+Ἔβερ,Eber
+Ἔραστος,Erastos
+Ἔφεσος,Efesos
+Ἕλλην,græsk
+ἠχέω,toner
+ἡγέομαι,leder
+ἡγεμονία,overherredømme
+ἡγεμονεύω,går foran
+ἡγεμών,fryste
+ἡδέως,sødt
+ἡδονή,fornøjelse
+ἡδύοσμον,mynte
+ἡλίκος,så stor som
+ἡλικία,alder
+ἡμέρα,dag
+ἡμέτερος,vores
+ἡμίωρον,halvtime
+ἡμιθανής,halvdød
+ἡνίκα,når; da
+ἡσσάομαι,ligger under for
+ἡσυχάζω,gør rolig
+ἡσυχία,rolighed
+ἡσύχιος,rolig
+ἤ,eller
+ἤδη,allerede
+ἤπερ,end
+ἤπιος,mild
+ἤρεμος,rolig
+ἤτοι,vistnok
+ἥκω,kommer
+ἥλιος,sol
+ἥμισυς,halv
+ἥσσων,ringere
+ἥττημα,nederlag
+ἦθος,sæde
+ἦχος (I),rygte
+ἦχος (II),rygte
+ἧλος,nagle
+Ἠλίας,Elias
+Ἠσαΐας,Esajas
+Ἠσαῦ,Esau
+Ἡρῳδίων,Herodion
+Ἡρῳδιάς,Herodes
+Ἡρῳδιανοί,herodianer
+Ἡρῴδης,Herodes
+Ἤρ,Er
+ἰάομαι,helbreder
+ἰατρός,læge
+ἰδιώτης,privatmand
+ἰκμάς,væske
+ἰσάγγελος,englelig
+ἰσχυρός,mægtig
+ἰσχύς,styrke
+ἰσχύω,er mægtig
+ἰσότης,lighed
+ἰσότιμος,af lige stand
+ἰσόψυχος,med et sind som
+ἰχθύδιον,lille fisk
+ἰχθύς,fisk
+ἰός,gift
+ἰῶτα,iota
+ἱδρώς,sved
+ἱεράτευμα,præsteembede
+ἱερατεία,præstestand
+ἱερατεύω,er præst
+ἱερεύς,præst
+ἱεροπρεπής,hellig
+ἱεροσυλέω,er tempelrøver
+ἱερουργέω,forestår religiøs offer
+ἱερωσύνη,præsteembede
+ἱερόθυτος,ofret til guderne
+ἱερός,tempel
+ἱερόσυλος,tempelraner
+ἱκανός,vældig; tilstrækkelig
+ἱκανότης,tilstrækkelighed
+ἱκανόω,gør dygtig
+ἱκετηρία,anråbelse
+ἱλάσκομαι,soner
+ἱλαρός,munter
+ἱλαρότης,munterhed
+ἱλασμός,soning
+ἱλαστήριος,forsonende
+ἱμάς,rem
+ἱμάτιον,kappe; klædning
+ἱματίζω,beklæder
+ἱματισμός,klædningsstykke
+ἱππεύς,rytter
+ἱππικός,rytteri
+ἱστορέω,iagttager
+ἴαμα,helbredelse
+ἴασις,helbredelse
+ἴασπις,jaspis
+ἴδιος,egen
+ἴσος,lige
+ἴσως,måske
+ἴχνος,fodspor
+ἵλεως,nådig
+ἵνα,for at
+ἵππος,hest
+ἵστημι,stopper; stiller
+ἶρις,regnbue
+Ἰάκωβος,Jakob
+Ἰάννης,Jannes
+Ἰάρετ,Jered
+Ἰάσων,Jason
+Ἰάϊρος,Jairus
+Ἰακώβ,Jakob
+Ἰαμβρῆς,Jambres
+Ἰανναί,Jannaj
+Ἰδουμαία,Idumæa
+Ἰεζάβελ,Jezabel
+Ἰερεμίας,Jeremias
+Ἰεριχώ,Jeriko
+Ἰεσσαί,Isaj
+Ἰεφθάε,Jefta
+Ἰεχονίας,Jekonja
+Ἰησοῦς,Jesus
+Ἰκόνιον,Ikonion
+Ἰλλυρικόν,Illyrien
+Ἰορδάνης,"Jordanfloden, Jordan"
+Ἰουδαΐζω,lever på jødisk vis
+Ἰουδαία,Judæa
+Ἰουδαϊκός,jødisk
+Ἰουδαϊκῶς,på jødisk vis
+Ἰουδαϊσμός,jødedommen
+Ἰουδαῖος,jøde
+Ἰουλία,Julia
+Ἰουνιᾶς,Junias
+Ἰούδας,Judas
+Ἰούλιος,Julius
+Ἰοῦστος,Justus
+Ἰσαάκ,Isaac
+Ἰσκαριώθ,Iskariot
+Ἰσραήλ,Israel
+Ἰσραηλίτης,sraelit
+Ἰσσαχάρ,Issakar
+Ἰταλία,Italien
+Ἰταλικός,italiensk
+Ἰτουραῖος,Ituræa
+Ἰωάννα,Johanna
+Ἰωάννης,Johannes
+Ἰωήλ,Joel
+Ἰωαθάμ,Jotam
+Ἰωανάν,Johanan
+Ἰωβήδ,Obed
+Ἰωδά,Juda
+Ἰωνάμ,Jonam
+Ἰωνᾶς,Jonah
+Ἰωράμ,Joram
+Ἰωρίμ,Jorim
+Ἰωσήφ,Josef
+Ἰωσήχ,Josef
+Ἰωσίας,Josija
+Ἰωσαφάτ,Joshafat
+Ἰωσῆς,Joses
+Ἰόππη,Joppe
+Ἰώβ,Job
+Ἱεράπολις,Hierapolis
+Ἱεροσολυμίτης,indbygger i Jerusalem
+Ἱεροσόλυμα,Jerusalem
+ὀγδοήκοντα,80
+ὀδούς,tand
+ὀδυνάω,forårsager smerte
+ὀδυρμός,klage
+ὀδύνη,smerte
+ὀθόνη,fint hvidt linned
+ὀθόνιον,stykke linnedtøj
+ὀκνέω,tøver
+ὀκνηρός,betænksom
+ὀκταήμερος,på ottende dag
+ὀκτώ,otte
+ὀλίγος,lidt; ringe
+ὀλίγως,lidt; ringe
+ὀλιγοπιστία,lidettroende
+ὀλιγωρέω,ringeagter
+ὀλιγόπιστος,lidettroende
+ὀλιγόψυχος,ængstelig
+ὀλοθρευτής,fordærver
+ὀλοθρεύω,fordærver
+ὀλολύζω,jubler
+ὀμίχλη,tåge; mørke
+ὀμνύω,sværger
+ὀνάριον,lille æsel
+ὀνίνημι,hjælper
+ὀνειδίζω,skælder
+ὀνειδισμός,dadel; bebrejdelse
+ὀνικός,hørende til æslet
+ὀνομάζω,kalder
+ὀξύς,skarp
+ὀπή,åbning
+ὀπίσω,efter
+ὀπτάνομαι,viser sig
+ὀπτασία,syn
+ὀπτός,stegt
+ὀπώρα,efterår; efterårsfrugt
+ὀρέγω,rækker
+ὀργή,vrede
+ὀργίζω,ophidser
+ὀργίλος,hidsig
+ὀργυιά,favn
+ὀρεινός,fra bjerget
+ὀρθοποδέω,går lige frem
+ὀρθοτομέω,går lige
+ὀρθρίζω,kommer tidligt om morgenen
+ὀρθρινός,tidlig om morgenen
+ὀρθός,ret
+ὀρθῶς,ret
+ὀρφανός,forældreløs
+ὀρχέομαι,danser
+ὀρύσσω,graver
+ὀσμή,lugt
+ὀστέον,knogle; ben
+ὀστράκινος,af ler; af jord
+ὀσφῦς,hofte
+ὀφείλημα,gæld
+ὀφείλω,skylder
+ὀφειλέτης,skyldner
+ὀφειλή,skyld
+ὀφθαλμοδουλία,øjentjener
+ὀφθαλμός,øje
+ὀφρῦς,bjergryg
+ὀχλέω,besværer
+ὀχλοποιέω,laver opløb
+ὀχύρωμα,det befæstede
+ὀψάριον,lille fisk
+ὀψέ,lang tid efter
+ὀψώνιον,proviant; sold
+ὁ,ART
+ὁδεύω,går
+ὁδηγέω,viser vej
+ὁδηγός,vejviser
+ὁδοιπορέω,rejser
+ὁδοιπορία,rejse
+ὁδός,vej
+ὁλοκαύτωμα,brændoffer
+ὁλοκληρία,helhed
+ὁλοτελής,aldeles fuldendt
+ὁλόκληρος,fuldstændig
+ὁμείρομαι,hænger fast ved
+ὁμιλέω,"kommer sammen med,"
+ὁμιλία,omgang
+ὁμοίωμα,afbildning
+ὁμοίως,på samme måde
+ὁμοίωσις,efterligning
+ὁμοθυμαδόν,enstemmigt
+ὁμοιοπαθής,befinder mig i samme tilstand som
+ὁμοιότης,lighed
+ὁμοιόω,sammenligner
+ὁμολογέω,bekender
+ὁμολογία,indrømmelse
+ὁμολογουμένως,overensstemmende
+ὁμοῦ,sammen
+ὁμότεχνος,eskæftigelse
+ὁμόφρων,ligesindet
+ὁπλίζω,udruster
+ὁποῖος,af hvilken slags
+ὁπότε,hvornår
+ὁράω,ser
+ὁρίζω,begrænser
+ὁρατός,synlig
+ὁρκίζω,tager i ed
+ὁρκωμοσία,edsaflæggelse
+ὁρμάω,sætter i bevægelse
+ὁρμή,heftigt angreb
+ὁροθεσία,grænsebestemmelse
+ὁσάκις,såmange gange som
+ὁσίως,hellig
+ὁσιότης,gudsfrygt; fromhed
+ὄγδοος,ottende
+ὄγκος,masse
+ὄζω,lugter
+ὄλεθρος,fordærvelse
+ὄλυνθος,figen
+ὄμβρος,regn
+ὄμμα,øje
+ὄναρ,drøm
+ὄνειδος,skam
+ὄνομα,navn
+ὄνος,æsel
+ὄντως,virkeligt
+ὄξος,vineddike
+ὄπισθεν,bagfra
+ὄρεξις,begærlighe
+ὄρθρος,tidlig morgen
+ὄρνεον,fugl
+ὄρνις,fugl
+ὄρος,bjerg
+ὄσφρησις,lugtesans
+ὄφελον,gid
+ὄφελος,nytte
+ὄφις,slange
+ὄχλος,gruppe
+ὄψιμος,langsom
+ὄψιος,sen
+ὄψις,syn
+ὅδε,denne
+ὅθεν,hvorfra
+ὅλος,hel
+ὅλως,fuldstændigt
+ὅμοιος,ens
+ὅμως,aligevel
+ὅπλον,redskab
+ὅπου,hvor
+ὅπως,"hvordan, så at, for at"
+ὅραμα,syn; skuespil
+ὅρασις,synssans
+ὅριον,grænse
+ὅρκος,ed
+ὅρμημα,iver
+ὅς,"som, der"
+ὅσιος,hellig
+ὅσος,så stor som
+ὅστις,hvemsomhelst
+ὅταν,når
+ὅτε,da
+ὅτι,at; for; fordi
+Ὀζίας,Uzzija
+Ὀλυμπᾶς,Olympas
+Ὀνήσιμος,Onesimos
+Ὀνησίφορος,Onesiforos
+ὑάκινθος,hyacinth
+ὑάλινος,af glas
+ὑακίνθινος,mørkerød; hyacinthfarvet
+ὑβρίζω,er overmodig
+ὑβριστής,voldsmand
+ὑγιής,sund
+ὑγιαίνω,er sund
+ὑγρός,våd
+ὑδρία,vandkrukke
+ὑδροποτέω,drikker vand
+ὑδρωπικός,vand i kroppen
+ὑετός,regn
+ὑμέτερος,din
+ὑμνέω,berømmer
+ὑπάγω,forlader; går væk; trækker sig tilbage
+ὑπάντησις,imødekommelse
+ὑπάρχω,er
+ὑπέρ,over
+ὑπέρακμος,udover ungdomsårene
+ὑπέρογκος,overmåde stor
+ὑπέχω,holder
+ὑπήκοος,lydig
+ὑπακοή,lydighed
+ὑπακούω,lytter; adlyder
+ὑπαντάω,går imod
+ὑπείκω,viger
+ὑπεναντίος,modsat
+ὑπεράνω,opover
+ὑπερέκεινα,hinsides
+ὑπερέχω,holder frem over noget
+ὑπερήφανος,remragende; udmærket
+ὑπεραίρω,hæver
+ὑπεραυξάνω,forstørrer overmåde
+ὑπερβάλλω,kaster udover
+ὑπερβαίνω,går over
+ὑπερβαλλόντως,overmåde
+ὑπερβολή,overgang
+ὑπερεκπερισσοῦ,over
+ὑπερεκπερισσῶς,i høj grad
+ὑπερεκτείνω,udstrækker
+ὑπερεκχύννω,giver i topmål
+ὑπερεντυγχάνω,går i forbøn
+ὑπερηφανία,overmod
+ὑπερλίαν,over
+ὑπερνικάω,overgår lang
+ὑπεροράω,ser fraoven nedpå
+ὑπεροχή,overmål
+ὑπερπερισσεύω,er tilstede
+ὑπερπερισσῶς,gør meget
+ὑπερπλεονάζω,er i overmåde
+ὑπερυψόω,ophøjer derover
+ὑπερφρονέω,tænker udover
+ὑπερῷον,højenloft
+ὑπηρέτης,slave
+ὑπηρετέω,tjener
+ὑποβάλλω,kaster
+ὑπογραμμός,forbillede
+ὑποδέχομαι,modtager som ven
+ὑποδέω,tager på fødderne
+ὑποδείκνυμι,viser
+ὑποζύγιον,trækdyr
+ὑποζώννυμι,ombinder
+ὑποκάτω,nedenfor
+ὑποκρίνομαι,svarer
+ὑποκριτής,hykler
+ὑπολήνιον,kar under vinperser
+ὑπολαμβάνω,optager
+ὑπολείπω,lader tilbage
+ὑπολιμπάνω,lader tilbage
+ὑπομένω,forbliver
+ὑπομιμνῄσκω,minder
+ὑπομονή,udholdenhed
+ὑπονοέω,formoder
+ὑποπλέω,opfyldt af
+ὑποπνέω,ånder
+ὑποπόδιον,fodskammel
+ὑποστέλλω,nedlader
+ὑποστολή,formindskelse
+ὑποστρέφω,vender tilbage
+ὑποστρωννύω,breder
+ὑποτάσσω,placerer under
+ὑποτίθημι,sætter under
+ὑποταγή,lydighed
+ὑποτρέχω,løber ned
+ὑποτύπωσις,udkast
+ὑποφέρω,bærer bort
+ὑποχωρέω,går tilbage
+ὑπωπιάζω,slår
+ὑπό,under; af
+ὑπόδειγμα,forskrift
+ὑπόδημα,sandal
+ὑπόδικος,anklaget
+ὑπόκρισις,hykleri
+ὑπόλειμμα,lader tilbage
+ὑπόμνησις,erindring
+ὑπόνοια,formodning
+ὑπόστασις,substans
+ὑστέρημα,mangel
+ὑστέρησις,mangel
+ὑστερέω,kommer bagefter
+ὑφαίνω,fletter
+ὑφαντός,vævet
+ὑψηλοφρονέω,er overmodig
+ὑψηλός,høj
+ὑψόω,hæver op
+ὕαλος,glas; gennemsigtig sten
+ὕβρις,overmod
+ὕδωρ,vand
+ὕλη,skov; brænde
+ὕμνος,sang
+ὕπανδρος,under manden; gift
+ὕπαρξις,tilværelse
+ὕπνος,søvn
+ὕσσωπος,ysop
+ὕστερος,senere
+ὕψιστος,højest
+ὕψος,højde
+ὕψωμα,højde
+ὗς,svin
+Ὑμέναιος,Hymenæus
+ὠδίν,fødselssmerte
+ὠδίνω,lider
+ὠνέομαι,køber
+ὠρύομαι,brøler
+ὠτάριον,øre
+ὠτίον,øre
+ὠφέλεια,hjælp; nytte
+ὠφέλιμος,nyttig
+ὠφελέω,hjælper
+ὡραῖος,smyk
+ὡς,sådan som
+ὡσαννά,"hosianna; giv frelse, jeg beder"
+ὡσαύτως,på samme måde
+ὡσεί,ligesom
+ὡσπερεί,ligesom
+ὥρα,time
+ὥσπερ,ligesom
+ὥστε,så at; sådan at; derfor
+ὦ,åh
+ὦμος,skulder
+ὧδε,her
+Ὡσηέ,Hoseas
+Ὦ,omega
+ᾄδω,besynger
+ᾅδης,Hades
+ᾠδή,sang
+ᾠόν,æg
+ῥάβδος,kæp
+ῥάκος,pjalt; lap
+ῥάπισμα,stokkeprygl
+ῥέδη,vogn
+ῥέω,flyder
+ῥήγνυμι,brækker
+ῥήτωρ,taler
+ῥίζα,rod
+ῥίπτω,kaster
+ῥαββί,Rabbi; lærer
+ῥαββουνί,Rabbuni
+ῥαβδίζω,slår med en stok
+ῥαβδοῦχος,embedsmand
+ῥακά,Raka
+ῥαντίζω,bestænker
+ῥαντισμός,rensende
+ῥαπίζω,slår
+ῥαφίς,nål
+ῥητῶς,udtrykkeligt
+ῥιζόω,lader slå rod; beplanter
+ῥιπή,kast
+ῥιπίζω,sætter i bevægelse
+ῥοιζηδόν,med larm
+ῥομφαία,sværd
+ῥυπαρία,smuds
+ῥυπαρός,smudsig
+ῥυτίς,rynke; fold
+ῥύμη,gade; stræde
+ῥύομαι,reder
+ῥύπος,smuds
+ῥύσις,strøm
+ῥώννυμι,bliver stærk
+ῥᾳδιουργία,ondskab
+ῥᾳδιούργημα,slyngelstreg
+ῥῆγμα,brud
+ῥῆμα,ord
+Ῥήγιον,Regium
+Ῥαάβ,Rahab
+Ῥαγαύ,Re'u
+Ῥαιφάν,Raifans
+Ῥαμά,Rama
+Ῥαχάβ,Rahab
+Ῥαχήλ,Rakel
+Ῥεβέκκα,Rebekka
+Ῥησά,Resa
+Ῥοβοάμ,Rehabeam
+Ῥουβήν,Ruben
+Ῥούθ,Ruth
+Ῥοῦφος,Rufus
+Ῥωμαϊστί,på latin
+Ῥωμαῖος,romer
+Ῥόδη,Rhode
+Ῥόδος,Rhodos
+Ῥώμη,Rom

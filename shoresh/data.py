@@ -110,7 +110,9 @@ def resolve_word_gloss(src: str, lang: str, lex: str, stem: str | None) -> str |
                 return row[c]
         return None
 
-    if stem and stem != "NA":            # verb
+    # Stem-aware only when the file actually has stem columns (Hebrew verbs). Greek
+    # files are single-gloss (lex, default) → everything falls through to `default`.
+    if stem_cols and stem and stem != "NA":   # verb
         return row.get(stem) or _first(stem_cols)
     return row.get("default") or _first(gloss_cols)
 
