@@ -1,0 +1,18 @@
+macro_iso639_3	macro_name	member_iso639_3	member_name
+zho	Chinese	cmn	Mandarin
+zho	Chinese	yue	Cantonese
+zho	Chinese	wuu	Wu
+zho	Chinese	hak	Hakka
+zho	Chinese	nan	Min Nan
+ara	Arabic	arb	Standard Arabic
+ara	Arabic	arz	Egyptian Arabic
+ara	Arabic	apc	Levantine Arabic
+ara	Arabic	acm	Mesopotamian Arabic
+ara	Arabic	ary	Moroccan Arabic
+nor	Norwegian	nob	Bokmål
+nor	Norwegian	nno	Nynorsk
+swa	Swahili	swh	Coastal Swahili
+swa	Swahili	swc	Congo Swahili
+yid	Yiddish	ydd	Eastern Yiddish
+yid	Yiddish	yih	Western Yiddish
+nep	Nepali	npi	Nepali (individual)

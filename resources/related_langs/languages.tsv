@@ -1,0 +1,51 @@
+iso639_3	iso639_1	name	glottocode	stock	group	branch	scripts	macrolanguage	is_source	available	gloss_names
+afr	af	Afrikaans		Indo-European	Germanic	West-Continental	Latn		no	no	
+amh	am	Amharic		Afro-Asiatic	Semitic	Ethiopic	Ethi		no	yes	Amharic
+ara	ar	Arabic		Afro-Asiatic	Semitic	Arabic	Arab	ara	no	no	
+arc		Aramaic		Afro-Asiatic	Semitic	Aramaic	Hebr,Syrc		yes	no	
+bel	be	Belarusian		Indo-European	Slavic	East	Cyrl		no	no	
+ben	bn	Bengali		Indo-European	Indo-Aryan	Other	Beng		no	no	
+bul	bg	Bulgarian		Indo-European	Slavic	South	Cyrl		no	no	
+cat	ca	Catalan		Indo-European	Romance	Ibero	Latn		no	no	
+ces	cs	Czech		Indo-European	Slavic	West	Latn		no	no	
+cmn	zh	Chinese		Sino-Tibetan	Sinitic	Mandarin	Hans,Hant	zho	no	yes	Chinese-Simplified;Chinese-Traditional
+dan	da	Danish		Indo-European	Germanic	North (Scandinavian)	Latn		no	yes	Danish
+deu	de	German		Indo-European	Germanic	West-Continental	Latn		no	yes	German
+ell	el	Greek		Indo-European	Hellenic	Greek	Grek		yes	no	
+eng	en	English		Indo-European	Germanic	Anglic	Latn		no	yes	English
+fao	fo	Faroese		Indo-European	Germanic	North (Scandinavian)	Latn		no	no	
+fra	fr	French		Indo-European	Romance	Gallo	Latn		no	yes	French
+gez		Geez		Afro-Asiatic	Semitic	Ethiopic	Ethi		no	no	
+glg	gl	Galician		Indo-European	Romance	Ibero	Latn		no	no	
+guj	gu	Gujarati		Indo-European	Indo-Aryan	Other	Gujr		no	no	
+heb	he	Hebrew		Afro-Asiatic	Semitic	Canaanite	Hebr		yes	no	
+hin	hi	Hindi		Indo-European	Indo-Aryan	Hindustani	Deva		no	no	
+hrv	hr	Croatian		Indo-European	Slavic	South	Latn		no	no	
+isl	is	Icelandic		Indo-European	Germanic	North (Scandinavian)	Latn		no	no	
+ita	it	Italian		Indo-European	Romance	Italo	Latn		no	no	
+lin	ln	Lingala		Atlantic-Congo	Bantu	Other	Latn		no	no	
+mar	mr	Marathi		Indo-European	Indo-Aryan	Other	Deva		no	no	
+mkd	mk	Macedonian		Indo-European	Slavic	South	Cyrl		no	no	
+nep	ne	Nepali		Indo-European	Indo-Aryan	Other	Deva	nep	no	no	
+nld	nl	Dutch		Indo-European	Germanic	West-Continental	Latn		no	yes	Dutch
+nor	no	Norwegian		Indo-European	Germanic	North (Scandinavian)	Latn	nor	no	no	
+oci	oc	Occitan		Indo-European	Romance	Gallo	Latn		no	no	
+pan	pa	Punjabi		Indo-European	Indo-Aryan	Other	Guru		no	no	
+pol	pl	Polish		Indo-European	Slavic	West	Latn		no	no	
+por	pt	Portuguese		Indo-European	Romance	Ibero	Latn		no	yes	Portuguese
+ron	ro	Romanian		Indo-European	Romance	Eastern	Latn		no	no	
+rus	ru	Russian		Indo-European	Slavic	East	Cyrl		no	no	
+slk	sk	Slovak		Indo-European	Slavic	West	Latn		no	no	
+slv	sl	Slovene		Indo-European	Slavic	South	Latn		no	no	
+sna	sn	Shona		Atlantic-Congo	Bantu	Other	Latn		no	no	
+spa	es	Spanish		Indo-European	Romance	Ibero	Latn		no	yes	Spanish
+srp	sr	Serbian		Indo-European	Slavic	South	Cyrl,Latn		no	no	
+swa	sw	Swahili		Atlantic-Congo	Bantu	Swahili	Latn		no	yes	Swahili
+swe	sv	Swedish		Indo-European	Germanic	North (Scandinavian)	Latn		no	no	
+tir	ti	Tigrinya		Afro-Asiatic	Semitic	Ethiopic	Ethi		no	no	
+ukr	uk	Ukrainian		Indo-European	Slavic	East	Cyrl		no	no	
+urd	ur	Urdu		Indo-European	Indo-Aryan	Hindustani	Arab		no	no	
+xho	xh	Xhosa		Atlantic-Congo	Bantu	Other	Latn		no	no	
+yid	yi	Yiddish		Indo-European	Germanic	West-Continental	Hebr	yid	no	no	
+yue		Cantonese		Sino-Tibetan	Sinitic	Other	Hant,Hans	zho	no	no	
+zul	zu	Zulu		Atlantic-Congo	Bantu	Other	Latn		no	no	
