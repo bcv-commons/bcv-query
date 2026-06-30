@@ -13,6 +13,8 @@ All under the service root. Deterministic endpoints have no external dependency.
 |----------|------|------|
 | `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine with morphology + gloss | $0 |
 | `GET /word/{strong}` | Concordance — every occurrence of a Strong's number | $0 |
+| `GET /words` | Vocab-trainer feed — glosses in 11 languages, per-binyan for Hebrew verbs | $0 |
+| `GET /wordstudy/{strong}` | Word-study card — multilingual sense breakdown for a Strong's number | $0 |
 | `GET /tw/{strong}` | Translation-Words article(s) explaining a Strong's number, ranked (e.g. G0026 → bible/kt/love) | $0 |
 | `GET /gloss/{word}` | Reverse gloss — English word → Hebrew/Greek Strong's numbers | $0 |
 | `GET /concept/{word}` | Concept pivot — English → Strong's + sample occurrences | $0 |

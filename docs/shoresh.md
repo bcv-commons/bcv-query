@@ -4,8 +4,14 @@
 **original Hebrew and Greek**. Give it a verse and it returns the interlinear with
 morphology and glosses; give it a Strong's number and it returns every occurrence;
 give it an English (or original-language) word and it finds the matching concepts.
-It also does **clause-level semantic search** — "find clauses that mean roughly
-this" over 88k Hebrew clauses and 8k Greek sentences.
+It also serves a **vocab-trainer feed** and a **word-study card**, runs a
+**Hebrew→Greek bridge** through the Septuagint, and does **clause-level semantic
+search** — "find clauses that mean roughly this" over 88k Hebrew clauses and 8k
+Greek sentences.
+
+shoresh anchors its data on the most granular *original* unit — the Hebrew lexeme
+and each individual word occurrence — and derives the rest (Strong's numbers,
+multilingual glosses, per-word senses) from it.
 
 Almost everything it does is **deterministic and $0** — no model, no LLM, no
 external call. The one exception is clause search, which needs a query embedding.
@@ -20,10 +26,12 @@ All endpoints are plain `GET`s under the service root.
 |---|---|---|
 | `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine, with morphology + gloss | $0 |
 | `GET /word/{strong}` | Concordance — every occurrence of a Strong's number | $0 |
+| `GET /words` | Vocab-trainer feed — glosses in 11 languages, per-binyan for Hebrew verbs | $0 |
+| `GET /wordstudy/{strong}` | Word-study card — a multilingual sense breakdown for a Strong's number | $0 |
 | `GET /gloss/{word}` | Reverse gloss — a word → the Hebrew/Greek Strong's numbers behind it | $0 |
 | `GET /concept/{word}` | Concept pivot — word → Strong's + sample occurrences | $0 |
 | `GET /morph?pattern=&book=&chapter=` | Morphology search — imperatives, participles, nouns, … | $0 |
-| `GET /bridge/{strong}` | LXX bridge — how the Septuagint renders a Hebrew word in Greek | $0 |
+| `GET /bridge/{strong}` | LXX bridge — how the Septuagint renders a Hebrew word in Greek (H→G) | $0 |
 | `GET /structure/{book}/{ch}/{v}` | Syntax — BHSA/Nestle1904 hierarchy (proxied from the corpus engine) | $0 |
 | `GET /search?q=&lang=hbo` | **Hebrew** clause search (88,131 BHSA clauses) | $0 |
 | `GET /search?q=&lang=grc` | **Greek** clause search (8,011 Nestle1904 sentences) | $0 |
@@ -33,6 +41,11 @@ All endpoints are plain `GET`s under the service root.
 
 There's also a small authenticated `POST /upload/{filename}` used to push the
 clause-vector files to a running deployment.
+
+**Sense layer.** Every Hebrew word carries a context-derived sense, which is what
+makes `/wordstudy` and the binyan-conditioned, homograph-precise concordance
+precise. How it's built is documented separately in
+[`docs/sense-layer-pipeline.md`](sense-layer-pipeline.md).
 
 ## What's inside
 

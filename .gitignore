@@ -103,5 +103,5 @@ shoresh/**/clauses_*.sqlite
 # per-host deploy config (paths only, no secrets) — the .example IS tracked
 deploy/deploy.local.env
 bcv-RAG/data/
-resources/occurrences/
-resources/occurrences/context_emb.npz
+resources/occurrences/*.db
+resources/occurrences/*.npz

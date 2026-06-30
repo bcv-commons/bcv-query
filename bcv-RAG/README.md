@@ -19,7 +19,7 @@ Retrieval-augmented Q&A over Bible translation resources.
 ## Interfaces
 
 - **REST API** — `/api/ask`, `/api/search`, `/api/books`, `/api/clauses`, and more. See [docs/API.md](docs/API.md).
-- **MCP server** — same tools via Model Context Protocol. Default tools make zero LLM calls.
+- **MCP server** — same tools via Model Context Protocol (including `morphology_concordance`, a binyan-conditioned, sense-aware concordance). Default tools make zero LLM calls.
 - **CLI** — `python -m query.ask "question"`
 
 ## Environment variables
@@ -27,6 +27,8 @@ Retrieval-augmented Q&A over Bible translation resources.
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
 | `GROQ_API_KEY` | Mode C | — | LLM synthesis (primary) |
+| `GROQ_MODEL` | No | (see `query/llm.py`) | Synthesis model (configurable) |
+| `GROQ_REASONING_EFFORT` | No | `none` | Reasoning effort for reasoning models (`low`/`medium`/`high`) |
 | `OPENAI_API_KEY` | Mode C fallback | — | LLM synthesis (fallback) |
 | `CLOUDFLARE_ACCOUNT_ID` | Mode A vectors | — | BGE-M3 query embedding |
 | `CLOUDFLARE_API_TOKEN` | Mode A vectors | — | BGE-M3 query embedding |

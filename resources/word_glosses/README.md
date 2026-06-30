@@ -25,12 +25,23 @@ Resolution per word (mirrors the client rule exactly):
 - The **full gloss string is returned unmodified** (e.g. `"sige, tænke"`); the client
   may split on `; ` / `, ` to accept any synonym.
 
-`English` is always available (inline from the corpus); it needs no file here.
+`English` is also available inline from the corpus, so it works even without a file;
+a per-stem `hbo/English.csv` is present here as the source the other languages bridge from.
 
-## Files
-| file | source lang | coverage | notes |
-|---|---|---|---|
-| `hbo/Danish.csv` | Hebrew/Aramaic | ~1,631 lexemes | per-stem verb glosses |
+## Languages (11)
+`hbo/` Hebrew+Aramaic carries **per-binyan** columns; `grc/` Greek is single-gloss.
+
+Danish, German, Dutch, Portuguese, Spanish, Swahili, Amharic, French,
+Chinese-Simplified, Chinese-Traditional, English. (`English` is also available
+inline from the corpus and needs no file.)
+
+Provenance: the per-stem **English** came from BibleOL; the other languages were
+bridged/converted from it; **Chinese-Traditional** via OpenCC from Simplified. A
+per-stem LLM pipeline (`build_perstem_glosses_llm.py`) fills the catch-up gaps.
+
+## Forward
+Per-stem catch-up for more languages via the LLM pipeline — drop the generated CSV
+here, commit, thin deploy.
 
 ## Licensing
 Each gloss set carries its own terms — record provenance/licence per file as more are

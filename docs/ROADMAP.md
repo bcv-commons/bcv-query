@@ -35,19 +35,44 @@ done"** — no need to touch the live serving path.
 | Phase | Theme | Status |
 |---|---|---|
 | **0** | Shared `resources/` + repo-root Docker build | ✅ **Done** — `resources/` is live, both services read it |
-| **1** | Free recall wins (no new data) | ⬜ Open — great first issues |
-| **2** | Headline ingests (speaker index, semantic domains) | ⬜ Open — biggest leap |
+| **1** | Free recall wins (no new data) | ✅ **Done** — R1 + R2 shipped |
+| **2** | Headline ingests (speaker index, semantic domains) | ✅ **Done** — S1 + S2 live (see below) |
 | **3** | Better answers (concept briefs, speech-acts, genre) | ⬜ Open |
 | **4** | Breadth (OT-in-NT, proper nouns, synoptics, geography) | ⬜ Open |
 | **5** | Depth (association graph, MWEs, discourse, versification) | ⬜ Open |
 
 **Already live:** the full retrieval pipeline (13 retrievers + RRF + expansion
-strategies); the multilingual core (10 languages — aligned_lex, Bibles, book
+strategies); the multilingual core (now 11 languages — aligned_lex, Bibles, book
 names, per-language analyzer configs); the Strong's name-bridge; in-language
 synthesis; the MCP server; clause-level semantic search in shoresh; LLM gap-fill
 glosses for the gloss-thin languages; **canonical ISO 639-3 / BCP 47 language
-codes** (legacy 2-letter still accepted); and the **published `strongs` dataset**
-(see Publishing).
+codes** (legacy 2-letter still accepted); the **published `strongs` dataset** (see
+Publishing); **semantic domains** (SDBG Greek / SDBH Hebrew, S2 below); MACULA
+frames/coref; Greek pagan-Koine keyness; branched retrieval; and a
+**lex-anchored, Hebrew-context sense layer** (see The anchoring principle).
+
+### The anchoring principle (now central)
+
+The guiding rule across the project: **anchor on the most granular ORIGINAL and
+derive everything coarser.** Hebrew word data is anchored on the **BHSA lexeme
+(`lex`)** and the **per-occurrence BHSA word node** — *not* Strong's. Strong's,
+English glosses, and coarser senses are **derived views**. This matters because
+`lex` distinguishes homographs Strong's conflates (733 codes cover 2+ lexemes) and
+supports **per-binyan (stem) senses** for Hebrew verbs.
+
+Strong's still earns its keep as the **cross-language join key** (keyness, the LXX
+bridge, Translation-Words, `concept_expand`, semantic-domain expansion) — but it
+sits *above* the lex anchor, not at the root. Live today on this principle:
+
+- **Multilingual glosses** — 11 languages, **per-binyan** granularity for Hebrew
+  verbs; lex-keyed CSVs in `resources/word_glosses/`, served by shoresh `/words`.
+- **Occurrence sense layer** — a per-occurrence `lex+stem` sidecar from BHSA
+  (stable word-node id) gives a binyan-conditioned, homograph-precise concordance
+  (`morphology_concordance` MCP tool + `sense:` tags). Senses are **derived from
+  Hebrew context** (bge-m3 embedding of the Hebrew clause, clustered within each
+  `lex+stem`), then labeled with the curated per-stem glosses (multilingual).
+  Surfaced in the concordance (`sense` param) and the `/wordstudy` card
+  (`lex_senses`, multilingual via `gloss_lang`).
 
 ## Publishing & open data
 
@@ -148,10 +173,18 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   `speaker_search` retriever that intersects a speaker's ranges with the topic FTS
   ("what did Jesus say about faith" → Mark 11:22 "Have faith in God", Luke 18:42).
   Existing intents unaffected (speaker weight 0.0 / returns []). Eval-gate before deploy.
-- **S2 · Semantic domains** (Louw-Nida Greek / SDBH Hebrew). Concept retrieval
-  *broader than a single Strong's* — the right granularity for thematic queries.
-  Open, token-aligned source exists (MACULA + UBS SDBH/SDGNT). Biggest concept
-  upgrade.
+- **S2 · Semantic domains** (Louw-Nida Greek / SDBH Hebrew).
+  → **Done.** Lexeme-level domain tables shipped:
+  [`resources/semantic_domains/{grc,hbo}.tsv`](../resources/semantic_domains)
+  (SDBG Greek + SDBH Hebrew, plus an `sdbg` bridge axis), with sister
+  `resources/senses/` (word-sense inventory) and a MACULA-derived
+  `resources/lxx_bridge.tsv`. The data's real payoff turned out to be **discovery,
+  not re-ranking**: a `/wordstudy/{strong}` card + `/domain/{code}` browse in
+  shoresh (gloss, co-domain siblings, senses, cross-language equivalent) and a
+  `word_study` section in the bcv-RAG response, rather than a domain re-ranker
+  (measured marginal, kept opt-in `DOMAIN_EXPAND=1`). The larger **per-occurrence**
+  semantic layer (frames, coreference, participant referents) is now its own
+  forward track.
 
 ### Phase 3 — turn that into better answers
 
@@ -208,9 +241,9 @@ by it. Concrete wins from the shared data:
 
 | Resource | What it unlocks in shoresh |
 |---|---|
-| `llm_strongs_glosses` | `/verse`, `/word`, `/search?translate=gloss` go **multilingual** (today English-only). Biggest win. |
+| `word_glosses` / `llm_strongs_glosses` | ✅ live — `/verse`, `/words`, `/wordstudy` are **multilingual** (11 langs), with **per-binyan** glosses for Hebrew verbs. |
 | `aligned_lex` | `/gloss` + `/concept` accept **non-English** input (Spanish word → Strong's). |
-| semantic_domains (S2) | Louw-Nida/SDBH domain per original word in `/verse`, `/word`. |
+| semantic_domains (S2) | ✅ live — Louw-Nida/SDBH domain in the `/wordstudy` card + `/domain/{code}` browse. |
 | speaker_quotations (S1) | speaker per word/verse in `/verse`, `/structure` — shoresh is the natural token-level home. |
 | OT-in-NT (X1) | shoresh already has `/bridge` + `lxx.db` → the natural quotation-detection engine. |
 
@@ -288,6 +321,54 @@ reusing [Bob Utley / freebiblecommentary.org](https://www.freebiblecommentary.or
 where present, rather than finding scarce native verse-level content.
 
 ---
+
+## The language registry (forward — scale to thousands)
+
+The project ships a **code-keyed language registry** today:
+`resources/related_langs` (ISO 639-3 relatedness — for cross-language ranking and
+fallback) + `resources/regional_langs` (script/regional variants, macrolanguages).
+That covers the languages we actively serve.
+
+**Next — build a `languages.db` covering thousands of languages** by ingesting the
+standard open language databases and projecting them into one table (same
+build-a-table pattern as everything else):
+
+- **Glottolog** — genealogy / family tree (which languages are related, and how
+  closely by descent).
+- **URIEL / lang2vec** — typological + genetic + geographic **distance vectors**
+  between languages (a numeric "how similar" for ranking fallbacks).
+- **ISO 639-3** — the canonical code registry (names, macrolanguage membership,
+  retirements).
+- **CLDR** — script, region, and display-name data (localized names, BCP-47
+  subtags).
+
+Output: a built `languages.db` keyed by ISO 639-3, joining genealogy + distance +
+script/region, so cross-language ranking and resource-fallback can reason about
+*any* language, not just the served ones. Design notes live in
+[`resources/related_langs/README.md`](../resources/related_langs) and
+[`resources/regional_langs/README.md`](../resources/regional_langs).
+
+## Per-binyan glosses for from-scratch languages (forward)
+
+Hebrew verbs carry **per-binyan (stem) glosses** in the served languages. To extend
+this to languages built from scratch (Russian, Arabic, Hindi), each needs a **base
+gloss set first** before the per-stem split. The Hebrew-anchored per-stem LLM
+pipeline already exists — `build_perstem_glosses_llm.py` — so the work is: produce
+base glosses for the new language, then run the existing per-stem split over them.
+
+## Sense-layer next steps (forward)
+
+The lex-anchored, Hebrew-context sense layer is live (see The anchoring principle).
+Remaining detailed work:
+
+- **Polish sub-sense labels** — tighten the cluster→gloss labeling so each
+  per-`lex+stem` sense reads cleanly.
+- **Sense-correct synthesis grounding** — feed the per-occurrence sense into the
+  answer-writer so synthesis cites the *contextually correct* sense, not just the
+  lexeme.
+- **Publish the per-stem / sense data** as a reusable, standalone dataset (same
+  HF + GitHub shop-window pattern as `strongs`), anchored on `lex` with Strong's
+  carried as a derived column.
 
 ## How to contribute
 

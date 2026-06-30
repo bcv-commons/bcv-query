@@ -3,9 +3,14 @@
 **Bible study search that understands the original languages.**
 
 bcv-query answers questions about the Bible the way a translator would — by
-anchoring every word back to its **original Hebrew or Greek** (via Strong's
-numbers) and reasoning across many translations and study resources at once. Ask
-a question in one of 10 languages and get a cited answer grounded in the text.
+anchoring every word back to its **original Hebrew or Greek** and reasoning
+across many translations and study resources at once. Ask a question in one of
+11 languages and get a cited answer grounded in the text.
+
+**The guiding idea:** anchor the data on the most granular *original* unit — the
+Hebrew lexeme and each individual word as it occurs — and *derive* everything
+coarser from it: Strong's numbers, glosses in many languages, and per-word
+senses. Granular original first; everything else falls out of it.
 
 > New here? Start with **[What it is](#what-it-is)**, then read the deep-dive for
 > whichever service interests you: **[bcv-RAG](docs/bcv-RAG.md)** (search & Q&A)
@@ -24,14 +29,14 @@ language.
 | Service | What it does | Docs |
 |---|---|---|
 | **[bcv-RAG](bcv-RAG/)** | Retrieval-augmented Q&A over Bible translations + study resources. 13 retrievers fused with Reciprocal Rank Fusion, plus multi-step expansion strategies. Three cost modes — from $0 keyword/vector search to full LLM-synthesized answers. | **[docs/bcv-RAG.md](docs/bcv-RAG.md)** |
-| **[shoresh](shoresh/)** | The original-language engine: interlinear, concordance, morphology search, a Hebrew↔Greek (LXX) bridge, and clause-level semantic search over 88k Hebrew + 8k Greek clauses. Most endpoints cost $0. | **[docs/shoresh.md](docs/shoresh.md)** |
+| **[shoresh](shoresh/)** | The original-language engine: interlinear, concordance, morphology search, a vocab-trainer feed, a word-study card, a Hebrew→Greek (LXX) bridge, and clause-level semantic search over 88k Hebrew + 8k Greek clauses. Most endpoints cost $0. | **[docs/shoresh.md](docs/shoresh.md)** |
 
 Both read from a shared, **[`resources/`](resources/)** folder of Strong's-keyed
 data (glosses, word-alignments, analyzer configs, book names) — the same data
 that makes the multilingual support work.
 
 ```
-                 your question (any of 10 languages)
+                 your question (any of 11 languages)
                               │
                   ┌───────────▼───────────┐
                   │        bcv-RAG         │   13 retrievers + RRF fusion
@@ -45,16 +50,25 @@ that makes the multilingual support work.
                               │
                   ┌───────────▼───────────┐
                   │      resources/        │   Strong's-keyed shared data
-                  │  glosses · aligned_lex │   (10 languages)
+                  │  glosses · aligned_lex │   (11 languages)
                   └────────────────────────┘
 ```
 
-**Languages today:** English, Spanish, French, Portuguese, Russian, Arabic,
-Hindi, Bengali, Assamese, Hausa. Book names are locale-aware; internally
-everything is keyed by USFM book codes + Strong's numbers.
+**Languages today:** English, Spanish, French, Portuguese, Chinese, Russian,
+Arabic, Hindi, Bengali, Assamese, Hausa — with **per-binyan (verbal-stem)**
+detail for Hebrew verbs. Book names are locale-aware; internally everything is
+keyed by USFM book codes + Strong's numbers.
 
 ## What's new / coming next
 
+- **Multilingual glosses, 11 languages.** Short glosses keyed by Strong's number,
+  with **per-binyan (verbal-stem)** detail for Hebrew verbs — these feed
+  shoresh's `/words` vocab-trainer.
+- **A per-occurrence sense layer.** Every Hebrew word carries a
+  context-derived sense, powering a binyan-conditioned, homograph-precise
+  concordance (the `morphology_concordance` MCP tool) and the multilingual sense
+  breakdown on the `/wordstudy` card. How it's built:
+  [`docs/sense-layer-pipeline.md`](docs/sense-layer-pipeline.md).
 - **Open data published.** The Strong's→words tables are now a standalone,
   provenance-marked open dataset for people who want *just the data* (not the
   services): **[huggingface.co/datasets/bcv-commons/strongs](https://huggingface.co/datasets/bcv-commons/strongs)**

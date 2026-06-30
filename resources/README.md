@@ -42,7 +42,12 @@ in Phase 0.
 | `speaker_quotations/` | who speaks where — quotations → speaker, verse-range, red-letter flag (S1) | `speaker, …, start_bbcccvvv, end_bbcccvvv, divine` |
 | `lxx_bridge.tsv` | Hebrew→Greek LXX bridge (from MACULA `greekstrong`); concept expansion across the Testaments | `hebrew_strong, greek_strong, count` |
 | `semantic_domains/<lang>.tsv` | Strong's → semantic domain (SDBG Greek / SDBH Hebrew, from MACULA); broaden a lexeme to its domain (S2) — see its README | `strong, domain_type, domain, label, count, share` |
-| `senses/<lang>.tsv` | Strong's → word-sense inventory (polysemy; e.g. ruach → spirit/wind/breath), from MACULA — see its README | `strong, sense, gloss, count, share` |
+| `senses/{hbo,grc}.tsv` | **Strong's**-keyed word-sense inventory (polysemy; e.g. ruach → spirit/wind/breath), from MACULA — see its README | `strong, sense, gloss, count, share` |
+| `senses/hbo_lex.tsv` | **lex**-keyed, binyan-aware, homograph-split sense inventory derived from Hebrew context (the newer Hebrew sense layer) — see its README | `lex, stem, sense, gloss, count, share` |
+| `word_glosses/{hbo,grc}/<Language>.csv` | target-language glosses for shoresh `/words`, keyed by **BHSA lex** (NOT Strong's), 11 langs, per-binyan columns for Hebrew verbs — see its README | `lex, default, qal, nif, …` |
+| `related_langs/` | language registry + genetic/typological relatedness (which langs are X's closest relatives) — see its README | `iso639_3`-keyed |
+| `regional_langs/` | regional/script/locale variants *within* one ISO 639-3 code — see its README | `iso639_3`-keyed |
+| `occurrences/` | **gitignored build artifact** — per-occurrence lex/stem/sense sidecar + Hebrew-context embeddings (regenerable; feeds `senses/hbo_lex.tsv`) — see its README | — |
 
 Build-only intermediates (`strong_lemma.tsv`, `concepts/forms/tw_links.tsv`,
 `glosses_overview.tsv`) intentionally stay in `bcv-RAG/` — they are **git-tracked

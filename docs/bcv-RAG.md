@@ -1,6 +1,6 @@
 # bcv-RAG — retrieval & Q&A, explained
 
-bcv-RAG answers questions about the Bible. You ask in plain language (in any of 10
+bcv-RAG answers questions about the Bible. You ask in plain language (in any of 11
 languages) and it returns a **cited answer** drawn from Bible translations and
 study resources — or, if you'd rather, just the **ranked source passages** with no
 LLM involved at all.
@@ -67,7 +67,8 @@ Question → Analyzer → [3 automatic strategies] → 13 Retrievers → RRF fus
 
 6. **Synthesis (Mode C only)** — an LLM writes a cited answer from the top
    passages, with a strict rule that every claim must point at a source chunk.
-   Answers come back in the query's language.
+   Answers come back in the query's language. The model is configurable via the
+   `GROQ_MODEL` env var (reasoning models supported via `GROQ_REASONING_EFFORT`).
 
 Everything lives in **one SQLite file** (`index.db`): documents, chunks, an FTS5
 full-text index, `sqlite-vec` vectors (1024-d BGE-M3), passage references, and
@@ -81,10 +82,11 @@ Fabric) is embedded as a local module — no network call.
   `/api/topic`) and corpus endpoints (`/api/books`, `/api/clauses`,
   `/api/passage`, `/api/context`, `/api/trees`). Full reference:
   [API.md](../bcv-RAG/docs/API.md).
-- **MCP server** — the same capabilities as 14 read-only tools over the Model
+- **MCP server** — the same capabilities as read-only tools over the Model
   Context Protocol (at `/mcp`): `search`, `get_chunk`, `passage_lookup`,
   `entity_lookup`, `tree_listing`, `study`, `cross_references`, `concordance`,
-  `topics`, `topic`, and four `corpus_*` tools. The default tools make **zero
+  `morphology_concordance` (binyan-conditioned, homograph-precise, sense-aware),
+  `topics`, `topic`, and the `corpus_*` tools. The default tools make **zero
   LLM calls** — your MCP client does any synthesis itself.
 - **CLI** — `python -m query.ask "your question"` (add `--no-llm` for Mode A,
   `--lang`, `--top-k`, `--json`, …).
