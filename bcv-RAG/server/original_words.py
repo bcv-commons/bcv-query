@@ -1,7 +1,7 @@
 """Bridge 1: enrich BCV citations with original-language words from shoresh.
 
 For each cited verse reference, calls shoresh /verse/{book}/{ch}/{v} over
-private networking and returns a compact interlinear (surface, gloss, strong).
+private networking and returns a compact interlinear (surface, lemma, gloss, strong).
 Fails silently — the enrichment is optional and should never break answers.
 """
 from __future__ import annotations
@@ -43,8 +43,11 @@ def _parse_ref(passage: str) -> tuple[str, int, int] | None:
 
 
 def _compact_words(words: list[dict]) -> list[dict]:
+    # Keep `lemma` (BHSA lex, present for Hebrew; "" for Greek): it distinguishes the
+    # homographs a shared Strong's number conflates, and is the key into per-stem glosses.
     return [
         {"surface": w["surface"], "strong": w.get("strong", ""),
+         "lemma": w.get("lemma", ""),
          "gloss": w.get("gloss", ""), "translit": w.get("translit", "")}
         for w in words if w.get("strong")
     ]

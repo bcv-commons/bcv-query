@@ -66,7 +66,9 @@ def gloss_languages(src: str) -> list[str]:
     """Available gloss languages for a source language — English (always, inline from
     the corpus) plus every <Lang>.csv present. Drives the client's language dropdown."""
     base = _gloss_dir(src)
-    extra = sorted(p.stem for p in base.glob("*.csv")) if base.exists() else []
+    # English is always offered as the inline corpus gloss; an English.csv (per-stem,
+    # used by study features) must not double-list it in the dropdown.
+    extra = sorted(p.stem for p in base.glob("*.csv") if p.stem != "English") if base.exists() else []
     return ["English"] + extra
 
 
@@ -331,6 +333,42 @@ def _norm_strong(s: str) -> str:
     return f"{m.group(1).upper()}{int(m.group(2)):04d}" if m else s.strip().upper()
 
 
+@lru_cache(maxsize=1)
+def _strong_to_lex() -> dict[str, list[str]]:
+    """{padded Strong's: [BHSA lex, ...]} — reverse of word_freq/hbo_strong.tsv. Lets a
+    Strong's-keyed card recover the distinct lexemes (homographs) a single Strong's conflates
+    — 733 Hebrew Strong's codes cover 2+ lexemes — and thus their per-stem (binyan) senses."""
+    path = _resources_dir() / "word_freq" / "hbo_strong.tsv"
+    out: dict[str, list[str]] = {}
+    if not path.exists():
+        return out
+    with path.open(encoding="utf-8") as fh:
+        next(fh, None)
+        for line in fh:
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) >= 2 and parts[0]:
+                out.setdefault(_norm_strong(parts[1]), []).append(parts[0])
+    return out
+
+
+def _stem_senses(code: str) -> list[dict]:
+    """Per-lexeme, per-stem (binyan) English senses behind a Hebrew Strong's — the lex-anchored
+    granularity Strong's can't express. Each entry: {lex, senses: {qal: …, nif: …}}; only verb
+    lexemes (≥1 stem gloss) are included. Empty for Greek / non-verbs."""
+    if not code.startswith("H"):
+        return []
+    table, stem_cols, _gc = _gloss_table("hbo", "English")
+    out = []
+    for lex in _strong_to_lex().get(code, []):
+        row = table.get(lex)
+        if not row:
+            continue
+        senses = {c: _real_gloss(row.get(c)) for c in stem_cols if _real_gloss(row.get(c))}
+        if senses:
+            out.append({"lex": lex, "senses": senses})
+    return out
+
+
 def word_study(strong: str) -> dict:
     """Composite word-study: gloss + keyness (how distinctively biblical) +
     semantic domain(s) + co-domain siblings + senses (polysemy) + cross-language
@@ -352,6 +390,7 @@ def word_study(strong: str) -> dict:
         "tw": tw_articles(code).get("articles", []),  # nudge 1: study the concept
         "domains": domains, "siblings": siblings,      # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
+        "stems": _stem_senses(code),                   # lex-anchored: per-binyan senses + homographs
     }
 
 
