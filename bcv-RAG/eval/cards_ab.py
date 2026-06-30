@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-"""Cards-on vs cards-off A/B — does the synthesis reference card improve answers?
+"""Per-kind cards-on/off A/B — does each card KIND improve answers, judged by ITS OWN rubric?
 
-For each concept-relevant eval query: retrieve ONCE, then synthesize TWICE over the SAME
-sources — with the concept card in the prompt vs without — and have a NEUTRAL judge (OpenAI,
-a different provider from the Groq generator) pick the better-grounded answer, BLIND (A/B order
-randomized per query to kill position bias). Reports wins / ties / losses.
+Per the per-kind-strategy principle (internal-docs/card-family.md), each kind is validated on its
+own terms — concept by lexical grounding, speaker by attribution, entity by who/relation accuracy.
+For each query: assemble the family, synthesize ONCE with the gated reference block and ONCE
+without (same sources), and judge with the rubric of the kind that fired. Reports W/T/L per kind,
+BLIND (A/B order randomized), neutral judge (OpenAI — a different provider from the Groq generator).
 
-Run where shoresh + index + the keys are wired (the bcv-rag container / a throwaway from the
-new image):  python -m eval.cards_ab
-Env: SHORESH_URL, GROQ_API_KEY+GROQ_MODEL (generator), OPENAI_API_KEY+OPENAI_MODEL (judge),
-     INDEX_DB (default /data/index.db).
+Run where shoresh + index + keys are wired:  python -m eval.cards_ab
+Env: SHORESH_URL, GROQ_API_KEY+GROQ_MODEL (gen), OPENAI_API_KEY+OPENAI_MODEL (judge), INDEX_DB.
 """
 from __future__ import annotations
 
@@ -22,28 +21,47 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 SETS = [REPO / "eval/set/v1.yaml", REPO / "eval/set/v2-expansion.yaml", REPO / "eval/set/denoise.yaml"]
 
+# Each kind's judge rubric — what "better" MEANS for that kind (its own terms).
+RUBRICS = {
+    "concept": "grounded in the original-language (Hebrew/Greek) lexical facts — the correct sense "
+               "of the key word, the right gloss / semantic domain",
+    "speaker": "correctly attributes the words to the NAMED speaker, draws on their ACTUAL quoted "
+               "words, and flags divine / red-letter speech where applicable",
+    "entity":  "gets the ENTITY facts right — correct identity (who / what) and correct relations "
+               "(parentage / genealogy: the right father, mother, spouse, child)",
+}
+# Curated queries to give the thinner kinds enough samples (the yaml sets are concept-heavy).
+CURATED = {
+    "speaker": ["what did Jesus say about faith", "what did Paul teach about love",
+                "God's promises to Abraham", "what did Moses command the people",
+                "what did Jesus teach about prayer", "the words of Paul on grace"],
+    "entity": ["father of David", "Who was Boaz?", "the wife of Boaz", "Who was Ruth?",
+               "Who was the mother of Solomon?", "What is Babylon?", "who was the father of Solomon",
+               "Who was Jesse?"],
+}
+
 
 def _queries() -> list[str]:
-    out = []
+    out: list[str] = []
     for f in SETS:
         if f.exists():
             for line in f.read_text(encoding="utf-8").splitlines():
                 m = re.match(r'\s*(?:query|question):\s*"(.+)"\s*$', line)
                 if m:
                     out.append(m.group(1))
-    return out
+    for qs in CURATED.values():
+        out.extend(qs)
+    return list(dict.fromkeys(out))
 
 
-def _judge(question: str, a: str, b: str) -> str:
-    """Return 'A' | 'B' | 'TIE' — which answer is better grounded in the original-language facts."""
+def _judge(question: str, a: str, b: str, rubric: str) -> str:
+    """'A' | 'B' | 'TIE' — which answer is better by this kind's rubric. Ignore length/style."""
     from openai import OpenAI
     cli = OpenAI(api_key=os.environ["OPENAI_API_KEY"].strip())
     model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
     prompt = (
-        f"You are grading two answers to a Bible-study question for ACCURACY and for being "
-        f"GROUNDED IN THE ORIGINAL-LANGUAGE (Hebrew/Greek) lexical facts (correct sense of the "
-        f"key word, right gloss/domain). Ignore length and style.\n\n"
-        f"QUESTION: {question}\n\nANSWER A:\n{a}\n\nANSWER B:\n{b}\n\n"
+        f"Grade two answers to a Bible-study question. The better answer is the one more {rubric}. "
+        f"Ignore length and style.\n\nQUESTION: {question}\n\nANSWER A:\n{a}\n\nANSWER B:\n{b}\n\n"
         f"Reply with exactly one token: A, B, or TIE."
     )
     r = cli.chat.completions.create(model=model, max_tokens=4, temperature=0,
@@ -70,9 +88,9 @@ def main() -> None:
     except Exception:
         db = sqlite3.connect(os.environ.get("INDEX_DB", "/data/index.db"))
 
-    wins = ties = losses = skipped = 0
+    buckets = {k: {"w": 0, "t": 0, "l": 0} for k in RUBRICS}
+    skipped = 0
     rng = random.Random(12345)
-    rows = []
     for q in _queries():
         lang = "en"
         analysis = analyze(q, lang=lang)
@@ -81,10 +99,15 @@ def main() -> None:
         concept_tags = expand_concepts(analysis.fts_query, analysis.tags, lang=lang)
         analysis.tags.extend(concept_tags)
         analysis.concept_tags = concept_tags
-        ref = render_synthesis(assemble(analysis, db, q, lang), analysis)
-        if not ref:                                  # only queries the card actually fires on
+
+        built = assemble(analysis, db, q, lang)
+        # which kind actually fires in the SYNTHESIS projection (gated)?
+        syn_kinds = [b.kind for b in built if b.strategy.to_synthesis(b.data, analysis)]
+        ref = render_synthesis(built, analysis)
+        if not syn_kinds or not ref:
             skipped += 1
             continue
+        kind = syn_kinds[0]                              # highest-confidence firing kind
 
         query_vec = None
         if has_vec(db):
@@ -102,20 +125,22 @@ def main() -> None:
 
         on = synthesize(q, cards, db=db, analysis=analysis, lang=lang, reference_block=ref)["answer"]
         off = synthesize(q, cards, db=db, analysis=analysis, lang=lang, reference_block=None)["answer"]
-        on_is_a = rng.random() < 0.5                 # blind: randomize position
-        verdict = _judge(q, on if on_is_a else off, off if on_is_a else on)
+        on_is_a = rng.random() < 0.5
+        verdict = _judge(q, on if on_is_a else off, off if on_is_a else on, RUBRICS[kind])
         won = (verdict == "A" and on_is_a) or (verdict == "B" and not on_is_a)
         lost = (verdict == "A" and not on_is_a) or (verdict == "B" and on_is_a)
-        wins += won; losses += lost; ties += (verdict == "TIE")
-        rows.append((("CARD" if won else "off" if lost else "tie"), q[:64]))
-        print(f"  [{'CARD' if won else 'off ' if lost else 'tie '}] {q[:70]}", flush=True)
+        buckets[kind]["w"] += won; buckets[kind]["l"] += lost; buckets[kind]["t"] += (verdict == "TIE")
+        print(f"  [{kind:<7}] {'CARD' if won else 'off ' if lost else 'tie '} {q[:60]}", flush=True)
 
-    n = wins + ties + losses
-    print(f"\n=== cards-on vs off: {n} judged ({skipped} skipped: no concept/sources) ===")
-    print(f"  card WINS: {wins}  ties: {ties}  card LOSES: {losses}")
-    if n:
-        print(f"  net lift: {(wins - losses)} ({(wins - losses) / n:+.0%})  "
-              f"win-rate (excl. ties): {wins}/{wins + losses}")
+    print(f"\n=== per-kind cards-on vs off ({skipped} skipped: no synthesis card / no sources) ===")
+    for kind, b in buckets.items():
+        n = b["w"] + b["t"] + b["l"]
+        if not n:
+            print(f"  {kind:<7}: (no samples)")
+            continue
+        net = b["w"] - b["l"]
+        print(f"  {kind:<7}: {n:2} judged  W {b['w']}  T {b['t']}  L {b['l']}  "
+              f"net {net:+d} ({net/n:+.0%})  win-rate {b['w']}/{b['w']+b['l']}")
 
 
 if __name__ == "__main__":

@@ -13,6 +13,8 @@ Two projections, opposite economics:
 """
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import dataclass
 
 
@@ -123,8 +125,154 @@ class ConceptStrategy(CardStrategy):
                 "drill": f"/wordstudy/{strong}" if strong else None}
 
 
-# The family registry — steps 3-4 append SpeakerStrategy / EntityStrategy / PassageStrategy / ...
-STRATEGIES: list[CardStrategy] = [ConceptStrategy()]
+# ── Speaker ────────────────────────────────────────────────────────────────────────────────
+class SpeakerStrategy(CardStrategy):
+    """Speaker — who is quoted, the red-letter/divine-speech flag, how many passages, scoped to
+    the topic. Its OWN strategy: unlike concept, speaker FACTS ground the prose even on a bare
+    "what did X say" (who said it, whether it's divine speech) → NO bare-lookup suppression."""
+    kind = "speaker"
+
+    def confidence(self, analysis, db) -> float:
+        return 1.0 if getattr(analysis, "speaker", None) else 0.0
+
+    def build(self, analysis, db, query, lang) -> dict | None:
+        from query.speakers import is_divine, speaker_passages
+        name = getattr(analysis, "speaker", None)
+        if not name:
+            return None
+        return {"name": name, "divine": is_divine(name),
+                "passages": len(speaker_passages(name))}
+
+    @staticmethod
+    def _line(data: dict) -> str:
+        bits = [data["name"]]
+        if data.get("divine"):
+            bits.append("red-letter / divine speech")
+        if data.get("passages"):
+            bits.append(f"{data['passages']} quoted passages — answer from their actual words")
+        return "SPEAKER — " + " | ".join(bits)
+
+    def to_synthesis(self, data, analysis) -> str | None:
+        # UX-ONLY (per-kind A/B: speaker in the prose was net −14%). The card is metadata (name the
+        # LLM already knows + a count + a directive), not grounding — its value is navigation, the UX
+        # surface. Redesign-and-re-eval candidate: inject the speaker's ACTUAL quotations on the topic.
+        return None
+
+    def to_ux(self, data, analysis) -> dict | None:
+        if not data:
+            return None
+        return {"kind": self.kind, "headline": self._line(data), "anchor": data["name"],
+                "drill": f"/speaker/{data['name']}"}
+
+
+# ── Entity ─────────────────────────────────────────────────────────────────────────────────
+_REL_NOUN = {"father-of": "father", "mother-of": "mother",
+             "sibling-of": "sibling", "partner-of": "partner"}
+_LOOKUP_STOP = {"who", "what", "where", "when", "why", "how", "the", "is", "was", "were", "are",
+                "a", "an", "did", "does"}
+
+
+def _entity_facts(db, entity_query: dict, lang: str = "en") -> dict | None:
+    """Resolve an entity to structured facts: who/what summary + a one-hop relation ANSWER."""
+    name = (entity_query or {}).get("name", "").strip()
+    if not name:
+        return None
+    # Prefer the RICHEST entity for a name — disambiguates homonyms (the person "Boaz" carries a
+    # full article; the temple pillar "Boaz" is a thin stub).
+    row = (db.execute("SELECT id,type,name,metadata FROM entities WHERE LOWER(name)=LOWER(?) "
+                      "ORDER BY LENGTH(metadata) DESC, id LIMIT 1", (name,)).fetchone()
+           or db.execute("SELECT id,type,name,metadata FROM entities WHERE LOWER(name) LIKE LOWER(?) "
+                         "ORDER BY LENGTH(metadata) DESC, id LIMIT 1", (name + "%",)).fetchone())
+    if not row:
+        return None
+    eid, etype, ename, meta = row
+    summary = ""
+    try:
+        m = json.loads(meta or "{}")
+        desc = (m.get("description") or m.get("tipnr_description") or "").strip()
+        desc = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", desc)          # strip markdown links
+        summary = re.split(r"(?<=[.!?])\s", desc)[0][:160] if desc else ""
+    except Exception:
+        pass
+    data = {"name": ename, "type": etype, "summary": summary}
+    relation = (entity_query or {}).get("relation")
+    if relation:
+        reverse = relation.endswith("-rev")                          # "-rev" = inbound to the match
+        rel = relation[:-4] if reverse else relation
+        dirs = [("source_id", "target_id")] if reverse else [("target_id", "source_id")]
+        if rel in ("partner-of", "sibling-of"):                      # symmetric → try both directions
+            dirs = [("target_id", "source_id"), ("source_id", "target_id")]
+        names: list[str] = []
+        for join_id, where_id in dirs:
+            names += [r[0] for r in db.execute(
+                f"SELECT e.name FROM entity_relations er JOIN entities e ON e.id=er.{join_id} "
+                f"WHERE er.{where_id}=? AND er.relation=? LIMIT 8", (eid, rel)).fetchall()]
+        data["relation"] = relation
+        data["related"] = list(dict.fromkeys(names))[:8]
+    return data
+
+
+def _entity_line(data: dict) -> str:
+    if data.get("relation"):
+        rel = data["relation"]; reverse = rel.endswith("-rev")
+        noun = _REL_NOUN.get(rel[:-4] if reverse else rel, rel)
+        rels = ", ".join(data.get("related") or []) or "—"
+        if reverse:                                                  # "father of David → Jesse"
+            phrase = f"{noun} of {data['name']} → {rels}"
+        elif noun in ("father", "mother"):                          # forward father/mother = children
+            phrase = f"children of {data['name']} → {rels}"
+        else:
+            phrase = f"{noun}s of {data['name']} → {rels}"
+        return "ENTITY — " + phrase
+    line = f"{data['name']} ({data['type']})"
+    if data.get("summary"):
+        line += f": {data['summary']}"
+    return "ENTITY — " + line
+
+
+class EntityStrategy(CardStrategy):
+    """Entity — who/what summary + a one-hop relation ANSWER (genealogy). Its own strategy: entity
+    facts ground the prose even on a bare lookup (the relation answer IS the answer) → NO
+    bare-lookup suppression. Genealogy gets name+relation from the analyzer; a plain "who is X"
+    extracts the proper noun and matches it against the entities graph."""
+    kind = "entity"
+
+    def confidence(self, analysis, db) -> float:
+        return 1.0 if getattr(analysis, "intent", "") in ("entity_lookup", "genealogy") else 0.0
+
+    def build(self, analysis, db, query, lang) -> dict | None:
+        eq = getattr(analysis, "entity_query", None)
+        if not (eq and eq.get("name")):
+            name = self._lookup_name(db, query)
+            if not name:
+                return None
+            eq = {"name": name}
+        return _entity_facts(db, eq, lang)
+
+    @staticmethod
+    def _lookup_name(db, query: str) -> str | None:
+        for c in re.findall(r"\b([A-Z][a-z]+)\b", query or ""):
+            if c.lower() in _LOOKUP_STOP:
+                continue
+            if db.execute("SELECT 1 FROM entities WHERE LOWER(name)=LOWER(?) LIMIT 1", (c,)).fetchone():
+                return c
+        return None
+
+    def to_synthesis(self, data, analysis) -> str | None:
+        # Synthesize ONLY the discrete relation ANSWER (genealogy: "father of David → Jesse") — a
+        # grounding fact + a safety net if retrieval misses it. The who/what SUMMARY ties in the A/B
+        # (the prose self-summarizes from the sources) → UX-only. (per-kind A/B: entity ≈ neutral.)
+        return _entity_line(data) if (data and data.get("related")) else None
+
+    def to_ux(self, data, analysis) -> dict | None:
+        if not data:
+            return None
+        return {"kind": self.kind, "headline": _entity_line(data), "anchor": data["name"],
+                "drill": None}
+
+
+# The family registry — step 4 appends PassageStrategy / CrossRefStrategy / ...
+STRATEGIES: list[CardStrategy] = [ConceptStrategy(), SpeakerStrategy(), EntityStrategy()]
 
 
 def assemble(analysis, db, query: str = "", lang: str = "en") -> list[BuiltCard]:
