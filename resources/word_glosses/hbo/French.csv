@@ -1,0 +1,6384 @@
+lex,default
+<B/,nuage
+<B=/,nuage
+<B==/,nuage
+<BC[,"se ratatiner, pourrir"
+<BD/,esclave
+<BD=/,acte
+<BD==/,esclave
+<BD>/,Avda
+<BD>L/,Avdeél
+<BDH/,"travail, labeur, service"
+<BDH=/,esclaves
+<BDJ/,Avdi
+<BDJ>L/,Avdiel
+<BDJHW/,esclave
+<BDWN/,Avdôn
+<BDWN=/,Avdôn
+<BD[,servir (quelqu'un)
+<BD_>DWM/,Obed-Èdom
+<BD_MLK/,Èved-Mèlek
+<BD_NGW/,Abed-Nego
+<BH[,être gras
+<BJ/,être épais
+<BR/,côté
+<BR=/,côté
+<BR=[,passer
+<BRH/,gué
+<BRH=/,colère
+<BRJ/,Hébreu
+<BRJ=/,Hébreu
+<BRJM/,Abarim
+<BRN/,Èbrôn
+<BRNH/,Avrona
+<BR[,passer
+<BT/,corde
+<BV=[,emprunter
+<BVJV/,gage
+<BV[,emprunter
+<BWT/,arbres feuillus
+<BWV/,gage
+<C/,mite
+<C=/,mite
+<C==/,mite
+<CC[,faiblir
+<CJR/,personne riche
+<CN/,fumée
+<CN=/,fumant
+<CN==/,fumée
+<CQ/,exploiter
+<CQ=/,Ésheq
+<CQH/,troublé
+<CQ[,exploiter
+<CR/,richesse
+<CR[,être riche
+<CT/,plaque? tablette? panneau? bloc?
+<CTJ/,onze
+<CTRT/,Astarté
+<CTRT=/,agneau
+<CTRT==/,Astarté
+<CTRTJ/,Ashteratite
+<CTRT_QRNJM/,Ashtaroth-Qarnaïm
+<CTRWT/,Ashtaroth
+<CTWT/,pensée
+<CWT=/,Ashwath
+<D<DH/,Adéada
+<D=/,témoin
+<DCH/,lentille
+<DH/,témoignage
+<DH=/,témoignage
+<DH===/,Ada
+<DJ/,parure
+<DJ>L/,Adiel
+<DJN>/,Adina
+<DJTJM/,Aditaïm
+<DLJ/,Adlaï
+<DLM/,Adoullam
+<DLMJ/,Adoullamite
+<DN,jusqu'ici
+<DN===/,Èden
+<DN>/,Adna
+<DP[,excédent
+<DR/,troupeau
+<DR=/,troupeau
+<DR==/,troupeau
+<DR===/,Èdèr
+<DRJ>L/,Adriel
+<FB/,herbe
+<FH>L/,Asahel
+<FH[,faire
+<FJ>L/,Asiel
+<FJH/,Asaya
+<FJRJ/,dixième
+<FQ/,Éseq
+<FR/,dix
+<FR=/,dix
+<FRH/,dix
+<FRH=/,dix
+<FRWN/,un tiers
+<FR[,prendre un dixième
+<FW/,Ésaü
+<FWR/,dix
+<GH/,gâteau de pain
+<GJL/,boucle d'oreille
+<GL/,veau
+<GL=/,rond
+<GLH/,Èglath-Shelishiya
+<GLH=/,charrette
+<GLH==/,Èglath-Shelishiya
+<GLWN/,Èglôn
+<GLWN=/,Èglôn
+<GM[,s'affliger
+<GN[,se tenir à l'écart
+<GWR/,grue
+<J/,ruine
+<JBL/,Éval
+<JBL=/,Éval
+<JC/,Grande Ourse
+<JJM/,Iyim
+<JJ_H<BRJM/,Iyé-Avarim
+<JLJ/,Ilaï
+<JLM/,Élam
+<JNN/,Énân
+<JN_<GLJM/,Én-Églaïm
+<JN_CMC/,Én-Shèmesh
+<JN_DWR/,Én-Dor
+<JN_GDJ/,Én-Guédi
+<JN_GNJM/,Én-Gannim
+<JN_MCPV/,Én-Mishpath
+<JN_RGL/,Én-Roguel
+<JN_RMWN/,Én-Rimmôn
+<JN_TPWX/,En Tappoua
+<JN_XDH/,Én-Hadda
+<JN_XRD/,Én-Harod
+<JN_XYWR/,Én-Hatsor
+<JP/,fatigué
+<JP[,voler
+<JR/,ville
+<JR=/,ânon
+<JR==/,ville
+<JR===/,ville
+<JR====/,ville
+<JR>/,Ira
+<JRD/,Irad
+<JRJ/,Iri
+<JRM/,nu
+<JRM=/,Iram
+<JRW/,Irou
+<JR_CMC/,Ir-Shèmesh
+<JR_HMLX/,Ir-Mèlah
+<JV/,oiseaux de proie
+<JVM/,Étam
+<JWN/,Iyôn
+<KBJC/,araignée
+<KBR/,souris
+<KBWR/,Akbor
+<KCWB/,araignée
+<KN/,Akân
+<KR/,Akar
+<KRN/,Okrân
+<KR[,trouble
+<KS/,chaînette (de cheville)
+<KSH/,Aksa
+<KW/,Akko
+<KWR/,Akor
+<L/,joug
+<L>/,Oulla
+<LG/,bègue
+<LH/,offrande consumée
+<LH=/,feuille
+<LH[,monter
+<LJ/,supérieur
+<LJ=/,pilon
+<LJ==/,Héli
+<LJH/,chambre haute
+<LJL/,fourneau
+<LJLH/,acte
+<LJLJH/,acte
+<LJWN/,haut
+<LJZ/,joyeux
+<LLWT/,glanages
+<LL[,pratiquer (certaines) actions
+<LM/,garçon
+<LMH/,"fille nubile, en âge de se marier"
+<LMT/,Alèmeth
+<LMT=/,Alèmeth
+<LMWN/,Almôn
+<LM[,"se cacher, se dissimuler"
+<LPH/,s'évanouir
+<LP[,s'évanouir
+<LS[,se délecter
+<LVH/,crépuscule
+<LWQH/,sangsue
+<LY[,"se réjouir, exulter"
+<LZ/,"se réjouir, exulter"
+<M/,peuple
+<M<D/,Améad
+<MCSJ/,Amashsaï
+<MD=/,place
+<MDH/,lieu d'attente
+<MD[,se tenir
+<MF>/,Amasa
+<MFJ/,Amasaï
+<MH/,tout comme
+<MJ>L/,Ammiel
+<MJCDJ/,Ammishaddaï
+<MJHWD/,Ammihoud
+<MJNDB/,Amminadav
+<MJR/,gerbes
+<MJT/,voisin
+<MJZBD/,Ammizavad
+<ML/,travail
+<ML=/,travail
+<ML==/,travail
+<MLQ/,Amaleq
+<MLQJ/,Amalécite
+<MM=[,se ternir
+<MM[,se ternir
+<MNH/,Kefar-Ammona
+<MQ/,Émeq-Qetsits
+<MQ=/,profond
+<MQ==/,"langue profonde > langage obscur, inconnu"
+<MQ===/,profondeur
+<MR/,gerbe
+<MR=/,gerbe
+<MRH/,Gomorrhe
+<MRJ/,Omri
+<MRM/,Amram
+<MRMJ/,Amramite
+<MR[,lier
+<MSJH/,Amasya
+<MS[,supporter
+<MWD/,pilier
+<MWN/,Ammon
+<MWNJ/,Ammonite
+<MWQ/,Amoq
+<MWS/,Amos
+<NB/,raisin
+<NB=/,Anav
+<NC/,amende
+<NC[,être condamné à une amende
+<ND[,lier à
+<NG/,délicat
+<NG=/,délicieux
+<NG[,être délicat
+<NH=/,Ana
+<NH==[,"répondre, dire"
+<NH[,"répondre, dire"
+<NJ/,pauvre
+<NJ=/,affliction
+<NJ==/,Ounni
+<NJH/,Anaya
+<NJM/,Anim
+<NJN/,affaires
+<NM/,Anem
+<NMJM/,Anamim
+<NMLK/,Anammèlek
+<NN/,nuage
+<NN=/,nuage
+<NNH/,nuage
+<NNJ/,Anani
+<NNJH/,Ananya
+<NNJH=/,Ananya
+<NN[,pratiquer la divination
+<NP/,rameau
+<NP=/,plein de branches
+<NQ=/,collier
+<NQ[,(une activité) sert de collier > être pleinement engagé (dans une certaine activité)
+<NR/,Anér
+<NR=/,Anér
+<NT/,Anath
+<NTTJ/,Anatotite
+<NTTJH/,Ântotiya
+<NTWT/,Anatoth
+<NTWT=/,Anatoth
+<NW/,affligé
+<NWB/,Anouv
+<NWH/,"humility, douceur"
+<NWT/,affliction
+<PL/,hémorroïdes
+<PL[,se gonfler d'orgueil
+<PNJ/,Ofni
+<PR/,poussière
+<PR=/,"jeune cerf, chevreuil, faon"
+<PR==/,Éfer
+<PRH/,Ofra
+<PRH=/,Ofra
+<PRH==/,Ofra
+<PRT/,plomb
+<QB/,compensation
+<QB=/,talon
+<QB==/,suivi
+<QBH/,tromperie
+<QB[,Jacob
+<QC/,retors
+<QC=/,retors
+<QCWT/,distorsion
+<QD/,rayé
+<QD[,lier
+<QH/,clameur
+<QLQL/,chemin sinueux
+<QLTWN/,tortueux
+<QL[,perverti
+<QN/,Aqân
+<QR/,stérile
+<QR=/,membre de la famille
+<QR==/,membre de la famille
+<QRB/,scorpion
+<QRWN/,Éqrôn
+<QRWNJ/,Èqronite
+<QR[,déraciner
+<QWB/,Aqqouv
+<R/,ennemi
+<R<R/,démuni
+<R<RJ/,Aroérite
+<R<WR/,Aroër
+<R=/,Ér
+<R==/,ennemi
+<RB/,soir
+<RB=/,nuée d'insectes
+<RB==/,tissu ou tricot
+<RB===/,corbeau
+<RB====/,tissu ou tricot
+<RB======/,corbeau
+<RB========/,soir
+<RBH==/,sécurité
+<RBJ/,Arabe
+<RBJ=/,Arabe
+<RBTJ/,Arbatite
+<RBWN/,gage
+<RB[,cautionner
+<RD/,Arad
+<RD=/,Arad
+<RF/,lit
+<RG[,haleter
+<RH/,découvrir
+<RH[,découvrir
+<RJ/,Éri
+<RJ=/,Éri
+<RJH/,nu
+<RJRJ/,sans enfant
+<RJSH/,pâte
+<RJY/,puissant
+<RK/,égal
+<RK[,se mettre en réseau
+<RL/,personne incirconcise
+<RLH/,prépuce
+<RL[,considérer comme interdit
+<RMH/,astuce
+<RMH=/,astuce
+<RMWN/,platane d'Orient
+<RN/,Érân
+<RNJ/,Éranite
+<RP/,nuque
+<RPH/,Orpa
+<RPL/,"épais nuages, obscurité"
+<RP[,briser la nuque
+<RQJ/,Arqite
+<RQ[,ronger
+<RR[,se dépouiller
+<RW<R=/,Aroër
+<RWD/,onagre
+<RWGH/,lit surélevé
+<RWH/,nudité
+<RWM/,nu
+<RWM=/,astucieux
+<RWY/,ravin
+<RY[,être terrifié
+<SJS/,moût
+<SS[,fouler aux pieds
+<T/,temps
+<TD[,faire des préparatifs
+<TH,maintenant
+<TJ/,prêt
+<TJD/,prêt
+<TJH/,Ataya
+<TJQ/,enlevé du sein
+<TJQ=/,splendide
+<TK/,Atak
+<TLJ/,Atlaï
+<TLJH/,Athalie
+<TM[,être roussi
+<TNJ/,Otni
+<TNJ>L/,Otniel
+<TQ/,mots insolents
+<TQ=/,durable
+<TQ[,se déplacer
+<TR/,suppliant
+<TR=/,Ètèr
+<TRT/,abondance
+<TR[,implorer
+<TWD/,bouc
+<TWD=/,bouc
+<V/,plume
+<VH/,couvrir
+<VH=[,couvrir
+<VH[,couvrir
+<VJCH/,éternuement
+<VJN/,abdomen > corps
+<VLP/,chauve-souris
+<VRH/,couronne
+<VRH=/,couronne
+<VRWT/,Ataroth
+<VRWT_>DR/,Ataroth-Addar
+<VRWT_BJT_JW>B/,Atroth-Beth-Yoav
+<VRWT_CWPN/,Atroth-Shofân
+<VR[,entourer
+<WBD/,Obed
+<WBL/,Obal
+<WB[,couvrir d'un nuage
+<WC[,se dépêcher
+<WD[,avertir
+<WG/,Og
+<WGB/,flûte
+<WH/,ruine
+<WH=/,ruine
+<WJ/,Awwim
+<WJT/,Awith
+<WL/,agir de manière incorrecte
+<WL==/,injuste
+<WLH/,offrande consumée
+<WLM/,"durée, éternité"
+<WL[,agir de manière incorrecte
+<WN/,iniquité
+<WP/,oiseaux
+<WP[,voler
+<WQ[,grincer
+<WR/,aveugle
+<WR=/,peau
+<WR[,s'éveiller
+<WTH/,tort
+<WTJ/,Outaï
+<WY/,Outs
+<WY=/,Outs
+<WY[,prendre conseil
+<WZ[,fuir pour se mettre à l'abri
+<Y/,arbre
+<YB/,idole
+<YB=/,travail
+<YB==/,idole
+<YB===/,idole
+<YB====/,travail
+<YBT/,douleur
+<YBWN/,travail
+<YB[,être blessé
+<YH==/,épine dorsale
+<YJWN_GBR/,Etsyôn-Guèber
+<YL/,fainéant
+<YLWT/,être paresseux
+<YL[,être réticent
+<YM/,os
+<YM=/,structure squelettique
+<YM==/,structure squelettique
+<YM===/,os
+<YMH/,quoi ?
+<YMWN/,Azmôn
+<YM[,être nombreux
+<YR/,utérus fermé > utérus stérile
+<YR=/,règle
+<YRH/,assemblée solennelle
+<YRT/,assemblée solennelle
+<YR[,ralentir
+<YWM/,nombreux
+<Z/,fort
+<Z=/,fort
+<Z==/,chèvre
+<Z===/,fort
+<Z====/,fort
+<Z>ZL/,Azazel
+<ZB=[,"laisser, abandonner"
+<ZBWQ/,Azbouq
+<ZB[,"laisser, abandonner"
+<ZGD/,Azgad
+<ZH/,Gaza
+<ZH=/,Gaza
+<ZJ/,Ouzzi
+<ZJ>/,Ouzziya
+<ZJ>L/,Ouzziel
+<ZJ>L=/,Aziel
+<ZJ>LJ/,Ouzziélite
+<ZJH/,Ozias
+<ZJZ>/,Aziza
+<ZMWT/,Azmaweth
+<ZN/,Azzân
+<ZNJH/,vautour moine
+<ZQH/,Azéqa
+<ZQ[,travailler la terre
+<ZR>/,Esdras
+<ZR>L/,Azarel
+<ZRH/,aide
+<ZRH=/,"cour, parvis"
+<ZRH==/,aide
+<ZRJ/,Èzri
+<ZRJ=/,Èzri
+<ZRJ>L/,Azriel
+<ZRJH/,Azarya
+<ZRJQM/,Azriqam
+<ZR[,être aidé
+<ZTJ/,Gazatite
+<ZWBH/,Azouva
+<ZWR/,Azzour
+<ZWZ/,"puissance, pouvoir"
+<ZWZ=/,"fort, vigoureux, puissant, guerrier"
+<ZZ/,Azaz
+<ZZJHW/,Azazyahou
+<ZZ[,être puissant
+>B/,père
+>B<B<T/,plaie ouverte
+>B=/,fleur
+>BDH/,objet perdu
+>BDH=/,objet perdu
+>BDN/,destruction
+>BD[,être perdu
+>BGT>/,Abagta/Avagta
+>BH/,roseau
+>BH[,vouloir
+>BJ/,Abi
+>BJ<ZR/,Abiézer
+>BJ>L/,Abiel
+>BJ>SP/,Abiasaph
+>BJB/,épi
+>BJCG/,Abishag
+>BJCW</,Abishoua
+>BJCWR/,Abishour
+>BJD</,Abida
+>BJDN/,Abidân
+>BJGJL/,Abigaïl
+>BJH/,Abiya
+>BJHW>/,Abihou
+>BJHWD/,Abihoud
+>BJM/,Abiyam
+>BJM>L/,Abimaël
+>BJMLK/,Abimélek
+>BJN<M/,Abinoam
+>BJNDB/,Abinadab
+>BJR/,taureau
+>BJR=/,le puissant
+>BJRM/,Abiram
+>BJSP/,Ébiasaph
+>BJTR/,Abiatar
+>BJVL/,Abital
+>BJVWB/,Abitoub
+>BJWN/,pauvre
+>BJWNH/,câpre
+>BK[,tourbillonner
+>BL,mais
+>BL/,en deuil
+>BL=/,en deuil
+>BL===/,en deuil
+>BL[,prendre le deuil
+>BL_BJT_M<KH/,Beth-Gân
+>BL_HCVJM/,Abel-Shittim
+>BL_KRMJM/,Abel-Keramim
+>BL_MJM/,Abel-Maïm
+>BL_MXWLH/,Abel-Mehola
+>BL_MYRJM/,Abel-Mitsraïm
+>BN/,pierre glissante
+>BN=/,tour (de potier)
+>BNR/,Abner
+>BNV/,ceinture
+>BN_H<ZR/,Eben-Ezer
+>BQ/,poussière
+>BQH/,poudres parfumées
+>BR/,aile
+>BRH/,aile
+>BRHM/,Abraham
+>BRK,à genoux
+>BRM/,Abram
+>BS[,engraisser
+>BT/,Oboth
+>BVJX/,pastèque
+>BWJ/,"malheur, hélas"
+>BWS/,crêche
+>BXH/,étinceler
+>BY/,Abets
+>BYN/,Ibtsân
+>C/,feu
+>C<N/,Èsheân
+>C=/,il y a
+>CB<L/,Eshbaal
+>CBL/,Ashbel
+>CBLJ/,Ashbélite
+>CBN/,Eshbân
+>CDWD/,Ashdod
+>CDWDJ/,Ashdodite
+>CH/,femme
+>CH=/,offrande consumée par le feu
+>CJM>/,Ashima
+>CK/,testicule
+>CKNZ/,Ashkenaz
+>CKR/,présent
+>CKWL/,grappe
+>CL/,tamaris
+>CM/,culpabilité
+>CM=/,coupable
+>CMH/,culpabilité
+>CM[,"se rendre coupable, se mettre en tort, avoir tort"
+>CNB/,fenêtre à treillis
+>CNH/,Achna
+>CP/,"conjureur, enchanteur, envoûteur"
+>CPH/,carquois
+>CPNZ/,Ashpenaz
+>CPR/,gâteau de dattes
+>CPT/,fumier
+>CQLWN/,Ashqelôn
+>CQLWNJ/,Ashqelonite
+>CR,qui
+>CR==/,Aser
+>CR===/,"heureux, béni"
+>CR=[,Aser
+>CRH/,Ashéra
+>CRJ/,Asérite
+>CR[,qui
+>CT>L/,Eshtaol
+>CT>LJ/,Eshtaolite
+>CTWN/,Eshtôn
+>CWR/,Assour
+>CWR=/,Assour
+>CWR==/,Assour
+>CXWR/,Ashehour
+>D/,brume
+>DB>L/,Adbéel
+>DB[,attrister
+>DC[,"fouler, battre, écraser"
+>DD/,Hadad
+>DJR/,puissant
+>DLJ>/,Adalia
+>DM/,humain
+>DM=/,rouge
+>DM==/,rubis
+>DM===/,humain
+>DM====/,humain
+>DMDM/,rougeâtre
+>DMH/,sol
+>DMH=/,Adma
+>DMH==/,sol
+>DMNJ/,roux
+>DMT>/,Admatha
+>DM[,être rouge
+>DN/,base
+>DN=/,Addan
+>DNJ/,Seigneur
+>DNJQM/,Adoniqam
+>DNJRM/,Adoniram
+>DNJ_BZQ/,Adoni-Bèzeq
+>DNJ_YDQ/,Adoni-Tsèdeq
+>DR/,honneur
+>DR<J/,Édrèi
+>DR==/,Addar
+>DR===/,Addar
+>DRM/,Adoram
+>DRMLK/,Adrammèlekh
+>DRMLK=/,Adrammèlekh
+>DRT/,majesté
+>DR[,"être grand, être majestueux, être glorieux"
+>DW/,Iddo
+>DWM/,Édom
+>DWN/,seigneur
+>DWRJM/,Adoraïm
+>FR>L/,Asareël
+>FR>LH/,Asareéla
+>FRJ>L/,Asriel
+>FRJ>LJ/,Asriélite
+>G>/,Agué
+>GDH/,corde
+>GG/,Agag
+>GGJ/,Agaguite
+>GL/,gouttes
+>GLJM/,Églaïm
+>GM/,étang
+>GM=/,attristé
+>GMWN/,jonc
+>GN/,coupe
+>GP/,armée
+>GRP/,poing
+>GRT/,lettre
+>GRVL/,plat
+>GR[,amasser
+>GWR/,Agour
+>GWRH/,pièce d'argent
+>GWZ/,noyer
+>HB/,faire l'amour
+>HB=/,être ravissant
+>HBH/,amour
+>HB[,aimer
+>HD/,Ohad
+>HH,ah
+>HL/,tente
+>HL=/,tente
+>HL==/,bois d'agar
+>HLH/,Ohola
+>HLJ>B/,Oholiab
+>HLJBH/,Oholiba
+>HLJBMH/,Oholibama
+>HLJBMH=/,Oholibama
+>HRN/,Aaron
+>HW>/,Ahawa
+>HWD/,Éhoud
+>J<ZR/,Ièzèr
+>J<ZRJ/,Ièzerite
+>JBH/,inimitié
+>JC/,personne
+>JCHWD/,Ishhod
+>JC_BCT/,personne
+>JD/,calamité
+>JH,où?
+>JKH=,où?
+>JL/,daim
+>JL=/,bélier
+>JL==/,bélier
+>JL===/,bélier
+>JL====/,force
+>JLH/,daine
+>JLM=/,Élim
+>JLWN/,Élôn
+>JLWN=/,Élôn
+>JLWN==/,Ayalôn
+>JLWT/,force
+>JL_P>RN/,El Parân
+>JM/,troublant
+>JMH/,terreur
+>JMJ/,Émim
+>JN,d'où?
+>JN/,d'où?
+>JN=,y a-t-il... ?
+>JPH,où? comment?
+>JPH/,épha
+>JTJ>L/,Ithiel
+>JTMR/,Itamar
+>JTN/,permanent
+>JTN=/,permanent
+>JWB/,Job
+>JZBL/,Jézabel
+>K,seulement
+>KCP/,Akshaf
+>KD/,Akkad
+>KJC/,Akish
+>KJLH/,nourriture
+>KL/,"nourriture, vivres"
+>KL=/,Oukal
+>KLH/,nourriture
+>KL[,manger
+>KN,assurément
+>KP/,pression
+>KR/,paysan
+>KZB/,trompeur
+>KZJB/,Akzib
+>KZR/,cruel
+>KZRJ/,cruel
+>KZRJWT/,"cruauté, férocité"
+>L<D/,Éléad
+>L<DH/,Éleada
+>L<FH/,Èleasa
+>L<WZJ/,Élouzaï
+>L<ZR/,Éléazar
+>L>/,Ela
+>LD<H/,Eldaa
+>LDD/,Eldad
+>LGBJC/,grêle
+>LH,"ces, ceux-ci"
+>LH/,térébinthe
+>LH=/,serment
+>LH==/,térébinthe
+>LH===/,térébinthe
+>LHJM/,êtres célestes
+>LJ<M/,Èliam
+>LJ<ZR/,Éliézer
+>LJ>B/,Éliab
+>LJ>L/,Èliel
+>LJ>TH/,Èliata
+>LJC</,Élisée
+>LJCB</,Èlishèba
+>LJCH/,Èlisha
+>LJCJB/,Elyashib
+>LJCM</,Élishama
+>LJCPV/,Èlishafat
+>LJCW</,Èlishoua
+>LJD</,Élyada
+>LJDD/,Èlidad
+>LJH/,queue grasse
+>LJH=/,Élie
+>LJHW=/,Élihou
+>LJL/,image
+>LJMLK/,Élimèlek
+>LJPL/,Èlifal
+>LJPLHW/,Èlifeléhou
+>LJPZ/,Èlifaz
+>LJQ>/,Èliqa
+>LJQJM/,Elyaqim
+>LJSP/,Eliasaph
+>LJXB>/,Éliahba
+>LJXRP/,Élihoreph
+>LJYWR/,Èlitsour
+>LLJ,ah là là! hélas !
+>LM/,muet
+>LM=/,silence
+>LMGJM/,genévrier
+>LMH/,gerbe
+>LMLK/,Alammèlek
+>LMN/,veuvage
+>LMN=/,veuf
+>LMNH/,veuve
+>LMNJ/,"un tel, un certain"
+>LMNWT/,veuvage
+>LMWDD/,Almodad
+>LN<M/,Elnaam
+>LNJ/,Élonite
+>LNTN/,Elnathan
+>LP<L/,Elpaal
+>LQCJ/,Elqoshite
+>LQNH/,Elqana
+>LQWM/,personne n'ose résister
+>LSR/,Ellasar
+>LTQ>/,Elteqé
+>LTQN/,Elteqôn
+>LTWLD/,Eltolad
+>LW,si seulement
+>LWC/,Aloush
+>LWH/,être divin
+>LWL/,Elul
+>LWN/,chêne
+>LWN==/,Élôn
+>LWP/,chef
+>LWP=/,chef
+>LXNN/,Elhanân
+>LX[,être mauvais
+>LY[,excéder
+>LZBD/,Elzabad
+>M/,mère
+>MC/,crépuscule
+>MH/,esclave
+>MH=/,coudée
+>MH===/,coudée
+>MH====/,coudée
+>MJ/,Ami
+>MJR/,rameau
+>MJY/,fort
+>MLL/,minable
+>MLL=/,languissant
+>ML[,dépérir
+>MM/,Amam
+>MN,amen
+>MN/,fidélité
+>MN=/,fidélité
+>MNH/,linteau
+>MNH==/,"accord, contrat"
+>MNH===/,"accord, contrat"
+>MNM=,vraiment ? véritablement ? est-il vrai ?
+>MNWN/,Amnon
+>MN[,affermir
+>MR/,mot
+>MR=/,parole
+>MR==/,mot
+>MR===/,Immer
+>MRH/,paroles
+>MRJ/,Amorite
+>MRJ=/,Imri
+>MRPL/,Amrafel
+>MR[,dire
+>MT/,fidélité
+>MTJ/,Amittaï
+>MTXT/,sac
+>MWNH/,fixité
+>MWY/,Amots
+>MY/,force
+>MY=/,pommelé
+>MYH/,force
+>MYJ/,Amtsi
+>MYJH/,Amatsia
+>MY[,être fort
+>N,où?
+>N>,s'il te plaît
+>NC/,humain
+>NJ,je
+>NJ/,flotte
+>NJ<M/,Aniam
+>NJH/,navire
+>NJH=/,lamentation
+>NK/,fil à plomb
+>NN[,se plaindre
+>NPH/,héron
+>NP[,être en colère
+>NQ[,soupirer
+>NTH,tu
+>NWC/,personne
+>NXH/,soupir
+>NXRT/,Anaharath
+>NX[,soupirer
+>P</,inutile
+>P<H/,vipère
+>PD/,"pagne de lin, éphod de lin"
+>PD=/,"pagne de lin, éphod de lin"
+>PDH/,revêtement
+>PDN/,tente royale
+>PD[,nouer autour de la taille (de quelqu'un)
+>PH/,cuire
+>PH[,cuire
+>PJL/,tardif
+>PJM/,Appaïm
+>PJQ/,oued
+>PJQ=/,oued
+>PJX/,Afiah
+>PL/,totalement noir
+>PL=/,obscurité profonde
+>PLH/,obscurité profonde
+>PLL/,Eflal
+>PN/,bon moment
+>PP[,entourer
+>PQH/,Aféqa
+>PQ[,se contenir
+>PR/,cendres
+>PR=/,bande
+>PRJM/,Éphraïm
+>PRJWN/,palanquin
+>PRTJ/,Èfratite
+>PRX/,oisillons
+>PS[,être fini
+>PS_DMJM/,Èfès-Dammim
+>PW,alors
+>QDX/,pierre précieuse
+>QW/,bouquetin
+>R>/,Ara
+>R>L/,puissant guerrier
+>R>LJ/,Areéli
+>R>LJ=/,Areéli
+>RB/,piège
+>RB</,quatre
+>RB=/,repaire
+>RB==/,Arab
+>RBH/,sauterelle
+>RBH=/,"ouverture, trou, cavité, fenêtre, écluse"
+>RBH==/,grand
+>RBJ/,Arbite
+>RBWT/,Aroubboth
+>RB[,s'embusquer
+>RCT/,requête
+>RD/,Ard
+>RDJ/,Ardite
+>RDJ=/,Ardite
+>RDWN/,Ardôn
+>RF[,contracter un mariage
+>RG/,navette
+>RGB/,Argob
+>RGWN/,pourpre rouge
+>RGZ/,coffret
+>RG[,tisser
+>RH[,grappiller
+>RJ>L/,puissant guerrier
+>RJ>L=/,puissant guerrier
+>RJ>L==/,puissant guerrier
+>RJDT>/,Aridata
+>RJSJ/,Arisaï
+>RJWK/,Aryok
+>RK/,long
+>RK=/,longueur
+>RK==/,long
+>RK===/,Èrek
+>RKJ/,Arkite
+>RK[,être long
+>RM/,Aram Maaka
+>RMJ/,Araméen
+>RMJ=/,Araméen
+>RMNJ/,Armoni
+>RMWN/,palais
+>RN=/,Arân
+>RNBT/,lièvre
+>RNN/,Arnân
+>RNWN/,Arnon
+>RPD/,Arpad
+>RPKCD/,Arpakshad
+>RRV/,Ararat
+>RR[,maudire
+>RTXCFT>/,Artaxerxès
+>RWD=/,Arvad
+>RWDJ/,Arvadite
+>RWDJ=/,Arod
+>RWDJ==/,Arod
+>RWH/,écurie
+>RWKH/,réparer
+>RWMH/,Arouma
+>RWN/,caisse
+>RWNH/,Arawna
+>RX/,chemin
+>RX=/,voyager
+>RXH/,caravane
+>RXH=/,entretien
+>RX[,voyager
+>RY/,terre
+>RY>/,Artsa
+>RZ/,cèdre (du Liban)
+>RZH/,boiserie de cèdre
+>S>/,Asa
+>SJP/,moisson
+>SJR/,prisonnier
+>SM/,grange
+>SNH/,Asna
+>SNT/,Asenath
+>SP/,moisson
+>SP==/,Asaph
+>SPH/,rassemblement
+>SPH=/,collecte
+>SPSP/,ramassis
+>SPT>/,Aspata
+>SP[,se réunir
+>SR[,attacher
+>STR/,Esther
+>SWK/,jarre d'huile d'olive
+>SWN/,accident
+>SWR/,lanière
+>T,pioche
+>T/,pioche
+>T==,pioche
+>TB<L/,Etbaal
+>TH[,venir
+>TJ/,Ittaï
+>TM,Étam
+>TM/,Étam
+>TMWL/,pioche
+>TN,pioche
+>TNH,pioche
+>TNH/,don
+>TNJ/,Etni
+>TNN/,don
+>TNN=/,pioche
+>TRJM/,Atarim
+>VD/,ronces
+>VM[,grillagé
+>VR/,fermé de main droite = gaucher
+>VR=/,Atér
+>VWN/,(toile de) lin
+>W,ou
+>W>L/,Ouel
+>WB/,outre (à vin)
+>WB=/,outre (à vin)
+>WBJL/,Obil
+>WD/,tison
+>WH/,désir
+>WH[,avoir envie
+>WJ,malheur
+>WJ/,Èwi
+>WJH,malheur
+>WJL/,imbécile
+>WJL_MRDK/,Èwil-Merodak
+>WL/,bélier
+>WLJ,peut-être
+>WLJ/,fou
+>WLJ=/,peut-être
+>WLT/,"folie, sottise"
+>WMR/,Omar
+>WNM/,Onam
+>WNN/,Onân
+>WNW/,Ono
+>WPJR/,Ophir
+>WPJR=/,Ophir
+>WPN/,roue
+>WPZ/,Ouphaz
+>WR/,lumière
+>WRJ/,Ouri
+>WRJ>L/,Ouriel
+>WRJH/,Urie
+>WR[,être lumineux
+>WT/,enseigne
+>WT[,"consentir, s'entendre"
+>WYR/,trésor
+>WY[,se hâter
+>WZJ/,Ouzaï
+>WZL/,Ouzal
+>X,frère
+>X/,frère
+>X=/,chacal
+>X==/,frère
+>XBN/,Ahbân
+>XCTRJ/,Ahashtari
+>XCTRN/,royal
+>XCWRWC/,Assuérus
+>XD/,un
+>XJ/,Éhi
+>XJ<ZR/,Ahièzer
+>XJ=/,Ahi
+>XJ>M/,Ahyam
+>XJCR/,Ahishar
+>XJCXR/,Ahishahar
+>XJH/,Ahiya
+>XJHWD/,Ahihoud
+>XJLWD/,Ahiloud
+>XJM<Y/,Ahimaats
+>XJMLK/,Ahimèlek
+>XJMN/,Ahimân
+>XJMWT/,Ahimoth
+>XJN/,Ahyân
+>XJN<M/,Ahinoam
+>XJNDB/,Ahinadab
+>XJQM/,Ahiqam
+>XJR</,Ahira
+>XJRM/,Ahiram
+>XJRMJ/,Ahiramite
+>XJSMK/,Ahisamak
+>XJTPL/,Ahitofel
+>XJVWB/,Ahitoub
+>XJW/,Ahio
+>XJXD/,Ahihoud
+>XLB/,Ahlab
+>XLJ,ah! si seulement... !
+>XLMH/,améthyste (?)
+>XMT>/,Ahmetha
+>XR/,derrière
+>XR=/,autre
+>XR==/,autre
+>XRJT/,au plus loin de
+>XRNJT,en arrière
+>XRWN/,derrière
+>XRX/,Aharah
+>XRXL/,Aharhel
+>XR[,être retardé
+>XSBJ/,Ahasbaï
+>XW/,roseau
+>XWD/,Éhoud
+>XWH=/,explication
+>XWMJ/,Ahoumaï
+>XWR/,arrière
+>XWT/,sœur
+>XWX/,Ahoah
+>XWXJ/,Ahohite
+>XZ=/,Achaz
+>XZH/,possession
+>XZJ/,Ahzaï
+>XZJH/,Ahazya
+>XZM/,Ahouzzam
+>XZT/,Ahouzzath
+>Y<DH/,bracelet
+>YB</,doigt
+>YBWN/,Ezbôn
+>YJL/,confins
+>YJL=/,confins
+>YJL==/,articulation du bras
+>YL/,à côté de
+>YL=/,Azel
+>YL==/,prendre part à
+>YLJHW/,Atsalya
+>YL[,prendre part à
+>YM/,Otsem
+>YR/,Étsèr
+>Z,à ce moment-là
+>ZBJ/,Ezbaï
+>ZJ,alors
+>ZKRH/,portion symbolique
+>ZL/,pierre d'Èzel
+>ZL[,s'en aller
+>ZN/,oreille
+>ZN=/,affaires
+>ZNJ/,Ozni
+>ZNJ=/,Ozni
+>ZNJH/,Azanya
+>ZNWT_TBWR/,Aznoth-Tabor
+>ZN[,écouter
+>ZN_C>RH/,Ouzzên-Shèèra
+>ZQJM/,chaînes
+>ZRX/,autochtone
+>ZRXJ/,Ezrahite
+>ZR[,être ceinturé
+>ZWB/,hysope
+>ZWR/,"pagne,"
+B<C>/,Baasha
+B<CTRH/,Béeshtera
+B<D/,accès
+B<FJH/,Baaséya
+B<H[,faire bouillir
+B<JR/,"bétail, élevage"
+B<L/,"maître, propriétaire, détenteur, mari"
+B<L=/,diriger
+B<L==/,"maître, propriétaire, détenteur, mari"
+B<LJD</,Béelyada
+B<LJH/,Béalya
+B<LJS/,Baalis
+B<LJ_JHWDH/,Baalé-Juda
+B<LT/,Baalath
+B<LT_B>R/,Baalath-Beér
+B<LWT/,Béaloth
+B<L_BRJT/,Baal-Berith
+B<L_CLCH/,Baal-Shalisha
+B<L_GD/,Baal-Gad
+B<L_HMWN/,Baal-Hamôn
+B<L_M<WN/,Baal-Méôn
+B<L_P<WR/,Baal-Péor
+B<L_PRYJM/,Baal-Peratsim
+B<L_TMR/,Baal-Tamar
+B<L_XNN/,Baal-Hanân
+B<L_XRMWN/,Baal-Hermon
+B<L_XYWR/,Baal-Hatsor
+B<N/,Beôn
+B<N>/,Baana
+B<NH/,Baana
+B<R/,"bête, stupide, abruti, vulgaire"
+B<R>/,Baara
+B<RH/,incendie
+B<R[,brûler
+B<TH/,effroi
+B<T[,tourmenter
+B<V[,ruer
+B<WR/,Beor
+B<Z/,Booz
+B>C/,puanteur
+B>CH/,"fruit pourri, mauvaise herbe puante"
+B>C[,puer
+B>H/,entrée
+B>R/,"puits, abreuvoir, source"
+B>R=/,"puits, abreuvoir, source"
+B>R>/,Bééra
+B>RH/,Bééra
+B>RJ/,Bééri
+B>RTJ/,Béérotite
+B>RT_BNJ_J<QN/,Bééroth-Bené-Yaaqân
+B>RWT/,Bééroth
+B>R[,clarifier
+BBH/,pupille
+BBJ/,Bébaï
+BBL/,"Babel, Babylone"
+BCL/,bouilli
+BCLM/,Bishlam
+BCL[,bouillir
+BCN/,Bashân
+BCNH/,honte
+BCS[,taxer
+BCT/,honte
+BD/,lin
+BD=/,lin
+BD>[,choisir
+BDD/,seul
+BDD=/,Bedad
+BDJH/,Bédya
+BDL/,"coin, morceau, bout"
+BDLX/,bdellium
+BDL[,"séparer, détacher"
+BDN/,Bedân
+BDQ/,brèche
+BDQR/,Bidqar
+BFMT/,Basmath
+BFR/,"chair, viande"
+BFWR/,Besor
+BGD/,"étoffe, tissu"
+BGD=/,"étoffe, tissu"
+BGDWT/,trahison
+BGT>/,Bigta
+BGTN/,Bigtân
+BGWD/,traître
+BGWJ/,Bigvaï
+BHJR/,brillant
+BHLH/,"épouvante, terreur, angoisse"
+BHL[,aller vite
+BHMH/,animaux terrestres
+BHMWT/,behémoth
+BHN/,pouce
+BHQ/,leucodermie
+BHRT/,tache
+BHV/,"porphyre (?), marbre (?)"
+BHW/,vide
+BHWN/,pouce
+BJ,pardon
+BJN/,entre (deux lieux ou plus)
+BJNH/,"compréhension, discernement, intelligence"
+BJRH/,"forteresse, citadelle"
+BJT/,Beth-Gân
+BJTN/,palais
+BJT_<NT/,Beth-Anath
+BJT_<NWT/,Beth-Anoth
+BJT_<QD/,Beth-Éqed
+BJT_<ZMWT/,Beth-Azmaveth
+BJT_>L/,Béthel
+BJT_>RB>L/,Beth-Arbel
+BJT_>WN/,Beth-Aven
+BJT_BR>J/,Beth-Biréi
+BJT_BRH/,Beth-Bara
+BJT_C>N/,Beth-Shéân
+BJT_CMC/,Beth-Shémesh
+BJT_DBLTJM/,Beth-Diblataïm
+BJT_DGWN/,Beth-Dagôn
+BJT_GMWL/,Beth-Gamoul
+BJT_H<MQ/,Beth-Émeq
+BJT_H<RBH/,Beth-Araba
+BJT_H>YL/,Beth-Étsel
+BJT_HCVH/,Beth-Shitta
+BJT_HJCMWT/,Beth-Yeshimoth
+BJT_HKRM/,Beth-Kèrem
+BJT_HMRKBWT/,Beth-Markaboth
+BJT_HRM/,Beth-Haram
+BJT_HRN/,Beth-Harân
+BJT_KR/,Beth-Kar
+BJT_LB>WT/,Beth-Lebaoth
+BJT_LXM/,Bethléhem
+BJT_NMRH/,Beth-Nimra
+BJT_P<WR/,Beth-Péor
+BJT_PLV/,Beth-Pèleth
+BJT_PYY/,Beth-Patsets
+BJT_RXWB/,Beth-Rehob
+BJT_TPWX/,Beth-Tappouah
+BJT_XGLH/,Beth-Hogla
+BJT_XWRWN/,Beth-Horôn
+BJT_YWR/,Beth-Tsour
+BJYH/,œuf
+BKH/,pleur
+BKH[,"crier, pleurer, se lamenter, se plaindre, sangloter"
+BKJM/,Bokim
+BKJRH/,"premier-né, aîné(e)"
+BKJT/,pleurs
+BKR/,premier-né
+BKR==/,chamelon
+BKRH/,droit d'aînesse
+BKRH=/,"jeune chamelle, jeune dromadaire"
+BKRJ/,Bakrite
+BKRJ=/,Bikri
+BKRW/,Bokrou
+BKWRH/,figue précoce
+BKWRJM/,premiers fruits
+BKWRT/,Bekorath
+BKWT/,pleur
+BL,ne pas
+BL/,Bel
+BL<DJ,autre que
+BL<J/,Baléite
+BL<M/,Balaam
+BL<M=/,Balaam
+BL<[,avaler
+BL>DN/,Baladân
+BLC>YR/,Belshatsar
+BLCN/,Bilshân
+BLDD/,Bildad
+BLGH/,Bilga
+BLGJ/,Bilgaï
+BLG[,illuminer
+BLH/,usé
+BLH=/,user
+BLHH/,"terreur, horreur"
+BLHH=/,Bilha
+BLHH==/,Bilha
+BLHN/,Bilhân
+BLH[,user
+BLJ/,ne pas
+BLJ<L/,"méchant, vaurien, inutile, bon-à-rien"
+BLJL/,fourrage
+BLL[,mélanger
+BLM[,freiner
+BLQ/,Balaq
+BLS[,entretenir des sycomores
+BLT/,ne pas
+BLVC>YR/,Belteshatsar
+BMH/,dos
+BMHL/,Bimhal
+BMWT/,Bamoth-Baal
+BMWT_B<L/,Bamoth-Baal
+BN/,vallée (des fils) de Hinnom
+BN<>/,Binéa
+BN=/,vallée (des fils) de Hinnom
+BNH[,construire
+BNJ/,Bani
+BNJ=/,Bounni
+BNJH/,bâtiment
+BNJHW/,vallée (des fils) de Hinnom
+BNJM/,champion
+BNJNW/,Beninou
+BNJ_BRQ/,Bené-Beraq
+BNJ_J<QN/,Bené-Yaaqân
+BNWJ/,Binnoui
+BN_>WNJ/,Ben-Oni
+BN_HDD/,vallée (des fils) de Hinnom
+BQ</,demi shèqel
+BQ<H/,vallée d'Aven
+BQ<[,se fendre
+BQBQ/,cruche
+BQBQJH/,Baqbouqya
+BQBQR/,Baqbaqqar
+BQBWQ/,Baqbouq
+BQCH/,requête
+BQC[,"chercher, rechercher"
+BQJ/,Bouqqi
+BQJ</,brèche
+BQQ[,ravager
+BQR/,bétail
+BQR=/,matin
+BQRH/,chercher
+BQRT/,enquête
+BQR[,chercher
+BR</,Bèra
+BR=/,propreté
+BR=====/,propreté
+BR>==[,créer
+BR>=[,créer
+BR>DK_BL>DN/,Merodak-Baladân
+BR>JH/,Beraya
+BR>[,créer
+BRBR/,oie
+BRC</,Birsha
+BRD/,grêle
+BRD=/,tacheté
+BRD==/,Bèred
+BRD===/,Bèred
+BRH=[,manger
+BRH[,manger
+BRJ/,Bikrites
+BRJ<H/,Beria
+BRJ<J/,Beriites
+BRJ>H/,quelque chose de nouveau
+BRJH/,nourriture
+BRJT/,"alliance, engagement, traité, accord"
+BRJT=/,"savon, lessive"
+BRJX/,traverse
+BRJX=/,Bariah
+BRJX==/,Bariah
+BRK/,genou
+BRK=[,faire accroupir
+BRK>L/,Barakel
+BRKH/,"bénédiction, louange"
+BRKH=/,"réservoir, bassin"
+BRKH==/,"bénédiction, louange"
+BRK[,faire accroupir
+BRQ/,"foudre, éclair"
+BRQ=/,"foudre, éclair"
+BRQNJM/,"épine, chardon, ronce"
+BRQT/,émeraude
+BRQT=/,émeraude
+BRQWS/,Barqos
+BRR[,tester
+BRWC/,cyprès
+BRWK/,Barouk
+BRWT/,nourriture
+BRXMJ/,Barhoumite
+BRX[,fuir
+BRZL/,fer
+BRZLJ/,Barzillaï
+BSJ/,Bésaï
+BSWDJH/,Besodya
+BT/,fille
+BT=/,fille
+BTH/,ravin
+BTH=/,désolation
+BTJH/,Bitya
+BTQ[,lacérer
+BTR/,morceau
+BTR=/,morceau
+BTRWN/,matinée
+BTR[,couper en moitiés
+BTW>L/,Betouel
+BTW>L=/,Betouel
+BTWLH/,"jeune fille, vierge"
+BTWLJM/,virginité
+BT_RBJM/,Bath-Rabbim
+BV>[,"parler à la légère, propos irréfléchis"
+BVN/,"ventre, entrailles, estomac, parties intimes"
+BVN=/,"ventre, entrailles, estomac, parties intimes"
+BVNH/,pistaches
+BVNJM/,Betonim
+BVX/,"confiant, insouciant, en sécurité, inattentif"
+BVX=/,"confiant, insouciant, en sécurité, inattentif"
+BVXH/,confiance
+BVXWN/,"confiance, espoir"
+BVXWT/,"confiance, sécurité"
+BW>[,exercer (ses) fonctions
+BWCH/,honte
+BWC[,avoir honte
+BWJ/,Bavvaï
+BWK[,être perplexe
+BWNH/,Bouna
+BWQH/,ravage
+BWQR/,bouvier
+BWR/,"source, puits"
+BWS[,se débattre
+BWY/,fin lin
+BWYY/,Bozez
+BWZH/,mépris
+BWZJ/,Bouzite
+BWZJ=/,Bouzite
+BXJR/,"choisi, élu"
+BXL[,détester
+BXN/,épreuve
+BXN=/,tour de guet
+BXN[,tester
+BXRJM/,Bahourim
+BXRJM=/,Bahourim
+BXR[,jeune homme
+BXWN/,essayeur
+BXWN=/,essayeur
+BXWR/,jeune homme
+BY/,boue
+BY</,gain injuste
+BYH/,marais
+BYJ/,Bétsaï
+BYJR/,"vendange, cueillette du raisin"
+BYJR=/,"vendange, cueillette du raisin"
+BYL/,oignon
+BYL>L/,Betsaleël
+BYQ/,pâte
+BYQT/,Botsqath
+BYQ[,enfler
+BYR=[,vendanger
+BYRT/,sécheresse
+BYRWN/,"forteresse, place forte"
+BYR[,vendanger
+BYWR/,vendanger
+BZ/,dépouille
+BZ>[,diviser
+BZH/,butin
+BZH[,déprécier
+BZJWN/,mépris
+BZJWTJH/,Bizyotya
+BZQ/,éclair
+BZQ=/,Bèzeq
+BZR[,distribuer
+BZT>/,Bizta
+BZZ[,dépouiller
+C<<=[,être aveugle
+C<<[,être aveugle
+C<CGZ/,Shaashgaz
+C<L/,creux de la main
+C<LBJM/,Shaalabbîn
+C<LBJN/,Shaalabbîn
+C<LBNJ/,de Shaalbôn
+C<LJM/,Shaalim
+C<N[,s'appuyer sur
+C<P/,Shaaf
+C<R==/,mauvais
+C<RJH/,Shearya
+C<RJM/,Shaaraïm
+C<VH/,estampillage
+C<VNZ/,tissu composé de différents fils
+C>B[,puiser (de l'eau)
+C>GH/,rugir
+C>G[,rugir
+C>JH/,gaspillage
+C>L/,Shéal
+C>LH/,demande
+C>LH=/,demande
+C>LTJ>L/,Shéaltiel
+C>NN/,à l'aise
+C>N[,être à l'aise
+C>P[,halètement
+C>R/,"chair, viande"
+C>R=/,"laisser en suspens, de côté"
+C>RH/,parent
+C>RH=/,Shèèra
+C>RJT/,"laisser en suspens, de côté"
+C>R[,"laisser en suspens, de côté"
+C>R_JCWB/,Shéar-Yashouv
+C>S[,dépouiller
+C>T/,gaspillage
+C>V/,dédain
+C>WL=/,Saül
+C>WLJ/,Saülite
+C>WN/,rugissant
+C>WN=/,rugissant
+CB</,sept
+CB<=/,sept
+CB<==/,sept
+CB<NH/,sept
+CB<[,prêter serment
+CB>/,Saba
+CBB/,éclats
+CBH[,captif
+CBJ<J/,septième
+CBJ=/,Chobi
+CBJB/,flamme
+CBJH=/,captivité
+CBJL/,chemin > conduite
+CBJS/,bandeau
+CBL/,jupe
+CBLT/,flux
+CBLWL/,escargot
+CBN>/,Chebna
+CBRJM/,carrières de pierre
+CBRWN/,briser les reins (de quelqu'un) > jambes faibles
+CBT/,"sabbat, (jour) du repos"
+CBT=/,session
+CBTJ/,Chabthaï
+CBTWN/,fête sabbatique
+CBT[,se terminer
+CBV/,bâton
+CBV=/,Shevat
+CBW/,agate
+CBW</,semaine
+CBW<H/,serment
+CBY/,angoisse
+CBY[,tisser des motifs
+CC>[,"conduire, mener"
+CCBYR/,Sheshbatsar
+CCH[,prendre un sixième
+CCJ/,sixième
+CCJ=/,Shéshaï
+CCJ==/,Shashaï
+CCK/,Shéshak
+CCN/,Shéshân
+CCQ/,Shashaq
+CCR/,vermillon
+CD==/,esprit
+CDH/,de nombreuses concubines
+CDJ/,Tout-Puissant
+CDJ>WR/,Chedéour
+CDMH/,terrain
+CDP[,"dessécher, brûler"
+CDRK/,Shadrak
+CFH[,prendre un sixième
+CG<WN/,folie
+CG<[,insensé
+CGGH/,péché involontaire
+CGG[,se tromper
+CGH[,s'égarer
+CGJ>H/,erreur
+CGJWN/,chant funèbre
+CGR/,première portée
+CGX[,regarder
+CHM/,onyx
+CHM=/,onyx
+CJ/,don
+CJ>N/,Chiôn
+CJC/,marbre blanc
+CJC>/,Shisha
+CJCQ/,Shishaq
+CJH[,négliger
+CJMWN/,Shimôn
+CJR[,chanter
+CJT/,épine
+CJT=/,prendre position
+CJT[,prendre position
+CJV/,fouet
+CJXH/,fosse
+CJXWR/,Shihor
+CJXWR_LBNT/,Chihor-Libnath
+CJZ>/,Shiza
+CKBH/,couche de rosée
+CKBT/,avoir des relations sexuelles
+CKB[,s'allonger
+CKK[,diminuer
+CKLJM/,faire une fausse couche
+CKL[,être privé d'enfants
+CKM/,épaule
+CKM=/,épaule
+CKM==/,épaule
+CKM===/,Shèkem
+CKMJ/,Shikemite
+CKM[,se lever tôt
+CKN[,s'installer
+CKR=/,alcool de dattes
+CKWL=/,privé de (ses) enfants
+CKWR/,ivre
+CKX[,oublier
+CL/,indiscrétion
+CL>NN/,à l'aise
+CLB/,cadre
+CLB[,être parallèle
+CLCH/,Shilsha
+CLCH=/,Shalisha
+CLCJM/,petits-enfants
+CLCWM/,auparavant
+CLC[,en trois fois
+CLG/,neige
+CLG=/,neige
+CLH=/,Shéla
+CLJ/,quiétude
+CLJC/,bol
+CLJC=/,bol
+CLJC==/,bol
+CLJH/,post-natal
+CLJV/,maître
+CLK/,balbuzard
+CLK[,jeter
+CLL/,butin
+CLM/,offrande de bien-être
+CLMH/,vengeance
+CLMH=/,Salomon
+CLMJ/,Shillémite
+CLMJ=/,Shelomi
+CLMJ>L/,Sheloumiel
+CLMJT/,Shelomith
+CLMN/,Shalmân
+CLMN>SR/,Salmanasar
+CLMWT/,Shelomoth
+CLM[,être terminé
+CLNJ/,Shélanite
+CLP/,Shèlef
+CLP[,arracher
+CLV/,bouclier
+CLVT/,effronté
+CLWH/,facilité
+CLWM/,complètement
+CLWM=/,vengeance
+CLWM==/,Shalloum
+CLWN/,Shalloum
+CLX===/,Siloé
+CLXJ/,Shilhi
+CLXJM/,Shilhim
+CLXJM=/,Shilhim
+CLXN/,table
+CLX[,envoyer (un messager vers quelqu'un)
+CM,là
+CM/,nom
+CM</,nouvelles
+CM<=/,sonore
+CM<==/,nouvelles
+CM<===/,sonore
+CM<====/,Shama
+CM<>/,"Shiméa, Shamma"
+CM<H/,Shemaa
+CM<H=/,Shiméah
+CM<J/,Shiméi
+CM<J=/,Shiméi
+CM<NJ/,Siméonite
+CM<T/,Shiméath
+CM<TJ/,Shiméatite
+CM<WN/,Siméon
+CM<[,entendre
+CM=/,nom
+CM>/,Shamma
+CM>BR/,Shèméver
+CM>H/,Shiméa
+CM>M/,Shiméam
+CMC/,le soleil
+CMCRJ/,Shamsheraï
+CMCWN/,Samson
+CMD[,détruire
+CMGR/,Shamgar
+CMHWT/,Shamhouth
+CMJ/,Shammaï
+CMJD</,Shemida
+CMJD<J/,Shemidaïte
+CMJM/,ciel
+CMJNJ/,huitième
+CMJRMWT/,Shemiramoth
+CMM/,être dévasté
+CMMWN/,horreur
+CMM[,être dévasté
+CMN/,huile
+CMN=/,engraissement
+CMN==/,fertile
+CMNH/,huit
+CMN[,être bien nourri
+CMRH/,paupière
+CMRJ/,Shimri
+CMRJM/,vigile
+CMRJT/,Shimrith
+CMRNJ/,Shimronite
+CMRT/,Shimrath
+CMRWN=/,Shimrôn
+CMRWN==/,Shimrôn
+CMRWN_MR>WN/,Shimrôn-Merôn
+CMR[,observer
+CMTJ/,Shoumatite
+CMVH/,remise
+CMV[,glisser
+CMW</,Shammoua
+CMW<H/,nouvelles
+CMW>L/,Samuel
+CMWT/,Shammoth
+CMY/,chuchotement
+CMYH/,"dérision, opprobre"
+CN/,dent
+CN<R/,Shinéar
+CN=/,dent
+CN>B/,Shinéav
+CN>N/,des milliers et des milliers
+CN>YR/,Shènatsar
+CNH/,an
+CNHBJM/,ivoire
+CNH[,être différent
+CNJ/,"deuxième, second"
+CNJ=/,écarlate
+CNJM/,deux
+CNJNH/,raillerie
+CNN=[,affûter
+CNN[,affûter
+CNS[,se ceindre les reins
+CP</,abondance
+CP<H/,abondance
+CP<J/,Shiféi
+CPJM/,Shouppim
+CPJPN/,vipère
+CPJR/,Shafir
+CPK/,lieu de déversement
+CPKH/,pénis
+CPK[,se déverser
+CPL/,faible
+CPLH/,de l'argent
+CPLH=/,Bas-Pays
+CPLWT/,paresse
+CPM/,Shefam
+CPM=/,Shafam
+CPMJ/,Shifmite
+CPN/,daman
+CPN=/,daman
+CPR/,beauté
+CPR=/,beauté
+CPV/,jugement
+CPV=/,Shafath
+CPVN/,Shiftân
+CPV[,juger
+CPWV/,jugement
+CPXH/,servante
+CQ<RWRH/,petits creux
+CQ<[,couler
+CQD/,amandier
+CQH[,être humidifié
+CQL/,shèqel
+CQMH/,sycomore
+CQP[,négliger
+CQQ[,se précipiter sur
+CQR/,trahison
+CQR[,agir faussement
+CQT/,abreuvoir
+CQV/,tranquillité
+CQV[,être tranquille
+CQWJ/,boisson
+CQWY/,détestable
+CQY/,chose abominable
+CQY[,se contaminer
+CR/,nombril
+CRB/,chaleur étouffante
+CRBJH/,Shérévya
+CRBJV/,sceptre
+CRC=/,racine
+CRH/,rangée de vigne
+CRJ/,Sharaï
+CRJR/,"tendon, muscle"
+CRQH/,sifflement
+CRQH=/,sifflement
+CRT/,service
+CRT[,servir
+CRWN/,Sharôn
+CRWNJ/,Sharonite
+CRWXN/,Sharouhèn
+CRY/,créature grouillante
+CS</,fente (sabot)
+CSH[,dépouiller
+CSP[,couper en morceaux
+CSS[,dépouiller
+CTH[,boire
+CTJH/,boire
+CTLXJ/,Shoutalhite
+CTM/,recevoir une vision
+CTN[,homme
+CTQ[,être immobile
+CTR/,Shétar
+CVH/,acacia
+CVJM/,Shittim
+CVP/,débit
+CVP[,s'écouler
+CVR[,fonctionnaire
+CVV/,fléau
+CVX[,se répandre
+CW<==/,appeler à l'aide
+CW<>/,Shoua
+CW<H/,crier à l'aide
+CW<L/,chacal
+CW<L=/,chacal
+CW<L==/,chacal
+CW<R/,guetteur
+CW>/,mensonge
+CWB=[,faire demi-tour
+CWBH/,retournement
+CWBL/,Shobal
+CWBQ/,Shobeq
+CWB[,faire demi-tour
+CWC>/,Chavcha
+CWCN/,lis
+CWCN=/,lis
+CWH/,Chavé
+CWH=/,Chavé
+CWL/,"traîne, ourlet"
+CWLL/,"dépouillé (de raison, de vêtements)"
+CWMJM/,ail
+CWMR/,Shomer
+CWNJ/,Shouni
+CWNJ=/,Shouni
+CWNM/,Shounem
+CWP=[,écraser
+CWPK/,Shophak
+CWPMJ/,Chouphamite
+CWPR/,trompe
+CWP[,écraser
+CWQ/,"cuisse, jambe, épaule (du bétail)"
+CWQ=/,déborder
+CWR/,tête de bétail
+CWRH/,rangée
+CWTLX/,Shoutèlah
+CWX/,Chouah
+CWXJ/,Shouhite
+CWXM/,Shouham
+CWXMJ/,Chouhamite
+CX/,humble
+CXD/,cadeau
+CXJN/,furoncle
+CXJT/,puits
+CXJVH/,battu
+CXL/,lion errant
+CXLT/,coquille odoriférante
+CXP/,mouette
+CXPT/,consomption
+CXQ/,[Glosses - fr]
+CXQ[,s'user
+CXR/,aube
+CXR=/,noir
+CXRJH/,Sheharya
+CXRJM/,Shaharaïm
+CXRWT/,cheveux noirs
+CXT/,puits
+CXT[,être ruiné
+CXWR/,"noirceur, suie"
+CXWT/,puits
+CXX[,s'affaiblir
+CXY/,lion
+CYP/,accablant
+CZP[,voir
+CZR[,filé
+D</,savoir
+D<H/,savoir
+D<K[,s'éteindre
+D<T/,savoir
+D<W>L/,Deouel
+D>BH/,effroi
+D>BWN/,faiblesse
+D>B[,être faible
+D>G/,Doëg
+D>GH/,peur
+D>H/,milan noir
+D>H[,fondre
+DB/,ours (brun de Syrie)
+DB>/,force
+DBB[,couler
+DBC/,miel
+DBH/,"rapport négatif, calomnie, ragot"
+DBLH/,"gâteau aux figues, cataplasme"
+DBLH=/,"Divla, Rivla"
+DBLJM/,Divlaïm
+DBQ/,attache
+DBQ=/,joint à
+DBQ[,se coller ensemble
+DBR/,parole
+DBR=/,peste
+DBR===/,peste
+DBRH/,cas
+DBRJ/,Divri
+DBRT/,Davrath
+DBRT=/,Davrath
+DBR[,exterminer
+DBWRH/,abeille
+DC>/,verdure
+DCN/,graisse
+DCN=/,engraisser
+DCN[,engraisser
+DD/,seins
+DDH[,mener une marche
+DDN/,Dedân
+DG/,poisson
+DGH/,poisson
+DGH[,foisonner
+DGL/,"bannière, étendard"
+DGN/,grain
+DGR[,couver
+DGWN/,Dagôn
+DHM[,être stupéfait
+DHRH/,galop
+DHR[,galoper
+DJ/,suffisance
+DJBN/,Dibôn
+DJC/,battage
+DJCN/,Dishân
+DJCWN=/,Addax
+DJG/,pêcheur
+DJH/,milan
+DJMWN/,Dimôn
+DJMWNH/,Dimona
+DJN=/,juge
+DJNH/,Dina
+DJQ/,mur de siège
+DJW/,encre
+DJ_ZHB/,Di-Zahav
+DK/,écrasé
+DK>/,écrasement
+DKJ/,ronflement
+DL/,porte
+DL<N/,Dil'ân
+DL=/,porte
+DLG[,sauter
+DLH/,étoffe tissée
+DLH=/,étoffe tissée
+DLH[,puiser de l'eau
+DLJ/,baquet
+DLJLH/,Dalila
+DLL[,baisser
+DLP/,égouttement
+DLPWN/,Dalfôn
+DLQT/,inflammation
+DLQ[,brûler
+DLT/,porte
+DLX[,remuer
+DM/,sang
+DM</,jus
+DM<H/,larmes
+DMCQ/,coussin
+DMFQ/,Damas
+DMH[,cesser
+DMMH/,silence
+DMM[,se tenir immobile
+DMN/,fumier
+DMNH/,Dimna
+DMWT/,similarité
+DN/,Dân
+DNH,Danna
+DNH/,Danna
+DNHBH/,Dinhava
+DNJ/,Danite
+DPJ/,calomnie
+DPQH/,Dofqa
+DPQ[,frapper
+DQ/,maigre
+DQ=/,rideau
+DQLH/,Diqla
+DQQ[,être réduit en poussière
+DQR/,transpercer
+DQR[,transpercer
+DR/,nacre
+DR>WN/,objet d'horreur
+DRC[,chercher
+DRD</,Darda
+DRDR/,épine
+DRK/,"chemin, route, voie"
+DRK[,marcher
+DRQWN/,Darqôn
+DRWM/,sud
+DRWR/,fluide
+DRWR=/,fluide
+DTN/,Dotân
+DTN=/,Datân
+DWB[,faire dépérir
+DWD/,"bien-aimé, amant"
+DWD=/,corbeille
+DWD==/,David
+DWDH/,tante paternelle
+DWDJ=/,mandragore
+DWDW/,Dodo
+DWG/,pêcheur
+DWGH/,pêche
+DWH/,femme qui a ses règles
+DWJ/,maladie
+DWJ=/,hébété
+DWKJPT/,huppe
+DWK[,piler
+DWMJH/,silence
+DWMM,silencieusement
+DWNG/,cire
+DWR/,demeure
+DWR=/,entasser
+DWX[,"laver, nettoyer"
+DWY[,sauter
+DXJ/,pousser
+DXN/,millet
+DXP[,être pressé
+DXQ[,bousculer
+F<JR/,bouc (à poil long)
+F<JR=/,bouc (à poil long)
+F<JR==/,bouc (à poil long)
+F<JR===/,bouc (à poil long)
+F<JR====/,Séir
+F<JRH/,chèvre (à poil long)
+F<JRH=/,chèvre (à poil long)
+F<R/,poil
+F<R=/,terreur
+F<R==/,terreur
+F<RH/,orge
+F<RH=/,cheveu
+F<RH==/,tempête
+F<RJM/,Seorim
+F>R/,levain
+F>T/,lever
+FB</,rassasié
+FB<=/,rassasié
+FB<==/,abondance
+FB<H/,satisfaction
+FB<[,être rassasié
+FBR/,espoir
+FDH/,"Champ des guetteurs, champ de Tsofim"
+FDJ/,"Champ des guetteurs, champ de Tsofim"
+FDJM/,Siddim
+FDRH/,rang
+FFWN/,joie
+FGB[,garder en sécurité
+FGWB/,Ségoub
+FH/,mouton
+FHD/,témoin
+FHDW/,Yegar-Sahadouta
+FHRNJM/,petites lunes
+FJ>/,hauteur
+FJ>N/,Syôn
+FJB/,"être gris, vieux"
+FJBH/,"être gris, vieux"
+FJD/,blanchir à la chaux
+FJD[,blanchir à la chaux
+FJG/,occupé
+FJM[,prendre position
+FJXH/,méditation
+FJX[,gémir
+FK/,épine
+FK=/,"abri, cabane, hutte"
+FKH/,harpon
+FKJH/,navire
+FKJN/,couteau
+FKJR/,loué
+FKL/,"perspicacité, prudence"
+FKL=[,réussir
+FKR/,récompense
+FKR=/,salaire
+FKR==/,récompense
+FKR[,se louer
+FKW/,Sékou
+FKWJ/,coq
+FLM>/,Salma
+FLMH/,manteau
+FLMH=/,manteau
+FLMWN/,Salmôn
+FLW/,caille
+FM>L/,côté gauche
+FM>LJ/,gauche
+FM>L[,aller à gauche
+FMJKH/,couverture
+FMLH/,manteau
+FMLH=/,Samla
+FMMJT/,gecko
+FMX/,joyeux
+FMXH/,joie
+FMX[,joyeux
+FN>H/,haine
+FN>[,haïr
+FNJ>/,haï
+FNJR/,Senir
+FPH/,lèvre
+FPM/,moustache
+FPMWT/,Sifmoth
+FPN[,recouvrir
+FQ/,sac
+FR/,commandant
+FR<[,s'étirer
+FR>YR/,Sarètsèr
+FRD/,stylet
+FRD=/,sorte de matière tissée
+FRD[,survivre
+FRG[,être entrelacé
+FRJ/,Saraï
+FRJD/,survivant
+FRJD=/,survivant
+FRJG/,sarment
+FRJN/,Siryôn
+FRK[,courir dans tous les sens
+FRP/,"(serpent) brûlant, vipère des pyramides"
+FRP=/,"(serpent) brûlant, vipère des pyramides"
+FRPH/,brûlant
+FRP[,brûler
+FRQ/,cépage de choix
+FRQ==/,cépage de choix
+FRQH/,cépage de choix
+FRV[,se faire du mal
+FRWG/,Seroug
+FRWK/,sandale-tong
+FRX/,Sèrah
+FTM[,recevoir une vision
+FV/,rebelle
+FVH[,"se retourner, se détourner"
+FVM[,avoir de la rancune (envers quelqu'un)
+FVN/,adversaire
+FWF[,se réjouir
+FWKH=/,Soko
+FWKTJ/,Soukkatien
+FWRH/,rangée
+FWX[,se déplacer
+FX/,pensées
+FXJP/,"planche, emboiserie"
+FXQ[,rire
+FXV[,presser
+FXW/,action de nager
+FXWQ/,rire
+G<C/,Gaash
+G<H/,Goa
+G<L/,"rejeter, exécrer, avoir en aversion"
+G<L=/,Gaal
+G<L[,"rejeter, exécrer, avoir en aversion"
+G<RH/,reproche
+G<R[,rabrouer
+G<TM/,Gatam
+G>/,"orgueilleux, arrogant"
+G>H/,"orgueilleux, arrogant"
+G>H=/,"orgueil, arrogance"
+G>H[,croître
+G>LH/,"rédemption, rachat"
+G>W>L/,Gueouel
+G>WH/,"augmentation, gonflement"
+G>WN/,fourré
+G>WT/,"augmentation, gonflement"
+GB</,Guèva
+GB<>/,colline
+GB<L/,en boutons
+GB<TJ/,Guivéatite
+GB<WN/,Gabaon
+GB=/,"mare, flaque"
+GB>/,"bassin, mare"
+GBH/,"haut, grand"
+GBH=/,"taille, hauteur"
+GBHWT/,"orgueil, arrogance"
+GBH[,"être grand, être haut"
+GBJ/,Gabbaï
+GBJ</,gobelet
+GBJ=/,Gabbaï
+GBJC/,cristal
+GBJM/,Guévim
+GBJR/,"seigneur, maître"
+GBJRH/,maîtresse
+GBL/,Guebal
+GBL=/,Guebal
+GBLJ/,Guiblite
+GBLT/,tresse
+GBL[,former la frontière
+GBN/,bossu
+GBNH/,fromage
+GBNN/,pic
+GBR/,homme
+GBR=/,homme
+GBR==/,héros
+GBRJ>L/,Gabriel
+GBR[,devenir puissant
+GBTWN/,Guibbetôn
+GBWL/,"frontière, territoire, mur, borne, rebord"
+GBWLH/,"frontière, territoire"
+GBWR/,héros
+GBWRH/,grandeur
+GBX/,chauve du front
+GBXT/,calvitie du front
+GCC[,tâtonner
+GCM/,pluie
+GCM=/,pluie
+GCM==/,pluie
+GCN/,Goshèn
+GCP>/,Guishpa
+GCWR/,Gueshour
+GCWRJ/,Gueshourite
+GD/,coriandre
+GD<M/,Guidéom
+GD<NJ/,Guidéoni
+GD<WN/,Gédéon
+GD<[,se casser
+GD=/,coriandre
+GD===/,coriandre
+GDD[,se couper
+GDJ/,chevreau
+GDJ==/,Gaddi
+GDJ>L/,Gaddiel
+GDJC/,"meule, gerbier"
+GDJH/,chevrette
+GDJH=/,chevrette
+GDL/,grandeur
+GDL==/,gland
+GDL===/,Guiddel
+GDLTJ/,Guiddalti
+GDL[,être grand
+GDP[,injurier
+GDR=/,Guèdèr
+GDR==/,Guedor
+GDRJ/,Guedérite
+GDRTJ/,Guedératite
+GDRTJM/,Guedérotaïm
+GDRWT/,Guedéroth
+GDWD/,bande de pillards
+GDWD=/,bande de pillards
+GDWDH/,scarification
+GDWLH/,grandeur
+GDWPH/,injure
+GG/,toit
+GHH/,bonne santé
+GHR[,se recroqueviller
+GJ>/,vallée (des fils) de Hinnom
+GJD/,tendon
+GJL/,"se réjouir, être content"
+GJL=/,"se réjouir, être content"
+GJLH/,joie
+GJLNJ/,Guilonite
+GJNT/,Guinath
+GJXWN/,Guihôn
+GJXZJ/,Guéhazi
+GL/,vague
+GL<D/,Galaad
+GL<D=/,Galéed
+GL<DJ/,Galaadite
+GL<[,exploser de colère
+GL==/,vague
+GLB/,barbier
+GLB</,Guilboa
+GLC[,dégringoler
+GLD/,peau
+GLGL/,roue
+GLGL==/,roue
+GLGLT/,crâne
+GLH/,cuvette
+GLH=/,Guilo
+GLH[,"découvrir l'oreille (de quelqu'un), ouvrir l'oreille (de quelqu'un)"
+GLJLH/,"région, district"
+GLJLWT/,Gueliloth
+GLJM/,Gallim
+GLJT/,Goliath
+GLJWN/,tablette
+GLLJ/,Guilalaï
+GLL[,rouler
+GLM/,fœtus
+GLMWD/,stérile
+GLWM/,manteau
+GLWT/,"exil, captivité"
+GLX[,se raser
+GM,aussi
+GM>/,papyrus
+GMD/,gomed
+GML/,chameau
+GMLJ/,Guemalli
+GMLJ>L/,Gamliel
+GML[,sevrer
+GMR/,Gomer
+GMR=/,Gomer
+GMRJH/,Guemarya
+GMWL/,actions
+GMWL=/,Gamoul
+GMWLH/,"actes, agissements"
+GMZW/,Guimzo
+GN/,jardin
+GNB/,voleur
+GNBH/,vol
+GNBT/,Guenoubath
+GNB[,voler
+GNH/,jardin
+GNN[,défendre
+GNTWN/,Guinnetôn
+GNZ/,trésor
+GNZK/,trésor
+GP/,corps
+GP=/,corps
+GPN/,vigne
+GPR/,"cyprès, cèdre"
+GPRJT/,soufre
+GR/,étranger
+GR<[,tondre
+GR=/,craie
+GR>/,Guéra
+GRB/,infection de peau
+GRB=/,Gareb
+GRC/,rendement
+GRCH/,expropriation
+GRCM/,Guershom
+GRCNJ/,Guershonite
+GRCWN/,Guershôn
+GRC[,balloter
+GRD[,se gratter
+GRF/,grain pilé
+GRGCJ/,Guirgashite
+GRGR/,olive
+GRH[,provoquer
+GRM/,os
+GRMJ/,Garmite
+GRM[,ronger
+GRN/,aire de battage
+GRP[,balayer
+GRR/,Guerar
+GRR[,entraîner
+GRS[,concasser
+GRWN/,gorge
+GRWT/,Guérouth Kimham
+GRZJM/,Garizim
+GRZN/,"hache, pioche"
+GRZ[,entraîner
+GTJ/,Guittite
+GTJM/,Guittaïm
+GTJT/,guittith
+GTR/,Guètèr
+GT_RMWN/,Gath-Rimmôn
+GW/,dos
+GW<[,"expirer, rendre son dernier souffle, périr"
+GW=/,jeter derrière (son) dos
+GW==/,dos
+GWC/,croûte
+GWD[,assaillir
+GWG/,Gog
+GWH/,fier
+GWH=/,fier
+GWJH/,"corps, cadavre, carcasse"
+GWLH/,"exil, captivité"
+GWLN/,Golân
+GWMY/,fosse
+GWNJ/,Gouni
+GWNJ=/,Gouni
+GWPH/,cadavre
+GWP[,fermer
+GWR/,immigrer
+GWR==[,immigrer
+GWRL/,sort
+GWR[,immigrer
+GWZL/,oisillon
+GWZN/,Gozân
+GWZ[,amener
+GXM/,Gaham
+GXR/,Gahar
+GXWN/,ventre
+GZ/,tonte
+GZ</,tronc
+GZBR/,trésorier
+GZH/,toison
+GZJT/,pierre taillée
+GZL/,vol
+GZL=/,vol
+GZLH/,objet volé
+GZL[,s'emparer de
+GZM/,sauterelle
+GZM=/,Gazzam
+GZR/,moitié
+GZR=/,moitié
+GZRH/,séparé
+GZRH=/,espace ouvert
+GZWNJ/,Guizonite
+GZZ/,Gazez
+GZZ[,tondre
+H>,vois
+H>=,vois
+H>X,Ha ha !
+HBR[,diviser > analyser
+HCM/,Hashem
+HCM<WT/,"nouvelles, rapport, rumeur"
+HD/,cris de joie
+HDD/,Hadad
+HDD<ZR/,Hadadèzèr
+HDH[,mettre (sa main)
+HDJ/,Hiddaï
+HDK[,piétiner
+HDM/,marchepied
+HDP[,pousser
+HDR/,majesté
+HDR=/,"gloire, splendeur"
+HDR==/,majesté
+HDRH/,majesté
+HDR[,"magnifique, glorieux"
+HDS/,myrte
+HDSH/,Hadassa
+HDW/,Inde
+HDWRM/,Hadoram
+HGH/,"grondement, murmure, soupir"
+HGH[,retirer
+HGJG/,murmure
+HGJWN/,méditation
+HGR/,Hagar
+HGRJ/,Hagrite
+HGRJ=/,Hagrite
+HGWT/,méditation
+HH,ah!
+HJ/,malheur
+HJ>,eux
+HJDD/,hourra
+HJK,comment ?
+HJKL/,palais
+HJLL/,"étoile du matin, du berger"
+HJMM/,Hémam
+HJMN/,Hémân
+HJN/,hîn
+HKRH/,partialité
+HKR[,maltraiter
+HL>H,en avant (dans le temps)
+HL>[,être éloigné
+HLJK/,pas
+HLJKH/,aller
+HLK/,coulée
+HLK[,aller
+HLL/,Hillel
+HLL[,"faire briller, irradier"
+HLM,ici
+HLMWT/,"marteau, maillet"
+HLM[,frapper
+HLWLJM/,louange
+HM,eux
+HM/,Ham
+HMH,eux
+HMH/,mugir
+HMH[,mugir
+HMJH/,son
+HMLH/,rugissement
+HMM[,lancer en panique
+HMN/,Haman
+HMN=/,Haman
+HMS/,broussailles
+HMWN,mugir
+HMWN/,mugir
+HMWNH/,Hamona
+HN</,Héna
+HNH=,elles
+HNH==,elles
+HNM/,vallée (des fils) de Hinnom
+HNXH/,remise (d'impôts)
+HPGH/,arrêt
+HPKH/,renverser
+HPKPK/,être tortueux dans son comportement
+HPK[,se tourner
+HR/,montagne
+HR=/,Hor
+HR>/,Hara
+HR>L/,foyer de l'autel
+HRG/,massacre
+HRGH/,carnage
+HRG[,massacrer
+HRH/,concevoir
+HRH[,concevoir
+HRJSH/,destruction
+HRM/,Horam
+HRMWN/,Harmôn
+HRN/,Harân
+HRRJ/,Hararite
+HRS/,destruction
+HRS[,être en ruine
+HRWRJ/,de Haror
+HSH[,être silencieux
+HTK/,Hatak
+HTT[,menacer
+HTWK/,fusion
+HW,hélas!
+HWC</,Hosée
+HWC<JH/,Hoshaya
+HWCM</,Hoshama
+HWDWH/,Hodva
+HWDWJH/,Hodawya
+HWH/,désastre
+HWH=/,désir
+HWH==/,désir
+HWHM/,Hoham
+HWJ,hélas !
+HWLLH/,folie
+HWLLWT/,folie
+HWMM/,Homam
+HWM[,trembler
+HWN[,considérer comme facile
+HWTJR/,Hotir
+HYLH/,délivrance
+HYN/,équipé
+HZH[,murmurer dans son sommeil
+J<BY/,Yaébets
+J<D[,être fixé
+J<FJ>L/,Yaasiel
+J<H/,pelle
+J<H[,balayer
+J<J>L/,Yeïel
+J<KN/,Yakân
+J<LH/,éterle
+J<LH=/,éterle
+J<LM/,Yaelam
+J<N/,parce que
+J<N=/,autruche
+J<NH/,hibou grand-duc
+J<NJ/,Yaénaï
+J<P/,épuisé
+J<P=/,vol
+J<QB/,Jacob
+J<QBH/,Yaaqova
+J<QN/,Yaaqân
+J<R/,forêt
+J<R=/,forêt
+J<R==/,forêt
+J<RCJH/,Yaarèshya
+J<RH==/,Yaara
+J<W>L/,Yeouel
+J<WC/,Yeoush
+J<WY/,Yeouts
+J<Y[,"planifier, comploter, concevoir, avoir un but."
+J<ZJ>L/,Yaaziel
+J<ZJHW/,Yaaziya
+J<ZR/,Yaezer
+J<Z[,être arrogant
+J>B[,désirer
+J>C[,renoncer à
+J>H[,convenir
+J>JR/,Yaïr
+J>R/,fleuve Nil
+J>R=/,fleuve Nil
+J>TRJ/,Yeatraï
+J>ZNJH/,Yaazanya
+JBB[,regarder
+JBC/,sécher
+JBCH/,terre sèche
+JBCT/,terre sèche
+JBC[,sécher
+JBFM/,Yivsam
+JBJN/,Yavîn
+JBL<M/,Yibléam
+JBLT/,verrue
+JBM/,beau-frère
+JBMT/,belle-sœur
+JBM[,s'acquiter de l'obligation de donner un héritier à son frère
+JBN>L/,Yavneël
+JBNH/,Yavné
+JBNJH/,Yivneya
+JBNJH=/,Yivniya
+JBQ/,Yabboq
+JBRKJHW/,Yevèrèkya
+JBWL/,récolte
+JBWS/,Jébus
+JBWSJ/,Jébusite
+JBXR/,Yivhar
+JC<J/,Yishéi
+JC<[,remporter la victoire
+JCB<M/,s'asseoir
+JCB>B/,Yèshèvéav
+JCBJ/,Yashouvite
+JCBJ=/,Yashouvite
+JCBJ_LXM/,Yashouvi-Lèhem
+JCBQ/,Yishbaq
+JCBQCH/,Yoshbeqasha
+JCBX/,Yishbah
+JCB[,s'asseoir
+JCC/,"âgé, décrépi"
+JCJ/,Jessé
+JCJC/,âgé
+JCJCJ/,Yeshishaï
+JCJMN/,désert
+JCJMWN/,désert
+JCM<>L/,Ismaël
+JCM<>LJ/,Ismaélite
+JCM>/,Yishma
+JCMRJ/,Yishmeraï
+JCM[,être déserté
+JCN/,dormir
+JCN=/,vieux
+JCN==/,dormir
+JCN=[,dormir
+JCNH/,Yeshana
+JCN[,dormir
+JCPH/,jaspe
+JCPH=/,Yishpa
+JCPN/,Yishpân
+JCR/,droit
+JCR=/,"droiture, honnêteté, sincérité, intégrité"
+JCR==/,Yésher
+JCRH/,"droiture, honnêteté, sincérité, intégrité"
+JCRWN/,Yeshouroun
+JCR[,redresser
+JCV[,maintenir
+JCW</,Yéshoua
+JCW<=/,Yéshoua
+JCW<H/,succès
+JCWB/,Yashouv
+JCWH/,Yishwa
+JCWJ/,Ishwi
+JCWJ=/,Ishwi
+JCWXJH/,Yeshohaya
+JCX/,vide
+JD/,main
+JD</,Yada
+JD<JH/,Yedaya
+JD<NJ/,esprit des morts
+JD<[,apprendre
+JD>LH/,Yidéala
+JDBC/,Yidbash
+JDDWT/,aimée
+JDD[,lancer
+JDH=[,confesser le nom (de Dieu)
+JDH[,confesser le nom (de Dieu)
+JDJ<>L/,Yediaël
+JDJDH/,Yedida
+JDJDJH/,Yedidya
+JDJH/,Yedaya
+JDLP/,Yidlaf
+JDW</,Yaddoua
+JDWN/,Yadôn
+JDWTWN/,Yedoutoun
+JDWTWN=/,Yedoutoun
+JFFKR/,Issakar
+JFJM>L/,Yesimiel
+JFR>L/,Israël
+JFR>LH/,Yesaréla
+JFR>LJ/,Israélite
+JG</,fatigué
+JG<=/,ce pour quoi on a travaillé
+JG<H/,"lassant, épuisant"
+JG<[,"devenir lassant, s'épuiser, se fatiguer, peiner"
+JG>L/,Yiguéal
+JGB/,champs
+JGBHH/,Yogbeha
+JGDLJHW/,Yigdalyahou
+JGJ</,"peine, labeur, dur travail"
+JGJ<=/,"las, épuisé, usé"
+JGLJ/,Yogli
+JGR/,Yegar-Sahadouta
+JGR[,craindre
+JGWN/,chagrin
+JGWR=/,Yagour
+JH/,Yah
+JHB/,fardeau
+JHB[,donner
+JHDJ/,Yahdaï
+JHJR/,présomptueux
+JHLL>L/,Yehallèlel
+JHLM/,diamant ?
+JHW<DH/,Yoadda
+JHW>/,Jéhu
+JHW>C/,Yoash
+JHW>XZ/,Yoakhaz
+JHWC</,Josué
+JHWCB</,Yoshèva
+JHWCPV/,Yehoshaphat
+JHWDH/,Juda
+JHWDJT/,Judith
+JHWH/,YHWH
+JHWJD</,Yoyada
+JHWJKJN/,Yoyakîn
+JHWJQJM/,Yoyaqim
+JHWJRJB/,Yoyariv
+JHWKL/,Yehoukal
+JHWNDB/,Yonadav
+JHWRM/,Yoram
+JHWSP/,Joseph
+JHWXNN/,Yohanân
+JHWYDQ/,Yotsadaq
+JHWZBD/,Yozavad
+JHY/,Yahats
+JJN/,vin
+JKJN/,Yakîn
+JKJNJ/,Yakinite
+JKL[,être en mesure de
+JKX[,régler les conflits
+JLD/,enfant
+JLDH/,fille
+JLDWT/,jeunesse
+JLJD/,descendant de
+JLL/,hurlement
+JLLH/,gémissement
+JLPT/,gale
+JLQ/,criquet
+JLQWV/,"sac (de berger), gibecière, besace"
+JLWD/,né
+JLWN/,Yalôn
+JM/,mer des Joncs
+JMJMH/,Yemima
+JMJN/,côté droit
+JMJN=/,côté droit
+JMJNJ/,Yaminite
+JMJNJ=/,Yaminite
+JML>/,Yimla
+JMLK/,Yamlek
+JMM/,mules
+JMN</,Imna
+JMNH/,Imna
+JMNJ/,droite
+JMN[,aller à droite
+JMRH/,Yimra
+JMR[,se vanter
+JMW>L/,Yemouel
+JNCWP/,chouette hulotte
+JNH[,opprimer
+JNJQH/,pousse
+JNQ[,téter
+JNWM/,Yanoum
+JNWX/,Yanoah
+JP<H/,splendeur
+JP<[,briller
+JPDJH/,Yifdeya
+JPH/,beau
+JPJ/,beauté
+JPJ</,Yafia
+JPJ<=/,Yafia
+JPLV/,Yafleth
+JPLVJ/,Yaflétite
+JPNH/,Yefounnè
+JPT/,Japhet
+JPTX/,Yiftah
+JPTX=/,Yiftah
+JPTX_>L/,vallée de Yiftah-El
+JPW/,Jaffa (Joppé)
+JPX/,expirer
+JQ<[,être disloqué
+JQB/,pressoir de Zeëv
+JQBY>L/,Yeqavtseël
+JQCN/,Yoqshân
+JQC[,attraper
+JQD<M/,Yoqdéam
+JQH/,Yaqé
+JQHH/,hommage
+JQJM/,Yaqim
+JQM<M=/,Yeqaméam
+JQMJH/,Yeqamya
+JQN<M/,Yoqnéam
+JQR/,précieux
+JQR=/,préciosité
+JQT>L/,Yoqteél
+JQVN/,Yoqtân
+JQWD/,brûler
+JQWM/,créatures
+JQWTJ>L/,Yeqoutiel
+JQY[,se réveiller
+JR<[,frémir
+JR>/,redouter
+JR>H/,crainte
+JR>JJH/,Yiriya
+JR>WN/,Yiréôn
+JR>[,redouter
+JRB/,Yarev
+JRB<L/,Yeroubbaal
+JRB<M/,Jéroboam
+JRBCT/,Yeroubbèsheth
+JRCH/,possession (de quelqu'un d'autre)
+JRCH=/,possession (de quelqu'un d'autre)
+JRC[,hériter
+JRD/,Yèred
+JRDN/,Jourdain
+JRD[,descendre
+JRJ<H/,"toile (de tente), tenture"
+JRJ<WT/,Yerioth
+JRJ>L/,Yeriel
+JRJBJ/,Yerivaï
+JRJXW/,Jéricho
+JRK/,cuisse
+JRKH/,arrière
+JRMJ/,Yerémaï
+JRMJH/,Yirmeyahou
+JRMWT/,Yarmouth
+JRMWT=/,Yarmouth
+JRP>L/,Yirpeél
+JRQ/,verdure
+JRQ<M/,Yorqéam
+JRQ=/,cracher
+JRQRQ/,verdâtre
+JRQWN/,pâleur
+JRQWN=/,Mé-Yarqôn
+JRQ[,cracher
+JRV[,prendre le droit chemin (pour quelque chose)
+JRW>L/,Yerouel
+JRWCLM/,Jérusalem
+JRWQ/,verdure
+JRWX/,Yaroah
+JRX</,Yarha
+JRX=/,lune
+JRXM/,Yeroham
+JRXM>L/,Yerahmeél
+JRXM>LJ/,Yerahmeélite
+JSD/,début
+JSKH/,Yiska
+JSK[,être frotté
+JSMKJHW/,Ismakya
+JSP[,être ajouté
+JSR[,discipliner
+JSWD/,fondement
+JSWDH/,fondement
+JTD/,"piquet, crochet"
+JTJR/,Yattir
+JTLH/,Yitla
+JTMH/,Yitma
+JTNJ>L/,Yatniel
+JTNN/,Itân
+JTR/,"subsistant, reste, vestige, survécu"
+JTR<M/,Yitréam
+JTR=/,"subsistant, reste, vestige, survécu"
+JTR==/,"subsistant, reste, vestige, survécu"
+JTR===/,Yattir
+JTRH/,possession
+JTRJ/,Yitrite
+JTRN/,Yitrân
+JTRT/,membrane (du foie)
+JTRW/,Jéthro
+JTRWN/,avantage
+JTR[,rester
+JTT/,Yeteth
+JTWM/,orphelin
+JVBH/,Yotva
+JVBTH/,Yotvata
+JVB[,"soigner, orner, améliorer"
+JVWR/,Yetour
+JW<>LH/,Yoéla
+JW<C/,Yoash
+JW<D/,Yoed
+JW<ZR/,Yoèzèr
+JW>B/,Joab
+JW>X/,Yoa
+JWB/,Yov
+JWBB/,Yovav
+JWBB=/,Yovav
+JWBL/,corne de bélier
+JWCBJH/,Yoshivya
+JWCB_XSD/,Youshav-Hèded
+JWCH/,Yosha
+JWCWJH/,Yoshavya
+JWKBD/,Yokébed
+JWM/,jour
+JWMM,par jour
+JWN/,boue
+JWN=/,Yavân
+JWNH/,pigeon
+JWNJ/,Yavanite
+JWNQ/,rejeton
+JWNQT/,rejeton
+JWQJM/,Yoqim
+JWRH/,archer
+JWRJ/,Yoraï
+JWSPJH/,Yosifya
+JWTM/,Yotam
+JWTR/,restant
+JWVH/,Youtta
+JWX>/,Yoha
+JXDJ>L/,Yahdiel
+JXDJHW/,Yèhdeya
+JXDW/,Yahdo
+JXD[,s'unir
+JXF/,livre de généalogie
+JXJ>L/,Yehiel
+JXJ>LJ/,Yehiéli
+JXJD/,unique
+JXJH/,Yehiya
+JXJL/,en attendant
+JXL>L/,Yahleël
+JXL>LJ/,Yahleélite
+JXMJ/,Yahmaï
+JXMWR/,daim
+JXM[,être en chaleur
+JXP/,pieds-nus
+JXT/,Yahath
+JXY>L/,Yahtseël
+JXY>LJ/,Yahtseélite
+JXZJ>L/,Yahaziel
+JXZJH/,Yahzeya
+JXZQ>L/,Yehezqel
+JXZQJH/,Yehizqiya
+JXZRH/,Yahzéra
+JY<[,étendre (comme lit)
+JY>[,sortir
+JYB[,se tenir
+JYG[,placer
+JYHRJ/,Yitseharite
+JYQH/,"couler, fondre"
+JYQ[,couler
+JYR/,ce qui est formé
+JYR=/,ce qui est formé
+JYT[,incendier
+JYXQ/,Isaac
+JZ</,transpiration
+JZJH/,Yizziya
+JZJZ/,Yaziz
+JZLJ>H/,Yizlia
+JZR<>L=/,Yizréel
+JZR<>LJ/,Yizreélite
+JZRX/,Izrahite
+JZRXJH/,Izrahya
+K<S/,"s'irriter, être en colère"
+K<S[,"s'irriter, être en colère"
+K>B/,blessure
+K>B[,être blessé
+KBC/,marchepied
+KBCN/,"fournaise, fourneau"
+KBC[,être soumis
+KBD/,lourd
+KBD=/,lourd
+KBD==/,poids
+KBDT/,lourdeur
+KBD[,être lourd
+KBF/,agneau
+KBFH/,agnelle
+KBH[,être éteint
+KBJR/,puissant
+KBL/,entraves
+KBR/,Kevar
+KBR=/,Kevar
+KBS[,se laver
+KBWD/,"honneur, pouvoir, dignité"
+KBWDH/,grandeur
+KBWL/,Kaboul
+KBWN/,Kabbôn
+KCJL/,hache
+KCLWN/,échouer
+KCL[,trébucher
+KCP/,sorcellerie
+KCP=/,enchanteur
+KCP[,pratiquer la magie
+KCRWN/,succès
+KCR[,"être juste, approprié"
+KD/,jarre
+KDKD/,rubis
+KDRL<MR/,Kedor-Laomèr
+KFB/,agneau
+KFBH/,jeune brebis
+KFD/,Kèsed
+KFDJ/,Chaldéens
+KFDJM/,Chaldéens
+KFH[,"devenir gros, gras"
+KHH/,(son) courage fait défaut
+KHH=/,affaiblissement
+KHN/,prêtre
+KHNH/,sacerdoce
+KHN[,exercer la prêtrise
+KJCWR/,quenouille
+KJD/,calamité
+KJDWD/,étincelle
+KJDWN/,javelot
+KJDWR/,attaque
+KJLJ/,escroc
+KJLP/,pied-de-biche
+KJMH/,Pléiades
+KJR/,"four, fournaise"
+KJS/,bourse
+KJWN/,Kiyyoun
+KJWR/,chaudron
+KKH,ainsi
+KKR/,miche
+KL>/,prison
+KL>B/,Kiléav
+KL>JM/,deux sortes (de chose)
+KL>[,"emprisonner, enfermer"
+KLB/,chien
+KLB=/,Caleb
+KLBJ/,Calébite
+KLH/,belle-fille
+KLH=/,être terminé
+KLH==/,faible
+KLJ/,objet
+KLJH/,"rognon, rein"
+KLJL/,"être parfait, en entier, complètement"
+KLJWN/,destruction complète
+KLKL/,Kalkol
+KLL/,Kelal
+KLMD/,Kilmad
+KLMH/,honte
+KLMWT/,honte
+KLM[,avoir honte
+KLNH/,Kalné
+KLWBJ/,Kelouvaï
+KMHM/,Kimham
+KMH[,languir (après quelqu'un)
+KMN/,cumin
+KMR[,être brûlant
+KMS[,conserver > garder (à l'esprit)
+KMW,"feu, fournaise (du jugement de Dieu)"
+KMWC/,Kemosh
+KN,position
+KN/,position
+KN<H/,chargement
+KN<N/,Canaan
+KN<NH/,Kenaana
+KN<NJ/,Canaan
+KN<NJ=/,Canaan
+KN<[,s'humilier
+KN=/,position
+KN==/,position
+KNH/,branche
+KNNJ/,Kenani
+KNNJH/,Kenanya
+KNP/,aile
+KNRT/,Kinnèreth
+KNS[,se réunir
+KNT/,collègue
+KNWR/,petite lyre
+KP/,"paume, main"
+KP=/,rocher
+KPC[,faire reculer
+KPH/,branche de palmiers
+KPJRH/,Kefira
+KPJS/,ouvrage en stuc
+KPL/,double
+KPL[,plier en deux
+KPN/,faim
+KPP[,s'incliner
+KPR==/,village
+KPRJM/,expiation
+KPRT/,couvercle (de l'arche de l'alliance)
+KPR[,recouvrir
+KPTRJ/,Kaftorites
+KPTWR/,bouton
+KPWR/,cuvette
+KPWR=/,cuvette
+KR/,agneau
+KR<JM/,os des jambes
+KR<[,s'effondrer
+KR=/,kor
+KR==/,agneau
+KR===/,agneau
+KRBL[,être habillé
+KRCN>/,Karshena
+KRF/,estomac
+KRH/,festin
+KRJ/,Karite
+KRJT/,Kerith
+KRJTWT/,divorce
+KRKB/,rebord
+KRKMJC/,Karkemish
+KRKRH/,dromadaire
+KRKS/,Karkas
+KRM/,vigne
+KRM=/,vigneron
+KRMJ/,Karmi
+KRMJ=/,Karmi
+KRMJL/,cramoisi
+KRML/,grain nouveau
+KRML=/,grain nouveau
+KRML==/,grain nouveau
+KRMLJ/,de Karmel
+KRN/,Kerân
+KRPS/,coton
+KRR[,danser
+KRSM[,ravager
+KRTJ/,Kerétite
+KRT[,couper
+KRWB/,chérubin
+KRWB=/,chérubin
+KS>=/,pleine lune
+KSH[,couvrir
+KSJLWT/,"folie, sottise"
+KSL/,"rein, flanc, lombe"
+KSL=/,"rein, flanc, lombe"
+KSLH/,confiance
+KSLT_TBR/,Kisloth-Tabor
+KSLW/,Kislev
+KSLWN/,Kesalôn
+KSLWN=/,Kislôn
+KSLXJM/,"Kaslouhim, Kaslouhites"
+KSMT/,"épeautre, amidon"
+KSM[,couper
+KSP/,argent
+KSPJ>/,Kasifya
+KSP[,désirer
+KSS[,faire un calcul
+KST/,bandelette
+KSWJ/,couverture
+KSWLT/,Kesouloth
+KSWT/,preuve d'innocence
+KSX[,couper
+KTBT/,tatouage
+KTB[,écrire
+KTC[,marteler
+KTJ/,Kittim
+KTJT/,pressé
+KTL/,mur
+KTLJC/,Kitlish
+KTM/,or
+KTNT/,tunique
+KTP/,épaule
+KTR/,"couronne, diadème"
+KTRT/,chapiteau
+KTR[,attendre
+KTT[,écraser
+KWB/,Kouv
+KWB</,casque
+KWC/,Koush
+KWC=/,Koush
+KWCJ/,Koushite
+KWCN/,Koushân
+KWCN_RC<TJM/,Koushân-Rishéatayim
+KWCRH/,sécurité
+KWH/,être roussi
+KWH[,être roussi
+KWJH/,brûlure
+KWKB/,étoile
+KWL[,retenir
+KWMZ/,pendentif
+KWN/,galettes sacrées
+KWN=/,être en place
+KWN[,être en place
+KWR/,"creuset, fourneaux"
+KWS/,coupe
+KWS=/,coupe
+KWT/,Kouth
+KX/,force
+KX=/,force
+KXC/,maigreur
+KXC=/,mensonge
+KXC[,"maigrir, s'émacier."
+KXD[,être caché
+KXL[,se maquiller
+KZB/,"mensonge, fausseté"
+KZB>/,Kozéva
+KZBJ/,Kozbi
+KZB[,mentir
+KZJB/,Keziv
+L</,gorge
+L<B[,se moquer
+L<DH/,Laada
+L<DN/,Ladân
+L<G/,raillerie
+L<G=/,moqueur
+L<NH/,armoise
+L<V[,laisser engloutir (de grandes quantités de nourriture)
+L<Z[,parler une langue étrangère
+L>,pas
+L>H/,Léa
+L>L/,Laël
+L>M/,peuplade
+L>MJM/,Leoummim
+L>_<MJ/,Lo-Ammi
+L>_DBR/,pas
+L>_RXMH/,Lo-Rouhama
+LB/,cœur
+LB>WT/,Levaoth
+LBB/,cœur
+LBC[,"habillé, paré"
+LBH/,flamme
+LBH=/,cœur
+LBN=[,blanchir
+LBNH/,brique
+LBNH=/,encens
+LBNH==/,peuplier blanc
+LBNH====/,Livna
+LBNJ/,Livni
+LBNJ=/,Livni
+LBNWN/,Liban
+LBV[,échouer
+LBWC/,"vêtements, habits, robes"
+LC</,Lèsha
+LCD/,gâteau
+LCKH/,pièce
+LCM/,hyacinthe
+LCM=/,hyacinthe
+LCWN/,langue
+LD/,Lod
+LG/,log
+LHB/,flamme
+LHBH/,flamme
+LHBJM/,Lehavim
+LHD/,Lahad
+LHG/,étude
+LHM[,gourmandises
+LHQH/,groupe
+LHV/,flamme
+LHVJM/,eux
+LHV[,brûler
+LJC/,Laïsha
+LJC=/,Laïsha
+LJC==/,Laïsha
+LJH/,"couronne, torsade"
+LJL/,nuit
+LJLH/,nuit
+LJLJT/,hulotte
+LJY[,insolent
+LKD/,capture
+LKD[,attraper
+LKH/,Léka
+LKJC/,Lakish
+LL>T/,"boucle, lacet"
+LMD/,apprendre
+LMD[,apprendre
+LMK/,Lamek
+LMW>L/,Lemouel
+LPJD/,torche
+LPJDWT/,Lappidoth
+LPT[,toucher
+LQC/,semis tardif
+LQQ[,lapper
+LQV/,glanage
+LQV[,cueillir
+LQWM/,Laqqoum
+LQX/,enseignement
+LQXJ/,Liqhi
+LQX[,s'enflammer
+LTK/,létek
+LV/,tranquillement
+LV=/,ladanum
+LV>H/,lézard
+LVC[,marteler
+LVWCJM/,Letoushim
+LWBJ/,Lybien
+LWC[,pétrir
+LWD/,Loud
+LWDJM/,Loudim
+LWH=[,rejoindre
+LWH[,rejoindre
+LWJ/,Lévi
+LWJ=/,Lévi
+LWJH/,"couronne, guirlande"
+LWJTN/,léviathan
+LWL/,escalier en colimaçon
+LWVN/,Lotân
+LWX/,"plaque, planche"
+LWXC/,Lohesh
+LWXJT/,Louhith
+LX/,vigueur
+LX=/,frais
+LXC/,chuchotant
+LXJ/,mâchoire
+LXJ=/,mâchoire
+LXJ_R>J/,Béer-Lahaï- Roï
+LXK[,lapper
+LXM/,pain
+LXM=/,"combattant, combat"
+LXM=[,manger
+LXMJ/,Lahmi
+LXMJ=/,Lahmi
+LXMS/,Lahmas
+LXM[,manger
+LXWM/,chair
+LXY/,oppression
+LXY[,se serrer
+LYWN/,raillerie
+LZ,ceci
+LZH,ceci
+LZWT/,déviance
+M<BH/,moule
+M<DJ/,Maadaï
+M<DJH/,Maadya
+M<DN/,gourmandises
+M<DR/,"houe, binette"
+M<FH/,acte
+M<FJ/,Massaï
+M<FR/,un dixième
+M<GL/,trace
+M<GL=/,trace
+M<J=/,Maaï
+M<JL/,"robe, manteau, pèlerine"
+M<JN/,source
+M<KTJ/,Maakatite
+M<K[,tripoter
+M<L==/,soulèvement
+M<LH/,Gour
+M<LH=/,monter
+M<LL/,contrat
+M<MD/,bureau
+M<MSH/,lourde pierre
+M<NH/,lieu d'habitation
+M<NH=/,réponse
+M<NH==/,sillon
+M<NH===/,réponse
+M<QH/,parapet
+M<R/,espace vide
+M<RH/,grotte
+M<RH=/,espace ouvert
+M<RH==/,grotte
+M<RH===/,grotte
+M<RK/,plans
+M<RKT/,rangée
+M<RT/,Maarath
+M<RYH/,terreur
+M<V/,peu
+M<VH/,habit
+M<VH=/,habit
+M<V[,devenir rare
+M<WG/,"quelque chose de cuit, de cuisiné"
+M<WK/,Maok
+M<WN/,lieu d'habitation
+M<WNJ/,Meounim
+M<WNTJ/,Meonotaï
+M<WP/,noirceur
+M<WR/,nudité
+M<WZ/,"forteresse, refuge"
+M<Y/,Maats
+M<YBH/,douleur
+M<YD/,"hache, herminette, ciseau"
+M<YWR/,maîtrise de soi
+M<ZJH/,Maazyahou
+M>BWS/,grenier
+M>H/,cent
+M>H=/,cent
+M>KL/,nourriture
+M>KLT/,couteau
+M>KLT=/,nourriture
+M>MY/,effort
+M>N[,refuser
+M>PH/,= une chose cuite (au four)
+M>PL/,obscurité
+M>PLJH/,obscurité
+M>RB/,embuscade
+M>RH/,maudire
+M>R[,blesser
+M>S=[,rejeter
+M>S[,rejeter
+M>WM/,imperfection
+M>WMH/,quelque chose
+M>WR/,luminaire
+M>WRH/,trou
+M>ZNJM/,balance
+MBDLH/,"mis à part, réservé"
+MBFM/,Mivsam
+MBLJGJT/,grimace
+MBNH/,ensemble
+MBNJ/,Mevounnaï
+MBRX/,fugitif
+MBV/,espoir
+MBV>/,"expression, parole impétueuse"
+MBVX/,confiance
+MBW</,fontaine
+MBW>/,venue
+MBWKH/,désarroi
+MBWL/,"inondation, déluge"
+MBWQH/,vide
+MBWSH/,piétinement
+MBXR/,être choisi
+MBXR=/,être choisi
+MBXWR/,être choisi
+MC/,Mash
+MC<J/,lavage
+MC<M/,Mishéam
+MC<NH/,"bâton, sceptre"
+MC<NT/,"bâton, sceptre"
+MC<WL/,chemin
+MC>/,dette
+MC>=/,Mésha
+MC>B/,point d'eau
+MC>H/,emprunt
+MC>L/,Mishéal
+MC>LH/,requête
+MC>RT/,bol à pétrir
+MC>WN/,tromperie
+MCBR/,déferlante
+MCBT/,fin
+MCBYWT/,fixé
+MCC[,sentir
+MCGH/,erreur
+MCH/,prêt
+MCH=/,Moïse
+MCJ/,étoffe précieuse
+MCJX/,oint
+MCJZB>L/,Meshézavéel
+MCKB/,repos
+MCKN/,"résidence, maison"
+MCK[,être élancé
+MCL/,dicton
+MCL=/,ressemblance
+MCL==/,ressemblance
+MCL===/,dicton
+MCLM/,Meshoullam
+MCLMJT/,Meshillémith
+MCLMT/,Meshoullèmeth
+MCLMWT/,Meshillémoth
+MCLXT/,décharge
+MCL[,être comme
+MCM<T/,sujets
+MCMH/,désolation
+MCMN/,fertile
+MCMNH/,Mishmanna
+MCMR/,détention
+MCMRT/,garder
+MCNH/,double
+MCPTJM/,"bergerie, parc (à moutons)"
+MCPV/,procès
+MCPXH/,genre
+MCPXT/,genre
+MCQ/,héritier
+MCQ</,eau limpide
+MCQ=/,se précipiter sur
+MCQD/,en forme d'amande
+MCQH/,rafraîchissement
+MCQL/,poids
+MCQLT/,fil à plomb
+MCQWL/,peser
+MCQWP/,linteau
+MCR<J/,Mishraïte
+MCRH/,jus
+MCTH/,boire
+MCVR/,fonctionnaire
+MCVWX/,terrain de séchage
+MCWBB/,Meshovav
+MCWBH/,défection
+MCWGH/,erreur
+MCWV/,rame
+MCXJT/,destruction
+MCXR/,aube
+MCXT/,arme de destruction
+MCX[,oindre
+MD/,vêtement
+MD</,connaissance
+MD<=/,connaissance
+MDBR/,steppe
+MDBR=/,steppe
+MDCH/,"ce qui est battu, foulé"
+MDD[,mesurer
+MDHBH/,audace
+MDJ/,Madaï
+MDJ=/,Madaï
+MDJN==/,Middîn
+MDJNH/,district
+MDJNJ/,Madianite
+MDKH/,mortier
+MDMN/,Madmén
+MDMNH==/,Madmanna
+MDMNH===/,Madmanna
+MDQRH/,poignarder
+MDRC/,récit
+MDRGH/,falaise
+MDRK/,empreinte
+MDW/,vêtement
+MDW<,pourquoi ?
+MDWH/,maladie
+MDWRH/,tas
+MDXH/,pousser
+MDXPH/,rapidement
+MF>==/,partialité
+MF>H/,s'élevant (fumée)
+MF>T/,porter la responsabilité
+MFGB/,forteresse
+MFKJL/,maskil
+MFKJT/,image en pierre
+MFKRT/,récompense
+MFPX/,croûtes
+MFRH/,gouverner
+MFRPWT_MJM/,Misrefoth-Maïm
+MFRQH/,Masréqa
+MFRT/,poêle
+MFVMH/,rancune
+MFWF/,joie
+MFWKH/,haie d'épines
+MFWR/,scie
+MFWRH/,mesure (de liquides)
+MFXQ/,se moquer
+MG<RT/,reprocher
+MGB<H/,turban
+MGBJC/,Magbish
+MGBLT/,torsadé
+MGD/,choix
+MGDJ>L/,Magdiel
+MGDL/,tour
+MGDL=/,tour
+MGDL_<DR/,Migdal-Éder
+MGDL_>L/,Migdal-El
+MGDL_GD/,Migdal-Gad
+MGDNWT/,choses de valeur
+MGDW/,Meguiddo
+MGDWL/,tour
+MGL/,faucille
+MGN/,bouclier
+MGN=/,bouclier
+MGNH/,insolence
+MGN[,donner
+MGPH/,"coup, peste, défaite"
+MGPJ<C/,Magpiash
+MGRC/,prairie
+MGRH/,"rabot, lime (à pierre)"
+MGRPH/,motte
+MGRWN/,Migrôn
+MGWG/,Magog
+MGWRH=/,"grange, grenier"
+MGZRH/,hache
+MH,quoi ?
+MHH[,attendre
+MHJR/,rapide
+MHJVB>L/,Mehétaveél
+MHLL/,"louange, remerciement"
+MHLL>L/,Mahalalel
+MHL[,être mélangé
+MHPKH/,renverser
+MHPKT/,entrave
+MHR/,dot
+MHRH/,rapidement
+MHRJ/,Mahraï
+MHR_CLL_XC_BZ/,Maher-Shalal Hash-Baz
+MHWMH/,être bouleversé
+MHWMN/,Mehoumân
+MJ,qui?
+MJC</,Mésha
+MJC<=/,Mésha
+MJC>/,Mésha
+MJC>L/,Mishaël
+MJCK/,Méshak
+MJCWR/,plaine
+MJDB>/,Médeva
+MJDD/,Médad
+MJK>/,Mika
+MJK>L/,Mikaël
+MJKH/,Mika
+MJKJH/,Mikaya
+MJKJHW/,"Mika, Mikayehou"
+MJKJHW=/,Mikayahou
+MJKL/,Mikal
+MJKL=/,qui?
+MJM/,eau
+MJMN/,Miyamîn
+MJN/,espèce
+MJNQT/,téter
+MJP<T/,Méfaath
+MJTR/,"corde, cordage"
+MJVB/,mieux
+MJY/,pression
+MJ_ZHB/,Mé-Zahav
+MKBNJ/,Makbannaï
+MKBR/,grillage
+MKBR=/,grillage
+MKCLH/,ruine
+MKCWL/,pierre d'achoppement
+MKH/,coup
+MKJ/,Maki
+MKJR/,Makir
+MKJRJ/,Makirite
+MKK[,s'enfoncer
+MKLL/,perfection
+MKLT/,nourriture
+MKLWL/,parfaire
+MKMR/,filet
+MKMRT/,filet de jet (épervier)
+MKMS/,Mikmas
+MKMTT/,Mikmetath
+MKNDBJ/,Maknadevaï
+MKNH/,Mekona
+MKNS/,caleçon
+MKPLH/,Makpéla
+MKR/,articles
+MKR=/,connaissance
+MKRH/,épée
+MKRH=/,fosses salines
+MKRJ/,Mikri
+MKRTJ/,Mekératite
+MKR[,vendre
+MKS/,proportion
+MKSH/,toit
+MKSH=/,enveloppe
+MKSH==/,proportion
+MKTB/,écrire
+MKTC/,mortier
+MKTH/,fragments
+MKTM/,miktam
+MKWH/,brûlure
+MKWN/,lieu
+MKWNH/,lieu
+MKWRH/,origines
+ML>/,être plein
+ML>=/,groupe
+ML>H/,"produit complet, entier"
+ML>H=/,sertissure
+ML>JM/,sertissure
+ML>K/,messager
+ML>KH/,travail
+ML>KJ/,Malachie
+ML>KWT/,message
+ML>T/,cadre
+MLBN/,"moule à brique, four à brique"
+MLBWC/,"vêtements, habits, robes"
+MLH/,mot
+MLJLH/,épi de céréale
+MLJYH/,moquerie
+MLK/,roi
+MLK=/,Molek
+MLK==/,roi
+MLKDT/,piège
+MLKH/,reine
+MLKH=/,Milka
+MLKJ>L/,Malkiel
+MLKJ>LJ/,Malkiélite
+MLKJRM/,Malkiram
+MLKJ_YDQ/,Melkisédeq
+MLKT/,Reine du ciel
+MLKT=/,Ha-Molèketh
+MLKWT/,royauté
+MLLJ/,Milalaï
+MLL[,(se) flétrir
+MLMD/,aiguillon
+MLQWC/,pluie tardive
+MLQ[,pincer
+MLTXH/,garde-robe
+MLV/,mortier
+MLVJH/,Melatya
+MLV[,fuir
+MLW>/,Beth-Millo
+MLWKH/,royauté
+MLWN/,campement
+MLWNH/,cabane
+MLWTJ/,Malloti
+MLWX/,arroche marine
+MLX/,sel
+MLX=/,marin
+MLX==/,sel
+MLXH/,terre salée
+MLXMH/,guerre
+MLYR/,gardien
+MLY[,être agréable
+MMCL/,gouverner
+MMCLH/,gouverner
+MMCLT/,gouverner
+MMCQ/,possession
+MMCX/,oindre
+MMD/,mesure
+MMGRH/,"grange, grenier"
+MMKR/,vendre
+MMKRT/,vendre
+MMLKH/,royauté
+MMLKT/,royauté
+MMLKWT/,royauté
+MMR/,amertume
+MMR>/,Mamré
+MMR>=/,Mamré
+MMSK/,vin mélangé
+MMWKN/,Memoukân
+MMZR/,bâtard
+MN/,manne
+MN<L/,barre
+MN<WL/,verrou
+MN<[,retenir
+MN=,manne
+MN=/,cordes
+MN==/,cordes
+MNCH/,Manassé
+MNCJ/,Manassite
+MNGJNH/,chanson moqueuse
+MNH/,compter
+MNH=/,mine
+MNH==/,heure
+MNHG/,conduisant
+MNHRH/,caverne
+MNH[,compter
+MNJ/,Destin
+MNJ=/,Minni
+MNJMJN/,Minyamîn
+MNJT/,Minnith
+MNQJT/,récipient de libation
+MNT/,part
+MNWD/,secousse de la tête > moquerie
+MNWN/,héritier
+MNWR/,"ensouple de tisserand, bobine"
+MNWRH/,chandelier
+MNWS/,vol
+MNWSH/,vol
+MNWX/,lieu de repos > tranquillité d'esprit
+MNWXH/,lieu de repos > tranquillité d'esprit
+MNXH/,cadeau
+MNXM/,Menahem
+MP/,Memphis
+MP<L/,action
+MPF<H/,fesses
+MPG</,cible
+MPJBCT/,Mefivosheth
+MPJM/,Mouppim
+MPJY/,massue
+MPL/,déchets
+MPLF/,déploiement
+MPLGH/,regroupement
+MPLH/,éboulis
+MPLT/,carcasse
+MPLV/,refuge
+MPLYT/,horrible idole
+MPQD/,recensement
+MPRF/,voile
+MPRQT/,(os du) cou
+MPRY/,débarcadère
+MPTN/,seuil
+MPTX/,clé
+MPTX=/,paroles prononcées
+MPX/,soufflets
+MPX=/,expiration
+MPY/,"gourdin, massue"
+MPY=/,"gourdin, massue"
+MQ/,pourriture
+MQCH/,métal martelé
+MQCH=/,métal martelé
+MQCH==/,coiffure élaborée
+MQDC/,part consacrée
+MQDH/,Maqqéda
+MQHL/,assemblée
+MQHLT/,Maqhéloth
+MQL/,branche
+MQL<T/,"sculpture, gravure"
+MQLV/,refuge
+MQLWT/,Miqloth
+MQNH/,possession
+MQNH=/,achat
+MQNJHW/,Miqnéya
+MQQ[,pourrir
+MQR>/,rassemblement
+MQRH/,"accident, hasard"
+MQRH=/,"charpente, toit, combles"
+MQRH==/,fraîcheur
+MQSM/,divination
+MQVR/,embraser
+MQVRT/,encensoir
+MQWH=/,"réservoir, citerne"
+MQWM/,lieu
+MQWR/,source
+MQX/,recevoir
+MQY/,Maqats
+MQY<H/,"ciseau, rabot"
+MQYW</,"coin, angle"
+MR/,goutte
+MR</,ami
+MR<=/,agir méchamment
+MR<H/,pré
+MR<JT/,pré
+MR<LH/,Maréala
+MR=/,goutte
+MR==/,myrrhe
+MR>H/,apparence
+MR>H=/,vision
+MR>H==/,jabot
+MRB/,Mérab
+MRBH=/,"beaucoup, plusieurs, nombreux"
+MRBJT/,la majeure partie
+MRBQ/,étable
+MRBY/,lieu de repos (pour les animaux)
+MRBY=/,lieu de repos (pour les animaux)
+MRC<T/,perfide
+MRCH=/,Marésha
+MRD/,rébellion
+MRDK/,"Merodak, Mardouk"
+MRDKJ/,Mordokaï
+MRDP/,persécution
+MRDWT/,rébellion
+MRD[,se rebeller
+MRG<H/,repos
+MRGMH/,"fronde, lance-pierre"
+MRGW</,repos
+MRH/,détresse
+MRH=/,Mara
+MRH[,se rebeller
+MRJ/,rebelle
+MRJ>/,veau gras
+MRJBH/,litige
+MRJBH=/,litige
+MRJB_B<L/,Merib-Baal
+MRJH/,Moriya
+MRJH=/,Meraya
+MRJM/,Miryam
+MRJRJ/,amer
+MRJRWT/,en détresse
+MRJWT/,Merayoth
+MRK/,timidité
+MRKB/,chars
+MRKBH/,"char, chariot"
+MRKBT/,"char, chariot"
+MRKLT/,marché
+MRMH/,tromperie
+MRMH=/,tromperie
+MRMS/,"fouler, piétiner"
+MRMWT/,Merémoth
+MRNTJ/,Méronotite
+MRP>/,guérison
+MRP>=/,guérison
+MRPF/,embourbement
+MRQ/,bouillon
+MRQX/,herbes aromatiques
+MRQXH/,épices
+MRQXT/,mélange d'onguent
+MRRH/,bile
+MRRH=/,bile
+MRRJ/,Merari
+MRRJ=/,Merari
+MRS/,Mèrès
+MRSN>/,Marsena
+MRTJM/,Merataïm
+MRV[,perdre ses cheveux
+MRWD/,agitation
+MRWM/,élevé
+MRWM=/,Mérom
+MRWT/,Maroth
+MRWX/,ecchymoses
+MRWY/,course
+MRWYH/,course (à pied)
+MRWYH=/,course (à pied)
+MRWZ/,Méroz
+MRXB/,large (pâturage)
+MRXCT/,poêle
+MRXQ/,lointain
+MRX[,appliquer
+MRY</,"poinçon, alène"
+MRYPT/,chaussée
+MRY[,être douloureux
+MS/,travailleurs conscrits
+MS</,marche
+MS<=/,carrière
+MS<D/,soutiens
+MS=/,désespéré
+MSD/,fondations
+MSDRWN/,vestibule
+MSGR/,forgeron
+MSGR=/,forgeron
+MSGRT/,bord
+MSH=/,part proportionnelle
+MSH[,fondre
+MSK/,"rideau, voile"
+MSK=/,vin mélangé
+MSKH/,métal fondu
+MSKH=/,métal fondu
+MSKH==/,métal fondu
+MSKN/,pauvre
+MSKNT/,pauvreté
+MSKNWT/,lieux de stockage
+MSKT/,fils de chaîne
+MSLH/,route
+MSLWL/,grande route
+MSPD/,"deuil, lamentation"
+MSPR/,rapport
+MSPR=/,rapport
+MSPRT/,Mispéreth
+MSPW>/,fourrage
+MSPXT/,éruption cutanée (de la peau)
+MSRT/,lien
+MSR[,choisir
+MSS[,fondre
+MSTR/,cachette
+MSTR=/,cacher/dissimuler (son) visage
+MSTWR/,abri
+MSWH/,voile
+MSWKH/,haie d'épines
+MSX,inconnu
+MSXR/,commerce
+MT/,personnes
+MTBN/,paille
+MTG/,mors
+MTJ,quand?
+MTKNT/,nombre
+MTM/,zone saine
+MTN/,"cadeau, présent"
+MTN=/,"cadeau, présent"
+MTNH/,don
+MTNH=/,don
+MTNJ/,Mitnite
+MTNJ=/,Mattenaï
+MTNJM/,reins
+MTQ/,douceur
+MTQH/,Mitqa
+MTQ[,avoir bon goût
+MTRDT/,Mitredath
+MTT/,don
+MTTH/,Mattatta
+MTWC>L/,Metoushaël
+MTWCLX/,Mathusalem
+MTWQ/,savoureux
+MTX[,étendre
+MV</,"action de planter, plantation"
+MV<MJM/,aliments savoureux
+MV>V>/,balai
+MVBX/,(lieu de) massacre
+MVH/,branche
+MVH=/,lit
+MVH==/,inférieur (en années)
+MVH===/,déploiement (des ailes)
+MVH====/,corruption
+MVJL/,tige de fer
+MVMN/,trésor caché
+MVPXT/,châle
+MVR/,pluie
+MVRD/,Matred
+MVRJ/,matrite
+MVR[,envoyer la pluie
+MVWH/,fil
+MW<D/,rencontre
+MW<DH/,désignation
+MW<DJH/,Moadya
+MW<P/,grisaille
+MW<QH/,fardeau
+MW<YH/,conception
+MW>B/,Moab
+MW>BJ/,Moabite
+MWB>/,entrer
+MWCB/,"endroit, emplacement"
+MWCJ/,Moushi
+MWCJ=/,Moushi
+MWG[,fondre
+MWK[,devenir pauvre
+MWL/,"circoncire, circoncision"
+MWLDH/,Molada
+MWLDT/,naissance
+MWLH/,circoncision
+MWLJD/,Molid
+MWL[,"circoncire, circoncision"
+MWPT/,signe
+MWQC/,piège
+MWQD/,foyer
+MWQDH/,foyer
+MWQ[,se moquer
+MWRC/,possession
+MWRC=/,possession
+MWRCH/,possession
+MWRCTJ/,de Morèsheth
+MWRCT_GT/,Morèsheth-Gath
+MWRD/,descente
+MWRG/,traîneau-herse
+MWRH=/,rasoir
+MWR[,changer
+MWSB/,pourtour
+MWSD/,fondement
+MWSD=/,fondement
+MWSDH/,fondement
+MWSR/,"leçon, instruction, correction, avertissement, admonestation"
+MWT/,mort
+MWTR/,avantage
+MWT[,mourir
+MWV/,bouger
+MWVH/,barre
+MWV[,bouger
+MWY>/,sortir
+MWY>H/,origine
+MX/,veau gras
+MX=/,moelle
+MXBRT/,assemblage
+MXBT/,grille
+MXCBH/,plan
+MXCBT/,plan
+MXCK/,obscurité
+MXFP/,exposition
+MXGRT/,ceinture
+MXH==[,essuyer
+MXH=[,essuyer
+MXH[,essuyer
+MXJ/,coup
+MXJD>/,Mehida
+MXJH/,rester vivant
+MXJJ>L/,Mehouyaël
+MXJR/,prix
+MXJR=/,prix
+MXLH=/,danser
+MXLH==/,"trou, fente"
+MXLH====/,Mahla
+MXLJ/,Mahli
+MXLJ=/,Mahli
+MXLP/,réparé
+MXLPWT/,tresse
+MXLQT/,division
+MXLTJ/,Meholatite
+MXLWN/,Mahlôn
+MXMD/,objet convoité
+MXML/,(objet d')affection
+MXNH/,campement
+MXNJM/,Mahanaïm
+MXNQ/,étranglement
+MXQR/,profondeur
+MXQ[,écraser
+MXR/,demain
+MXRCH/,soc
+MXRT/,le jour suivant
+MXSH/,refuge
+MXSJH/,Mahséya
+MXSWM/,"muselière, bâillon"
+MXSWR/,manquer
+MXT/,Mahath
+MXTH/,encensoir
+MXTH=/,ruine
+MXTRT/,effraction
+MXWGH/,compas
+MXWJ>L/,Mehouyaël
+MXWJM/,Mahawites
+MXWZ/,havre
+MXY/,plaie
+MXYB/,pierres de taille
+MXYH/,moitié
+MXYJT/,moitié
+MXY[,frapper
+MXZH/,"recevoir en vision, avoir une vision"
+MXZH=/,fenêtre
+MXZJ>WT/,Mahazioth
+MY/,paille
+MY</,lit
+MY<D/,le parcours de vie (d'une personne)
+MY<R/,un petit (objet)
+MY=/,paille
+MY>[,trouver
+MYB/,position debout (sur les pieds)
+MYB=/,tour de siège
+MYBH/,souche
+MYBH=/,garnison
+MYBJH/,Metsovaya
+MYD/,"proie, gibier"
+MYH/,pain sans levain
+MYH=/,pain sans levain
+MYH==/,Motsa
+MYH[,presser
+MYLH/,cloche
+MYNPT/,turban
+MYPH=/,"Mitspa, Mitspè"
+MYR/,détresse
+MYRJ/,Égyptien
+MYRJM/,Égyptien
+MYRP/,creuset
+MYWH/,commandement
+MYWLH/,ravin
+MYWQ/,désarroi
+MYWQ=/,pilier
+MYWQH/,désarroi
+MYWR=/,détresse
+MYWRH/,fortification
+MYX/,front
+MYXH/,jambières
+MYY[,téter
+MZ<R/,peu
+MZBX/,autel
+MZG/,vin aux épices
+MZH/,faible
+MZH=/,Mizza
+MZLG/,fourchette
+MZLG=/,fourchette
+MZMH/,plan
+MZMRH/,serpe
+MZMWR/,psaume
+MZR</,terre ensemencée
+MZRH/,fourche à vanner
+MZRQ/,coupe à aspersion
+MZRX/,levant
+MZW/,"grange, grenier"
+MZWN/,nourriture
+MZWZH/,montant (de la porte)
+N<H/,Noa
+N<H=/,Néa
+N<J>L/,Neiel
+N<JM/,charmant
+N<L/,sandale
+N<M/,beauté
+N<M=/,Naam
+N<MH/,Naama
+N<MH=/,Naama
+N<MJ/,Naamite
+N<MN/,Naamân
+N<MTJ/,Naamatite
+N<M[,être charmant
+N<R/,garçon
+N<R=/,jeunesse
+N<RH/,fille
+N<RH=/,fille
+N<RH==/,fille
+N<RJ/,Naaraï
+N<RJH/,Néarya
+N<RN/,Naarân
+N<RT/,étoupe
+N<YWY/,"épine, chardon, ronce"
+N>=/,No
+N>D/,outre
+N>M/,déclaration
+N>P[,commettre un adultère
+N>QH/,gémissement
+N>Q[,gémir
+N>R[,rejeter
+N>WH/,beau
+N>Y[,rejeter
+NB/,Nob
+NB<[,jaillir
+NBB[,creux
+NBCN/,Nivshân
+NBJ>/,prophète
+NBJ>H/,prophétesse
+NBJWT/,Nevayoth
+NBK/,source
+NBL/,"fou, impie, insensé, fou furieux, vaurien"
+NBL===/,"fou, impie, insensé, fou furieux, vaurien"
+NBLH/,"stupidité, folie, actions stupides"
+NBLH=/,cadavre
+NBLV/,Nevallat
+NBLWT/,parties intimes (d'une femme)
+NBL[,"flétrir, faner"
+NBV/,Nevath
+NBV[,regarder
+NBW/,Nébo
+NBW=/,Nébo
+NBW>H/,parole de prophète
+NBWCZBN/,Neboushazbân
+NBWKDN>YR/,Nabuchodonosor
+NBWT/,Naboth
+NBWZR>DN/,Nebouzaradân
+NBX/,Novah
+NBX=/,Novah
+NBXZ/,Nivhaz
+NC>=[,pioche
+NCB[,souffler
+NCH/,muscle de la cuisse
+NCJ/,dette
+NCJH/,oubli
+NCJQH/,baiser
+NCK/,intérêt
+NCK=[,mordre
+NCKH/,pièce
+NCK[,mordre
+NCL[,tomber
+NCMH/,souffle
+NCM[,haleter
+NCP/,crépuscule
+NCP[,souffler
+NCQ[,embrasser
+NCR/,grand oiseau de proie
+NCTWN/,lettre
+NCT[,sécher
+ND/,bloc (d'eau)
+NDB/,Nadav
+NDBH/,de plein gré
+NDBJH/,Nedavya
+NDB[,inciter
+NDD[,fuir
+NDH/,impureté
+NDH=/,rémunération
+NDJB/,volontaire
+NDJBH/,dignité
+NDP[,souffler
+NDR/,vœu
+NDR[,faire un vœu
+NDX[,s'élever
+NFG[,dépasser
+NFJ>/,chef
+NFJ>=/,chef
+NFW>H/,objets à transporter
+NG</,coup
+NG<[,toucher
+NGB/,Nèguev
+NGC[,être proche
+NGD[,raconter
+NGF[,maître d'œuvre
+NGH/,luminosité
+NGH=/,luminosité
+NGHH/,luminosité
+NGH[,briller
+NGJD/,dirigeant
+NGJNH/,instrument à cordes
+NGN[,jouer
+NGP/,pierre à trébucher
+NGP[,heurter le pied (sur qqc) > se heurter
+NGR[,torrent
+NGX/,sujet à encorner
+NGX[,encorner
+NH/,prééminence
+NHG=[,diriger
+NHG[,diriger
+NHH=[,se lamenter
+NHH[,se lamenter
+NHJ/,lamentation
+NHL[,avancer
+NHM/,rugir
+NHMH/,rugissement
+NHQ[,braire
+NHR/,"courant, fleuve"
+NHRH/,lumière (du jour)
+NJ/,lamentation
+NJB/,viande
+NJD/,se balancer
+NJN/,descendance
+NJNWH/,Ninive
+NJN[,descendance
+NJSN/,Nisan
+NJXX/,apaisement
+NJYWY/,étincelle
+NK>/,expulser
+NK>T/,"gomme adragante, tragacanthe"
+NKD/,descendance
+NKH=/,poser une condition
+NKH[,poser une condition
+NKL/,tromper
+NKL[,tromper
+NKR/,étranger
+NKRJ/,"étranger, étrange"
+NKSJM/,richesse
+NKT/,"maison du trésor, trésor"
+NKW/,Neko
+NKX/,"juste, droit, correct, sincère"
+NLH[,finir
+NMCJ/,Nimshi
+NMLH/,fourmi
+NMR/,léopard
+NMRD/,Nimrod
+NMRH/,Nimra
+NMRJM/,Nimrim
+NMW>L/,Nemouel
+NMW>LJ/,Nemouélite
+NPC/,gorge
+NPC[,respirer
+NPG/,Nèfeg
+NPH/,"tamis, crible"
+NPJC/,Nafish
+NPJLJM/,Nefilim
+NPK/,turquoise
+NPL[,tomber
+NPT/,miel pur
+NPT=/,colline
+NPTLJ/,Neftali
+NPTWLJM/,lutter
+NPTWX/,Neftoah
+NPTXJM/,Naftouhim
+NPWCSJM/,Nefisim
+NPX/,Nofah
+NPX[,souffler
+NPY/,éclaircie
+NQ<[,être dégoûté
+NQBH/,féminin
+NQB[,"aléser, percer"
+NQC[,attraper
+NQD/,éleveur de moutons
+NQD=/,moucheté
+NQDH/,perle
+NQDJM/,gâteau
+NQH[,être vidé
+NQJ/,innocent
+NQJQ/,fente
+NQJWN/,famine
+NQM/,vengeance
+NQMH/,vengeance
+NQM[,venger
+NQP/,battre (un arbre pour récolter ses fruits)
+NQPH/,corde
+NQP[,dépouiller
+NQRH/,fendu (dans la roche)
+NQR[,ronger
+NQWD>/,Neqoda
+NRD/,nard
+NRGL/,Nergal
+NRJH/,Nériya
+NS/,bannière
+NS<[,retirer
+NSBH/,tournure des événements
+NSH[,tester
+NSJK/,libation
+NSJK=/,libation
+NSK/,image fondue
+NSK[,verser
+NSRK/,Nisrok
+NSX[,arracher
+NT<[,briser
+NTC[,déraciner
+NTJN/,servants du temple
+NTK[,se déverser
+NTN/,Natân
+NTN>L/,Netanéel
+NTQ/,infection de peau
+NTQ[,être brisé
+NTR/,natron
+NTR[,relâcher les cordons du joug > cesser d'oppresser d'autres personnes
+NTS[,couper le sentier (de quelqu'un)
+NTX/,"morceau, pièce"
+NTY[,être démoli
+NV</,plantes
+NV<JM/,Netaïm
+NV<[,planter
+NVC[,se détacher
+NVH[,être plié
+NVJ</,plante
+NVJL/,peser
+NVL/,poids
+NVPH/,boucles d'oreilles
+NVPH=/,Netofa
+NVP[,goutter
+NVR=[,superviser
+NW<DJH/,Noadya
+NW<[,bouger
+NW>[,interdire
+NWC[,être désespéré
+NWDB/,Nodav
+NWD[,se balancer
+NWH=/,rester
+NWMH/,somnolence
+NWM[,somnoler
+NWN/,Noun
+NWP[,agiter çà et là
+NWS[,fuir
+NWV[,bouger
+NWXH/,Noha
+NWYH/,plumes
+NWY[,fuir
+NX/,Noé
+NXBJ/,Nahbi
+NXC/,serpent
+NXC=/,présage
+NXC==/,serpent
+NXCT/,cuivre
+NXCT=/,cuivre
+NXCT>/,Nehoushta
+NXCTN/,idole de serpent
+NXCWN/,Nahshôn
+NXC[,présager
+NXH=[,diriger
+NXH[,diriger
+NXL/,oued
+NXLH/,héritage
+NXLJ>L/,Nahaliel
+NXLMJ/,de Nèhèlam
+NXL[,obtenir
+NXM/,compassion
+NXM=/,Naham
+NXMH/,consolation
+NXMJH/,Nehèmya
+NXMNJ/,Nahamani
+NXM[,réconforter
+NXRJ/,Naharaï
+NXT==/,confiance
+NXWC/,de bronze
+NXWCH/,bronze
+NXWM/,Nahoum
+NXWM=/,Nehoum
+NXWR/,Nahor
+NXY[,être urgent
+NY/,bourgeon
+NY=/,bourgeon
+NY>[,s'envoler
+NYB/,garde (de l'épée)
+NYB[,se tenir
+NYH=/,floraison
+NYH[,se bagarrer
+NYJB/,colonne de sel
+NYJB=/,colonne de sel
+NYJX/,Netsiah
+NYL[,arracher à
+NYR/,germe
+NYY[,scintiller
+NZH[,éclabousser
+NZJD/,soupe
+NZJR/,élu
+NZL[,couler
+NZM/,"anneau, boucle d'oreille, anneau de nez"
+NZQ/,blessure
+NZR/,consécration
+NZR[,se séparer
+P<H[,hurler
+P<L/,acte
+P<LH/,acte
+P<LTJ/,Péoultaï
+P<M/,pied
+P<MWN/,"cloche, sonnette"
+P<M[,être perturbé
+P<RJ/,Paaraï
+P<R[,ouvrir (la bouche) en grand
+P<WR/,Peor
+P>H/,côté
+P>H=/,côté
+P>H==/,côté
+P>R/,turban
+P>R=[,inspecter les branches
+P>RN/,Parân
+P>RWR/,"rougeur, éclat"
+P>R[,inspecter les branches
+PC/,folie
+PC</,rébellion
+PCR/,interprétation
+PCT/,lin
+PCV[,se dépouiller de sa peau
+PCXWR/,Pashehour
+PCX[,mutiler
+PD<[,racheter
+PDH>L/,Pedahel
+PDHYWR/,Pedahçour
+PDH[,rançonner
+PDN/,Paddân-Aram
+PDR/,graisse
+PDWJM/,rançon
+PDWN/,Padôn
+PDWT/,rédemption
+PF</,pas
+PFH[,se répandre
+PFQ[,se répandre
+PG/,figue précoce
+PG</,chance
+PG<J>L/,Paguiël
+PG<[,rencontrer
+PGC[,rencontrer
+PGR/,cadavre
+PGWL/,viande (sacrificatoire) impure
+PH,"ici, par ici"
+PJCWN/,Pichon
+PJD/,malheur
+PJKL/,Pikol
+PJMH/,gras
+PJNN/,Pinôn
+PJNXS/,Pinhas
+PJTWN/,Pitôn
+PJX/,suie
+PJ_HXJRWT/,Pi-Hahiroth
+PK/,flacon
+PKH[,s'écouler
+PL>/,miracle
+PL>J/,merveilleux
+PL>J=/,Pallouite
+PLCT/,Philistie
+PLCTJ/,Philistin
+PLC[,rouler
+PLDC/,Pildash
+PLGC/,concubine
+PLGH/,regroupement
+PLGH=/,regroupement
+PLH[,être différent
+PLJL/,juge
+PLJLH/,juger
+PLJLJ/,jugement
+PLJLJH/,juger
+PLJVH/,ceux qui se sont échappés
+PLK/,fuseau
+PLK=/,fuseau
+PLL/,Palal
+PLL=[,s'attendre à
+PLLJH/,Pelalia
+PLL[,s'attendre à
+PLS/,balance
+PLT/,Pélet
+PLTJ/,Kerétite
+PLV/,Pèleth
+PLVJ/,Palti
+PLVJ=/,Palti
+PLVJ>L/,Paltiël
+PLW>/,Pallou
+PLX/,tranche
+PLX>/,Pileha
+PLYWT/,tremblement
+PLY[,trembler
+PNG/,repas
+PNH=/,coin
+PNH[,tourner
+PNJMH,"dans, en dedans"
+PNJMJ/,dedans
+PNNH/,Peninna
+PNQ[,gâter
+PQDH/,enrôlement
+PQDT/,"gardien, sentinelle"
+PQDWN/,"dépôt, réserve"
+PQD[,observer
+PQJD/,officier
+PQX/,vision
+PQX=/,Péqah
+PQXJH/,Pekahya
+PQX[,faire voir
+PR/,taureau
+PR</,mèches
+PR<C/,puce
+PR<C=/,puce
+PR<H/,Pharaon
+PR<TWN/,Piratôn
+PR<TWNJ/,Piratonite
+PR<[,laisser pendre/tomber
+PR>/,onagre
+PR>M/,Piréam
+PRBR/,cour
+PRC=/,entrailles
+PRC==/,entrailles
+PRCDN/,intestins
+PRCH/,indication exacte
+PRCNDT>/,Parchandatha
+PRC[,séparer
+PRD/,mulet
+PRDH/,mule
+PRDS/,"parc, forêt"
+PRD[,"être détaché, être disjoint, être étalé, être divisé"
+PRF[,étendre
+PRH==/,Poura
+PRJ/,fruit
+PRJY/,féroce
+PRJY=/,féroce
+PRK/,sévérité
+PRKT/,voile
+PRMCT>/,Parmachta
+PRM[,déchirer
+PRNK/,Parnak
+PRPR/,Parpar
+PRQ/,[Glosses - fr]
+PRQ[,arracher
+PRR=[,[Glosses - fr]
+PRR[,[Glosses - fr]
+PRS/,gypaète barbu
+PRS=/,partager
+PRSH/,sabot
+PRS[,partager
+PRT/,Euphrate
+PRV/,fruits tombés
+PRWJM/,Parvaïm
+PRWR/,pot
+PRWX/,Parouah
+PRX/,bourgeon
+PRXX/,populace
+PRX[,éclater
+PRY/,brèche
+PRY=/,brèche
+PRYJ/,Partsite
+PRYJM/,Peratsim
+PRY[,déborder
+PRZ/,"combattant, soldat"
+PRZH/,"villes ouvertes, villages"
+PRZJ/,Phérésien
+PRZJ=/,"villes ouvertes, villages"
+PRZWN/,paysans
+PS/,robe avec manches
+PSGH/,Pisga
+PSG[,étudier
+PSH/,abondance
+PSJL/,idole
+PSK/,Pasak
+PSL/,idole
+PSL[,couper
+PSPH/,Pispa
+PSS[,"cesser, dissiper, disparaître"
+PSX/,Pâque
+PSX=/,être laminé
+PSX==/,Paséah
+PSX[,être laminé
+PT</,instant
+PT=/,"gond, charnière"
+PT>M,soudainement
+PTBG/,nourriture
+PTJGJL/,robe de luxe
+PTJL/,"cordon, ficelle"
+PTJWT/,naivité
+PTLTL/,rusé
+PTL[,se battre
+PTM/,Pitom
+PTN/,cobra
+PTRSJM/,Patrousim
+PTRWN/,interprétation
+PTRWS/,Patros
+PTR[,interpréter
+PTT[,mettre en morceaux
+PTW>L/,Petouël
+PTWR/,Petor
+PTWX/,gravures
+PTX/,ouverture
+PTX=/,explication
+PTX=[,ouvrir
+PTXJH/,Petahya
+PTXWN/,pouvoir d'expression
+PTX[,ouvrir
+PVDH/,topaze
+PVJC/,marteau
+PW<H/,Poua
+PWC[,donner un coup de patte
+PWGH/,arrêt
+PWG[,être faible
+PWK/,khôl
+PWL=/,"Poul, Tilgath-Pilnéser"
+PWL==/,"Poul, Tilgath-Pilnéser"
+PWNJ/,un pounite
+PWNN/,Pounôn
+PWN[,être désespéré
+PWQH/,trébucher (dans ses actes)
+PWR/,sort
+PWRH/,pressoir
+PWRT>/,Porata
+PWTJ/,Pourien
+PWV/,Pouth
+PWVJ>L/,Poutiël
+PWVJPR/,Potiphar
+PWVJ_PR</,Poti-Phéra
+PWX=[,"souffler (sur), faire exhaler, souffler dessus"
+PWX[,"souffler (sur), faire exhaler, souffler dessus"
+PWY[,mettre en pièces
+PX/,piège
+PX=/,piège
+PXD/,trembler
+PXD=/,trembler
+PXDH/,frayeur
+PXD[,trembler
+PXH/,gouverneur
+PXM/,charbon de bois
+PXT/,puits
+PXTT/,pourriture
+PXT_MW>B/,Pahath-Moab
+PXX[,piéger
+PXZ/,perfide
+PXZWT/,arrogance > vantardise
+PXZ[,être perfide / fourbe / traître
+PY</,blessure
+PYH[,ouvrir (la bouche) en grand
+PYJRH/,affûtage
+PYLH/,bandes pelées
+PYL[,éplucher
+PYM[,"fendre, entrouvrir"
+PYR[,presser
+PYX=[,(se) briser en morceaux
+PYX[,(se) briser en morceaux
+PYY[,"Happicéç, Happitsets"
+PZ/,or pur
+PZR[,disperser
+Q<JLH/,Qeïla
+Q<Q</,tatouage
+Q<RH/,plat
+Q>T/,pélican
+QB/,qab
+QB<T/,coupe
+QB<[,voler
+QBB[,maudire
+QBH/,"ventre, estomac (des animaux)"
+QBH=/,pièce intérieure
+QBL[,s'emparer
+QBR/,tombe
+QBRWT_HT>WH/,Qibroth-Taava
+QBR[,enterrer
+QBWRH/,enterrement
+QBWY/,collection
+QBY>L/,Qabtseel
+QBYH/,rassembler
+QBYJM/,Qibtsaïm
+QBY[,être réuni
+QC/,chaume
+QC>H/,melon
+QCB/,attention
+QCC[,assembler
+QCH/,dur
+QCH[,être difficile
+QCJ/,obstination
+QCJWN/,Qichyôn
+QCR/,conspiration
+QCR[,être réuni
+QCT/,arc
+QCT=/,"archer, tireur à l'arc"
+QCX[,"rendre obstiné, rendre raide de la nuque"
+QDC/,sainteté
+QDC===/,Qédesh
+QDC[,se sanctifier
+QDC_BRN</,Qadesh-Barnéa
+QDD[,s'incliner
+QDH/,arbre de casse
+QDJM/,avant
+QDMH/,"vers l'est de, à l'est de"
+QDMH==/,Qedma
+QDMJ>L/,Qadmiel
+QDMWN/,oriental
+QDMWT/,Qedémoth
+QDQD/,crâne
+QDR/,Qédar
+QDRNJT,avec tristesse
+QDRWN/,Cédron
+QDRWT/,obscurité
+QDWC/,saint
+QDWMJM/,"antiques, antiquité"
+QDXT/,fièvre
+QDX[,allumer
+QFJVH/,pièce d'argent
+QFQFT/,écailles des poissons
+QFWH/,cruche
+QHH[,être émoussé
+QHLT/,Qohéleth
+QHLTH/,Qehélata
+QHL[,assembler
+QHT/,Qehath
+QHTJ/,Qehatite
+QJ>[,vomir
+QJC/,Qish
+QJCJ/,Qichi
+QJCWN/,Qichôn
+QJM/,adversaire
+QJMH/,action de lever
+QJNJ/,Qénien
+QJNN/,Qénân
+QJQJWN/,ricin
+QJQLWN/,déshonneur
+QJR/,"mur, paroi, clôture"
+QJR=/,"mur, paroi, clôture"
+QJRS/,Qéros
+QJVWR/,(puante) fumée
+QJY/,été
+QJYWN/,à l'extrémité
+QJY[,été
+QL/,léger
+QL</,fronde
+QL<=/,porteurs de fronde
+QL<==/,fronde
+QL<[,tirer une pierre  avec une fronde
+QLCWN/,fourche
+QLH[,brûler
+QLJ/,grain séché
+QLJH/,Qélaya
+QLJV>/,Qelita
+QLL/,poli
+QLLH/,maudire
+QLL[,léger
+QLQL/,vil
+QLS/,mépris
+QLSH/,objet de mépris
+QLV[,être atrophié
+QLWN/,honte
+QLXT/,marmite
+QMH/,grain encore debout
+QML[,se faner
+QMV[,saisir
+QMW>L/,Qemouel
+QMWF/,ronce
+QMWN/,Qamôn
+QMX/,farine
+QMY/,poignée
+QMY[,prendre (une poignée de quelque chose)
+QN/,nid
+QN>/,jaloux
+QN>H/,zèle
+QNH/,roseau
+QNH=/,acquérir
+QNH=[,acquérir
+QNH[,acquérir
+QNJN/,possessions
+QNMWN/,cannelle
+QNN[,nicher
+QNT/,Qenath
+QNW>/,jaloux
+QNY/,"piège, filet, collet"
+QNZ/,Qenaz
+QNZJ/,Qenizzite
+QPD/,enrouler (une pièce de vêtement)
+QPDH/,"horreur, terreur"
+QPD[,enrouler (une pièce de vêtement)
+QPWZ/,hibou
+QPY[,fermer
+QR/,froid
+QR<[,couper
+QR=/,frais
+QR>[,crier
+QRB/,entrailles
+QRB=/,s'approcher
+QRB==/,combat
+QRBH/,s'approcher (de Dieu)
+QRB[,s'approcher
+QRC/,cadre
+QRDM/,herminette
+QRH/,se produire
+QRH=/,éjection nocturne
+QRH[,se produire
+QRJ/,contradiction
+QRJ>/,appelé
+QRJ>H/,message
+QRJH/,ville
+QRJT/,Qiriath-Yéarim
+QRJTJM/,Qiryataïm
+QRJT_>RB</,Qiriath-Arba
+QRJT_B<L/,Qiriath-Baal
+QRJT_J<RJM/,Qiriath-Yéarim
+QRJT_XYWT/,Qiriath-Houtsoth
+QRJWT/,Qeriyoth
+QRM[,"couvrir, s'étendre dans le temps"
+QRN[,"briller, rayonner"
+QRN_HPWK/,Qérèn-Happouk
+QRQ</,sol
+QRQ<=/,sol
+QRQR=/,Karkor
+QRS/,crochet
+QRSL/,cheville
+QRT/,ville
+QRTH/,Qarta
+QRTN/,Qartân
+QRWB/,proche
+QRX/,temps froid
+QRX=/,chauve
+QRX==/,Qorah
+QRX===/,Qaréah
+QRXH/,tonsure
+QRXJ/,Qoréite
+QRXT/,endroit chauve
+QRX[,tonsure
+QRY/,taon
+QSM/,divination
+QSS[,"couper, abattre, rendre écailleux (raisins pour le vin)"
+QST/,écritoire
+QVB/,épidémie
+QVL/,tuer
+QVN/,"rendre petit, réduire"
+QVN==/,"petit doigt, auriculaire"
+QVP[,"cueillir, arracher"
+QVR/,parfum
+QVRT/,fumet (en brûlant des sacrifices d'animaux)
+QVRWN/,Qitrôn
+QVT/,Qattath
+QVWRH/,fumée (de l'encens brûlé en sacrifice à Dieu)
+QVWRH=/,Qetoura
+QW/,se lever
+QW</,Qoa
+QW>/,vomir
+QWB</,casque
+QWCJHW/,Qouchaya
+QWC[,tendre un piège
+QWH=[,"espérer, attendre, rechercher"
+QWH[,"espérer, attendre, rechercher"
+QWLJH/,Qolaya
+QWMH/,"hauteur, stature"
+QWMMJWT/,droit
+QWM[,se lever
+QWP/,babouin
+QWR>/,perdrix bartavelle
+QWRH/,poutre
+QWY/,épine
+QWY[,être dégoûté
+QY/,fin
+QY<[,retirer
+QYB/,forme
+QYH/,bord
+QYH[,couper
+QYJN/,chef
+QYJR/,moisson
+QYJR=/,moisson
+QYP/,colère
+QYP=/,colère
+QYPH/,éclater
+QYP[,être fâché
+QYR/,être découragé
+QYR=/,[Glosses - fr]
+QYT/,fin
+QYW/,fin
+QYX/,fleur de noix de muscade (cumin noir)
+QYY[,couper
+R<<[,agir méchamment
+R<===/,mauvais
+R<B/,faim
+R<B=/,avoir faim
+R<BWN/,famine
+R<B[,avoir faim
+R<C/,être abondant
+R<C[,être abondant
+R<H/,pâturer
+R<H=/,ami
+R<H==/,Compagnon (femme)
+R<H=[,pâturer
+R<J/,pré
+R<J=/,Réï
+R<JH/,(mon) ami(e)
+R<L/,tituber
+R<LH/,voile
+R<LJH/,Reélaya
+R<M/,"tumulte, tonnerre"
+R<MJH/,Raamia
+R<MSS/,Ramsès
+R<P[,[Glosses - fr]
+R<W/,Reou
+R<W>L/,Réouel
+R<WT/,poursuivre
+R<WT=/,poursuivre
+R<Y[,[Glosses - fr]
+R>C/,tête
+R>C=/,tête
+R>C==/,tête
+R>CH/,premier
+R>CH=/,principale (pierre)
+R>CJT/,commencement
+R>CWN/,premier
+R>H/,voyant
+R>H=/,voir
+R>H==/,voyant
+R>H[,voir
+R>J/,vue
+R>J=/,miroir
+R>JH/,Reaya
+R>M/,bœuf sauvage
+R>WBN/,Ruben
+R>WBNJ/,Rubénite
+R>WMH/,Reouma
+RB/,grand
+RB</,quatrième génération de descendants
+RB<=/,le quart
+RB<==/,le quart
+RB<===/,le quart
+RB<====/,le quart
+RB<=[,coucher
+RB==/,grand
+RB===/,grand
+RBBH/,dix mille
+RBD[,"couvrir, orner un lit"
+RBH/,Rabba
+RBJ<J/,quatrième
+RBJBJM/,pluie
+RBJD/,collier
+RBJT/,Rabbith
+RBK[,mélanger
+RBLH/,Ribla
+RBQH/,Rébecca
+RBY/,lieu de repos
+RBY[,s'allonger (animaux)
+RB_CQH/,grand
+RC</,"méchant, mauvais"
+RC<=/,méfaits
+RC<H/,méfaits
+RC<[,être coupable
+RCC[,briser
+RCJWN/,permission
+RCP/,flamme
+RCP=/,flamme
+RCT/,filet
+RDD[,superposer
+RDH=[,gouverner
+RDH[,gouverner
+RDJ/,Raddaï
+RDJD/,voile
+RDM[,s'allonger dans un sommeil profond
+RDP[,suivre
+RG</,moment
+RG<=/,calme
+RG<[,pour un instant
+RGB/,motte
+RGL/,pied
+RGLJ/,fantassin
+RGLJM/,Roguelim
+RGL[,enseigner la marche
+RGM/,Réguém
+RGMH/,foule
+RGM[,lapider
+RGM_MLK/,Réguem-Mélek
+RGZ/,"tourment, agitation"
+RGZ=/,cœur tremblant
+RGZH/,agitation
+RGZ[,trembler
+RHB/,fier
+RHB==/,fier
+RHJV/,faisceau
+RJ/,humidité
+RJB/,"dispute, querelle, conflit, argument"
+RJBH/,"dispute, querelle, conflit, argument"
+RJBJ/,Ribaï
+RJB[,se quereller
+RJC/,pauvreté
+RJQ/,vide
+RJQ=/,vide
+RJQM,mains vides
+RJQ[,laisser insatisfait
+RJR/,salive
+RJR[,"faire couler, s'écouler"
+RJX/,"odeur, parfum"
+RK/,timide
+RK=/,gentillesse
+RKB/,meule du dessus
+RKB=/,conducteur de char
+RKB==/,Rékab
+RKBH/,équitation
+RKB[,conduire
+RKC/,cheval
+RKC[,acquérir
+RKJL/,calomniateur
+RKK[,ramollir
+RKL/,Rakal
+RKLH/,commerce
+RKS/,terrain accidenté
+RKS=/,"tramer, concevoir, manigancer"
+RKS[,attacher
+RKWB/,char
+RKWC/,propriété
+RM/,Ram
+RMF/,(rampants) animaux
+RMF[,ramper
+RMH/,ver
+RMH=/,jeter
+RMH==/,jeter
+RMH=[,jeter
+RMH[,jeter
+RMJH/,paresseux
+RMJH=/,paresseux
+RMJH==/,Ramia
+RMLJHW/,Remaliahou
+RMS[,"fouler, piétiner"
+RMT/,Rémeth
+RMT=/,Rémeth
+RMTJ/,de Rama
+RMWN/,grenadier
+RMWN=/,Rimmono
+RMWN_PRY/,Rimmôn-Pérets
+RMWT/,déchets
+RMX/,lance
+RN/,cri
+RNH/,pleurer
+RNH=/,pleurer
+RP>/,Rapha
+RP>JM=/,Rapha
+RP>JM==/,Rapha
+RP>L/,Rephaël
+RP>WT/,guérison
+RP>[,guérir
+RPC/,boue
+RPD[,rafraîchir
+RPH/,faible
+RPH=/,laisser seul
+RPH==/,laisser seul
+RPH[,laisser seul
+RPJDH/,"lit de repos, impériale de la litière, appui, support"
+RPJDJM/,Rephidim
+RPJH/,Rephaya
+RPJWN/,découragement
+RPQ[,"se pencher, s'appuyer"
+RPT/,parcs à bête
+RPW>/,Raphou
+RPX/,Répha
+RQ/,salive
+RQ</,"aminci, réduit en lames"
+RQ<[,tamponner
+RQB/,pourriture
+RQBWN/,pourriture
+RQD[,danser
+RQH/,tempe
+RQJ</,firmament
+RQJQ/,mince gâteau
+RQM/,Réqem
+RQM=/,Réqem
+RQMH/,"étoffe brodée, broderie"
+RQM[,brodeur
+RQQ[,cracher
+RQT/,Raqqath
+RQWN/,Raqqôn
+RQX/,mélanger
+RQX==/,parfumeur
+RQX===/,épicé
+RSH/,Rissa
+RSJS/,humide
+RSJS=/,humide
+RSS[,humidifier
+RTMH/,Ritma
+RTQ[,mettre aux fers
+RTT/,tremblement
+RTWQ/,chaîne
+RVB/,frais
+RVC[,mettre en pièces
+RVPC[,frais
+RVV/,trembler > être stupéfait
+RW<[,crier
+RWC[,souffrir de manque
+RWD[,être agité
+RWH/,humide
+RWJH/,abondance
+RWMH=/,Rouma
+RWMM/,"louange, exaltation (de Dieu)"
+RWT/,Ruth
+RWX/,esprit
+RWX=/,secours
+RWXH/,[Glosses - fr]
+RWY[,courir
+RXB/,large
+RXB<M/,Roboam
+RXB=/,largeur
+RXB==/,place ouverte
+RXB===/,large
+RXB====/,place ouverte
+RXB=====/,place ouverte
+RXB======/,large/vaste place
+RXBWT/,Rehoboth
+RXB[,être grand
+RXC[,avoir plein de pensées
+RXJM/,broyeur à main
+RXM=/,Percnoptère (d'Egypte)
+RXM==/,"amour, compassion"
+RXMH/,des femmes
+RXMH=/,des femmes
+RXMH==/,des femmes
+RXMNJ/,compatissant
+RXM[,aimer
+RXP[,trembler
+RXQ/,être loin (de quelqu'un)
+RXQ[,être loin
+RXT/,pelle à vanner
+RXWM/,compatissant
+RXWM=/,Rehoum
+RXWQ/,loin (en temps)
+RXY/,cuvette
+RXYH/,laver
+RXY[,"prendre un bain, baigner, laver"
+RY/,morceau
+RY<[,percer
+RY>[,courir
+RYD[,regarder avec envie
+RYH=[,rembourser
+RYH[,rembourser
+RYJ>/,Ritsia
+RYJN/,Retsîn
+RYP/,charbons ardents
+RYP=/,charbons ardents
+RYPH/,"charbon actif, vif, incondescent"
+RYPH==/,"charbon actif, vif, incondescent"
+RYWN/,acceptation
+RYX/,assassiner
+RYX[,commettre un meurtre
+RYY[,casser
+RZH/,pauvre (sol)
+RZJ/,gaspiller
+RZM[,les yeux (d'une personne) s'illuminent
+RZN[,diregeant
+S<D[,renforcer
+S<H[,se déchaîner
+S<JP/,fente (dans la roche)
+S<JP=/,fente (dans la roche)
+S<P/,double pensée
+S<PH/,"rameau, branche"
+S>H/,séa
+S>N[,piétiner
+S>WN/,botte
+SB>/,alcool
+SB>==/,Seva
+SB>[,alcool
+SBB[,tourner
+SBH/,tournure
+SBK/,fourré
+SBKJ/,Sibbekaï
+SBL/,porteur
+SBL=/,corvée
+SBL==/,fardeau > oppression
+SBLT/,épi ou grain
+SBLWT/,"fardeau > corvée, travail forcé"
+SBL[,porter
+SBRJM/,Sivraïm
+SBT>/,Savta
+SBTK>/,Savteka
+SD/,entraves
+SDJN/,tunique
+SDM/,Sodome
+SDR/,ordre
+SGLH/,"bien précieux, peuple choisi"
+SGN/,préfet
+SGR[,fermer
+SGWR/,cage thoracique
+SGWR=/,cage thoracique
+SHR/,prison
+SHR=/,rondeur
+SJG/,crasse
+SJN/,désert de Sîn
+SJN=/,désert de Sîn
+SJNJ/,Sinite
+SJNJ=/,Sinaï
+SJNJM/,Sinim
+SJSR>/,Sisera
+SJWN/,Sivân
+SJXWN/,Sihôn
+SK/,cabane
+SK=/,foule
+SKH/,"abri, cabane, hutte"
+SKJ/,Soukkiyens
+SKKH/,Sekaka
+SKL/,fou
+SKL=/,délire
+SKLWT/,folie
+SKL[,agir de manière insensée
+SKN[,être bénéfique
+SKR=[,être fermé
+SKR[,être fermé
+SKT[,garder le silence
+SKWT/,Soukkot
+SKWT=/,Sikkouth
+SKWT_BNWT/,Soukkoth-Benoth
+SL/,corbeille
+SL</,rocher
+SL<=/,rocher
+SL<M/,sauterelle
+SL>/,Silla
+SLD/,Sèled
+SLH,sela
+SLJXH/,pardon
+SLKH/,Salka
+SLLH/,rampe d'attaque
+SLL[,jeter
+SLM/,échelle
+SLP/,perversité
+SLP[,subvertir
+SLSLH/,rameau
+SLT/,fine farine
+SLWN/,épine
+SLX/,prêt à pardonner
+SLX[,pardonner
+SM/,épices parfumées
+SMDR/,fleur de vigne
+SMGR_NBW/,Samgar-Nebou
+SMKJHW/,Semakya
+SMK[,poser (la main sur)
+SML/,image
+SMN[,placer
+SMR/,[Glosses - fr]
+SNBLV/,Sânballat
+SNH/,buisson
+SNPJR/,nageoire
+SNSNH/,Sânsanna
+SNSNH=/,Sânsanna
+SNW>H/,Ha-Senoua
+SNWRJM/,aveuglement
+SNXRJB/,Sennakérib
+SP/,bol
+SP=/,bol
+SP==/,bol
+SPD[,"pleurer quelqu'un, s'endeuiller"
+SPH[,[Glosses - fr]
+SPJ/,Sippaï
+SPJNH/,navire
+SPJR/,saphir
+SPJX/,torrent
+SPJX=/,torrent
+SPL/,bol
+SPN/,plafond
+SPN[,recouvrir
+SPP[,se tenir sur le seuil
+SPRD/,Sefarad
+SPRH/,nombre
+SPRT/,Sofèreth
+SPRWJ/,Sefarwites
+SPRWJM=/,Sefarwaïm
+SPXT/,éruption cutanée
+SQL[,"cribler, bombarder de pierres"
+SR/,têtu
+SR<PH/,rameau
+SRB/,épine
+SRD/,Sèred
+SRDJ/,Sardite
+SRGWN/,Sargon
+SRH/,cessation
+SRH=/,cessation
+SRJS/,eunuque
+SRN/,essieu
+SRN=/,essieu
+SRPD/,ortie
+SRP[,brûler
+SRR[,être rebelle
+SRX/,surplombant
+SS/,mite
+SSMJ/,Sismaï
+STRJ/,Sitri
+STR[,être caché
+STW/,saison pluvieuse
+STWR/,Setour
+SW>/,So
+SWD/,conseil
+SWDJ/,Sodi
+SWGR/,cage
+SWG[,reculer
+SWK=[,s'oindre (d'huile)
+SWK[,s'oindre (d'huile)
+SWP/,roseau
+SWP==/,roseau
+SWPH/,orage
+SWPH=/,orage
+SWS/,cheval
+SWSH/,jument
+SWSJ/,Sousi
+SWT/,habillement
+SWVJ/,Sotaï
+SWX/,Souah
+SWXH/,déchets
+SXB[,traîner
+SXH[,balayer
+SXJ/,balayures
+SXP[,endommager
+SXR/,gain
+SXRH/,défense
+SXRH=/,marchandise
+SXRT/,pierre
+SXR[,se déplacer livrement > commercer
+T<<[,se moquer
+T<B[,détester
+T<H[,errer
+T<LH/,canal
+T<LH=/,canal
+T<LMH/,secret
+T<NJT/,s'humilier en jeûnant
+T<NK/,Taanak
+T<NWG/,confort
+T<R/,rasoir
+T<WDH/,message écrit
+T>/,salle
+T>BH/,aspiration
+T>CWR/,cyprès
+T>H[,délimiter
+T>LH/,malédiction
+T>M[,porter des jumeaux
+T>NH/,figuier
+T>NJH/,deuil
+T>NT_CLH/,Taanath-Silo
+T>R/,silhouette
+T>R</,Taréa
+T>R[,faire un tournant
+T>W/,oryx
+T>WH/,envie
+TB<RH/,Tabeéra
+TBH/,panier
+TBH=/,panier
+TBL/,terre
+TBL=/,perversion
+TBL==/,Toubal
+TBLJT/,s'épuiser
+TBLL/,défaut
+TBN/,paille
+TBNJ/,Tivni
+TBNJT/,construction
+TBW>H/,rendement
+TBWNH/,compréhension
+TBWR/,Tabor
+TBWSH/,chute
+TBY/,Tébets
+TC</,neuf
+TC>H/,cri
+TCBJ/,"Tishbite, de Tishbé"
+TCBY/,tunique brodée
+TCJ<J/,neuvième
+TCW<H/,salut
+TCWBH/,retourner
+TCWQH/,désir
+TCWRH/,don
+TD<L/,Tidéal
+TDHR/,laurier
+TDMR/,Tadmor
+TFWMT/,dépôt
+TGLT_PL>SR/,Tiglath-Piléser
+TGMWL/,actions
+TGRH/,coup
+THLH/,louange
+THPKWT/,être tortueux dans son comportement
+THW/,"vide, désolation, chaos"
+THWM/,océan
+TJC/,bouc
+TJM>/,Téma
+TJMNJ/,Témanite
+TJMNJ=/,Témeni
+TJMRH/,colonne
+TJRJ>/,Tirya
+TJRS/,Tiras
+TJRWC/,moût
+TJYJ/,Titsite
+TK/,tromperie
+TKH[,suivre les traces de (quelqu'un)
+TKLH/,perfection
+TKLJT/,limite
+TKLT/,pourpre rouge
+TKN/,nombre
+TKN=/,nombre
+TKNJT/,"plan, structure, modèle"
+TKRJK/,robe
+TL/,monticule
+TL<[,être vêtu d'écarlate
+TL>FR/,Telassar
+TL>H/,bouleversant
+TL>[,pendre
+TLBCT/,vêtement
+TLH[,accroché
+TLJ/,carquois
+TLM/,sillon
+TLMJ/,Talmaï
+TLMJD/,élève
+TLNWT/,"murmurer, se plaindre, maugréer"
+TLTL/,bouclé (cheveux)
+TLX/,Tèlah
+TL_>BJB/,Tel-Aviv
+TL_MLX/,Tel-Mèlah
+TL_XRC>/,Tel-Harsha
+TM/,joint
+TM=/,intégrité
+TMH/,intégrité
+TMHWN/,être étonné
+TMH[,être étonné
+TMJD/,constamment
+TMJM/,entier
+TMJM=/,Ourim et Toummim
+TMK[,obtenir
+TMM[,être fini
+TMN</,Timna
+TMNH/,Timna
+TMNJ/,Timnite
+TMR=/,dattier
+TMR==/,dattier
+TMRWQ/,massage avec des produits cosmétiques
+TMS/,couler
+TMWRH/,récompense
+TMWTH/,la mort
+TMWZ/,Tammouz
+TMX/,Tèmah
+TNCMT/,chouette effraie
+TNCMT=/,chouette effraie
+TNJN/,monstre marin
+TNW>H/,entrave
+TNWBH/,produit
+TNWK/,lobe de l'oreille
+TNWMH/,assoupissement
+TNWPH/,agiter çà et là
+TNWR/,"four, fournaise"
+TNXMT/,Tanhoumeth
+TP/,tambour
+TPF[,s'engager (dans quelque chose)
+TPL/,(nourriture) fade
+TPL=/,(nourriture) fade
+TPL==/,Tofel
+TPLH/,prière
+TPLH=/,irrationalité
+TPLYT/,trembler
+TPP[,[Glosses - fr]
+TPR[,coudre
+TPSX/,Tifsah
+TPTH/,bûcher
+TQ</,sonnerie
+TQP/,force
+TQW<J/,de Teqoa
+TQWH/,cordon
+TQWH=/,cordon
+TQWH==/,cordon
+TQWMH/,rester ferme
+TQWPH/,horizon
+TR<LH/,tituber
+TR<TJ/,Tiréatite
+TR>LH/,Taréala
+TRBJT/,intérêt
+TRBWT/,accroissement
+TRC/,Tèresh
+TRCT>/,gouverneur
+TRDMH/,"profond sommeil, léthargie"
+TRGM[,traduit
+TRHQH/,Tirhaqa
+TRN/,hampe
+TRPJM/,idoles domestiques
+TRTN/,général en chef
+TRTQ/,Tartaq
+TRW<H/,cri
+TRWMH/,contribution
+TRWMJH/,contribution
+TRWPH/,guérison
+TRX/,Tèrah
+TRX=/,Tèrah
+TRXNH/,Tirhana
+TRYH/,Tirtsa
+TRYH=/,Tirtsa
+TRZH/,pin pignon
+TW/,marque
+TW<BH/,pratique abominable
+TW<H/,égarer
+TW<PWT/,éminence
+TWBL_QJN/,Toubal-Caïn
+TWCB/,résident
+TWCJH/,saine sagesse
+TWDH/,confession
+TWGH/,chagrin
+TWGRMH/,Togarma
+TWK/,au milieu de
+TWL<J/,Tolaïte
+TWLD/,Tolad
+TWLDWT/,ordre de naissance
+TWLL/,oppresseur
+TWR[,espionner
+TWTX/,masse
+TWX/,Toah
+TWXLT/,espoir
+TWY>WT/,sortie
+TXKMNJ/,Tahkemonite
+TXLH/,"débuter, commencer"
+TXMS/,hibou des marais
+TXN/,Tahân
+TXNH/,pitié
+TXNH=/,pitié
+TXNJ/,Tahanite
+TXNWN/,implorer la clémence
+TXPNJS/,Tahpenès
+TXPNXS/,Tahpanhès
+TXR</,Tahréa
+TXR>/,cotte de maille
+TXT/,au lieu de
+TXT=/,au lieu de
+TXT==/,au lieu de
+TXTJ/,inférieur
+TXTWN/,inférieur
+TXW/,Tohou
+TZNWT/,fornication
+TZZ[,"retrancher, couper"
+V<H[,égarer
+V<M/,goût
+V<N[,charger
+VB<T/,"bague, chevalière"
+VB<WT/,Tabbaoth
+VB<[,sombrer
+VBLJHW/,Tevalyahou
+VBL[,tremper
+VBT/,Tabbath
+VBWR/,nombril
+VBX=/,"cuisinier, boucher"
+VBXH/,abattre
+VBXH=/,cuisinière
+VBXT/,Tivhath
+VHR/,pur
+VHR=/,pureté
+VHRH/,"purification, nettoyage"
+VHR[,"devenir propre, pur"
+VJRH/,"camp, campement, village"
+VJV/,boue
+VJX/,"enduit, plâtre"
+VL/,rosée
+VL>JM/,Telaïm
+VL>[,"rapiécer, raccommoder"
+VLM/,Tèlem
+VLM=/,Tèlem
+VLMWN/,Talmôn
+VLVLH/,éjection violente
+VM>/,devenir impur
+VM>H/,impureté
+VM>[,devenir impur
+VMH[,passer pour stupide
+VMN[,se cacher
+VN>/,"corbeille, panier"
+VNP[,souiller
+VP/,"jeune enfant, un petit"
+VPC[,être gras
+VPL[,"enduire, recouvrir"
+VPP[,se déhancher
+VPSR/,"commandant, officier recruteur, scribe"
+VPT/,Tafath
+VPX=/,un palme
+VRJ/,frais
+VRJPH/,"proie, victime"
+VRM/,avant que
+VRP/,"proie, victime"
+VRP=/,"frais, fraîchement germé"
+VRP==/,"proie, victime"
+VRP[,"mettre en pièce, déchiqueter, dépecer"
+VRX/,"fardeau, charge"
+VWB=/,bonté
+VWF[,descendre en piqué
+VWH[,filer
+VWL[,lancer
+VWR/,série
+VWVPT/,bandeau
+VXH[,(portée d'un) tir d'arc
+VXNH/,moudre
+VXN[,moudre
+VXRJM/,hémorroïdes
+VXWN/,moulin manuel
+WCNJ/,Washni
+WCTJ/,Vashti
+WDN/,Wedân
+WHB/,Wahev
+WJZT>/,Waïzata
+WLD/,enfant
+WNJH/,Wanya
+WPSJ/,Wofsi
+WW/,crochet
+WZR/,coupable
+XB/,poche
+XB>[,geler
+XBB/,Hovav
+XBB[,aimer
+XBC[,s'entrelacer
+XBH/,Houbba
+XBJH/,Havaya
+XBJWN/,être caché
+XBL==/,matelot
+XBL=====/,mât
+XBQ/,croiser les mains > être oisif
+XBQWQ/,Habaquq
+XBQ[,enlacer
+XBR/,"compagnon, camarade, associé"
+XBR==/,"compagnon, ami, associé"
+XBRH/,"groupe, compagnie"
+XBRJ/,Hébrites
+XBRNJ/,Hébronites
+XBRT/,assemblage
+XBRT=/,partenaire
+XBRWN/,Hébron
+XBRWN=/,Hébron
+XBR[,"être joint ensemble, se toucher"
+XBV[,"battre, secouer"
+XBWR/,Habor
+XBWRH/,blessure
+XBYLT/,narcisse
+XBYNJH/,Havatsinya
+XCB/,ceinture
+XCBDNH/,Hashbaddana
+XCBH/,Hashouva
+XCBNH/,Hashavna
+XCBNJH/,Hashavneya
+XCB[,penser
+XCC/,"herbe sèche, paille"
+XCH[,se taire
+XCK/,"ténèbres, obscurité"
+XCK=/,obscur
+XCKH/,"ténèbres, obscurité"
+XCK[,s'obscurcir
+XCL[,être las
+XCM/,Housham
+XCM=/,Hashoum
+XCM==/,Hashoum
+XCML/,bronze éclatant
+XCMNH/,Hashmona
+XCMWN/,Heshmôn
+XCN/,pectoral
+XCQ/,désirer
+XCQ=/,rayon
+XCQ[,relier avec une tringle
+XCR/,moyeu
+XCRH/,(nuages) saturés d'eau
+XCTJ/,Houshatite
+XCWB/,Hashouv
+XDC/,neuf
+XDC=/,mois
+XDC==/,mois
+XDCH/,Hadasha
+XDD/,Hadad
+XDH/,"être satisfait, être heureux, se réjouir"
+XDH[,"être satisfait, être heureux, se réjouir"
+XDJD/,Hadid
+XDL/,fragile
+XDL=/,ce monde (qui passera)
+XDLJ/,Hadlaï
+XDL[,cesser d'exister
+XDQ/,ronces
+XDQL/,Tigre
+XDR/,"pièce, chambre"
+XDRK/,Hadrak
+XDWH/,joie
+XFK[,retenir
+XFP/,petit troupeau
+XFWP>/,Hasoufa
+XG/,"fête, festivité"
+XG>/,terreur
+XGB/,sauterelle
+XGB=/,sauterelle
+XGG[,tituber
+XGJ/,Haggui
+XGJ=/,Aggée
+XGJ==/,Haggui
+XGJH/,Hagguiya
+XGJT/,Hagguith
+XGLH/,Hogla
+XGR[,être ceinturé de
+XGW/,creux des rochers
+XJ>L/,Hiel
+XJC/,venir vite
+XJDH/,énigme
+XJH=/,"être en bonne santé, être fort, être vigoureux"
+XJH[,"être en vie, prendre vie, vivre"
+XJL==/,"mur extérieur, rempart, fortification"
+XJL==[,attendre
+XJLM/,Hélam
+XJL[,attendre
+XJN/,beauté
+XJQ/,corps
+XJRH/,Hira
+XJRM/,Hiram
+XJWT/,"en vie, vivant"
+XJY/,mur branlant
+XJYWN/,extérieur
+XK/,palais
+XKH/,"harpon, lance à pêcher"
+XKJLH/,Hakila
+XKLJH/,Hakalya
+XKLJLJ/,yeux injectés de sang
+XKLLWT/,yeux injectés de sang
+XKM/,"sage, intelligent, capable, doué, habile, avisé"
+XKMH/,"sagesse, intelligence, habileté"
+XKMWNJ/,Hakmoni
+XKM[,être capable
+XL/,"commun, profane"
+XL>[,être malade
+XLB/,lait
+XLBH/,Helba
+XLBNH/,galbanum
+XLBWN/,Helbôn
+XLC/,faible
+XLC[,être faible
+XLD/,monde
+XLD=/,mangouste
+XLD==/,Héled
+XLDH/,Houlda
+XLDJ/,Heldaï
+XLH/,gâteau
+XLH[,"être, devenir faible"
+XLJ/,"maladie, mal, blessure"
+XLJH/,"parure, joyau"
+XLJL/,flûte
+XLJLH,À Dieu ne plaise !
+XLJPH/,ensemble
+XLJYH/,possessions
+XLL/,victime
+XLL[,se profaner
+XLMJC/,silex
+XLMWT/,jus de pourpier/mauve
+XLM[,prendre force
+XLN/,Hélôn
+XLN=/,Holôn
+XLP/,en retour de
+XLP=/,en retour de
+XLP=[,pousser
+XLP[,pousser
+XLQ/,"part, partie, partage"
+XLQ=/,"lisse, poli"
+XLQ==/,lisse
+XLQ===/,"part, partie, partage"
+XLQ====/,"part, partie, partage"
+XLQH/,part
+XLQH=/,part
+XLQH==/,division
+XLQJ/,Helqite
+XLQJ=/,Helqaï
+XLQJH/,Hilqiya(hou)
+XLQT/,Helqath
+XLQ[,diviser
+XLV[,accepter
+XLWCH/,défaite
+XLWM/,rêve
+XLWN/,fenêtre
+XLWP/,"personnes sans défense, indigents"
+XLX/,Halah
+XLXLH/,tremblement
+XLXWL/,Halhoul
+XLY/,Hèlets
+XLY=/,Hèlets
+XLY[,"ôter, enlever, sortir, retirer"
+XM/,chaleur
+XM>H/,lait caillé
+XMC/,cinq
+XMC=/,cinquième part
+XMC==/,cinquième part
+XMD/,attraits
+XMDN/,Hemdân
+XMD[,désirer
+XMH/,"venin, poison, agression"
+XMH=/,chaleur
+XMJCJ/,cinquième
+XMJCJT/,cinquième
+XMJY/,être assaisonné
+XMLH/,"compassion, clémence"
+XMLH=/,"compassion, clémence"
+XMN/,autel de l'encens
+XMQ[,se retourner
+XMR/,"boue, glaise, argile, mortier"
+XMR=/,"boue, glaise, argile, mortier"
+XMR==/,bitume
+XMR===/,vin (bourru)
+XMRN/,Hamrân
+XMS/,violence
+XMT/,outre
+XMT=/,Hamath
+XMT==/,Hammath
+XMT===/,Hammath
+XMTJ/,Hamatite
+XMT_D>R/,Hammoth-Dor
+XMV/,scinque
+XMVH/,Houmta
+XMW>L/,Hammouel
+XMWL/,Hamoul
+XMWLJ/,Hamoulite
+XMWN/,Hammôn
+XMWQ/,courbe
+XMWR/,âne
+XMWT/,belle-mère
+XMWY/,oppresseur
+XMWY=/,oppresseur
+XMY=/,"vin aigre, vinaigre"
+XN/,"beauté, élégance, charme"
+XN=/,"beauté, élégance, charme"
+XNDD/,Hénadad
+XNH/,Anne
+XNH[,camper
+XNJ>L/,Hanniel
+XNJK/,formé
+XNJNH/,montrer de la tendresse
+XNJT/,lance
+XNKH/,dédicace
+XNKJ/,Hanokite
+XNK[,dédier
+XNM,"sans paiement, pour rien, gratuit"
+XNM>L/,Hanamel
+XNML/,"déluge, inondation, gel, grésil"
+XNN/,Hanân
+XNN>L/,Hananel
+XNNJ/,Hanani
+XNNJH/,Hananya
+XNN[,être bien disposé
+XNP/,"être souillé, être profané"
+XNP=/,"pratiquer l'impiété, agir en impie"
+XNPH/,"impiété, profanation"
+XNP[,"être souillé, être profané"
+XNQ[,s'étrangler (avec une corde autour du cou)
+XNS/,Hanès
+XNTN/,Hannatôn
+XNWK/,Hénok
+XNWK=/,Hénok
+XNWN/,généreux
+XNWN=/,Hanoun
+XNWT/,voûte
+XP/,"pur, net"
+XP>[,faire des choses en secret
+XPC/,"étoffe, couverture"
+XPCH/,liberté
+XPCJ/,libre
+XPF/,plan
+XPF[,rechercher
+XPJM/,Houppim
+XPN/,les deux mains
+XPNJ/,Hofni
+XPP[,abriter
+XPR=[,piaffer
+XPRJ/,Héferite
+XPRJM/,Hafaraïm
+XPY/,plaisir
+XPY=/,aimer bien
+XPYJ_BH/,Heftsi-Va
+XPY[,aimer bien
+XPZWN/,hâte
+XPZ[,avoir peur
+XQ/,tâche
+XQH/,coutumes
+XQQ/,Houqoq
+XQQ[,graver
+XQR/,examen
+XQR[,"rechercher, essayer, tester, cerner, explorer, enquêter, examiner, contre-interroger, sonder, déterminer"
+XQWP>/,Haqoufa
+XRB/,"ciseau, couteau"
+XRB=/,sécheresse
+XRB==/,sec
+XRB===/,Horeb
+XRBH/,terre sèche
+XRBWN/,sécheresse
+XRBWN>/,Harvona
+XRB[,sécher
+XRC/,artisan
+XRC=/,être sourd
+XRC===/,artisan
+XRC====/,artisan
+XRC=====/,artisan
+XRC======/,artisan
+XRC>/,Harsha
+XRCT/,"graver (une pierre), sculpter (le bois)"
+XRC[,graver (la pierre)
+XRD/,tremblant
+XRDH/,tremblement > choc
+XRDH=/,tremblement > choc
+XRDJ/,Harodite
+XRD[,frémir
+XRF/,"pot en terre cuite, vase d'argile"
+XRGL/,sauterelle
+XRG[,trembler
+XRH=[,se consumer
+XRHJH/,Harhaya
+XRH[,se consumer
+XRJ=/,être fâcher
+XRJC/,"labour, labourage"
+XRJCJ/,(vent) brûlant
+XRJP/,Harif
+XRJV/,"bourse, sac (à main)"
+XRJY/,fromage
+XRJY=/,fromage
+XRM/,senne (ou seine)
+XRM=/,senne (ou seine)
+XRM==/,Harim
+XRM===/,Horem
+XRM=[,"(quelqu'un avec un) manque, défiguré (oreille, nez ou lèvre)"
+XRMC/,faucille
+XRMH/,Horma
+XRMWN/,Hermon
+XRM[,"(quelqu'un avec un) manque, défiguré (oreille, nez ou lèvre)"
+XRN/,Harân
+XRN=/,Harân
+XRNJ/,Horonite
+XRNPR/,Harnèfèr
+XRP/,"automne, hiver"
+XRP=/,"automne, hiver"
+XRP==/,Haref
+XRP=[,"défier, insulter, reprocher, outrager, blasphémer"
+XRPH/,"honte, mépris, déshonneur"
+XRP[,"défier, insulter, reprocher, outrager, blasphémer"
+XRQ[,grincer des dents
+XRS/,gale
+XRS=/,gale
+XRT/,Hèreth
+XRT[,graver
+XRV/,"burin, moule"
+XRVM/,"mage, magicien"
+XRWL/,mauvaise herbe
+XRWMP/,Haroumaf
+XRWN/,flétri
+XRXR/,canicule
+XRXS/,Harhas
+XRXWR/,Harhour
+XRYN/,pépin (du raisin)
+XRY[,parler contre
+XR_HGDGD/,Hor-Hagguidgad
+XSD/,"loyauté, fidélité, bonté"
+XSD=/,"loyauté, fidélité, bonté"
+XSD==/,"loyauté, fidélité, bonté"
+XSDJH/,Hasadya
+XSH/,Hosa
+XSH=/,Hosa
+XSH[,se réfugier
+XSJD/,"(personne) fidèle, loyale, pieuse"
+XSJDH/,cigogne
+XSJL/,jeune criquet
+XSJN/,puissant
+XSL[,dévorer
+XSM[,museler
+XSN/,fort
+XSN=/,trésor
+XSPS[,être floconneux
+XSR/,manquer
+XSR=/,manque
+XSR==/,manque
+XSRH/,Hasra
+XSRWN/,manque
+XSR[,manquer
+XSWT/,se réfugier
+XT/,brisé
+XT=/,brisé
+XT==/,Heth
+XTH/,terreur
+XTJ/,Hittite
+XTJT/,terreur
+XTK[,déterminer
+XTLH/,lange
+XTLN/,Hètlôn
+XTL[,envelopper de tissu
+XTMT/,sceau
+XTM[,sceller
+XTN/,"marié, époux"
+XTNH/,"mariage, noces"
+XTN[,"faire un mariage endogame, faire une union matrimoniale"
+XTP/,voleur
+XTR[,creuser
+XTT[,éclater
+XTWL/,bandage
+XV>/,culpabilité
+XV>=/,"coupable de, être responsable de"
+XV>H/,culpabilité
+XVB=[,couper
+XVB[,couper
+XVH/,blé
+XVJL/,Hattil
+XVJP>/,Hatifa
+XVJV>/,Hatita
+XVM[,se retenir
+XVP[,saisir
+XVR/,rejeton
+XVWC/,Hattoush
+XWBH/,Hova
+XWC=[,venir vite
+XWCH/,Housha
+XWCJ/,Houshaï
+XWCJM/,Houshim
+XWCJM=/,Houshim
+XWC[,venir vite
+XWD[,proposer une devinette
+XWG/,"sphère (céleste), horizon, voûte, dôme, coupole"
+XWH/,campement
+XWH=/,campement
+XWH[,s'incliner
+XWJ/,Hivvite
+XWJLH/,Hawila
+XWL/,sable
+XWL==/,attendre
+XWL[,attendre
+XWM/,sombre
+XWMH/,mur
+XWP/,littoral
+XWPM/,Houfam
+XWPMJ/,Houfamite
+XWRJ=/,Houri
+XWRJ==/,Houraï
+XWRM/,Houram
+XWRN/,Hawrân
+XWS[,prendre en pitié
+XWTM/,"sceau, cachet"
+XWV/,fil
+XWY/,dehors
+XX/,crochet
+XY/,flèche
+XYB[,tailler
+XYH[,être divisé
+XYJ/,moitié (d'un objet ou d'une substance)
+XYJ=/,moitié (d'un objet ou d'une substance)
+XYR/,"village, campement"
+XYRMWT/,Hatsarmaweth
+XYRWN/,Hetsrôn
+XYRWN=/,Hetsrôn
+XYRWNJ/,Hetsronite
+XYRWT/,Hatséroth
+XYR_<JNN/,Hatsar-Einân
+XYR_<JNWN/,Hatsar-Einôn
+XYR_>DR/,Hatsar-Addar
+XYR_CW<L/,Hatsar-Shoual
+XYR_GDH/,Hatsar-Gadda
+XYR_SWSH/,Hatsar-Soussa
+XYR_SWSJM/,Hatsar-Sousim
+XYWR/,Hatsor
+XYWR_XDTH/,Hatsor-Hadatta
+XYWT/,moitié (du temps)
+XYY/,gravier
+XYYN_TMR/,Hatsetsôn-Tamar
+XYYRH/,trompette
+XYY[,marcher en rangs
+XZ>L/,Hazaël
+XZH/,poitrine
+XZH=/,voyant
+XZH[,voir
+XZJ>L/,Haziel
+XZJH/,Hazaya
+XZJR/,porc
+XZJR=/,Hézir
+XZJZ/,nuage orageux
+XZQ/,"fort, puissant"
+XZQ=/,"force, puissance"
+XZQ==/,"fort, puissant, renforcer"
+XZQ===/,force
+XZQH/,réparer
+XZQH=/,"force, puissance, pouvoir"
+XZQJ/,Hizqi
+XZQJH/,Ézékias
+XZQ[,être fort
+XZW/,Hazo
+XZWN/,rêve
+XZWT/,voyant
+Y<D/,pas
+Y<DH/,brassard
+Y<D[,faire un pas
+Y<H[,se prosterner
+Y<JP/,voile
+Y<JR/,petit
+Y<JR=/,petit
+Y<JRH/,petit
+Y<N/,"Tsoân, Tanis"
+Y<NNJM/,Tsaanannim
+Y<QH/,cri d'alarme
+Y<Q[,rassembler les gens
+Y<R/,Tsoar
+Y>H/,pioche
+Y>H=/,excrément
+Y>N/,troupeau
+Y>NN/,Tsaanân
+YB/,char
+YB</,étoffe teinte
+YB<JM/,Tseboïm
+YB<WN/,Tsibéôn
+YB=/,char
+YB>/,travail
+YB>=/,travail
+YB>JM/,Tseboïm
+YBH/,enflé
+YBH[,enfler
+YBJ>/,Tsibia
+YBJH/,gazelle
+YBR/,tas
+YBT/,"gerbes, javelles"
+YBV[,passer
+YBW</,tacheté
+YD/,côté
+YD=/,côté
+YDD/,Tsedad
+YDH=[,se mettre en attente
+YDH[,se mettre en attente
+YDJH/,se tenir à l'affût
+YDJM/,Tsiddim
+YDJQ/,"juste, droit, innocent"
+YDQ/,juste
+YDQH/,justice
+YDQJH/,Sédécias
+YDQ[,être juste
+YDWQ/,Tsadoq
+YHB/,jaunâtre
+YJ/,navire
+YJ<R/,Tsior
+YJ=/,navire
+YJB>/,Tsiba
+YJD/,chasse
+YJD=/,chasse
+YJD==/,chasseur
+YJDH/,provisions
+YJDNJ/,Sidonien
+YJDWN/,Sidon
+YJH/,sécheresse
+YJNQ/,"collier de fer, les fers, carcan"
+YJR/,image
+YJR=/,image
+YJR==/,image
+YJR===/,image
+YJR[,se déguiser en ambassadeur
+YJWN=/,"indicateur, repère, signe"
+YJWN==/,Sion
+YJX>/,Tsiha
+YJY/,fleur
+YJY=/,fleur
+YJYH/,fleur
+YJYT/,frange
+YL/,ombre
+YL<=/,côte
+YLH/,Tsilla
+YLJ/,rôti (viande)
+YLJL/,miche (de pain)
+YLL[,projeter de l'ombre
+YLM/,image
+YLMN</,Tsalmounna
+YLMNH/,Tsalmona
+YLMWN/,Tsalmôn
+YLMWN=/,Tsalmôn
+YLMWT/,ténèbres profondes
+YLP/,Tsalaph
+YLPXD/,Tselophhad
+YLQ/,Tséleq
+YLTJ/,Tsiltaï
+YLXJT/,"bol, écuelle, plat"
+YLX[,"se précipiter (sur), venir (sur)"
+YLYX/,Tseltsah
+YM>/,avoir soif
+YM>=/,avoir soif
+YM>H/,soif
+YM>WN/,terre altérée
+YM>[,avoir soif
+YMD/,paire (d'animaux)
+YMD[,être ceint
+YMH/,voile
+YMJD/,bracelet
+YMJD=/,bracelet
+YMJM/,assoiffé
+YMQ[,se dessécher
+YMR/,laine
+YMRJ/,Tsemarites
+YMRJM/,Tsemaraïm
+YMRT/,cîme d'un arbre
+YMTT/,déchéance (du droit de rachat)
+YMT[,"disparaître, dissiper"
+YMX/,"croissance, pousse, végétation"
+YMX[,"germer, pousser (plantes)"
+YN/,épine
+YN=/,Tsîn
+YN>/,troupeau
+YNH/,froid
+YNH=/,froid
+YNH==/,froid
+YNJNJM/,piqûres
+YNM/,"stérile, asséchée"
+YNN/,Tsenân
+YNPH/,turban
+YNP[,rouler
+YNWR/,tunnel d'eau
+YNX[,descendre
+YNYNT/,vase
+YP</,cobra
+YPD[,se dessécher
+YPH/,"surveiller, guetter"
+YPJH/,"surveiller, espérer"
+YPJR/,bouc
+YPJRH/,"couronne, diadème"
+YPJT/,"étoffe, tapis"
+YPJWN/,Tsiphiôn
+YPJXT/,gâteau
+YPNJH/,Tsephania
+YPNT_P<NX/,Tsaphnath-Panéah
+YPN[,se cacher
+YPP[,"pépier, gazouiller"
+YPRD</,(fléau des) grenouilles
+YPRH/,Tsippora
+YPRN/,ongle
+YPR[,(re)tourner
+YPT/,chapiteau
+YPT=/,Tsephath
+YPWJ/,"couverture, revêtement"
+YPWN/,Mont Zaphon
+YPWN==/,Tsephôn
+YPWR/,moineau
+YPXT/,jarre
+YPYPH/,saule
+YQLG/,Tsiqlag
+YR<H/,frelon
+YR<H=/,Tsorea
+YR<T/,être atteint d'une maladie de la peau
+YR<[,être atteint d'une maladie de la peau
+YR=====/,Tser
+YRB/,être brûlé
+YRB[,être brûlé
+YRDH/,Tseréda
+YRH/,"angoisse, anxiété, souffrance"
+YRH=/,"angoisse, anxiété, souffrance"
+YRJ=/,Tyrien
+YRJ==/,storax
+YRJX/,"cave, voûte"
+YRK/,le besoin
+YRPJ/,orfèvre
+YRPT/,Sarepta
+YRP[,tester
+YRRH/,Tseréra
+YRT/,Tséréth
+YRTN/,Tsartân
+YRT_HCXR/,Tséreth-Hachahar
+YRW<H/,Tseroua
+YRWJH/,Tserouya
+YRWR/,sac
+YRWR=/,sac
+YRWR==/,sac
+YRX[,crier
+YW/,ordre
+YW<R/,Tsouar
+YWB>/,Tsoba
+YWH[,"ordonner, commander"
+YWLH/,profondeur
+YWM[,jeûner
+YWP/,couler
+YWP=/,couler
+YWPX/,Tsophah
+YWP[,couler
+YWQ[,harceler
+YWR/,roche
+YWR=/,roche
+YWR==/,roche
+YWR=[,barricader
+YWRH/,plan
+YWRJ>L/,Touriel
+YWRJCDJ/,Tsourishaddaï
+YWR[,barricader
+YWT[,être la proie des flammes
+YWXH/,crier
+YWX[,"pleurer, crier"
+YWY=[,fleurir
+YWY[,fleurir
+YX/,blanc lumineux
+YXH/,sec (avec la soif)
+YXH[,sec (avec la soif)
+YXJX/,surface nue
+YXJXH/,terre nue
+YXNH/,mauvaise odeur
+YXQ/,rire
+YXQ[,rire
+YXR/,"blanc, beige"
+YXR=/,Tsohar
+YXYXH/,"terre nue, lieu aride"
+Z<H/,transpiration
+Z<JR/,petit
+Z<K[,s'éteindre
+Z<M/,"colère, fureur, courroux"
+Z<M[,"exprimer sa colère, passer sa colère"
+Z<P/,rage
+Z<P=/,furieux
+Z<P[,être furieux
+Z<QH/,cri d'alarme
+Z<Q[,crier
+Z<WN/,Zaavân
+Z>B/,loup
+Z>B=/,loup
+ZBD=/,Zavad
+ZBDJ/,Zavdi
+ZBDJ>L/,Zavdiel
+ZBD[,faire un cadeau précieux
+ZBJ/,Zabbaï
+ZBJN>/,Zevina
+ZBWB/,mouche
+ZBWD/,Zavoud
+ZBWLN/,Zabulon
+ZBWLNJ/,Zabulonite
+ZBX/,sacrifice
+ZBX=/,sacrifice
+ZBX[,"abattre, tuer"
+ZD/,présomptueux
+ZDWN/,présomption
+ZG/,peau (de raisin)
+ZH=,cette
+ZHB/,or
+ZHM/,"rejeter, trouver répugnant"
+ZHR/,"luminosité, brillance, splendeur, éclat"
+ZHR[,"briller, être brillant, resplendir"
+ZJ</,Zia
+ZJDWN/,écumant
+ZJD[,bouillir
+ZJN>/,Zina
+ZJP/,Zif
+ZJP=/,Zif
+ZJPH/,Zifa
+ZJPJ/,Zifite
+ZJQH/,"chaînes, fers"
+ZJT/,olivier
+ZJTN/,Zétân
+ZJZ/,créatures des champs
+ZJZ=/,créatures des champs
+ZJZ>/,Ziza
+ZJZH/,Ziza
+ZK/,pur
+ZKH[,être juste
+ZKK[,être propre
+ZKR/,remémoration
+ZKR=/,"mâle, homme"
+ZKR==/,remémoration
+ZKRJ/,Zikri
+ZKRWN/,souvenir
+ZKWKJT/,verre
+ZKWR=/,homme
+ZKWR==/,Zakkour
+ZL<PH/,échauffement
+ZLL[,être un glouton
+ZLPH/,Zilpa
+ZMH/,plan
+ZMH=/,plan
+ZMJR/,"chant, chanson"
+ZMJR=/,"chant, chanson"
+ZMJRH/,Zemira
+ZMM[,planifier
+ZMR/,mouflon
+ZMRJ/,Zimri
+ZMRJ=/,Zimri
+ZMRN/,Zimram
+ZMR[,chanter la louange
+ZMWRH/,sarment
+ZMZMJM/,Zamzoummites
+ZN/,espèce
+ZNB/,queue
+ZNB[,attaquer l'arrière
+ZNQ[,s'élancer
+ZNWNJM/,prostitution
+ZNWT/,prostitution
+ZNWX/,Zanoah
+ZNWX=/,Zanoah
+ZNX=[,"être infect, empester"
+ZNX[,"être infect, empester"
+ZPT/,bitume
+ZQN/,"vieux, âgé"
+ZQN=/,barbe
+ZQN==/,vieillesse
+ZQNH/,vieillesse
+ZQNJM/,vieux jours
+ZQN[,"être vieux, devenir vieux"
+ZQQ[,raffiné
+ZR</,semence
+ZR<[,"semer, répandre, planter"
+ZR=/,moulure
+ZR>/,dégoût
+ZRBBL/,Zorobabel
+ZRB[,fondre
+ZRC/,Zèresh
+ZRD/,Zèred
+ZRM/,"orage, trombe d'eau"
+ZRMH/,émission (de sperme)
+ZRQ=[,disperser
+ZRQ[,disperser
+ZRT/,empan
+ZRW</,bras
+ZRW<=/,semence
+ZRXJ/,Zarhite
+ZRXJH/,Zerahya
+ZRX[,se lever
+ZRZJP/,arroser
+ZRZJR/,"coq, poulet"
+ZTM/,Zétam
+ZTR/,Zétar
+ZTW>/,Zattou
+ZW/,Ziw
+ZW<H/,(objet de) terreur
+ZWB[,couler
+ZWJT/,"coin, angle"
+ZWLH/,sauf
+ZWL[,prélever
+ZWR=[,extraire
+ZWXT/,Zoheth
+ZWZJ/,Zouzim
+ZXLT/,serpent
+ZXL[,ramper
+ZXX[,glisser
+ZZ>/,Zaza

@@ -42,6 +42,19 @@ def _resources_dir() -> Path:
     return Path(env) if env else HERE.parent / "resources"
 
 
+# Non-answerable placeholders that some lexicons use for function words instead of a
+# translatable gloss: empty, a dash, or an ALL-CAPS label/transliteration (Greek "ART";
+# Hebrew "ZH"/"MH"/"KJ" transliterations, "UKENDT"=unknown). A learner can't type these,
+# so they are treated as "no gloss" — the lexeme drops out of the /words pool.
+_GLOSS_PLACEHOLDER = re.compile(r"^[A-ZÆØÅ]{2,}$")
+
+
+def _real_gloss(v: str | None) -> str:
+    """The gloss if it's answerable, else '' (empty / '-' / an all-caps placeholder)."""
+    v = (v or "").strip()
+    return "" if (not v or v == "-" or _GLOSS_PLACEHOLDER.match(v)) else v
+
+
 def _gloss_dir(src: str) -> Path:
     """resources/word_glosses/<src>/ — per source-language (hbo / grc). Each <Lang>.csv
     is keyed by `lex` (the value /words returns) with columns: lex, default, then one
@@ -91,7 +104,8 @@ def gloss_lexemes(src: str, lang: str) -> set:
     filter /words. Files commonly list every lexeme with mostly-empty rows, so a row
     must carry at least one non-empty gloss column to count."""
     table, _stem_cols, gloss_cols = _gloss_table(src, lang)
-    return {lex for lex, row in table.items() if any(row.get(c) for c in gloss_cols)}
+    return {lex for lex, row in table.items()
+            if any(_real_gloss(row.get(c)) for c in gloss_cols)}
 
 
 def resolve_word_gloss(src: str, lang: str, lex: str, stem: str | None) -> str | None:
@@ -106,15 +120,17 @@ def resolve_word_gloss(src: str, lang: str, lex: str, stem: str | None) -> str |
 
     def _first(cols):
         for c in cols:
-            if row.get(c):
-                return row[c]
+            g = _real_gloss(row.get(c))
+            if g:
+                return g
         return None
 
     # Stem-aware only when the file actually has stem columns (Hebrew verbs). Greek
     # files are single-gloss (lex, default) → everything falls through to `default`.
+    # Placeholder values ('-', labels) are skipped, so a real gloss in another column wins.
     if stem_cols and stem and stem != "NA":   # verb
-        return row.get(stem) or _first(stem_cols)
-    return row.get("default") or _first(gloss_cols)
+        return _real_gloss(row.get(stem)) or _first(stem_cols)
+    return _real_gloss(row.get("default")) or _first(gloss_cols)
 
 
 def _tw_tsv_path() -> Path:

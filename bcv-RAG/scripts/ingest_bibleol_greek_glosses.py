@@ -25,9 +25,15 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "example/BibleOL/lexicons/greek_da.csv"
 BRIDGE = ROOT / "resources/word_freq/grc_strong.tsv"   # Nestle1904 lemma → Strong's
-OUT = ROOT / "resources/word_glosses/grc/Danish.csv"
+
+# Default: Danish. Otherwise: <Language> <suffix>  (e.g. "Dutch nl" → greek_nl.csv → grc/Dutch.csv)
+if len(sys.argv) >= 3:
+    LANGUAGE, SUFFIX = sys.argv[1], sys.argv[2]
+else:
+    LANGUAGE, SUFFIX = "Danish", "da"
+SRC = ROOT / f"example/BibleOL/lexicons/greek_{SUFFIX}.csv"
+OUT = ROOT / f"resources/word_glosses/grc/{LANGUAGE}.csv"
 
 
 def main() -> None:
@@ -75,8 +81,8 @@ def main() -> None:
         for lem in sorted(lemma_gloss):
             w.writerow([lem, lemma_gloss[lem]])
 
-    print(f"greek_da: {seen} glossed, {skipped} skipped (unreliable Strong's), {bridged} "
-          f"bridged → {len(lemma_gloss)} lemmas → {OUT.relative_to(ROOT)}", file=sys.stderr)
+    print(f"{LANGUAGE} (grc): {seen} glossed, {skipped} skipped (unreliable Strong's), "
+          f"{bridged} bridged → {len(lemma_gloss)} lemmas → {OUT.relative_to(ROOT)}", file=sys.stderr)
 
 
 if __name__ == "__main__":
