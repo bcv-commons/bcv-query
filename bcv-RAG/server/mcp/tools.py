@@ -306,6 +306,60 @@ def _passage_lookup(args: dict, db: sqlite3.Connection) -> dict:
 
 
 @register_tool(
+    name="morphology_concordance",
+    description=(
+        "Concordance by BHSA lexeme + verbal stem (binyan): every verse where a Hebrew "
+        "lexeme occurs in a given stem. A PRECISE structured lookup (not fuzzy search) over "
+        "BHSA-derived lex/stem tags — so it separates senses Strong's can't. e.g. "
+        "lex='QDC[', stem='hif' → verses where קדשׁ is causative ('declare holy'), distinct "
+        "from stem='piel' ('consecrate'); and it distinguishes homographs a single Strong's "
+        "conflates. `lex` is the BHSA lex-id (get it from shoresh /words or /wordstudy). Omit "
+        "`stem` for all occurrences of the lexeme (any binyan)."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "lex": {"type": "string", "description": "BHSA lex-id, e.g. 'QDC[' (qadash)."},
+            "stem": {
+                "type": "string",
+                "description": "Verbal stem / binyan, e.g. 'qal','nif','piel','hif'. Omit for any.",
+            },
+            "top_k": {"type": "integer", "default": 50, "minimum": 1, "maximum": 500},
+            "lang": {"type": "string", "default": "en"},
+        },
+        "required": ["lex"],
+    },
+)
+def _morphology_concordance(args: dict, db: sqlite3.Connection) -> dict:
+    lex = args.get("lex", "").strip()
+    if not lex:
+        raise ValueError("'lex' is required (BHSA lex-id, e.g. 'QDC[')")
+    stem = args.get("stem", "").strip()
+    top_k = int(args.get("top_k", 50))
+    tag = f"lexstem:{lex}.{stem}" if stem else f"lex:{lex}"
+    total = db.execute("SELECT count(*) FROM tags WHERE tag = ?", (tag,)).fetchone()[0]
+    rows = db.execute(
+        """
+        SELECT chunks.id
+        FROM chunks
+        JOIN tags ON tags.doc_id = chunks.doc_id AND tags.tag = ?
+        JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id
+        ORDER BY passage_refs.start_bbcccvvv
+        LIMIT ?
+        """,
+        (tag, top_k),
+    ).fetchall()
+    cards = citations_mod.resolve_many(db, [r[0] for r in rows])
+    return {
+        "lex": lex,
+        "stem": stem or None,
+        "tag": tag,
+        "total": total,
+        "verses": [chunk_preview_from_card(c, lang=args.get("lang", "en")) for c in cards],
+    }
+
+
+@register_tool(
     name="entity_lookup",
     description=(
         "Find chunks about a person, place, or biblical concept. Merges Door43 "
