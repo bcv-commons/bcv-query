@@ -10,26 +10,29 @@ from __future__ import annotations
 import os
 from typing import Literal
 
-def _model_env(name: str, default: str) -> str:
-    """Prefer the clean NAME (e.g. GROQ_MODEL, matching ANTHROPIC_MODEL style); fall back
-    to the legacy BTMCP_-prefixed var so existing deployments keep working."""
-    return os.environ.get(name) or os.environ.get(f"BTMCP_{name}") or default
+def _model_setting(name: str) -> str:
+    """Resolve a model setting from the env (clean NAME, or legacy BTMCP_NAME). '' if unset."""
+    return (os.environ.get(name) or os.environ.get(f"BTMCP_{name}") or "").strip()
 
 
-# Default upgraded from llama-3.3-70b-versatile (verified live on Groq 2026-06).
-# Override per deploy via GROQ_MODEL, e.g.
-#   GROQ_MODEL=qwen/qwen3.6-27b      # stronger for synthesis quality (this default)
-#   GROQ_MODEL=openai/gpt-oss-120b   # stronger for reasoning-heavy / tool-using tasks
-GROQ_MODEL = _model_env("GROQ_MODEL", "qwen/qwen3.6-27b")
-OPENAI_MODEL = _model_env("OPENAI_MODEL", "gpt-4o-mini")
+def _require_model(name: str) -> str:
+    """The model MUST be set in the env — NO hardcoded fallback. A stale default silently
+    serving the wrong model is a footgun (and drifts from what the .env intends). Validated
+    at call time so the error points at the actual missing config."""
+    v = _model_setting(name)
+    if not v:
+        raise RuntimeError(f"{name} is not set — set it in the .env (no hardcoded model default)")
+    return v
 
-# qwen3 / gpt-oss / deepseek-r1 are REASONING models: by default they emit a chain-of-thought
-# that leaks into (and at our token budget, crowds out) the answer. For the synthesis path we
-# want the answer, not the reasoning — so disable thinking on Groq reasoning models.
-# Override with GROQ_REASONING_EFFORT=low|medium|high to re-enable (or "" to send nothing).
-GROQ_REASONING_EFFORT = _model_env("GROQ_REASONING_EFFORT", "none")
+
+# Infra / behaviour settings (NOT stale-prone model choices), so a sensible default is fine:
+#   GROQ_BASE_URL         — the Groq endpoint (the API contract, same for everyone).
+#   GROQ_REASONING_EFFORT — 'none' disables chain-of-thought on reasoning models so the answer
+#                           fits the token budget; set low|medium|high to re-enable, '' to omit.
+GROQ_BASE_URL = _model_setting("GROQ_BASE_URL") or "https://api.groq.com/openai/v1"
+GROQ_REASONING_EFFORT = os.environ.get(
+    "GROQ_REASONING_EFFORT", os.environ.get("BTMCP_GROQ_REASONING_EFFORT", "none"))
 _REASONING_FAMILIES = ("qwen3", "gpt-oss", "deepseek-r1")
-GROQ_BASE_URL = _model_env("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
 
 
 def _is_reasoning_model(model: str) -> bool:
@@ -95,12 +98,13 @@ def chat_completion(
 
     last_err: Exception | None = None
     if groq is not None:
+        groq_model = _require_model("GROQ_MODEL")
         try:
             groq_extras = dict(extras)
             # disable/limit thinking on reasoning models so the answer fits the token budget
-            if GROQ_REASONING_EFFORT and _is_reasoning_model(GROQ_MODEL):
+            if GROQ_REASONING_EFFORT and _is_reasoning_model(groq_model):
                 groq_extras["extra_body"] = {"reasoning_effort": GROQ_REASONING_EFFORT}
-            resp = groq.chat.completions.create(model=GROQ_MODEL, messages=messages, **groq_extras)
+            resp = groq.chat.completions.create(model=groq_model, messages=messages, **groq_extras)
             return _strip_think(resp.choices[0].message.content or "")
         except transient_errors as e:
             last_err = e
@@ -112,7 +116,8 @@ def chat_completion(
                 raise
 
     if oai is not None:
-        resp = oai.chat.completions.create(model=OPENAI_MODEL, messages=messages, **extras)
+        resp = oai.chat.completions.create(model=_require_model("OPENAI_MODEL"),
+                                           messages=messages, **extras)
         return resp.choices[0].message.content or ""
 
     raise RuntimeError(f"groq failed and no OpenAI fallback configured: {last_err!r}")

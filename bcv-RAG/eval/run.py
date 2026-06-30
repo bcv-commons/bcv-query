@@ -355,8 +355,9 @@ def main() -> int:
         embedding_model = EMBEDDING_MODEL
     synthesis_model: str | None = None
     if not args.no_llm:
-        from query.llm import GROQ_MODEL, OPENAI_MODEL
-        synthesis_model = f"{GROQ_MODEL} (Groq, primary) → {OPENAI_MODEL} (OpenAI, fallback)"
+        from query.llm import _model_setting
+        synthesis_model = (f"{_model_setting('GROQ_MODEL') or '(unset)'} (Groq, primary) → "
+                           f"{_model_setting('OPENAI_MODEL') or '(unset)'} (OpenAI, fallback)")
 
     out = {
         "ran_at": datetime.now(timezone.utc).isoformat(),
