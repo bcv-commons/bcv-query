@@ -37,6 +37,18 @@ def _prep(q: str, lang: str, book: str | None) -> "object":
     return analysis
 
 
+def _cards(db: sqlite3.Connection, analysis, query: str, lang: str):
+    """Assemble the card family for the branched surface — the featured HEADLINES that lead the
+    tree (UX projection, prominent-first by kind) + the gated synthesis block. concept_expand is
+    $0 (local gloss reverse-lookup), so it's safe on the deterministic /search/branched surface.
+    Returns (ux_cards, reference_block)."""
+    from query.concept_expand import expand_concepts
+    from server.cards import assemble, render_synthesis, render_ux
+    analysis.concept_tags = expand_concepts(analysis.fts_query, analysis.tags, lang=lang)
+    built = assemble(analysis, db, query, lang)
+    return render_ux(built, analysis), render_synthesis(built, analysis)
+
+
 def _embed(db: sqlite3.Connection, q: str) -> list[float] | None:
     if not has_vec(db):
         return None
@@ -82,6 +94,7 @@ def search_branched(
             "intent": analysis.intent,
             "tags": analysis.tags,
         },
+        "cards": _cards(db, analysis, q, lang)[0],   # featured headlines, prominent-first by kind
         "branches": result["branches"],
         "suggested_drilldown": result["suggested_drilldown"],
     }
@@ -112,16 +125,20 @@ def ask_branched(
         lang=lang, per_branch=req.per_branch, force=req.force,
     )
 
-    # One narrative over the FEATURED branches; the tree carries the rest.
+    ux_cards, reference_block = _cards(db, analysis, req.question, lang)
+
+    # One narrative over the FEATURED branches; the tree carries the rest. The gated card family
+    # grounds the prose (parity with /ask); the UX cards lead the tree.
     from query.synthesize import synthesize  # lazy: pulls openai SDK
     synth = synthesize(req.question, result["featured_cards"], db=db,
-                       analysis=analysis, lang=lang)
+                       analysis=analysis, lang=lang, reference_block=reference_block)
 
     return {
         "question": req.question,
         "answer": synth["answer"],
         "confidence": synth["confidence"],
         "citations": synth["citations"],
+        "cards": ux_cards,   # featured headlines, prominent-first by kind
         "branches": result["branches"],
         "suggested_drilldown": result["suggested_drilldown"],
         "lang": lang,
