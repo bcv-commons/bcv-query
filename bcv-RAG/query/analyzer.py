@@ -56,6 +56,7 @@ class QueryAnalysis:
     # the corresponding intent shape; consumed by the matching retriever.
     word_study_terms: list[str] = field(default_factory=list)      # transliterations or English glosses
     word_study_strongs: list[str] = field(default_factory=list)    # explicit "Strong's G####" (strongs: tags)
+    concept_tags: list[str] = field(default_factory=list)          # concept_expand strongs (set post-analyze by ask)
     entity_query: dict | None = None                                # {'name': str, 'relation': str | None}
     topic_query: str | None = None                                  # canonical topic name
     xref_source: int | None = None                                  # source bbcccvvv for cross-reference followup

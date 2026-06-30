@@ -61,8 +61,7 @@ def main() -> None:
     from query.concept_expand import expand_concepts, filter_biblical_words
     from query.retrieve import retrieve
     from query.synthesize import synthesize
-    from server.cards import cards_for
-    from server.word_study import word_study_anchor, word_study_card
+    from server.cards import assemble, render_synthesis
     from lang import canon
 
     try:
@@ -81,8 +80,8 @@ def main() -> None:
             analysis.fts_query = filter_biblical_words(q, lang=lang)
         concept_tags = expand_concepts(analysis.fts_query, analysis.tags, lang=lang)
         analysis.tags.extend(concept_tags)
-        study = word_study_card(concept_tags, q, anchor_strongs=word_study_anchor(db, analysis))
-        ref = cards_for(analysis, study, lang)
+        analysis.concept_tags = concept_tags
+        ref = render_synthesis(assemble(analysis, db, q, lang), analysis)
         if not ref:                                  # only queries the card actually fires on
             skipped += 1
             continue
