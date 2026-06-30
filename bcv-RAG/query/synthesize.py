@@ -245,6 +245,7 @@ def synthesize(
     intent_context: str | None = None,
     analysis=None,
     lang: str = "en",
+    reference_block: str | None = None,
 ) -> dict:
     """Return {answer, citations, confidence, raw}.
 
@@ -276,6 +277,8 @@ def synthesize(
     if intent_context:
         sources_block = f"({intent_context})\n\n{sources_block}"
     user = USER_TEMPLATE.format(sources=sources_block, question=question)
+    if reference_block:                            # card-family facts ahead of the sources
+        user = f"{reference_block}\n\n{user}"
 
     system = SYSTEM_PROMPT + _language_directive(lang)
     raw = chat_completion(system=system, user=user, response_format="json")

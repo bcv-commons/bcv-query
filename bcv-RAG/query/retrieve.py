@@ -566,6 +566,56 @@ def vector_search(
     return [Hit(chunk_id=cid, score=-d, retrievers=["vec"]) for cid, d in cand]
 
 
+_hnsw_rev: dict[str, int] | None = None
+
+
+def _hnsw_rev_keys() -> dict[str, int]:
+    """chunk_id → int HNSW key (reverse of the keys list). Built once, cached (~250ms,
+    ~150MB); only materialized when a semantic-mode branch re-rank actually runs."""
+    global _hnsw_rev
+    if _hnsw_rev is None:
+        _, keys = _load_hnsw()
+        _hnsw_rev = {c: i for i, c in enumerate(keys)} if keys else {}
+    return _hnsw_rev
+
+
+def rerank_by_query_cos(hits: list[Hit], query_vec: list[float] | None) -> list[Hit]:
+    """Denoise a branch by folding query↔candidate COSINE into its order via RRF — so a
+    semantically-near hit rises and frame-word noise sinks, without dropping a strong
+    existing hit. Cheap on the HNSW view (one vector fetch + a numpy dot per candidate,
+    ~sub-ms each — the ~580s figure in old docs was sqlite-vec brute-force, long gone).
+    No-op without query_vec / the index, or for fewer than 2 vector-bearing candidates."""
+    if not query_vec or len(hits) < 2:
+        return hits
+    idx, _keys = _load_hnsw()
+    if idx is None:
+        return hits
+    import numpy as np
+    rev = _hnsw_rev_keys()
+    qv = np.asarray(query_vec, dtype=np.float32)
+    cos: dict[str, float] = {}
+    for h in hits:
+        k = rev.get(h.chunk_id)
+        if k is not None:
+            try:
+                cos[h.chunk_id] = float(np.dot(np.asarray(idx.get(k), dtype=np.float32), qv))
+            except Exception:
+                pass
+    if len(cos) < 2:
+        return hits
+    K = 60
+    base_rank = {h.chunk_id: i for i, h in enumerate(hits)}
+    cos_rank = {c: i for i, c in enumerate(sorted(cos, key=lambda x: -cos[x]))}
+
+    def _fused(h: Hit) -> float:
+        s = 1.0 / (K + base_rank[h.chunk_id])
+        if h.chunk_id in cos_rank:
+            s += 1.0 / (K + cos_rank[h.chunk_id])
+        return s
+
+    return sorted(hits, key=_fused, reverse=True)
+
+
 def tag_search(db: sqlite3.Connection, tags: list[str], *, limit: int = 50) -> list[Hit]:
     if not tags:
         return []
@@ -1667,6 +1717,13 @@ def retrieve_branched(
             db, [Hit(chunk_id=r[0], score=1.0, retrievers=["term_anchor"])
                  for r in rows if r[0] not in seen_terms], lang)
         buckets["terms"] = anchored + buckets["terms"]  # anchored articles lead
+
+    # Semantic re-rank (cheap on HNSW): fold query↔candidate cosine into each branch's order
+    # so frame-word noise sinks. Skip `terms` — its Strong's-anchored lead is deliberate.
+    if query_vec:
+        for key in buckets:
+            if key != "terms":
+                buckets[key] = rerank_by_query_cos(buckets[key], query_vec)
 
     featured = set(_FEATURED_BRANCHES.get(analysis.intent, _FEATURED_BRANCHES["thematic"]))
     if force:

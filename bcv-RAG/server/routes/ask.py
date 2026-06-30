@@ -128,8 +128,13 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
 
     all_cards = cards + corpus_cards
 
+    study = word_study_card(concept_tags, req.question)  # fetched once: JSON nudge + reference block
+    from server.cards import cards_for
+    reference_block = cards_for(analysis, study, req.lang)  # gated card family → synthesis prompt
+
     from query.synthesize import synthesize  # lazy: pulls openai SDK
-    synth = synthesize(req.question, all_cards, db=db, analysis=analysis, lang=req.lang)
+    synth = synthesize(req.question, all_cards, db=db, analysis=analysis, lang=req.lang,
+                       reference_block=reference_block)
 
     by_id = {c.chunk_id: c for c in all_cards}
     citations_out: list[dict] = []
@@ -144,8 +149,7 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
         preview["n"] = n
         citations_out.append(preview)
 
-    citations_out = enrich_citations(citations_out)
-    study = word_study_card(concept_tags, req.question)  # S2 nudge: query's concepts, gloss-matched
+    citations_out = enrich_citations(citations_out)  # `study` already fetched above (reused)
 
     return {
         "question": req.question,
