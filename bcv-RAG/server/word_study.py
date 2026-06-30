@@ -30,7 +30,8 @@ _UBIQUITOUS = {
     "H0430", "H0410", "H0433", "H3068", "H0136", "H0113",  # God / LORD / Lord
     "G2316", "G2962",                                      # theos / kurios
     "H0559", "G3004",                                      # amar / legō (say)
-}
+    "G1446", "G1447", "G1673", "G1676",                   # Hebrew/Greek language NAMES — framing
+}                                                          # in "the Hebrew word X", never the subject
 
 
 def _concept_strongs(tags: list[str]) -> list[str]:
@@ -51,33 +52,48 @@ def _concept_strongs(tags: list[str]) -> list[str]:
     return [c for c, k in scored if k > 0]
 
 
-def word_study_card(tags: list[str], query: str = "") -> dict | None:
+def _get_card(client: "httpx.Client", strong: str) -> dict | None:
+    """Fetch + validate one /wordstudy card (a real lexical entry: has domains or senses)."""
+    try:
+        resp = client.get(f"/wordstudy/{strong}")
+    except Exception:
+        return None
+    if resp.status_code != 200:
+        return None
+    card = resp.json()
+    return card if (card.get("domains") or card.get("senses")) else None
+
+
+def word_study_card(tags: list[str], query: str = "",
+                    anchor_strongs: list[str] | None = None) -> dict | None:
     """A word-study card for the query's primary concept Strong's, or None.
 
-    Tries the top concept candidates (keyness order) and prefers the one whose gloss
-    is actually a word in the question — a strong signal that cuts through
-    concept_expand noise (e.g. "love your neighbor" emits both H0157 *love* and a
-    spurious H4960 *feast*; keyness ranks feast first, but only *love* is in the
-    query). Falls back to the first candidate that resolves to a real lexical entry."""
+    `anchor_strongs` — the Strong's the user EXPLICITLY named ("the Hebrew word AB",
+    "Strong's G3962"); briefed directly, *ahead* of the keyness/gloss heuristic, which over-ranks
+    framing words ("the Hebrew word AB" → AB=father, not G1446 *Hebrew*). See word_study_anchor.
+
+    Otherwise tries the top concept candidates (keyness order) and prefers the one whose gloss is
+    actually a word in the question — cuts through concept_expand noise (e.g. "love your neighbor"
+    emits both H0157 *love* and a spurious H4960 *feast*; keyness ranks feast first, but only
+    *love* is in the query). Falls back to the first candidate that resolves to a lexical entry."""
     if not SHORESH_URL:
         return None
     cands = _concept_strongs(tags)
-    if not cands:
+    if not (cands or anchor_strongs):
         return None
     qtokens = set(re.findall(r"[a-z]{3,}", query.lower()))
     fallback: dict | None = None
     thin_match: dict | None = None  # gloss matches but card has no related words
     try:
         with httpx.Client(base_url=SHORESH_URL, timeout=_TIMEOUT) as client:
+            # explicit anchor wins: the user named the word — brief it before any heuristic.
+            for strong in (anchor_strongs or []):
+                card = _get_card(client, strong)
+                if card:
+                    return card
             for strong in cands[:4]:
-                try:
-                    resp = client.get(f"/wordstudy/{strong}")
-                except Exception:
-                    continue
-                if resp.status_code != 200:
-                    continue
-                card = resp.json()
-                if not (card.get("domains") or card.get("senses")):
+                card = _get_card(client, strong)
+                if card is None:
                     continue
                 if fallback is None:
                     fallback = card
@@ -91,3 +107,36 @@ def word_study_card(tags: list[str], query: str = "") -> dict | None:
         logger.debug("word_study unavailable: %s", exc)
         return None
     return thin_match or fallback
+
+
+def _lemma_to_strongs(db, term: str) -> list[str]:
+    """A transliteration the user typed ("AB"/"AGAPE") → Strong's code(s), via the lexicon's
+    paired `lemma:`/`strongs:` tags. Selective on `lemma:<slug>`, so the tags join is cheap."""
+    slug = re.sub(r"[^a-z0-9]+", "", term.lower())
+    if not slug or db is None:
+        return []
+    try:
+        rows = db.execute(
+            "SELECT DISTINCT s.tag FROM tags l "
+            "JOIN tags s ON s.doc_id = l.doc_id AND s.tag LIKE 'strongs:%' "
+            "JOIN tags k ON k.doc_id = l.doc_id AND k.tag = 'kind:lexicon' "
+            "WHERE l.tag = ?",
+            (f"lemma:{slug}",),
+        ).fetchall()
+    except Exception:
+        return []
+    from query.concept_expand import _normalize_code
+    return [_normalize_code(r[0].split(":", 1)[1]) for r in rows]
+
+
+def word_study_anchor(db, analysis) -> list[str]:
+    """The Strong's the user EXPLICITLY named — an explicit "Strong's G####" or a transliteration
+    ("the Hebrew word AB"). Anchors the concept card directly, ahead of the keyness/gloss heuristic
+    (which over-ranks framing language-name words). Empty when the query names no specific word."""
+    from query.concept_expand import _normalize_code
+    out: list[str] = []
+    for t in getattr(analysis, "word_study_strongs", None) or []:
+        out.append(_normalize_code(t.split(":", 1)[1] if ":" in t else t))
+    for term in getattr(analysis, "word_study_terms", None) or []:
+        out.extend(_lemma_to_strongs(db, term))
+    return list(dict.fromkeys(out))

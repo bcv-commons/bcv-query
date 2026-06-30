@@ -55,6 +55,7 @@ class QueryAnalysis:
     # Stage-3 intent extensions. Populated only when the analyzer detects
     # the corresponding intent shape; consumed by the matching retriever.
     word_study_terms: list[str] = field(default_factory=list)      # transliterations or English glosses
+    word_study_strongs: list[str] = field(default_factory=list)    # explicit "Strong's G####" (strongs: tags)
     entity_query: dict | None = None                                # {'name': str, 'relation': str | None}
     topic_query: str | None = None                                  # canonical topic name
     xref_source: int | None = None                                  # source bbcccvvv for cross-reference followup
@@ -530,6 +531,7 @@ def analyze(question: str, lang: str = "en") -> QueryAnalysis:
     return QueryAnalysis(
         raw=raw, fts_query=fts_query, passages=passages, tags=tags, intent=intent,
         word_study_terms=word_study_terms,
+        word_study_strongs=word_study_strongs,
         entity_query=entity_query,
         topic_query=topic_query,
         xref_source=xref_source,

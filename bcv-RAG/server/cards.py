@@ -56,9 +56,15 @@ def cards_for(analysis, study_card: dict | None, lang: str = "en") -> str | None
     intent = getattr(analysis, "intent", "") or ""
     blocks: list[str] = []
     if intent not in _CONCEPT_SUPPRESS_INTENTS:
-        # confident concept = the user asked about a word (word_study), OR the gloss genuinely
-        # matched (the card carries co-domain siblings) — not a weak fallback that adds noise.
-        if intent == "word_study" or (study_card or {}).get("siblings"):
+        # Fire only when the card adds a lexical lens the prose LACKS: a confident FOCAL concept
+        # (carries co-domain siblings) embedded in a broader question. Two A/B-validated guards:
+        #  - require `siblings` — a weak fallback match is noise, not signal;
+        #  - suppress BARE word-lookups ("what does AGAPE mean", "Strong's G3962" → explicit anchor):
+        #    the prose already defines the word, so the card is redundant (anchor lookups added only
+        #    losses, never wins). The deterministic UX still shows them — see internal-docs/card-family.md.
+        bare_lookup = bool(getattr(analysis, "word_study_terms", None)
+                           or getattr(analysis, "word_study_strongs", None))
+        if (study_card or {}).get("siblings") and not bare_lookup:
             cc = _concept_card(study_card)
             if cc:
                 blocks.append(cc)
