@@ -128,7 +128,8 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
 
     all_cards = cards + corpus_cards
 
-    from server.cards import assemble, concept_data, render_synthesis, render_ux
+    from server.cards import (assemble, concept_data, render_synthesis, render_ux,
+                              source_leads, suggested_layout, to_branches)
     built = assemble(analysis, db, req.question, req.lang)  # the card family, routed by intent
     reference_block = render_synthesis(built, analysis)    # gated projection → synthesis prompt
     study = concept_data(built)                            # concept card → JSON word_study field
@@ -153,6 +154,9 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
 
     citations_out = enrich_citations(citations_out)  # `study` already fetched above (reused)
 
+    # Phase 3 — the leads-by-branch contract + advisory layout hint (client owns the actual layout).
+    branches = to_branches(ux_cards, source_leads(citations_out))
+
     return {
         "question": req.question,
         "answer": synth["answer"],
@@ -161,6 +165,8 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
         "lang": req.lang,
         "word_study": study,
         "cards": ux_cards,  # never-exclusive UX projection (prominent first, by kind) — grows with the family
+        "branches": branches,               # leads grouped by branch (cards + source verses), confidence-scored
+        "suggested_layout": suggested_layout(branches),   # advisory: hero | deck | tree | explore
         "analysis": {
             "fts_query": analysis.fts_query,
             "passages": [list(p) for p in analysis.passages],

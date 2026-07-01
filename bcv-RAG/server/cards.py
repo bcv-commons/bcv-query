@@ -517,10 +517,20 @@ def render_synthesis(built: list[BuiltCard], analysis) -> str | None:
             "by chunk id):\n" + "\n".join(f"• {ln}" for ln in lines))
 
 
+_FEATURED_TAU = 0.7   # a lead is "featured" (presents as a card) above this deterministic confidence
+
+
 def render_ux(built: list[BuiltCard], analysis) -> list[dict]:
-    """The never-exclusive UX projection — every built card as a by-kind headline, ranked by
-    confidence (the prominent one leads). Part B folds these into branched retrieval."""
-    return [ux for ux in (b.strategy.to_ux(b.data, analysis) for b in built) if ux]
+    """The never-exclusive UX projection — every built card as a by-kind lead, confidence-ranked. Each
+    lead carries its deterministic `confidence` (0–1) + a `featured` flag so the CLIENT can pick a
+    layout (hero/deck/tree/explore); the server never dictates presentation. See roadmap Phase 3."""
+    out = []
+    for b in built:
+        ux = b.strategy.to_ux(b.data, analysis)
+        if ux:
+            out.append({**ux, "confidence": round(b.confidence, 2),
+                        "featured": b.confidence >= _FEATURED_TAU})
+    return out
 
 
 def concept_data(built: list[BuiltCard]) -> dict | None:
@@ -529,3 +539,43 @@ def concept_data(built: list[BuiltCard]) -> dict | None:
         if b.kind == "concept":
             return b.data
     return None
+
+
+# ── Phase 3 — the leads-by-branch contract (client owns layout; server supplies shape + hint) ──
+def source_leads(citations: list[dict]) -> list[dict]:
+    """The cited source verses/notes → leads on the `source` branch — the never-exclusive retrieved
+    evidence: ranked by cite order but NOT featured (the featured surface is the cards)."""
+    out, n = [], len(citations)
+    for i, c in enumerate(citations):
+        out.append({"kind": "source", "headline": c.get("passage") or c.get("document_title") or "",
+                    "confidence": round(0.6 - 0.3 * i / max(1, n), 2), "featured": False,
+                    "drill": c.get("chunk_id"), "n": c.get("n")})
+    return out
+
+
+def to_branches(ux_leads: list[dict], source: list[dict] | None = None) -> list[dict]:
+    """Group leads into branches (by kind) — the contract the client renders any layout from. Each
+    branch: {kind, featured, n, leads (confidence-sorted)}. Featured-first."""
+    groups: dict = {}
+    for lead in ux_leads + (source or []):
+        groups.setdefault(lead["kind"], []).append(lead)
+    branches = []
+    for kind, leads in groups.items():
+        leads.sort(key=lambda l: -l.get("confidence", 0))
+        branches.append({"kind": kind, "featured": any(l.get("featured") for l in leads),
+                         "n": len(leads), "leads": leads})
+    branches.sort(key=lambda b: (not b["featured"],
+                                 -max((l.get("confidence", 0) for l in b["leads"]), default=0)))
+    return branches
+
+
+def suggested_layout(branches: list[dict]) -> str:
+    """Advisory layout from the lead-set shape (the client may override). See roadmap Phase 3:
+    0 featured → explore · 1 featured branch, 1 strong lead → hero · 1 branch, many → deck · ≥2 → tree."""
+    featured = [b for b in branches if b["featured"]]
+    if not featured:
+        return "explore"
+    if len(featured) > 1:
+        return "tree"
+    strong = sum(1 for lead in featured[0]["leads"] if lead.get("featured"))
+    return "deck" if strong > 1 else "hero"
