@@ -395,7 +395,7 @@ def _ingest_referenced_tw(staging: Path, paths_to_passages: dict[str, list[tuple
             # Strong's anchors from the term's gloss family — so this English
             # article is reachable from any language via the concept bridge
             # (e.g. Spanish "amor" → strongs:G0026 → tag_search). See
-            # query.concept_expand.term_strongs / internal-docs/branch-denoising.md.
+            # query.concept_expand.term_strongs / internal-docs/roadmap.md.
             from query.concept_expand import term_strongs
             tags = ["resource:tw", "lang:en", "org:unfoldingWord",
                     f"category:{category}", f"term:{term}", "kind:term",

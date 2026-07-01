@@ -7,7 +7,7 @@ from shoresh `/wordstudy` and attach it to the answer — gloss + TW concept art
 words (nudge: follow the chain ahav → agapaō → eleos …). A question becomes a guided
 word-study journey. Additive and best-effort — never breaks answers.
 
-See internal-docs/macula-semantic-layer-plan.md §11.
+See internal-docs/roadmap.md.
 """
 from __future__ import annotations
 

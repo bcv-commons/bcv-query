@@ -122,7 +122,7 @@ def _fts_keywords(text: str, lang: str = "en") -> list[str]:
     # Frame-strip (universal — closes the English gap): drop interrogative
     # scaffolding words ("different/kinds/speak") that expand to off-target
     # Strong's. Same per-language `frame_words` source filter_biblical_words
-    # uses (read directly, NO English fallback). See branch-denoising.md.
+    # uses (read directly, NO English fallback). See internal-docs/roadmap.md.
     from query.concept_expand import _lang_frame_words  # lazy: avoid import cycle
     frames = _lang_frame_words(lang)
     return [w for w in words if w not in stop and w not in frames]

@@ -1,6 +1,6 @@
 """Synthesis reference cards — the card family.
 
-Per-kind strategies (see internal-docs/card-family.md): each kind is a self-contained
+Per-kind strategies (see internal-docs/roadmap.md): each kind is a self-contained
 `CardStrategy` — its OWN confidence, build, and two projections (the gated `to_synthesis` and
 the never-exclusive `to_ux`). The shared layer (`assemble` + `render_synthesis`/`render_ux`) only
 routes, builds, ranks, and projects. Adding a kind = adding a strategy to STRATEGIES — never
@@ -309,6 +309,18 @@ def _single_verse(analysis) -> int | None:
     return None
 
 
+def _passage_ref(analysis):
+    """(start bbcccvvv, is_range) for a passage query — a single verse, else the range's OPENING
+    verse (a representative anchor for "Romans 8"). None when there's no passage."""
+    ps = getattr(analysis, "passages", None) or []
+    for s, e in ps:
+        if s == e:
+            return s, False
+    for s, e in ps:
+        return s, True
+    return None
+
+
 class PassageStrategy(CardStrategy):
     """Passage — the cited verse's interlinear original words (translit = gloss). Its own strategy:
     confidence is near-DETERMINISTIC (an explicit verse ref), and the OPPOSITE gate from concept —
@@ -319,18 +331,19 @@ class PassageStrategy(CardStrategy):
     def confidence(self, analysis, db) -> float:
         if getattr(analysis, "intent", "") not in ("passage_specific", "passage_book"):
             return 0.0
-        return 1.0 if _single_verse(analysis) is not None else 0.0
+        return 1.0 if _passage_ref(analysis) is not None else 0.0
 
     _FUNC_GLOSS = {"the", "a", "an", "[obj.]", "[obj]", "and"}   # pure structural noise (repeated)
 
     def build(self, analysis, db, query, lang) -> dict | None:
         from indexer.references import decode, human
-        from server.original_words import verse_interlinear
+        from server.original_words import verse_interlinear, verse_speaker
         from server.verse_senses import verse_senses
         from query.concept_expand import strong_keyness
-        bb = _single_verse(analysis)
-        if bb is None:
+        ref = _passage_ref(analysis)
+        if ref is None:
             return None
+        bb, is_range = ref
         try:
             code, ch, v = decode(bb)
         except Exception:
@@ -353,13 +366,29 @@ class PassageStrategy(CardStrategy):
         if not words:
             return None
         words.sort(key=lambda x: -x["key"])                  # distinctive words first
-        return {"ref": human(bb, bb), "lang": il["lang"], "words": words,
+        lxx = []                                             # OT verse-level cross-language parallel
+        for w in (il.get("lxx") or []):
+            g = w.get("gloss", "")
+            if g and g.lower() not in self._FUNC_GLOSS:
+                lxx.append({"translit": w.get("translit") or w.get("surface"), "gloss": g,
+                            "key": strong_keyness(w.get("strong", "")) if w.get("strong") else 0.0})
+        lxx.sort(key=lambda x: -x["key"])
+        return {"ref": human(bb, bb), "lang": il["lang"], "words": words, "lxx": lxx,
+                "speaker": verse_speaker(code, ch, v), "is_range": is_range,
                 "sensed": any(w["sensed"] for w in words)}
 
     @staticmethod
-    def _line(data: dict) -> str:                            # feature the top-keyness words
-        parts = [f"{w['translit']}={w['gloss']}" for w in data["words"][:6]]
-        return f"PASSAGE {data['ref']} ({data['lang']}) — " + " · ".join(parts)
+    def _line(data: dict) -> str:                            # top-keyness words + speaker + LXX
+        head = f"PASSAGE {data['ref']}" + (" (opening)" if data.get("is_range") else "")
+        head += f" ({data['lang']})"
+        sp = data.get("speaker")
+        if sp and sp.get("name"):
+            head += f" [{sp['name']}" + (", red-letter" if sp.get("divine") else "") + "]"
+        line = f"{head} — " + " · ".join(f"{w['translit']}={w['gloss']}" for w in data["words"][:6])
+        lxx = data.get("lxx") or []
+        if lxx:
+            line += " | LXX: " + " · ".join(f"{w['translit']}={w['gloss']}" for w in lxx[:4])
+        return line
 
     def to_synthesis(self, data, analysis) -> str | None:
         return self._line(data) if data else None
@@ -382,7 +411,7 @@ class CrossRefStrategy(CardStrategy):
     def confidence(self, analysis, db) -> float:
         # xref intent only — cross-refs point AWAY from the verse, so they're a separate branch, not
         # part of the passage card's grounding (research: the passage rubric can't reward them, and the
-        # redesigned sense-rich passage card stands on its own). See internal-docs/passage-card-redesign.md.
+        # redesigned sense-rich passage card stands on its own). See internal-docs/roadmap.md.
         return 1.0 if (getattr(analysis, "intent", "") == "xref"
                        and _single_verse(analysis) is not None) else 0.0
 

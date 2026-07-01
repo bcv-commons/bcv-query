@@ -54,8 +54,8 @@ def _compact_words(words: list[dict]) -> list[dict]:
 
 
 def verse_interlinear(book: str, ch: int, v: int) -> dict | None:
-    """{lang, words:[compact interlinear]} for a single verse via shoresh /verse, or None.
-    Reusable building block (the PassageStrategy card draws on it); best-effort."""
+    """{lang, words, lxx} for a single verse via shoresh /verse, or None. `lxx` = the compact LXX
+    Greek parallel (present for OT verses, [] otherwise). Reusable by the PassageStrategy card."""
     if not SHORESH_URL:
         return None
     try:
@@ -63,12 +63,32 @@ def verse_interlinear(book: str, ch: int, v: int) -> dict | None:
             resp = client.get(f"/verse/{book}/{ch}/{v}")
             if resp.status_code != 200:
                 return None
-            spine = (resp.json() or {}).get("spine") or {}
+            data = resp.json() or {}
     except Exception as e:
         logger.debug("verse_interlinear failed: %s", e)
         return None
-    words = _compact_words(spine.get("words") or [])
-    return {"lang": spine.get("language", ""), "words": words} if words else None
+    words = _compact_words((data.get("spine") or {}).get("words") or [])
+    if not words:
+        return None
+    return {"lang": (data.get("spine") or {}).get("language", ""), "words": words,
+            "lxx": _compact_words((data.get("lxx") or {}).get("words") or [])}
+
+
+def verse_speaker(book: str, ch: int, v: int) -> dict | None:
+    """{name, divine} of who speaks this verse (red-letter), or None — via shoresh /speakers/at."""
+    if not SHORESH_URL:
+        return None
+    try:
+        with httpx.Client(base_url=SHORESH_URL, timeout=3.0) as client:
+            resp = client.get(f"/speakers/at/{book}/{ch}/{v}")
+            if resp.status_code != 200:
+                return None
+            speakers = (resp.json() or {}).get("speakers") or []
+    except Exception:
+        return None
+    if not speakers:
+        return None
+    return {"name": speakers[0].get("speaker", ""), "divine": bool(speakers[0].get("divine"))}
 
 
 def enrich_citations(citations: list[dict]) -> list[dict]:

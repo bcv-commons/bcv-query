@@ -193,6 +193,8 @@ def _glosses() -> dict[str, tuple[str, str]]:
 def _spine_code(code: str) -> str:
     """Spine glosses key on UNPADDED codes (G26, H157); resources use padded
     (G0026, H0157). Normalize to the spine form for lookups."""
+    if not code:                          # some spine words carry no strong (→ no gloss); don't crash
+        return code
     m = re.match(r"^([GgHh])0*(\d+)", code.strip())
     return f"{m.group(1).upper()}{int(m.group(2))}" if m else code
 

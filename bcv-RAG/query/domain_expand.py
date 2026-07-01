@@ -28,7 +28,7 @@ from query.concept_expand import _normalize_code, strong_keyness
 # DEFAULT-OFF: measured to have only marginal retrieval impact (it surfaces TW
 # concept articles already findable via title/tag, and a single RRF retriever can't
 # lift them past vec/commentary). Kept opt-in (DOMAIN_EXPAND=1) for experiments and
-# in case a future use surfaces — see internal-docs/macula-semantic-layer-plan.md §9.
+# in case a future use surfaces — see internal-docs/roadmap.md.
 DOMAIN_EXPAND = os.environ.get("DOMAIN_EXPAND", "0") != "0"
 PRIMARY_SHARE = 0.5
 # A light backstop against grammatical mega-domains only — the real noise control

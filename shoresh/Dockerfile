@@ -20,7 +20,7 @@ ENV BCV_RESOURCES_DIR=/app/resources
 
 # Corpus engine (relocated from bcv-RAG) reads the precompiled text-fabric corpus
 # from $HOME/text-fabric-data — a MOUNTED volume (host /opt/corpus-data), NOT
-# baked (baking the cfabric loadAll OOMs the build; see internal-docs/build-on-hetzner.md).
+# baked (baking the cfabric loadAll OOMs the build; see internal-docs/hosting.md).
 ENV PORT=8080
 EXPOSE 8080
 HEALTHCHECK CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"

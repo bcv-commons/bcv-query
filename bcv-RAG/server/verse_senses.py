@@ -4,7 +4,7 @@ the stem-blind generic gloss (qadash niphal → "be shown holy", not a flat "con
 
 hbo.db is Hebrew/OT only and shipped to the host as a data volume (HBO_DB_PATH; see
 deploy/deploy-data.sh) — NOT in git. Best-effort: absent db / non-OT verse → empty, and the card
-falls back to the /verse gloss. See internal-docs/passage-card-redesign.md.
+falls back to the /verse gloss. See internal-docs/roadmap.md.
 """
 from __future__ import annotations
 

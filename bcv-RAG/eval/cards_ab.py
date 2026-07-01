@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Per-kind cards-on/off A/B — does each card KIND improve answers, judged by ITS OWN rubric?
 
-Per the per-kind-strategy principle (internal-docs/card-family.md), each kind is validated on its
+Per the per-kind-strategy principle (internal-docs/roadmap.md), each kind is validated on its
 own terms — concept by lexical grounding, speaker by attribution, entity by who/relation accuracy.
 For each query: assemble the family, synthesize ONCE with the gated reference block and ONCE
 without (same sources), and judge with the rubric of the kind that fired. Reports W/T/L per kind,

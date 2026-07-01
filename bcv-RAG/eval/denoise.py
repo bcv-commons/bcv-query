@@ -9,7 +9,7 @@ and reports:
   subj present  any subject_code in the branch?
 
 Deterministic / $0: no vector retrieval (the frame-strip effect lives in query
-expansion, independent of vectors). See internal-docs/branch-denoising.md.
+expansion, independent of vectors). See internal-docs/roadmap.md.
 
   python -m eval.denoise
   python -m eval.denoise --ids amor perdon

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build topic_strongs.tsv: per-Nave's-topic set of Strong's codes attested in
 that topic's verses — the offline half of the *topic-anchoring* branch
-de-noiser (see internal-docs/branch-denoising.md).
+de-noiser (see internal-docs/roadmap.md).
 
 At query time, concept expansion maps query words → strongs: tags but can't
 tell the SUBJECT ("amor"→G0026 ágape) from interrogative FRAME words
