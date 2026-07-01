@@ -417,6 +417,7 @@ class PassageStrategy(CardStrategy):
                for w in (il.get("lxx") or [])
                if w.get("gloss") and (strong_keyness(w["strong"]) if w.get("strong") else 0) > 0][:5]
         return {"ref": human(bb, bb, lang), "lang": il["lang"], "words": words, "lxx": lxx,
+                "code": code, "ch": ch, "v": v,                  # USFM + numeric — for drill URLs
                 "speaker": verse_speaker(code, ch, v), "is_range": is_range,
                 "frame": _clause_frame(syntax), "sensed": any(w["sensed"] for w in words)}
 
@@ -437,11 +438,11 @@ class PassageStrategy(CardStrategy):
     def to_ux(self, data, analysis) -> dict | None:
         if not data:
             return None
-        code = data["ref"].replace(" ", "").replace(":", "/")
+        loc = f"{data['code']}/{data['ch']}/{data['v']}"        # USFM code + numeric ch/v (NOT the localized ref)
         domains = [f"{w['translit']}: {re.split(r'[,:]', w['domain'])[0].strip()}"
                    for w in data["words"][:6] if w.get("domain")]   # NT semantic domains (Louw-Nida)
         return {"kind": self.kind, "headline": self._line(data), "anchor": data["ref"],
-                "drill": f"/verse/{code}", "syntax": f"/structure/{code}/syntax",
+                "drill": f"/verse/{loc}", "syntax": f"/structure/{loc}/syntax",
                 "lxx": data.get("lxx"), "frame": data.get("frame"),
                 "domains": domains or None}   # never-exclusive extras
 
