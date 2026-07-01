@@ -26,19 +26,28 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 def _read_strong_glosses(path: Path) -> dict[str, str]:
+    """{strong: gloss} from a strong-keyed file. Header-aware: if a header names a
+    `gloss` column (e.g. build_llm_glosses' `strong,lemma_ref,en_ref,gloss`), use it;
+    else assume the legacy 2-column `strong,gloss`."""
     out: dict[str, str] = {}
     with path.open(encoding="utf-8-sig", newline="") as fh:
-        sample = fh.readline()
-        delim = "\t" if "\t" in sample else ","
-        fh.seek(0)
-        reader = csv.reader(fh, delimiter=delim)
-        for row in reader:
-            if len(row) < 2:
-                continue
-            strong, gloss = row[0].strip(), row[1].strip()
-            if strong.lower() == "strong" or not strong or not gloss:
-                continue   # header or empty
-            out[strong] = gloss
+        lines = [ln for ln in fh if ln.strip() and not ln.lstrip().startswith("#")]
+    if not lines:
+        return out
+    delim = "\t" if "\t" in lines[0] else ","          # sniff from data, not a comment line
+    rows = list(csv.reader(lines, delimiter=delim))
+    head = [c.strip().lower() for c in rows[0]]
+    if "strong" in head and "gloss" in head:
+        si, gi, data = head.index("strong"), head.index("gloss"), rows[1:]
+    else:
+        si, gi, data = 0, 1, rows                     # legacy: strong, gloss
+    for row in data:
+        if len(row) <= max(si, gi):
+            continue
+        strong, gloss = row[si].strip(), row[gi].strip()
+        if strong.lower() == "strong" or not strong or not gloss:
+            continue
+        out[strong] = gloss
     return out
 
 
@@ -56,7 +65,10 @@ def build(src: str, lang: str, strong_file: str) -> None:
             lex, strong = line.rstrip("\n").split("\t")
             strong_to_lex[strong].append(lex)
 
-    # Existing CSV — preserve header + every row; track which lexemes already have a gloss.
+    # Existing CSV — preserve header + every row. We gap-fill the `default` column only;
+    # `glossed` = lexemes that already HAVE a default (never re-filled). Per-stem verb cells
+    # (qal/nif/…) are always preserved and never block a default — a verb still uses `default`
+    # as the fallback when its specific stem is unglossed, so filling it is correct.
     header = ["lex", "default"]
     rows: dict[str, dict] = {}
     glossed: set[str] = set()
@@ -66,13 +78,12 @@ def build(src: str, lang: str, strong_file: str) -> None:
             cols = [c.strip() for c in next(reader)]
             header = [c for c in cols if c]                       # drop unnamed index col
             lex_i = cols.index("lex")
-            gloss_cols = [c for i, c in enumerate(cols) if c and i != lex_i]
             for r in reader:
                 if len(r) <= lex_i or not r[lex_i].strip():
                     continue
                 lx = r[lex_i].strip()
                 rows[lx] = {cols[i]: (r[i].strip() if i < len(r) else "") for i in range(len(cols)) if cols[i]}
-                if any(rows[lx].get(c) for c in gloss_cols):
+                if rows[lx].get("default"):
                     glossed.add(lx)
 
     added = 0

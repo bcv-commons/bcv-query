@@ -32,7 +32,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-SEED = ROOT / "example/BibleOL/lexicons/heb_en.csv"          # per-stem ENGLISH template
+# per-stem ENGLISH template (BibleOL, MIT). Prefer the committed resources/ copy so this
+# needs no gitignored example/; fall back to a local example/ checkout, then (in _seed_rows)
+# to the committed word_glosses/hbo/English.csv (same per-stem data, minus transliteration).
+_SEED_RES = ROOT / "resources/lexicons/heb_en.csv"
+_SEED_EX = ROOT / "example/BibleOL/lexicons/heb_en.csv"
+SEED = _SEED_RES if _SEED_RES.exists() else _SEED_EX
 WG = ROOT / "resources/word_glosses/hbo"
 DEFAULT_REFS = ["English", "German", "Danish", "Swahili"]    # ordered; most-related first
 MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
@@ -70,17 +75,38 @@ def _real(v):
     return "" if (not v or v == "-" or _PLACEHOLDER.match(v)) else v
 
 
-def _english_table():
-    """English per-stem from the heb_en seed (there's no word_glosses/hbo/English.csv —
-    English is inline, but its per-stem senses live in the seed)."""
-    out = {}
-    with SEED.open(encoding="utf-8-sig", newline="") as fh:
-        for row in csv.reader(fh):
-            if len(row) < 6 or row[1] == "lex" or not row[1].strip():
+def _seed_rows():
+    """Yield (lex, translit, {stem: english_gloss}) — the per-stem STRUCTURE + English
+    reference. Prefers the BibleOL `heb_en.csv` seed (has transliteration); falls back to
+    the committed `word_glosses/hbo/English.csv` (same per-stem data, no translit column)
+    so per-stem generation needs no gitignored example/ file."""
+    if SEED.exists():
+        with SEED.open(encoding="utf-8-sig", newline="") as fh:
+            for row in csv.reader(fh):
+                if len(row) < 6 or row[1] == "lex" or not row[1].strip():
+                    continue
+                translit = row[3].strip() if len(row) > 3 else ""
+                cells = {STEMS[i][0]: _real(row[i]) for i in STEMS if i < len(row) and _real(row[i])}
+                yield row[1].strip(), translit, cells
+        return
+    p = WG / "English.csv"
+    if not p.exists():
+        return
+    with p.open(encoding="utf-8-sig", newline="") as fh:
+        r = csv.reader(fh)
+        idx = {c.strip(): i for i, c in enumerate(next(r))}
+        stemcols = [(idx[c], c) for _, (c, _f) in STEMS.items() if c in idx]
+        li = idx.get("lex", 0)
+        for row in r:
+            if li >= len(row) or not row[li].strip():
                 continue
-            out[row[1].strip()] = {STEMS[i][0]: _real(row[i])
-                                   for i in STEMS if i < len(row) and _real(row[i])}
-    return out
+            cells = {c: _real(row[i]) for i, c in stemcols if i < len(row) and _real(row[i])}
+            yield row[li].strip(), "", cells
+
+
+def _english_table():
+    """English per-stem senses, keyed by lex."""
+    return {lex: cells for lex, _t, cells in _seed_rows()}
 
 
 def _lang_table(language):
@@ -109,21 +135,16 @@ def _worklist(ref_langs):
     reference languages' glosses, in priority order (most-related first)."""
     tables = {L: _lang_table(L) for L in ref_langs}
     entries = []
-    with SEED.open(encoding="utf-8-sig", newline="") as fh:
-        for row in csv.reader(fh):
-            if len(row) < 6 or row[1] == "lex" or not row[1].strip():
-                continue
-            lex, translit = row[1].strip(), (row[3].strip() if len(row) > 3 else "")
-            cells = {STEMS[i][0]: _real(row[i]) for i in STEMS if i < len(row) and _real(row[i])}
-            if len({v for v in cells.values()}) < 2:        # not genuinely multi-stem → skip
-                continue
-            for stem in cells:
-                fn = next(f for c, f in STEMS.values() if c == stem)
-                # ordered refs (dict preserves ref_langs order = priority)
-                refs = {L: tables[L].get(lex, {}).get(stem) for L in ref_langs}
-                refs = {k: v for k, v in refs.items() if v}
-                entries.append({"key": f"{lex}|{stem}", "lemma": lex, "translit": translit,
-                                "stem": stem, "function": fn, "refs": refs})
+    for lex, translit, cells in _seed_rows():
+        if len({v for v in cells.values()}) < 2:        # not genuinely multi-stem → skip
+            continue
+        for stem in cells:
+            fn = next(f for c, f in STEMS.values() if c == stem)
+            # ordered refs (dict preserves ref_langs order = priority)
+            refs = {L: tables[L].get(lex, {}).get(stem) for L in ref_langs}
+            refs = {k: v for k, v in refs.items() if v}
+            entries.append({"key": f"{lex}|{stem}", "lemma": lex, "translit": translit,
+                            "stem": stem, "function": fn, "refs": refs})
     return entries
 
 

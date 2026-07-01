@@ -46,7 +46,7 @@ BATCH = int(os.environ.get("LLM_GLOSS_BATCH", "40"))
 # keyed by canonical tag (ISO 639-3 / BCP 47)
 LANG_NAMES = {"spa": "Spanish", "fra": "French", "por": "Portuguese",
               "cmn-Hans": "Simplified Chinese", "cmn-Hant": "Traditional Chinese",
-              "deu": "German", "ita": "Italian",
+              "deu": "German", "ita": "Italian", "ind": "Indonesian",
               "rus": "Russian", "arb": "Arabic", "hin": "Hindi",
               "ben": "Bengali", "asm": "Assamese", "hau": "Hausa"}
 # accept legacy 2-letter on the CLI

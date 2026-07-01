@@ -696,6 +696,14 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
                 code = _strong_code(spine_lang, r["strong"])
                 w = {"idx": r["idx"], "surface": r["surface"], "lemma": r["lemma"],
                      "strong": code, "morph": r["morph"], **(gloss_of(code) or {})}
+                # Localize the per-word gloss where the spine lemma IS the word_glosses key
+                # (Greek/Nestle1904). Hebrew's pointed lemma doesn't match the ETCBC-lex key, so
+                # it stays on the binyan-correct `sense` path below (going via strong→lex here
+                # would mis-pick homographs, e.g. אֵת → a content gloss).
+                if gloss_lang and gloss_lang != "English" and r["lemma"]:
+                    loc = resolve_word_gloss(spine_lang, gloss_lang, r["lemma"], None)
+                    if loc:
+                        w["gloss"] = re.split(r"[;,]", loc)[0].strip()
                 if senses.get(code):                       # binyan-correct sense (OT, hbo.db)
                     w["sense"] = senses[code]
                 dd = doms.get(_pad_strong(code)) if code else None
