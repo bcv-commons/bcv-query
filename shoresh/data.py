@@ -436,6 +436,8 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         "senses": _strong_senses().get(code, []), "cross_language": cross,
         "stems": _stem_senses(code),                   # lex-anchored: per-binyan glosses + homographs
         "lex_senses": _lex_senses(code, gloss_lang),   # Hebrew-context-derived senses (per lex, per stem)
+        # per-stem/sense occurrence distribution + sample refs (hbo.db); [] for Greek / db absent
+        "sense_distribution": (sense_concordance(code).get("senses", []) if code.startswith("H") else []),
     }
 
 
@@ -596,11 +598,16 @@ def verse(book: str, chapter: int, vrs: int) -> dict:
             (book, chapter, vrs)).fetchall()
         scon.close()
         if rows:
-            result["spine"] = {"language": spine_lang, "words": [
-                {"idx": r["idx"], "surface": r["surface"], "lemma": r["lemma"],
-                 "strong": _strong_code(spine_lang, r["strong"]), "morph": r["morph"],
-                 **(gloss_of(_strong_code(spine_lang, r["strong"])) or {})}
-                for r in rows]}
+            senses = _verse_sense_map(book, chapter, vrs) if spine_lang == "hbo" else {}
+            words = []
+            for r in rows:
+                code = _strong_code(spine_lang, r["strong"])
+                w = {"idx": r["idx"], "surface": r["surface"], "lemma": r["lemma"],
+                     "strong": code, "morph": r["morph"], **(gloss_of(code) or {})}
+                if senses.get(code):                       # binyan-correct sense (OT, hbo.db)
+                    w["sense"] = senses[code]
+                words.append(w)
+            result["spine"] = {"language": spine_lang, "words": words}
     return result
 
 
@@ -699,8 +706,127 @@ def concordance(strong: str, limit: int = 200) -> dict:
                         "surface": r["surface"], "morph": r["morph"]})
         scon.close()
 
+    if lang == "hbo":                                  # attach the binyan-correct sense per occurrence
+        by_ref = _strong_sense_by_ref(strong)
+        for o in occ:
+            label = by_ref.get(o["ref"])
+            if label:
+                o["sense"] = label
+
     return {"strong": strong, "language": lang, **(gloss_of(strong) or {}),
             "count": len(occ), "truncated": len(occ) >= limit, "occurrences": occ}
+
+
+# ---------- OT linguistic core (hbo.db): sense-concordance + lexeme profile ----------
+# hbo.db = per-occurrence BHSA (ref, lex, stem, strong, sense). Hebrew/OT only; shipped as a host
+# data volume (HBO_DB_PATH), NOT baked. See internal-docs/roadmap.md (Phase 1).
+
+def _hbo_path() -> Path:
+    env = os.environ.get("HBO_DB_PATH")
+    return Path(env) if env else _resources_dir() / "occurrences" / "hbo.db"
+
+
+def _pad_strong(s: str) -> str:
+    """hbo.db keys Strong's zero-padded to 4 digits (H0430); normalize any input to match."""
+    s = s.strip().upper()
+    return f"{s[0]}{int(s[1:]):04d}" if len(s) > 1 and s[1:].isdigit() else s
+
+
+def _sense_groups(rows) -> list[dict]:
+    """Group occurrence rows (lex/stem/sense + book/chapter/verse) by (lex, stem, sense) → each a
+    binyan-correct sense with its label, count, and sample refs. Count-sorted."""
+    labels = _lex_sense_table()                       # {lex: {stem: [{sense, gloss, share}]}}
+    groups: dict = collections.OrderedDict()
+    for r in rows:
+        stem, sense = r["stem"] or "", r["sense"] or ""
+        key = (r["lex"], stem, sense)
+        g = groups.get(key)
+        if g is None:
+            label = next((s["gloss"] for s in labels.get(r["lex"], {}).get(stem, [])
+                          if s["sense"] == sense), None)
+            g = groups[key] = {"lex": r["lex"], "stem": stem, "sense": sense,
+                               "label": label, "count": 0, "refs": []}
+        g["count"] += 1
+        if len(g["refs"]) < 6:
+            g["refs"].append(f"{r['book']} {r['chapter']}:{r['verse']}")
+    return sorted(groups.values(), key=lambda x: -x["count"])
+
+
+def sense_concordance(strong: str, limit: int = 5000) -> dict:
+    """Occurrences of a Hebrew Strong's GROUPED by binyan/sense (hbo.db) — e.g. H6942 → piel
+    'consecrate' (63×) · niphal 'be shown holy' (9×) · qal 'be holy' (7×). Hebrew/OT only."""
+    strong = strong.strip().upper()
+    if not (strong.startswith("H") and strong[1:].isdigit()):
+        return {"error": "sense-concordance is Hebrew-only (H####)"}
+    con = _ro(_hbo_path())
+    if con is None:
+        return {"error": "hbo.db unavailable (OT linguistic core not shipped)"}
+    rows = con.execute(
+        "SELECT book, chapter, verse, lex, stem, sense FROM occurrence WHERE strong=? "
+        "ORDER BY node LIMIT ?", (_pad_strong(strong), limit)).fetchall()
+    con.close()
+    return {"strong": strong, "language": "hbo", **(gloss_of(strong) or {}),
+            "senses": _sense_groups(rows)}
+
+
+def lexeme_profile(lex: str) -> dict:
+    """A BHSA-lexeme profile (the granular anchor a shared Strong's conflates): every stem × sense ×
+    count × sample refs, from hbo.db."""
+    con = _ro(_hbo_path())
+    if con is None:
+        return {"error": "hbo.db unavailable (OT linguistic core not shipped)"}
+    rows = con.execute(
+        "SELECT book, chapter, verse, lex, stem, sense, strong FROM occurrence WHERE lex=? "
+        "ORDER BY node", (lex,)).fetchall()
+    con.close()
+    if not rows:
+        return {"error": f"no occurrences for lex {lex!r}"}
+    return {"lex": lex, "strong": sorted({r["strong"] for r in rows if r["strong"]}),
+            "total": len(rows), "senses": _sense_groups(rows)}
+
+
+def _verse_sense_map(book: str, chapter: int, vrs: int) -> dict:
+    """{strong: binyan-correct sense label} for a verse's Hebrew words (hbo.db ⋈ sense inventory).
+    First occurrence of a strong wins. Empty when hbo.db is unavailable / the verse is non-OT."""
+    con = _ro(_hbo_path())
+    if con is None:
+        return {}
+    labels = _lex_sense_table()
+    rows = con.execute(
+        "SELECT strong, lex, stem, sense FROM occurrence WHERE book=? AND chapter=? AND verse=?",
+        (book, chapter, vrs)).fetchall()
+    con.close()
+    out: dict = {}
+    for r in rows:
+        if not r["strong"] or r["strong"] in out:
+            continue
+        label = next((s["gloss"] for s in labels.get(r["lex"], {}).get(r["stem"] or "", [])
+                      if s["sense"] == (r["sense"] or "")), None)
+        if label:
+            out[_spine_code(r["strong"])] = label      # unpad (H0430→H430) to match the spine word code
+    return out
+
+
+def _strong_sense_by_ref(strong: str) -> dict:
+    """{'BOOK C:V': sense label} for a Hebrew strong (hbo.db ⋈ inventory) — attaches the sense to each
+    occurrence of a concordance. First sense per verse wins."""
+    con = _ro(_hbo_path())
+    if con is None:
+        return {}
+    labels = _lex_sense_table()
+    out: dict = {}
+    for r in con.execute(
+            "SELECT book, chapter, verse, lex, stem, sense FROM occurrence WHERE strong=? ORDER BY node",
+            (_pad_strong(strong),)):
+        ref = f"{r['book']} {r['chapter']}:{r['verse']}"
+        if ref in out:
+            continue
+        label = next((s["gloss"] for s in labels.get(r["lex"], {}).get(r["stem"] or "", [])
+                      if s["sense"] == (r["sense"] or "")), None)
+        if label:
+            out[ref] = label
+    con.close()
+    return out
 
 
 # -- Bridge 3: morphological pattern search --

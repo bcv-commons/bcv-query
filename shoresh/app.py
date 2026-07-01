@@ -142,6 +142,26 @@ def get_word(strong: str, limit: int = 200) -> dict:
     return result
 
 
+@app.get("/senses/{strong}")
+def get_senses(strong: str) -> dict:
+    """Sense-concordance: a Hebrew Strong's GROUPED by binyan/sense (the OT linguistic core, hbo.db) —
+    e.g. H6942 → piel 'consecrate' (63×) · niphal 'be shown holy' (9×) · qal 'be holy' (7×). H#### only."""
+    result = data.sense_concordance(strong)
+    if "error" in result:
+        raise HTTPException(400 if "Hebrew-only" in result["error"] else 503, result["error"])
+    return result
+
+
+@app.get("/lexeme/{lex}")
+def get_lexeme(lex: str) -> dict:
+    """BHSA-lexeme profile (the granular anchor a shared Strong's conflates): every stem × sense ×
+    count × sample refs, from hbo.db. `lex` is the BHSA lex-id (URL-encode the [ < > = chars)."""
+    result = data.lexeme_profile(lex)
+    if "error" in result:
+        raise HTTPException(404 if "no occurrences" in result["error"] else 503, result["error"])
+    return result
+
+
 @app.get("/gloss/{word}")
 def get_gloss(word: str) -> dict:
     """Reverse gloss: English word → all Hebrew/Greek Strong's numbers behind it."""
