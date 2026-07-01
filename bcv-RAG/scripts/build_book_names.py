@@ -45,6 +45,7 @@ CODES = set(NUMBER_TO_CODE.values())
 UW_REPOS = {
     "hi": ["hi_irv"], "bn": ["bn_irv"], "as": ["as_irv"],
     "ha": ["ha_ulb"], "ar": ["ar_avd", "ar_nav"],
+    "id": ["id_tb1", "id_ulb", "id_ayt"],
 }
 WD_BOOK_CLASS = "Q29154430"  # "book of the Bible"
 UA = {"User-Agent": "bcv-query/1.0 (book-name builder)"}

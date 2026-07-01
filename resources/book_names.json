@@ -709,6 +709,74 @@
       "3JN": "3 Johannes",
       "JUD": "Judas",
       "REV": "Offenbarung"
+    },
+    "ind": {
+      "GEN": "Kejadian",
+      "EXO": "Keluaran",
+      "LEV": "Imamat",
+      "NUM": "Bilangan",
+      "DEU": "Ulangan",
+      "JOS": "Yosua",
+      "JDG": "Hakim-hakim",
+      "RUT": "Rut",
+      "1SA": "1 Samuel",
+      "2SA": "2 Samuel",
+      "1KI": "1 Raja-raja",
+      "2KI": "2 Raja-raja",
+      "1CH": "1 Tawarikh",
+      "2CH": "2 Tawarikh",
+      "EZR": "Ezra",
+      "NEH": "Nehemia",
+      "EST": "Ester",
+      "JOB": "Ayub",
+      "PSA": "Mazmur",
+      "PRO": "Amsal",
+      "ECC": "Pengkhotbah",
+      "SNG": "Kidung Agung",
+      "ISA": "Yesaya",
+      "JER": "Yeremia",
+      "LAM": "Ratapan",
+      "EZK": "Yehezkiel",
+      "DAN": "Daniel",
+      "HOS": "Hosea",
+      "JOL": "Yoel",
+      "AMO": "Amos",
+      "OBA": "Obaja",
+      "JON": "Yunus",
+      "MIC": "Mikha",
+      "NAM": "Nahum",
+      "HAB": "Habakuk",
+      "ZEP": "Zefanya",
+      "HAG": "Hagai",
+      "ZEC": "Zakharia",
+      "MAL": "Maleakhi",
+      "MAT": "Matius",
+      "MRK": "Markus",
+      "LUK": "Lukas",
+      "JHN": "Yohanes",
+      "ACT": "Kisah Para Rasul",
+      "ROM": "Roma",
+      "1CO": "1 Korintus",
+      "2CO": "2 Korintus",
+      "GAL": "Galatia",
+      "EPH": "Efesus",
+      "PHP": "Filipi",
+      "COL": "Kolose",
+      "1TH": "1 Tesalonika",
+      "2TH": "2 Tesalonika",
+      "1TI": "1 Timotius",
+      "2TI": "2 Timotius",
+      "TIT": "Titus",
+      "PHM": "Filemon",
+      "HEB": "Ibrani",
+      "JAS": "Yakobus",
+      "1PE": "1 Petrus",
+      "2PE": "2 Petrus",
+      "1JN": "1 Yohanes",
+      "2JN": "2 Yohanes",
+      "3JN": "3 Yohanes",
+      "JUD": "Yudas",
+      "REV": "Wahyu"
     }
   },
   "extra_aliases": {
@@ -2026,6 +2094,214 @@
         "Offenbarung des Johannes",
         "Apokalypse",
         "Offb"
+      ]
+    },
+    "ind": {
+      "GEN": [
+        "Kej"
+      ],
+      "EXO": [
+        "Kel"
+      ],
+      "LEV": [
+        "Im"
+      ],
+      "NUM": [
+        "Bil"
+      ],
+      "DEU": [
+        "Ul"
+      ],
+      "JOS": [
+        "Yos"
+      ],
+      "JDG": [
+        "Hak",
+        "Hakim"
+      ],
+      "1SA": [
+        "1 Sam"
+      ],
+      "2SA": [
+        "2 Sam"
+      ],
+      "1KI": [
+        "1 Raj",
+        "1 Raja"
+      ],
+      "2KI": [
+        "2 Raj",
+        "2 Raja"
+      ],
+      "1CH": [
+        "1 Taw"
+      ],
+      "2CH": [
+        "2 Taw"
+      ],
+      "EZR": [
+        "Ezr"
+      ],
+      "NEH": [
+        "Neh"
+      ],
+      "EST": [
+        "Est"
+      ],
+      "JOB": [
+        "Ayb"
+      ],
+      "PSA": [
+        "Mzm",
+        "Maz"
+      ],
+      "PRO": [
+        "Ams"
+      ],
+      "ECC": [
+        "Pkh"
+      ],
+      "SNG": [
+        "Kid",
+        "Kidung"
+      ],
+      "ISA": [
+        "Yes"
+      ],
+      "JER": [
+        "Yer"
+      ],
+      "LAM": [
+        "Rat"
+      ],
+      "EZK": [
+        "Yeh"
+      ],
+      "DAN": [
+        "Dan"
+      ],
+      "HOS": [
+        "Hos"
+      ],
+      "JOL": [
+        "Yl"
+      ],
+      "AMO": [
+        "Am"
+      ],
+      "OBA": [
+        "Ob"
+      ],
+      "JON": [
+        "Yun"
+      ],
+      "MIC": [
+        "Mi"
+      ],
+      "NAM": [
+        "Nah"
+      ],
+      "HAB": [
+        "Hab"
+      ],
+      "ZEP": [
+        "Zef"
+      ],
+      "HAG": [
+        "Hag"
+      ],
+      "ZEC": [
+        "Za"
+      ],
+      "MAL": [
+        "Mal"
+      ],
+      "MAT": [
+        "Mat"
+      ],
+      "MRK": [
+        "Mrk",
+        "Mark"
+      ],
+      "LUK": [
+        "Luk"
+      ],
+      "JHN": [
+        "Yoh"
+      ],
+      "ACT": [
+        "Kis",
+        "Kisah"
+      ],
+      "ROM": [
+        "Rm",
+        "Rom"
+      ],
+      "1CO": [
+        "1 Kor"
+      ],
+      "2CO": [
+        "2 Kor"
+      ],
+      "GAL": [
+        "Gal"
+      ],
+      "EPH": [
+        "Ef"
+      ],
+      "PHP": [
+        "Flp",
+        "Fil"
+      ],
+      "COL": [
+        "Kol"
+      ],
+      "1TH": [
+        "1 Tes"
+      ],
+      "2TH": [
+        "2 Tes"
+      ],
+      "1TI": [
+        "1 Tim"
+      ],
+      "2TI": [
+        "2 Tim"
+      ],
+      "TIT": [
+        "Tit"
+      ],
+      "PHM": [
+        "Flm"
+      ],
+      "HEB": [
+        "Ibr"
+      ],
+      "JAS": [
+        "Yak"
+      ],
+      "1PE": [
+        "1 Ptr",
+        "1 Pet"
+      ],
+      "2PE": [
+        "2 Ptr",
+        "2 Pet"
+      ],
+      "1JN": [
+        "1 Yoh"
+      ],
+      "2JN": [
+        "2 Yoh"
+      ],
+      "3JN": [
+        "3 Yoh"
+      ],
+      "JUD": [
+        "Yud"
+      ],
+      "REV": [
+        "Why"
       ]
     }
   }

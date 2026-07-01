@@ -18,18 +18,20 @@ from __future__ import annotations
 _LEGACY_TO_CANON = {
     "en": "eng", "es": "spa", "fr": "fra", "pt": "por", "ru": "rus",
     "ar": "arb", "hi": "hin", "bn": "ben", "as": "asm", "ha": "hau",
+    "de": "deu", "id": "ind",
     "zh": "cmn-Hans", "zh-hant": "cmn-Hant", "zh-hans": "cmn-Hans",
 }
 # canonical -> shortest BCP 47 tag for the web / Hugging Face
 _CANON_TO_WEB = {
     "eng": "en", "spa": "es", "fra": "fr", "por": "pt", "rus": "ru",
     "arb": "ar", "hin": "hi", "ben": "bn", "asm": "as", "hau": "ha",
+    "deu": "de", "ind": "id",
     "cmn-Hans": "zh-Hans", "cmn-Hant": "zh-Hant",
 }
 _DISPLAY = {
     "eng": "English", "spa": "Spanish", "fra": "French", "por": "Portuguese",
     "rus": "Russian", "arb": "Arabic", "hin": "Hindi", "ben": "Bengali",
-    "asm": "Assamese", "hau": "Hausa",
+    "asm": "Assamese", "hau": "Hausa", "deu": "German", "ind": "Indonesian",
     "cmn-Hans": "Chinese (Simplified)", "cmn-Hant": "Chinese (Traditional)",
     # original-language corpus codes (already ISO 639-3)
     "hbo": "Hebrew", "grc": "Greek",

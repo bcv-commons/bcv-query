@@ -72,7 +72,7 @@ BOOK_NAMES: dict[str, str] = _ENGLISH_BOOK_NAMES
 # book_names.json keys are canonical ISO 639-3 (BCP 47); accept legacy 2-letter.
 _LEGACY_LANG = {
     "en": "eng", "es": "spa", "fr": "fra", "pt": "por", "ru": "rus", "ar": "arb",
-    "hi": "hin", "bn": "ben", "as": "asm", "ha": "hau",
+    "hi": "hin", "bn": "ben", "as": "asm", "ha": "hau", "id": "ind",
     "zh": "cmn-Hans", "zh-Hant": "cmn-Hant",
 }
 

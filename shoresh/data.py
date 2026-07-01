@@ -145,6 +145,32 @@ def _tw_tsv_path() -> Path:
 TW_TSV = _tw_tsv_path()
 
 
+@lru_cache(maxsize=1)
+def _tw_lang_by_name() -> dict[str, str]:
+    """gloss-language display NAME -> ISO 639-3, from related_langs/languages.tsv."""
+    out: dict[str, str] = {}
+    p = _resources_dir() / "related_langs" / "languages.tsv"
+    if not p.exists():
+        return out
+    with p.open(encoding="utf-8") as fh:
+        r = csv.DictReader(fh, delimiter="\t")
+        for row in r:
+            name, code = (row.get("name") or "").strip(), (row.get("iso639_3") or "").strip()
+            if name and code:
+                out[name] = code
+    return out
+
+
+@lru_cache(maxsize=8)
+def _tw_articles_i18n(lang3: str) -> dict:
+    """{slug: {title, definition}} of localized TW articles for a language, or {}."""
+    p = _resources_dir() / "tw_articles" / f"{lang3}.json"
+    if not p.exists():
+        return {}
+    import json
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
 def _speaker_tsv_path() -> Path:
     """speaker_quotations.tsv (S1 — who speaks where). `$SPEAKER_QUOTATIONS_TSV`
     overrides; else from the shared resources/ root."""
@@ -483,10 +509,19 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
             if loc:
                 head = {**head, "gloss": re.split(r"[;,]", loc)[0].strip()}
                 break
+    # attach localized TW article text (title + definition) to each strong→slug entry;
+    # requested language, else English fallback. Body from tw_articles/<lang3>.json.
+    lang3 = _tw_lang_by_name().get(gloss_lang, "eng")
+    loc, eng = _tw_articles_i18n(lang3), _tw_articles_i18n("eng")
+    tw = tw_articles(code).get("articles", [])
+    for a in tw:
+        art = loc.get(a["tw_article"]) or eng.get(a["tw_article"])
+        if art:
+            a["title"], a["definition"] = art["title"], art["definition"]
     return {
         "strong": code, **head,
         "keyness": keyness_of(code),                   # how distinctively biblical
-        "tw": tw_articles(code).get("articles", []),  # nudge 1: study the concept
+        "tw": tw,                                       # nudge 1: study the concept (localized text)
         "domains": domains, "siblings": siblings,      # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
         "stems": _stem_senses(code),                   # lex-anchored: per-binyan glosses + homographs
