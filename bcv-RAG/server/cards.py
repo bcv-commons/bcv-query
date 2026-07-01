@@ -343,6 +343,29 @@ def _clause_frame(syntax: dict | None) -> str | None:
     return "frame: " + " · ".join(parts) if parts else None
 
 
+def _norm_gloss(g: str) -> str:
+    """Normalize a gloss for cross-source matching: lowercase, first sense, alpha-only, de-plural."""
+    first = re.split(r"[;,]", g or "")[0]
+    return re.sub(r"[^a-z]", "", first.lower()).rstrip("s")
+
+
+def _role_map(syntax: dict | None) -> dict:
+    """{normalized content-gloss: role} from the verse's main clause Subj/Pred/Objc phrases — lets the
+    word list carry its clause role inline (one view, not a redundant separate frame)."""
+    clauses = (syntax or {}).get("clauses") or []
+    main = next((c for c in clauses if any(p.get("function") == "Pred" for p in c.get("phrases", []))),
+                None)
+    out: dict = {}
+    for p in (main or {}).get("phrases", []):
+        fn = p.get("function")
+        if fn not in ("Subj", "Pred", "Objc"):
+            continue
+        for w in p.get("words", []):
+            if w.get("sp") in _CONTENT_SP and w.get("gloss"):
+                out.setdefault(_norm_gloss(w["gloss"]), fn)
+    return out
+
+
 class PassageStrategy(CardStrategy):
     """Passage — the cited verse's interlinear original words (translit = gloss). Its own strategy:
     confidence is near-DETERMINISTIC (an explicit verse ref), and the OPPOSITE gate from concept —
@@ -354,8 +377,6 @@ class PassageStrategy(CardStrategy):
         if getattr(analysis, "intent", "") not in ("passage_specific", "passage_book"):
             return 0.0
         return 1.0 if _passage_ref(analysis) is not None else 0.0
-
-    _FUNC_GLOSS = {"the", "a", "an", "[obj.]", "[obj]", "and"}   # pure structural noise (repeated)
 
     def build(self, analysis, db, query, lang) -> dict | None:
         from indexer.references import decode, human
@@ -372,47 +393,42 @@ class PassageStrategy(CardStrategy):
         il = verse_interlinear(code, ch, v)
         if not il:
             return None
+        syntax = verse_syntax(code, ch, v) if il["lang"] == "hbo" else None
+        roles = _role_map(syntax)
+        # ONE view: keyness-ranked content words (keyness>0 drops et/articles/particles at the source —
+        # form-independent, so the sense-form "<OM>" can't leak), sense trimmed, role annotated inline.
         words = []
         for w in il["words"]:
-            strong = w.get("strong", "")
-            sense = w.get("sense")                           # binyan-correct sense from shoresh /verse (hbo.db)
-            if sense:                                        # beats the generic gloss
-                gloss, sensed = sense.split(";")[0].strip(), True
-            else:
-                gloss, sensed = w.get("gloss", ""), False
-            if not gloss or gloss.lower() in self._FUNC_GLOSS:
+            key = strong_keyness(w.get("strong", "")) if w.get("strong") else 0.0
+            if key <= 0:
+                continue
+            sense = w.get("sense")
+            gloss = re.split(r"[;,]", sense)[0].strip() if sense else w.get("gloss", "")
+            if not gloss:
                 continue
             words.append({"translit": w.get("translit") or w.get("surface"), "gloss": gloss,
-                          "key": strong_keyness(strong) if strong else 0.0, "sensed": sensed})
+                          "key": key, "sensed": bool(sense), "role": roles.get(_norm_gloss(gloss))})
         if not words:
             return None
-        words.sort(key=lambda x: -x["key"])                  # distinctive words first
-        lxx = []                                             # OT verse-level cross-language parallel
-        for w in (il.get("lxx") or []):
-            g = w.get("gloss", "")
-            if g and g.lower() not in self._FUNC_GLOSS:
-                lxx.append({"translit": w.get("translit") or w.get("surface"), "gloss": g,
-                            "key": strong_keyness(w.get("strong", "")) if w.get("strong") else 0.0})
-        lxx.sort(key=lambda x: -x["key"])
-        frame = _clause_frame(verse_syntax(code, ch, v)) if il["lang"] == "hbo" else None
+        words.sort(key=lambda x: -x["key"])
+        # UX-only extras (kept OFF the synthesis line — they restate the words): LXX parallel + frame.
+        lxx = [{"translit": w.get("translit") or w.get("surface"), "gloss": w["gloss"]}
+               for w in (il.get("lxx") or [])
+               if w.get("gloss") and (strong_keyness(w["strong"]) if w.get("strong") else 0) > 0][:5]
         return {"ref": human(bb, bb), "lang": il["lang"], "words": words, "lxx": lxx,
-                "speaker": verse_speaker(code, ch, v), "is_range": is_range, "frame": frame,
-                "sensed": any(w["sensed"] for w in words)}
+                "speaker": verse_speaker(code, ch, v), "is_range": is_range,
+                "frame": _clause_frame(syntax), "sensed": any(w["sensed"] for w in words)}
 
     @staticmethod
-    def _line(data: dict) -> str:                            # top-keyness words + speaker + LXX
+    def _line(data: dict) -> str:                            # one lean view: words (role-annotated) + speaker
         head = f"PASSAGE {data['ref']}" + (" (opening)" if data.get("is_range") else "")
         head += f" ({data['lang']})"
         sp = data.get("speaker")
         if sp and sp.get("name"):
             head += f" [{sp['name']}" + (", red-letter" if sp.get("divine") else "") + "]"
-        line = f"{head} — " + " · ".join(f"{w['translit']}={w['gloss']}" for w in data["words"][:6])
-        lxx = data.get("lxx") or []
-        if lxx:
-            line += " | LXX: " + " · ".join(f"{w['translit']}={w['gloss']}" for w in lxx[:4])
-        if data.get("frame"):
-            line += " | " + data["frame"]
-        return line
+        parts = [f"{w['translit']}={w['gloss']}" + (f"[{w['role']}]" if w.get("role") else "")
+                 for w in data["words"][:6]]
+        return f"{head} — " + " · ".join(parts)
 
     def to_synthesis(self, data, analysis) -> str | None:
         return self._line(data) if data else None
@@ -422,7 +438,8 @@ class PassageStrategy(CardStrategy):
             return None
         code = data["ref"].replace(" ", "").replace(":", "/")
         return {"kind": self.kind, "headline": self._line(data), "anchor": data["ref"],
-                "drill": f"/verse/{code}"}
+                "drill": f"/verse/{code}", "syntax": f"/structure/{code}/syntax",
+                "lxx": data.get("lxx"), "frame": data.get("frame")}   # never-exclusive extras
 
 
 # ── Cross-reference ──────────────────────────────────────────────────────────────────────────
