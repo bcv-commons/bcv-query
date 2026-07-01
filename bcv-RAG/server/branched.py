@@ -59,19 +59,29 @@ def build_branches(
             p["retrievers"] = h.retrievers
         return p
 
+    def _lead(p: dict, kind: str, featured: bool) -> dict:
+        """A preview → a lead in the unified contract shape (keeps the rich preview fields too)."""
+        p = dict(p)
+        p["kind"] = kind
+        p["headline"] = p.get("passage") or p.get("title") or p.get("document_title") or p.get("name") or ""
+        p["confidence"] = round(min(1.0, float(p.get("score", 0) or 0)), 2)
+        p["featured"] = featured
+        p["drill"] = p.get("chunk_id")
+        return p
+
     out_branches: list[dict] = []
     featured_cards: list = []
     suggested: list[dict] = []
     for b in branches:
         items = [p for p in (_preview(h) for h in b.hits) if p is not None]
-        out_branches.append({
-            "key": b.key, "label": b.label, "featured": b.featured,
-            "total": b.total, "items": items,
+        out_branches.append({          # unified contract shape (shared with /ask's to_branches)
+            "kind": b.key, "label": b.label, "featured": b.featured,
+            "n": b.total, "leads": [_lead(p, b.key, b.featured) for p in items],
         })
         if b.featured:
             featured_cards.extend(by_id[h.chunk_id] for h in b.hits if h.chunk_id in by_id)
         elif b.total:
-            suggested.append({"key": b.key, "label": b.label, "total": b.total})
+            suggested.append({"kind": b.key, "label": b.label, "n": b.total})
 
     return {
         "branches": out_branches,

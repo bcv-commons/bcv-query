@@ -211,6 +211,7 @@ def _search_branched(args: dict, db: sqlite3.Connection) -> dict:
             pass
 
     from server.branched import build_branches
+    from server.cards import suggested_layout
     result = build_branches(
         db, analysis, query_vec=query_vec, source_filter=args.get("source", "all"),
         lang=lang, per_branch=int(args.get("per_branch", 8)),
@@ -226,6 +227,7 @@ def _search_branched(args: dict, db: sqlite3.Connection) -> dict:
             "intent": analysis.intent,
         },
         "branches": result["branches"],
+        "suggested_layout": suggested_layout(result["branches"]),   # advisory (Phase 3)
         "suggested_drilldown": result["suggested_drilldown"],
     }
 

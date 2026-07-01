@@ -553,20 +553,39 @@ def source_leads(citations: list[dict]) -> list[dict]:
     return out
 
 
+_BRANCH_LABELS = {"concept": "Concept", "passage": "Passage", "speaker": "Speaker",
+                  "entity": "Entity", "xref": "Cross-references", "source": "Sources",
+                  "verses": "Verses", "topics": "Topics", "lexicon": "Lexicon",
+                  "crossref": "Cross-references"}
+
+
+def _sort_branches(branches: list[dict]) -> list[dict]:
+    branches.sort(key=lambda b: (not b["featured"],
+                                 -max((l.get("confidence", 0) for l in b["leads"]), default=0)))
+    return branches
+
+
 def to_branches(ux_leads: list[dict], source: list[dict] | None = None) -> list[dict]:
-    """Group leads into branches (by kind) — the contract the client renders any layout from. Each
-    branch: {kind, featured, n, leads (confidence-sorted)}. Featured-first."""
+    """Group leads into branches (by kind) — the unified contract the client renders any layout from.
+    Each branch: {kind, label, featured, n, leads (confidence-sorted)}. Featured-first."""
     groups: dict = {}
     for lead in ux_leads + (source or []):
         groups.setdefault(lead["kind"], []).append(lead)
     branches = []
     for kind, leads in groups.items():
         leads.sort(key=lambda l: -l.get("confidence", 0))
-        branches.append({"kind": kind, "featured": any(l.get("featured") for l in leads),
+        branches.append({"kind": kind, "label": _BRANCH_LABELS.get(kind, kind.title()),
+                         "featured": any(l.get("featured") for l in leads),
                          "n": len(leads), "leads": leads})
-    branches.sort(key=lambda b: (not b["featured"],
-                                 -max((l.get("confidence", 0) for l in b["leads"]), default=0)))
-    return branches
+    return _sort_branches(branches)
+
+
+def merge_branches(*branch_lists: list[dict]) -> list[dict]:
+    """Concatenate disjoint-kind branch-lists (e.g. card branches + retrieval branches), featured-first."""
+    out: list[dict] = []
+    for bl in branch_lists:
+        out.extend(bl or [])
+    return _sort_branches(out)
 
 
 def suggested_layout(branches: list[dict]) -> str:
@@ -581,15 +600,3 @@ def suggested_layout(branches: list[dict]) -> str:
     return "deck" if strong > 1 else "hero"
 
 
-def branched_layout(branches: list[dict], cards: list[dict]) -> str:
-    """Advisory layout for the branched surface (its `branches` carry {featured, total} — a different
-    shape than /ask's to_branches, but the SAME shape rule): featured retrieval branches + featured
-    cards → hero | deck | tree | explore."""
-    featured = [b for b in branches if b.get("featured")]
-    featured_cards = [c for c in cards if c.get("featured")]
-    n = len(featured) + len(featured_cards)
-    if n == 0:
-        return "explore"
-    if n == 1:
-        return "deck" if (featured and featured[0].get("total", 0) > 1) else "hero"
-    return "tree"
