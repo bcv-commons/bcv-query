@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from indexer import citations as citations_mod
 from indexer.db import has_vec
 from query.analyzer import analyze
+from query.lang_detect import detect_lang
 from lang import canon
 from query.concept_expand import expand_concepts, filter_biblical_words
 from query.retrieve import retrieve
@@ -30,7 +31,9 @@ class AskScope(BaseModel):
 
 class AskRequest(BaseModel):
     question: str = Field(..., min_length=1)
-    lang: str = "en"
+    # Omit to auto-detect from the question (script + stopword overlap); an explicit
+    # value is always honored (the client owns its UI language when it sets one).
+    lang: str | None = None
     scope: AskScope | None = None
     top_k: int = 10
     expand: list[str] = Field(default_factory=list)
@@ -41,6 +44,9 @@ class AskRequest(BaseModel):
 def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_db)) -> dict:
     if req.top_k < 1 or req.top_k > 50:
         raise HTTPException(status_code=400, detail="top_k must be 1..50")
+
+    if not req.lang:                       # client omitted lang → detect it from the question
+        req.lang = detect_lang(req.question)
 
     analysis = analyze(req.question, lang=req.lang)
     if req.scope and req.scope.book:
