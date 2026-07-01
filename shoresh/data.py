@@ -427,19 +427,24 @@ def _strong_to_lex() -> dict[str, list[str]]:
     return out
 
 
-def _stem_senses(code: str) -> list[dict]:
-    """Per-lexeme, per-stem (binyan) English senses behind a Hebrew Strong's — the lex-anchored
+def _stem_senses(code: str, lang: str = "English") -> list[dict]:
+    """Per-lexeme, per-stem (binyan) senses behind a Hebrew Strong's — the lex-anchored
     granularity Strong's can't express. Each entry: {lex, senses: {qal: …, nif: …}}; only verb
-    lexemes (≥1 stem gloss) are included. Empty for Greek / non-verbs."""
+    lexemes (≥1 stem gloss) are included. Localized to `lang` (per-lex English fallback where a
+    language has no per-stem cell yet). Empty for Greek / non-verbs."""
     if not code.startswith("H"):
         return []
-    table, stem_cols, _gc = _gloss_table("hbo", "English")
+    table, stem_cols, _gc = _gloss_table("hbo", lang)
+    en_table = en_cols = None
     out = []
-    for lex in _strong_to_lex().get(code, []):
+    for lex in _strong_to_lex().get(_pad_strong(code), []):
         row = table.get(lex)
-        if not row:
-            continue
-        senses = {c: _real_gloss(row.get(c)) for c in stem_cols if _real_gloss(row.get(c))}
+        senses = {c: _real_gloss(row.get(c)) for c in stem_cols if row and _real_gloss(row.get(c))}
+        if not senses and lang != "English":            # fall back to English per-stem for this lex
+            if en_table is None:
+                en_table, en_cols, _ = _gloss_table("hbo", "English")
+            er = en_table.get(lex)
+            senses = {c: _real_gloss(er.get(c)) for c in en_cols if er and _real_gloss(er.get(c))}
         if senses:
             out.append({"lex": lex, "senses": senses})
     return out
@@ -524,7 +529,7 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         "tw": tw,                                       # nudge 1: study the concept (localized text)
         "domains": domains, "siblings": siblings,      # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
-        "stems": _stem_senses(code),                   # lex-anchored: per-binyan glosses + homographs
+        "stems": _stem_senses(code, gloss_lang),       # lex-anchored: per-binyan glosses + homographs
         "lex_senses": _lex_senses(code, gloss_lang),   # Hebrew-context-derived senses (per lex, per stem)
         # per-stem/sense occurrence distribution + sample refs (hbo.db); [] for Greek / db absent
         "sense_distribution": (sense_concordance(code).get("senses", []) if code.startswith("H") else []),
