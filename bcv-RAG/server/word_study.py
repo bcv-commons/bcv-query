@@ -52,10 +52,11 @@ def _concept_strongs(tags: list[str]) -> list[str]:
     return [c for c, k in scored if k > 0]
 
 
-def _get_card(client: "httpx.Client", strong: str) -> dict | None:
-    """Fetch + validate one /wordstudy card (a real lexical entry: has domains or senses)."""
+def _get_card(client: "httpx.Client", strong: str, gloss_lang: str = "English") -> dict | None:
+    """Fetch + validate one /wordstudy card (a real lexical entry: has domains or senses).
+    `gloss_lang` localizes the gloss + lex_senses labels (shoresh resolves per-stem multilingual glosses)."""
     try:
-        resp = client.get(f"/wordstudy/{strong}")
+        resp = client.get(f"/wordstudy/{strong}", params={"gloss_lang": gloss_lang})
     except Exception:
         return None
     if resp.status_code != 200:
@@ -65,7 +66,8 @@ def _get_card(client: "httpx.Client", strong: str) -> dict | None:
 
 
 def word_study_card(tags: list[str], query: str = "",
-                    anchor_strongs: list[str] | None = None) -> dict | None:
+                    anchor_strongs: list[str] | None = None,
+                    gloss_lang: str = "English") -> dict | None:
     """A word-study card for the query's primary concept Strong's, or None.
 
     `anchor_strongs` — the Strong's the user EXPLICITLY named ("the Hebrew word AB",
@@ -88,11 +90,11 @@ def word_study_card(tags: list[str], query: str = "",
         with httpx.Client(base_url=SHORESH_URL, timeout=_TIMEOUT) as client:
             # explicit anchor wins: the user named the word — brief it before any heuristic.
             for strong in (anchor_strongs or []):
-                card = _get_card(client, strong)
+                card = _get_card(client, strong, gloss_lang)
                 if card:
                     return card
             for strong in cands[:4]:
-                card = _get_card(client, strong)
+                card = _get_card(client, strong, gloss_lang)
                 if card is None:
                     continue
                 if fallback is None:

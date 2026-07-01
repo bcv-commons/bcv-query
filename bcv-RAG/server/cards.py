@@ -13,9 +13,37 @@ Two projections, opposite economics:
 """
 from __future__ import annotations
 
+import functools
 import json
 import re
 from dataclasses import dataclass
+
+
+@functools.lru_cache(maxsize=1)
+def _gloss_lang_map() -> dict:
+    """lang code (639-1 / 639-3) → gloss CSV name, from related_langs/languages.tsv `gloss_names`."""
+    import csv
+
+    from resource_paths import resource_path
+    out: dict = {}
+    try:
+        with open(resource_path("related_langs/languages.tsv"), encoding="utf-8") as f:
+            for row in csv.DictReader(f, delimiter="\t"):
+                name = (row.get("gloss_names") or "").split(";")[0].strip()
+                if name:
+                    for code in (row.get("iso639_3"), row.get("iso639_1")):
+                        if code:
+                            out[code] = name
+    except Exception:
+        pass
+    return out
+
+
+def _gloss_lang(lang: str) -> str:
+    """The gloss-language NAME for a query lang code (default English) — for shoresh `gloss_lang`."""
+    from lang import canon
+    mp = _gloss_lang_map()
+    return mp.get((lang or "").lower()) or mp.get(canon(lang or "en")) or "English"
 
 
 def _concept_line(card: dict | None) -> str | None:
@@ -105,7 +133,8 @@ class ConceptStrategy(CardStrategy):
     def build(self, analysis, db, query, lang) -> dict | None:
         from server.word_study import word_study_anchor, word_study_card
         tags = getattr(analysis, "concept_tags", None) or getattr(analysis, "tags", [])
-        return word_study_card(tags, query, anchor_strongs=word_study_anchor(db, analysis))
+        return word_study_card(tags, query, anchor_strongs=word_study_anchor(db, analysis),
+                               gloss_lang=_gloss_lang(lang))     # localize gloss + senses to query lang
 
     def to_synthesis(self, data, analysis) -> str | None:
         if not (data or {}).get("siblings"):              # weak fallback match = noise
