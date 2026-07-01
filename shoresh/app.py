@@ -125,9 +125,10 @@ def root() -> dict:
 
 
 @app.get("/verse/{book}/{chapter}/{verse}")
-def get_verse(book: str, chapter: int, verse: int) -> dict:
-    """Greek (LXX) + Hebrew/Greek (spine) words of a verse, side by side."""
-    result = data.verse(book, chapter, verse)
+def get_verse(book: str, chapter: int, verse: int, gloss_lang: str = "English") -> dict:
+    """Greek (LXX) + Hebrew/Greek (spine) words of a verse, side by side.
+    `gloss_lang` localizes the per-word binyan-correct sense (e.g. German, Spanish)."""
+    result = data.verse(book, chapter, verse, gloss_lang)
     if result["lxx"] is None and result["spine"] is None:
         raise HTTPException(404, f"no original-language words for {book} {chapter}:{verse}")
     return result

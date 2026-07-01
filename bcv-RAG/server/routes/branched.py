@@ -85,6 +85,8 @@ def search_branched(
         db, analysis, query_vec=query_vec, source_filter=source, lang=lang,
         per_branch=per_branch, force=[f for f in (force or "").split(",") if f],
     )
+    ux_cards = _cards(db, analysis, q, lang)[0]
+    from server.cards import branched_layout
     return {
         "query": q,
         "lang": lang,
@@ -94,8 +96,9 @@ def search_branched(
             "intent": analysis.intent,
             "tags": analysis.tags,
         },
-        "cards": _cards(db, analysis, q, lang)[0],   # featured headlines, prominent-first by kind
+        "cards": ux_cards,   # featured headlines, prominent-first by kind (each with confidence/featured)
         "branches": result["branches"],
+        "suggested_layout": branched_layout(result["branches"], ux_cards),  # advisory (Phase 3 contract)
         "suggested_drilldown": result["suggested_drilldown"],
     }
 
@@ -133,13 +136,15 @@ def ask_branched(
     synth = synthesize(req.question, result["featured_cards"], db=db,
                        analysis=analysis, lang=lang, reference_block=reference_block)
 
+    from server.cards import branched_layout
     return {
         "question": req.question,
         "answer": synth["answer"],
         "confidence": synth["confidence"],
         "citations": synth["citations"],
-        "cards": ux_cards,   # featured headlines, prominent-first by kind
+        "cards": ux_cards,   # featured headlines, prominent-first by kind (each with confidence/featured)
         "branches": result["branches"],
+        "suggested_layout": branched_layout(result["branches"], ux_cards),  # advisory (Phase 3 contract)
         "suggested_drilldown": result["suggested_drilldown"],
         "lang": lang,
         "analysis": {

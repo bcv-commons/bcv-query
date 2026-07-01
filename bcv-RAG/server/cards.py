@@ -390,7 +390,7 @@ class PassageStrategy(CardStrategy):
             code, ch, v = decode(bb)
         except Exception:
             return None
-        il = verse_interlinear(code, ch, v)
+        il = verse_interlinear(code, ch, v, _gloss_lang(lang))   # localized per-word sense
         if not il:
             return None
         syntax = verse_syntax(code, ch, v) if il["lang"] == "hbo" else None
@@ -415,7 +415,7 @@ class PassageStrategy(CardStrategy):
         lxx = [{"translit": w.get("translit") or w.get("surface"), "gloss": w["gloss"]}
                for w in (il.get("lxx") or [])
                if w.get("gloss") and (strong_keyness(w["strong"]) if w.get("strong") else 0) > 0][:5]
-        return {"ref": human(bb, bb), "lang": il["lang"], "words": words, "lxx": lxx,
+        return {"ref": human(bb, bb, lang), "lang": il["lang"], "words": words, "lxx": lxx,
                 "speaker": verse_speaker(code, ch, v), "is_range": is_range,
                 "frame": _clause_frame(syntax), "sensed": any(w["sensed"] for w in words)}
 
@@ -468,12 +468,12 @@ class CrossRefStrategy(CardStrategy):
         refs = []
         for s, e in rows:
             try:
-                refs.append(human(s, e))
+                refs.append(human(s, e, lang))
             except Exception:
                 pass
         if not refs:
             return None
-        return {"ref": human(bb, bb), "xrefs": refs}
+        return {"ref": human(bb, bb, lang), "xrefs": refs}
 
     @staticmethod
     def _line(data: dict) -> str:
@@ -579,3 +579,17 @@ def suggested_layout(branches: list[dict]) -> str:
         return "tree"
     strong = sum(1 for lead in featured[0]["leads"] if lead.get("featured"))
     return "deck" if strong > 1 else "hero"
+
+
+def branched_layout(branches: list[dict], cards: list[dict]) -> str:
+    """Advisory layout for the branched surface (its `branches` carry {featured, total} — a different
+    shape than /ask's to_branches, but the SAME shape rule): featured retrieval branches + featured
+    cards → hero | deck | tree | explore."""
+    featured = [b for b in branches if b.get("featured")]
+    featured_cards = [c for c in cards if c.get("featured")]
+    n = len(featured) + len(featured_cards)
+    if n == 0:
+        return "explore"
+    if n == 1:
+        return "deck" if (featured and featured[0].get("total", 0) > 1) else "hero"
+    return "tree"

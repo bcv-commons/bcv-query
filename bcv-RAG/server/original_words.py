@@ -54,14 +54,15 @@ def _compact_words(words: list[dict]) -> list[dict]:
     ]
 
 
-def verse_interlinear(book: str, ch: int, v: int) -> dict | None:
+def verse_interlinear(book: str, ch: int, v: int, gloss_lang: str = "English") -> dict | None:
     """{lang, words, lxx} for a single verse via shoresh /verse, or None. `lxx` = the compact LXX
-    Greek parallel (present for OT verses, [] otherwise). Reusable by the PassageStrategy card."""
+    Greek parallel (present for OT verses, [] otherwise). `gloss_lang` localizes the per-word sense.
+    Reusable by the PassageStrategy card."""
     if not SHORESH_URL:
         return None
     try:
         with httpx.Client(base_url=SHORESH_URL, timeout=3.0) as client:
-            resp = client.get(f"/verse/{book}/{ch}/{v}")
+            resp = client.get(f"/verse/{book}/{ch}/{v}", params={"gloss_lang": gloss_lang})
             if resp.status_code != 200:
                 return None
             data = resp.json() or {}

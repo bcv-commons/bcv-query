@@ -428,8 +428,15 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
     fwd, rev = _lxx_pairs()
     cross = ([{"strong": g, "count": c, **(gloss_of(g) or {})} for g, c in fwd.get(code, [])][:3]
              or [{"strong": h, "count": c, **(gloss_of(h) or {})} for h, c in rev.get(code, [])][:3])
+    head = gloss_of(code) or {}                        # headline gloss — localize it too (Hebrew)
+    if code.startswith("H") and gloss_lang and gloss_lang != "English":
+        for lex in _strong_to_lex().get(code, []):
+            loc = resolve_word_gloss("hbo", gloss_lang, lex, None)
+            if loc:
+                head = {**head, "gloss": re.split(r"[;,]", loc)[0].strip()}
+                break
     return {
-        "strong": code, **(gloss_of(code) or {}),
+        "strong": code, **head,
         "keyness": keyness_of(code),                   # how distinctively biblical
         "tw": tw_articles(code).get("articles", []),  # nudge 1: study the concept
         "domains": domains, "siblings": siblings,      # nudge 3: related words
@@ -569,8 +576,9 @@ def _strong_code(word_lang: str, strong: int | None) -> str | None:
     return f"{'H' if word_lang == 'hbo' else 'G'}{strong}"
 
 
-def verse(book: str, chapter: int, vrs: int) -> dict:
-    """Greek (LXX) + Hebrew/Greek (spine) words for one verse."""
+def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dict:
+    """Greek (LXX) + Hebrew/Greek (spine) words for one verse. `gloss_lang` localizes the per-word
+    binyan-correct sense."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
@@ -598,7 +606,7 @@ def verse(book: str, chapter: int, vrs: int) -> dict:
             (book, chapter, vrs)).fetchall()
         scon.close()
         if rows:
-            senses = _verse_sense_map(book, chapter, vrs) if spine_lang == "hbo" else {}
+            senses = _verse_sense_map(book, chapter, vrs, gloss_lang) if spine_lang == "hbo" else {}
             words = []
             for r in rows:
                 code = _strong_code(spine_lang, r["strong"])
@@ -785,25 +793,30 @@ def lexeme_profile(lex: str) -> dict:
             "total": len(rows), "senses": _sense_groups(rows)}
 
 
-def _verse_sense_map(book: str, chapter: int, vrs: int) -> dict:
+def _verse_sense_map(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dict:
     """{strong: binyan-correct sense label} for a verse's Hebrew words (hbo.db ⋈ sense inventory).
-    First occurrence of a strong wins. Empty when hbo.db is unavailable / the verse is non-OT."""
+    `gloss_lang` localizes the label via the per-stem multilingual gloss (falls back to the English
+    sense). First occurrence of a strong wins. Empty when hbo.db is unavailable / the verse is non-OT."""
     con = _ro(_hbo_path())
     if con is None:
         return {}
-    labels = _lex_sense_table()
+    english = _lex_sense_table()
+    localize = bool(gloss_lang) and gloss_lang != "English"
     rows = con.execute(
         "SELECT strong, lex, stem, sense FROM occurrence WHERE book=? AND chapter=? AND verse=?",
         (book, chapter, vrs)).fetchall()
     con.close()
     out: dict = {}
     for r in rows:
-        if not r["strong"] or r["strong"] in out:
+        code = _spine_code(r["strong"]) if r["strong"] else None   # unpad (H0430→H430) → spine word code
+        if not code or code in out:
             continue
-        label = next((s["gloss"] for s in labels.get(r["lex"], {}).get(r["stem"] or "", [])
-                      if s["sense"] == (r["sense"] or "")), None)
+        label = resolve_word_gloss("hbo", gloss_lang, r["lex"], r["stem"] or None) if localize else None
+        if not label:
+            label = next((s["gloss"] for s in english.get(r["lex"], {}).get(r["stem"] or "", [])
+                          if s["sense"] == (r["sense"] or "")), None)
         if label:
-            out[_spine_code(r["strong"])] = label      # unpad (H0430→H430) to match the spine word code
+            out[code] = label
     return out
 
 
