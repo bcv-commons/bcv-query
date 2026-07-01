@@ -292,9 +292,13 @@ class PassageStrategy(CardStrategy):
             return 0.0
         return 1.0 if _single_verse(analysis) is not None else 0.0
 
+    _FUNC_GLOSS = {"the", "a", "an", "[obj.]", "[obj]", "and"}   # pure structural noise (repeated)
+
     def build(self, analysis, db, query, lang) -> dict | None:
         from indexer.references import decode, human
         from server.original_words import verse_interlinear
+        from server.verse_senses import verse_senses
+        from query.concept_expand import strong_keyness
         bb = _single_verse(analysis)
         if bb is None:
             return None
@@ -305,15 +309,27 @@ class PassageStrategy(CardStrategy):
         il = verse_interlinear(code, ch, v)
         if not il:
             return None
-        return {"ref": human(bb, bb), "lang": il["lang"], "words": il["words"]}
+        senses = verse_senses(bb)                            # {strong: binyan-correct label} (OT only)
+        words = []
+        for w in il["words"]:
+            strong = w.get("strong", "")
+            if strong in senses:                             # binyan-correct sense beats generic gloss
+                gloss, sensed = senses[strong].split(";")[0].strip(), True
+            else:
+                gloss, sensed = w.get("gloss", ""), False
+            if not gloss or gloss.lower() in self._FUNC_GLOSS:
+                continue
+            words.append({"translit": w.get("translit") or w.get("surface"), "gloss": gloss,
+                          "key": strong_keyness(strong) if strong else 0.0, "sensed": sensed})
+        if not words:
+            return None
+        words.sort(key=lambda x: -x["key"])                  # distinctive words first
+        return {"ref": human(bb, bb), "lang": il["lang"], "words": words,
+                "sensed": any(w["sensed"] for w in words)}
 
-    _FUNC_GLOSS = {"the", "a", "an", "[obj.]", "[obj]", "and"}   # pure structural noise (repeated)
-
-    @classmethod
-    def _line(cls, data: dict) -> str:
-        parts = [f"{w['translit'] or w['surface']}={w['gloss']}"
-                 for w in data["words"]
-                 if w.get("gloss") and w["gloss"].lower() not in cls._FUNC_GLOSS][:12]
+    @staticmethod
+    def _line(data: dict) -> str:                            # feature the top-keyness words
+        parts = [f"{w['translit']}={w['gloss']}" for w in data["words"][:6]]
         return f"PASSAGE {data['ref']} ({data['lang']}) — " + " · ".join(parts)
 
     def to_synthesis(self, data, analysis) -> str | None:
@@ -335,6 +351,9 @@ class CrossRefStrategy(CardStrategy):
     kind = "xref"
 
     def confidence(self, analysis, db) -> float:
+        # xref intent only — cross-refs point AWAY from the verse, so they're a separate branch, not
+        # part of the passage card's grounding (research: the passage rubric can't reward them, and the
+        # redesigned sense-rich passage card stands on its own). See internal-docs/passage-card-redesign.md.
         return 1.0 if (getattr(analysis, "intent", "") == "xref"
                        and _single_verse(analysis) is not None) else 0.0
 

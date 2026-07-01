@@ -299,7 +299,7 @@ def synthesize(
     cited = []
     seen = set()
     for cid in [*inline, *listed]:
-        if cid in valid_ids and cid not in seen:
+        if isinstance(cid, str) and cid in valid_ids and cid not in seen:  # LLM may emit a non-str cid
             cited.append(cid)
             seen.add(cid)
 

@@ -3,7 +3,9 @@
 #   • .env   — secrets/config: GROQ_API_KEY, OPENAI_API_KEY (synthesis fallback),
 #              CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN (query embedding),
 #              BTMCP_EMBEDDING_MODEL=bge-m3, ASK password, etc.
-#   • data/  — holds index.db (built/uploaded separately; not in the image)
+#              Optional: HBO_DB_PATH=/data/hbo.db (the OT linguistic core, for the passage card).
+#   • data/  — holds index.db + hbo.db (built/uploaded separately via deploy/deploy-data.sh;
+#              not in git, not in the image)
 # Adjust ports/limits for your host. The image is built locally by deploy/deploy.sh.
 services:
   bcv-rag:
