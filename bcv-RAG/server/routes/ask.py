@@ -115,7 +115,7 @@ def ask(request: Request, req: AskRequest, db: sqlite3.Connection = Depends(get_
 
     corpus_cards = []
     for cid, preview in corpus_previews.items():
-        card = citations_mod.CitationCard(
+        card = citations_mod.SourceLead(
             chunk_id=cid,
             document_title=preview["title"],
             passage=preview["passage"],

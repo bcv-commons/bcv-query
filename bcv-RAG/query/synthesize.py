@@ -4,7 +4,7 @@ The prompt forces the model to cite only chunk_ids that appear in its
 SOURCES list. Downstream validation drops any citation not in that set,
 so a hallucinated source_id can't survive into the rendered answer.
 
-Note on chunk body vs. excerpt: CitationCard.excerpt is the 240-char
+Note on chunk body vs. excerpt: SourceLead.excerpt is the 240-char
 display preview shown alongside citations in the UI. The LLM gets the
 FULL chunk body (capped at MAX_BODY_CHARS) — otherwise it can't see
 content past the excerpt boundary. Translator notes commonly bury the
@@ -23,7 +23,7 @@ from .llm import chat_completion
 from lang import canon
 
 if TYPE_CHECKING:
-    from indexer.citations import CitationCard
+    from indexer.citations import SourceLead
 
 MAX_BODY_CHARS = 1500
 
@@ -174,7 +174,7 @@ QUESTION: {question}
 Reply only with the JSON object specified."""
 
 
-def _format_sources(cards: list["CitationCard"], bodies: dict[str, str]) -> str:
+def _format_sources(cards: list["SourceLead"], bodies: dict[str, str]) -> str:
     """Render SOURCES block with FULL chunk bodies (per-kind capped) — not
     the 240-char display excerpt. Per-kind caps tighten the prompt: a verse
     needs ~50 chars, a lexicon entry can use up to 1200, a section heading
@@ -239,7 +239,7 @@ def _intent_context_for(analysis) -> str | None:
 
 def synthesize(
     question: str,
-    cards: list["CitationCard"],
+    cards: list["SourceLead"],
     db: sqlite3.Connection | None = None,
     *,
     intent_context: str | None = None,

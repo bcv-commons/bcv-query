@@ -31,7 +31,7 @@ def build_branches(
     Returns {branches, suggested_drilldown, featured_cards}:
       • branches            — [{key, label, featured, total, items:[preview]}]
       • suggested_drilldown — collapsed-but-non-empty branches [{key,label,total}]
-      • featured_cards      — the CitationCards backing FEATURED branches, for a
+      • featured_cards      — the SourceLeads backing FEATURED branches, for a
                               synthesis step to narrate over (REST /ask/branched).
     """
     branches = retrieve_branched(

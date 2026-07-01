@@ -1,4 +1,4 @@
-"""Resolve a provenance reference back to a user-facing CitationCard.
+"""Resolve a provenance reference back to a user-facing SourceLead.
 
 Cards are what the UI shows. Every claim in an answer carries one card so
 the user can see exactly which source backs it.
@@ -36,7 +36,7 @@ EXCERPT_LEN = 240
 
 
 @dataclass
-class CitationCard:
+class SourceLead:
     chunk_id: str
     document_title: str
     passage: str | None        # human-readable, e.g. "Titus 1:1"
@@ -73,7 +73,7 @@ def _tags_for(db: sqlite3.Connection, doc_id: str) -> list[str]:
     return [r[0] for r in db.execute("SELECT tag FROM tags WHERE doc_id = ? ORDER BY tag", (doc_id,))]
 
 
-def resolve(db: sqlite3.Connection, chunk_id: str) -> CitationCard | None:
+def resolve(db: sqlite3.Connection, chunk_id: str) -> SourceLead | None:
     row = db.execute(
         """
         SELECT chunks.body,
@@ -91,7 +91,7 @@ def resolve(db: sqlite3.Connection, chunk_id: str) -> CitationCard | None:
         meta = json.loads(meta_json) if meta_json else {}
     except json.JSONDecodeError:
         meta = {}
-    return CitationCard(
+    return SourceLead(
         chunk_id=chunk_id,
         document_title=title,
         passage=_passage_for(db, doc_id),
@@ -103,8 +103,8 @@ def resolve(db: sqlite3.Connection, chunk_id: str) -> CitationCard | None:
     )
 
 
-def resolve_many(db: sqlite3.Connection, chunk_ids: list[str]) -> list[CitationCard]:
-    cards: list[CitationCard] = []
+def resolve_many(db: sqlite3.Connection, chunk_ids: list[str]) -> list[SourceLead]:
+    cards: list[SourceLead] = []
     for cid in chunk_ids:
         card = resolve(db, cid)
         if card is not None:

@@ -277,7 +277,7 @@ def humanize_passages(passages: list[tuple[int, int]]) -> str | None:
 
 
 def chunk_preview_from_card(card, lang: str = "en") -> dict:
-    """Convert a CitationCard to the API's compact chunk preview shape."""
+    """Convert a SourceLead to the API's compact chunk preview shape."""
     paths = derive_tree_paths_from_card(card, lang=lang)
     kind = kind_from_tags(card.tags)
     out = {
@@ -307,7 +307,7 @@ def chunk_preview_from_card(card, lang: str = "en") -> dict:
 
 
 def derive_tree_paths_from_card(card, *, lang: str = "en") -> list[str]:
-    """Convenience: derive tree paths from a CitationCard's tags + decoded passage."""
+    """Convenience: derive tree paths from a SourceLead's tags + decoded passage."""
     # Re-encode the card's human passage back to BBCCCVVV pairs is messy;
     # the card already has tags. Build a synthetic [(start,end)] list from the
     # human passage where possible, otherwise leave empty (paths fall back to
