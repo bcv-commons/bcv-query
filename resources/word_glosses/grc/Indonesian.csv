@@ -12,6 +12,7 @@ lex,default
 Βαλαάμ,Bileam
 Βαράκ,Barak
 Βαραββᾶς,Barabas
+Βαραχίας,Barakias
 Βαρθολομαῖος,Bartolomeus
 Βαριησοῦς,Bar-Yesus
 Βαριωνᾶ,"Petrus, Simon Petrus, Kefas"
@@ -174,7 +175,7 @@ lex,default
 Μαλελεήλ,Mahalaleel
 Μαναήν,Manaen
 Μανασσῆ,Manasye
-Μαρία,
+Μαρία,Maria
 Ματθάν,Matan
 Ματταθά,Matata
 Ματταθίας,Matatius
@@ -195,6 +196,7 @@ lex,default
 Μᾶρκος,Yohanes Markus
 Μῆδος,"Orang Media, Media"
 Νάρκισσος,Narkisus
+Νίγερ,Niger
 Ναΐν,Nain
 Ναασσών,Nahsyom
 Ναγγαί,Naggai
@@ -207,7 +209,12 @@ lex,default
 Ναούμ,Nahum
 Ναχώρ,Nahor
 Νεφθαλίμ,Naftali
+Νηρί,Neri
+Νηρεύς,Nereus
+Νικάνωρ,Nikanor
 Νικολαΐτης,Nikolait
+Νικόδημος,Nikodemus
+Νικόλαος,Nikolaus
 Νικόπολις,Nikopolis
 Νινευίτης,"Ninewe, Orang Niniwe"
 Νύμφα,Nimfa
@@ -395,6 +402,7 @@ lex,default
 αἶνος,"memuji, memuji, dipuji, memuji"
 αἷμα,darah
 αὐγάζω,melihat
+αὐγή,fajar
 αὐθάδης,keras kepala
 αὐθαίρετος,sukarela
 αὐθεντέω,kekuasaan
@@ -411,12 +419,13 @@ lex,default
 αὐτοῦ,di sana
 αὐτόματος,sendiri
 αὐτόπτης,"kesaksian, bersaksi, saksi, saksi-saksi"
-αὐτός,
+αὐτός,dia
 αὐτόχειρ,dengan tangan sendiri
 αὐχέω,(tidak ada lemma)
 αὐχμηρός,gelap
 αὔξησις,pertumbuhan
 αὔριον,besok
+βάθος,kedalaman
 βάλλω,"menanam, ditanam kembali, ditransplantasikan, menabur benih"
 βάπτισμα,"membaptis, baptisan"
 βάπτω,mencelupkan
@@ -534,7 +543,7 @@ lex,default
 γάζα,perbendaharaan
 γάλα,susu
 γάμος,pesta
-γάρ,
+γάρ,karena
 γέ,sesungguhnya
 γέεννα,"neraka, lautan api"
 γέλως,tawa
@@ -722,6 +731,7 @@ lex,default
 διακονία,"melayani, pelayanan"
 διακούω,mendengarkan
 διακρίνω,"arif, kearifan, membedakan, ketajaman"
+διακωλύω,cegah
 διακόσιοι,dua ratus
 διαλέγομαι,berdebat
 διαλαλέω,membicarakan
@@ -797,7 +807,7 @@ lex,default
 διηνεκής,selamanya
 διθάλασσος,beting
 δικαίωμα,peraturan
-δικαίως,
+δικαίως,dengan benar
 δικαίωσις,"adil, keadilan, tidak adil, dengan tidak adil"
 δικαιοκρισία,keadilan
 δικαιοσύνη,"benar, adil, tidak benar, tidak benar"
@@ -855,7 +865,7 @@ lex,default
 δυσβάστακτος,"keras, lebih sulit, paling sulit, mengeras"
 δυσεντέριον,disentri
 δυσερμήνευτος,sulit dipahami
-δυσκόλως,
+δυσκόλως,dengan sulit
 δυσμή,barat
 δυσνόητος,"fitnah, difitnah, pemfitnah, memfitnah"
 δυσφημέω,"fitnah, difitnah, pemfitnah, memfitnah"
@@ -879,7 +889,7 @@ lex,default
 δύο,dua
 δύσις,barat
 δύσκολος,"keras, lebih sulit, paling sulit, mengeras"
-δώδεκα,
+δώδεκα,dua belas
 δώρημα,pemberian
 δῆλος,jelas
 δῆμος,rakyat
@@ -894,7 +904,7 @@ lex,default
 εἰδωλόθυτος,persembahan berhala
 εἰκοσιτρεῖς,dua puluh
 εἰκών,"patung, patung pahatan, patung ukiran, patung logam tuangan"
-εἰκῇ,
+εἰκῇ,sia-sia
 εἰλικρίνεια,kesungguhan
 εἰλικρινής,"suci, menyucikan, penyucian"
 εἰμί,"Anak Allah, sang Anak, Anak"
@@ -903,7 +913,7 @@ lex,default
 εἰρηνικός,"damai, kedamaian, pembuat perdamaian"
 εἰρηνοποιέω,"damai, kedamaian, pembuat perdamaian"
 εἰρηνοποιός,pembuat damai
-εἰς,
+εἰς,ke
 εἰσάγω,membawa masuk
 εἰσέρχομαι,masuk
 εἰσακούω,mendengarkan
@@ -973,7 +983,7 @@ lex,default
 εὐσέβεια,"saleh, kesalehan, fasik, murtad"
 εὐσεβέω,menyembah
 εὐσεβής,"saleh, kesalehan, fasik, murtad"
-εὐσεβῶς,
+εὐσεβῶς,saleh
 εὐσχήμων,sopan
 εὐσχημοσύνη,kesenonohan
 εὐσχημόνως,tertib
@@ -1001,8 +1011,8 @@ lex,default
 εὔφημος,terpuji
 εὔχομαι,"berdoa, doa, pendoa, didoakan"
 εὔχρηστος,berguna
-εὖ,
-εὖγε,
+εὖ,baik
+εὖγε,baik
 ζάω,putra-putra Allah
 ζέω,bergairah
 ζήτημα,pertanyaan
@@ -1010,9 +1020,9 @@ lex,default
 ζεστός,panas
 ζευκτηρία,tali kemudi
 ζεῦγος,pasangan
-ζηλεύω,
+ζηλεύω,iri
 ζηλωτής,"semangat, bersemangat"
-ζηλόω,
+ζηλόω,iri
 ζημία,rugi
 ζημιόω,"menderita, diderita, penderitaan, kesengsaraan"
 ζητέω,"mencari, dicari, pencarian"
@@ -1142,7 +1152,7 @@ lex,default
 κίνδυνος,bahaya
 κίνησις,gerakan
 κίχρημι,meminjamkan
-καί,
+καί,dan
 καίγε,bahkan
 καίπερ,meskipun
 καίτοι,padahal
@@ -1189,7 +1199,7 @@ lex,default
 κακοῦργος,penjahat
 κακός,"jahat, fasik, kefasikkan"
 κακόω,"salah, pelanggar, berbuat salah, menganiaya"
-κακῶς,
+κακῶς,buruk
 καλάμη,jerami
 καλέω,memanggil
 καλλιέλαιος,zaitun
@@ -1197,7 +1207,7 @@ lex,default
 καλοποιέω,berbuat baik
 καλός,"baik, kebaikan"
 καλύπτω,menutupi
-καλῶς,
+καλῶς,baik
 καμμύω,menutup
 κανών,kaidah
 καπηλεύω,memperdagangkan
@@ -1268,7 +1278,7 @@ lex,default
 καταλέγω,mendaftar
 καταλαλέω,menggunjing
 καταλαλιά,"gosip, gosip-gosip, pengecek, bicara omong kosong"
-καταλαμβάνω,
+καταλαμβάνω,tangkap
 καταλείπω,meninggalkan
 καταλιθάζω,"batu, bebatuan, merajam"
 καταλλάσσω,"mendamaikan, didamaikan, rekonsiliasi"
@@ -1571,6 +1581,7 @@ lex,default
 λίτρα,pon
 λίψ,barat daya
 λαγχάνω,"undi, membuang undi"
+λακάω,pecah
 λακτίζω,menendang
 λαλέω,berbicara
 λαλιά,perkataan
@@ -1651,7 +1662,7 @@ lex,default
 μάρτυς,"kesaksian, bersaksi, saksi, saksi-saksi"
 μάστιξ,"yang menderita, menimpa, menderita, penderitaan"
 μάταιος,"sia-sia, kesombongan"
-μάτην,
+μάτην,sia-sia
 μάχαιρα,"pedang, pedang-pedang, ahli pedang"
 μάχη,perselisihan
 μάχομαι,bertengkar
@@ -1665,7 +1676,7 @@ lex,default
 μέλλω,akan
 μέλος,"anggota, anggota-anggota"
 μέμφομαι,menyalahkan
-μέν,
+μέν,memang
 μέντοι,namun
 μένω,tinggal
 μέριμνα,kekhawatiran
@@ -1906,7 +1917,7 @@ lex,default
 νοέω,"memahami, mengerti, mengerti, pengertian"
 νομή,padang rumput
 νομίζω,menganggap
-νομίμως,
+νομίμως,sah
 νομικός,"hukum, kaidah, pemberi hukum, pelanggar hukum"
 νομοδιδάσκαλος,"guru, guru-guru, Guru"
 νομοθέτης,pembuat hukum
@@ -1982,7 +1993,7 @@ lex,default
 οἷος,seperti
 οὐ,tidak
 οὐά,aduh
-οὐαί,
+οὐαί,celakalah
 οὐδέ,juga tidak
 οὐδέποτε,tidak pernah
 οὐδέπω,belum
@@ -1992,14 +2003,14 @@ lex,default
 οὐκοῦν,maka
 οὐρά,ekor
 οὐράνιος,"surga, langit, surga, surgawi"
-οὐρανόθεν,
+οὐρανόθεν,dari langit
 οὐρανός,"surga, langit, surga, surgawi"
 οὐσία,harta
 οὐχί,bukan
 οὔπω,belum
 οὔτε,juga tidak
 οὕτω,demikian
-οὖν,
+οὖν,jadi
 οὖς,telinga
 οὗ,ke mana
 οὗτος,ini
@@ -2197,7 +2208,7 @@ lex,default
 πεινάω,lapar
 πειράζω,"ujian, ujian-ujian, menguji"
 πειράομαι,mencoba
-πειρασμός,
+πειρασμός,pencobaan
 πεισμονή,persuasi
 πελεκίζω,memenggal
 πενθέω,"meratap, ratapan, meratapi, peratap"
@@ -2318,7 +2329,7 @@ lex,default
 πληροφορέω,memastikan
 πληροφορία,keyakinan
 πληρόω,menggenapi
-πλησίον,
+πλησίον,tetangga
 πλησμονή,kepuasan
 πλοιάριον,perahu kecil
 πλουσίως,melimpah
@@ -2333,7 +2344,7 @@ lex,default
 πνέω,bertiup
 πνίγω,mencekik
 πνευματικός,"roh, roh-roh, rohani"
-πνευματικῶς,
+πνευματικῶς,secara rohani
 πνεῦμα,"Roh Kudus, Roh Allah, Roh Tuhan, roh"
 πνικτός,yang dicekik
 πνοή,hembusan
@@ -2632,7 +2643,7 @@ lex,default
 σάτον,seah
 σέβασμα,menyembah
 σέβω,menyembah
-σήμερον,
+σήμερον,hari ini
 σήπω,busuk
 σής,ngengat
 σίδηρος,besi
@@ -2897,7 +2908,7 @@ lex,default
 συνέκδημος,rekan perjalanan
 συνέπομαι,menemani
 συνέρχομαι,"majelis, pertemuan, berkumpul, telah berkumpul"
-συνέχω,
+συνέχω,menahan
 συνήδομαι,senang
 συνήθεια,kebiasaan
 συνίημι,"memahami, mengerti, mengerti, pengertian"
@@ -3004,7 +3015,7 @@ lex,default
 σωφροσύνη,"penguasaan diri, menguasai diri"
 σωφρόνως,bijaksana
 σός,milikmu
-σύ,
+σύ,kamu
 σύγχυσις,kebingungan
 σύζυγος,mitra
 σύμβουλος,"nasihat, konselor, saran, penasihat"
@@ -3064,7 +3075,7 @@ lex,default
 ταλαντιαῖος,seberat
 ταλιθά,talita
 ταμεῖον,kamar
-ταπείνωσις,
+ταπείνωσις,kehinaan
 ταπεινοφροσύνη,"rendah hati, kesederhanaan"
 ταπεινός,"rendah hati, kesederhanaan"
 ταπεινόφρων,"rendah hati, kesederhanaan"
@@ -3419,7 +3430,9 @@ lex,default
 ψεῦσμα,kebohongan
 ψηλαφάω,meraba
 ψηφίζω,menghitung
+ψιθυρισμός,bisik-bisik
 ψιθυριστής,"gosip, gosip-gosip, pengecek, bicara omong kosong"
+ψιχίον,remah
 ψυχή,"jiwa, jiwa-jiwa"
 ψυχικός,jasmani
 ψυχρός,dingin
@@ -3565,12 +3578,13 @@ lex,default
 ἀμάρτυρος,tanpa saksi
 ἀμάω,"panen, dipanen, mesin penunai, pemanen"
 ἀμέθυστος,ametis
-ἀμέμπτως,
+ἀμέμπτως,sempurna
 ἀμέριμνος,tenang
-ἀμήν,
+ἀμήν,amin
 ἀμήτωρ,tanpa ibu
 ἀμίαντος,murni
 ἀμαθής,bodoh
+ἀμαράντινος,abadi
 ἀμελέω,mengabaikan
 ἀμετάθετος,tetap
 ἀμετακίνητος,tetap
@@ -3623,6 +3637,7 @@ lex,default
 ἀναίρεσις,pembunuhan
 ἀναίτιος,tak berdosa
 ἀναβάλλω,menunda
+ἀναβαίνω,naik
 ἀναβαθμός,tangga
 ἀναβιβάζω,menarik
 ἀναβλέπω,memandang ke atas
@@ -3676,6 +3691,7 @@ lex,default
 ἀναπείθω,membujuk
 ἀναπηδάω,melompat masuk
 ἀναπληρόω,menggenapi
+ἀναπολόγητος,tak dapat dibenarkan
 ἀναρίθμητος,tak terhitung
 ἀνασείω,menghasut
 ἀνασκευάζω,mengacaukan
@@ -3721,6 +3737,7 @@ lex,default
 ἀνθρώπινος,manusiawi
 ἀνθύπατος,prokonsu
 ἀνοίγω,membuka
+ἀνοικοδομέω,membangun kembali
 ἀνομία,"halal, halal, melanggar hukum, tidak halal"
 ἀνορθόω,meluruskan
 ἀνοχή,kesabaran
@@ -3752,6 +3769,7 @@ lex,default
 ἀντιμισθία,"upah, upahan, memberikan upah, pemberi upah"
 ἀντιπέρα,seberang
 ἀντιπίπτω,menolak
+ἀντιπαρέρχομαι,melewati
 ἀντιστρατεύω,"tentara, pejuang, prajurit"
 ἀντιτάσσω,"pemberontak, pemberontak-pemberontak, mendurhaka, memberontak"
 ἀντλέω,menimba
@@ -3782,9 +3800,11 @@ lex,default
 ἀπαίρω,diangkat
 ἀπαγγέλλω,"kabar, kabar-kabar, terkabar"
 ἀπαιτέω,menuntut
+ἀπαλγέω,menjadi keras hati
 ἀπαλλάσσω,"bebas, kebebasan, kemerdekaan"
 ἀπαλλοτριόω,asing
 ἀπαντάω,bertemu
+ἀπαράβατος,abadi
 ἀπαρασκεύαστος,tidak siap
 ἀπαρνέομαι,menyangkal
 ἀπαρτισμός,penyelesaian
@@ -3815,6 +3835,7 @@ lex,default
 ἀποβολή,"menolak, ditolak, penolakan"
 ἀπογίνομαι,meninggalkan
 ἀπογράφω,mendaftar
+ἀπογραφή,sensus
 ἀποδέχομαι,"menerima, diterima, penerima"
 ἀποδίδωμι,"upah, upahan, memberikan upah, pemberi upah"
 ἀποδείκνυμι,menampilkan
@@ -3921,6 +3942,7 @@ lex,default
 ἀρετή,kebajikan
 ἀριθμέω,menghitung
 ἀριθμός,bilangan
+ἀριστάω,sarapan
 ἀριστερός,kiri
 ἀρκέω,mencukupi
 ἀρκετός,cukup
@@ -3957,6 +3979,7 @@ lex,default
 ἀσκός,"anggur, alat pemeras anggur, penekan anggur, kantung anggur"
 ἀσμένως,dengan senang hati
 ἀσπάζομαι,menyapa
+ἀσπίς,ular
 ἀσπασμός,salam
 ἀσσάριον,as
 ἀστήρ,bintang
@@ -4102,7 +4125,7 @@ lex,default
 ἄντλημα,ember
 ἄνυδρος,tandus
 ἄνω,atas
-ἄνωθεν,
+ἄνωθεν,dari atas
 ἄξιος,layak
 ἄπειμι (I),absen
 ἄπειμι (II),pergi
@@ -4150,7 +4173,7 @@ lex,default
 ἄχυρον,Sekam
 ἄψινθος,apsintus
 ἄψυχος,tak bernyawa
-ἅγιος,
+ἅγιος,kudus
 ἅλας,garam
 ἅλλομαι,melompat
 ἅλυσις,rantai
@@ -4261,13 +4284,13 @@ lex,default
 ἐγκρύπτω,mencampur
 ἐγκόπτω,menghalangi
 ἐγχρίω,"mengurapi, diurapi"
-ἐγώ,
+ἐγώ,aku
 ἐδαφίζω,meratakan
 ἐθίζω,terbiasa
 ἐθελοθρησκία,ibadah pilihan
 ἐθνάρχης,"memerintah, pemerintah, pemerintah-pemerintah, gubernur"
 ἐθνικός,"Kafir, orang kafir"
-ἐθνικῶς,
+ἐθνικῶς,seperti bangsa lain
 ἐκ,dari
 ἐκβάλλω,"mencampakkan, mengusir, membuang"
 ἐκβαίνω,jalan keluar
@@ -4401,7 +4424,7 @@ lex,default
 ἐμφανίζω,"kabar, kabar-kabar, terkabar"
 ἐμφυσάω,meniupkan
 ἐμός,milik
-ἐν,
+ἐν,di
 ἐνάλιος,laut
 ἐνάρχομαι,memulai
 ἐνέδρα,jebakan
@@ -4457,7 +4480,7 @@ lex,default
 ἐνυπνιάζομαι,mimpi
 ἐνωτίζομαι,mendengarkan
 ἐνύπνιον,mimpi
-ἐνώπιον,
+ἐνώπιον,di hadapan
 ἐξάγω,membawa keluar
 ἐξάλλομαι,melompat
 ἐξάπινα,tiba-tiba
@@ -4505,13 +4528,13 @@ lex,default
 ἐπάγω,mendatangkan
 ἐπάν,ketika
 ἐπάναγκες,perlu
-ἐπάνω,
+ἐπάνω,di atas
 ἐπάρατος,"kutukan, terkutuk"
 ἐπάρχειος,"provinsi, wilayah provinsi"
 ἐπέκεινα,seberang
 ἐπέρχομαι,datang
 ἐπέχω,mempertahankan
-ἐπί,
+ἐπί,atas
 ἐπίβλημα,tambalan
 ἐπίγειος,"bumi, duniawi"
 ἐπίγνωσις,"mengetahui, pengetahuan, memberitahukan, mengetahui sebelumnya"
@@ -4653,6 +4676,7 @@ lex,default
 ἐπιτυγχάνω,peroleh
 ἐπιφάνεια,penampakan
 ἐπιφέρω,menimpakan
+ἐπιφαίνω,tampak
 ἐπιφανής,terkenal
 ἐπιφαύσκω,bersinar
 ἐπιφωνέω,"menangis, berseru, seruan, menjerit"
@@ -4683,6 +4707,7 @@ lex,default
 ἐρυθρός,"gelagah, gelagah-gelagah, buluh, buluh-buluh"
 ἐρωτάω,"berdoa, doa, pendoa, didoakan"
 ἐσθής,pakaian
+ἐσθίω,makan
 ἐσχάτως,sangat
 ἐσώτερος,dalam
 ἐφάλλομαι,melompat
@@ -4695,7 +4720,7 @@ lex,default
 ἐφφαθά,terbuka
 ἐχθές,kemarin
 ἐχθρός,"penentang, lawan-lawan, musuh, musuh-musuh"
-ἑαυτοῦ,
+ἑαυτοῦ,diri
 ἑβδομήκοντα,tujuh puluh
 ἑβδομηκοντάκις,tujuh puluh kali tujuh
 ἑδραίωμα,fondasi
@@ -4757,7 +4782,7 @@ lex,default
 ἔλεος,"kemurahan hati, bermurah hati"
 ἔλευσις,kedatangan
 ἔμπορος,pedagang
-ἔμπροσθεν,
+ἔμπροσθεν,di depan
 ἔμφοβος,"teror, ketakutan, mengerikan"
 ἔμφυτος,tertanam
 ἔναντι,di hadapan
@@ -4783,7 +4808,7 @@ lex,default
 ἔξεστι(ν),boleh
 ἔξοδος,kepergian
 ἔξυπνος,terjaga
-ἔξω,
+ἔξω,luar
 ἔξωθεν,luar
 ἔοικα,menyerupai
 ἔπαινος,"memuji, memuji, dipuji, memuji"
@@ -4797,6 +4822,7 @@ lex,default
 ἔρις,perselisihan
 ἔριφος,"kambing, anak kambing, kambing hitam"
 ἔρχομαι,datang
+ἔσοπτρον,cermin
 ἔσχατος,"hari terakhir, hari-hari terakhir, hari-hari akhir"
 ἔσω,dalam
 ἔσωθεν,di dalam
@@ -4810,7 +4836,7 @@ lex,default
 ἕκτος,keenam
 ἕλκος,luka
 ἕλκω,menarik
-ἕνδεκα,
+ἕνδεκα,sebelas
 ἕνεκα,karena
 ἕξ,enam
 ἕξις,kebiasaan
@@ -4836,14 +4862,14 @@ lex,default
 Ἐφέσιος,Efesus
 Ἐφραίμ,"Efraim, orang Efraim, orang-orang Efraim"
 Ἑβραΐς,Ibrani
-Ἑβραϊστί,
+Ἑβραϊστί,Ibrani
 Ἑβραῖος,Ibrani
 Ἑζεκίας,Hizkia
 Ἑλλάς,"Yunani, orang Yunani"
 Ἑλληνίς,"Yunani, Orang Yunani"
 Ἑλληνικός,"Yunani, Orang Yunani"
 Ἑλληνιστής,"Yunani, Orang Yunani"
-Ἑλληνιστί,
+Ἑλληνιστί,Yunani
 Ἑμμώρ,Hamor
 Ἑνώχ,Henokh
 Ἑρμογένης,Hermogenes
@@ -4975,7 +5001,7 @@ lex,default
 Ἰουδαΐζω,"Orang Yahudi, Yahudi, Orang-orang Yahudi"
 Ἰουδαία,Yudea
 Ἰουδαϊκός,"Orang Yahudi, Yahudi, Orang-orang Yahudi"
-Ἰουδαϊκῶς,
+Ἰουδαϊκῶς,Yahudi
 Ἰουδαϊσμός,"Yudaisme, agama Yahudi"
 Ἰουδαῖος,"Orang Yahudi, Yahudi, Orang-orang Yahudi"
 Ἰουλία,Julia
@@ -5025,9 +5051,9 @@ lex,default
 ὀκτώ,delapan
 ὀλίγος,sedikit
 ὀλίγως,sedikit
-ὀλιγοπιστία,
+ὀλιγοπιστία,sedikit
 ὀλιγωρέω,menganggap remeh
-ὀλιγόπιστος,
+ὀλιγόπιστος,sedikit
 ὀλιγόψυχος,pengecut
 ὀλοθρευτής,pembinasa
 ὀλοθρεύω,"hancur, binasa, penghancur, pembinasa"
@@ -5079,7 +5105,7 @@ lex,default
 ὀψάριον,ikan
 ὀψέ,sore
 ὀψώνιον,upah
-ὁ,
+ὁ,yang
 ὁδεύω,berjalan
 ὁδηγέω,memandu
 ὁδηγός,pemandu
@@ -5118,7 +5144,7 @@ lex,default
 ὁρμή,dorongan
 ὁροθεσία,batas
 ὁσάκις,setiap kali
-ὁσίως,
+ὁσίως,saleh
 ὁσιότης,"kudus, kekudusan, tak kudus, sakral"
 ὄγδοος,kedelapan
 ὄγκος,beban
@@ -5260,7 +5286,7 @@ lex,default
 ὑποφέρω,"mampu menanggung, teguh, ketahanan"
 ὑποχωρέω,mundur
 ὑπωπιάζω,menonjol
-ὑπό,
+ὑπό,oleh
 ὑπόδειγμα,contoh
 ὑπόδημα,"kasut, sandal"
 ὑπόδικος,"Menghakimi, penghakiman"
@@ -5319,7 +5345,7 @@ lex,default
 ᾅδης,"Hades, Dunia orang mati"
 ᾠδή,nyanyian
 ᾠόν,telur
-ῥάβδος,
+ῥάβδος,tongkat
 ῥάκος,kain
 ῥάπισμα,tamparan
 ῥέδη,"Kereta Perang, Kereta-kereta Perang, Kusir"
@@ -5332,7 +5358,7 @@ lex,default
 ῥαββουνί,Rabi
 ῥαβδίζω,cambuk
 ῥαβδοῦχος,petugas
-ῥακά,
+ῥακά,bodoh
 ῥαντίζω,menyiramkan
 ῥαντισμός,penyiraman
 ῥαπίζω,menampar
