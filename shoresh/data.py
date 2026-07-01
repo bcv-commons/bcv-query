@@ -607,6 +607,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
         scon.close()
         if rows:
             senses = _verse_sense_map(book, chapter, vrs, gloss_lang) if spine_lang == "hbo" else {}
+            doms = _strong_domains() if spine_lang == "grc" else {}   # NT: Louw-Nida domain per word
             words = []
             for r in rows:
                 code = _strong_code(spine_lang, r["strong"])
@@ -614,6 +615,9 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
                      "strong": code, "morph": r["morph"], **(gloss_of(code) or {})}
                 if senses.get(code):                       # binyan-correct sense (OT, hbo.db)
                     w["sense"] = senses[code]
+                dd = doms.get(_pad_strong(code)) if code else None
+                if dd:                                     # dominant Louw-Nida domain (Greek, per-strong)
+                    w["domain"] = max(dd, key=lambda d: d[3])[2]
                 words.append(w)
             result["spine"] = {"language": spine_lang, "words": words}
     return result

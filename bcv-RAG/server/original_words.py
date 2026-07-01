@@ -49,7 +49,8 @@ def _compact_words(words: list[dict]) -> list[dict]:
         {"surface": w["surface"], "strong": w.get("strong", ""),
          "lemma": w.get("lemma", ""),
          "gloss": w.get("gloss", ""), "translit": w.get("translit", ""),
-         "sense": w.get("sense", "")}          # shoresh /verse's binyan-correct sense (hbo.db-derived)
+         "sense": w.get("sense", ""),          # shoresh /verse's binyan-correct sense (hbo.db-derived, OT)
+         "domain": w.get("domain", "")}        # dominant Louw-Nida domain (Greek, NT)
         for w in words if w.get("strong")
     ]
 

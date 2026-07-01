@@ -407,7 +407,8 @@ class PassageStrategy(CardStrategy):
             if not gloss:
                 continue
             words.append({"translit": w.get("translit") or w.get("surface"), "gloss": gloss,
-                          "key": key, "sensed": bool(sense), "role": roles.get(_norm_gloss(gloss))})
+                          "key": key, "sensed": bool(sense), "role": roles.get(_norm_gloss(gloss)),
+                          "domain": w.get("domain") or None})   # Louw-Nida domain (NT/Greek)
         if not words:
             return None
         words.sort(key=lambda x: -x["key"])
@@ -437,9 +438,12 @@ class PassageStrategy(CardStrategy):
         if not data:
             return None
         code = data["ref"].replace(" ", "").replace(":", "/")
+        domains = [f"{w['translit']}: {re.split(r'[,:]', w['domain'])[0].strip()}"
+                   for w in data["words"][:6] if w.get("domain")]   # NT semantic domains (Louw-Nida)
         return {"kind": self.kind, "headline": self._line(data), "anchor": data["ref"],
                 "drill": f"/verse/{code}", "syntax": f"/structure/{code}/syntax",
-                "lxx": data.get("lxx"), "frame": data.get("frame")}   # never-exclusive extras
+                "lxx": data.get("lxx"), "frame": data.get("frame"),
+                "domains": domains or None}   # never-exclusive extras
 
 
 # ── Cross-reference ──────────────────────────────────────────────────────────────────────────
