@@ -5,7 +5,8 @@ languages) and it returns a **cited answer** drawn from Bible translations and
 study resources — or, if you'd rather, just the **ranked source passages** with no
 LLM involved at all.
 
-This page is the friendly tour. For the exact request/response shapes see
+This page is the friendly tour. To **connect a client** and call the service, see the
+[Client Integration Guide](client-guide.md). For the exact request/response shapes see
 [`bcv-RAG/docs/API.md`](../bcv-RAG/docs/API.md); for the internals see
 [`bcv-RAG/docs/architecture.md`](../bcv-RAG/docs/architecture.md).
 

@@ -14,8 +14,10 @@ senses. Granular original first; everything else falls out of it.
 
 > New here? Start with **[What it is](#what-it-is)**, then read the deep-dive for
 > whichever service interests you: **[bcv-RAG](docs/bcv-RAG.md)** (search & Q&A)
-> or **[shoresh](docs/shoresh.md)** (original languages). Want to help build it?
-> Jump to the **[ROADMAP](docs/ROADMAP.md)** — it's written for new contributors.
+> or **[shoresh](docs/shoresh.md)** (original languages). Building an app on top?
+> See the **[Client Integration Guide](docs/client-guide.md)** — how to connect and
+> call both services. Want to help build it? Jump to the
+> **[ROADMAP](docs/ROADMAP.md)** — it's written for new contributors.
 
 ---
 

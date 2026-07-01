@@ -16,6 +16,9 @@ multilingual glosses, per-word senses) from it.
 Almost everything it does is **deterministic and $0** — no model, no LLM, no
 external call. The one exception is clause search, which needs a query embedding.
 
+> Connecting a client? The [Client Integration Guide](client-guide.md) covers how to
+> call shoresh (and bcv-RAG) — base URLs, the `gloss_lang` parameter, and the endpoint map.
+
 ---
 
 ## What you can ask it
