@@ -509,6 +509,16 @@ def get_structure(book: str, chapter: int, verse: int) -> dict:
     return result
 
 
+@app.get("/structure/{book}/{chapter}/{verse}/syntax")
+def get_structure_syntax(book: str, chapter: int, verse: int) -> dict:
+    """Whole-verse clause→phrase SYNTAX tree (who-did-what: phrase function Subj / Pred / Objc / …),
+    one graph traversal. Hebrew (BHSA)."""
+    result = corpus.syntax(book, chapter, verse)
+    if "error" in result:
+        raise HTTPException(503 if "not found for" in result["error"] else 404, result["error"])
+    return result
+
+
 @app.get("/structure/{book}/{chapter}/{verse}/word/{idx}")
 def get_word_structure(book: str, chapter: int, verse: int, idx: int) -> dict:
     """Clause/phrase/sentence hierarchy for one word, from bcv-corpus (private)."""

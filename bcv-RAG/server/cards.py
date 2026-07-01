@@ -338,7 +338,6 @@ class PassageStrategy(CardStrategy):
     def build(self, analysis, db, query, lang) -> dict | None:
         from indexer.references import decode, human
         from server.original_words import verse_interlinear, verse_speaker
-        from server.verse_senses import verse_senses
         from query.concept_expand import strong_keyness
         ref = _passage_ref(analysis)
         if ref is None:
@@ -351,12 +350,12 @@ class PassageStrategy(CardStrategy):
         il = verse_interlinear(code, ch, v)
         if not il:
             return None
-        senses = verse_senses(bb)                            # {strong: binyan-correct label} (OT only)
         words = []
         for w in il["words"]:
             strong = w.get("strong", "")
-            if strong in senses:                             # binyan-correct sense beats generic gloss
-                gloss, sensed = senses[strong].split(";")[0].strip(), True
+            sense = w.get("sense")                           # binyan-correct sense from shoresh /verse (hbo.db)
+            if sense:                                        # beats the generic gloss
+                gloss, sensed = sense.split(";")[0].strip(), True
             else:
                 gloss, sensed = w.get("gloss", ""), False
             if not gloss or gloss.lower() in self._FUNC_GLOSS:

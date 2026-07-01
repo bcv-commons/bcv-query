@@ -215,6 +215,36 @@ class CFEngine:
 
         return PassageResult(corpus=corpus, verses=verses)
 
+    def get_verse_syntax(self, book: str, chapter: int, verse: int,
+                         corpus: str = "hebrew") -> dict:
+        """Whole-verse clause→phrase SYNTAX tree (the 'who-did-what': phrase function Subj / Pred /
+        Objc / Cmpl / Adju …) in ONE graph traversal — no per-word RTTs. Hebrew (BHSA)."""
+        api = self._ensure_loaded(corpus)
+        wtype = WORD_TYPE.get(corpus, "word")
+        vnode = api.T.nodeFromSection((book, chapter, verse))
+        if vnode is None:
+            return {"error": f"verse not found: {book} {chapter}:{verse}"}
+
+        def fv(node, name):
+            f = api.Fs(name)
+            v = f.v(node) if f else None
+            return v if v not in (None, "NA", "", "unknown") else None
+
+        clauses = []
+        for cl in api.L.d(vnode, otype="clause"):
+            phrases = []
+            for ph in api.L.d(cl, otype="phrase"):
+                words = [{"text": (api.T.text(w) or "").strip(), "lex": fv(w, "lex"),
+                          "gloss": fv(w, "gloss"), "sp": fv(w, "sp"), "stem": fv(w, "vs")}
+                         for w in api.L.d(ph, otype=wtype)]
+                phrases.append({"function": fv(ph, "function"), "type": fv(ph, "typ"),
+                                "text": (api.T.text(ph) or "").strip(), "words": words})
+            clauses.append({"type": fv(cl, "typ"), "rela": fv(cl, "rela"),
+                            "kind": fv(cl, "kind"), "text": (api.T.text(cl) or "").strip(),
+                            "phrases": phrases})
+        return {"corpus": corpus, "book": book, "chapter": chapter, "verse": verse,
+                "clauses": clauses}
+
     def get_schema(self, corpus: str = "hebrew") -> SchemaResult:
         api = self._ensure_loaded(corpus)
 

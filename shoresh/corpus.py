@@ -70,3 +70,13 @@ def context(book: str, chapter: int, verse: int, word_index: int = 0) -> dict:
     name, corpus_id = resolved
     result = _eng().get_context(name, chapter, verse, word_index, corpus_id)
     return {"corpus": corpus_id, "corpus_book": name, "data": result}  # get_context already returns a dict
+
+
+def syntax(book: str, chapter: int, verse: int) -> dict:
+    """Whole-verse clause→phrase syntax tree (in-process engine)."""
+    resolved = _resolve(book)
+    if not resolved:
+        return {"error": f"no corpus mapping for book '{book}'"}
+    name, corpus_id = resolved
+    result = _eng().get_verse_syntax(name, chapter, verse, corpus_id)
+    return {"corpus": corpus_id, "corpus_book": name, "data": result}

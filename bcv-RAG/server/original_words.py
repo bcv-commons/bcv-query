@@ -48,7 +48,8 @@ def _compact_words(words: list[dict]) -> list[dict]:
     return [
         {"surface": w["surface"], "strong": w.get("strong", ""),
          "lemma": w.get("lemma", ""),
-         "gloss": w.get("gloss", ""), "translit": w.get("translit", "")}
+         "gloss": w.get("gloss", ""), "translit": w.get("translit", ""),
+         "sense": w.get("sense", "")}          # shoresh /verse's binyan-correct sense (hbo.db-derived)
         for w in words if w.get("strong")
     ]
 
