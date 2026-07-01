@@ -75,6 +75,21 @@ def verse_interlinear(book: str, ch: int, v: int) -> dict | None:
             "lxx": _compact_words((data.get("lxx") or {}).get("words") or [])}
 
 
+def verse_syntax(book: str, ch: int, v: int) -> dict | None:
+    """The verse's clause→phrase syntax tree (who-did-what) via shoresh /structure/…/syntax, or None.
+    Hebrew/BHSA. Best-effort; the Context-Fabric graph is loaded lazily so the first call may miss."""
+    if not SHORESH_URL:
+        return None
+    try:
+        with httpx.Client(base_url=SHORESH_URL, timeout=4.0) as client:
+            resp = client.get(f"/structure/{book}/{ch}/{v}/syntax")
+            if resp.status_code != 200:
+                return None
+            return (resp.json() or {}).get("data") or None
+    except Exception:
+        return None
+
+
 def verse_speaker(book: str, ch: int, v: int) -> dict | None:
     """{name, divine} of who speaks this verse (red-letter), or None — via shoresh /speakers/at."""
     if not SHORESH_URL:

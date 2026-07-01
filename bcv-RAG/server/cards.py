@@ -321,6 +321,28 @@ def _passage_ref(analysis):
     return None
 
 
+_CONTENT_SP = {"subs", "nmpr", "verb", "adjv", "advb"}   # BHSA content parts of speech
+
+
+def _clause_frame(syntax: dict | None) -> str | None:
+    """Who-did-what from the verse's main (verbal) clause: Subj/Pred/Objc content glosses, compact."""
+    clauses = (syntax or {}).get("clauses") or []
+    main = next((c for c in clauses if any(p.get("function") == "Pred" for p in c.get("phrases", []))),
+                None)
+    if not main:
+        return None
+    parts = []
+    for p in main["phrases"]:
+        fn = p.get("function")
+        if fn not in ("Subj", "Pred", "Objc"):
+            continue
+        g = " ".join(w["gloss"] for w in p.get("words", [])
+                     if w.get("gloss") and w.get("sp") in _CONTENT_SP)
+        if g:
+            parts.append(f"{fn} {g}")
+    return "frame: " + " · ".join(parts) if parts else None
+
+
 class PassageStrategy(CardStrategy):
     """Passage — the cited verse's interlinear original words (translit = gloss). Its own strategy:
     confidence is near-DETERMINISTIC (an explicit verse ref), and the OPPOSITE gate from concept —
@@ -337,7 +359,7 @@ class PassageStrategy(CardStrategy):
 
     def build(self, analysis, db, query, lang) -> dict | None:
         from indexer.references import decode, human
-        from server.original_words import verse_interlinear, verse_speaker
+        from server.original_words import verse_interlinear, verse_speaker, verse_syntax
         from query.concept_expand import strong_keyness
         ref = _passage_ref(analysis)
         if ref is None:
@@ -372,8 +394,9 @@ class PassageStrategy(CardStrategy):
                 lxx.append({"translit": w.get("translit") or w.get("surface"), "gloss": g,
                             "key": strong_keyness(w.get("strong", "")) if w.get("strong") else 0.0})
         lxx.sort(key=lambda x: -x["key"])
+        frame = _clause_frame(verse_syntax(code, ch, v)) if il["lang"] == "hbo" else None
         return {"ref": human(bb, bb), "lang": il["lang"], "words": words, "lxx": lxx,
-                "speaker": verse_speaker(code, ch, v), "is_range": is_range,
+                "speaker": verse_speaker(code, ch, v), "is_range": is_range, "frame": frame,
                 "sensed": any(w["sensed"] for w in words)}
 
     @staticmethod
@@ -387,6 +410,8 @@ class PassageStrategy(CardStrategy):
         lxx = data.get("lxx") or []
         if lxx:
             line += " | LXX: " + " · ".join(f"{w['translit']}={w['gloss']}" for w in lxx[:4])
+        if data.get("frame"):
+            line += " | " + data["frame"]
         return line
 
     def to_synthesis(self, data, analysis) -> str | None:
