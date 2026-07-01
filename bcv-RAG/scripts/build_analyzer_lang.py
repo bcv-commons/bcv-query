@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Build per-language analyzer intent configs (fr/pt/ru/ar/hi).
 
+NB: the committed configs are 3-letter ISO 639-3 (fra/por/…); this builder's keys
+are 2-letter — a post-generation rename step (not in this script) produced the
+final names. German (analyzer_lang/deu.json) was hand-authored to the same
+capture-group contract below rather than regenerated here.
+
 Replicates the es.json template (stopwords / topic_stopwords / relation_map /
 patterns) for five more languages. Generated via Python so JSON/regex escaping
 is handled by json.dump. See internal-docs/multilingual-unlock-plan.md (step 2)

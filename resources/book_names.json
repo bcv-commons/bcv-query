@@ -641,6 +641,74 @@
       "JUD": "Yahuda",
       "REV": "Wahayin Yahaya",
       "ISA": "Ishaya"
+    },
+    "deu": {
+      "GEN": "Genesis",
+      "EXO": "Exodus",
+      "LEV": "Levitikus",
+      "NUM": "Numeri",
+      "DEU": "Deuteronomium",
+      "JOS": "Josua",
+      "JDG": "Richter",
+      "RUT": "Rut",
+      "1SA": "1 Samuel",
+      "2SA": "2 Samuel",
+      "1KI": "1 Könige",
+      "2KI": "2 Könige",
+      "1CH": "1 Chronik",
+      "2CH": "2 Chronik",
+      "EZR": "Esra",
+      "NEH": "Nehemia",
+      "EST": "Ester",
+      "JOB": "Ijob",
+      "PSA": "Psalmen",
+      "PRO": "Sprichwörter",
+      "ECC": "Kohelet",
+      "SNG": "Hoheslied",
+      "ISA": "Jesaja",
+      "JER": "Jeremia",
+      "LAM": "Klagelieder",
+      "EZK": "Ezechiel",
+      "DAN": "Daniel",
+      "HOS": "Hosea",
+      "JOL": "Joel",
+      "AMO": "Amos",
+      "OBA": "Obadja",
+      "JON": "Jona",
+      "MIC": "Micha",
+      "NAM": "Nahum",
+      "HAB": "Habakuk",
+      "ZEP": "Zefanja",
+      "HAG": "Haggai",
+      "ZEC": "Sacharja",
+      "MAL": "Maleachi",
+      "MAT": "Matthäus",
+      "MRK": "Markus",
+      "LUK": "Lukas",
+      "JHN": "Johannes",
+      "ACT": "Apostelgeschichte",
+      "ROM": "Römer",
+      "1CO": "1 Korinther",
+      "2CO": "2 Korinther",
+      "GAL": "Galater",
+      "EPH": "Epheser",
+      "PHP": "Philipper",
+      "COL": "Kolosser",
+      "1TH": "1 Thessalonicher",
+      "2TH": "2 Thessalonicher",
+      "1TI": "1 Timotheus",
+      "2TI": "2 Timotheus",
+      "TIT": "Titus",
+      "PHM": "Philemon",
+      "HEB": "Hebräer",
+      "JAS": "Jakobus",
+      "1PE": "1 Petrus",
+      "2PE": "2 Petrus",
+      "1JN": "1 Johannes",
+      "2JN": "2 Johannes",
+      "3JN": "3 Johannes",
+      "JUD": "Judas",
+      "REV": "Offenbarung"
     }
   },
   "extra_aliases": {
@@ -1720,6 +1788,244 @@
       ],
       "REV": [
         "Откр"
+      ]
+    },
+    "deu": {
+      "GEN": [
+        "1 Mose",
+        "1. Mose",
+        "1 Buch Mose",
+        "Erstes Buch Mose",
+        "1Mo"
+      ],
+      "EXO": [
+        "2 Mose",
+        "2. Mose",
+        "2 Buch Mose",
+        "2Mo"
+      ],
+      "LEV": [
+        "3 Mose",
+        "3. Mose",
+        "Leviticus",
+        "3Mo"
+      ],
+      "NUM": [
+        "4 Mose",
+        "4. Mose",
+        "4Mo"
+      ],
+      "DEU": [
+        "5 Mose",
+        "5. Mose",
+        "5Mo"
+      ],
+      "RUT": [
+        "Ruth"
+      ],
+      "1SA": [
+        "1 Sam",
+        "1. Samuel",
+        "1. Sam"
+      ],
+      "2SA": [
+        "2 Sam",
+        "2. Samuel",
+        "2. Sam"
+      ],
+      "1KI": [
+        "1 Kön",
+        "1. Könige",
+        "1. Kön",
+        "1 Koen",
+        "1 Koenige",
+        "1. Koenige",
+        "1. Koen"
+      ],
+      "2KI": [
+        "2 Kön",
+        "2. Könige",
+        "2. Kön",
+        "2 Koen",
+        "2 Koenige",
+        "2. Koenige",
+        "2. Koen"
+      ],
+      "1CH": [
+        "1 Chr",
+        "1. Chronik",
+        "1. Chr"
+      ],
+      "2CH": [
+        "2 Chr",
+        "2. Chronik",
+        "2. Chr"
+      ],
+      "EST": [
+        "Esther"
+      ],
+      "JOB": [
+        "Hiob"
+      ],
+      "PSA": [
+        "Psalm",
+        "Ps"
+      ],
+      "PRO": [
+        "Sprüche",
+        "Spr",
+        "Sprichwoerter",
+        "Sprueche"
+      ],
+      "ECC": [
+        "Prediger",
+        "Prediger Salomo",
+        "Pred"
+      ],
+      "SNG": [
+        "Hohelied",
+        "Das Hohelied",
+        "Lied der Lieder",
+        "Hld"
+      ],
+      "ISA": [
+        "Jes"
+      ],
+      "JER": [
+        "Jer"
+      ],
+      "EZK": [
+        "Hesekiel",
+        "Hes"
+      ],
+      "DAN": [
+        "Dan"
+      ],
+      "OBA": [
+        "Obadias",
+        "Obd"
+      ],
+      "ZEP": [
+        "Zephanja",
+        "Zef"
+      ],
+      "MAT": [
+        "Matth",
+        "Mt",
+        "Matthaeus"
+      ],
+      "MRK": [
+        "Markusevangelium",
+        "Mk"
+      ],
+      "LUK": [
+        "Lukasevangelium",
+        "Lk"
+      ],
+      "JHN": [
+        "Johannesevangelium",
+        "Joh"
+      ],
+      "ACT": [
+        "Apostelgesch",
+        "Apg"
+      ],
+      "ROM": [
+        "Römerbrief",
+        "Röm",
+        "Roemer",
+        "Roemerbrief",
+        "Roem"
+      ],
+      "1CO": [
+        "1 Kor",
+        "1. Korinther",
+        "1. Kor"
+      ],
+      "2CO": [
+        "2 Kor",
+        "2. Korinther",
+        "2. Kor"
+      ],
+      "GAL": [
+        "Galaterbrief",
+        "Gal"
+      ],
+      "EPH": [
+        "Epheserbrief",
+        "Eph"
+      ],
+      "PHP": [
+        "Philipperbrief",
+        "Phil",
+        "Php"
+      ],
+      "COL": [
+        "Kolosserbrief",
+        "Kol"
+      ],
+      "1TH": [
+        "1 Thess",
+        "1. Thessalonicher",
+        "1. Thess"
+      ],
+      "2TH": [
+        "2 Thess",
+        "2. Thessalonicher",
+        "2. Thess"
+      ],
+      "1TI": [
+        "1 Tim",
+        "1. Timotheus",
+        "1. Tim"
+      ],
+      "2TI": [
+        "2 Tim",
+        "2. Timotheus",
+        "2. Tim"
+      ],
+      "HEB": [
+        "Hebräerbrief",
+        "Hebr",
+        "Hebraeer",
+        "Hebraeerbrief"
+      ],
+      "JAS": [
+        "Jakobusbrief",
+        "Jak"
+      ],
+      "1PE": [
+        "1 Petr",
+        "1. Petrus",
+        "1. Petr"
+      ],
+      "2PE": [
+        "2 Petr",
+        "2. Petrus",
+        "2. Petr"
+      ],
+      "1JN": [
+        "1 Joh",
+        "1. Johannes",
+        "1. Joh"
+      ],
+      "2JN": [
+        "2 Joh",
+        "2. Johannes",
+        "2. Joh"
+      ],
+      "3JN": [
+        "3 Joh",
+        "3. Johannes",
+        "3. Joh"
+      ],
+      "JUD": [
+        "Jud"
+      ],
+      "REV": [
+        "Offenbarung des Johannes",
+        "Apokalypse",
+        "Offb"
       ]
     }
   }

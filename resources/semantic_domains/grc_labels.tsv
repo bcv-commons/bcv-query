@@ -1,0 +1,665 @@
+code	en	es	fr	zh-hans
+001001	Universe, Creation	Universo, Creación	Univers, Création	宇宙，万物
+001002	Regions Above the Earth	Regiones sobre la Tierra	Régions au-dessus de la Terre	地面之上的地方
+001003	Regions Below the Surface of the Earth	Regiones bajo la superficie de la Tierra	Régions sous la surface de la Terre	地面以下的地方
+001004	Heavenly Bodies	Cuerpos Celestiales	Corps célestes	天体
+001005	Atmospheric Objects	Cuerpos Atmosféricos	Objets de l'atmosphère	大气的物体
+001006	The Earth's Surface	La Superficie de la Tierra	La surface de la Terre	地球的表面
+001007	Elevated Land Formations	Elevaciones terrestres	Reliefs	凸起的地形
+001008	Depressions and Holes	Depresiones y agujeros	Dépressions et cavités	洼地及洞穴
+001009	Land in Contrast With the Sea	Tierra en contraste con el mar	Terres contrastant avec la mer	与海洋形成对比的陆地
+001010	Bodies of Water	Cuerpos Acuáticos	Masses d'eau	水体
+001011	Sociopolitical Areas	Áreas Sociopolíticas	Zones sociopolitiques	社会政治区域
+001012	Governmental Administrative Areas	Áreas Administrativas de Gobierno	Zones administratives gouvernementales	政府行政区域
+001013	Areas Which Are Uninhabited or Only Sparsely Populated	Zonas deshabitadas o escasamente pobladas	Zones inhabitées ou peu peuplées	无人居住或人烟稀少的地区
+001014	Population Centers	Centros Poblados	Centres de population	人口集中的地区
+001015	Pastures and Cultivated Lands	Pastos y tierras cultivadas	Pâturages et terres cultivées	牧地及耕地
+001016	Thoroughfares: Roads, Streets, Paths, etc.	Vías de comunicación: Carreteras, calles, caminos, etc.	Voies de circulation : routes, rues, chemins, etc.	通路：道路、街道、小径等
+002001	Elements	Elementos	Éléments	元素
+002003	Fire	Fuego	Feu	火
+002004	Water	Agua	Eau	水
+002005	Earth, Mud, Sand, Rock	Tierra, Barro, Arena, Roca	Terre, boue, sable, roche	土，泥，沙，石
+002006	Precious and Semiprecious Stones and Substances	Piedras y sustancias preciosas y semipreciosas	Pierres et substances précieuses et semi-précieuses	宝石、半宝石及珍贵的天然物质
+002007	Metals	Metales	Métaux	金属
+003001	Plants [General Meaning]	Plantas [Significado general]	Plantes [Sens général]	植物（一般意义）
+003002	Trees	Árboles	Arbres	树木
+003003	Plants That Are Not Trees	Plantas que no son árboles	Plantes qui ne sont pas des arbres	树木以外的植物
+003004	Fruit Parts of Plants	Partes frutales de las plantas	Fruits Parties de plantes	植物的果实部分
+003005	Non-Fruit Parts of Plants	Partes no frutales de las plantas	Parties de plantes autres que les fruits	植物的非果实部分
+003006	Wood and Wood Products	Madera y derivados de la madera	Bois et produits dérivés du bois	木材及木制品
+004001	Animals	Animales	Animaux	动物
+004002	Birds	Aves	Oiseaux	鸟类
+004003	Insects	Insectos	Insectes	昆虫
+004004	Reptiles and Other 'Creeping Things'	Reptiles y otros seres que se arrastran	Reptiles et autres « bestioles rampantes »	爬虫类及其他“爬行动物”
+004005	Fishes and Other Sea Creatures	Peces y otras criaturas marinas	Poissons et autres créatures marines	鱼类及其他海洋生物
+005001	Food	Alimentos	Aliments	食物
+005002	Condiments	Condimentos	Condiments	调味品
+006001	Artifacts [General Meaning]	Artefactos [Significado general]	Artefacts [Sens général]	人工制品（一般意义）
+006002	Instruments Used in Agriculture and Husbandry	Instrumentos usados en agricultura y labranza	Instruments utilisés en agriculture et en élevage	耕种及畜牧用的工具
+006003	Instruments Used in Fishing	Instrumentos utilizados en la pesca	Instruments utilisés pour la pêche	捕鱼用的工具
+006004	Instruments Used in Binding and Fastening	Instrumentos utilizados para atar y sujetar	Instruments utilisés pour attacher et fixer	捆扎及固定用的工具
+006005	Traps, Snares	Trampas, lazos	Pièges, collets	陷阱，罗网
+006006	Instruments Used in Punishment and Execution	Instrumentos utilizados para castigo y ejecución	Instruments utilisés pour punir et exécuter	刑罚及处死用的工具
+006007	Weapons and Armor	Armas y armaduras	Armes et armures	武器及盔甲
+006008	Boats and Parts of Boats	Barcos y partes de barcos	Bateaux et parties de bateaux	船只及船只各部分
+006009	Vehicles	Vehículos	Véhicules	车辆
+006010	Instruments Used in Marking and Writing	Instrumentos utilizados para marcar y escribir	Instruments utilisés pour marquer et écrire	用于标记及书写的工具
+006011	Money and Monetary Units	Dinero y unidades monetarias	Monnaie et unités monétaires	货币及货币单位
+006012	Musical Instruments	Instrumentos musicales	Instruments de musique	乐器
+006013	Images and Idols	Imágenes e ídolos	Images et idoles	塑像及偶像
+006014	Lights and Light Holders	Luces y soportes de luz	Lumières et supports de lumière	灯火及支托物
+006015	Furniture	Muebles	Mobilier	家具
+006016	Containers	Contenedores	Récipients	容器
+006017	Cloth, Leather, and Objects Made of Such Materials	Telas, cueros y objetos hechos con estos materiales	Tissus, cuir et objets fabriqués à partir de ces matériaux	布料、皮革及制成物品
+006018	Adornments	Adornos	Parures	装饰品
+006019	Plant Products	Productos vegetales	Produits végétaux	植物产品
+006020	Medicines	Medicamentos	Médicaments	药物
+006021	Perfumes and Incense	Perfumes e Incienso	Parfums et encens	香料、香膏及燃香
+006022	Instruments for Measuring	Instrumentos para medir	Instruments de mesure	测量工具
+006023	Miscellaneous	Misceláneos	Divers	其他人工制品
+007001	Constructions [General Meaning]	Construcciones [Significado general]	Constructions [Sens général]	建造物（一般意义）
+007002	Buildings	Edificios	Bâtiments	建筑物
+007003	Parts and Areas of Buildings	Partes y áreas de edificios	Parties et zones des bâtiments	建筑物的部分及区域
+007004	Open Constructions	Construcciones abiertas	Constructions ouvertes	露天建造物
+007005	Constructions for Holding Water	Construcciones para retener agua	Constructions destinées à retenir l'eau	蓄水建造物
+007006	Walls and Fences	Muros y vallas	Murs et clôtures	围墙及篱笆
+007007	Miscellaneous Constructions	Construcciones varias	Constructions diverses	其他建造物
+007008	Building Materials	Materiales de construcción	Matériaux de construction	建筑材料
+008001	Body	Cuerpo	Corps	身体
+008002	Parts of the Body	Partes del cuerpo	Parties du corps	身体各部分
+008003	Physiological Products of the Body	Productos fisiológicos corporales	Produits physiologiques du corps	身体的生理产物
+009001	Human Beings	Seres humanos	Êtres humains	人类
+009002	Males	Hombres	Hommes	男性
+009003	Females	Mujeres	Femmes	女性
+009004	Children	Niños	Enfants	孩童
+009005	Persons For Whom There Is Affectionate Concern	Personas por las que se siente afecto	Personnes pour lesquelles on éprouve une affection particulière	被深情关怀的人
+010001	Groups and Members of Groups of Persons Regarded as Related by Blood but without Special Reference to Successive Generations	Grupos y miembros de grupos de personas considerados como parientes por consanguinidad, pero sin referencia especial a las generaciones sucesivas	Groupes et membres de groupes de personnes considérées comme apparentées par le sang, mais sans référence particulière aux générations successives	有血缘关系但不限定前后代关系的群体及群体的成员
+010002	Kinship Relations Involving Successive Generations	Relaciones de parentesco que implican generaciones sucesivas	Relations de parenté impliquant des générations successives	不同代的亲属关系
+010003	Kinship Relations of the Same Generation	Relaciones de parentesco de la misma generación	Relations de parenté de la même génération	同一代的亲属关系
+010004	Kinship Relations Based upon Marriage	Relaciones de parentesco basadas en el matrimonio	Relations de parenté fondées sur le mariage	基于婚姻的亲属关系
+011001	General	General	Généralités	一般性的
+011002	Socio-Religious	Socio-Religioso	Socio-religieux	社会宗教的
+011003	Socio-Political	Socio-Político	Socio-politiques	社会政治的
+011004	Ethnic-Cultural	Étno-Cultural	Ethnico-culturelles	种族文化的
+011005	Philosophical	Filosófico	Philosophiques	哲学思想的
+012001	Supernatural Beings	Seres sobrenaturales	Êtres surnaturels	超自然生物
+012002	Supernatural Powers	Poderes sobrenaturales	Pouvoirs surnaturels	超自然力量
+013001	State	Subdominio Estado	État	状态
+013002	Change of State	Cambio de Estado	Changement d'état	状态的改变
+013003	Exist	Existir	Exister	存在
+013004	Happen	Ocurrir	Se produire	发生
+014001	Weather	Clima	Conditions météorologiques	天气
+014002	Wind	Viento	Vent	风
+014003	Rain	Lluvia	Pluie	雨
+014004	Thunder and Lightning	Truenos y relámpagos	Tonnerre et éclairs	雷电
+014005	Events Involving Liquids and Dry Masses	Eventos que involucran líquidos y masas secas	Manifestations impliquant des liquides et des masses sèches	与液体和干物质有关的事件或活动
+014006	Light	Luz	Lumière	光
+014007	Darkness	Oscuridad	Ténèbres	黑暗
+014008	Burning	Ardor	Brûler	燃烧
+014009	Sound	Sonido	Son	声音
+014010	Movement of the Earth	Movimiento de la Tierra	Mouvement de la Terre	大地的移动
+015001	Move, Come/Go	Mover, ir/venir	Se déplacer, aller/venir	移动，来／去
+015002	Travel, Journey	Viaje, Trayecto	Voyager, faire un voyage	旅行，旅程
+015003	Pass, Cross Over, Go Through, Go Around	Pasar, Cruzar, Atravesar, Rodear	Passer, traverser, contourner	经过，跨越，穿过，绕过
+015004	Leave, Depart, Flee, Escape, Send	Dejar, Salir, Huir, Escapar, Enviar	Quitter, partir, fuir, échapper, envoyer	离开，起程，逃走，逃脱，差遣
+015005	Come Near, Approach	Acercarse, Abordar	S'approcher	靠近，趋近
+015006	Come, Come To, Arrive	Venir, llegar	Venir, arriver	来，来到，到达
+015007	Return	Regresar	Revenir	返回
+015008	Come/Go Into	Venir/Ir hacia	Entrer	来到，进入
+015009	Come/Go Onto	Venir/Ir hacia	Monter	登上，骑上
+015010	Come/Go Up, Ascend	Subir, ascender	Descendre/Monter	上来／上去，上升
+015011	Come/Go Down, Descend	Bajar, descender	Descendre	下来／下去，下降
+015012	Fall	Caer	Tomber	掉落
+015013	Gather, Cause To Come Together	Reunir, hacer que se reúna	Rassembler, faire venir ensemble	聚集，召集
+015014	Disperse, Scatter	Dispersar, esparcir	Se disperser, se disperser	散开，驱散
+015015	Come/Go Prior To	Venir/Ir antes de	Venir/Aller avant	先来／先去
+015016	Come/Go In Front Of	Venir/ir delante de	Venir/Aller devant	走在前面
+015017	Come/Go Behind	Venir/ir detrás de	Venir/Aller derrière	走在后面
+015018	Go Around, Surround	Ir alrededor, rodear	Contourner, entourer	绕着走，围绕
+015019	Come/Go With, Travel With	Venir/ir con, viajar con	Venir/Aller avec, voyager avec	同行，结伴
+015020	Follow, Accompany	Seguir, Acompañar	Suivre, accompagner	跟随，伴随
+015021	Pursue, Follow	Perseguir, Seguir	Poursuivre, suivre	追赶，追逐
+015022	Drive Along, Carry Along	Conducir, Transportar (¿?)	Rouler, transporter	驱动，带动
+015023	Lead, Bring, Take	Llevar, traer, tomar	Diriger, apporter, prendre	引领，带来，带领
+015024	Carry, Bear	Llevar, soportar	Porter, soutenir, supporter	携带，负担
+015025	Pull, Draw, Drag	Tirar, Remolcar, Arrastrar	Tirer, extraire, traîner/glisser	拉，拖，拽
+015026	Throw, Hurl	Lanzar, Arrojar	Lancer, jeter, projeter	投掷，扔掉
+015027	Movement with Speed	Movimiento con Velocidad	Mouvement rapide	快速移动
+015028	Goal-Oriented Movement	Movimiento orientado a un objetivo	Mouvement orienté vers un but	向着目标移动
+015029	Walk, Step	Caminar, Pisar	Marcher, faire un pas	步行，踩踏
+015030	Run	Correr	Courir	奔跑
+015031	Jump, Leap	Saltar, brincar	Sauter, bondir	跳起，跳跃
+015032	Dance	Bailar	Danser	跳舞
+015033	Fly	Volar	Voler	飞行
+015034	Swim	Nadar	Nager	游泳
+015035	Roll	Rodar	Rouler	滚动
+016	Non-Linear Movement	Movimiento No Lineal	Mouvement non linéaire	非线性运动
+017001	Stand	Pararse	Être debout	站立
+017002	Sit	Sentarse	S'asseoir	坐下
+017003	Kneel	Arrodillarse	S'agenouiller	跪下
+017004	Prostrate	Postrarse	Se prosterner	俯卧、趴着
+017005	Prostrate as an Act of Reverence or Supplication	Postrarse como acto de reverencia o súplica	Se prosterner en signe de révérence ou de supplication	俯伏敬拜或恳求
+017006	Recline [to eat]	Reclinarse [para comer]	Incliner [pour manger]	斜倚（用餐）
+017007	Lie	Acostarse	S'allonger	躺卧
+017008	Bend Over, Straighten Up	Inclinarse, enderezarse	Se pencher, se redresser	弯身，挺直
+018001	Grasp, Hold	Agarrar, sostener	Saisir, tenir	抓紧，抓住
+018002	Fasten, Stick To	Sujetar, Pegarse	Fixer, coller	系上，粘住
+019001	Hit, Strike	Golpear, Pegar	Frapper, donner un coup	击打，撞击
+019002	Pierce, Cut	Perforar, Cortar	Transpercer, couper	刺穿，切割
+019003	Split, Tear	Dividir, desgarrar	Fendre, déchirer	裂开，撕破
+019004	Break, Break Through	Romper, atravesar	Casser, briser	打破，冲破
+019005	Press	Presionar	Presser	挤压
+019006	Dig	Cavar	Creuser	挖掘
+020001	Violence	Violencia	Violence	暴力
+020002	Harm, Wound	Dañar, Herir	Blesser, blesser	伤害，伤口
+020003	Destroy	Destruir	Détruire	摧毁
+020004	Kill	Matar	Tuer	杀死
+021001	Danger	Peligro	Danger	危险
+021002	Expose Oneself to Danger	Exponerse a un peligro	S'exposer au danger	冒险
+021003	Safe, Free from Danger	Estar a Salvo, Liberarse del Peligro	Sécurité, à l'abri du danger	安全，没有危险
+021004	Become Safe, Free from Danger	Convertirse en Seguro, Libre de Peligro	Devenir en sécurité, à l'abri du danger	变得安全，没有危险
+021005	Cause To Be Safe, Free from Danger	Hacer Estar a Salvo, Libre de Peligro	Rendre en sécurité, à l'abri du danger	使安全，没有危险
+021006	Save in a Religious Sense	Salvar en un sentido religioso	Sauver au sens religieux	宗教意义上的拯救
+022001	Trouble, Hardship, Distress	Problemas, Dificultades, Angustia	Problèmes, épreuves, détresse	烦恼，困难，危难
+022002	Experience Trouble, Hardship	Experimentar Problemas, Dificultades	Vivre des difficultés, des épreuves	经历烦恼、困难
+022003	Cause Trouble, Hardship	Ocasionar problemas, dificultades	Provoquer des difficultés, des épreuves	引起烦恼、困难
+022004	Difficult, Hard	Difícil, duro	Difficile, dur	困难的，艰难的
+022005	Relief from Trouble	Alivio del problema	Soulagement des difficultés	摆脱烦恼
+022006	Easy, Light	Fácil, Ligero	Facile, léger	容易的，轻松的
+022007	Favorable Circumstances or State	Circunstancias o estado favorables	Circonstances ou état favorables	有利的情况或状态
+023001	Eat, Drink	Comer, beber	Manger, boire	吃，喝
+023002	Processes Involving the Mouth, Other Than Eating and Drinking	Procesos que implican la boca, aparte de comer y beber	Processus impliquant la bouche, autres que manger et boire	吃、喝以外，涉及口腔的活动
+023003	Birth, Procreation	Nacimiento, Procreación	Naissance, procréation	诞生，生育
+023004	Sexual Relations	Relaciones Sexuales	Relations sexuelles	性关系
+023005	Sleep, Waking	Dormir, Despertar	Sommeil, éveil	睡觉，醒来
+023006	Tire, Rest	Cansarse, Descansar	Fatigue, repos	疲倦，休息
+023007	Live, Die	Vivir, Morir	Vivre, mourir	活着，死去
+023008	Health, Vigor, Strength	Salud, Vigor, Fuerza	Santé, vigueur, force	健康，活力，力气
+023009	Sickness, Disease, Weakness	Enfermedad, dolencia, debilidad	Maladie, affaiblissement	疾病，恶疾，衰弱
+023010	Breathe, Breath	Respirar, aliento (respiro)	Respirer, souffle	呼气，呼吸
+023011	Grow, Growth	Crecer, Crecimiento	Grandir, croissance	生长
+023012	Ripen, Produce Fruit, Bear Seed	Madurar, Producir Fruto, Tener Semilla	Mûrir, produire des fruits, porter des graines	成熟，结果子，结种籽
+023013	Rot, Decay	Pudrirse, Decaer	Pourrir, se décomposer	腐烂，腐朽
+024001	See	Ver	Voir	看
+024002	Hear	Oír	Entendre	听
+024003	Smell	Olfato	Sentir	嗅
+024004	Taste	Gusto	Goûter	尝味
+024005	Touch, Feel	Tocar, Sentir	Toucher, sentir	触摸，感觉
+024006	Pain, Suffering	Dolor, Sufrimiento	Douleur, souffrance	痛苦，苦难
+024007	General Sensory Perception	Percepción Sensorial General	Perception sensorielle générale	一般感官知觉
+025001	Desire, Want, Wish	Deseo, querer, desear	Désirer, vouloir, souhaiter	意欲，希望，愿望
+025002	Desire Strongly	Desear fuertemente	Désirer fortement	强烈地渴望
+025003	Love, Affection, Compassion	Amor, Afecto, Compasión	Amour, affection, compassion	爱，情感，同情
+025004	Hope, Look Forward To	Esperanza, mirar hacia delante	Espérer, avoir hâte de	盼望，期待
+025005	Be Willing	Estar dispuesto	Être disposé	愿意
+025006	Be Eager, Be Earnest, In a Devoted Manner	Estar dispuesto, Ser Ferviente, en sentido de devoción	Être impatient, être sérieux, d’une manière dévouée	热切，认真，全心全意
+025007	Content, Satisfied	Contento, Satisfecho	Content, satisfait	知足，满足
+025008	Acceptable To, To Be Pleased With	Aceptable a, Estar Complacido con	Acceptable, être satisfait de	蒙悦纳，喜悦
+025009	Thankful, Grateful	Agradecido	Reconnaissance, gratitude	感恩的，感激的
+025010	Enjoy, Take Pleasure In, Be Fond of Doing	Disfrutar, Complacerse en, Estar encantado de hacer	Apprécier, prendre plaisir à, aimer faire	享受，享乐，喜爱做
+025011	Happy, Glad, Joyful	Feliz, Contento, Alegre	Heureux, content, joyeux	快乐，高兴，喜乐
+025012	Laugh, Cry, Groan	Reír, Llorar, Gemir	Rire, pleurer, gémir	喜笑，哀哭，悲叹
+025013	Encouragement, Consolation	Ánimo, Consuelo	Encouragement, consolation	鼓励，安慰
+025014	Courage, Boldness	Valor, Coraje, Audacia	Courage, audace	勇气，胆量
+025015	Patience, Endurance, Perseverance	Paciencia, Resistencia, Perseverancia	Patience, endurance, persévérance	忍耐，忍受，容忍，坚忍
+025016	Offend, Be Offended	Ofender, Ser Ofendido	Offenser, être offensé	冒犯，被冒犯
+025017	Abhor	Aborrecer	Détester	憎恶
+025018	Shame, Disgrace, Humiliation	Vergüenza, Desgracia, Humillación	Honte, déshonneur, humiliation	羞愧，耻辱，屈辱
+025019	Pride [legitimate]	Orgullo [legítimo]	Fierté [légitime]	自豪，骄傲，光荣
+025020	Surprise, Astonish	Sorpresa, Asombro	Surprise, étonnement	惊奇，惊诧
+025021	Worry, Anxiety, Distress, Peace	Preocupación, Ansiedad, Angustia, Paz	Inquiétude, anxiété, détresse, paix	担忧，忧虑，忧伤，平静
+025022	Fear, Terror, Alarm	Miedo, Terror, Alarma	Peur, terreur, alarme	惧怕，惊骇，惊慌
+025023	Sorrow, Regret	Pena, Arrepentimiento	Chagrin, regret	悲伤，遗憾
+025024	Discouragement	Desánimo	Découragement	沮丧
+026	Psychological Faculties	Facultades psicológicas	Facultés psychologiques	心理官能
+027001	Learn	Aprender	Apprendre	学习
+027002	Learn the Location of Something	Aprender la ubicación de algo	Apprendre l'emplacement de quelque chose	得知某物的位置
+027003	Learn Something Against Someone	Aprender algo en contra alguien	Apprendre quelque chose contre quelqu'un	得知某人的错处
+027004	Try To Learn	Intentar Aprender	Essayer d’apprendre	尝试学习
+027005	Be Willing To Learn	Estar Dispuesto a Aprender	Être disposé à apprendre	愿意学习
+027006	Be Ready To Learn, Pay Attention	Estar preparado para aprender, prestar atención	Être prêt à apprendre, prêter attention	准备好去学习，留心
+027007	Recognize	Reconocer	Reconnaître	认出
+028001	Know	Saber	Connaître	知道
+028002	Known [the content of knowledge]	Conocido [contenido del conocimiento]	Connu [le contenu de la connaissance]	已知的
+028003	Well Known, Clearly Shown, Revealed	Bien Conocido, Mostrado Claramente, Revelado	Bien connu, clairement montré, révélé	知名的，清楚显示的，显露的
+028004	Able To Be Known	Poder de ser conocido	Pouvant être connu	可知的
+028005	Not Able To Be Known, Secret	No poder conocer, secreto	Ne pouvant être connu, secret	不可知的，秘密的
+029001	Storing of Information	Almacenamiento de información	Stockage d’informations	资讯的储存
+029002	Recalling from Memory	Recuerdo de la memoria	Se souvenir	想起来
+029003	Not Remembering, Forgetting	No Recordar, Olvidar	Ne pas se souvenir, oublier	不记得，忘记
+029004	Recalling and Responding with Appropriate Action	Recordar y Responder con la Acción Apropiada	Se souvenir et réagir par une action appropriée	回忆并以适当行动回应
+030001	To Think, Thought	Pensar, Pensamiento	Penser, Pensée	思考，思想
+030002	To Think About, with the Implied Purpose of Responding Appropriately	Pensar, con el propósito implícito de responder adecuadamente	Réfléchir, avec le but implicite de répondre de façon appropriée	探讨、考虑，有作出适当回应的隐含目的
+030003	To Think Concerning Future Contingencies	Pensar sobre contingencias futuras	Penser concernant les éventualités futures	考虑未来的偶发事件
+030004	To Intend, To Purpose, To Plan	Ser Intencional, Tener Propósito, Planificar	Avoir l'intention, se proposer, planifier	打算，企图，计划
+030005	To Decide, To Conclude	Decidir, Concluir	Décider, conclure	决定，作出结论
+030006	To Choose, To Select, To Prefer	Elegir, Seleccionar, Preferir	Choisir, sélectionner, préférer	选择，拣选，宁取
+030007	To Distinguish, To Evaluate, To Judge	Distinguir, Evaluar, Juzgar	Distinguer, Évaluer, Juger	区别，评价，评断
+031001	Have an Opinion, Hold a View	Tener una opinión, Sostener un punto de vista	Avoir une opinion, Avoir un point de vue	有意见，持有观点
+031002	Hold a Wrong View, Be Mistaken	Sostener una opinión equivocada, estar equivocado	Avoir un point de vue erroné, Se tromper	持有错误观点，被误导
+031003	Agree, Consent	Estar de acuerdo, consentir	Être d'accord, consentir	赞同，同意
+031004	Acknowledge	Reconocer	Reconnaissance	承认
+031005	Suppose, Think Possible	Suponer, pensar que es posible	Supposer, penser que c'est possible	假设，认为有可能
+031006	Believe To Be True	Creer que es verdad	Croire que c'est vrai	相信是真的
+031007	Accept As True	Aceptar como Verdadero	Accepter comme vrai	接受为真实的
+031008	Change an Opinion Concerning Truth	Cambiar de opinión con respecto a la verdad	Changer d'avis concernant la vérité	改变对事实／真理的看法
+031009	Trust, Rely	Confiar, Apoyarse	Faire confiance, compter sur	信赖，依靠
+031010	Be a Believer, Christian Faith	Ser un creyente, fe cristiana	Être croyant, la foi chrétienne	成为信徒，对基督的信仰
+032001	Understand	Entender	Comprendre	理解
+032002	Come To Understand	Llegar a comprender	Venir à comprendre	终于理解或明白过来
+032003	Ease or Difficulty in Understanding	Facilidad o dificultad de comprensión	Facilité ou difficulté à comprendre	容易理解或难于理解
+032004	Capacity for Understanding	Capacidad de comprensión	Capacité de compréhension	理解能力
+032005	Lack of Capacity for Understanding	Falta de capacidad para entender	Manque de capacité de compréhension	缺乏理解能力
+033001	Language	Lenguaje	Langage	语言
+033002	Word, Passage	Palabra, pasaje	Mot, passage	言语，段落
+033003	Discourse Types	Tipos de discurso	Types de discours	话语类型
+033004	Language Levels	Niveles lingüísticos	Niveaux de langue	语言层次
+033005	Written Language	Lenguaje escrito	Langue écrite	书面语言
+033006	Speak, Talk	Hablar, Conversar	Parler, discuter	说话，谈话
+033007	Sing, Lament	Cantar, Lamentar	Chanter, se lamenter	唱歌，唱哀歌
+033008	Keep Silent	Guardar silencio	Garder le silence	保持沉默
+033009	Name	Nombre	Nom	名字
+033010	Interpret, Mean, Explain	Interpretar, Significar, Explicar	Interpréter, signifier, expliquer	翻译，表示……的意思，说明
+033011	Converse, Discuss	Conversar, Discutir	Converser, discuter	交谈，讨论
+033012	Ask For, Request	Pedir por, Solicitar	Demander, solliciter	请求，要求
+033013	Pray	Orar	Prier	祷告
+033014	Question, Answer	Pregunta, Respuesta	Questionner, répondre	问题，答案
+033015	Inform, Announce	Informe, Anuncio	Informer, annoncer	通知，宣布
+033016	Assert, Declare	Afirmar, Declarar	Affirmer, déclarer	断言，声明
+033017	Teach	Enseñar	Enseigner	教导
+033018	Speak Truth, Speak Falsehood	Decir la Verdad, Decir Falsedad	Dire la vérité, dire le mensonge	说真话，说假话
+033019	Preach, Proclaim	Predicar, Proclamar	Prêcher, proclamer	传道，宣扬
+033020	Witness, Testify	Atestiguar, Testificar	Témoigner, attester	见证，证明
+033021	Profess Allegiance	Profesar Lealtad	Professer son allégeance	宣称效忠
+033022	Admit, Confess, Deny	Admitir, Confesar, Negar	Admettre, confesser, nier	承认，宣认，否认
+033023	Agree	Estar de acuerdo	Accepter	赞同
+033024	Foretell, Tell Fortunes	Predecir, Adivinar el futuro	Prédire, deviner l'avenir	预告，占卜
+033025	Promise	Promea	Promettre	承诺
+033026	Threaten	Amenazar	Menacer	威胁
+033027	Advise	Aconsejar	Conseiller	建议
+033028	Urge, Persuade	Urgir, Persuadir	Exhorter, persuader	劝告，力劝
+033029	Call	Llamar	Appeler	召唤，呼召
+033030	Invite	Invitar	Inviter	邀请
+033031	Insist	Insistir	Insister	坚持
+033032	Command, Order	Mandar, Ordenar	Commander, ordonner	吩咐，命令
+033033	Law, Regulation, Ordinance	Ley, Reglamento, Ordenanza	Loi, règlement, ordonnance	法律，规则，条例
+033034	Recommend, Propose	Recomendar, Proponer	Recommander, proposer	推荐，提议
+033035	Intercede	Interceder	Intercéder	求情
+033036	Thanks	Gracias	Merci	感谢
+033037	Praise	Alabanza	Louer	赞美
+033038	Flatter	Adular	Fléchir	奉承
+033039	Boast	Presumir	Se vanter	吹嘘
+033040	Foolish Talk	Hablar tonterías	Paroles insensées	愚蠢的话
+033041	Complain	Queja	Se plaindre	埋怨
+033042	Insult, Slander	Insulto, Calumnia	Insulter, calomnier	侮辱，中伤
+033043	Gossip	Chisme	Commérer	说闲话
+033044	Mock, Ridicule	Burlarse, Ridiculizar	Se moquer, ridiculiser	嘲笑，戏弄
+033045	Criticize	Criticar	Critiquer	批评
+033046	Rebuke	Reprender	Réprimander	指责
+033047	Warn	Advertir	Avertir	警告
+033048	Accuse, Blame	Acusar, Culpar	Accuser, blâmer	控告，谴责
+033049	Defend, Excuse	Defender, Excusar	Défendre, excuser	辩护，藉口
+033050	Dispute, Debate	Disputar, debatir	Contester, débattre	辩论，争论
+033051	Argue, Quarrel	Discutir, reñir	Discuter, se quereller	争辩，争吵
+033052	Oppose, Contradict	Oponerse, Contradecir	S'opposer, contredire	反对，驳斥
+033053	Prophesy	Profetizar	Prophétiser	预言
+033054	Swear, Put Under Oath, Vow	Jurar, Poner bajo juramento, Hacer un voto	Jurer, faire prêter serment, faire vœu	发誓，宣誓，许愿
+033055	Bless, Curse	Bendición, Maldición	Bénir, maudire	祝福，诅咒
+033056	Non-Verbal Communication	Comunicación no verbal	Communication non verbale	非语言的沟通
+034001	Associate	Asociar	Associé	联系
+034002	Join, Begin To Associate	Unir, Empezar a Asociar	Rejoindre, commencer à s'associer	加入，开始联系
+034003	Belong To, Be Included in the Membership of, Be Excluded From	Pertenecer a, Estar incluido en la membresía de, Estar excluido de	Appartenir à, être inclus dans la composition de, être exclu de	属于，包括在成员中，排除在外
+034004	Limit or Avoid Association	Limitar o Evitar Asociación	Limiter ou éviter l'association	限制或避免联系
+034005	Establish or Confirm a Relation	Establecer o confirmar una relación	Établir ou confirmer une relation	建立或确认关系
+034006	Visit	Visitar	Rendre visite	探望
+034007	Welcome, Receive	Acoger, Recibir	Accueillir, recevoir	迎接，接待
+034008	Show Hospitality	Ser hospitalario	Faire preuve d'hospitalité	殷勤招待
+034009	Kiss, Embrace	Besar, Abrazar	Embrasser, étreindre	亲吻，拥抱
+034010	Marriage, Divorce	Matrimonio, Divorcio	Mariage, divorce	结婚，离婚
+035001	Help	Ayudar	Aider	帮助
+035002	Serve	Servir	Servir	服侍
+035003	Provide For, Support	Proveer para, apoyar	Subvenir aux besoins, soutenir	供应，支持
+035004	Care For, Take Care Of	Cuidar a, atender a	Prendre soin de, s'occuper de	照顾，照应
+035005	Entrust To the Care Of	Confiar al cuidado de	Confier à la garde de	托付
+035006	Rear, Bring Up	Criar, educar	Élever, éduquer	抚养，养育
+035007	Adopt	Adoptar	Adopter	收养
+035008	Desert, Forsake	Desertar, Desamparar	Déserter, abandonner	遗弃，放弃
+036001	Guide, Lead	Guiar, Dirigir	Guider, diriger	引导，引领
+036002	Discipline, Train	Disciplinar, Entrenar	Discipliner, former	管教，锻炼
+036003	Obey, Disobey	Obedecer, Desobedecer	Obéir, désobéir	服从，不服从
+036004	Follow, Be a Disciple	Seguir, Ser Discípulo	Suivre, être un disciple	跟从，成为门徒
+037001	Control, Restrain	Controlar, Restringir	Contrôler, restreindre	控制，限制
+037002	Compel, Force	Obligar, Forzar	Contraindre, forcer	迫使，强迫
+037003	Exercise Authority	Ejercer la autoridad	Exercer son autorité	运用权力
+037004	Rule, Govern	Reglamentar, Gobernar	Régner, gouverner	管理，统治
+037005	Assign to a Role or Function	Asignar un rol o función	Attribuer un rôle ou une fonction	任命，分配职能
+037006	Seize, Take into Custody	Apoderarse, Poner bajo Custodia	Saisir, mettre en détention	捉拿，扣留
+037007	Hand Over, Betray	Entregar, Traicionar	Remettre, trahir	交出，出卖
+037008	Imprison	Encarcelar	Emprisonner	监禁
+037009	Guard, Watch Over	Guardar, Vigilar	Garder, surveiller	守卫，看守
+037010	Release, Set Free	Liberar, Poner en libertad	Libérer, affranchir	释放，解放
+038001	Punish	Castigar	Punir	惩罚
+038002	Reward, Recompense	Recompensa, Recompensar	Récompenser, récompenser	报应，赏罚
+039001	Opposition, Hostility	Oposición, Hostilidad	Opposition, hostilité	对抗，敌意
+039002	Division	División	Division	分裂
+039003	Resistance	Resistencia	Résistance	抵抗
+039004	Yielding	Ceder	Céder	屈服
+039005	Strife, Struggle	Contienda, Lucha	Conflit, lutte	冲突，斗争
+039006	Revenge	Venganza	Vengeance	报复
+039007	Rebellion	Rebelión	Rébellion	反叛
+039008	Riot	Motín	Émeute	暴乱
+039009	Persecution	Persecución	Persécution	迫害
+039010	Attack	Ataque	Attaque	攻击
+039011	Ambush	Emboscada	Embuscade	伏击
+039012	Conquer	Conquistar	Conquête	征服
+040001	Reconciliation	Reconciliación	Réconciliation	和解
+040002	Forgiveness	Perdón	Pardon	宽恕
+041001	Behavior, Conduct	Comportamiento, conducta	Comportement, conduite	行为，品行
+041002	Custom, Tradition	Costumbre, Tradición	Coutume, tradition	习俗，传统
+041003	Particular Patterns of Behavior	Patrones particulares de comportamiento	Modèles particuliers de comportement	特定行为模式
+041004	Imitate Behavior	Imitar el comportamiento	Imitation du comportement	模仿行为
+041005	Change Behavior	Cambiar el comportamiento	Changement de comportement	改变行为
+042001	Function	Función	Fonction	发挥功用
+042002	Do, Perform	Hacer, realizar	Faire, accomplir	做，执行
+042003	Make, Create	Hacer, Crear	Fabriquer, créer	制作，创造
+042004	Work, Toil	Trabajar, Esforzarse	Travail, labeur	工作，劳碌
+042005	Craft, Trade	Artesanía, Comercio	Artisanat, commerce	工艺，职业
+043	Agriculture	Agricultura	Agriculture	农耕
+044	Animal Husbandry, Fishing	Ganadería, Pesca	Élevage, pêche	畜牧，捕鱼
+045	Building, Constructing	Edificación, Construcción	Bâtir, construire	建造，兴建
+046	Household Activities	Actividades domésticas	Activités ménagères	家务活动
+047001	Movement of Liquids or Masses	Movimiento de líquidos o masas	Mouvement de liquides ou de masses	液体或干物质的移动
+047002	Use of Liquids	Uso de líquidos	Utilisation de liquides	液体的使用
+047003	Application and Removal of Liquids or Masses	Aplicación y Eliminación de Líquidos o Masas	Application et retrait de liquides ou de masses	液体或干物质的应用及清除
+048	Activities Involving Cloth	Actividades que involucran telas	Activités impliquant des tissus	涉及布料的活动
+049	Activities Involving Clothing and Adorning	Actividades que involucran telas y adornos	Activités impliquant les vêtements et la parure	涉及衣着及装饰的活动
+050	Contests and Play	Certámenes y juegos	Concours et jeux	竞赛及游戏
+051	Festivals	Fiestas, Festivales	Fêtes	节日
+052	Funerals and Burial	Funerales y Entierros	Funérailles et enterrement	丧礼及葬礼
+053001	Religious Practice	Práctica Religiosa	Pratique religieuse	宗教行为
+053002	Offering, Sacrifice	Ofrenda, Sacrificio	Offrande, sacrifice	奉献，献祭
+053003	Purify, Cleanse	Purificar, Limpiar	Purifier, nettoyer	净化，洁净
+053004	Defile, Unclean, Common	Profanar, Impuro, Común	Souiller, rendre impur, profaner	玷污，不洁，俗物
+053005	Baptize	Bautizar	Baptiser	施洗
+053006	Dedicate, Consecrate	Dedicar, Consagrar	Consacrer, dédier	献身，成为圣洁
+053007	Worship, Reverence	Adorar, Reverencia	Adorer, vénérer	敬拜，尊崇
+053008	Fasting	Ayunar	Jeûner	禁食
+053009	Roles and Functions	Roles y Funciones	Rôles et fonctions	角色及作用
+053010	Magic	Magia	Magie	邪术
+053011	Exorcism	Exorcismo	Exorcisme	驱鬼
+053012	Sacrilege	Sacrilegio	Sacrilège	亵渎神
+054	Maritime Activities	Actividades Marítimas	Activités maritimes	海上活动
+055001	To Arm	Armar	Armer	配备武器
+055002	To Fight	Combatir	Combattre	战斗
+055003	Army	Ejército	Armée	军队
+055004	Soldiers, Officers	Soldados, Oficiales	Soldats, officiers	士兵及军官
+055005	Prisoners of War	Prisioneros de Guerra	Prisonniers de guerre	战俘
+056001	Court of Justice	Corte de Justicia	Cour de justice	法庭
+056002	Lawsuit, Case	Demanda, Caso	Procès, affaire	法律诉讼，案件
+056003	Accusation	Acusación	Accusation	起诉
+056004	Judicial Hearing, Inquiry	Audiencia judicial, investigación	Audience judiciaire, enquête	法庭聆讯，审讯
+056005	Judge, Condemn, Acquit	Juzgar, Condenar, Absolver	Juger, condamner, acquitter	审判，判刑，宣告无罪
+056006	Obtain Justice	Obtener Justicia	Obtenir justice	伸张正义
+056007	Attorney, Lawyer	Abogado, Procurador	Avocat, juriste	辩士，律师
+056008	Lead Off to Punishment	Llevar al castigo	Condamner à une peine	领去受刑
+057	Possess, Transfer, Exchange	Poseer, Transferir, Intercambiar	Posséder, transférer, échanger	拥有，转移，交换
+057001	Have, Possess, Property, Owner	Tener, poseer, propiedad, dueño	Avoir, posséder, propriété, propriétaire	有，拥有，财产，所有者
+057002	Have Sufficient	Tener Suficiente	Avoir suffisamment	有足够的
+057003	Be Rich, Be Wealthy	Ser rico, ser acaudalado	Être riche, être prospère	有钱，富裕的
+057004	Treasure	Tesoro	Trésor	财宝
+057005	Need, Lack	Necesidad, Carencia	Besoin, manque	需要，缺乏
+057006	Be Poor, Be Needy, Poverty	Ser pobre, estar necesitado, pobreza	Être pauvre, être dans le besoin, pauvreté	贫乏，贫困，贫穷
+057007	Take, Obtain, Gain, Lose	Tomar, Obtener, Ganar, Perder	Prendre, obtenir, gagner, perdre	拿去，获得，赢得，失去
+057008	Give	Dar	Donner	给予
+057009	Receive	Recibir	Recevoir	接受
+057010	Exchange	Intercambio	Échanger	交换
+057011	Spend, Waste	Gastar, Desperdiciar	Dépenser, gaspiller	花费，浪费
+057012	Pay, Price, Cost	Pagar, Precio, Costo	Payer, prix, coût	支付，价钱，费用
+057013	Hire, Rent Out	Contratar, alquilar	Louer, mettre en location	雇用，出租
+057014	Tax, Tribute	Impuesto, tributo	Taxe, tribut	税款，贡品
+057015	Sell, Buy, Price	Vender, Comprar, Precio	Vendre, acheter, prix	售卖，购买，价钱
+057016	Earn, Gain, Do Business	Obtener, Ganar, Hacer negocios	Gagner, faire des affaires	赚取，赢利，做生意
+057017	Lend, Loan, Interest, Borrow, Bank	Préstamo, Prestar, Intereses, Tomar Prestado, Banco	Prêter, prêt, intérêt, emprunter, banque	借出，贷款，利息，借入，银行
+057018	Owe, Debt, Cancel	Deber, Deudas, Cancelar	Detter, dette, annuler	欠债，债项，销账
+057019	Be a Financial Burden	Ser una carga financiera	Être un fardeau financier	成为财务负担
+057020	Keep Records	Llevar registros	Tenir des registres	记账
+057021	Steal, Rob	Robar, Asaltar	Voler, dérober	偷窃，盗取
+058001	Nature, Character	Naturaleza, Carácter	Nature, caractère	性质，特征
+058002	Appearance as an Outward Manifestation of Form	Apariencia como manifestación externa de forma	Apparence en tant que manifestation extérieure de la forme	外貌，形式的外在显现
+058003	Basic Principles or Features Defining the Nature of Something	Principios o rasgos básicos que definen la naturaleza de algo	Principes ou caractéristiques fondamentaux définissant la nature de quelque chose	界定事物性质的基本原则或特征
+058004	Class, Kind	Clase, tipo	Classe, genre	类别，种类
+058005	Same or Equivalent Kind or Class	Clase o tipo igual o equivalente	Type ou catégorie identique ou équivalent	同类或同等
+058006	Different Kind or Class	De Diferente Tipo o Clase	Genre ou classe différent	不同类或不同等
+058007	Distinctive, Unique	Distintivo, único	Distinctif, unique	独特的，独一无二的
+058008	Unusual, Different From the Ordinary	Inusual, diferente de lo ordinario	Insolite, différent de l'ordinaire	不寻常的，与众不同的
+058009	Pattern, Model, Example, and Corresponding Representation	Patrón, Modelo, Ejemplo y Representación correspondiente	Motif, modèle, exemple et représentation correspondante	样式，模式，榜样及对应的表现
+058010	Archetype, Corresponding Type [Antitype]	Arquetipo, Tipo correspondiente [Antitipo]	Archétype, type correspondant [antitype]	原型，对应的类型（对型）
+058011	New, Old [primarily non-temporal]	Nuevo, Viejo [primariamente no-temporal]	Nouveau, Ancien [essentiellement non temporel]	新的，旧的（主要指非时间性的事物）
+059001	Many, Few [Countables]	Muchos, Pocos [Contables]	Beaucoup, Peu [Comptables]	多，少（可数的事物）
+059002	Much, Little [Masses, Collectives, Extensions]	Mucho, Poco [Masas, Colectivos, Extensiones]	Beaucoup, Peu [Masses, Collectifs, Extensions]	多，少（大量，总体，延伸）
+059003	All, Any, Each, Every [Totality]	Todo, Cualquiera, Cada, Todos [Totalidad]	Tous, N'importe lequel, Chacun, Chaque [Totalité]	所有，任何，各个，每个（整体）
+059004	Full, Empty	Lleno, Vacío	Plein, Vide	满的，空的
+059005	Enough, Sufficient	Bastante, Suficente	Assez, Suffisant	足够的，充足的
+059006	Abundance, Excess, Sparing	Abundancia, Exceso, Ahorro	Abondance, Excès, Économie	充裕，过量，极少
+059007	Increase, Decrease	Aumentar, Disminuir	Augmentation, Diminution	增加，减少
+059008	Add, Subtract	Sumar, Restar	Ajouter, Soustraire	相加，相减
+060001	Number, Countless	Número, Incontable	Nombre, Innombrable	数目，无数的
+060002	One, Two, Three, Etc. [Cardinals]	Uno, dos, tres, etc. [Números Cardinales]	Un, deux, trois, etc. [Cardinaux]	一，二，三，等等（基数）
+060003	First, Second, Third, Etc. [Ordinals]	Primero, Segundo, Tercero, Etc. [Números Ordinales]	Premier, deuxième, troisième, etc. [Ordinaux]	第一，第二，第三，等等（序数）
+060004	Half, Third, Fourth [Fractional Part]	La mitad, la tercera, la cuarta [Fracción].	Moitié, tiers, quart [Part fractionnaire]	二分之一，三分之一，四分之一（分数）
+060005	Once, Twice, Three Times, Etc. [Cardinals of Time]	Una, dos, tres veces, etc. [Cardinales Temporales]	Une fois, deux fois, trois fois, etc. [Cardinaux du temps]	一次，两次，三次，等等（时间基数）
+060006	Double, Four Times As Much, Etc. [Multiples]	Doble, cuatro veces más, etc. [Múltiplos]	Double, quatre fois plus, etc. [Multiples]	两倍，四倍之多，等等（倍数）
+060007	Pair, Group [Numbered Collectives]	Par, Grupo [Numerales colectivos]	Paire, groupe [Collectifs numérotés]	一对，一群（共计的集合体）
+061	Sequence	Secuencia	Séquence	序列
+062001	Put Together, Arrange [of physical objects]	Juntar, Arreglo [de objetos físicos]	Assembler, Disposer [d'objets physiques]	（实物的）组合，排列
+062002	Organize [of events and states]	Organización [de eventos y estados]	Organiser [d'événements et d'états]	（事件及状态的）安排
+063001	Whole	Entero	Entier	整体
+063002	Unite	Unir	Unir	联合
+063003	Mix	Mezclar	Mélanger	混合
+063004	Part	Parte	Partie	部分
+063005	Remnant	Remanente	Reste	剩余部分
+063006	Divide	Dividir	Diviser	分开
+063007	Separate	Separar	Séparer	分隔
+064	Comparison	Comparación	Comparaison	比较
+065001	Valuable, Lacking in Value	Valioso, carente de valor	Précieux, sans valeur	有价值的，没有价值的
+065002	Worthy, Not Worthy	Digno, Indigno	Digne, indigne	值得的，不值得的
+065003	Good, Bad	Bueno, malo	Bon, Mauvais	好的，坏的
+065004	Useful, Useless	Útil, Inútil	Utile, inutile	有用的，无用的
+065005	Advantageous, Not Advantageous	Ventajoso, Desventajoso	Avantageuse, pas avantageux	有益的，无益的
+065006	Important, Unimportant	Importante, No Importante	Important, sans importance	重要的，不重要的
+066	Proper, Improper	Apropiado, Impropio	Approprié, inapproprié	适当的，不适当的
+067001	A Point of Time without Reference to Other Points of Time: Time, Occasion, Ever, Often	Punto de tiempo sin referencia a otros puntos de tiempo: tiempo, ocasión, siempre, a menudo	Un point de temps sans référence à d'autres points de temps : le temps, l'occasion, Toujours, Souvent	与其他时间点无关的时间点：时间，时机，曾经，常常
+067002	A Point of Time with Reference to Other Points of Time: Before, Long Ago, Now, At the Same Time, When, About, After	Punto de tiempo con referencia a otros puntos de tiempo: antes, hace tiempo, ahora, al mismo tiempo, cuando, sobre, después	Un point de temps avec référence à d'autres points de temps : Avant, Il y a longtemps, Maintenant, En même temps, Quand, Environ, Après	与其他时间点有关的时间点：之前，很久以前，现在，同时，在那时，大约，之后
+067003	A Point of Time with Reference to Duration of Time: Beginning, End	Punto de tiempo con referencia a duración del tiempo: Principio, Fin	Un point de temps avec référence à la durée : Début, Fin	与时间段有关的时间点：起初，最后
+067004	A Point of Time with Reference to Units of Time: Daybreak, Midday, Midnight, Late	Punto de tiempo con referencia a las unidades de tiempo: Amanecer, Mediodía, Medianoche, Tarde	Un moment dans le temps en référence à des unités de temps : l'aube, midi, minuit, tard	与时间单位有关的时间点：黎明，中午，午夜，傍晚
+067005	Duration of Time without Reference to Points or Units of Time: Time, Spend Time, Always, Eternal, Old, Immediately, Young	Duración de Tiempo sin Referencia a Puntos o Unidades de Tiempo: Tiempo, Pasar el Tiempo, Siempre, Eterno, Viejo, Inmediato, Joven	Durée du temps sans référence à des moments ou à des unités de temps : le temps, passer du temps, toujours, éternel, ancien, immédiatement, jeune	与时间点或时间单位无关的时间段：时间，花时间，总是，永恒，年老，立即，年轻
+067006	Duration of Time with Reference to Some Point of Time: Until, Delay, Still, From	Duración del tiempo con referencia a algún punto de tiempo: Hasta, Retraso, Todavía, Desde	Durée du temps en référence à un moment donné : jusqu'à, retard, encore, depuis	与某个时间点有关的时间段：直至，延迟，仍然，从……起
+067007	Duration of Time with Reference to Some Unit of Time: During, In, While, Throughout	Duración de tiempo con referencia a alguna unidad de tiempo: Durante, En, Mientras, A lo largo de	Durée du temps en référence à une unité de temps : pendant, en, tandis que, tout au long	与某个时间单位有关的时间段：在……期间，在……的时候，当……的时候，自始至终
+067008	Indefinite Units of Time: Age, Lifetime, Interval, Period	Unidades de Tiempo Indefinidas: Edad, Vida, Intervalo, Período	Unités de temps indéfinies : âge, durée de vie, intervalle, période	模糊的时间单位：时代，寿命，间隔，时期
+067009	Definite Units of Time: Year, Month, Week, Day, Hour	Unidades de Tiempo Definidas: Año, Mes, Semana, Día, Hora	Unités de temps définies : année, mois, semaine, jour, heure	明确的时间单位：年，月，星期，日，小时
+067010	Units of Time with Reference to Other Units or Points of Time: Yesterday, Today, Next Day	Unidades de Tiempo con Referencia a Otras Unidades o Puntos de Tiempo: Ayer, Hoy, Próximo Día	Unités de temps en référence à d’autres unités ou moments : hier, aujourd’hui, demain	与其他时间单位或时间点有关的时间单位：昨天，今天，次日
+068001	Begin, Start	Empezar, comenzar	Commencer, démarrer	开始
+068002	Continue	Continuar	Continuer	继续
+068003	Complete, Finish, Succeed	Completar, terminar, tener éxito	Terminer, finir, réussir	完竣，完成，成就
+068004	Cease, Stop	Cesar, Detenerse	Cesser, s’arrêter	停止
+068005	Try, Attempt	Tratar, Intentar	Essayer, tenter	尝试，试图
+068006	Do Intensely or Extensively	Realizar intensamente o extensamente	Faire intensément ou extensivement	专心努力去做，全力去做
+068007	Rapidity, Suddenness	Rapidez, Repentino	Rapidité, soudaineté	高速，突然
+069001	Affirmation	Afirmación	Affirmation	肯定
+069002	Negation	Negación	Négation	否定
+069003	Negation Combined with Clitics	Negación combinada con clíticos	Négation combinée avec clitique	否定，结合附着词
+069004	Markers for an Affirmative Response to Questions	Marcadores para una respuesta afirmativa a las preguntas	Marqueurs pour une réponse affirmative aux questions	对问题作肯定回应的标记
+069005	Markers for a Negative Response to Questions	Marcadores para una respuesta negativa a las preguntas	Marqueurs pour une réponse négative aux questions	对问题作否定回应的标记
+070	Real, Unreal	Real, irreal	Réel, irréel	实在的，不实在的
+071001	Possible, Impossible	Posible, Imposible	Possible, impossible	可能，不可能
+071002	Probable, Improbable	Probable, Improbable	Probable, improbable	很可能，不大可能
+071003	Certain, Uncertain	Cierto, Incierto	Certain, incertain	确定的，不确定的
+071004	Should, Ought	Debería, Tener que	Devrait, il faut	应该，理应
+071005	Necessary, Unnecessary	Necesario, Innecesario	Nécessaire, inutile	必要的，不必要的
+072001	True, False	Verdadero, falso	Vrai, Faux	真的，假的
+072002	Accurate, Inaccurate	Exacto, Inexacto	Précis, inexact	准确的，不准确的
+073	Genuine, Phony	Genuino, Falso	Authentique, Faux	真实的，虚假的
+074	Able, Capable	Apto, Capaz	Capable, Apte	能够，有能力
+075	Adequate, Qualified	Adecuado, Calificado	Adéquat, qualifié	胜任，有资格
+076	Power, Force	Poder, Fuerza	Puissance, Force	能力，力量
+077	Ready, Prepared	Listo, Preparado	Prêt, Préparé	准备好
+078001	Much, Little [Positive-Negative Degree]	Mucho, Poco [Grado positivo-negativo]	Beaucoup, Peu [Degré positif-négatif]	多，少（正负程度）
+078002	More Than, Less Than [Comparative Degree]	Más que, menos que [Grado comparativo]	Plus que, moins que [Degré comparatif]	多于，少于（比较程度）
+078003	About, Approximately, Almost, Hardly [Approximate Degree]	Más o menos, aproximadamente, casi, apenas [grado aproximado].	Environ, Approximativement, Presque, À peine [Degré approximatif]	左右，大约，差不多，几乎不（接近程度）
+078004	Completely, Enough [Completive Degree]	Completamente, Suficiente [Grado Completivo]	Complètement, Assez [Degré complet]	完全，足够（完成程度）
+078005	Up To, As Much As, To the Degree That [Marked Extent of Degree]	Hasta, Tanto como, En la medida que [Marca extendida de grado]	Jusqu’à, Autant que, Au point que [Degré marqué]	以至于，正如，到……的程度（显著程度）
+079001	Physical [Material], Spiritual	Físico [Material], Espiritual	Physique [Matériel], Spirituel	有形的（物质的），属灵的
+079002	Natural [Human], Spiritual	Natural [Humano], Espiritual	Naturel [Humain], Spirituel	自然的（人类的），属灵的（属神的）
+079003	Solid, Liquid	Sólido, Líquido	Solide, Liquide	固体，液体
+079004	Beautiful, Ugly	Hermoso, Feo	Beau, Laid	美丽的，丑陋的
+079005	Glorious	Glorioso	Magnifique	荣美的
+079006	Transparent	Transparente	Transparent	透明的
+079007	Color	Color	Couleur	颜色
+079008	Sweet, Bitter, Tasteless	Dulce, Amargo, Insípido	Doux, Amer, Insipide	甜的，苦的，无味的
+079009	Fragrance, Odor	Fragancia, Olor	Parfum, Odeur	香味，气味
+079010	Clean, Dirty	Limpio, Sucio	Propre, Sale	干净的，肮脏的
+079011	Spotted, Spotless	Salpicado, Sin Salpicaduras	Taché, Immaculé	有污点的，没有污点的
+079012	Blemished, Unblemished	Manchado, Sin manchas	Imparfait, parfait	有瑕疵的，无瑕疵的
+079013	Strong, Weak	Fuerte, Débil	Fort, faible	强壮的，软弱的
+079014	Hot, Lukewarm, Cold	Caliente, Tibio, Frío	Chaud, tiède, froid	热的，温的，冷的
+079015	Wet, Dry	Húmedo, seco	Humide, sec	湿的，干的
+079016	Uneven [Rough], Level [Smooth]	Desigual [áspero], nivelado [liso]	Irrégulier [rugueux], régulier [lisse]	不平的（崎岖的），平坦的（平整的）
+079017	Straight, Crooked	Recto, Torcido	Droit, tordu	直的，弯曲的
+079018	Two-Dimensional and Three-Dimensional Shapes	Formas bidimensionales y tridimensionales	Formes bidimensionnelles et tridimensionnelles	二维及三维的形状
+079019	Sharp	Afilado	Tranchant	尖的
+079020	Pure, Unadulterated, Undiluted	Puro, sin adulterar, sin diluir	Pur, non altéré, non dilué	纯净的，没有杂质，没有稀释
+079021	Soft, Tender	Suave, tierno	Doux, tendre	柔滑的，柔软的
+079022	Male, Female	Masculino, Femenino	Masculin, féminin	雄性的，雌性的
+079023	Shapes	Formas	Formes	形状
+079024	Open, Closed	Abierto, cerrado	Ouvert, fermé	打开，关闭
+079025	Covered Over	Cubierto	Recouvert	掩盖的
+079026	Wrapped	Envuelto	Enveloppé	包裹着
+079027	Rolled Up	Enrollado	Enroulé	卷起的
+079028	Large, Small	Grande, pequeño	Grand, petit	大的，小的
+079029	Perfect	Perfecto	Parfait	完美的
+080001	Space, Place	Espacio, Lugar	Espace, lieu	空间，地方
+080002	Limits, Boundaries of Space	Límites, fronteras espaciales	Limites, frontières de l'espace	界限，空间的边界
+081001	Measure, To Measure	Medida, Medir	Mesure, mesurer	尺寸，量度
+081002	High, Low, Deep	Alto, Bajo, Profundo	Haut, bas, profond	高，低，深
+081003	Long, Short, Far	Largo, corto, lejano	Long, court, loin	长，短，远
+081004	Narrow, Wide	Estrecho, ancho	Étroit, large	窄，宽
+081005	Specific Measures of Volume	Medidas específicas de volumen	Mesures spécifiques du volume	容积测量单位
+081006	Specific Measures of Length	Medidas específicas de longitud	Mesures spécifiques de la longueur	长度测量单位
+082001	North, South, East, West	Norte, Sur, Este, Oeste	Nord, sud, est, ouest	东，南，西，北
+082002	Left, Right, Straight Ahead, Opposite	Izquierda, Derecha, Adelante, Opuesto	Gauche, droite, tout droit, opposé	左，右，正前面，对面
+083001	Here, There	Aquí, Ahí	Ici, Là	这里，那里
+083002	Where, Somewhere, Everywhere	Dónde, en algún lugar, en todas partes	Où, Quelque part, Partout	……的地方，某处，到处
+083003	Among, Between, In, Inside	En medio, Entre, En, Dentro	Parmi, Entre, Dans, À l'intérieur	在……之中，介于……之间，在……里面，在……内部
+083004	Around, About, Outside	Alrededor, Sobre, Fuera	Autour, Aux alentours, À l'extérieur	在周围，在附近，在外面
+083005	At, Beside, Near, Far	En, Al lado, Cerca, Lejos	À, À côté de, Près de, Loin de	在，在旁边，接近，在远处
+083006	In Front Of, Face To Face, In Back Of, Behind	Delante de, Frente a frente, Detrás de, Detrás de	Devant, Face à face, Derrière, Derrière	在前面，面对面，在后面
+083007	Opposite, Over Against, Across From, Offshore From	Opuesto a, Enfrente de, Al cruzar de, a cierta distancia de	Opposé, Contre, En face de, Au loin, à l'extérieur	在……面前，在对面，在对岸，离岸
+083008	On, Upon, On the Surface Of	En, Sobre, En la superficie de	Sur, Au-dessus de, À la surface de	在上面，在表面
+083009	Above, Below	Encima, Debajo	Au-dessus, En dessous	在……之上，在……之下
+083010	Beyond, On the Other Side Of	Más allá, al otro lado de	Au-delà, De l'autre côté de	在……以外，在另一边
+084001	Extension From a Source	Extensión de una Fuente	Extension à partir d'une source	从源头延伸
+084002	Extension To a Goal	Extensión hacia una meta	Extension vers un but	向目标延伸
+084003	Extension Along a Path	Extensión a lo largo de un camino	Extension le long d'un chemin	沿路径延伸
+085001	Be in a Place	Estar en un lugar	Être dans un lieu	在某个地方
+085002	Put, Place	Poner, colocar	Mettre, placer	放置，安置
+085003	Remain, Stay	Permanecer, Quedarse	Rester, demeurer	留下，停留
+085004	Leave in a Place	Dejar en un lugar	Laisser dans un lieu	留在某处
+085005	Dwell, Reside	Habitar, Residir	Habiter, résider	居住，定居
+086001	Heavy, Light	Pesado, Ligero	Lourd, léger	沉重，轻省
+086002	Pound, Talent [Specific Units of Weight]	Libra, Talento [Unidades específicas de peso]	Livre, talent [unités de poids spécifiques]	磅，他连得（重量单位）
+087	Status	Estatus	Statut	地位
+087001	Position, Rank	Posición, Rango	Position, rang	职分，等级
+087002	Honor or Respect in Relation to Status	Honor o respeto en relación con el estatus	Honneur ou respect en relation avec le statut	与地位有关的荣誉及尊重
+087003	High Status or Rank [including persons of high status]	De alto rango o estatus [incluye a las personas de alto estatus]	Statut ou rang élevé [y compris les personnes de haut rang]	地位崇高（包括地位崇高的人）
+087004	Low Status or Rank [including persons of low status]	De bajo rango o estatus [incluye a las personas de bajo estatus]	Statut ou rang faible [y compris les personnes de bas rang]	地位卑微（包括地位卑微的人）
+087005	Slave, Free	Esclavo, libre	Esclave, libre	奴役，自由
+088001	Goodness	Bondad	Bonté	良善
+088002	Just, Righteous	Justo, Recto	Juste, vertueux	公平，正直，公义
+088003	Holy, Pure	Santo, Puro	Saint, pur	神圣的，纯洁的
+088004	Perfect, Perfection	Perfecto, Perfección	Parfait, perfection	完美的，完美
+088005	Honesty, Sincerity	Honestidad, Sinceridad	Honnêteté, sincérité	诚实，真诚
+088006	Modesty, Propriety	Modestia, Ser Correcto	Modestie, bienséance	端正，得体
+088007	Humility	Humildad	Humilité	谦卑
+088008	Gentleness, Mildness	Gentileza, Suavidad	Douceur, douceur d'esprit	柔和，温和
+088009	Kindness, Harshness	Bondad, Dureza	Gentillesse, dureté	仁慈，苛刻
+088010	Mercy, Merciless	Misericordia, Despiadado	Miséricorde, impitoyable	怜悯，无情
+088011	Self-Control, Lack of Self-Control	Dominio Propio, Falta de Dominio Propio	Maîtrise de soi, manque de maîtrise de soi	自制，缺乏自制
+088012	Sensible Behavior, Senseless Behavior	Comportamiento Sensible, Comportamiento Insensible	Comportement sensé, comportement insensé	理智的行为，愚蠢的行为
+088013	Mature Behavior	Comportamiento Maduro	Comportement mature	成熟的行为
+088014	Peaceful Behavior	Comportamiento pacífico	Comportement pacifique	平和的行为
+088015	Bad, Evil, Harmful, Damaging	Malo, Malvado, Dañino, Perjudicial	Mauvais, malfaisant, nuisible, préjudiciable	腐败的，邪恶的，有害的，有破坏性的
+088016	Treat Badly	Tratar mal	Maltraiter	虐待
+088017	Act Harshly	Actuar con dureza	Agir avec dureté	苛待
+088018	Act Lawlessly	Actuar Ilegalmente	Agir en dehors de la loi	无法无天
+088019	Exploit	Explotar	Exploiter	剥削，利用
+088020	Act Shamefully	Actuar con vergüenza	Agir de manière honteuse	行为可耻
+088021	Mislead, Lead Astray, Deceive	Desviar, extraviar, engañar	Duper, égarer, tromper	误导，引入歧途，欺骗
+088022	Envy, Jealousy	Envidia, celos	Envie, jalousie	嫉妒，忌恨
+088023	Resentful, Hold a Grudge Against	Resentido, guardar rencor	Rancunier, garder rancune	充满怨恨，怀恨在心
+088024	Anger, Be Indignant With	Resentido, estar indignado con	Colère, être indigné	愤怒，愤慨
+088025	Despise, Scorn, Contempt	Despreciar, Desdeñar, Menospreciar	Mépriser, dédaigner, mépriser	厌恶，鄙弃，藐视
+088026	Hate, Hateful	Odiar, Tener Odio	Haine, haineux	憎恨，可憎的
+088027	Arrogance, Haughtiness, Pride	Arrogancia, Altanería, Orgullo	Arrogance, hautaineté, fierté	自负，傲慢，骄傲
+088028	Stubbornness	Obstinación	Entêtement	顽固
+088029	Hypocrisy, Pretense	Hipocresía, Pretensión	Hypocrisie, faux-semblant	伪善，假装
+088030	Show Favoritism, Prejudice	Mostrar favoritismo, prejuicio	Faire preuve de favoritisme, de préjugés	偏袒，偏见
+088031	Being a Busybody	Ser un entrometido	Être un fouineur	好管闲事
+088032	Laziness, Idleness	Pereza, Ociosidad	Paresse, oisiveté	懒惰，闲散
+088033	Extravagant Living, Intemperate Living	Vida extravagante, Vida destemplada	Mode de vie extravagant, mode de vie intempérant	奢侈的生活，放纵的生活
+088034	Impurity	Impureza	Impureté	不洁，污秽
+088035	Licentiousness, Perversion	Libertinaje, Perversión	Licence, perversion	放荡，性变态
+088036	Sexual Misbehavior	Mala conducta sexual	Comportement sexuel répréhensible	不正当的性行为
+088037	Drunkenness	Embriaguez	L'ivresse	酗酒
+088038	Sin, Wrongdoing, Guilt	Pecado, maldad, culpa	Péché, actes répréhensibles, culpabilité	罪恶，坏事，罪行
+089003	Derivation	Origen	Dérivation	衍生
+089004	Specification	Especificación	Spécification	具体说明
+089005	Relations Involving Correspondences [Isomorphisms]	Relaciones que implican correspondencias [Isomorfismos]	Relations impliquant des correspondances [isomorphismes]	涉及对应的关系（同构关系）
+089006	Basis	Base	Base	根据
+089007	Cause and/or Reason	Causa y/o Razón	Cause et/ou motif	原因及／或理由
+089008	Result	Resultado	Résultat	结果
+089009	Purpose	Propósito	But	目的
+089010	Condition	Condición	Condition	条件
+089011	Concession	Concesión	Concession	让步
+089012	Means	Medios	Moyens	方法，途径
+089013	Attendant Circumstances	Circunstancias concurrentes	Circonstances particulières	伴随的情况
+089014	Manner	Manera	Manière	方式
+089015	Sequential Addition	Suma secuencial	Addition séquentielle	顺序添加
+089016	Distribution	Distribución	Distribution	分布
+089017	Addition	Suma	Addition	添加
+089018	Linkage	Vinculación	Lien	连系
+089019	Equivalence	Equivalencia	Équivalence	等同
+089020	Association	Asociación	Association	关联
+089021	Dissociation	Disociación	Dissociation	分离
+089022	Combinative Relation	Relación combinada	Relation combinative	结合关系
+089023	Contrast	Contraste	Contraste	对比
+089024	Alternative Relation	Relación alternativa	Relation alternative	替代关系
+089025	Substance	Sustancia	Substance	实质
+090001	Agent, Personal or Nonpersonal, Causative or Immediate, Direct or Indirect	Agente, personal o no personal, causal o inmediato, directo o indirecto	Agent, personnel ou impersonnel, causatif ou immédiat, direct ou indirect	施事者──个人或非个人、诱因或直接、直接或间接
+090002	Instrument	Instrumento	Instrument	工具
+090003	Source of Event or Activity	Origen de un evento o actividad	Source d'un événement ou d'une activité	事件或活动的来源
+090004	Responsibility	Responsabilidad	Responsabilité	责任
+090005	Viewpoint Participant	Punto de vista Participante	Participant au point de vue	视点参与者
+090006	Content	Contenido	Contenu	内容
+090007	Guarantor Participant with Oaths	Garante como Participante con Juramento	Garant Participant avec serments	起誓保证的参与者
+090008	Opposition	Oposición	Opposition	反对
+090009	Benefaction	Beneficio	Bienfait	受益
+090010	Reason Participant	Participante de Razón	Raison de la participation	成因参与者
+090011	Agent of a Numerable Event	Agente de un suceso numerable	Agent d'un événement numérique	可数事件的施事者
+090012	Agent in a Causative Role Marked by Verbs	Agente en un papel causativo marcado por verbos	Agent dans un rôle causal marqué par des verbes	以动词来标记的使役施事者
+090013	Experiencer	El que experimenta	Expérimenter	经历者
+090014	To Cause To Experience	Provocar la experiencia	Provoquer Vivre	使经历
+091001	Markers of Transition	Marcadores de transición	Marqueurs de transition	转折的标记
+091002	Markers of Emphasis	Marcadores de énfasis	Marqueurs d'emphase	强调的标记
+091003	Prompters of Attention	Marcadores de atención	Marqueurs d'attention	提示关注的标记
+091004	Marker of Direct Address	Marcador de dirección directa	Marqueur d'adresse directe	直呼的标记
+091005	Markers of Identificational and Explanatory Clauses [Epexegetical]	Marcadores de cláusulas identificativas y explicativas [epexegéticas].	Marqueurs de clauses identitaires et explicatives [Exégétique]	识别子句及说明子句的标记（补说的）
+092001	Speaker	Hablante	Locuteur	说话者
+092002	Speaker and Those Associated with the Speaker [exclusive and inclusive]	El hablante y los asociados al hablante [exclusivo e inclusivo]	Conférencier et personnes associées au conférencier [exclusif et inclusif]	说话者及与说话者相关联的人（排除或包括听众）
+092003	Receptor, Receptors	Receptor, receptores	Récepteur, Récepteurs	接收者
+092004	Whom or What Spoken or Written About	De quién o qué se habla o escribe	Sujet de la parole ou de l'écriture	说及或写到的人或物
+092005	Reciprocal Reference	Referencia recíproca	Référence réciproque	相互的参照
+092006	Relative Reference	Referencia relativa	Référence relative	相关的参照
+092007	Demonstrative or Deictic Reference	Referencia demostrativa o deíctica	Référence démonstrative ou déictique	限定或指示的参照
+092008	Emphatic Adjunct	Adjunto enfático	Complément emphatique	强调附加语
+093001	Persons	Personas	Personnes	人名
+093002	Places	Lugares	Lieux	

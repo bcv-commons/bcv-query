@@ -15,6 +15,7 @@ is in `ingest.door43` and only affects URL construction, not BBCCCVVV.
 from __future__ import annotations
 
 import json
+import os
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -40,7 +41,13 @@ BOOK_NUMBERS: dict[str, int] = {
 }
 # fmt: on
 
-_BOOK_NAMES_JSON = Path(__file__).resolve().parent.parent / "book_names.json"
+# book_names.json lives in the shared resources/ root (baked to /app/resources in the
+# image via $BCV_RESOURCES_DIR; repo-root resources/ in a dev checkout) — same convention
+# as data._resources_dir(). Was previously ../book_names.json, which never existed → this
+# module silently fell back to English-only names.
+_RES_DIR = Path(os.environ["BCV_RESOURCES_DIR"]) if os.environ.get("BCV_RESOURCES_DIR") \
+    else Path(__file__).resolve().parent.parent / "resources"
+_BOOK_NAMES_JSON = _RES_DIR / "book_names.json"
 
 _ENGLISH_BOOK_NAMES: dict[str, str] = {
     "GEN": "Genesis", "EXO": "Exodus", "LEV": "Leviticus", "NUM": "Numbers", "DEU": "Deuteronomy",
@@ -90,7 +97,9 @@ NUMBER_TO_CODE: dict[int, str] = {n: c for c, n in BOOK_NUMBERS.items()}
 
 
 def _normalize_alias(name: str) -> str:
-    return re.sub(r"\s+", "", name).lower()
+    # Drop whitespace AND periods so "1. Korinther" / "1. Corinthians" collapse to the
+    # same key as the "1 Korinther" space form ("1korinther").
+    return re.sub(r"[\s.]+", "", name).lower()
 
 
 # Map normalized natural-language / abbreviation forms → USFM code.
@@ -169,7 +178,7 @@ def human(start_bbcccvvv: int, end_bbcccvvv: int | None = None,
 _REF_RE = re.compile(
     r"""
     \b
-    ((?:[123]\s*)?[A-Za-z]+)             # book name (optional 1/2/3 prefix)
+    ((?:[123]\s*\.?\s*)?[A-Za-z]+)       # book name (optional 1/2/3 prefix, "1 " or "1. ")
     \s+(?:chapter\s+|chap\.?\s+|ch\.?\s+)?  # optional "chapter" / "chap." / "ch." filler
     (\d+)                                # chapter number (REQUIRED)
     (?:                                  # optional verse(s)

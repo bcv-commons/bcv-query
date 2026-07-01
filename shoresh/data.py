@@ -256,6 +256,54 @@ def _strong_domains() -> dict:
 
 
 @lru_cache(maxsize=1)
+def _domain_label_i18n() -> dict:
+    """code -> {lang: label} from resources/semantic_domains/grc_labels.tsv (UBS
+    open-license, CC-BY-SA; en/es/fr/zh-hans). Localizes the NT domain label."""
+    out: dict = {}
+    p = _resources_dir() / "semantic_domains" / "grc_labels.tsv"
+    if not p.exists():
+        return out
+    with p.open(encoding="utf-8") as fh:
+        header = next(fh, "").rstrip("\n").split("\t")   # code, en, es, fr, zh-hans
+        cols = header[1:]
+        for line in fh:
+            parts = line.rstrip("\n").split("\t")
+            if not parts or not parts[0]:
+                continue
+            out[parts[0]] = {c: v for c, v in zip(cols, parts[1:]) if v}
+    return out
+
+
+# gloss_lang (word_glosses filename) -> grc_labels.tsv column; absent -> English label.
+_DOMAIN_LANG_COL = {"English": "en", "Spanish": "es", "French": "fr",
+                    "Chinese-Simplified": "zh-hans"}
+
+
+def _localize_domain(code: str, en_label: str, gloss_lang: str) -> str:
+    col = _DOMAIN_LANG_COL.get(gloss_lang)
+    if not col or col == "en":
+        return en_label
+    return _domain_label_i18n().get(code, {}).get(col) or en_label
+
+
+def _dominant_domain(dd: list, min_share: float = 0.6) -> tuple | None:
+    """Pick a word's dominant Louw-Nida domain, or None if genuinely polysemous.
+    Aggregate share to the 3-digit TOP domain for the confidence decision (pisteuō's
+    subdomains 031010/031009/031006 all roll up to 031 "Believe/Trust" = 0.97 cohesive),
+    but return the dominant SUBdomain's finer label ("Be a Believer, Christian Faith").
+    huios splits across three top domains (012/010/009) → suppressed."""
+    agg: dict = collections.defaultdict(float)
+    for _axis, code, _label, share in dd:
+        agg[code[:3]] += share
+    top, top_share = max(agg.items(), key=lambda kv: kv[1])
+    if top_share < min_share:
+        return None
+    subs = [(c, lab, sh) for _a, c, lab, sh in dd if c[:3] == top]
+    code, label, _ = max(subs, key=lambda x: x[2])
+    return code, label
+
+
+@lru_cache(maxsize=1)
 def _strong_senses() -> dict:
     out: dict = collections.defaultdict(list)
     base = _resources_dir() / "senses"
@@ -617,7 +665,9 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
                     w["sense"] = senses[code]
                 dd = doms.get(_pad_strong(code)) if code else None
                 if dd:                                     # dominant Louw-Nida domain (Greek, per-strong)
-                    w["domain"] = max(dd, key=lambda d: d[3])[2]
+                    best = _dominant_domain(dd)            # top-domain gate + finer subdomain label
+                    if best:
+                        w["domain"] = _localize_domain(best[0], best[1], gloss_lang)
                 words.append(w)
             result["spine"] = {"language": spine_lang, "words": words}
     return result

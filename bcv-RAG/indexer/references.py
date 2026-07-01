@@ -124,7 +124,9 @@ def _to_int(s: str) -> int:
 
 
 def _normalize_alias(name: str) -> str:
-    return _fold_digits(re.sub(r"\s+", "", _ARABIC_DIACRITICS.sub("", name)).lower())
+    # Drop whitespace AND periods so "1. Korinther" / "1. Corinthians" collapse to the
+    # same key as the "1 Korinther" space form ("1korinther").
+    return _fold_digits(re.sub(r"[\s.]+", "", _ARABIC_DIACRITICS.sub("", name)).lower())
 
 
 # Map normalized natural-language / abbreviation forms → USFM code.
@@ -210,7 +212,7 @@ _NAMEWORD = r"[^\s\d_.,:;!?()\[\]{}«»\"'“”’/\\।॥]"
 _REF_RE = re.compile(
     rf"""
     \b
-    ((?:\d\s*)?{_NAMEWORD}+(?:\s+{_NAMEWORD}+){{0,6}})  # book name: up to 7 words
+    ((?:\d\s*\.?\s*)?{_NAMEWORD}+(?:\s+{_NAMEWORD}+){{0,6}})  # book name: up to 7 words
                                         # (optional 1/2/3 prefix). Multi-word lets
                                         # "От Иоанна" / "Song of Songs" and long formal
                                         # titles ("রিসَالَةُ … رُومِيَةَ") match;
