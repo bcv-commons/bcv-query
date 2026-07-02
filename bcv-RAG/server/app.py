@@ -50,6 +50,11 @@ app.add_middleware(
     allow_credentials=False,
 )
 
+# Registration gate (mechanism A) + coarse rate limiting over every path (REST + /mcp).
+# Added AFTER CORS so CORS runs outermost (preflight/headers apply even to 401/429).
+from server.gate import gate as _gate  # noqa: E402
+app.middleware("http")(_gate)
+
 # REST surface
 app.include_router(health_route.router, prefix="/api")
 app.include_router(chunks_route.router, prefix="/api")

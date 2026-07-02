@@ -42,6 +42,20 @@ def _parse_ref(passage: str) -> tuple[str, int, int] | None:
     return None
 
 
+def shoresh_get(path: str, params: dict | None = None, timeout: float = 4.0) -> dict | None:
+    """Generic GET against shoresh over private networking → parsed JSON, or None.
+    Best-effort (original-language enrichment must never break a response)."""
+    if not SHORESH_URL:
+        return None
+    try:
+        with httpx.Client(base_url=SHORESH_URL, timeout=timeout) as client:
+            resp = client.get(path, params=params or {})
+            return resp.json() if resp.status_code == 200 else None
+    except Exception as e:
+        logger.debug("shoresh GET %s failed: %s", path, e)
+        return None
+
+
 def _compact_words(words: list[dict]) -> list[dict]:
     # Keep `lemma` (BHSA lex, present for Hebrew; "" for Greek): it distinguishes the
     # homographs a shared Strong's number conflates, and is the key into per-stem glosses.

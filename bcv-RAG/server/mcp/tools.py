@@ -14,9 +14,9 @@ from typing import Callable
 
 from indexer import citations as citations_mod
 from indexer.db import has_vec
-from indexer.references import human, parse_references
+from indexer.references import decode, human, parse_references
 from query.analyzer import analyze
-from query.concept_expand import filter_biblical_words
+from query.concept_expand import expand_concepts, filter_biblical_words
 from query.lang_detect import resolve_lang
 from query.retrieve import retrieve
 from server.corpus_cards import resolve_corpus_hits
@@ -54,66 +54,63 @@ def call_tool(name: str, arguments: dict, db: sqlite3.Connection) -> dict:
 
 # ---------- tools ----------
 
+# shared retrieval fields for `search` / `semantic_search` (identical except the vector step)
+_SEARCH_PROPS = {
+    "query": {"type": "string", "description": "Free-form question or keyword search."},
+    "lang": {"type": "string", "default": "en"},
+    "kind": {
+        "type": "string",
+        "enum": ["scripture", "translator-note", "question", "term", "methodology",
+                 "study-note", "book-intro", "map", "image"],
+    },
+    "book": {"type": "string", "description": "USFM book code (e.g. 'TIT')."},
+    "source": {"type": "string", "enum": ["all", "door43", "aquifer"], "default": "all"},
+    "top_k": {"type": "integer", "default": 10, "minimum": 1, "maximum": 50},
+}
+
+
 @register_tool(
     name="search",
     description=(
-        "Search the indexed Bible-translation corpus. Returns ranked chunks "
-        "with metadata; does NOT generate an answer — caller (you) should read "
-        "the chunks and synthesize.\n\n"
-        "By default uses FTS5 keyword matching, passage-range matching, title "
-        "matching, and tag filters via reciprocal rank fusion — no model calls, "
-        "no API keys required, deterministic. Pass `use_semantic: true` to "
-        "additionally enable vector ANN (requires OPENAI_API_KEY on the server "
-        "and adds ~150ms per call); useful for paraphrased queries where keyword "
-        "match misses the right chunks. NOTE: `use_semantic: true` is gated by "
-        "the server-side API password (BTMCP_API_PASSWORD) — pass `Authorization: "
-        "Bearer <password>` or `X-API-Key: <password>` on the MCP HTTP request."
+        "Search the indexed Bible-translation corpus (lexical). Returns ranked chunks "
+        "with metadata; does NOT generate an answer — caller (you) should read the "
+        "chunks and synthesize.\n\n"
+        "FTS5 keyword matching, passage-range matching, title matching, tag filters, and "
+        "automatic concept expansion (query words → Strong's-anchored related terms) fused "
+        "with reciprocal rank fusion — no model calls, no API key, deterministic, $0. For "
+        "paraphrased queries, rephrase and search again; the concept expansion widens matches."
     ),
-    input_schema={
-        "type": "object",
-        "properties": {
-            "query": {"type": "string", "description": "Free-form question or keyword search."},
-            "lang": {"type": "string", "default": "en"},
-            "kind": {
-                "type": "string",
-                "enum": ["scripture", "translator-note", "question", "term", "methodology",
-                         "study-note", "book-intro", "map", "image"],
-            },
-            "book": {"type": "string", "description": "USFM book code (e.g. 'TIT')."},
-            "source": {"type": "string", "enum": ["all", "door43", "aquifer"], "default": "all"},
-            "top_k": {"type": "integer", "default": 10, "minimum": 1, "maximum": 50},
-            "use_semantic": {
-                "type": "boolean",
-                "default": False,
-                "description": "Opt-in: also rank by semantic vector similarity. Requires OPENAI_API_KEY on the server.",
-            },
-        },
-        "required": ["query"],
-    },
+    input_schema={"type": "object", "properties": dict(_SEARCH_PROPS), "required": ["query"]},
 )
 def _search(args: dict, db: sqlite3.Connection) -> dict:
+    return _run_search(args, db, semantic=False)
+
+
+# NB: semantic/vector search is intentionally NOT an MCP tool — it's the one paid
+# (embedding) path and stays REST-only (`GET /api/search?semantic=true`, key-gated). The
+# MCP surface is uniformly $0; concept expansion (below) makes lexical search meaning-aware.
+def _run_search(args: dict, db: sqlite3.Connection, semantic: bool = False) -> dict:
     q = args.get("query", "").strip()
     if not q:
         raise ValueError("'query' is required and non-empty")
     lang = args.get("lang", "en")
     top_k = int(args.get("top_k", 10))
 
-    analysis = analyze(q)
+    analysis = analyze(q, lang=lang)
     if args.get("kind"):
         analysis.tags.append(f"kind:{args['kind']}")
     if args.get("book"):
         analysis.tags.append(f"book:{str(args['book']).upper()}")
+    # concept expansion (query words → Strong's tags → related terms): makes lexical
+    # search meaning-aware without a vector — the $0 stand-in for semantic_search.
+    if canon(lang) != "eng":
+        analysis.fts_query = filter_biblical_words(q, lang=lang)
+    analysis.tags.extend(expand_concepts(analysis.fts_query, analysis.tags, lang=lang))
 
-    # MCP default: NO model calls. Pure FTS5 + structured retrieval.
-    # Caller can opt in to semantic vec via use_semantic=true (costs an
-    # OPENAI_API_KEY-backed embedding call per query).
     query_vec = None
-    if args.get("use_semantic") and has_vec(db):
-        try:
-            from indexer.embed import embed_texts
-            query_vec = embed_texts([q], input_type="query")[0]
-        except Exception:
-            pass
+    if semantic and has_vec(db):
+        from indexer.embed import embed_texts
+        query_vec = embed_texts([q], input_type="query")[0]
 
     hits = retrieve(db, analysis, top_k=top_k, query_vec=query_vec,
                     source_filter=args.get("source", "all"))
@@ -182,10 +179,6 @@ def _search(args: dict, db: sqlite3.Connection) -> dict:
                 "description": "Branch keys to force-expand even if the intent didn't "
                                "feature them, e.g. ['lexicon','morphology'].",
             },
-            "use_semantic": {
-                "type": "boolean", "default": False,
-                "description": "Opt-in: also rank by semantic vector similarity. Requires OPENAI_API_KEY on the server.",
-            },
         },
         "required": ["query"],
     },
@@ -202,14 +195,7 @@ def _search_branched(args: dict, db: sqlite3.Connection) -> dict:
     if args.get("book"):
         analysis.tags.append(f"book:{str(args['book']).upper()}")
 
-    query_vec = None
-    if args.get("use_semantic") and has_vec(db):
-        try:
-            from indexer.embed import embed_texts
-            query_vec = embed_texts([q], input_type="query")[0]
-        except Exception:
-            pass
-
+    query_vec = None   # lexical/structured only ($0); for meaning-based ranking use semantic_search
     from server.branched import build_branches
     from server.cards import suggested_layout
     result = build_branches(
@@ -691,7 +677,150 @@ def _topic(args: dict, db: sqlite3.Connection) -> dict:
             "passage_count": len(passages), "passages": passages}
 
 
-# Original-language corpus tools (corpus_books/clauses/passage/context) were
-# removed when the Context-Fabric engine moved to shoresh (migration). Corpus
-# morphosyntax is now served by shoresh at /structure/{book}/{ch}/{v}[/word/{idx}];
-# re-add as shoresh-backed MCP wrappers here if that surface is needed again.
+# ---------- original-language tools (shoresh-backed, over private networking, $0) ----------
+
+def _ref_to_bcv(reference: str) -> tuple[str, int, int]:
+    """'John 3:16' / 'JHN 3:16' → (USFM, chapter, verse). Raises on no single-verse ref."""
+    refs = parse_references(reference or "")
+    if not refs:
+        raise ValueError(f"could not parse a verse reference from {reference!r}")
+    code, ch, v = decode(refs[0][0])
+    return code, ch, v
+
+
+def _glang(lang: str | None) -> str:
+    from server.cards import _gloss_lang       # lazy: avoid import cycle
+    return _gloss_lang(lang or "en")
+
+
+@register_tool(
+    name="word_study",
+    description=(
+        "Original-language word study for a Strong's number (Hebrew H#### or Greek G####). "
+        "Returns the localized gloss, keyness (how distinctively biblical), per-binyan stem "
+        "senses (Hebrew verbs), sense distribution, Louw-Nida/SDBH semantic domains, related "
+        "lexemes, and Translation-Words article(s). $0, no model. Localized via `lang`."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "strong": {"type": "string", "description": "Strong's number, e.g. 'G0025' or 'H0430'."},
+            "lang": {"type": "string", "default": "en"},
+        },
+        "required": ["strong"],
+    },
+)
+def _word_study(args: dict, db: sqlite3.Connection) -> dict:
+    from server.original_words import shoresh_get
+    s = str(args.get("strong", "")).strip()
+    if not s:
+        raise ValueError("'strong' is required")
+    return shoresh_get(f"/wordstudy/{s}", {"gloss_lang": _glang(args.get("lang"))}) or {"strong": s, "unavailable": True}
+
+
+@register_tool(
+    name="verse_interlinear",
+    description=(
+        "Per-word interlinear for a verse: each original word with surface, lemma, Strong's, "
+        "morphology, localized gloss, binyan-correct sense (Hebrew), and Louw-Nida domain "
+        "(Greek), plus the LXX parallel for OT verses. $0. Localized via `lang`."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "reference": {"type": "string", "description": "A single verse, e.g. 'John 3:16'."},
+            "lang": {"type": "string", "default": "en"},
+        },
+        "required": ["reference"],
+    },
+)
+def _verse_interlinear(args: dict, db: sqlite3.Connection) -> dict:
+    from server.original_words import verse_interlinear
+    code, ch, v = _ref_to_bcv(args.get("reference", ""))
+    return verse_interlinear(code, ch, v, _glang(args.get("lang"))) or {"reference": args.get("reference"), "unavailable": True}
+
+
+@register_tool(
+    name="verse_syntax",
+    description=(
+        "Clause→phrase syntax tree for a verse (who-did-what): clauses with type/relation, "
+        "phrases with grammatical function and their words. Hebrew (BHSA) / Greek (Nestle1904). $0."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {"reference": {"type": "string", "description": "A single verse, e.g. 'Genesis 1:1'."}},
+        "required": ["reference"],
+    },
+)
+def _verse_syntax(args: dict, db: sqlite3.Connection) -> dict:
+    from server.original_words import verse_syntax
+    code, ch, v = _ref_to_bcv(args.get("reference", ""))
+    return verse_syntax(code, ch, v) or {"reference": args.get("reference"), "unavailable": True}
+
+
+@register_tool(
+    name="lexeme_profile",
+    description=(
+        "Profile of a BHSA/Nestle1904 lexeme (the granular original anchor): stems × senses × "
+        "counts × sample references × gloss. Deeper than a Strong's number (Strong's conflates "
+        "homographs). $0. Localized via `lang`."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "lex": {"type": "string", "description": "BHSA lex (Hebrew, e.g. 'QDC[') or Nestle1904 lemma (Greek)."},
+            "lang": {"type": "string", "default": "en"},
+        },
+        "required": ["lex"],
+    },
+)
+def _lexeme_profile(args: dict, db: sqlite3.Connection) -> dict:
+    from server.original_words import shoresh_get
+    lex = str(args.get("lex", "")).strip()
+    if not lex:
+        raise ValueError("'lex' is required")
+    return shoresh_get(f"/lexeme/{lex}", {"gloss_lang": _glang(args.get("lang"))}) or {"lex": lex, "unavailable": True}
+
+
+@register_tool(
+    name="semantic_domain",
+    description=(
+        "Every lexeme in a Louw-Nida / SDBH semantic domain — 'all the words for Love/Affection' "
+        "— glossed. Useful for concept study across the original-language vocabulary. $0. "
+        "Localized via `lang`."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "code": {"type": "string", "description": "Domain code, e.g. '025003'."},
+            "lang": {"type": "string", "default": "en"},
+        },
+        "required": ["code"],
+    },
+)
+def _semantic_domain(args: dict, db: sqlite3.Connection) -> dict:
+    from server.original_words import shoresh_get
+    code = str(args.get("code", "")).strip()
+    if not code:
+        raise ValueError("'code' is required")
+    return shoresh_get(f"/domain/{code}", {"gloss_lang": _glang(args.get("lang"))}) or {"code": code, "unavailable": True}
+
+
+@register_tool(
+    name="cross_language",
+    description=(
+        "Hebrew↔Greek equivalents for a Strong's number via the Septuagint (LXX) bridge — how a "
+        "Hebrew word was rendered in Greek (or vice versa), with counts. $0."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {"strong": {"type": "string", "description": "Strong's number, e.g. 'H0430'."}},
+        "required": ["strong"],
+    },
+)
+def _cross_language(args: dict, db: sqlite3.Connection) -> dict:
+    from server.original_words import shoresh_get
+    s = str(args.get("strong", "")).strip()
+    if not s:
+        raise ValueError("'strong' is required")
+    return shoresh_get(f"/bridge/{s}") or {"strong": s, "unavailable": True}

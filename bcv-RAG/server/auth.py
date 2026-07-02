@@ -75,14 +75,11 @@ def require_password(
         )
 
 
-def mcp_tool_call_uses_ai(name: Optional[str], arguments: dict) -> bool:
-    """Whether an MCP `tools/call` invocation will hit an AI provider key.
+_AI_TOOLS = {"semantic_search"}   # tools that make a provider (embedding/LLM) call → need the key
 
-    Mirrors the REST gate: `ask` always does (LLM); `search` does when
-    `use_semantic` is truthy (embedding call).
-    """
-    if name == "ask":
-        return True
-    if name == "search":
-        return bool(arguments.get("use_semantic"))
-    return False
+
+def mcp_tool_call_uses_ai(name: Optional[str], arguments: dict) -> bool:
+    """Whether an MCP `tools/call` invocation will hit an AI provider key. Keyed on the
+    TOOL (not an argument flag) so the auth boundary is a clear per-tool contract:
+    `semantic_search` needs the key; every other tool is $0 and open."""
+    return name in _AI_TOOLS
