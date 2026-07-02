@@ -39,24 +39,28 @@ def main() -> int:
                     help="fetch non-English TW articles only (skips book ingest). "
                          "Requires --tw-langs. Articles get no passage/book tags "
                          "(acceptable — Strong's anchoring still works).")
+    ap.add_argument("--notes-langs", action="append", metavar="LANG",
+                    help="canonical language code for native TN + TQ study notes (legacy "
+                         "per-verse markdown from Door43-Catalog, e.g. --notes-langs ind). "
+                         "Repeatable. Scoped to --book if given, else all books.")
     ap.add_argument("--lang", default="eng")
     ap.add_argument("--staging", type=Path, default=DEFAULT_STAGING,
                     help="root staging dir (a per-source subdir is created underneath)")
     args = ap.parse_args()
-    if not args.tw_langs_only and not args.book and not args.all_books:
-        ap.error("pass --book <CODE> (repeatable), --all-books, or --tw-langs-only")
+    if not args.tw_langs_only and not args.notes_langs and not args.book and not args.all_books:
+        ap.error("pass --book <CODE> (repeatable), --all-books, --tw-langs-only, or --notes-langs")
     load_env()
 
     if canon(args.lang) != "eng":
         print("v1: English only", file=sys.stderr)
         return 2
 
-    if args.tw_langs_only:
-        book_codes = []
-    elif args.all_books:
+    if args.all_books:
         book_codes = [NUMBER_TO_CODE[n] for n in range(1, 67) if n in NUMBER_TO_CODE]
-    else:
+    elif args.book:
         book_codes = [b.upper() for b in args.book]
+    else:                                    # --tw-langs-only / --notes-langs (no English books)
+        book_codes = []
     sources = args.source or ["door43"]
 
     _ALL_TW_LANGS = list(door43._LANG_TW_REPOS.keys())
@@ -82,6 +86,15 @@ def main() -> int:
             )
         if "aquifer" in sources:
             results["aquifer"] = aquifer.ingest_books(book_codes, args.staging / "aquifer")
+
+    # Native TN + TQ study notes (legacy per-verse markdown) for the requested languages.
+    for nlang in args.notes_langs or []:
+        results.setdefault("door43", {})
+        scope = set(book_codes) or None
+        for res in ("tn", "tq"):
+            n = door43.ingest_notes_lang(nlang, res, args.staging / "door43", books=scope)
+            results["door43"][f"{res}_{nlang}"] = n
+            print(f"  {res}/{nlang}: {n} notes staged", file=sys.stderr)
 
     print(json.dumps({
         "sources": sources,

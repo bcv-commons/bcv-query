@@ -74,7 +74,15 @@ _LANG_TW_REPOS: dict[str, str] = {
     "por": "pt-br_tw",
     "rus": "ru_tw",
     "ben": "bn_tw",
+    "ind": "id_tw",
 }
+
+# Non-English TN/TQ in the LEGACY per-verse markdown layout (Door43-Catalog/<repo>/
+# <book>/<chapter>/<verse>.md) — distinct from unfoldingWord's per-book TSV. canon → {res: repo}.
+_LANG_NOTES_REPOS: dict[str, dict[str, str]] = {
+    "ind": {"tn": "id_tn", "tq": "id_tq"},
+}
+_NOTE_PATH_RE = re.compile(r"^([1-3a-z]{2,3})/(\d+|front)/(\d+|intro)\.md$")
 
 # Per-book TSV/USFM resources. (repo_name, file_path_template).
 PER_BOOK_RESOURCES: dict[str, tuple[str, str]] = {
@@ -476,6 +484,73 @@ def ingest_tw_lang(
             out_path = out_dir / category / f"{term}.md"
             _write_md(out_path, title=title, tags=tags, passages=passages, body=text.strip())
             written += 1
+    return written
+
+
+def ingest_notes_lang(canon_lang: str, resource: str, staging: Path,
+                     books: set[str] | None = None) -> int:
+    """Ingest a non-English TN/TQ resource in the LEGACY per-verse markdown layout
+    (Door43-Catalog/<lang>_<res>/<book>/<chapter>/<verse>.md) — one Document per note,
+    passage-tagged. `resource` = 'tn' | 'tq'.
+
+    Reads the repo ARCHIVE (one zip): these repos have ~25k files and the git-trees API
+    truncates at 12k, so per-file/tree fetching misses books past the cutoff.
+    """
+    import zipfile
+    from lang import to_web
+    repo = _LANG_NOTES_REPOS.get(canon_lang, {}).get(resource)
+    if not repo:
+        print(f"  no {resource} repo for {canon_lang}", file=sys.stderr)
+        return 0
+    lang_tag = to_web(canon_lang)
+    note_kind = {"tn": "translator-note", "tq": "question"}[resource]
+    out_dir = staging / resource / lang_tag
+
+    zip_url = f"{CATALOG_RAW_BASE}/{repo}/archive/{DEFAULT_BRANCH}.zip"
+    try:
+        resp = httpx.get(zip_url, timeout=180.0, follow_redirects=True)
+        resp.raise_for_status()
+        zf = zipfile.ZipFile(io.BytesIO(resp.content))
+    except Exception as e:
+        print(f"  archive fetch failed for {repo}: {e}", file=sys.stderr)
+        return 0
+
+    written = 0
+    for name in zf.namelist():
+        rel = name.split("/", 1)[1] if "/" in name else name   # strip the archive's top dir
+        m = _NOTE_PATH_RE.match(rel)
+        if not m:
+            continue
+        book = m.group(1).upper()
+        if book not in BOOK_NAMES or (books and book not in books):
+            continue
+        text = zf.read(name).decode("utf-8", "replace")
+        if not text.strip():
+            continue
+        ch_s, vs_s = m.group(2), m.group(3)
+        book_name, kind = BOOK_NAMES[book], note_kind
+        try:
+            if ch_s == "front":                          # book intro
+                passages, ref = [], "intro"
+                if resource == "tn":
+                    kind = "book-intro"
+            elif vs_s == "intro":                        # chapter intro
+                ch = int(ch_s)
+                passages, ref = [(encode(book, ch, 1), encode(book, ch, 999))], f"{ch}:intro"
+                if resource == "tn":
+                    kind = "book-intro"
+            else:
+                ch, vs = int(ch_s), int(vs_s)
+                bb = encode(book, ch, vs)
+                passages, ref = [(bb, bb)], f"{ch}:{vs}"
+        except ValueError:
+            continue
+        title = f"{resource.upper()} — {book_name} {ref}"
+        tags = [f"resource:{resource}", f"lang:{lang_tag}", "org:Door43-Catalog",
+                f"book:{book}", f"kind:{kind}"]
+        _write_md(out_dir / book.lower() / f"{_safe_name(ref)}.md",
+                  title=title, tags=tags, passages=passages, body=text)
+        written += 1
     return written
 
 
