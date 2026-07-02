@@ -78,9 +78,9 @@ Authorization: Bearer <your key>
 For stdio, put the key in the client's `env` (`BTMCP_API_PASSWORD`, as in the config above).
 Requests are rate-limited per key (429 + `Retry-After` when exceeded).
 
-> Vector/semantic search is intentionally **not** an MCP tool (it's the one paid path); it
-> stays REST-only at `GET /api/search?semantic=true`. On MCP, `search` already does concept
-> expansion (Strong's-anchored related terms), so lexical search is meaning-aware.
+> Vector/semantic search is intentionally **not** an MCP tool — it stays REST-only at
+> `GET /api/search?semantic=true` (open, $0). On MCP, `search` already does concept expansion
+> (Strong's-anchored related terms), so lexical search is meaning-aware.
 
 > Remote plug-and-play via the SDK's **Streamable HTTP** transport is landing next; today the
 > HTTP surface is the JSON-RPC endpoint below (stdio is fully standard now).

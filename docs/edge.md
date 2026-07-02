@@ -12,19 +12,20 @@ bcv-query.up.qombi.com  → localhost:8081   (bcv-RAG, incl. /mcp)
 shoresh.up.qombi.com    → localhost:8080   (shoresh)
 ```
 
-## 1. Close shoresh's raw public port (do first — security)
+## 1. shoresh's `:8080` exposure
 
-shoresh is reachable **both** via Caddy (TLS) **and** directly on `0.0.0.0:8080` (no TLS,
-no edge). Bind its published port to loopback so it's only reachable through Caddy — in the
-shoresh stack's `docker-compose.yml`:
+shoresh publishes `0.0.0.0:8080`. Two things matter here:
 
-```yaml
-    ports:
-      - "127.0.0.1:8080:8080"   # was "8080:8080" (0.0.0.0) — now loopback only
-```
+- **External `:8080` is already blocked by the Hetzner cloud firewall** (per the compose
+  comment). Verify that firewall rule exists — it's the actual control.
+- **Do NOT loopback-bind it** (`127.0.0.1:8080:8080`). Tested and reverted: bcv-RAG reaches
+  shoresh via `SHORESH_URL=http://host.docker.internal:8080` (the docker **bridge gateway**,
+  not loopback), so a loopback bind cuts the private bcv-RAG→shoresh path.
 
-`docker compose up -d` to apply. Caddy (`localhost:8080`) keeps working; the public `:8080`
-closes. (bcv-RAG is already correct at `127.0.0.1:8081`.)
+The clean way to take shoresh off the host port entirely (so the firewall isn't the only
+guard) is to put **bcv-RAG and shoresh on a shared docker network** and switch `SHORESH_URL`
+to service DNS (`http://shoresh:8080`); then the published `:8080` can be dropped. That's a
+compose change across both stacks — worth doing, but out of scope for a quick hardening pass.
 
 ## 2. Caddy hardening (request limits + security headers)
 

@@ -31,10 +31,10 @@ Both services are plain HTTP + JSON. Use the base URLs your deployment gives you
 - If your deployment only exposes bcv-RAG publicly, ask the operator to also expose (or
   proxy) shoresh — the card `drill` links are shoresh paths.
 
-### Authentication — registration required
+### Authentication
 
-Access is **registration-gated**: **every** endpoint needs a valid API key (you're issued one
-on registration), sent as a header:
+Only the **synthesis (LLM) + MCP + write** paths need a key; everything else is open
+(anonymous, rate-limited). Send the key on the gated calls as a header:
 
 ```
 X-API-Key: <your key>
@@ -42,11 +42,18 @@ X-API-Key: <your key>
 Authorization: Bearer <your key>
 ```
 
-- Only liveness/discovery is open: `GET /api/health`, `GET /` (and `/docs`, `/openapi.json`).
-- Requests are **rate-limited per key** (429 + `Retry-After` when exceeded); the LLM/semantic
-  paths have a tighter cap than the $0 ones.
-- The tools themselves are $0 — the key is for identity + rate-limiting, not billing —
-  except **semantic search** (`GET /api/search?semantic=true`), the one paid path.
+**Requires a key:**
+- `POST /api/ask`, `POST /api/ask/branched` — the LLM-synthesized answer.
+- the whole **MCP** surface (`/mcp`) — see the [MCP Guide](mcp.md).
+- any write method (PUT/PATCH/DELETE).
+
+**Open (no key)** — everything else, including **semantic search** (embedding is Cloudflare
+BGE-M3, $0): `GET /api/search` (incl. `?semantic=true`), `GET /api/search/branched`,
+`POST /api/study`, `/api/concordance/*`, `/api/cross-references/*`, `/api/topics`,
+`/api/entities`, trees, chunk, `/api/health`, `/` — and **all shoresh endpoints**.
+
+All requests (open included) are **rate-limited** per key (or per IP when anonymous):
+`429 + Retry-After` when exceeded; gated paths get a tighter cap.
 
 ## Quick start
 
@@ -182,13 +189,13 @@ tree (the passage card's `syntax` link).
 
 ### bcv-RAG (`{BCV_RAG_BASE}`)
 
-All require the API key except `GET /api/health` and `GET /`.
+Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; everything else is open.
 
 | Method | Path | Purpose |
 |---|---|---|
 | POST | `/api/ask` | Question → cited answer + cards + branches |
 | POST | `/api/ask/branched` | Same, results as the branch/lead tree |
-| GET | `/api/search` | Keyword / structured retrieval; `?semantic=true` for vector (paid path) |
+| GET | `/api/search` | Keyword / structured retrieval; `?semantic=true` adds vector (open, $0) |
 | GET | `/api/search/branched` | Search results as branches |
 | POST | `/api/study` | Build a study packet for a query |
 | GET | `/api/concordance/{word}` | Occurrences of a word |
