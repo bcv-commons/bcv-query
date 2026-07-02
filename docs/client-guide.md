@@ -147,6 +147,17 @@ not competing claims); rank by `featured` then `confidence`.
 "suggested_layout": "hero"
 ```
 
+Each **lead** carries three scores (from RRF fusion, k=60) so the **client owns the front cutoff**:
+- **`score`** — raw fused score (implementation detail; kept for transparency).
+- **`confidence`** ∈ [0,1] — `score ÷ branch-top` (**relative**): how strong within its branch. A flat
+  cluster sits near `1.0`; a peaked query shows one near `1.0` and the rest low. Threshold this for
+  per-branch front density.
+- **`agreement`** ∈ [0,1] — `score ÷ theoretical-max` (**absolute**, cross-branch): fraction of maximal
+  cross-retriever agreement. Threshold this to feature only genuinely-strong leads, comparably across branches.
+- **`featured`** — a server **default hint** only (top few near a branch's top); recompute your own
+  front set from `confidence`/`agreement` if you want different density. Keep the full `n` behind a
+  "browse all" affordance regardless.
+
 - **branch** = a study dimension; **leads** = pointers to go deeper.
 - `suggested_layout`: **hero** (one dominant result) · **deck** (one branch, many leads) ·
   **tree** (several branches) · **explore** (weak / no strong lead). The client owns the final
