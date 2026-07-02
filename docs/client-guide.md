@@ -158,6 +158,9 @@ Each **lead** carries three scores (from RRF fusion, k=60) so the **client owns 
   front set from `confidence`/`agreement` if you want different density. Keep the full `n` behind a
   "browse all" affordance regardless.
 
+See **[Rendering leads](lead-rendering.md)** for the full recipe — the front-cutoff algorithm,
+tunable knobs, worked examples, and layout mapping.
+
 - **branch** = a study dimension; **leads** = pointers to go deeper.
 - `suggested_layout`: **hero** (one dominant result) · **deck** (one branch, many leads) ·
   **tree** (several branches) · **explore** (weak / no strong lead). The client owns the final
