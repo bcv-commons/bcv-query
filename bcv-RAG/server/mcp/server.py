@@ -1,137 +1,59 @@
-"""MCP HTTP transport — JSON-RPC 2.0 over POST /mcp.
+"""MCP server — official SDK transports (Streamable HTTP + stdio).
 
-Hand-rolled JSON-RPC. The MCP spec is small enough that a custom handler is
-~150 lines, gives full control over auth/CORS, and avoids version coupling
-with any third-party MCP SDK.
+Wraps the shared tool registry in `server.mcp.tools` (unchanged) in the SDK's low-level
+`Server`, so a client discovers/calls the same tools. This replaced a hand-rolled JSON-RPC
+endpoint; the SDK now owns protocol compliance (Streamable HTTP with sessions, resumability)
+so remote MCP clients work plug-and-play.
 
-Methods supported:
-  initialize        protocol handshake
-  tools/list        catalog of registered tools
-  tools/call        invoke a tool with arguments
-  ping              liveness
-  notifications/*   acknowledged silently
+- HTTP:  the ASGI app `handle_streamable_http`, mounted at `/mcp` by server.app.
+- stdio: `python -m server.mcp.stdio` (calls `_server.run`).
+
+Auth + rate limiting are enforced by the app-level gate middleware (server.gate): the whole
+`/mcp` surface requires a valid API key. `stateless=True` — each request is independent (a
+pure tools server; no session state to persist).
 """
 from __future__ import annotations
 
-import json
-import sqlite3
-from typing import Any
+import contextlib
+from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Depends, Header, Request
+import anyio
+import mcp.types as types
+from mcp.server.lowlevel import Server
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 
-from server.auth import mcp_tool_call_uses_ai, verify
-from server.deps import get_db
-from server.mcp.tools import call_tool, list_tools
-from server.ratelimit import LIMIT_MCP, limiter
+from server.deps import get_shared_db
+from server.mcp.tools import call_tool as _call_tool
+from server.mcp.tools import list_tools as _list_tools
 
-router = APIRouter()
-
-PROTOCOL_VERSION = "2024-11-05"
-SERVER_INFO = {"name": "bcv-query", "version": "2.0.0"}
+_server: Server = Server("bcv-query")
 
 
-@router.post("/mcp")
-@limiter.limit(LIMIT_MCP)
-async def mcp_endpoint(
-    request: Request,
-    db: sqlite3.Connection = Depends(get_db),
-    authorization: str | None = Header(default=None),
-    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
-) -> Any:
-    """JSON-RPC 2.0 entrypoint."""
-    try:
-        body = await request.json()
-    except Exception:
-        return _err(None, -32700, "Parse error: invalid JSON")
-
-    auth = (authorization, x_api_key)
-    if isinstance(body, list):
-        # Batch request
-        return [_handle_one(msg, db, auth=auth) for msg in body]
-    return _handle_one(body, db, auth=auth)
+@_server.list_tools()
+async def _handle_list_tools() -> list[types.Tool]:
+    return [types.Tool(name=t["name"], description=t["description"], inputSchema=t["inputSchema"])
+            for t in _list_tools()]
 
 
-@router.get("/mcp")
-def mcp_get_info() -> dict:
-    """Discovery / liveness for clients that probe before POSTing."""
-    return {
-        "protocol": "MCP / JSON-RPC 2.0",
-        "transport": "Streamable HTTP",
-        "protocolVersion": PROTOCOL_VERSION,
-        "server": SERVER_INFO,
-        "endpoint": "POST /mcp with a JSON-RPC envelope",
-        "methods": ["initialize", "tools/list", "tools/call", "ping"],
-    }
+@_server.call_tool()
+async def _handle_call_tool(name: str, arguments: dict) -> dict:
+    db = get_shared_db()
+    # tools are sync and hit SQLite — run off the event loop so the transport stays responsive.
+    result = await anyio.to_thread.run_sync(lambda: _call_tool(name, arguments or {}, db))
+    # a dict → the SDK returns it as structuredContent AND serialized JSON in content.
+    return result if isinstance(result, dict) else {"result": result}
 
 
-# ---------- core dispatcher ----------
-
-def _handle_one(msg: dict, db: sqlite3.Connection, auth: tuple[str | None, str | None] | None = None) -> dict:
-    """Dispatch one JSON-RPC message.
-
-    `auth` is the (Authorization, X-API-Key) header tuple from the HTTP
-    transport, or `None` for stdio (local subprocess — gate skipped).
-    """
-    if not isinstance(msg, dict) or msg.get("jsonrpc") != "2.0":
-        return _err(msg.get("id") if isinstance(msg, dict) else None,
-                    -32600, "Invalid Request: jsonrpc must be '2.0'")
-
-    method = msg.get("method")
-    msg_id = msg.get("id")
-    params = msg.get("params") or {}
-
-    # Notifications: no id, no response. We acknowledge by returning an empty dict.
-    is_notification = "id" not in msg
-    if is_notification and method and method.startswith("notifications/"):
-        return {}  # silently consumed
-
-    if method == "initialize":
-        return _ok(msg_id, {
-            "protocolVersion": PROTOCOL_VERSION,
-            "capabilities": {"tools": {"listChanged": False}},
-            "serverInfo": SERVER_INFO,
-        })
-
-    if method == "ping":
-        return _ok(msg_id, {})
-
-    if method == "tools/list":
-        return _ok(msg_id, {"tools": list_tools()})
-
-    if method == "tools/call":
-        name = params.get("name")
-        if not name:
-            return _err(msg_id, -32602, "Invalid params: 'name' is required")
-        arguments = params.get("arguments") or {}
-        if auth is not None and mcp_tool_call_uses_ai(name, arguments):
-            authorization, x_api_key = auth
-            if not verify(authorization, x_api_key):
-                return _err(msg_id, -32001,
-                            "Authorization required: API password missing or invalid (BTMCP_API_PASSWORD)")
-        try:
-            result = call_tool(name, arguments, db)
-        except ValueError as e:
-            return _err(msg_id, -32602, f"Tool error: {e}")
-        except Exception as e:
-            return _err(msg_id, -32603, f"Internal error: {type(e).__name__}: {e}")
-        # Per MCP: result has `content[]` (array of TextContent / ImageContent etc.)
-        # We return JSON-as-text for maximum client compatibility, plus
-        # `structuredContent` for clients that support it.
-        text = json.dumps(result, ensure_ascii=False, indent=2)
-        return _ok(msg_id, {
-            "content": [{"type": "text", "text": text}],
-            "structuredContent": result,
-            "isError": False,
-        })
-
-    return _err(msg_id, -32601, f"Method not found: {method}")
+# Streamable HTTP transport (mounted at /mcp by server.app; its .run() lifespan is entered there).
+session_manager = StreamableHTTPSessionManager(app=_server, stateless=True, json_response=False)
 
 
-# ---------- envelope helpers ----------
-
-def _ok(msg_id: Any, result: Any) -> dict:
-    return {"jsonrpc": "2.0", "id": msg_id, "result": result}
+async def handle_streamable_http(scope, receive, send) -> None:
+    await session_manager.handle_request(scope, receive, send)
 
 
-def _err(msg_id: Any, code: int, message: str) -> dict:
-    return {"jsonrpc": "2.0", "id": msg_id, "error": {"code": code, "message": message}}
+@contextlib.asynccontextmanager
+async def session_lifespan() -> AsyncIterator[None]:
+    """Run the Streamable HTTP session manager's background task group for the app's lifetime."""
+    async with session_manager.run():
+        yield

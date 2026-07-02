@@ -17,8 +17,9 @@ is in [Tool catalog](#tool-catalog) below for quick human reference).
 
 ## Protocol
 
-- **JSON-RPC 2.0**, MCP `protocolVersion` **2024-11-05**.
-- Methods: `initialize` (handshake), `tools/list` (catalog), `tools/call` (invoke), `ping`.
+Standard MCP via the official SDK — both transports below are spec-compliant, so any MCP
+client (Claude Desktop/web connectors, Cursor, custom agents) connects without adapters. The
+protocol version is negotiated by the SDK during `initialize`.
 
 ## Transports
 
@@ -42,8 +43,7 @@ python -m server.mcp.stdio
       "args": ["-m", "server.mcp.stdio"],
       "cwd": "/absolute/path/to/bcv-query/bcv-RAG",
       "env": {
-        // only needed if you'll use semantic (vector) search — see Auth
-        "BTMCP_API_PASSWORD": "<your key>"
+        "BTMCP_API_PASSWORD": "<your key>"   // required — your registration key (see Auth)
       }
     }
   }
@@ -52,16 +52,13 @@ python -m server.mcp.stdio
 
 Cursor and other stdio MCP clients take the same `command` / `args` / `cwd`.
 
-### HTTP — for remote / programmatic use
+### Streamable HTTP — for remote clients
 
-A plain JSON-RPC-over-HTTP endpoint (single request/response, not SSE):
-
-- `POST {BCV_RAG_BASE}/mcp` — JSON-RPC calls (a single object or a batch array).
-- `GET  {BCV_RAG_BASE}/mcp` — server info (protocol version, method list).
-
-> This HTTP surface is a convenience for custom agents/scripts. Standard MCP clients that
-> expect the official *Streamable HTTP* transport should use **stdio** instead; the HTTP
-> endpoint is best consumed by your own JSON-RPC calls.
+The **official MCP Streamable HTTP** transport at `{BCV_RAG_BASE}/mcp` (stateless). Remote MCP
+clients — Claude.ai custom connectors, hosted agents — connect directly by pointing at that
+URL and sending the API key as a header (`X-API-Key` / `Authorization: Bearer`). Use an MCP
+client library rather than hand-rolling requests: the transport uses content negotiation
+(`Accept: application/json, text/event-stream`) and SSE framing, which the client handles.
 
 ## Authentication — registration required
 
@@ -82,29 +79,29 @@ Requests are rate-limited per key (429 + `Retry-After` when exceeded).
 > `GET /api/search?semantic=true` (open, $0). On MCP, `search` already does concept expansion
 > (Strong's-anchored related terms), so lexical search is meaning-aware.
 
-> Remote plug-and-play via the SDK's **Streamable HTTP** transport is landing next; today the
-> HTTP surface is the JSON-RPC endpoint below (stdio is fully standard now).
+## Quick test (Python MCP client)
 
-## Quick manual test
+The Streamable HTTP transport does a handshake + SSE framing, so use an MCP client library
+rather than a raw `curl` (the SDK is `pip install mcp`):
 
-```bash
-# server info
-curl {BCV_RAG_BASE}/mcp
+```python
+import anyio
+from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.session import ClientSession
 
-# list tools (the key is required on every request)
-curl -X POST {BCV_RAG_BASE}/mcp -H "Content-Type: application/json" -H "X-API-Key: $KEY" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+async def main():
+    url = "{BCV_RAG_BASE}/mcp"
+    async with streamablehttp_client(url, headers={"X-API-Key": "<your key>"}) as (r, w, _):
+        async with ClientSession(r, w) as s:
+            await s.initialize()
+            print([t.name for t in (await s.list_tools()).tools])
+            res = await s.call_tool("word_study", {"strong": "G0025", "lang": "en"})
+            print(res.structuredContent)          # also available as JSON in res.content
 
-# call a tool
-curl -X POST {BCV_RAG_BASE}/mcp -H "Content-Type: application/json" -H "X-API-Key: $KEY" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call",
-       "params":{"name":"study","arguments":{"question":"the love of God in John 3:16"}}}'
-
-# original-language depth (also on MCP now)
-curl -X POST {BCV_RAG_BASE}/mcp -H "Content-Type: application/json" -H "X-API-Key: $KEY" \
-  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call",
-       "params":{"name":"word_study","arguments":{"strong":"G0025","lang":"en"}}}'
+anyio.run(main)
 ```
+
+Without a key the connection is rejected with `401`.
 
 ## Tool catalog
 

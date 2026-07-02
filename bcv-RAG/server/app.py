@@ -34,7 +34,9 @@ async def lifespan(app: FastAPI):
     from query.retrieve import _lexicon_strongs_map
     db = get_shared_db()
     _lexicon_strongs_map(db)
-    yield
+    # Run the MCP Streamable HTTP session manager for the app's lifetime.
+    async with mcp_server.session_lifespan():
+        yield
 
 
 app = FastAPI(title="bcv-query API", version="2.0.0", lifespan=lifespan)
@@ -50,10 +52,10 @@ app.add_middleware(
     allow_credentials=False,
 )
 
-# Registration gate (mechanism A) + coarse rate limiting over every path (REST + /mcp).
-# Added AFTER CORS so CORS runs outermost (preflight/headers apply even to 401/429).
-from server.gate import gate as _gate  # noqa: E402
-app.middleware("http")(_gate)
+# Access gate (key on gated paths) + rate limiting — pure ASGI so it doesn't buffer the
+# streaming /mcp mount. Outermost (added last) → runs before routing.
+from server.gate import Gate  # noqa: E402
+app.add_middleware(Gate)
 
 # REST surface
 app.include_router(health_route.router, prefix="/api")
@@ -68,8 +70,9 @@ app.include_router(xref_route.router, prefix="/api")
 app.include_router(concordance_route.router, prefix="/api")
 app.include_router(study_route.router, prefix="/api")
 
-# MCP surface (mounted at /mcp; not under /api)
-app.include_router(mcp_server.router)
+# MCP surface — official SDK Streamable HTTP transport, mounted at /mcp (gated by the
+# app-level key middleware above). stdio transport: `python -m server.mcp.stdio`.
+app.mount("/mcp", mcp_server.handle_streamable_http)
 
 
 @app.get("/")

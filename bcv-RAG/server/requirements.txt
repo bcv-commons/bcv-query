@@ -1,4 +1,5 @@
 fastapi>=0.110
 uvicorn[standard]>=0.27
 slowapi>=0.1.9
+mcp>=1.28          # official Model Context Protocol SDK (Streamable HTTP + stdio transports)
 # context-fabric / text-fabric removed — the corpus engine moved to shoresh (migration).
