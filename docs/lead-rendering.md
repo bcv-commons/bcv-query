@@ -38,7 +38,7 @@ Two independent signals, by design:
 | **branch `featured`** | this study dimension is relevant to the query (intent) | which branches to expand vs collapse |
 | **branch `n`** | total matches | the "browse all (n)" affordance |
 | lead **`confidence`** | strength **within** its branch (`score÷top`, relative) | per-branch front density / ordering |
-| lead **`agreement`** | strength in **absolute** terms (cross-branch) | suppressing weak-consensus branches |
+| lead **`agreement`** | strength in **absolute** terms, universal [0,1] (comparable across branches AND queries) | one fixed threshold to suppress weak-consensus leads everywhere |
 | lead **`score`** | raw RRF | debugging / your own scoring |
 | lead **`featured`** | server default front hint | a fallback if you don't compute your own |
 

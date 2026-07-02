@@ -152,8 +152,9 @@ Each **lead** carries three scores (from RRF fusion, k=60) so the **client owns 
 - **`confidence`** ∈ [0,1] — `score ÷ branch-top` (**relative**): how strong within its branch. A flat
   cluster sits near `1.0`; a peaked query shows one near `1.0` and the rest low. Threshold this for
   per-branch front density.
-- **`agreement`** ∈ [0,1] — `score ÷ theoretical-max` (**absolute**, cross-branch): fraction of maximal
-  cross-retriever agreement. Threshold this to feature only genuinely-strong leads, comparably across branches.
+- **`agreement`** ∈ [0,1] — `score ÷ fixed-reference` (**absolute, universal**): fraction of maximal
+  cross-retriever agreement, on a query-independent scale — so one fixed threshold behaves the same
+  across every query (and across branches). Use it to feature only genuinely-strong leads.
 - **`featured`** — a server **default hint** only (top few near a branch's top); recompute your own
   front set from `confidence`/`agreement` if you want different density. Keep the full `n` behind a
   "browse all" affordance regardless.

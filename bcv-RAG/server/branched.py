@@ -19,12 +19,17 @@ from server.resolver import chunk_preview_from_card
 # Two scores per lead from the raw RRF fusion (k=60):
 #   confidence — score ÷ branch-top (max-norm, RELATIVE): "how strong is this WITHIN its
 #                branch". Query-independent; a flat cluster stays near 1.0, a peaked query drops.
-#   agreement  — score ÷ theoretical-max (ABSOLUTE, cross-branch): fraction of maximal
-#                cross-retriever agreement (all retrievers rank it #1 → Σweights/(k+1)). Lets a
-#                client compare strength across branches, not just within one.
+#   agreement  — score ÷ a FIXED reference (ABSOLUTE, universal): fraction of maximal
+#                cross-retriever agreement, on a query-INDEPENDENT [0,1] scale — so one
+#                threshold behaves identically across every query, and it's still directly
+#                comparable across branches within a response. (Denominator is a constant, the
+#                heaviest intent's total weight, NOT the per-query weights — that kept it from
+#                being comparable across queries.)
 # `featured` is a DEFAULT HINT only (server applies FRONT_RATIO/FRONT_MAX); clients own the
 # real front cutoff and may recompute it from confidence/agreement/score.
 _RRF_K = 60
+# fixed absolute reference: an item ranked #1 by every retriever under the heaviest weighting.
+_AGREE_REF = max((sum(w) for w in _INTENT_WEIGHTS.values()), default=1.0) / (_RRF_K + 1)
 _FRONT_RATIO = float(os.environ.get("BTMCP_FRONT_RATIO", "0.8"))
 _FRONT_MAX = int(os.environ.get("BTMCP_FRONT_MAX", "3"))
 
@@ -72,11 +77,6 @@ def build_branches(
             p["retrievers"] = h.retrievers
         return p
 
-    # theoretical max RRF score for this query = an item ranked #1 by every retriever.
-    intent = getattr(analysis, "intent", "thematic") or "thematic"
-    weights = _INTENT_WEIGHTS.get(intent) or _INTENT_WEIGHTS.get("thematic") or []
-    theo_max = (sum(weights) / (_RRF_K + 1)) if weights else 0.0
-
     def _lead(p: dict, kind: str, branch_top: float) -> dict:
         """A preview → a lead in the unified contract shape (keeps the rich preview + raw `score`)."""
         p = dict(p)
@@ -84,7 +84,7 @@ def build_branches(
         p["headline"] = p.get("passage") or p.get("title") or p.get("document_title") or p.get("name") or ""
         raw = float(p.get("score", 0) or 0)                            # raw RRF score kept as `score`
         p["confidence"] = round(raw / branch_top, 3) if branch_top else 0.0   # relative, per branch
-        p["agreement"] = round(min(1.0, raw / theo_max), 3) if theo_max else None  # absolute, cross-branch
+        p["agreement"] = round(min(1.0, raw / _AGREE_REF), 3) if _AGREE_REF else None  # absolute, universal
         p["drill"] = p.get("chunk_id")
         return p
 
