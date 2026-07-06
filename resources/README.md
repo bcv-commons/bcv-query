@@ -47,6 +47,7 @@ in Phase 0.
 | `word_glosses/{hbo,grc}/<Language>.csv` | target-language glosses for shoresh `/words`, keyed by **BHSA lex** (NOT Strong's), 11 langs, per-binyan columns for Hebrew verbs — see its README | `lex, default, qal, nif, …` |
 | `related_langs/` | language registry + genetic/typological relatedness (which langs are X's closest relatives) — see its README | `iso639_3`-keyed |
 | `regional_langs/` | regional/script/locale variants *within* one ISO 639-3 code — see its README | `iso639_3`-keyed |
+| `languages/` | **all-ISO-639-3** registry (7.9k langs) from ISO 639-3 + Glottolog — superset successor to `related_langs/`; Phase A of `languages.db` — see its README | `iso639_3`-keyed |
 | `occurrences/` | **gitignored build artifact** — per-occurrence lex/stem/sense sidecar + Hebrew-context embeddings (regenerable; feeds `senses/hbo_lex.tsv`) — see its README | — |
 
 Build-only intermediates (`strong_lemma.tsv`, `concepts/forms/tw_links.tsv`,
