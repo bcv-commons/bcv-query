@@ -65,11 +65,11 @@ def greek_lex_strong(api) -> dict[str, str]:
 
 def hebrew_lex_strong(api) -> dict[str, str]:
     """BHSA lex → Strong's via the three-tier resolver (see module docstring)."""
-    from corpus import _book_map
+    from corpus import name_to_usfm
     F, L, T = api.F, api.L, api.T
     lex, voc, cons = api.Fs("lex"), api.Fs("voc_lex_utf8"), api.Fs("g_cons_utf8")
     con = sqlite3.connect(SPINE_DB)
-    name2usfm = {n: u for u, (n, cid) in _book_map().items() if cid == "hebrew"}
+    name2usfm = name_to_usfm("hebrew")
 
     pointed: dict[str, str] = {}                       # spine pointed lemma → strong
     uniq: dict[str, set] = collections.defaultdict(set)  # consonantal lemma → {strong}

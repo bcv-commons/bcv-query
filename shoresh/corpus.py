@@ -9,14 +9,13 @@ host; see Dockerfile + compose). No network hop. Two views:
   context(book, ch, v, word_idx)  -> clause/phrase/sentence hierarchy for one word
 
 Book mapping: the engine returns its own book names per corpus ("hebrew" = BHSA,
-"greek" = Nestle1904) in canonical order, zipped positionally against the USFM
-codes in the same order.
+"greek" = Nestle1904); each name is mapped to its USFM code BY NAME (Hebrew via the
+explicit table below — BHSA follows the Hebrew-canon order, so a positional zip against
+Christian versification would misalign everything after Ruth; Greek names are USFM already).
 """
 from __future__ import annotations
 
 from functools import lru_cache
-
-from references import BOOK_NUMBERS
 
 
 def _eng():
@@ -26,19 +25,35 @@ def _eng():
     return engine
 
 
+# BHSA (Hebrew) book name -> USFM code. BHSA follows the HEBREW canon order (Ruth,
+# Chronicles, etc. sit in the Writings), which differs from the Christian versification —
+# so this is an explicit name map, NOT a positional zip (that misaligns after Ruth). Greek
+# (Nestle1904) book names are already USFM codes, so they map to themselves.
+_HEBREW_NAME_TO_USFM = {
+    "Genesis": "GEN", "Exodus": "EXO", "Leviticus": "LEV", "Numbers": "NUM",
+    "Deuteronomy": "DEU", "Joshua": "JOS", "Judges": "JDG", "Ruth": "RUT",
+    "1_Samuel": "1SA", "2_Samuel": "2SA", "1_Kings": "1KI", "2_Kings": "2KI",
+    "1_Chronicles": "1CH", "2_Chronicles": "2CH", "Ezra": "EZR",
+    "Nehemiah": "NEH", "Esther": "EST", "Job": "JOB", "Psalms": "PSA",
+    "Proverbs": "PRO", "Ecclesiastes": "ECC", "Song_of_songs": "SNG",
+    "Isaiah": "ISA", "Jeremiah": "JER", "Lamentations": "LAM",
+    "Ezekiel": "EZK", "Daniel": "DAN", "Hosea": "HOS", "Joel": "JOL",
+    "Amos": "AMO", "Obadiah": "OBA", "Jonah": "JON", "Micah": "MIC",
+    "Nahum": "NAM", "Habakkuk": "HAB", "Zephaniah": "ZEP", "Haggai": "HAG",
+    "Zechariah": "ZEC", "Malachi": "MAL",
+}
+
+
 @lru_cache(maxsize=1)
 def _book_map() -> dict[str, tuple[str, str]]:
-    """USFM code -> (corpus_book_name, corpus_id)."""
+    """USFM code -> (corpus_book_name, corpus_id). Order-independent: each corpus book name
+    maps to its USFM by name (Hebrew via _HEBREW_NAME_TO_USFM; Greek names are already USFM)."""
     mapping: dict[str, tuple[str, str]] = {}
     eng = _eng()
-    for corpus_id, (lo, hi) in [("hebrew", (1, 40)), ("greek", (40, 100))]:
-        names = [b.name for b in eng.list_books(corpus_id)]
-        codes = sorted(
-            [(u, n) for u, n in BOOK_NUMBERS.items() if lo <= n < hi],
-            key=lambda x: x[1],
-        )
-        for (usfm, _num), name in zip(codes, names):
-            mapping[usfm] = (name, corpus_id)
+    for corpus_id in ("hebrew", "greek"):
+        for b in eng.list_books(corpus_id):
+            usfm = _HEBREW_NAME_TO_USFM.get(b.name, b.name) if corpus_id == "hebrew" else b.name
+            mapping[usfm.upper()] = (b.name, corpus_id)
     return mapping
 
 
@@ -50,6 +65,13 @@ def configured() -> bool:
 
 def _resolve(book: str) -> tuple[str, str] | None:
     return _book_map().get(book.upper())
+
+
+@lru_cache(maxsize=2)
+def name_to_usfm(corpus_id: str) -> dict[str, str]:
+    """{corpus book name -> USFM code} for one corpus ('hebrew' | 'greek') — the inverse of
+    `_book_map`, so build scripts read the mapping from here instead of re-hardcoding it."""
+    return {name: usfm for usfm, (name, cid) in _book_map().items() if cid == corpus_id}
 
 
 def passage(book: str, chapter: int, verse: int) -> dict:

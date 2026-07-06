@@ -41,6 +41,15 @@ Louw-Nida domain. Native SDBH and bridged SDBG are *different taxonomies* — a
 lexeme can legitimately differ across them (chesed: SDBH `core`=Faithfulness,
 bridged `sdbg`=Mercy — both true; the LXX rendered חֶסֶד with ἔλεος).
 
+## Domain-name localization — `grc_labels.tsv`
+`code → en, es, fr, zh-hans, id` — the localized **name** of each Louw-Nida domain, used by
+shoresh `/verse` (`_localize_domain`, keyed by `gloss_lang`) to show the NT domain in-language.
+The `en/es/fr/zh-hans` columns are mined from UBS MARBLE (same licence caveat as above). The
+**`id` (Indonesian)** column is *authored* — UBS ships no Indonesian, so the 664 labels were
+translated from the English (see `bcv-RAG/scripts/build_domain_labels_id.py`; re-run it to rebuild
+the column). Being a fresh translation, `id` is not UBS-encumbered. `_domain_label_i18n()` reads the
+columns dynamically, so adding another language is just another column + a `_DOMAIN_LANG_COL` entry.
+
 ## Taxonomy caveat
 SDBG (Greek) and SDBH (Hebrew) are **different** domain systems — codes are **not
 cross-comparable**. For cross-language concept linking use the lexical bridge

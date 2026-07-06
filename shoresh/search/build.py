@@ -25,20 +25,6 @@ from search.store import DATA_DIR
 
 CORPUS_OF = {"hbo": "hebrew", "grc": "greek"}
 
-BHSA_TO_USFM = {
-    "Genesis": "GEN", "Exodus": "EXO", "Leviticus": "LEV", "Numbers": "NUM",
-    "Deuteronomy": "DEU", "Joshua": "JOS", "Judges": "JDG", "Ruth": "RUT",
-    "1_Samuel": "1SA", "2_Samuel": "2SA", "1_Kings": "1KI", "2_Kings": "2KI",
-    "1_Chronicles": "1CH", "2_Chronicles": "2CH", "Ezra": "EZR",
-    "Nehemiah": "NEH", "Esther": "EST", "Job": "JOB", "Psalms": "PSA",
-    "Proverbs": "PRO", "Ecclesiastes": "ECC", "Song_of_songs": "SNG",
-    "Isaiah": "ISA", "Jeremiah": "JER", "Lamentations": "LAM",
-    "Ezekiel": "EZK", "Daniel": "DAN", "Hosea": "HOS", "Joel": "JOL",
-    "Amos": "AMO", "Obadiah": "OBA", "Jonah": "JON", "Micah": "MIC",
-    "Nahum": "NAM", "Habakkuk": "HAB", "Zephaniah": "ZEP", "Haggai": "HAG",
-    "Zechariah": "ZEC", "Malachi": "MAL",
-}
-
 
 def fetch_clauses(corpus: str) -> list[dict]:
     """All clauses of a corpus, gathered book by book from the local engine."""
@@ -54,7 +40,9 @@ def fetch_clauses(corpus: str) -> list[dict]:
 
 def build(lang: str) -> None:
     import numpy as np
+    from corpus import name_to_usfm
     corpus = CORPUS_OF[lang]
+    name2usfm = name_to_usfm(corpus)          # corpus book name -> USFM (from the one helper)
     print(f"reading {corpus} clauses from the local corpus engine …", file=sys.stderr)
     clauses = fetch_clauses(corpus)
     print(f"embedding {len(clauses)} clauses with the {lang} model …", file=sys.stderr)
@@ -78,7 +66,7 @@ def build(lang: str) -> None:
                "chapter INTEGER, verse INTEGER, text TEXT)")
     db.executemany(
         "INSERT INTO clauses VALUES (?,?,?,?,?)",
-        [(i, BHSA_TO_USFM.get(c["book"], c["book"]),
+        [(i, name2usfm.get(c["book"], c["book"]),
           c["chapter"], c["verse"], c["text"])
          for i, c in enumerate(clauses)])
     db.commit()

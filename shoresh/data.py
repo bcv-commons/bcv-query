@@ -283,8 +283,9 @@ def _strong_domains() -> dict:
 
 @lru_cache(maxsize=1)
 def _domain_label_i18n() -> dict:
-    """code -> {lang: label} from resources/semantic_domains/grc_labels.tsv (UBS
-    open-license, CC-BY-SA; en/es/fr/zh-hans). Localizes the NT domain label."""
+    """code -> {lang: label} from resources/semantic_domains/grc_labels.tsv (en/es/fr/zh-hans
+    from UBS open-license CC-BY-SA; id authored via scripts/build_domain_labels_id.py). Localizes
+    the NT domain label. Columns are read dynamically, so adding a language column needs no change."""
     out: dict = {}
     p = _resources_dir() / "semantic_domains" / "grc_labels.tsv"
     if not p.exists():
@@ -302,7 +303,7 @@ def _domain_label_i18n() -> dict:
 
 # gloss_lang (word_glosses filename) -> grc_labels.tsv column; absent -> English label.
 _DOMAIN_LANG_COL = {"English": "en", "Spanish": "es", "French": "fr",
-                    "Chinese-Simplified": "zh-hans"}
+                    "Chinese-Simplified": "zh-hans", "Indonesian": "id"}
 
 
 def _localize_domain(code: str, en_label: str, gloss_lang: str) -> str:
