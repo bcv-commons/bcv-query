@@ -321,20 +321,28 @@ def _passage_ref(analysis):
     return None
 
 
-_CONTENT_SP = {"subs", "nmpr", "verb", "adjv", "advb"}   # BHSA content parts of speech
+_CONTENT_SP = {"subs", "nmpr", "verb", "adjv", "advb",   # BHSA content parts of speech
+               "noun", "adj", "adv"}                      # + Nestle1904 (verb shared)
+
+# Clause roles, corpus-agnostic: BHSA `function` codes ∪ Nestle1904 readable role labels,
+# so the frame/role helpers work for both Hebrew (Subj/Pred/Objc) and Greek (Subject/Verb/Object).
+_SUBJ_FN = {"Subj", "Subject"}
+_PRED_FN = {"Pred", "Predicate", "Verb", "VerbCopula"}
+_OBJ_FN = {"Objc", "Object"}
+_FRAME_FN = _SUBJ_FN | _PRED_FN | _OBJ_FN
 
 
 def _clause_frame(syntax: dict | None) -> str | None:
     """Who-did-what from the verse's main (verbal) clause: Subj/Pred/Objc content glosses, compact."""
     clauses = (syntax or {}).get("clauses") or []
-    main = next((c for c in clauses if any(p.get("function") == "Pred" for p in c.get("phrases", []))),
+    main = next((c for c in clauses if any(p.get("function") in _PRED_FN for p in c.get("phrases", []))),
                 None)
     if not main:
         return None
     parts = []
     for p in main["phrases"]:
         fn = p.get("function")
-        if fn not in ("Subj", "Pred", "Objc"):
+        if fn not in _FRAME_FN:
             continue
         g = " ".join(w["gloss"] for w in p.get("words", [])
                      if w.get("gloss") and w.get("sp") in _CONTENT_SP)
@@ -353,12 +361,12 @@ def _role_map(syntax: dict | None) -> dict:
     """{normalized content-gloss: role} from the verse's main clause Subj/Pred/Objc phrases — lets the
     word list carry its clause role inline (one view, not a redundant separate frame)."""
     clauses = (syntax or {}).get("clauses") or []
-    main = next((c for c in clauses if any(p.get("function") == "Pred" for p in c.get("phrases", []))),
+    main = next((c for c in clauses if any(p.get("function") in _PRED_FN for p in c.get("phrases", []))),
                 None)
     out: dict = {}
     for p in (main or {}).get("phrases", []):
         fn = p.get("function")
-        if fn not in ("Subj", "Pred", "Objc"):
+        if fn not in _FRAME_FN:
             continue
         for w in p.get("words", []):
             if w.get("sp") in _CONTENT_SP and w.get("gloss"):
@@ -393,7 +401,7 @@ class PassageStrategy(CardStrategy):
         il = verse_interlinear(code, ch, v, _gloss_lang(lang))   # localized per-word sense
         if not il:
             return None
-        syntax = verse_syntax(code, ch, v) if il["lang"] == "hbo" else None
+        syntax = verse_syntax(code, ch, v) if il["lang"] in ("hbo", "grc") else None
         roles = _role_map(syntax)
         # ONE view: keyness-ranked content words (keyness>0 drops et/articles/particles at the source —
         # form-independent, so the sense-form "<OM>" can't leak), sense trimmed, role annotated inline.

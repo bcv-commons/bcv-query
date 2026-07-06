@@ -93,7 +93,8 @@ def verse_interlinear(book: str, ch: int, v: int, gloss_lang: str = "English") -
 
 def verse_syntax(book: str, ch: int, v: int) -> dict | None:
     """The verse's clause→phrase syntax tree (who-did-what) via shoresh /structure/…/syntax, or None.
-    Hebrew/BHSA. Best-effort; the Context-Fabric graph is loaded lazily so the first call may miss."""
+    Hebrew (BHSA) + Greek (Nestle1904). Best-effort; the Context-Fabric graph is loaded lazily so the
+    first call may miss."""
     if not SHORESH_URL:
         return None
     try:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import threading
 from pathlib import Path
 from typing import Any
@@ -66,6 +67,59 @@ WORD_TYPE = {
     "hebrew": "word",
     "greek": "w",
 }
+
+# Clause/phrase SYNTAX features differ by corpus (BHSA vs Nestle1904) — same output
+# shape either way; this maps each logical field -> that corpus's TF feature name
+# (None = the corpus has no equivalent, so the field is emitted as null).
+SYNTAX_FEATURES = {
+    "hebrew": {"ph_function": "function", "ph_type": "typ",
+               "cl_type": "typ", "cl_rela": "rela", "cl_kind": "kind",
+               "w_lex": "lex", "w_sp": "sp", "w_stem": "vs"},
+    "greek":  {"ph_function": "role", "ph_type": "cls",
+               "cl_type": None, "cl_rela": "junction", "cl_kind": None,
+               "w_lex": "lemma", "w_sp": "cls", "w_stem": None},
+}
+
+# Nestle1904 phrase-role codes -> readable labels (BHSA's `function` is already readable).
+GREEK_ROLE_LABELS = {
+    "s": "Subject", "o": "Object", "o2": "Object2", "io": "IndirectObject",
+    "p": "Predicate", "v": "Verb", "vc": "VerbCopula", "adv": "Adverbial",
+    "aux": "Auxiliary", "apposition": "Apposition",
+}
+
+# Canonicalize a phrase-function token so /syntax/search matches across corpora and
+# spellings (raw BHSA `function` codes, raw Nestle `role` codes, and readable labels).
+# Unknown tokens fall through to their lowercased form, so exact-code matching still works.
+_FUNCTION_CANON: dict[str, str] = {}
+for _canon, _variants in {
+    "subject": ("subj", "subject", "s"),
+    "predicate": ("pred", "prec", "predicate", "p"),
+    "object": ("objc", "object", "obj", "o"),
+    "object2": ("o2", "object2"),
+    "indirectobject": ("io", "indirectobject"),
+    "verb": ("v", "verb"),
+    "verbcopula": ("vc", "verbcopula"),
+    "complement": ("cmpl", "complement"),
+    "adverbial": ("adju", "adverbial", "adv"),
+    "time": ("time",),
+    "location": ("loca", "location"),
+    "apposition": ("appo", "apposition"),
+}.items():
+    for _v in _variants:
+        _FUNCTION_CANON[_v] = _canon
+
+
+def _canon_function(raw: Any) -> str | None:
+    if raw is None:
+        return None
+    key = str(raw).strip().lower()
+    return _FUNCTION_CANON.get(key, key)
+
+
+def _norm_strong(s: Any) -> str:
+    """H0430 / H430 / h430 -> H430 (prefix + int + optional letter), for tolerant matching."""
+    m = re.match(r"^([HG])0*(\d+)([A-Za-z]?)$", str(s).strip(), re.I)
+    return f"{m.group(1).upper()}{int(m.group(2))}{m.group(3).lower()}" if m else str(s).strip().upper()
 
 _EXCLUDE_FEATURES: dict[str, set[str]] = {
     "greek": {"nodeId"},
@@ -218,32 +272,85 @@ class CFEngine:
     def get_verse_syntax(self, book: str, chapter: int, verse: int,
                          corpus: str = "hebrew") -> dict:
         """Whole-verse clause→phrase SYNTAX tree (the 'who-did-what': phrase function Subj / Pred /
-        Objc / Cmpl / Adju …) in ONE graph traversal — no per-word RTTs. Hebrew (BHSA)."""
+        Objc / Cmpl / Adju … for Hebrew; Subject / Object / Verb … for Greek) in ONE graph
+        traversal — no per-word RTTs. Works for BHSA (Hebrew) and Nestle1904 (Greek)."""
         api = self._ensure_loaded(corpus)
         wtype = WORD_TYPE.get(corpus, "word")
+        sf = SYNTAX_FEATURES.get(corpus, SYNTAX_FEATURES["hebrew"])
         vnode = api.T.nodeFromSection((book, chapter, verse))
         if vnode is None:
             return {"error": f"verse not found: {book} {chapter}:{verse}"}
 
+        clauses = [self._clause_dict(api, cl, sf, wtype, corpus)
+                   for cl in api.L.d(vnode, otype="clause")]
+        return {"corpus": corpus, "book": book, "chapter": chapter, "verse": verse,
+                "clauses": clauses}
+
+    def _clause_dict(self, api: Any, cl: int, sf: dict, wtype: str, corpus: str) -> dict:
+        """One clause -> {type, rela, kind, text, phrases:[{function, type, text, words}]}.
+        Shared by get_verse_syntax + get_verse_tree; corpus-agnostic via the `sf` feature map."""
         def fv(node, name):
+            if not name:
+                return None
             f = api.Fs(name)
             v = f.v(node) if f else None
             return v if v not in (None, "NA", "", "unknown") else None
 
-        clauses = []
+        def function_label(raw):
+            # Nestle1904 uses terse role codes (s/o/v/…); BHSA is already readable.
+            return GREEK_ROLE_LABELS.get(raw, raw) if corpus == "greek" else raw
+
+        def word_dict(w):
+            return {"text": (api.T.text(w) or "").strip(), "lex": fv(w, sf["w_lex"]),
+                    "gloss": fv(w, "gloss"), "sp": fv(w, sf["w_sp"]), "stem": fv(w, sf["w_stem"])}
+
+        entries: list[tuple[int, dict]] = []   # (first word node, phrase) — for reading-order sort
+        phrased: set[int] = set()
+        for ph in api.L.d(cl, otype="phrase"):
+            wnodes = list(api.L.d(ph, otype=wtype))
+            phrased.update(int(w) for w in wnodes)
+            entries.append((min(wnodes) if wnodes else int(ph),
+                            {"function": function_label(fv(ph, sf["ph_function"])),
+                             "type": fv(ph, sf["ph_type"]),
+                             "text": (api.T.text(ph) or "").strip(),
+                             "words": [word_dict(w) for w in wnodes]}))
+        # Nestle1904 leaves the finite verb bare under the clause (no phrase wrapper) — the
+        # predicate would otherwise be missing, so surface each bare verb as a `Verb` phrase.
+        if corpus == "greek":
+            for w in api.L.d(cl, otype=wtype):
+                if int(w) not in phrased and fv(w, sf["w_sp"]) == "verb":
+                    entries.append((int(w), {"function": "Verb", "type": "vp",
+                                             "text": (api.T.text(w) or "").strip(),
+                                             "words": [word_dict(w)]}))
+        entries.sort(key=lambda e: e[0])
+        return {"type": fv(cl, sf["cl_type"]), "rela": fv(cl, sf["cl_rela"]),
+                "kind": fv(cl, sf["cl_kind"]), "text": (api.T.text(cl) or "").strip(),
+                "phrases": [p for _, p in entries]}
+
+    def get_verse_tree(self, book: str, chapter: int, verse: int,
+                       corpus: str = "hebrew") -> dict:
+        """Full syntactic tree of a verse: sentence → clause → phrase → word — a superset of
+        get_verse_syntax (which is clause-rooted), adding the sentence grouping on top. The
+        verse's clauses are grouped under their parent sentence. BHSA + Nestle1904."""
+        api = self._ensure_loaded(corpus)
+        wtype = WORD_TYPE.get(corpus, "word")
+        sf = SYNTAX_FEATURES.get(corpus, SYNTAX_FEATURES["hebrew"])
+        vnode = api.T.nodeFromSection((book, chapter, verse))
+        if vnode is None:
+            return {"error": f"verse not found: {book} {chapter}:{verse}"}
+
+        groups: dict[int, dict] = {}
+        order: list[int] = []
         for cl in api.L.d(vnode, otype="clause"):
-            phrases = []
-            for ph in api.L.d(cl, otype="phrase"):
-                words = [{"text": (api.T.text(w) or "").strip(), "lex": fv(w, "lex"),
-                          "gloss": fv(w, "gloss"), "sp": fv(w, "sp"), "stem": fv(w, "vs")}
-                         for w in api.L.d(ph, otype=wtype)]
-                phrases.append({"function": fv(ph, "function"), "type": fv(ph, "typ"),
-                                "text": (api.T.text(ph) or "").strip(), "words": words})
-            clauses.append({"type": fv(cl, "typ"), "rela": fv(cl, "rela"),
-                            "kind": fv(cl, "kind"), "text": (api.T.text(cl) or "").strip(),
-                            "phrases": phrases})
+            sent = api.L.u(cl, otype="sentence")
+            skey = int(sent[0]) if sent else 0
+            if skey not in groups:
+                groups[skey] = {"text": (api.T.text(sent[0]) or "").strip() if sent else None,
+                                "clauses": []}
+                order.append(skey)
+            groups[skey]["clauses"].append(self._clause_dict(api, cl, sf, wtype, corpus))
         return {"corpus": corpus, "book": book, "chapter": chapter, "verse": verse,
-                "clauses": clauses}
+                "sentences": [groups[k] for k in order]}
 
     def get_schema(self, corpus: str = "hebrew") -> SchemaResult:
         api = self._ensure_loaded(corpus)
@@ -453,6 +560,82 @@ class CFEngine:
                 "text": text,
             })
         return out
+
+    def search_syntax(self, function: str | None = None, lex: str | None = None,
+                      strong: str | None = None, corpus: str = "hebrew",
+                      book: str | None = None, limit: int = 50) -> dict:
+        """Who-did-what search across the graph: clauses where a lexeme fills a phrase
+        function. Identify the word by `lex` (BHSA lex / Nestle1904 lemma) or `strong`
+        (mapped to lex via the lex_strong bridge). `function` accepts raw codes (Subj / s)
+        or readable labels (Subject); omit to match ANY function (grouped by what it fills).
+        `book` is a corpus book name (already resolved by the caller). BHSA + Nestle1904."""
+        api = self._ensure_loaded(corpus)
+        wtype = WORD_TYPE.get(corpus, "word")
+        sf = SYNTAX_FEATURES.get(corpus, SYNTAX_FEATURES["hebrew"])
+        lexfeat = api.Fs(sf["w_lex"])
+        if lexfeat is None:
+            return {"error": f"corpus '{corpus}' has no lexeme feature"}
+
+        # Resolve the target lexeme set (a Strong's may cover several homograph lexemes).
+        target: set[str] = set()
+        if lex:
+            target.add(lex)
+        if strong:
+            want_s = _norm_strong(strong)
+            for lx, st in self._lex_strong_map(corpus).items():
+                if _norm_strong(st) == want_s:
+                    target.add(lx)
+        if not target:
+            return {"error": "provide lex= or a known strong="}
+
+        if book is not None and api.T.nodeFromSection((book,)) is None:
+            return {"error": f"book not found: {book}"}
+        want_fn = _canon_function(function) if function else None
+
+        def fv(node, name):
+            if not name:
+                return None
+            f = api.Fs(name)
+            v = f.v(node) if f else None
+            return v if v not in (None, "NA", "", "unknown") else None
+
+        seen: set[int] = set()
+        matches: list[dict] = []
+        for lx in sorted(target):
+            for n in lexfeat.s(lx):
+                if api.F.otype.v(n) != wtype:      # .s() also returns the lex-object node
+                    continue
+                phs = api.L.u(n, otype="phrase")
+                if not phs:
+                    continue
+                ph = phs[0]
+                fn_raw = fv(ph, sf["ph_function"])
+                if want_fn and _canon_function(fn_raw) != want_fn:
+                    continue
+                cls = api.L.u(ph, otype="clause")
+                if not cls or cls[0] in seen:
+                    continue
+                cl = cls[0]
+                sec = api.T.sectionFromNode(cl)
+                if not sec or (book and sec[0] != book):
+                    continue
+                seen.add(cl)
+                fn_display = GREEK_ROLE_LABELS.get(fn_raw, fn_raw) if corpus == "greek" else fn_raw
+                matches.append({
+                    "book": sec[0],
+                    "chapter": sec[1] if len(sec) > 1 else None,
+                    "verse": sec[2] if len(sec) > 2 else None,
+                    "function": fn_display,
+                    "phrase": (api.T.text(ph) or "").strip(),
+                    "clause_text": (api.T.text(cl) or "").strip(),
+                })
+                if len(matches) >= limit:
+                    break
+            if len(matches) >= limit:
+                break
+
+        return {"corpus": corpus, "lex": sorted(target), "strong": strong,
+                "function": function, "count": len(matches), "clauses": matches}
 
     def _lex_strong_map(self, corpus: str) -> dict[str, str]:
         """{lex: strong} from resources/word_freq/{hbo,grc}_strong.tsv, memoized per

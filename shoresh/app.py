@@ -513,10 +513,45 @@ def get_structure(book: str, chapter: int, verse: int) -> dict:
 @app.get("/structure/{book}/{chapter}/{verse}/syntax")
 def get_structure_syntax(book: str, chapter: int, verse: int) -> dict:
     """Whole-verse clause→phrase SYNTAX tree (who-did-what: phrase function Subj / Pred / Objc / …),
-    one graph traversal. Hebrew (BHSA)."""
+    one graph traversal. Hebrew (BHSA) and Greek (Nestle1904) — the corpus is chosen from the book."""
     result = corpus.syntax(book, chapter, verse)
     if "error" in result:
         raise HTTPException(503 if "not found for" in result["error"] else 404, result["error"])
+    return result
+
+
+@app.get("/syntax/search")
+def get_syntax_search(function: str | None = None, strong: str | None = None,
+                      lex: str | None = None, book: str | None = None,
+                      corpus_id: str | None = None, limit: int = 50) -> dict:
+    """Who-did-what search across the BHSA/Nestle1904 graph: clauses where a lexeme fills a
+    phrase function. Identify the word by **strong** (`H0430` / `G0026`) or **lex** (BHSA
+    `lex` / Nestle1904 `lemma`); filter by **function** (`Subj`/`Subject`/`s`, `Objc`/`Object`/`o`,
+    `Pred`, `Adju`/`Adverbial` … — omit to match any). Corpus is pinned by **book** (USFM code,
+    optional scope) if given, else inferred from the Strong's prefix. e.g.
+    `/syntax/search?strong=H0430&function=Subject` → clauses where *God* is the subject."""
+    if not strong and not lex:
+        raise HTTPException(422, "provide strong= or lex=")
+    result = corpus.syntax_search(function=function, strong=strong, lex=lex,
+                                  book=book, corpus=corpus_id, limit=limit)
+    if "error" in result:
+        raise HTTPException(404, result["error"])
+    data = result.get("data", {})
+    if isinstance(data, dict) and "error" in data:
+        raise HTTPException(404, data["error"])
+    return result
+
+
+@app.get("/verse/{book}/{chapter}/{verse}/tree")
+def get_verse_tree(book: str, chapter: int, verse: int) -> dict:
+    """Full syntactic tree of a verse: sentence → clause → phrase → word (superset of
+    `/structure/{…}/syntax`, adding the sentence grouping). Hebrew (BHSA) + Greek (Nestle1904)."""
+    result = corpus.tree(book, chapter, verse)
+    if "error" in result:
+        raise HTTPException(503 if "not found for" in result["error"] else 404, result["error"])
+    data = result.get("data", {})
+    if isinstance(data, dict) and "error" in data:
+        raise HTTPException(404, data["error"])
     return result
 
 

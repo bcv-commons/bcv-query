@@ -80,3 +80,35 @@ def syntax(book: str, chapter: int, verse: int) -> dict:
     name, corpus_id = resolved
     result = _eng().get_verse_syntax(name, chapter, verse, corpus_id)
     return {"corpus": corpus_id, "corpus_book": name, "data": result}
+
+
+def tree(book: str, chapter: int, verse: int) -> dict:
+    """Full sentence→clause→phrase→word syntactic tree of a verse (in-process engine)."""
+    resolved = _resolve(book)
+    if not resolved:
+        return {"error": f"no corpus mapping for book '{book}'"}
+    name, corpus_id = resolved
+    result = _eng().get_verse_tree(name, chapter, verse, corpus_id)
+    return {"corpus": corpus_id, "corpus_book": name, "data": result}
+
+
+def syntax_search(function: str | None = None, strong: str | None = None,
+                  lex: str | None = None, book: str | None = None,
+                  corpus: str | None = None, limit: int = 50) -> dict:
+    """Who-did-what search: clauses where a lexeme (`strong` or `lex`) fills a phrase
+    `function`. The corpus is pinned by `book` if given, else inferred from the Strong's
+    prefix (H→hebrew, G→greek), else `corpus` (default hebrew)."""
+    corpus_book = None
+    if book:
+        resolved = _resolve(book)
+        if not resolved:
+            return {"error": f"no corpus mapping for book '{book}'"}
+        corpus_book, corpus = resolved
+    elif corpus is None:
+        if strong and strong.strip().upper().startswith("G"):
+            corpus = "greek"
+        else:
+            corpus = "hebrew"
+    result = _eng().syntax_search(function=function, lex=lex, strong=strong,
+                                  corpus=corpus, book=corpus_book, limit=limit)
+    return {"corpus": corpus, "corpus_book": corpus_book, "data": result}
