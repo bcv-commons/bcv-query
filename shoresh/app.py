@@ -500,6 +500,24 @@ def lxx_bridge(strong: str, limit: int = 50) -> dict:
     return result
 
 
+@app.get("/structure/context/batch")
+def get_context_batch(refs: str, idx: int = 0) -> dict:
+    """Batch word-context lookup in one request: `refs` = comma-separated `CODE/CH/V`
+    (e.g. `GEN/1/1,JHN/3/16`). Resolves all in-process, avoiding N sequential
+    `/structure/{…}/word/{idx}` round-trips. Returns `{results: {"CODE/CH/V": <context>}}`."""
+    parsed: list[tuple[str, int, int]] = []
+    for r in refs.split(","):
+        r = r.strip()
+        if not r:
+            continue
+        try:
+            code, ch, v = r.split("/")
+            parsed.append((code, int(ch), int(v)))
+        except ValueError:
+            raise HTTPException(422, f"bad ref '{r}' (want CODE/CH/V)")
+    return {"results": corpus.context_batch(parsed, idx)}
+
+
 @app.get("/structure/{book}/{chapter}/{verse}")
 def get_structure(book: str, chapter: int, verse: int) -> dict:
     """BHSA/Nestle1904 morphological view of a verse, from bcv-corpus (private)."""

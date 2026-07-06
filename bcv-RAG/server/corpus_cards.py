@@ -22,51 +22,46 @@ _TIMEOUT = 5.0
 
 
 def resolve_corpus_hits(hits: list[Hit]) -> dict[str, dict]:
-    """Fetch syntactic data from shoresh for corpus:* hits."""
+    """Fetch syntactic data from shoresh for corpus:* hits — one batch call, not N."""
     if not hits or not SHORESH_URL:
         return {}
 
-    results: dict[str, dict] = {}
+    # Build the ref list once; keep a ref-key -> hit map to reattach the responses.
+    by_ref: dict[str, tuple[Hit, int, str]] = {}
+    for h in hits:
+        bbcccvvv = int(h.chunk_id.split(":")[1])
+        code, chapter, verse = decode(bbcccvvv)
+        by_ref[f"{code}/{chapter}/{verse}"] = (h, bbcccvvv, code)
 
     try:
         with httpx.Client(base_url=SHORESH_URL, timeout=_TIMEOUT) as client:
-            for h in hits:
-                bbcccvvv = int(h.chunk_id.split(":")[1])
-                code, chapter, verse = decode(bbcccvvv)
-
-                try:
-                    # word 0's clause/phrase/sentence context — shoresh maps the
-                    # USFM book to its corpus internally.
-                    resp = client.get(f"/structure/{code}/{chapter}/{verse}/word/0")
-                    if resp.status_code != 200:
-                        continue
-                    payload = resp.json()
-                except Exception as e:
-                    logger.warning("shoresh corpus call failed for %s: %s", h.chunk_id, e)
-                    continue
-
-                data = payload.get("data", {})
-                corpus = payload.get("corpus", "")
-                if not data:
-                    continue
-
-                passage_str = human(bbcccvvv)
-                excerpt = _format_context(data, corpus)
-
-                results[h.chunk_id] = {
-                    "chunk_id": h.chunk_id,
-                    "title": f"Syntactic analysis: {passage_str}",
-                    "kind": "corpus-syntax",
-                    "passage": passage_str,
-                    "tags": [f"corpus:{corpus}", f"book:{code}"],
-                    "excerpt": excerpt,
-                    "primary_path": None,
-                    "permalink": None,
-                }
-
+            # ONE call resolves every verse in-process on shoresh (no per-verse round-trip).
+            resp = client.get("/structure/context/batch", params={"refs": ",".join(by_ref)})
+            if resp.status_code != 200:
+                return {}
+            batch = (resp.json() or {}).get("results", {})
     except Exception as e:
-        logger.warning("corpus card resolution error: %s", e)
+        logger.warning("shoresh corpus batch call failed: %s", e)
+        return {}
 
+    results: dict[str, dict] = {}
+    for ref, (h, bbcccvvv, code) in by_ref.items():
+        payload = batch.get(ref) or {}
+        data = payload.get("data", {})
+        corpus = payload.get("corpus", "")
+        if not data:
+            continue
+        passage_str = human(bbcccvvv)
+        results[h.chunk_id] = {
+            "chunk_id": h.chunk_id,
+            "title": f"Syntactic analysis: {passage_str}",
+            "kind": "corpus-syntax",
+            "passage": passage_str,
+            "tags": [f"corpus:{corpus}", f"book:{code}"],
+            "excerpt": _format_context(data, corpus),
+            "primary_path": None,
+            "permalink": None,
+        }
     return results
 
 

@@ -94,6 +94,20 @@ def context(book: str, chapter: int, verse: int, word_index: int = 0) -> dict:
     return {"corpus": corpus_id, "corpus_book": name, "data": result}  # get_context already returns a dict
 
 
+def context_batch(refs: list[tuple[str, int, int]], word_index: int = 0) -> dict:
+    """Many context() lookups in ONE in-process pass — so a caller resolves N verses with a
+    single request instead of N sequential HTTP round-trips. `refs` = [(book, chapter, verse)];
+    returns {"BOOK/ch/v": <context() result>} (errors kept per-ref, never raised)."""
+    out: dict = {}
+    for book, chapter, verse in refs:
+        key = f"{book}/{chapter}/{verse}"
+        try:
+            out[key] = context(book, chapter, verse, word_index)
+        except Exception as e:                       # keep one bad ref from sinking the batch
+            out[key] = {"error": str(e)}
+    return out
+
+
 def syntax(book: str, chapter: int, verse: int) -> dict:
     """Whole-verse clause→phrase syntax tree (in-process engine)."""
     resolved = _resolve(book)
