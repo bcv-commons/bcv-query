@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import sys
 from pathlib import Path
 
@@ -39,6 +40,8 @@ SOURCES = {
     "iso_macro.tab": "https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3-macrolanguages.tab",
     "iso_ret.tab": "https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3_Retirements.tab",
     "glottolog.csv": "https://raw.githubusercontent.com/glottolog/glottolog-cldf/master/cldf/languages.csv",
+    "glottolog_values.csv": "https://raw.githubusercontent.com/glottolog/glottolog-cldf/master/cldf/values.csv",
+    "cldr_languagedata.json": "https://raw.githubusercontent.com/unicode-org/cldr-json/main/cldr-json/cldr-core/supplemental/languageData.json",
 }
 
 
@@ -67,9 +70,24 @@ def build(no_net: bool = False) -> None:
     macro = _rows(_fetch("iso_macro.tab", no_net), "\t")
     ret = _rows(_fetch("iso_ret.tab", no_net), "\t")
     glot = _rows(_fetch("glottolog.csv", no_net), ",")
+    gvalues = _rows(_fetch("glottolog_values.csv", no_net), ",")
+    cldr = json.loads(_fetch("cldr_languagedata.json", no_net).read_text(encoding="utf-8"))
 
     # individual language -> its macrolanguage code
     indiv_to_macro = {m["I_Id"]: m["M_Id"] for m in macro}
+
+    # CLDR languageData: subtag -> [scripts]. Skip the -alt-secondary variants (primary only).
+    cldr_scripts: dict[str, list[str]] = {}
+    for subtag, info in cldr["supplemental"]["languageData"].items():
+        if "-alt-" in subtag:
+            continue
+        scr = info.get("_scripts")
+        if scr:
+            cldr_scripts[subtag] = scr
+
+    # Glottolog classification: glottocode -> path of ancestor glottocodes (stock ... parent).
+    class_by_glotto = {v["Language_ID"]: v["Value"]
+                       for v in gvalues if v["Parameter_ID"] == "classification" and v["Value"]}
 
     # Glottolog: ISO 639-3 code -> (glottocode, stock).  stock = the Family node's Name.
     # Prefer language-level nodes; fall back to dialect-level for ISO codes Glottolog only
@@ -96,6 +114,10 @@ def build(no_net: bool = False) -> None:
         if st and mac not in macro_stock:
             macro_stock[mac] = st
 
+    def gname(gc: str) -> str:
+        row = glot_by_id.get(gc)
+        return row["Name"] if row else ""
+
     # Registry rows: ISO 639-3 individual (I) + macrolanguage (M) scopes (skip Special).
     out_rows: list[dict] = []
     for r in iso:
@@ -105,17 +127,31 @@ def build(no_net: bool = False) -> None:
         glottocode, stock = iso_to_glot.get(code, ("", ""))
         if not stock and r["Scope"] == "M":          # macrolanguage: inherit member stock
             stock = macro_stock.get(code, "")
+        # group / branch = the two classification levels just below the stock (Glottolog path
+        # = stock/group/branch/…/language). Depth varies; fill what the path has.
+        path = class_by_glotto.get(glottocode, "").split("/") if glottocode else []
+        group = gname(path[1]) if len(path) > 1 else ""
+        branch = gname(path[2]) if len(path) > 2 else ""
+        # scripts (ISO 15924) from CLDR languageData, keyed by 639-1 where present else 639-3.
+        scr = cldr_scripts.get(r["Part1"]) or cldr_scripts.get(code) or []
         out_rows.append({
             "iso639_3": code,
             "iso639_1": r["Part1"],
             "name": r["Ref_Name"],
             "glottocode": glottocode,
             "stock": stock,
-            "group": "",          # Phase-A follow-up (Glottolog classification path)
-            "branch": "",         # Phase-A follow-up
-            "scripts": "",        # Phase-A follow-up (CLDR languageData)
+            "group": group,
+            "branch": branch,
+            "scripts": ",".join(scr),
             "macrolanguage": indiv_to_macro.get(code, ""),
         })
+    # CLDR keys scripts by the 639-1 macro code (zh/ar/sw); a member individual with no CLDR
+    # entry of its own (cmn/arb/swh) inherits its macrolanguage's scripts.
+    scripts_by_code = {r["iso639_3"]: r["scripts"] for r in out_rows if r["scripts"]}
+    for r in out_rows:
+        if not r["scripts"] and r["macrolanguage"]:
+            r["scripts"] = scripts_by_code.get(r["macrolanguage"], "")
+
     out_rows.sort(key=lambda x: x["iso639_3"])
 
     # code_alias: retired code -> its single successor (skip splits with no one successor)
@@ -134,10 +170,11 @@ def build(no_net: bool = False) -> None:
         w.writerow(["old_code", "current_code"])
         w.writerows(aliases)
 
-    n_glot = sum(1 for r in out_rows if r["glottocode"])
-    n_stock = sum(1 for r in out_rows if r["stock"])
+    def _n(col):
+        return sum(1 for r in out_rows if r[col])
     print(f"languages.tsv: {len(out_rows)} languages "
-          f"({n_glot} with glottocode, {n_stock} with stock)", file=sys.stderr)
+          f"(glottocode={_n('glottocode')}, stock={_n('stock')}, group={_n('group')}, "
+          f"branch={_n('branch')}, scripts={_n('scripts')})", file=sys.stderr)
     print(f"code_alias.tsv: {len(aliases)} retired→current mappings", file=sys.stderr)
 
 
