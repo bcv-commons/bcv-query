@@ -5,17 +5,29 @@ The built, **all-languages** registry — the superset successor to the hand-cur
 ISO 639-3 language (~7,900), so cross-language ranking and reference-language fallback work for
 *any* language, not just onboarded ones. Design + roadmap: `internal-docs/languages-db-design.md`.
 
-> **Status: Phase A (registry) + follow-ups + Phase B (relatedness) done.** Phase C
-> (`languages.db` + cutover of the live consumers) is not built yet — see the design note.
+> **Status: all phases built.** A (registry + follow-ups) · B (relatedness) · C (`languages.db`
+> + the reference-selection cutover). See `internal-docs/languages-db-design.md`.
 
 ## Files
 
 | file | what |
 |---|---|
-| `languages.tsv` | one row per ISO 639-3 language — `iso639_3 · iso639_1 · name · glottocode · stock · group · branch · scripts · macrolanguage` |
+| `languages.tsv` | one row per ISO 639-3 language — `iso639_3 · iso639_1 · name · glottocode · stock · group · branch · scripts · macrolanguage · classification` (`classification` = the `/`-joined Glottolog ancestor path) |
 | `related.tsv` | relatedness edges — `iso639_3 · rank · related_iso639_3 · distance · basis` (top-25 relatives per language) |
 | `code_alias.tsv` | retired ISO 639-3 code → current code (`old_code · current_code`), so old citations still resolve |
+| `languages.db` | built SQLite (git-ignored, re-derivable): `language` + `relatedness` + `code_alias`, indexed |
 | `_raw/` | downloaded source cache (git-ignored; re-fetched on build) |
+
+## Consumers & the reference-selection cutover (Phase C)
+
+`build_perstem_glosses_llm.py` picks **reference languages** for gloss generation. It now ranks
+the **available** gloss languages by genetic tree distance (`_nearest_available`, using the
+`classification` column) rather than intersecting a fixed top-K relatedness slice — because a
+language can have >25 closer *unavailable* dialects that would crowd out the real references
+(e.g. `deu`'s top-25 are all German dialects, so `nld`/`dan` never appear). Verified against the
+curated `related_langs/recommended_refs.tsv`: every served language's picks are a **superset** of
+the curated ones (`German→Danish,Dutch,English,…`), **zero regression**. Runtime is untouched —
+`server/cards.py` still reads the served-specific `gloss_names` from `related_langs/`.
 
 ## Relatedness (`related.tsv`)
 
@@ -71,6 +83,7 @@ licensing acceptance (see `internal-docs/roadmap.md`).
 python -m scripts.build_languages_registry            # Phase A: languages.tsv + code_alias.tsv
 python -m scripts.build_languages_registry --no-net   #   (rebuild from the _raw/ cache only)
 python -m scripts.build_language_relatedness          # Phase B: related.tsv (reads the cache)
+python -m scripts.build_languages_db                  # Phase C: languages.db (from the .tsv)
 ```
 (from `bcv-RAG/`). The `.tsv` outputs are the git-tracked source of truth; `_raw/` is a cache.
 This README is hand-authored, not regenerated.

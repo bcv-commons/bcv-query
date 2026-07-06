@@ -144,6 +144,9 @@ def build(no_net: bool = False) -> None:
             "branch": branch,
             "scripts": ",".join(scr),
             "macrolanguage": indiv_to_macro.get(code, ""),
+            # full Glottolog ancestor path (glottocodes, stock→parent) — lets consumers rank
+            # "nearest AVAILABLE" by shared-prefix tree distance, not just a fixed top-K.
+            "classification": "/".join(path),
         })
     # CLDR keys scripts by the 639-1 macro code (zh/ar/sw); a member individual with no CLDR
     # entry of its own (cmn/arb/swh) inherits its macrolanguage's scripts.
@@ -160,7 +163,7 @@ def build(no_net: bool = False) -> None:
 
     OUT.mkdir(parents=True, exist_ok=True)
     cols = ["iso639_3", "iso639_1", "name", "glottocode", "stock", "group", "branch",
-            "scripts", "macrolanguage"]
+            "scripts", "macrolanguage", "classification"]
     with (OUT / "languages.tsv").open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=cols, delimiter="\t")
         w.writeheader()

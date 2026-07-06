@@ -163,8 +163,9 @@ def _prompt(batch, lang_name, ref_langs):
     )
 
 
-RL = ROOT / "resources/related_langs"          # code-keyed relatedness registry
+RL = ROOT / "resources/related_langs"          # code-keyed relatedness registry (curated bootstrap)
 RG = ROOT / "resources/regional_langs"          # script/regional variants (same-code siblings)
+LANGREG = ROOT / "resources/languages"          # scaled all-ISO-639-3 registry (Phase A/B)
 
 
 def _perstem_langs():
@@ -219,11 +220,53 @@ def _load_registry():
     return name_code, code_name, code_gloss, related, code_variants
 
 
+_CLASSIF: dict[str, list[str]] | None = None
+
+
+def _scaled_classification() -> dict[str, list[str]]:
+    """{iso639_3: Glottolog ancestor path} from the scaled registry (resources/languages/),
+    memoized. Empty if Phase A isn't built. Powers `nearest AVAILABLE` reference selection."""
+    global _CLASSIF
+    if _CLASSIF is None:
+        _CLASSIF = {}
+        p = LANGREG / "languages.tsv"
+        if p.exists():
+            with p.open(encoding="utf-8", newline="") as fh:
+                for r in csv.DictReader(fh, delimiter="\t"):
+                    if r.get("classification"):
+                        _CLASSIF[r["iso639_3"]] = r["classification"].split("/")
+    return _CLASSIF
+
+
+def _nearest_available(code: str, cand_codes: set[str]) -> list[str]:
+    """Candidate codes ranked by GENETIC tree distance to `code` (shared-ancestor depth from
+    the scaled registry's classification). Only same-stock candidates qualify. This is the
+    "nearest AVAILABLE" query — correct even when a language has >K closer unavailable dialects
+    (which a fixed top-K relatedness slice would rank ahead of the actual reference languages)."""
+    classif = _scaled_classification()
+    tp = classif.get(code)
+    if not tp:
+        return []
+    scored = []
+    for c in cand_codes:
+        cp = classif.get(c)
+        if not cp or cp[0] != tp[0]:                 # unknown / different family → not a ref
+            continue
+        shared = 0
+        for x, y in zip(tp, cp):
+            if x != y:
+                break
+            shared += 1
+        scored.append(((len(tp) - shared) + (len(cp) - shared), c))
+    scored.sort()
+    return [c for _, c in scored]
+
+
 def _auto_refs(target, perstem):
     """Ordered reference languages for `target`, resolved from the registries:
-    same-code script/regional variants first (closest), then related languages by
-    rank, then English. Filtered to languages that actually have per-stem glosses.
-    Returns None if the registry isn't available (caller falls back to DEFAULT_REFS)."""
+    same-code script/regional variants first (closest), then the nearest AVAILABLE related
+    languages by genetic tree distance (scaled registry), then English. Filtered to languages
+    that actually have per-stem glosses. Returns None if the registry isn't available."""
     reg = _load_registry()
     if not reg:
         return None
@@ -236,8 +279,13 @@ def _auto_refs(target, perstem):
     for g in code_variants.get(code, []) + code_gloss.get(code, []):
         if g != target and g not in ordered:
             ordered.append(g)
-    # 2. related languages, by rank → their gloss-name(s)
-    for _rank, rcode in sorted(related.get(code, [])):
+    # 2. nearest AVAILABLE related languages by genetic distance (scaled registry); if the target
+    #    isn't in the scaled registry, fall back to the curated related.tsv rank order.
+    avail_codes = {name_code[g] for g in perstem if name_code.get(g)}
+    ranked = _nearest_available(code, avail_codes - {code})
+    if not ranked:
+        ranked = [rc for _rank, rc in sorted(related.get(code, []))]
+    for rcode in ranked:
         for g in (code_gloss.get(rcode) or [code_name.get(rcode)]):
             if g and g != target and g not in ordered:
                 ordered.append(g)

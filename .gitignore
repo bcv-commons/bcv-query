@@ -45,8 +45,9 @@ claude_desktop_config.json
 # === bcv-RAG: generated data (re-derivable) ===
 bcv-RAG/examples/
 bcv-RAG/ingest/_staging/
-# languages.db builder: downloaded source cache (the built .tsv outputs stay tracked)
+# languages.db builder: downloaded source cache + the built .db (re-derivable; .tsv stay tracked)
 resources/languages/_raw/
+resources/languages/*.db
 bcv-RAG/indexer/*.db
 bcv-RAG/indexer/*.db-*
 bcv-RAG/index.db
