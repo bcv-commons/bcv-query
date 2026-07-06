@@ -131,6 +131,6 @@ def syntax_search(function: str | None = None, strong: str | None = None,
             corpus = "greek"
         else:
             corpus = "hebrew"
-    result = _eng().syntax_search(function=function, lex=lex, strong=strong,
+    result = _eng().search_syntax(function=function, lex=lex, strong=strong,
                                   corpus=corpus, book=corpus_book, limit=limit)
     return {"corpus": corpus, "corpus_book": corpus_book, "data": result}
