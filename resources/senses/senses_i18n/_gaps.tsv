@@ -1,0 +1,4515 @@
+# non-dominant (polysemous) senses needing translation per language; the dominant sense of each (lex,stem) localizes for free via the per-stem gloss
+lex	stem	sense	en_gloss	share
+<BD/		2	male servants	0.003
+<BD/		3	O servants	0.003
+<BD/		4	their own	0.001
+<BD/		5	male slaves	0.001
+<BDH/		2	of servitude	0.09
+<BD[	hif	2	he made to labor	0.2
+<BD[	hif	3	compel to labor	0.2
+<BD[	hif	4	he made to serve	0.2
+<BD[	nif	2	he has been served	0.25
+<BD[	pual	2	it was labored	0.5
+<BD[	qal	2	[those	0.005
+<BD[	qal	3	the laborer	0.005
+<BH[	qal	2	you have become bloated	0.333
+<BJDH/		2	the administration	0.25
+<BJDH/		3	the service	0.25
+<BR/		2	his own	0.011
+<BR=[	hit	2	arrogant	0.125
+<BR=[	hit	3	[one	0.125
+<BR=[	hit	4	becomes furious	0.125
+<BRH=/		2	arrogance	0.059
+<BRH=/		3	overflowing	0.029
+<BR[	hif	10	you will take over	0.015
+<BR[	hif	11	spreading	0.015
+<BR[	hif	12	he made to pass away	0.015
+<BR[	hif	13	make pass through	0.015
+<BR[	hif	14	he has let pass by	0.015
+<BR[	hif	15	Q anyone will make pass over	0.015
+<BR[	hif	16	he took off	0.015
+<BR[	hif	17	I will cause to pass away	0.015
+<BR[	hif	18	put away	0.015
+<BR[	hif	19	send through	0.015
+<BR[	hif	2	they brought over	0.06
+<BR[	hif	20	he took away	0.015
+<BR[	hif	21	take	0.015
+<BR[	hif	3	you will make pass over	0.03
+<BR[	hif	4	make	0.03
+<BR[	hif	5	bring over	0.03
+<BR[	hif	6	he sent over	0.015
+<BR[	hif	7	he brought in	0.015
+<BR[	hif	8	you will dedicate	0.015
+<BR[	hif	9	you will cause to pass through	0.015
+<BR[	piel	2	it impregnates	0.5
+<BR[	qal	2	I will pass beyond	0.005
+<BR[	qal	3	about to pass	0.005
+<BR[	qal	4	flowing	0.005
+<BR[	qal	5	it passed beyond	0.002
+<BR[	qal	6	definitely (pass over)	0.002
+<BR[	qal	7	pass along	0.002
+<BT/		2	cords	0.263
+<BT/		3	of cordage	0.158
+<BV[	hif	2	generously (lend)	0.5
+<BV[	qal	2	take as pledge	0.5
+<CQ[	qal	2	[those	0.032
+<CR/		2	than wealth	0.027
+<CR[	hif	2	I made rich	0.167
+<CR[	hif	3	he will become rich	0.083
+<CR[	hif	4	he will gain wealth	0.083
+<CR[	qal	2	he will be rich	0.5
+<CTJ/		2	belong] to one plus	0.053
+<D=/		2	testimony	0.029
+<D=/		3	evidence	0.014
+<DH===/		2	O Adah	0.125
+<DJ/		2	trapping	0.071
+<DP[	qal	2	are] in excess	0.375
+<DWT/		2	eduth	0.024
+<FB/		2	be] like the vegetation	0.029
+<FH>L/		2	O Asahel	0.062
+<FH[	nif	2	it will be used	0.038
+<FH[	qal	10	really (do)	0.001
+<FH[	qal	11	carefully (do)	0.001
+<FH[	qal	12	squeezed	0.001
+<FH[	qal	13	I will carry out	0.001
+<FH[	qal	14	about to deal	0.001
+<FH[	qal	15	O do	0.001
+<FH[	qal	16	people	0.001
+<FH[	qal	17	people had made	0.001
+<FH[	qal	2	certainly (perform)	0.004
+<FH[	qal	3	[those	0.003
+<FH[	qal	4	let anyone make	0.002
+<FH[	qal	5	when offered	0.001
+<FH[	qal	6	was] instituted	0.001
+<FH[	qal	7	she will attend to	0.001
+<FH[	qal	8	he will use	0.001
+<FH[	qal	9	I show	0.001
+<FR/		2	teenth	0.005
+<FRWN/		2	one tenth	0.03
+<FR[	hif	2	receive the tithes	0.5
+<FR[	piel	2	receive the tithes	0.25
+<GJL/		2	earrings	0.5
+<JLM/		2	O Elam	0.036
+<JR/		2	O city	0.004
+<JR/		3	of Lair	0.002
+<JR=/		2	a male donkey	0.286
+<JR=/		3	donkeys	0.143
+<JR===/		2	rage	0.5
+<JRM/		2	nakedness	0.5
+<JV/		2	of prey	0.375
+<KBR/		2	mouse	0.333
+<KR[	nif	2	trouble	0.5
+<KR[	qal	2	[those	0.1
+<KR[	qal	3	O trouble	0.1
+<L		2	against	0.002
+<L		3	there-	0.001
+<LH/		2	than burnt offerings	0.003
+<LH=/		2	leaves	0.278
+<LH[	hif	2	about to bring up	0.009
+<LH[	hif	3	they made go up	0.005
+<LH[	hif	4	they will go up	0.005
+<LH[	hif	5	[one	0.005
+<LH[	hif	6	stir up	0.005
+<LH[	hif	7	people will offer up	0.005
+<LH[	hif	8	they have caused to rise	0.005
+<LH[	hof	2	it was taken away	0.333
+<LH[	hof	3	it was recorded	0.333
+<LH[	nif	2	he is exalted	0.125
+<LH[	nif	3	they took themselves up	0.062
+<LH[	nif	4	it had abandoned pursuit	0.062
+<LH[	nif	5	were led up	0.062
+<LH[	qal	2	mount	0.003
+<LH[	qal	3	spring up	0.002
+<LH[	qal	4	about to go up	0.002
+<LH[	qal	5	people went up	0.002
+<LH[	qal	6	someone will go up	0.002
+<LH[	qal	7	it had grown up	0.002
+<LH[	qal	8	when came up	0.002
+<LJH/		2	the roof-chamber	0.1
+<LJWN/		2	O Most High	0.038
+<LL[	hit	2	he dealt wantonly	0.25
+<LL[	hit	3	I have dealt ruthlessly	0.125
+<LL[	hit	4	they abused	0.125
+<LL[	hit	5	practice	0.125
+<LL[	piel	2	you will glean	0.222
+<LL[	piel	3	thoroughly (glean)	0.222
+<LL[	piel	4	acting like children	0.111
+<LL[	piel	5	deal severely	0.111
+<LM/		2	man	0.5
+<LMH/		2	young women	0.429
+<LMH/		3	a young woman	0.143
+<LM[	hif	2	he has hidden	0.2
+<LM[	hif	3	concealing	0.1
+<LP[	hit	2	they will become faint	0.333
+<LP[	pual	2	covered	0.5
+<LY[	qal	2	rejoice	0.25
+<M		2	than	0.059
+<MD[	hif	2	he will raise up	0.031
+<MD[	hif	3	fulfill	0.015
+<MD[	hif	4	holding upright	0.015
+<MD[	hof	2	placed	0.5
+<MD[	qal	2	it has stayed	0.007
+<MD[	qal	3	he made a stand	0.007
+<MD[	qal	4	he will stand firm	0.002
+<MD[	qal	5	those who] stood	0.002
+<MD[	qal	6	it will remain standing	0.002
+<MD[	qal	7	they will stand their ground	0.002
+<MD[	qal	8	he will present himself	0.002
+<MD[	qal	9	they stand forth	0.002
+<MH/		2	exactly as	0.5
+<MJR/		2	grain	0.25
+<MJT/		2	your fellow citizen	0.167
+<ML=/		2	of laborers	0.222
+<ML=/		3	a sufferer	0.222
+<MQ=/		2	unfathomable	0.059
+<MR=/		2	sheaves	0.25
+<MS[	qal	2	he loaded	0.286
+<MS[	qal	3	[those	0.143
+<MS[	qal	4	he carries a load	0.143
+<MWD/		2	posts	0.009
+<MWS/		2	O Amos	0.286
+<NC[	nif	2	he will be fined	0.333
+<NC[	qal	2	certainly (fine)	0.2
+<NG[	hit	2	was delicate	0.111
+<NG[	hit	3	are you making fun	0.111
+<NH=[	hit	2	you were afflicted	0.5
+<NH=[	nif	2	humble yourself	0.25
+<NH=[	piel	2	people afflicted	0.054
+<NH=[	piel	3	you will mistreat	0.027
+<NH=[	piel	4	they abused	0.027
+<NH=[	piel	5	[those	0.027
+<NH=[	piel	6	he violates	0.027
+<NH=[	piel	7	men have humiliated	0.027
+<NH=[	pual	2	it will humble	0.333
+<NH=[	qal	2	he will quieten	0.2
+<NH=[	qal	3	it cringes	0.2
+<NH[	nif	2	let myself give an answer	0.4
+<NH[	qal	2	[one	0.008
+<NH[	qal	3	will anyone answer	0.004
+<NJ/		2	O afflicted	0.045
+<NJ=/		2	than affliction	0.028
+<NN[	piel	2	he practiced soothsaying	0.3
+<PR/		2	of ground	0.018
+<QB==/		2	tracked	0.5
+<QC/		2	than the perverse	0.182
+<QC/		3	twisted	0.091
+<QR/		2	a sterile	0.083
+<QR/		3	O barren	0.083
+<QR[	piel	2	you will hamstring	0.2
+<R<R/		2	the destitute person	0.5
+<RB/		2	evenings	0.082
+<RB=/		2	a swarm of flies	0.222
+<RB====/		2	a mixed company	0.2
+<RB====/		3	person of mixed ancestry	0.2
+<RBH/		2	its desert	0.017
+<RBH/		3	clouds	0.017
+<RB[	qal	2	stand	0.143
+<RB[	qal	3	pledging	0.143
+<RB[	qal	4	trade	0.071
+<RB[	qal	5	the traders	0.071
+<RB[	qal	6	mortgaging	0.071
+<RF/		2	sarcophagus	0.2
+<RH[	hif	2	he poured out	0.333
+<RH[	hit	2	you will make yourself naked	0.5
+<RH[	piel	2	pour out	0.333
+<RH[	piel	3	it laid bare	0.222
+<RJY/		2	ruthless person	0.053
+<RK/		2	an order	0.034
+<RK[	hif	2	he taxed	0.25
+<RK[	qal	2	deploy	0.047
+<RK[	qal	3	to compare	0.031
+<RK[	qal	4	prepare	0.031
+<RK[	qal	5	he drew up in formation	0.031
+<RK[	qal	6	is he comparable	0.016
+<RMH/		2	cunning	0.4
+<RP=[	qal	2	necked	0.25
+<RP=[	qal	3	he will break	0.25
+<RR[	piel	2	utterly (laid bare)	0.5
+<RWH/		2	own nakedness	0.019
+<RWM=/		2	crafty	0.273
+<SJS/		2	wine	0.2
+<SJS/		3	of the juice	0.2
+<T/		2	than a time	0.003
+<TH		2	than now	0.002
+<TJD/		2	impending	0.2
+<TJQ/		2	ancient	0.5
+<TQ[	hif	2	who] removes	0.2
+<TQ[	hif	3	they copied	0.2
+<TQ[	qal	2	it has grown weak	0.25
+<TQ[	qal	3	do they grow old?	0.25
+<TR/		2	worshippers	0.5
+<TWD/		2	leaders	0.069
+<TWD/		3	male goats	0.034
+<VH=[	qal	2	firmly (grasp)	0.333
+<VH[	hif	2	you have wrapped	0.5
+<VH[	qal	2	wrapped	0.273
+<VH[	qal	3	he wraps himself	0.091
+<VH[	qal	4	a veiled	0.091
+<VP[	qal	2	he turns	0.333
+<VWP/		2	enfeebled	0.5
+<WD/		2	more	0.002
+<WD[	hif	2	I call as witnesses	0.088
+<WD[	hif	3	cause to witness	0.088
+<WD[	hif	4	certainly (warn)	0.029
+<WD[	hif	5	I will call as witness	0.029
+<WD[	hif	6	I protested	0.029
+<WN/		2	his own	0.009
+<WP/		2	than the bird	0.014
+<WP[	piel	2	he flew	0.25
+<WP[	qal	2	he flew	0.235
+<WP[	qal	3	it flies	0.059
+<WP[	qal	4	I want to fly away	0.059
+<WP[	qal	5	he will fly away	0.059
+<WP[	qal	6	it flies away	0.059
+<WR=/		2	than the skin	0.01
+<WR=[	piel	2	it makes blind	0.4
+<WR[	hif	2	he awakens	0.161
+<WR[	hif	3	he will stir up	0.129
+<WR[	hif	4	about to rouse	0.129
+<WR[	hif	5	waken	0.097
+<WR[	hif	6	rouse	0.065
+<WR[	hif	7	about	0.032
+<WR[	hif	8	wake	0.032
+<WR[	hif	9	he will awake	0.032
+<WR[	hit	2	I excited myself	0.2
+<WR[	piel	2	they rouse	0.308
+<WR[	piel	3	you will arouse	0.231
+<WR[	piel	4	stir	0.154
+<WR[	qal	2	a protector	0.05
+<WZ[	hif	2	they have brought to safety	0.25
+<WZ[	qal	2	he sought safety	0.5
+<YB=/		2	pain	0.167
+<YB=/		3	your hard	0.167
+<YB=/		4	of hurt	0.167
+<YB==/		2	of an idol	0.333
+<YB[	hit	2	they were indignant	0.5
+<YB[	nif	2	he will be hurt	0.143
+<YB[	piel	2	they twist	0.5
+<YH/		2	than the counsel	0.012
+<YH/		3	its own	0.012
+<YH=/		2	plan	0.5
+<YL/		2	O sluggard	0.143
+<YL/		3	lazy	0.071
+<YM[	qal	2	they became mighty	0.133
+<YM[	qal	3	you have become powerful	0.067
+<YM[	qal	4	they are vast	0.067
+<YM[	qal	5	it will be mighty	0.067
+<YM[	qal	6	he will become mighty	0.067
+<YR/		2	barrenness	0.333
+<YRH/		2	assembli	0.25
+<YR[	nif	2	are shut up	0.2
+<YR[	nif	3	detained	0.1
+<YR[	qal	2	hold back	0.062
+<YR[	qal	3	completely (shut up)	0.031
+<YR[	qal	4	let us detain	0.031
+<YR[	qal	5	he will rule	0.031
+<YR[	qal	6	withheld	0.031
+<YR[	qal	7	kept back	0.031
+<Z==/		2	she-goats	0.027
+<Z==/		3	your female	0.014
+<Z==/		4	hair(s)	0.014
+<Z==/		5	kids	0.014
+<ZB[	nif	2	they will be abandoned	0.222
+<ZB[	nif	3	has it been neglected	0.111
+<ZB[	pual	2	it has been forsaken	0.5
+<ZB[	qal	2	certainly (rearrange)	0.013
+<ZB[	qal	3	[those	0.013
+<ZB[	qal	4	I will let loose	0.013
+<ZRH=/		2	precinct	0.333
+<ZR[	qal	2	the [one	0.018
+<ZZ[	hif	2	he makes firm	0.5
+<ZZ[	qal	2	it is strong	0.143
+<ZZ[	qal	3	became strong	0.143
+<ZZ[	qal	4	it gives strength	0.143
+></		2	a beam	0.333
+>B/		2	king	0.002
+>B/		3	O	0.001
+>B/		4	temple	0.001
+>B/		5	greatness	0.001
+>B/		6	the records	0.001
+>B=/		2	the green shoots	0.5
+>BDH/		2	lost	0.25
+>BD[	hif	2	about to destroy	0.043
+>BD[	hif	3	destroys	0.043
+>BD[	piel	2	certainly (destroy)	0.03
+>BD[	piel	3	causing to stray	0.03
+>BD[	piel	4	count as lost	0.03
+>BD[	qal	2	certainly (perish)	0.027
+>BD[	qal	3	wandering	0.009
+>BD[	qal	4	of about to perish	0.009
+>BH[	qal	2	it yielded	0.074
+>BJB/		2	young barley ear	0.25
+>BJR/		2	O mighty	0.083
+>BL===/		2	mourning	0.429
+>BL[	hit	2	play the mourner	0.056
+>BL[	qal	2	it has dried up	0.267
+>BL[	qal	3	it will dry up	0.067
+>BN/		2	O stones	0.004
+>BNR/		2	O Abner	0.032
+>BRHM/		2	O Abraham	0.011
+>BRM/		2	O Abram	0.016
+>BWS/		2	trough	0.333
+>C/		2	O fire	0.003
+>CH/		2	than a woman	0.004
+>CH/		3	than women	0.003
+>CH/		4	O women	0.003
+>CH/		5	O wives	0.001
+>CH/		6	his own wife	0.001
+>CH/		7	O wife	0.001
+>CH/		8	every woman	0.001
+>CH=/		2	my fire	0.031
+>CJCH/		2	(of) cakes	0.25
+>CKR/		2	a gift	0.5
+>CKWL/		2	the cluster of grapes	0.222
+>CKWL/		3	of grapes	0.111
+>CL/		2	a tamarisk tree	0.333
+>CM[	qal	2	he became guilty	0.03
+>CPT/		2	ash heap	0.429
+>CR		2	belong] to which	0.003
+>CR		3	since	0.003
+>CTM</		2	Eshtemoh	0.167
+>D/		2	mist	0.5
+>DJR/		2	O noble	0.042
+>DM/		2	a human person	0.002
+>DM=/		2	redness	0.143
+>DM=/		3	ruddy	0.143
+>DMH/		2	O land	0.004
+>DM[	pual	2	red	0.143
+>DNJ/		2	belong]	0.002
+>DNJ/		3	O	0.002
+>DR/		2	the magnificence	0.5
+>DRT/		2	splendor	0.167
+>DWN/		2	O lord	0.006
+>DWN/		3	the owner(s)	0.003
+>GDH/		2	band	0.25
+>GDH/		3	bindings	0.25
+>GDH/		4	vault	0.25
+>GG/		2	than Agag	0.125
+>GM/		2	reed-pools	0.111
+>GMWN/		2	a cord	0.2
+>HBH/		2	leather	0.032
+>HBH/		3	O love	0.032
+>HB[	qal	2	one] whom it loves	0.025
+>HB[	qal	3	O love	0.006
+>HB[	qal	4	[one	0.006
+>HB[	qal	5	lovers	0.006
+>HLJBH/		2	O Oholibah	0.167
+>J/		2	O islands	0.083
+>J/		3	coast	0.056
+>JB[	qal	2	than	0.004
+>JC/		10	than someone	0.0
+>JC/		2	O people	0.001
+>JC/		3	a male	0.001
+>JC/		4	one	0.0
+>JC/		5	any	0.0
+>JC/		6	O men	0.0
+>JC/		7	of humankind	0.0
+>JC/		8	than a person	0.0
+>JC/		9	than anyone	0.0
+>JCWN/		2	middle	0.25
+>JM/		2	terrifying	0.333
+>JTN/		2	enduring	0.308
+>JTN/		3	permanence	0.077
+>JTN/		4	its normal	0.077
+>JTN/		5	long established	0.077
+>JTN/		6	constant	0.077
+>JWB/		2	O Job	0.052
+>K		2	just	0.018
+>KL/		2	the meal	0.023
+>KLH/		2	devouring	0.056
+>KL[	hif	2	feed	0.222
+>KL[	hif	3	about	0.111
+>KL[	hif	4	about to make eat	0.111
+>KL[	hif	5	I fed	0.111
+>KL[	hif	6	give	0.111
+>KL[	nif	2	ever (eaten)	0.022
+>KL[	nif	3	they will be devoured	0.022
+>KL[	pual	2	you will be eaten	0.25
+>KL[	qal	2	freely (eat)	0.002
+>KL[	qal	3	completely (consume)	0.002
+>KL[	qal	4	I want to eat	0.002
+>KL[	qal	5	food	0.002
+>KR/		2	O farmers	0.143
+>KZB/		2	become] (into) a deceitful thing	0.5
+>KZR/		2	fierce	0.25
+>KZR/		3	become] (into) cruel	0.25
+>L=		2	al-	0.286
+>LH		2	these things	0.001
+>LHJM/		2	Elohey	0.0
+>LHJM/		3	his own god	0.0
+>LHJM/		4	be] like God	0.0
+>LHJM/		5	than God	0.0
+>LJC</		2	O Elisha	0.017
+>LM=/		2	silence	0.5
+>LMH/		2	sheaf	0.4
+>LP=/		2	than thousands	0.004
+>LWH/		2	O God	0.018
+>LWP=/		2	a tame one	0.111
+>LWP=/		3	friend	0.111
+>LWP=/		4	cattle(s)	0.111
+>M/		2	O	0.005
+>MC/		2	yesterday	0.4
+>MH/		2	woman	0.036
+>MH/		3	slave	0.018
+>MH=/		2	the foundations	0.004
+>MNH==/		2	a fixed provision	0.5
+>MN[	hif	2	anyone trusts	0.02
+>MN[	nif	2	lasting	0.043
+>MN[	nif	3	firm	0.043
+>MN[	nif	4	that they may be verified	0.022
+>MN[	nif	5	they will be carried	0.022
+>MN[	nif	6	trustworthy	0.022
+>MN[	nif	7	trusted	0.022
+>MN[	qal	2	nurse	0.25
+>MN[	qal	3	guarding	0.125
+>MN[	qal	4	guardians	0.125
+>MN[	qal	5	who were] brought up	0.125
+>MN[	qal	6	acting as guardian	0.125
+>MR/		2	his decree	0.021
+>MR/		3	sayings	0.021
+>MR/		4	utterances	0.021
+>MR=/		2	a matter	0.167
+>MR[	nif	2	it will be called	0.048
+>MR[	qal	2	anyone said?	0.0
+>MR[	qal	3	I have promised	0.0
+>MR[	qal	4	he assigned	0.0
+>MR[	qal	5	everyone will say	0.0
+>MR[	qal	6	continually (say)	0.0
+>MR[	qal	7	she utters	0.0
+>MT/		2	stability	0.016
+>MWNH/		2	truth	0.02
+>MWNH/		3	of faithfulness(es)	0.02
+>MY[	hit	2	determined	0.25
+>MY[	piel	2	he made hard	0.143
+>MY[	piel	3	you made strong	0.143
+>MY[	piel	4	you will harden	0.071
+>MY[	piel	5	make strong	0.071
+>MY[	qal	2	they were strong	0.312
+>NC/		2	a human	0.231
+>NC/		3	of man	0.154
+>NC/		4	of humankind	0.077
+>NH/		2	of mourning(s)	0.5
+>NJH/		2	O ships	0.065
+>NXH/		2	groaning(s)	0.091
+>P/		2	double	0.004
+>P/		3	also	0.004
+>P<H/		2	a snake	0.333
+>PDH/		2	the sheathing	0.333
+>PJQ/		2	channels	0.333
+>PJQ/		3	stream-beds	0.056
+>PJQ/		4	a stream-bed	0.056
+>PJQ/		5	tubes	0.056
+>PJQ/		6	rows	0.056
+>PRJM/		2	O Ephraim	0.022
+>PRT/		2	Ephrath	0.4
+>PRX/		2	young ones	0.25
+>PRX/		3	its young	0.25
+>PS/		2	nothingness	0.032
+>PS/		3	no	0.032
+>RB</		2	belong] to the four	0.003
+>RB=/		2	lying-in-wait	0.5
+>RBH/		2	than locust	0.042
+>RB[	qal	2	lying in wait	0.026
+>RB[	qal	3	I have lain in wait	0.026
+>RG/		2	a weaver's shuttle	0.5
+>RGMN/		2	of purple cloth	0.026
+>RGMN/		3	purple wool	0.026
+>RGMN/		4	wool	0.026
+>RK/		2	the length	0.067
+>RK[	hif	2	they were long	0.115
+>RK[	hif	3	it will last long	0.038
+>RK[	qal	2	they are long	0.333
+>RK[	qal	3	they became long	0.333
+>RM/		2	Beth	0.008
+>RMWN/		2	the fortress	0.156
+>RR[	qal	2	certainly (curse)	0.019
+>RWN/		2	coffin	0.005
+>RX/		2	the caravans	0.017
+>RXH/		2	O caravans	0.5
+>RXH=/		2	his food	0.333
+>RXH=/		3	a portion	0.167
+>RX[	qal	2	traveler	0.5
+>RY/		2	O earth	0.004
+>RY/		3	his own land	0.0
+>S>/		2	O Asa	0.017
+>SJR/		2	O prisoners	0.083
+>SP/		2	gathering(s)	0.333
+>SP[	nif	2	was received	0.025
+>SP[	nif	3	about to be gathered	0.013
+>SP[	nif	4	fully (be gathered)	0.013
+>SP[	piel	2	receiving	0.286
+>SP[	piel	3	[those	0.143
+>SP[	piel	4	gathers	0.143
+>SP[	qal	2	I have withdrawn	0.022
+>SP[	qal	3	utterly (destroy)	0.011
+>SP[	qal	4	you withdrew	0.011
+>SR[	nif	2	be imprisoned	0.4
+>SR[	qal	2	he harnessed	0.065
+>SR[	qal	3	tethered	0.043
+>SR[	qal	4	only (bind)	0.022
+>SR[	qal	5	people	0.022
+>SR[	qal	6	will he begin	0.022
+>SR[	qal	7	girded	0.022
+>STR/		2	O Esther	0.036
+>TH[	qal	2	he came	0.133
+>TH[	qal	3	it will arrive	0.067
+>TJ/		2	Ithai	0.111
+>VD/		2	the threshing	0.333
+>VD/		3	a thorn bush	0.167
+>VM[	qal	2	shuts	0.5
+>WB/		2	necromancy	0.25
+>WH[	hit	2	coveting	0.067
+>WH[	piel	2	it craves	0.25
+>WN=/		2	disaster	0.013
+>WN=/		3	deception	0.013
+>WN=/		4	hardship	0.013
+>WN=/		5	strength	0.013
+>WN=/		6	(of) evil	0.013
+>WPJR/		2	gold of Ophir	0.111
+>WR[	hif	2	it shines	0.059
+>WR[	hif	3	setting light to	0.029
+>WR[	hif	4	it gave light	0.029
+>WR[	hif	5	you will set light to	0.029
+>WR[	hif	6	give	0.029
+>WR[	hif	7	enlightening	0.029
+>WR[	hif	8	make	0.029
+>WR[	hif	9	he has given light	0.029
+>WR[	qal	2	they brightened	0.286
+>WR[	qal	3	shine	0.286
+>WR[	qal	4	it became light	0.143
+>WYR/		2	stores	0.025
+>WYR/		3	storerooms	0.025
+>WYR/		4	armory	0.013
+>WYR/		5	than treasure	0.013
+>WYR/		6	supplies	0.013
+>WY[	hif	2	hasten	0.5
+>WY[	qal	2	urging	0.125
+>WY[	qal	3	it is narrow	0.125
+>X/		2	than a brother	0.003
+>XD/		2	plus	0.001
+>XD/		3	be] like one	0.001
+>XJH/		2	Ahiah	0.053
+>XJMLK/		2	O Ahimelech	0.059
+>XR/		2	the back(s)	0.001
+>XR/		3	the back end(s)	0.001
+>XR=/		2	following	0.006
+>XR=/		3	than other	0.006
+>XR=/		4	one	0.006
+>XRJT/		2	last	0.016
+>XRJT/		3	the latter part	0.016
+>XRWN/		2	behind	0.043
+>XRWN/		3	future	0.043
+>XR[	piel	2	he delayed	0.2
+>XWR/		2	behind	0.073
+>XWR/		3	hindquarters	0.049
+>XWR/		4	back	0.049
+>XWR/		5	the rear	0.024
+>XWR/		6	parts	0.024
+>XWR/		7	west	0.024
+>XWT/		2	O sister	0.009
+>XWXJ/		2	of Ahoah	0.2
+>XZ=[	qal	2	he covered	0.5
+>XZH/		2	his own	0.016
+>XZH/		3	property	0.016
+>XZJH/		2	O Ahaziah	0.143
+>XZ[	qal	2	supports	0.047
+>XZ[	qal	3	you held	0.047
+>XZ[	qal	4	the one] who he will seize	0.023
+>XZ[	qal	5	are] caught	0.023
+>XZ[	qal	6	bolt	0.023
+>YB</		2	the toes	0.032
+>YB</		3	digits	0.032
+>YL[	qal	2	have you reserved	0.25
+>YL[	qal	3	I withheld	0.25
+>ZKRH/		2	a memorial offering	0.143
+>ZL[	qal	2	they disappear	0.25
+>ZL[	qal	3	going away	0.25
+>ZN/		2	your own	0.005
+>ZRX/		2	native	0.059
+>ZRX/		3	a native tree	0.059
+B<D/		2	price	0.023
+B<H[	nif	2	they will be searched out	0.5
+B<H[	qal	2	it boils	0.5
+B<JR/		2	animal	0.167
+B<L/		2	the possessor	0.024
+B<L/		3	the partners	0.012
+B<L/		4	O citizens	0.012
+B<L/		5	rulers	0.012
+B<L/		6	a captain	0.012
+B<R[	hif	2	who] kindled	0.25
+B<R[	hif	3	he will cause to be grazed over	0.125
+B<R[	hif	4	about to sweep away	0.125
+B<R[	piel	2	I will sweep away	0.053
+B<R[	piel	3	someone sweeps away	0.026
+B<R[	piel	4	he destroyed	0.026
+B<R[	qal	2	people have burned	0.026
+B<R[	qal	3	about to burn	0.026
+B>C[	hif	2	making	0.125
+B>C[	hif	3	you have made stink	0.125
+B>C[	hif	4	it stank	0.125
+B>C[	hif	5	they stink	0.125
+B>C[	hif	6	he acts odiously	0.125
+B>C[	hif	7	it causes to stink	0.125
+B>R/		2	wells	0.25
+B>R/		3	O well	0.125
+B>R/		4	your own well	0.125
+B>R[	piel	2	clearly	0.333
+B>R[	piel	3	make clear	0.333
+BBL/		2	O Babylon	0.004
+BCL[	qal	2	it has grown ripe	0.5
+BCT/		2	thing	0.067
+BCT/		3	your own	0.033
+BD/		2	parts	0.051
+BD/		3	shoots	0.025
+BD/		4	alone	0.013
+BD/		5	apart	0.013
+BD/		6	bars	0.013
+BD>[	qal	2	inventing	0.5
+BDL[	hif	2	they have made a distinction	0.037
+BDL[	hif	3	make a distinction	0.037
+BDQ/		2	your leak	0.2
+BFM/		2	perfume	0.033
+BFM/		3	oil	0.033
+BFR/		2	your own	0.004
+BGTN/		2	Bigthana	0.5
+BHLH/		2	terror	0.5
+BHL[	nif	2	terrible	0.043
+BHL[	nif	3	may they be dismayed	0.043
+BHL[	nif	4	you have become dismayed	0.043
+BHL[	nif	5	hastening	0.043
+BHL[	nif	6	be hasty	0.043
+BHL[	piel	2	he hastened	0.25
+BHL[	piel	3	terrify	0.25
+BHL[	pual	2	hastened	0.5
+BHMH/		2	O animals	0.005
+BHMH/		3	than animals	0.005
+BHRT/		2	spot	0.417
+BJN/		2	among	0.002
+BJNH/		2	of understanding(s)	0.026
+BJRH/		2	temple	0.125
+BJT/		2	O house	0.018
+BJT/		3	a receptacle	0.0
+BJT/		4	than a house	0.0
+BJT/		5	of Beth	0.0
+BJT_>L/		2	O	0.018
+BJT_LXM/		2	O	0.037
+BKH[	piel	2	bewailing	0.5
+BKH[	qal	2	crying	0.009
+BKH[	qal	3	certainly (weep)	0.009
+BKH[	qal	4	I will bewail	0.009
+BKH[	qal	5	at all (weep)	0.009
+BKJ/		2	than the weeping	0.033
+BL<DJ		2	apart	0.294
+BL<DJ		3	without	0.176
+BL<[	piel	2	[those	0.067
+BL<[	piel	3	ruin	0.067
+BL<[	piel	4	someone	0.067
+BLC>YR/		2	O Belshazzar	0.143
+BLG[	hif	2	who] causes to flash	0.25
+BLH[	piel	2	they will use to the full	0.25
+BLH[	piel	3	he has made to waste away	0.25
+BLH[	qal	2	he wears out	0.4
+BLH[	qal	3	they have worn out	0.1
+BLH[	qal	4	they became worn out	0.1
+BLJ<L/		2	worthless person	0.111
+BLL[	qal	2	he confused	0.048
+BLL[	qal	3	he fed	0.024
+BLL[	qal	4	I have been anointed	0.024
+BLQ/		2	O Balak	0.023
+BLQ/		3	than Balak	0.023
+BN/		10	than children	0.0
+BN/		2	O son	0.022
+BN/		3	O people	0.002
+BN/		4	O children	0.001
+BN/		5	O descendants	0.001
+BN/		6	than sons	0.001
+BN/		7	Bohan	0.0
+BN/		8	belongs] to the people	0.0
+BN/		9	O Ben-	0.0
+BNH[	qal	2	about to build	0.009
+BNH[	qal	3	people had built	0.003
+BQ<[	hit	2	they will be cleft	0.5
+BQ<[	nif	2	be broken into	0.2
+BQ<[	nif	3	they will burst forth	0.067
+BQ<[	nif	4	it will break forth	0.067
+BQ<[	nif	5	it is hatched	0.067
+BQ<[	piel	2	he cut	0.091
+BQ<[	piel	3	they split	0.091
+BQ<[	piel	4	they tore in pieces	0.091
+BQ<[	piel	5	you will rip open	0.091
+BQ<[	piel	6	he ripped open	0.091
+BQ<[	piel	7	they have hatched	0.091
+BQ<[	piel	8	it will break through	0.091
+BQ<[	piel	9	I will make break out	0.091
+BQ<[	pual	2	broken into	0.333
+BQ<[	pual	3	they will be ripped open	0.333
+BQ<[	qal	2	they broke through	0.143
+BQ<[	qal	3	break	0.143
+BQ<[	qal	4	divide	0.071
+BQ<[	qal	5	it will hatch	0.071
+BQ<[	qal	6	you broke	0.071
+BQ<[	qal	7	you broke open	0.071
+BQ<[	qal	8	cleaves	0.071
+BQC[	piel	2	let people seek	0.015
+BQC[	piel	3	seekers	0.005
+BQC[	piel	4	people sought	0.005
+BQC[	piel	5	he sought to find	0.005
+BQJ</		2	rubble(s)	0.5
+BQQ[	nif	2	it will be disturbed	0.333
+BQQ[	qal	2	I will make void	0.25
+BQQ[	qal	3	luxuriant	0.25
+BQQ[	qal	4	lay waste	0.25
+BQR/		2	oxen	0.011
+BQR/		3	bull	0.006
+BQR=/		2	mornings	0.023
+BQR[	piel	2	consult	0.333
+BQR[	piel	3	contemplate	0.167
+BRD=/		2	dappled	0.333
+BRH[	qal	2	he ate	0.333
+BRK=[	qal	2	he knelt down	0.5
+BRK[	hit	2	who] blesses himself	0.143
+BRK[	piel	2	actually (bless)	0.013
+BRK[	piel	3	at all (bless)	0.006
+BRK[	piel	4	abundantly (bless)	0.006
+BRK[	piel	5	may people bless	0.006
+BRK[	piel	6	really (bless)	0.006
+BRR[	hif	2	polish	0.5
+BRR[	hit	2	they will purge themselves	0.5
+BRR[	qal	2	polished	0.143
+BRR[	qal	3	I will purge	0.143
+BRR[	qal	4	test	0.143
+BRWC/		2	cypress	0.15
+BRWC/		3	its pines	0.1
+BRWC/		4	a cypress tree	0.05
+BRWC/		5	O cypress	0.05
+BRWC/		6	fir(s)	0.05
+BRWK/		2	O Baruch	0.038
+BRX[	hif	2	passing through	0.25
+BRX[	hif	3	he drives away	0.25
+BRX[	qal	2	about to flee	0.017
+BRX[	qal	3	pass through	0.017
+BRX[	qal	4	headlong (flee)	0.017
+BRX[	qal	5	hasten	0.017
+BSR/		2	grape	0.4
+BSR/		3	unripe grape	0.2
+BT/		2	O daughter	0.053
+BT/		3	than daughters	0.002
+BTWLH/		2	women	0.04
+BTWLH/		3	its young	0.02
+BV>[	piel	2	he spoke rashly	0.333
+BVN/		2	bulge	0.014
+BVXWN/		2	hope	0.333
+BVX[	hif	2	you have made rely	0.5
+BVX[	qal	2	O confident	0.018
+BVX[	qal	3	than to trust	0.018
+BVX[	qal	4	falling to the ground	0.009
+BW>[	hif	10	cause to come	0.002
+BW>[	hif	11	he gathered	0.002
+BW>[	hif	12	she let come	0.002
+BW>[	hif	13	let people bring	0.002
+BW>[	hif	14	[those	0.002
+BW>[	hif	15	someone brought	0.002
+BW>[	hif	2	people brought	0.002
+BW>[	hif	3	someone will bring	0.002
+BW>[	hif	4	about	0.002
+BW>[	hif	5	people	0.002
+BW>[	hif	6	they will bring back	0.002
+BW>[	hif	7	he made go	0.002
+BW>[	hif	8	you took	0.002
+BW>[	hif	9	I will cause to go	0.002
+BW>[	hof	2	it will be put	0.083
+BW>[	hof	3	they will be taken	0.042
+BW>[	qal	2	actually (come)	0.001
+BW>[	qal	3	it set	0.001
+BW>[	qal	4	Lebo	0.001
+BW>[	qal	5	someone will come	0.001
+BW>[	qal	6	[those	0.001
+BW>[	qal	7	certainly (go)	0.001
+BWC[	hif	2	you will put to shame	0.273
+BWC[	hif	3	put	0.182
+BWC[	hif	4	brings shame	0.091
+BWC[	hif	5	putting to shame	0.091
+BWC[	qal	2	at all (ashamed)	0.021
+BWC[	qal	3	they are disappointed	0.011
+BWK[	nif	2	it was in confusion	0.333
+BWR/		2	wells	0.048
+BWR/		3	his own cistern	0.032
+BWR/		4	your own	0.016
+BWS[	qal	2	I trod down	0.167
+BWY/		2	linen	0.125
+BXJR/		2	the chosen one	0.154
+BXJR/		3	my chosen	0.154
+BXWR/		2	O young men	0.023
+BXWR/		3	O young man	0.023
+BY</		2	his own	0.045
+BYJR/		2	than the grape harvest	0.143
+BYJR/		3	harvest	0.143
+BYR[	qal	2	grape gatherers	0.429
+BZH[	qal	2	[those	0.034
+BZZ[	qal	2	despoiled	0.054
+BZZ[	qal	3	take as plunder	0.054
+BZZ[	qal	4	they had taken plunder	0.027
+BZZ[	qal	5	as spoil?	0.027
+C<<[	piel	2	he will play	0.333
+C<H[	qal	2	look away	0.25
+C<H[	qal	3	let them pay attention	0.083
+C<H[	qal	4	so that I may have regard	0.083
+C<L/		2	the hollow	0.333
+C<R/		2	O gates	0.008
+C>B[	qal	2	drawers	0.222
+C>B[	qal	3	they drew	0.167
+C>GH/		2	my cry of distress	0.143
+C>GH/		3	my cry	0.143
+C>GH/		4	of distress	0.143
+C>NN/		2	undisturbed	0.25
+C>NN/		3	carefree	0.125
+C>NN/		4	O carefree	0.125
+C>NN/		5	self-confident	0.125
+C>R/		2	body	0.125
+C>R/		3	food	0.062
+C>RJT/		2	O remnant	0.046
+C>R[	hif	2	it left over	0.026
+C>R[	hif	3	they will leave over	0.026
+C>R[	hif	4	I will leave as a remnant	0.026
+C>R[	nif	2	anyone was left	0.021
+C>R[	nif	3	I was left behind	0.011
+C>WN/		2	a noise	0.059
+CB</		2	sevenfold	0.01
+CB<[	hif	2	I adjure	0.2
+CB<[	hif	3	solemnly (make swear)	0.15
+CB<[	hif	4	he will make swear	0.1
+CB<[	hif	5	make	0.1
+CB<[	hif	6	he administered an oath	0.05
+CB<[	hif	7	you must cause to swear	0.05
+CB<[	hif	8	indeed (swear an oath)	0.05
+CB<[	hif	9	make swear an oath	0.05
+CB>/		2	Sabean	0.043
+CBH[	nif	2	it was captured	0.125
+CBJ/		2	the prisoner	0.021
+CBJ/		3	the capture	0.021
+CBJH=/		2	captivity	0.222
+CBLT/		2	Shibboleth	0.062
+CBLT/		3	the clusters	0.062
+CBR=[	hif	2	sold grain	0.25
+CBR=[	qal	2	he bought grain	0.062
+CBR[	nif	2	they will be shattered	0.038
+CBR[	nif	3	I was crushed	0.019
+CBR[	piel	2	totally (shatter)	0.061
+CBR[	piel	3	someone has broken	0.03
+CBR[	qal	2	it had mauled	0.021
+CBR[	qal	3	someone	0.021
+CBR[	qal	4	someone breaks	0.021
+CBR[	qal	5	people] broken	0.021
+CBT=/		2	a sitting still	0.333
+CBT=/		3	cessation	0.333
+CBT[	hif	2	about to cause to cease	0.026
+CBV/		2	club	0.011
+CBV/		3	spears	0.005
+CBW</		2	two weeks	0.05
+CBW<H/		2	a curse	0.034
+CD=/		2	two breasts	0.048
+CDMH/		2	the terraced fields	0.333
+CG<[	pual	2	driven mad	0.25
+CGG[	qal	2	going astray	0.25
+CGG[	qal	3	goes astray	0.25
+CGH[	hif	2	allow	0.25
+CGH[	qal	2	errs	0.235
+CGH[	qal	3	they reeled	0.176
+CGH[	qal	4	I have gone astray	0.059
+CGH[	qal	5	they wander	0.059
+CGH[	qal	6	astray	0.059
+CGH[	qal	7	may you be intoxicated	0.059
+CGH[	qal	8	stray	0.059
+CGH[	qal	9	staggers	0.059
+CGJWN/		2	a shiggaion	0.5
+CGX[	hif	2	they will stare	0.333
+CJR[	piel	2	singing	0.054
+CJR[	piel	3	they have sung	0.027
+CJR[	piel	4	sang	0.027
+CJR[	qal	2	female singers	0.061
+CJT[	qal	2	powerfully (take a stand)	0.03
+CJT[	qal	3	he will impose	0.015
+CJT[	qal	4	they placed	0.015
+CJT[	qal	5	they have taken a stand	0.015
+CJT[	qal	6	someone will fix	0.015
+CKBH/		2	the layer	0.222
+CKB[	hif	2	will he make to lie down	0.333
+CKB[	qal	2	rest	0.016
+CKB[	qal	3	about to lie down	0.005
+CKB[	qal	4	people had lain	0.005
+CKK[	qal	2	bend	0.25
+CKL[	piel	2	miscarrying	0.2
+CKL[	piel	3	it will make childless	0.2
+CKL[	piel	4	it has made childless	0.133
+CKL[	piel	5	causing abortions	0.067
+CKL[	piel	6	abortion	0.067
+CKL[	piel	7	it will prove barren	0.067
+CKL[	qal	2	she will become childless	0.25
+CKN[	hif	2	I will cause to settle	0.167
+CKN[	hif	3	may he lay	0.167
+CKN[	piel	2	he had pitched	0.083
+CKN[	qal	2	I want to settle down	0.009
+CKN[	qal	3	[those	0.009
+CKN[	qal	4	they stay	0.009
+CKR[	hif	2	make	0.333
+CKR[	qal	2	he became drunk	0.25
+CKWL=/		2	deprived of offspring	0.333
+CKWL=/		3	childless	0.167
+CKWR/		2	drunk	0.154
+CKWR/		3	O drunkards	0.077
+CKX[	qal	2	ever (forget)	0.014
+CKX[	qal	3	O forget	0.014
+CLC[	piel	2	you will divide into three	0.25
+CLC[	piel	3	you will do on the third day	0.25
+CLC[	pual	2	divided into three parts	0.2
+CLC[	pual	3	threefold	0.2
+CLJC/		2	a third of a measure	0.5
+CLJCJ/		2	thirty	0.013
+CLJV/		2	having mastery	0.25
+CLK[	hif	2	you threw away	0.022
+CLK[	hif	3	people have cast down	0.011
+CLK[	hif	4	people will throw out	0.011
+CLK[	hif	5	someone will throw	0.011
+CLK[	hif	6	he will shed	0.011
+CLK[	hof	2	about to be thrown	0.077
+CLK[	hof	3	I was cast	0.077
+CLL/		2	spoil	0.027
+CLL/		3	prey	0.014
+CLL/		4	gain	0.014
+CLM/		2	your peace	0.023
+CLM/		3	the peace offering	0.011
+CLMH=/		2	O Solomon	0.007
+CLM[	hif	2	he performs	0.273
+CLM[	hif	3	it will make peace	0.091
+CLM[	hif	4	he causes to be at peace	0.091
+CLM[	piel	2	have you repaid	0.024
+CLM[	piel	3	he completed	0.012
+CLM[	piel	4	paying back	0.012
+CLM[	piel	5	about to repay	0.012
+CLM[	piel	6	fully (repay)	0.012
+CLM[	piel	7	I will fulfill	0.012
+CLM[	piel	8	the one] who he will repay	0.012
+CLM[	piel	9	I have paid	0.012
+CLM[	pual	2	in a covenant	0.2
+CLM[	pual	3	it be repaid?	0.2
+CLM[	pual	4	it will be paid	0.2
+CLM[	qal	2	the peaceful	0.125
+CLM[	qal	3	[one	0.125
+CLM[	qal	4	he has remained unharmed	0.125
+CLM[	qal	5	be at peace	0.125
+CLP[	qal	2	drawn	0.167
+CLP[	qal	3	draw	0.167
+CLP[	qal	4	drawers	0.042
+CLP[	qal	5	it has shot up	0.042
+CLWM/		2	completeness(es)	0.004
+CLWM=/		2	bribe	0.333
+CLX[	hif	2	about to send	0.2
+CLX[	piel	2	you sent forth	0.005
+CLX[	piel	3	who] lets go	0.005
+CLX[	piel	4	really (let go)	0.005
+CLX[	piel	5	O let loose	0.005
+CLX[	piel	6	about	0.005
+CLX[	piel	7	spreads	0.005
+CLX[	pual	2	deserted	0.1
+CLX[	pual	3	he is caught	0.1
+CLX[	pual	4	let loose	0.1
+CLX[	qal	2	[those	0.006
+CLX[	qal	3	the [one	0.004
+CLX[	qal	4	people sent	0.004
+CLX[	qal	5	urgently (send)	0.002
+CLX[	qal	6	he sent away	0.002
+CLX[	qal	7	send away	0.002
+CLX[	qal	8	anyone stretches out	0.002
+CM/		2	than	0.001
+CM<[	hif	2	summon	0.04
+CM<[	hif	3	cause	0.04
+CM<[	hif	4	he made proclamation to	0.02
+CM<[	hif	5	make	0.02
+CM<[	nif	2	they became obedient	0.047
+CM<[	qal	2	people hear	0.002
+CM<[	qal	3	really (obey)	0.001
+CM<[	qal	4	people	0.001
+CM<[	qal	5	people have heard	0.001
+CM<[	qal	6	about to listen	0.001
+CM<[	qal	7	people listened	0.001
+CM<[	qal	8	heeds	0.001
+CMC/		2	O sun	0.015
+CMC/		3	battlements	0.007
+CMCWN/		2	O Samson	0.105
+CMD[	hif	2	you will demolish	0.021
+CMD[	hif	3	of destruction	0.021
+CMD[	hif	4	totally	0.021
+CMD[	nif	2	utterly (destroyed)	0.083
+CMJM/		2	O heaven	0.015
+CMJNJ/		2	sheminith	0.067
+CMMH/		2	become] (into) a desolation	0.018
+CMM[	hif	2	I will make desolate	0.067
+CMM[	hit	2	will you destroy yourself	0.2
+CMM[	piel	2	appalled	0.5
+CMN/		2	fat things	0.011
+CMN/		3	than ointment	0.005
+CMN=/		2	rich	0.222
+CMN=/		3	stout	0.111
+CMN=/		4	fat	0.111
+CMN[	hif	2	they grew fat	0.5
+CMN[	qal	2	he became fat	0.333
+CMR[	nif	2	he was kept	0.054
+CMR[	nif	3	you will keep yourself	0.027
+CMR[	nif	4	he took heed	0.027
+CMR[	nif	5	he took care	0.027
+CMR[	nif	6	they are preserved	0.027
+CMR[	qal	2	O watchman	0.005
+CMR[	qal	3	watching over	0.005
+CMR[	qal	4	carefully (keep)	0.002
+CMR[	qal	5	really (keep)	0.002
+CMR[	qal	6	he took care	0.002
+CMR[	qal	7	people watched	0.002
+CMR[	qal	8	people keep	0.002
+CMR[	qal	9	than watchmen	0.002
+CMV[	qal	2	he will let drop	0.25
+CMV[	qal	3	you will let fall	0.25
+CMW<H/		2	mention	0.037
+CMW>L/		2	Shemuel	0.007
+CN/		2	prongs	0.018
+CNH[	qal	2	repeats	0.231
+CNH[	qal	3	I change	0.231
+CNH[	qal	4	differing	0.154
+CNH[	qal	5	he repeated	0.077
+CNJ=/		2	a scarlet thread	0.024
+CNJ=/		3	thread	0.024
+CNJM/		2	plus	0.003
+CNJM/		3	than two plus	0.001
+CP<H/		2	the crowd	0.333
+CPK[	hit	2	they lie scattered	0.333
+CPK[	nif	2	it will be shed	0.25
+CPK[	pual	2	it was shed	0.333
+CPK[	qal	2	people will pour out	0.011
+CPL/		2	deep	0.235
+CPL/		3	low	0.118
+CPN/		2	rock badgers	0.25
+CPV[	nif	2	let them be judged	0.067
+CPV[	qal	2	about to judge	0.012
+CPV[	qal	3	he gave judgment	0.006
+CPV[	qal	4	rule	0.006
+CPV[	qal	5	O rulers	0.006
+CPV[	qal	6	O judge	0.006
+CPV[	qal	7	will you enter into judgment	0.006
+CPXH/		2	servants	0.032
+CPXH/		3	become] (into) a maid	0.016
+CQ<[	hif	2	will you make sink?	0.5
+CQ<[	qal	2	it died out	0.333
+CQD/		2	of an almond tree	0.25
+CQD/		3	tree	0.25
+CQH[	hif	2	people watered	0.023
+CQH[	hif	3	people will give to drink	0.023
+CQH[	hif	4	you have given to drink	0.023
+CQR/		2	a vain hope	0.009
+CQR[	piel	2	we had dealt falsely	0.2
+CQT/		2	the watering channels	0.5
+CQV[	hif	2	of quietness	0.2
+CQV[	hif	3	give quiet	0.1
+CQV[	hif	4	he will keep quiet	0.1
+CQV[	hif	5	is still	0.1
+CQV[	hif	6	he makes quiet	0.1
+CQV[	qal	2	be inactive	0.097
+CQV[	qal	3	I will remain quiet	0.065
+CQWJ/		2	refreshment	0.333
+CQY/		2	thing	0.091
+CQY[	piel	2	make detestable	0.333
+CQY[	piel	3	utterly (detest)	0.167
+CR/		2	cord	0.333
+CRB/		2	burning heat	0.5
+CRT[	piel	2	people served	0.023
+CRT[	piel	3	O serve	0.023
+CSH[	qal	2	of plunderers	0.286
+CSH[	qal	3	O plunder	0.143
+CTH[	qal	2	drinkers	0.014
+CTH[	qal	3	people will drink	0.005
+CTH[	qal	4	[those	0.005
+CTQ[	qal	2	it becomes quiet	0.25
+CVH/		2	acacia tree	0.036
+CVP[	nif	2	they will be swept away	0.5
+CVP[	qal	2	I washed off	0.087
+CVP[	qal	3	he has rinsed	0.043
+CVP[	qal	4	someone washed off	0.043
+CVP[	qal	5	about to overflow	0.043
+CVP[	qal	6	rushes	0.043
+CVP[	qal	7	flowed	0.043
+CW<H/		2	the cry for help	0.182
+CW<R/		2	become] (into) the gatekeepers	0.027
+CW>/		2	of nothingness	0.019
+CW>/		3	futility	0.019
+CW>/		4	deceitfulness	0.019
+CWB=[	qal	2	about to turn back	0.067
+CWB=[	qal	3	restored	0.067
+CWB=[	qal	4	turn	0.067
+CWB[	hif	10	do you draw back	0.003
+CWB[	hif	11	back	0.003
+CWB[	hif	2	respond	0.01
+CWB[	hif	3	they brought	0.007
+CWB[	hif	4	as withdrawing	0.003
+CWB[	hif	5	he will make return	0.003
+CWB[	hif	6	he drew back	0.003
+CWB[	hif	7	about to turn back	0.003
+CWB[	hif	8	make	0.003
+CWB[	hif	9	they will pay	0.003
+CWB[	hof	2	he was brought back	0.2
+CWB[	hof	3	is] repaid	0.2
+CWB[	hof	4	about to be brought back	0.2
+CWB[	piel	2	bring back	0.167
+CWB[	qal	10	about to return	0.002
+CWB[	qal	11	I will repeat	0.002
+CWB[	qal	2	ever (return)	0.006
+CWB[	qal	3	anyone will repent	0.003
+CWB[	qal	4	restore	0.003
+CWB[	qal	5	certainly (return)	0.002
+CWB[	qal	6	back	0.002
+CWB[	qal	7	anyone will return	0.002
+CWB[	qal	8	it came back	0.002
+CWB[	qal	9	its repentant	0.002
+CWCN/		2	Shoshannim	0.176
+CWCN/		3	shushan-	0.059
+CWL/		2	of your robe	0.273
+CWR/		2	of a cow	0.013
+CWV[	qal	2	who] row	0.286
+CWV[	qal	3	going about	0.286
+CWV[	qal	4	go about	0.143
+CXD/		2	a gift	0.087
+CXL/		2	like (the) lion	0.143
+CXQ/		2	dust	0.048
+CXQ[	qal	2	they rub away	0.5
+CXT[	hif	2	tashcheth	0.047
+CXT[	hif	3	they corrupted	0.023
+CXT[	hif	4	about	0.012
+CXT[	hif	5	you will trim	0.012
+CXT[	hif	6	certainly (act corruptly)	0.012
+CXT[	hif	7	a destroyer	0.012
+CXT[	hif	8	corruptly	0.012
+CXT[	hof	2	ruined	0.5
+CXT[	nif	2	it was ruined	0.333
+CXT[	nif	3	it was spoiled	0.167
+CXT[	piel	2	destroyed	0.111
+CXT[	piel	3	you perverted	0.028
+CXT[	piel	4	they have dealt corruptly	0.028
+CXT[	piel	5	you have corrupted	0.028
+CXV[	nif	2	will it be slaughtered	0.333
+CXV[	qal	2	the throat cut	0.029
+CXV[	qal	3	someone will slaughter	0.015
+CXV[	qal	4	beaten	0.015
+CXX[	nif	2	they will be reduced	0.25
+CXX[	qal	2	I am bent over	0.083
+CXX[	qal	3	they lay prostrate	0.083
+CXX[	qal	4	they will crouch	0.083
+DBH/		2	whispering	0.333
+DBH/		3	report	0.111
+DBH/		4	your bad	0.111
+DBQ/		2	soldering	0.333
+DBQ=/		2	touching	0.333
+DBQ[	hif	2	he overtook	0.2
+DBQ[	hif	3	he will make cling	0.2
+DBQ[	hif	4	I have made cling	0.1
+DBQ[	hif	5	I will make stick	0.1
+DBQ[	qal	2	they will hold	0.057
+DBQ[	qal	3	it will pursue closely	0.029
+DBQ[	qal	4	she stayed	0.029
+DBR/		2	business	0.001
+DBR/		3	reason	0.001
+DBR/		4	than the word	0.001
+DBR/		5	parts	0.001
+DBR/		6	a promise	0.001
+DBR/		7	affairs	0.001
+DBR/		8	the edict	0.001
+DBR==/		2	pasture	0.5
+DBRH/		2	the manner	0.2
+DBRH/		3	plea	0.2
+DBR[	hit	2	spoke	0.5
+DBR[	nif	2	have we spoken together	0.25
+DBR[	nif	3	they spoke together	0.25
+DBR[	piel	2	someone speaks	0.001
+DBR[	piel	3	than speaking	0.001
+DBR[	piel	4	people speak	0.001
+DBR[	qal	2	spoke	0.049
+DBR[	qal	3	about to speak	0.049
+DBR[	qal	4	saying	0.024
+DBR[	qal	5	spoken	0.024
+DBWRH=/		2	O Deborah	0.1
+DC>/		2	vegetation	0.143
+DC>/		3	grass	0.071
+DCN[	piel	2	they will take away the fatty ashes from	0.25
+DCN[	piel	3	you have refreshed	0.25
+DCN[	piel	4	it makes fat	0.25
+DCN[	pual	2	it will be fattened	0.25
+DD/		2	breasts	0.25
+DJ		2	where	0.009
+DJ/		2	than sufficiency	0.026
+DJ/		3	to abundance	0.026
+DJ/		4	be] as enough	0.026
+DJBN/		2	Dibon-	0.182
+DJH/		2	red kites	0.5
+DJN/		2	he defended	0.333
+DK/		2	its crushed	0.25
+DK>/		2	crushed matter	0.333
+DLG[	piel	2	he will leap	0.5
+DLH/		2	the hair	0.5
+DLH[	qal	2	they hang down	0.25
+DLL[	qal	2	they are low	0.375
+DLL[	qal	3	it became low	0.125
+DLQ[	qal	2	burning	0.5
+DLT/		2	lid	0.011
+DLT/		3	a pair of gates	0.011
+DM/		2	their own	0.003
+DMH[	piel	2	imagine	0.2
+DMH[	piel	3	he planned	0.1
+DMH[	piel	4	I gave parables	0.1
+DMH[	piel	5	we have reflected on	0.1
+DMH[	piel	6	will I liken	0.1
+DMH[	qal	2	that we may be alike	0.077
+DMM[	nif	2	they will be devastated	0.2
+DMM[	qal	2	they have become still	0.043
+DMM[	qal	3	that we may perish	0.043
+DMWT/		2	his own	0.042
+DN/		2	O Dan	0.014
+DNJ>L/		2	O Daniel	0.019
+DPQ[	qal	2	knocking	0.5
+DQ/		2	fine	0.154
+DQ/		3	soft	0.077
+DQQ[	hif	2	finely (pulverize)	0.143
+DQQ[	qal	2	you will crush	0.333
+DQR[	qal	2	pierce	0.5
+DRC[	nif	2	required	0.111
+DRC[	nif	3	I will let myself be sought	0.111
+DRC[	nif	4	they were investigated	0.111
+DRC[	qal	2	[those	0.015
+DRC[	qal	3	diligently (seek)	0.007
+DRC[	qal	4	you will resort	0.007
+DRC[	qal	5	certainly (require)	0.007
+DRC[	qal	6	O seek	0.007
+DRC[	qal	7	seeks carefully	0.007
+DRK/		2	of two ways	0.003
+DRK/		3	than	0.001
+DRK/		4	those who] my ways	0.001
+DRK[	hif	2	he will make walk	0.143
+DRK[	hif	3	they have bent	0.143
+DRK[	hif	4	someone	0.143
+DRK[	qal	2	it will march forth	0.021
+DRK[	qal	3	you will march	0.021
+DRK[	qal	4	anyone will tread	0.021
+DT/		2	decree	0.125
+DWC[	qal	2	anyone	0.091
+DWD/		2	than a lover	0.033
+DWD/		3	my beloved	0.016
+DWD/		4	one	0.016
+DWD/		5	O lovers	0.016
+DWD=/		2	pot	0.25
+DWD=/		3	a cooking pot	0.125
+DWD==/		2	O David	0.003
+DWDH/		2	sister	0.333
+DWH/		2	menstruating	0.25
+DWH/		3	a menstrual	0.25
+DWR/		2	belong]	0.006
+DWX[	hif	2	he will cleanse	0.333
+DXH[	qal	2	violently (push)	0.333
+DXL[	peal	2	fearing	0.4
+F<JR=/		2	goats	0.5
+F<RH=/		2	than the hairs	0.333
+F>T/		2	dignity	0.154
+F>T/		3	majesty	0.154
+F>T/		4	loftiness	0.077
+F>T/		5	uprising	0.077
+FB</		2	satiety	0.25
+FB<=/		2	surfeited	0.2
+FB<[	qal	2	let him be sated	0.013
+FBKH/		2	window-lattice	0.062
+FDH/		2	his own	0.003
+FDRH/		2	planks	0.25
+FGB[	nif	2	set on high	0.3
+FGB[	nif	3	high	0.2
+FGJ>/		2	many	0.154
+FGJ>/		3	plentiful	0.154
+FGJ>/		4	much	0.077
+FH/		2	an animal	0.043
+FH/		3	livestock	0.021
+FJBH/		2	age	0.053
+FJM[	hif	2	sets	0.5
+FJM[	qal	10	I have ordained	0.002
+FJM[	qal	11	really (set)	0.002
+FJM[	qal	12	about to set	0.002
+FJM[	qal	13	about to put	0.002
+FJM[	qal	14	someone has set	0.002
+FJM[	qal	15	about to make	0.002
+FJM[	qal	16	setting	0.002
+FJM[	qal	17	they formed	0.002
+FJM[	qal	18	he charges	0.002
+FJM[	qal	19	someone puts	0.002
+FJM[	qal	2	when	0.004
+FJM[	qal	20	I set in place	0.002
+FJM[	qal	21	they gave	0.002
+FJM[	qal	3	I will designate	0.002
+FJM[	qal	4	determined	0.002
+FJM[	qal	5	putting	0.002
+FJM[	qal	6	he had stationed	0.002
+FJM[	qal	7	he imposed	0.002
+FJM[	qal	8	people will set	0.002
+FJM[	qal	9	let them give	0.002
+FJX[	piel	2	I meditate	0.5
+FJX[	qal	2	complain	0.235
+FJX[	qal	3	tell	0.176
+FJX[	qal	4	they speak	0.059
+FKJR/		2	hired	0.111
+FKJR/		3	a hired animal	0.056
+FKJR/		4	soldiers	0.056
+FKL/		2	the prudence	0.125
+FKL/		3	sense	0.062
+FKR/		2	fare	0.036
+FKR[	qal	2	actually (hire)	0.071
+FM>L[	hif	2	using left hand	0.2
+FMLH/		2	our own	0.034
+FMXH/		2	of gladness(es)	0.011
+FN>H/		2	hatred(s)	0.059
+FN>[	piel	2	[one	0.071
+FN>[	piel	3	hate	0.071
+FN>[	qal	2	utterly (hate)	0.009
+FN>[	qal	3	O hate	0.009
+FPH/		2	the border	0.006
+FPH/		3	your own	0.006
+FR/		2	the governor	0.002
+FR/		3	rulers	0.002
+FR/		4	O officials	0.002
+FRJD/		2	among the survivors	0.036
+FRP/		2	seraphim	0.286
+FRP/		3	serpent	0.286
+FRP/		4	fiery	0.143
+FRP[	qal	2	completely (burn)	0.012
+FRP[	qal	3	someone	0.012
+FRV[	qal	2	severely (injure)	0.5
+FWF[	qal	2	greatly (rejoice)	0.038
+FXQ[	piel	2	that he may make sport	0.059
+FXQ[	piel	3	jesting	0.059
+FXQ[	piel	4	making merry	0.059
+FXQ[	qal	2	sported	0.056
+FXWQ/		2	than laughter	0.067
+G<L[	qal	2	it abhorred	0.429
+G<R[	qal	2	about to rebuke	0.071
+G>H[	qal	2	they had risen	0.143
+G>H[	qal	3	it grow tall?	0.143
+G>H[	qal	4	it rises up	0.143
+G>L[	qal	2	his kinsman	0.013
+G>L[	qal	3	vindicator	0.013
+G>WH/		2	your eminence	0.053
+G>WH/		3	boastfulness	0.053
+G>WH/		4	swelling	0.053
+G>WN/		2	arrogance	0.02
+G>WT/		2	pride	0.375
+G>WT/		3	a rising up	0.25
+GB<H/		2	Gibeah	0.029
+GB<H/		3	than hills	0.029
+GB<H/		4	O hills	0.014
+GB=/		2	beams	0.25
+GB=/		3	cisterns	0.25
+GB>/		2	marshes	0.5
+GBH/		2	haughty	0.057
+GBH/		3	proud	0.057
+GBH/		4	exalted	0.057
+GBH/		5	the height	0.029
+GBH=/		2	dignity	0.059
+GBH[	hif	2	I raise up	0.111
+GBH[	hif	3	exalt	0.111
+GBH[	hif	4	high	0.111
+GBH[	qal	2	he was exalted	0.083
+GBH[	qal	3	it was lofty	0.042
+GBH[	qal	4	they may be lifted up	0.042
+GBH[	qal	5	they have become exalted	0.042
+GBJ</		2	bowls	0.071
+GBJRH/		2	queen	0.167
+GBL[	qal	2	they set bounds	0.333
+GBR/		2	O man	0.015
+GBRJ>L/		2	Gabriel	0.5
+GBR[	hit	2	he will prevail	0.333
+GBR[	qal	2	they increased	0.235
+GBR[	qal	3	do they become strong?	0.059
+GBWL/		2	its own territory	0.004
+GBWL/		3	their own	0.004
+GBWL/		4	than	0.004
+GBWLH/		2	territories	0.1
+GBWR/		2	be] like a warrior	0.007
+GBWR/		3	than a warrior	0.007
+GBWRH/		2	deeds	0.026
+GBWRH/		3	than strength	0.026
+GBXT/		2	forehead	0.25
+GCM/		2	shower	0.057
+GD<[	piel	2	I will cut through	0.143
+GDJC/		2	a tomb	0.25
+GDL=/		2	growing up	0.5
+GDL==/		2	wreaths	0.5
+GDL[	hif	2	make big	0.03
+GDL[	hit	2	I will show myself great	0.25
+GDL[	piel	2	make great	0.235
+GDL[	piel	3	he made great	0.176
+GDL[	piel	4	he will make grow	0.118
+GDL[	piel	5	magnify	0.059
+GDL[	qal	2	they had grown up	0.096
+GDL[	qal	3	he will grow up	0.038
+GDP[	piel	2	reviles	0.143
+GDRH/		2	walls	0.375
+GDWD/		2	raid	0.032
+GDWL/		2	the greatness	0.002
+GDWLH/		2	greatness(es)	0.167
+GG/		2	top	0.071
+GJ>/		2	Ge	0.02
+GJXZJ/		2	O Gehazi	0.083
+GL/		2	of stones	0.029
+GL/		3	a spring	0.029
+GL<D/		2	O Gilead	0.01
+GL<[	hit	2	it has broken out	0.333
+GLGL/		2	whirlwind	0.111
+GLGL==/		2	dust	0.5
+GLGLT/		2	skull	0.25
+GLH/		2	springs	0.4
+GLH[	hif	2	people had taken into exile	0.033
+GLH[	hif	3	take into exile	0.033
+GLH[	hif	4	I will send into exile	0.033
+GLH[	hif	5	take	0.033
+GLH[	hif	6	people	0.033
+GLH[	hit	2	revealing itself	0.5
+GLH[	nif	2	shamelessly (uncover)	0.032
+GLH[	nif	3	it has been removed	0.032
+GLH[	piel	2	I have made known	0.054
+GLH[	piel	3	expose	0.018
+GLH[	piel	4	someone has uncovered	0.018
+GLH[	piel	5	he will make known	0.018
+GLH[	qal	2	opening	0.04
+GLH[	qal	3	exile	0.04
+GLH[	qal	4	it has departed	0.04
+GLH[	qal	5	displayed	0.04
+GLH[	qal	6	he has revealed	0.02
+GLH[	qal	7	it disappears	0.02
+GLJLH/		2	Geliloth	0.4
+GLJWN/		2	a tablet	0.5
+GLL[	qal	2	people will roll	0.1
+GLL[	qal	3	I have rolled away	0.1
+GLX[	pual	2	shaven	0.333
+GML[	qal	2	you dealt	0.105
+GML[	qal	3	ripening	0.105
+GML[	qal	4	repaying	0.105
+GML[	qal	5	making recompense	0.053
+GMWL/		2	benefits	0.105
+GMWLH/		2	deeds	0.333
+GMWLH/		3	of recompense(s)	0.333
+GNB/		2	thieves	0.235
+GNBH/		2	stolen	0.5
+GNB[	piel	2	steal	0.5
+GNB[	pual	2	it was brought secretly	0.25
+GNB[	qal	2	she stole	0.148
+GNB[	qal	3	actually (steal)	0.037
+GNZ/		2	blankets	0.333
+GPN/		2	be] like a vine	0.018
+GR<[	nif	2	diminished	0.143
+GR<[	nif	3	it will be deducted	0.143
+GR<[	nif	4	are we restrained	0.143
+GR<[	qal	2	he will reduce	0.071
+GR<[	qal	3	hold back	0.071
+GR<[	qal	4	clipped	0.071
+GR<[	qal	5	I will shave	0.071
+GR<[	qal	6	do you restrain?	0.071
+GR<[	qal	7	he withdraws	0.071
+GR<[	qal	8	take away	0.071
+GRB/		2	rash	0.333
+GRC[	nif	2	I have been driven away	0.333
+GRC[	piel	2	you have driven away	0.045
+GRC[	piel	3	someone drove out	0.045
+GRC[	piel	4	completely (drive out)	0.045
+GRC[	piel	5	he has driven out	0.045
+GRC[	piel	6	people	0.045
+GRC[	pual	2	they are driven away	0.5
+GRC[	qal	2	about to drive out	0.143
+GRC[	qal	3	they have tossed up	0.143
+GRH[	hit	2	they will get ready for war	0.182
+GRH[	hit	3	he will get ready	0.091
+GRM/		2	limbs	0.2
+GRN/		2	your threshing	0.094
+GRN/		3	be] like a threshing floor	0.031
+GRR/		2	towards	0.111
+GRWN/		2	neck	0.25
+GW<[	qal	2	about to die	0.043
+GWG/		2	O Gog	0.3
+GWJ/		2	O nations	0.005
+GWJH/		2	bodies	0.385
+GWJH/		3	the carcass	0.154
+GWRL/		2	your allotted	0.013
+GWR[	hit	2	they assemble themselves	0.333
+GWZL/		2	ones	0.5
+GWZ[	qal	2	it passes away	0.5
+GXL=/		2	burning coals	0.143
+GZ/		2	the mowings	0.25
+GZ/		3	mown grass	0.25
+GZ</		2	stump	0.333
+GZL[	qal	2	tear away	0.069
+GZL[	qal	3	take away	0.034
+GZL[	qal	4	a stolen	0.034
+GZL[	qal	5	[one	0.034
+GZL[	qal	6	I stole	0.034
+GZL[	qal	7	people tear away	0.034
+GZL[	qal	8	they snatch away	0.034
+GZRH=/		2	place	0.375
+GZRH=/		3	polishing	0.125
+GZZ[	qal	2	shear	0.357
+HDP[	qal	2	you push	0.167
+HDP[	qal	3	people	0.167
+HDP[	qal	4	he rejects	0.167
+HDR/		2	glory	0.033
+HDRH/		2	glory	0.2
+HDS/		2	trees	0.5
+HGH/		2	a sigh	0.333
+HGH/		3	rumbling	0.333
+HGH[	qal	2	I moan	0.13
+HGH[	qal	3	you will groan	0.087
+HGH[	qal	4	they devise	0.087
+HGH[	qal	5	it growls	0.043
+HGH[	qal	6	they make a sound	0.043
+HGH[	qal	7	it considers	0.043
+HGH[	qal	8	it plots	0.043
+HGJWN/		2	the meditation	0.25
+HGJWN/		3	a melody	0.25
+HGJWN/		4	muttering	0.25
+HGR/		2	O Hagar	0.167
+HJH[	nif	2	realized	0.095
+HJH[	nif	3	you have become	0.048
+HJH[	nif	4	I was exhausted	0.048
+HJH[	qal	2	when	0.002
+HJH[	qal	3	people were	0.002
+HJH[	qal	4	about to be	0.001
+HJH[	qal	5	any was	0.001
+HJH[	qal	6	they will remain	0.001
+HJH[	qal	7	expressly (come)	0.001
+HJH[	qal	8	exactly (be)	0.001
+HJKL/		2	your own	0.013
+HLJKH/		2	processions	0.333
+HLJKH/		3	the caravans	0.167
+HLK/		2	a visitor	0.5
+HLK[	hif	10	[when	0.03
+HLK[	hif	11	I will make go	0.03
+HLK[	hif	12	I will cause to walk	0.03
+HLK[	hif	13	it will carry	0.03
+HLK[	hif	2	he brought	0.091
+HLK[	hif	3	I made walk	0.061
+HLK[	hif	4	leading away	0.061
+HLK[	hif	5	he drove	0.03
+HLK[	hif	6	will I bring	0.03
+HLK[	hif	7	he led away	0.03
+HLK[	hif	8	caused to go	0.03
+HLK[	hif	9	caused	0.03
+HLK[	hit	2	they dispersed	0.016
+HLK[	hit	3	about	0.016
+HLK[	hit	4	moving about	0.016
+HLK[	hit	5	it will go	0.016
+HLK[	piel	2	they go	0.091
+HLK[	piel	3	I have gone about	0.091
+HLK[	piel	4	we walked about	0.091
+HLK[	piel	5	he went about	0.045
+HLK[	piel	6	they go about	0.045
+HLK[	piel	7	a traveler	0.045
+HLK[	piel	8	they went	0.045
+HLK[	piel	9	they have prowled	0.045
+HLK[	qal	10	people went	0.001
+HLK[	qal	2	he goes about	0.002
+HLK[	qal	3	go about	0.001
+HLK[	qal	4	walkers	0.001
+HLK[	qal	5	they have gone away	0.001
+HLK[	qal	6	who is] about to go away	0.001
+HLK[	qal	7	we want to go	0.001
+HLK[	qal	8	than going	0.001
+HLK[	qal	9	than to go	0.001
+HLL[	hit	2	she will be praised	0.043
+HLL[	piel	2	he boasts	0.02
+HLM[	qal	2	strikes	0.2
+HLWLJM/		2	rejoicings	0.5
+HMH		2	than them	0.077
+HMH[	qal	2	are you in turmoil	0.094
+HMH[	qal	3	I will murmur	0.062
+HMH[	qal	4	noisy	0.062
+HMH[	qal	5	boisterous	0.062
+HMH[	qal	6	they make a sound	0.031
+HMH[	qal	7	people	0.031
+HMM[	qal	2	disturb	0.286
+HMM[	qal	3	he sets in motion	0.143
+HMWN/		2	the uproar	0.012
+HMWN/		3	the din	0.012
+HMWN/		4	than wealth	0.012
+HNH==		2	hither	0.333
+HPK[	hit	2	tumbling	0.25
+HPK[	hit	3	turning every way	0.25
+HPK[	hit	4	it is changed	0.25
+HPK[	nif	2	it turned back	0.029
+HPK[	nif	3	about to be overturned	0.029
+HPK[	nif	4	perverted	0.029
+HPK[	nif	5	it has been overturned	0.029
+HPK[	nif	6	it was reversed	0.029
+HPK[	qal	2	turn around	0.058
+HPK[	qal	3	turned over	0.038
+HPK[	qal	4	they turned round	0.019
+HPK[	qal	5	I will restore	0.019
+HPK[	qal	6	they turned back	0.019
+HPK[	qal	7	they devastate	0.019
+HPK[	qal	8	he overturns	0.019
+HPK[	qal	9	was] overthrown	0.019
+HR/		2	than mountains	0.002
+HRG[	pual	2	we have been killed	0.5
+HRG[	qal	2	they slew	0.016
+HRG[	qal	3	about to kill	0.008
+HRG[	qal	4	immediately (kill)	0.008
+HRG[	qal	5	certainly (kill)	0.008
+HRG[	qal	6	murdered	0.008
+HRG[	qal	7	he will slay	0.008
+HRG[	qal	8	murderers	0.008
+HRG[	qal	9	[one	0.008
+HRH[	qal	2	we were pregnant	0.026
+HRH[	qal	3	the [one	0.026
+HRS[	nif	2	they will be thrown down	0.143
+HRS[	nif	3	it was broken down	0.143
+HRS[	piel	2	[those	0.5
+HRS[	qal	2	they should break through	0.08
+HRS[	qal	3	you threw down	0.04
+HRS[	qal	4	about to tear down	0.04
+HRS[	qal	5	break away	0.04
+HWH[	qal	2	about to become	0.2
+J<D[	nif	2	I meet	0.421
+J<D[	nif	3	they assembled	0.053
+J<R/		2	O forest	0.019
+J<R=/		2	honeycomb	0.5
+J<Y[	nif	2	counseling	0.182
+J<Y[	nif	3	did he take counsel	0.136
+J<Y[	nif	4	receive advice	0.045
+J<Y[	nif	5	he had taken counsel	0.045
+J<Y[	qal	2	I will give counsel	0.021
+J>C[	nif	2	he will desist	0.2
+J>L[	hif	2	I have undertaken	0.111
+J>L[	hif	3	he undertook	0.056
+J>R/		2	the River	0.19
+J>R/		3	shafts	0.048
+J>R=/		2	light	0.023
+JBCH/		2	dry ground	0.143
+JBCT/		2	dry land	0.5
+JBC[	hif	2	I will dry up	0.2
+JBC[	piel	2	it dries up	0.5
+JBC[	qal	2	they have become dry	0.025
+JBC[	qal	3	they became dry	0.025
+JBC[	qal	4	totally (wither)	0.025
+JBMT/		2	sister-in-law	0.4
+JBWSJ/		2	be] like a Jebusite	0.024
+JC<[	hif	2	about	0.014
+JC<[	hif	3	at all (deliver)	0.007
+JC<[	hif	4	about to save	0.007
+JC<[	hif	5	O deliverer	0.007
+JC<[	hif	6	it has given victory	0.007
+JC<[	nif	2	victorious	0.05
+JCB[	hof	2	it will be inhabited	0.5
+JCB[	nif	2	O inhabited	0.125
+JCB[	qal	2	O dwell	0.002
+JCB[	qal	3	people will dwell	0.002
+JCB[	qal	4	of dweller	0.001
+JCB[	qal	5	really (sit)	0.001
+JCB[	qal	6	you will stay	0.001
+JCB[	qal	7	those who were] dwelling	0.001
+JCB[	qal	8	anyone dwells	0.001
+JCB[	qal	9	inhabited	0.001
+JCN=/		2	old	0.333
+JCN[	nif	2	grown old	0.333
+JCR/		2	right	0.386
+JCR/		3	O upright	0.009
+JCR[	hif	2	let them look straight	0.5
+JCR[	piel	2	I will make smooth	0.25
+JCR[	piel	3	I approve	0.125
+JCR[	qal	2	they were straight	0.077
+JCR[	qal	3	it is upright	0.077
+JCV[	hif	2	he holds out	0.333
+JCW<H/		2	rescue	0.013
+JCW<H/		3	prosperity	0.013
+JD/		2	their own hands	0.001
+JD/		3	two hands	0.001
+JD<[	hif	2	about	0.035
+JD<[	hif	3	has made know	0.018
+JD<[	hif	4	show	0.018
+JD<[	hif	5	he taught	0.018
+JD<[	hif	6	teach	0.018
+JD<[	hif	7	were] leading	0.018
+JD<[	hit	2	I make myself known	0.5
+JD<[	nif	2	he will be recognized	0.025
+JD<[	nif	3	he will become known	0.025
+JD<[	qal	10	acquaintances	0.001
+JD<[	qal	11	I want to know	0.001
+JD<[	qal	12	learn	0.001
+JD<[	qal	13	you will take note of	0.001
+JD<[	qal	14	who] has knowledge	0.001
+JD<[	qal	2	I realized	0.001
+JD<[	qal	3	you experienced	0.001
+JD<[	qal	4	[one	0.001
+JD<[	qal	5	ever (know)	0.001
+JD<[	qal	6	people knew	0.001
+JD<[	qal	7	O know	0.001
+JD<[	qal	8	acquainted	0.001
+JD<[	qal	9	he distinguishes	0.001
+JDH[	hif	2	I will confess	0.015
+JDH[	hif	3	people	0.015
+JDH[	hif	4	confesses	0.015
+JDH[	hif	5	he gave thanks	0.015
+JDH[	hif	6	thanksgiving	0.015
+JDH[	hit	2	giving thanks	0.1
+JDJD/		2	lovely	0.125
+JDWTWN=/		2	of Jedithun	0.071
+JFR>L/		2	O Israel	0.017
+JG</		2	wearisome	0.333
+JG<[	qal	2	you have grown weary	0.05
+JG<[	qal	3	you became weary	0.05
+JGJ</		2	the produce	0.062
+JGJ</		3	the result	0.062
+JGJ</		4	labor	0.062
+JH/		2	O Yahweh	0.061
+JHB[	qal	2	ascribe	0.303
+JHB[	qal	3	provide	0.061
+JHB[	qal	4	set	0.03
+JHW>/		2	O Jehu	0.017
+JHWC</		2	O Joshua	0.009
+JHWD/		2	Judea	0.143
+JHWDH/		2	O Judah	0.01
+JJN/		2	be] like the wine	0.007
+JKL[	qal	2	I am able to endure	0.005
+JKL[	qal	3	they will succeed	0.005
+JKX[	hif	2	you have appointed	0.043
+JKX[	hif	3	a proof	0.043
+JKX[	hif	4	who] adjudicates	0.021
+JKX[	hif	5	an arbiter	0.021
+JKX[	hif	6	corrects	0.021
+JKX[	hif	7	reproof	0.021
+JKX[	hif	8	may he judge	0.021
+JKX[	nif	2	let us argue our case together	0.333
+JKX[	nif	3	reasoning	0.333
+JLD/		2	young	0.022
+JLD/		3	a young man	0.011
+JLD/		4	sons	0.011
+JLD/		5	ones	0.011
+JLD[	hif	2	I cause to bring forth	0.011
+JLD[	hif	3	he became a father	0.006
+JLD[	hif	4	they bring forth	0.006
+JLD[	piel	2	midwife	0.333
+JLD[	qal	2	bearing children	0.018
+JLD[	qal	3	they bore children	0.009
+JLD[	qal	4	begot	0.009
+JLD[	qal	5	begets	0.009
+JLD[	qal	6	about to bear	0.005
+JLD[	qal	7	my giving	0.005
+JLD[	qal	8	they will father children	0.005
+JLJD/		2	one born	0.385
+JMJN/		2	side	0.007
+JMNH/		2	the Imnahite	0.2
+JMNJ/		2	south	0.061
+JMN[	hif	2	using right hand	0.2
+JNCWP/		2	great owl	0.333
+JNH[	hif	2	he oppressed	0.231
+JNH[	hif	3	they have maltreated	0.154
+JNH[	hif	4	oppress	0.154
+JNH[	hif	5	[those	0.077
+JNH[	qal	2	oppresses	0.25
+JNQ[	hif	2	suckle	0.429
+JNQ[	hif	3	milking	0.143
+JP<[	hif	2	shine forth	0.25
+JP<[	hif	3	shine	0.125
+JP<[	hif	4	he makes shine forth	0.125
+JPH/		2	good looking	0.071
+JQ<[	qal	2	it should be alienated	0.5
+JQC[	qal	2	of fowlers	0.25
+JQC[	qal	3	they have laid	0.25
+JQC[	qal	4	ensnared	0.25
+JQR/		2	splendid	0.057
+JQR/		3	your noble	0.057
+JQR/		4	rare	0.029
+JQR/		5	be] like a splendid	0.029
+JQR/		6	prized	0.029
+JQR/		7	weighty	0.029
+JQR=/		2	precious thing	0.118
+JQR=/		3	thing	0.059
+JQR=/		4	the value	0.059
+JQR=/		5	of preciousness	0.059
+JQY[	qal	2	he will awake	0.182
+JR>[	piel	2	make	0.5
+JR>[	qal	2	people	0.004
+JR>[	qal	3	people will be afraid	0.004
+JRB<M/		2	O Jeroboam	0.01
+JRC[	hif	2	it took possession of	0.041
+JRC[	hif	3	about to dispossess	0.02
+JRC[	hif	4	making poor	0.02
+JRC[	hif	5	you will cause to inherit	0.02
+JRC[	piel	2	impoverish	0.5
+JRC[	qal	2	take	0.237
+JRC[	qal	3	about to dispossess	0.015
+JRC[	qal	4	have you taken possession?	0.007
+JRC[	qal	5	[those	0.007
+JRD[	hif	2	she put down	0.043
+JRD[	hif	3	you will cause to go down	0.043
+JRD[	hif	4	they took down	0.043
+JRD[	hif	5	he made to flow down	0.043
+JRD[	hif	6	people	0.022
+JRD[	hif	7	he has sent down	0.022
+JRD[	hif	8	send down	0.022
+JRD[	hof	2	it was taken down	0.167
+JRD[	qal	2	falls	0.003
+JRD[	qal	3	about to come down	0.003
+JRD[	qal	4	O go down	0.003
+JRH===[	hif	2	he will rain down	0.5
+JRH=[	hif	2	archers	0.182
+JRH=[	hif	3	they shot arrows	0.182
+JRH=[	hif	4	about to shoot	0.091
+JRH=[	hif	5	he shot	0.091
+JRH=[	hif	6	he will be watered	0.091
+JRH=[	qal	2	throws	0.143
+JRH=[	qal	3	he shot	0.143
+JRH=[	qal	4	archers	0.143
+JRH=[	qal	5	I have set up	0.071
+JRH=[	qal	6	he has thrown	0.071
+JRH=[	qal	7	really (shot)	0.071
+JRH=[	qal	8	did he lay	0.071
+JRH[	hif	2	show	0.04
+JRH[	hif	3	pointing	0.04
+JRKH/		2	side	0.036
+JRQWN/		2	paleness	0.167
+JRQ[	qal	2	she will spit	0.333
+JRWCLM/		2	than Jerusalem	0.002
+JRX=/		2	O moon	0.037
+JSP[	nif	2	increased	0.167
+JSR[	nif	2	I was disciplined	0.4
+JSR[	piel	2	I instructed	0.091
+JSR[	piel	3	they will punish	0.045
+JSR[	piel	4	correct	0.045
+JSR[	piel	5	chasten	0.045
+JSR[	piel	6	severely (discipline)	0.045
+JSR[	qal	2	admonishes	0.333
+JSR[	qal	3	an instructor	0.333
+JSWD/		2	foundation	0.471
+JTB[	peal	2	it will sit	0.25
+JTB[	peal	3	dwelling	0.25
+JTD/		2	a spade	0.042
+JTR/		2	the remnant	0.042
+JTR/		3	excellence	0.032
+JTR=/		2	bowstring	0.333
+JTR=/		3	tent-cord	0.167
+JTRWN/		2	profit	0.1
+JTR[	hif	2	excel	0.045
+JTR[	hif	3	it will remain	0.045
+JTR[	hif	4	I will leave behind	0.045
+JTR[	hif	5	she had excess	0.045
+JTR[	nif	2	over	0.012
+JTR[	nif	3	it will be left over	0.012
+JTR[	nif	4	I remained behind	0.012
+JVB[	hif	2	really (make good)	0.02
+JVB[	hif	3	rightly (do well)	0.02
+JVB[	qal	2	you been made good?	0.023
+JW>XZ/		2	of Joahaz	0.25
+JWBL/		2	rams' horns	0.148
+JWM/		2	than the day	0.0
+JWN=/		2	of Greece	0.273
+JWN=/		3	O Greece	0.091
+JWNH/		2	yonath-	0.031
+JWNQT/		2	its young shoots	0.167
+JWNQT/		3	its young	0.167
+JWNTN/		2	O Jonathan	0.024
+JWTR/		2	excessively	0.222
+JWTR/		3	rest	0.111
+JXD/		2	unity	0.022
+JXZQ>L/		2	Jehezkel	0.333
+JY>[	hif	10	you lead out?	0.005
+JY>[	hif	11	spreads	0.005
+JY>[	hif	12	he sent out	0.005
+JY>[	hif	2	he led out	0.014
+JY>[	hif	3	someone will bring out	0.005
+JY>[	hif	4	it had put forth	0.005
+JY>[	hif	5	forth	0.005
+JY>[	hif	6	he has sent forth	0.005
+JY>[	hif	7	he made go out	0.005
+JY>[	hif	8	people will bring out	0.005
+JY>[	hif	9	deliver	0.005
+JY>[	hof	2	about to be brought out	0.2
+JY>[	qal	2	get out	0.003
+JY>[	qal	3	just (go out)	0.001
+JY>[	qal	4	ever (go out)	0.001
+JY>[	qal	5	certainly (go out)	0.001
+JY>[	qal	6	I went outside	0.001
+JYB[	hit	2	take	0.042
+JYB[	hit	3	stand firm	0.021
+JYB[	hit	4	when presented themselves	0.021
+JYB[	hit	5	they stand forth	0.021
+JYJB/		2	truth	0.2
+JYQ[	hif	2	pouring out	0.5
+JYQ[	hof	2	cast	0.375
+JYQ[	hof	3	firmly established	0.125
+JYQ[	hof	4	molten	0.125
+JYR/		2	form	0.222
+JYR/		3	a pot	0.111
+JYR[	qal	2	potter	0.031
+JYR[	qal	3	I have planned	0.031
+JYR[	qal	4	about to fashion	0.031
+JYR[	qal	5	fashions	0.031
+JYT[	hif	2	they set on fire	0.412
+JYT[	hif	3	set	0.059
+JYT[	hif	4	about to kindle	0.059
+JYT[	nif	2	they have been burned	0.4
+JYT[	nif	3	they are left desolate	0.2
+K<S[	hif	2	to anger	0.029
+K<S[	hif	3	I will disturb	0.029
+K<S[	qal	2	he is vexed	0.167
+K<S[	qal	3	become angry	0.167
+K>B[	hif	2	you will spoil	0.333
+KBC[	nif	2	forced into slavery	0.2
+KBC[	qal	2	violate	0.143
+KBD/		2	wealthy	0.024
+KBD[	hif	2	he made unresponsive	0.25
+KBD[	hif	3	he will honor	0.062
+KBD[	hif	4	display honor	0.062
+KBD[	nif	2	I will gain honor	0.071
+KBD[	nif	3	glorious	0.071
+KBD[	nif	4	abounding	0.036
+KBD[	piel	2	[those	0.08
+KBD[	piel	3	they hardened	0.08
+KBD[	piel	4	people honor	0.04
+KBD[	pual	2	honorable	0.333
+KBD[	qal	2	it was unresponsive	0.045
+KBD[	qal	3	let him be glorified	0.045
+KBF/		2	been] like a lamb	0.009
+KBJR/		2	old	0.1
+KBJR/		3	much	0.1
+KBS[	piel	2	of washers	0.023
+KBWD/		2	than honor	0.01
+KBWD/		3	their own honor	0.005
+KBWDH/		2	valuable	0.333
+KCL[	hif	2	overthrow	0.333
+KCL[	hif	3	they bring injury	0.167
+KCL[	hif	4	he has made feeble	0.167
+KCL[	qal	2	people will stumble	0.034
+KCP[	piel	2	a sorceress	0.167
+KCP[	piel	3	he practiced sorcery	0.167
+KCRWN/		2	profit	0.333
+KCR[	qal	2	it is proper	0.5
+KHH/		2	faint	0.143
+KHN[	piel	2	he acts like a priest	0.05
+KJWR/		2	pot	0.087
+KJWR/		3	a platform	0.043
+KKR/		2	district	0.029
+KKR/		3	round loaves	0.029
+KKR/		4	the plain	0.015
+KKR/		5	a round cover	0.015
+KKR/		6	the surrounding region	0.015
+KL/		2	be] like all	0.0
+KL/		3	belong] to all	0.0
+KL/		4	one	0.0
+KL/		5	the whole	0.0
+KL/		6	than everything	0.0
+KL/		7	than everyone	0.0
+KL>[	qal	2	withhold	0.25
+KL>[	qal	3	shut up	0.25
+KL>[	qal	4	they have withheld	0.167
+KLH/		2	O bride	0.059
+KLJ/		2	garment	0.003
+KLJ/		3	ornaments	0.003
+KLJ/		4	than weapons	0.003
+KLJL/		2	an entirety	0.267
+KLJL/		3	perfect	0.267
+KLJL/		4	entirely	0.067
+KLJWN/		2	annihilation	0.5
+KLMH/		2	ignomini	0.033
+KLM[	hif	2	to exhibit shame	0.2
+KLM[	hif	3	he shames	0.2
+KMR[	nif	2	they grew warm	0.25
+KMR[	nif	3	they have grown hot	0.25
+KMW		2	according	0.015
+KMW		3	when	0.008
+KN		2	such	0.01
+KN		3	fore	0.005
+KN/		2	honest	0.192
+KN/		3	true	0.038
+KN<N/		2	O Canaan	0.011
+KN<[	hif	2	humble	0.375
+KNM>		2	accordingly	0.2
+KNP/		2	the extremity	0.009
+KNP/		3	of my garment	0.009
+KP/		2	paws	0.005
+KP/		3	of the hollow	0.005
+KP/		4	both hands	0.005
+KP/		5	the handles	0.005
+KPH/		2	his palm	0.333
+KPJR/		2	your young	0.032
+KPN/		2	hunger	0.5
+KPR====/		2	henna plants	0.333
+KPR====/		3	villages	0.333
+KPR[	piel	2	I will cover	0.012
+KPR[	piel	3	will I make amends	0.012
+KPR[	pual	2	it will be annulled	0.143
+KPTWR/		2	capital	0.111
+KPT[	pael	2	bind	0.333
+KR/		2	battering-rams	0.25
+KR<[	hif	2	exceedingly (bring low)	0.2
+KR<[	hif	3	make	0.2
+KR<[	qal	2	it crouched	0.036
+KR<[	qal	3	he sank down	0.036
+KR<[	qal	4	anyone kneeled down	0.036
+KR<[	qal	5	bending	0.036
+KR<[	qal	6	he knelt	0.036
+KRH=[	qal	2	you will buy	0.333
+KRH[	qal	2	digging up	0.083
+KRM=/		2	O vinedressers	0.2
+KRML/		2	its plantation	0.143
+KRT[	nif	2	it was chewed	0.014
+KRT[	nif	3	certainly (cut off)	0.014
+KRT[	qal	2	cutter	0.015
+KRT[	qal	3	about to make	0.008
+KRT[	qal	4	that people may cut	0.008
+KRT[	qal	5	someone	0.008
+KRWB/		2	O cherub	0.011
+KS>/		2	than the throne	0.007
+KS>/		3	than	0.007
+KS>/		4	a chair	0.007
+KS>=/		2	the full moon	0.5
+KSH[	hit	2	people will cover themselves	0.125
+KSH[	qal	2	covered	0.333
+KSL/		2	stupidity	0.333
+KSLH/		2	confidence	0.5
+KSP/		2	than silver	0.007
+KSP[	nif	2	ashamed	0.25
+KTB[	piel	2	they wrote	0.5
+KTJ/		2	Cyprus	0.375
+KTM/		2	than (the) gold	0.111
+KTR/		2	a head-dress	0.333
+KTR[	piel	2	wait	0.5
+KTT[	hof	2	they are crushed to pieces	0.25
+KTT[	piel	2	he crushed	0.4
+KTT[	piel	3	he crushed to pieces	0.2
+KTT[	qal	2	beat	0.2
+KWKB/		2	than the stars	0.027
+KWL[	hif	2	to hold in	0.091
+KWL[	piel	2	sustain	0.125
+KWL[	piel	3	endure	0.125
+KWL[	piel	4	to hold in	0.062
+KWL[	piel	5	he maintains	0.062
+KWN[	hif	2	he appointed	0.019
+KWN[	hif	3	firmly	0.01
+KWN[	hif	4	to make firm	0.01
+KWN[	hif	5	he gave attention	0.01
+KWN[	hof	2	established	0.333
+KWN[	nif	2	a reliable	0.045
+KWN[	nif	3	they were firm	0.015
+KWN[	piel	2	give attention	0.05
+KWN[	pual	2	they are established	0.5
+KX/		2	wealth	0.008
+KX/		3	his own	0.008
+KXC/		2	lies	0.167
+KXC/		3	leanness	0.167
+KXC[	piel	2	they cringed	0.167
+KXC[	piel	3	he lied	0.056
+KXD[	nif	2	it is hidden	0.364
+KXD[	piel	2	I have hidden	0.267
+KZB[	nif	2	you will be proved a liar	0.5
+KZB[	piel	2	tell a lie	0.182
+KZB[	piel	3	they will fail	0.091
+KZB[	piel	4	he told a lie	0.091
+KZB[	piel	5	they lied	0.091
+L<G=/		2	of mockers	0.5
+L>		2	O not	0.031
+L>H/		2	than Leah	0.029
+L>M/		2	than a people	0.032
+LBB/		2	his own heart	0.004
+LBC[	qal	2	you are dressing	0.036
+LBC[	qal	3	he has worn	0.018
+LBNH/		2	of (the) pavement	0.083
+LBNWN/		2	O Lebanon	0.014
+LCD/		2	juice	0.5
+LCWN/		2	its own	0.009
+LCWN/		3	O tongue	0.009
+LHV[	qal	2	blazing	0.5
+LJN[	hit	2	it passes the night	0.5
+LJN[	qal	2	I want to lodge	0.015
+LJN[	qal	3	it dwells	0.015
+LJY[	hif	2	interpreter	0.125
+LJY[	hif	3	spokesmen	0.125
+LJY[	hif	4	a mediator	0.125
+LJY[	hif	5	the envoys	0.125
+LKD[	hit	2	they grasp one another	0.5
+LKD[	qal	2	they catch	0.07
+LKD[	qal	3	he took	0.018
+LKD[	qal	4	he had taken	0.018
+LKD[	qal	5	I should take	0.018
+LKD[	qal	6	it has caught	0.018
+LKD[	qal	7	than captures	0.018
+LKD[	qal	8	people	0.018
+LMD[	piel	2	who] trains	0.067
+LMD[	piel	3	about to teach	0.022
+LMD[	piel	4	teachers	0.022
+LMD[	piel	5	will anyone teach	0.022
+LMD[	piel	6	[those	0.022
+LMD[	pual	2	has been taught	0.2
+LMD[	qal	2	really (learn)	0.045
+LMD[	qal	3	trained	0.045
+LMW>L/		2	O Lemuel	0.5
+LPJD/		2	lightning(s)	0.077
+LQQ[	qal	2	they lapped up	0.4
+LQV[	piel	2	he picked up	0.048
+LQV[	qal	2	glean	0.083
+LQX/		2	persuasiveness	0.333
+LQX/		3	learning	0.222
+LQX/		4	insight	0.111
+LQX[	hof	2	let it be brought	0.167
+LQX[	pual	2	he was taken away	0.125
+LQX[	qal	2	they took away	0.006
+LQX[	qal	3	someone will take	0.001
+LQX[	qal	4	seize	0.001
+LQX[	qal	5	they will choose	0.001
+LQX[	qal	6	O take	0.001
+LQX[	qal	7	will anyone take	0.001
+LV/		2	enchantments	0.429
+LVC[	qal	2	a sharpener	0.25
+LWH=[	hif	2	lender	0.143
+LWH=[	qal	2	borrower	0.2
+LWJ/		2	Levi	0.2
+LWN[	hif	2	they caused to grumble	0.111
+LWX/		2	of boards	0.07
+LWX/		3	plates	0.023
+LWX/		4	planks	0.023
+LX=/		2	moist	0.333
+LXC/		2	a whisper	0.2
+LXM/		2	be] like bread	0.003
+LXM=[	qal	2	eaten	0.167
+LXM[	nif	2	ever (wage war)	0.006
+LXY[	qal	2	[those	0.2
+LXY[	qal	3	it squeezed	0.067
+LXY[	qal	4	they pressed	0.067
+LXY[	qal	5	you will push	0.067
+M<BR/		2	the pass	0.333
+M<BR/		3	blow	0.333
+M<BRH/		2	passes	0.125
+M<BRH/		3	pass	0.125
+M<DN/		2	delights	0.333
+M<D[	qal	2	slipping	0.2
+M<FH/		2	construction(s)	0.009
+M<FH/		3	business	0.004
+M<FH/		4	workmanship	0.004
+M<FH/		5	a thing made	0.004
+M<FH/		6	activity	0.004
+M<FH/		7	the achievement	0.004
+M<FR/		2	the tenth part	0.065
+M<K[	qal	2	thrust	0.5
+M<L/		2	onwards	0.014
+M<LH/		2	the platform	0.083
+M<LH=/		2	ascents	0.326
+M<LH=/		3	the thoughts	0.022
+M<LH=/		4	stairs	0.022
+M<LH=/		5	the going up	0.022
+M<MD/		2	the standing	0.4
+M<NH/		2	a hiding place	0.125
+M<NH/		3	our hiding	0.125
+M<R/		2	nakedness	0.5
+M<RB/		2	westward	0.231
+M<RB/		3	setting place	0.154
+M<RH/		2	den?	0.026
+M<RKH/		2	row	0.105
+M<V/		2	small	0.02
+M<V/		3	too] little?	0.02
+M<V[	hif	2	you will make small	0.273
+M<V[	hif	3	he will make little	0.091
+M<V[	hif	4	it will diminish	0.091
+M<V[	hif	5	you will decrease	0.091
+M<V[	hif	6	make few	0.091
+M<V[	hif	7	he made few	0.091
+M<V[	qal	2	diminish	0.25
+M<V[	qal	3	they will be few	0.125
+M<V[	qal	4	they became few	0.125
+M<V[	qal	5	it will become small	0.125
+M<WG/		2	of cake	0.5
+M<WN/		2	place	0.111
+M<WNJ/		2	Meunites	0.5
+M>D/		2	strength	0.011
+M>D/		3	very many	0.005
+M>D/		4	very great	0.005
+M>KLT/		2	knives	0.25
+M>N[	piel	2	absolutely (refuse)	0.024
+M>R[	hif	2	pricks	0.25
+M>S=[	nif	2	it has oozed	0.5
+M>S[	qal	2	someone has rejected	0.018
+M>S[	qal	3	utterly (reject)	0.018
+M>WM/		2	defect	0.048
+MBVX/		2	object of confidence	0.133
+MBVX/		3	of securiti(es)	0.067
+MBVX/		4	objects	0.067
+MBW</		2	springs	0.333
+MBW</		3	spring	0.333
+MBW>/		2	entering(s)	0.043
+MBW>/		3	coming	0.043
+MBXR/		2	his choicest ones	0.083
+MC>H/		2	debts	0.5
+MC>RT/		2	troughs	0.25
+MCC[	piel	2	he searched	0.333
+MCH=/		2	O Moses	0.003
+MCKB/		2	place	0.022
+MCKN/		2	dwelling-places	0.007
+MCK[	nif	2	they will be prolonged	0.333
+MCK[	pual	2	deferred	0.333
+MCK[	qal	10	he will follow	0.037
+MCK[	qal	11	gratify	0.037
+MCK[	qal	2	he drew	0.259
+MCK[	qal	3	sounds	0.074
+MCK[	qal	4	drag	0.074
+MCK[	qal	5	it has dragged	0.037
+MCK[	qal	6	draw along	0.037
+MCK[	qal	7	they have drawn down	0.037
+MCK[	qal	8	he stretched out	0.037
+MCK[	qal	9	sower	0.037
+MCL/		2	oracle	0.179
+MCL/		3	discourse	0.051
+MCL=[	nif	2	he is like	0.4
+MCL=[	nif	3	you have become like	0.2
+MCL=[	qal	2	speak a parable	0.222
+MCL=[	qal	3	people will use as a proverb	0.111
+MCL=[	qal	4	use a proverb	0.111
+MCLWX/		2	the stretching out	0.333
+MCLX/		2	pastureland	0.143
+MCLXT/		2	discharge	0.5
+MCL[	qal	2	really (rule)	0.013
+MCL[	qal	3	O rulers	0.013
+MCM<T/		2	be] their subjects	0.25
+MCMH/		2	a horror	0.143
+MCMN/		2	the fatness	0.25
+MCMN/		3	fat places	0.25
+MCMR/		2	division	0.091
+MCMR/		3	watch	0.045
+MCMR/		4	services	0.045
+MCMRT/		2	post	0.026
+MCMRT/		3	guards	0.026
+MCMRT/		4	safekeeping	0.013
+MCMRT/		5	kept	0.013
+MCMRT/		6	command	0.013
+MCMRT/		7	in good care	0.013
+MCMRT/		8	of confinement	0.013
+MCNH/		2	the second rank	0.086
+MCNH/		3	(the) copy	0.057
+MCNH/		4	in rank	0.057
+MCNH/		5	second order	0.029
+MCPV/		2	the claim	0.002
+MCPV/		3	the manner	0.002
+MCPV/		4	practice	0.002
+MCPV/		5	the appearance	0.002
+MCPV/		6	place	0.002
+MCPV/		7	the cause	0.002
+MCPV/		8	decision	0.002
+MCPXH/		2	O clans	0.011
+MCPXH/		3	kinds	0.005
+MCPXT/		2	tribe	0.026
+MCPXT/		3	his own	0.009
+MCQH/		2	cup bearer	0.167
+MCQH/		3	cup-bearers	0.167
+MCQH/		4	well-watered	0.083
+MCQH/		5	bearer	0.083
+MCQH/		6	bearing	0.083
+MCQH/		7	the well-watered land	0.083
+MCWBH/		2	apostate one	0.25
+MCWBH/		3	O apostate one	0.083
+MCWBH/		4	turning away	0.083
+MCX[	qal	2	someone will anoint	0.039
+MCX[	qal	3	people had anointed	0.039
+MD/		2	your measure(s)	0.1
+MD</		2	mind	0.167
+MDBR/		2	than the wilderness	0.004
+MDD[	piel	2	it will continue	0.25
+MDH/		2	a measured portion	0.132
+MDH/		3	the measure	0.038
+MDH/		4	area	0.019
+MDJ/		2	Madai	0.125
+MDJ/		3	O Media	0.062
+MDRGH/		2	the steep place	0.5
+MF>T/		2	portions	0.2
+MF>T/		3	present	0.2
+MF>T/		4	the tax	0.133
+MF>T/		5	your offerings	0.067
+MF>T/		6	the raising	0.067
+MFGB/		2	stronghold	0.059
+MFKJT/		2	images	0.167
+MFKJT/		3	imaginations	0.167
+MFKJT/		4	his own	0.167
+MFKJT/		5	carvings	0.167
+MGD/		2	of excellence(s)	0.25
+MGD/		3	excellent things	0.125
+MGDL/		2	a high platform	0.022
+MGDL_<DR/		2	O	0.5
+MGDNWT/		2	gifts	0.25
+MGPH/		2	a blow	0.077
+MGRC/		2	open land	0.026
+MGRC/		3	pastureland	0.009
+MGWRJM/		2	sojourning-places	0.1
+MH		2	when?	0.009
+MH		3	much?	0.003
+MH		4	long?	0.003
+MHJR/		2	prompt	0.25
+MHLK/		2	a passage	0.2
+MHLK/		3	goings	0.2
+MHWMH/		2	turmoil	0.167
+MHWMH/		3	disturbances	0.167
+MJ		2	than whom?	0.125
+MJKH/		2	O Micah	0.03
+MJKJHW/		2	O Micaiah	0.048
+MJM/		2	like (the) waters	0.002
+MJNQT/		2	a wet nurse	0.167
+MJTR/		2	bowstrings	0.111
+MKCLH/		2	stumbling-blocks	0.5
+MKCWL/		2	stumbling	0.143
+MKCWL/		3	stumblings	0.071
+MKH/		2	slaughter	0.021
+MKMR/		2	his own	0.5
+MKMRT/		2	(of) a fishing net	0.333
+MKR/		2	merchandise	0.333
+MKR[	hit	2	you will sell yourselves	0.333
+MKR[	qal	2	seller	0.044
+MKR[	qal	3	certainly (sell)	0.022
+MKR[	qal	4	[those	0.022
+MKSH=/		2	coverings	0.25
+MKSH==/		2	the amount	0.5
+MKTB/		2	an inscription	0.111
+MKTC/		2	mortar	0.5
+MKWN/		2	foundations	0.176
+MKWNH/		2	its own stand	0.04
+MKWNH/		3	foundations	0.04
+ML>=/		2	a multitude	0.026
+ML>=/		3	than fullness	0.026
+ML>H=/		2	a setting	0.333
+ML>JM/		2	settings	0.267
+ML>JM/		3	offering(s)	0.067
+ML>JM/		4	your installation	0.067
+ML>K/		2	O messengers	0.005
+MLBN/		2	brick-terrace	0.333
+MLJYH/		2	a parable	0.5
+MLK/		2	than a king	0.0
+MLKM=/		2	Malkam	0.25
+MLKW/		2	the reign	0.129
+MLL[	piel	2	has he said	0.25
+MLL[	piel	3	will you say	0.25
+MLV[	nif	2	let me slip away	0.017
+MLV[	nif	3	really (escape)	0.017
+MLV[	piel	2	they left undisturbed	0.04
+MLV[	piel	3	it laid eggs	0.04
+MLV[	piel	4	certainly (rescue)	0.04
+MLWN/		2	the lodging place	0.375
+MMCL/		2	rulers	0.333
+MMCLT/		2	realm	0.154
+MMCLT/		3	authority	0.077
+MMCLT/		4	the rule	0.077
+MMLKH/		2	O kingdoms	0.011
+MMLKT/		2	of the reign	0.083
+MMLKWT/		2	the kingship	0.333
+MMZR/		2	a mixed population	0.5
+MN		2	distant	0.004
+MN		3	both	0.001
+MN		4	missabib	0.001
+MN		5	Bani from	0.001
+MN<[	nif	2	let yourself be restrained	0.25
+MNH[	piel	2	he assigned	0.333
+MNH[	piel	3	people have allotted	0.111
+MNH[	qal	2	you will muster	0.083
+MNH[	qal	3	I will appoint	0.083
+MNWS/		2	my place	0.25
+MNWS/		3	flight	0.125
+MNWX/		2	your resting	0.286
+MNXH/		2	offerings	0.005
+MPJBCT/		2	O Mephibosheth	0.154
+MPL/		2	the hanging parts	0.5
+MPLT/		2	the carcass	0.125
+MPLT/		3	trunk	0.125
+MPLYT/		2	image	0.5
+MPQD/		2	the appointed place	0.25
+MPQD/		3	the appointment	0.25
+MPRF/		2	spreading out(s)	0.5
+MQDC/		2	part	0.013
+MQL/		2	stick	0.111
+MQL/		3	staves	0.056
+MQL<T/		2	carving	0.25
+MQNH=/		2	price	0.133
+MQQ[	nif	2	they will rot	0.222
+MQQ[	nif	3	rotting away	0.111
+MQQ[	nif	4	they fester	0.111
+MQR>/		2	reading	0.043
+MQRH/		2	chance	0.3
+MQWH/		2	place	0.333
+MQWH==/		2	O hope	0.4
+MQYW</		2	buttress	0.417
+MR</		2	his close	0.429
+MR</		3	close friends	0.143
+MR<JT/		2	flock	0.111
+MR>/		2	O	0.25
+MR>H=/		2	the mirrors	0.083
+MRBJT/		2	part	0.2
+MRBJT/		3	of the greatness	0.2
+MRBJT/		4	the greater part	0.2
+MRD[	qal	2	rebel	0.24
+MRD[	qal	3	rebellious	0.04
+MRD[	qal	4	rebel against	0.04
+MRH[	hif	2	rebelling	0.333
+MRH[	hif	3	rebellious	0.143
+MRH[	hif	4	he will rebel against	0.095
+MRH[	hif	5	rebel toward	0.048
+MRH[	hif	6	they rebelled toward	0.048
+MRH[	qal	2	rebels	0.091
+MRJ>/		2	fatlings	0.375
+MRKB/		2	chariotry	0.333
+MRKB/		3	seat	0.333
+MRKBH/		2	chariotry	0.026
+MRMH/		2	treachery	0.026
+MRQXH/		2	of ointment	0.5
+MRRH=/		2	gall-bladder	0.5
+MRRJ=/		2	of Merarite	0.051
+MRV[	qal	2	made bare	0.4
+MRWD/		2	homelessness(es)	0.333
+MRWD/		3	homelessness	0.333
+MRWYH/		2	their own	0.333
+MRXB/		2	expanses	0.167
+MRXCT/		2	pan	0.5
+MRXQ/		2	distant places	0.056
+MRXQ/		3	places	0.056
+MRY[	nif	2	they are painful	0.333
+MRZX/		2	revelry	0.5
+MS/		2	a tax	0.043
+MS</		2	breaking	0.091
+MS</		3	journeying	0.091
+MS<=/		2	a dart	0.5
+MSB/		2	round about	0.25
+MSB/		3	table	0.25
+MSGRT/		2	strongholds	0.176
+MSK/		2	covering	0.12
+MSKNWT/		2	storehouses	0.143
+MSLH/		2	track	0.074
+MSPD/		2	mourning	0.188
+MSPR/		2	measure	0.008
+MSPR/		3	the recounting	0.008
+MSPXT/		2	a skin rash	0.333
+MSS[	nif	2	they dropped off	0.056
+MSS[	nif	3	worthless	0.056
+MT/		2	O men	0.045
+MTKNT/		2	proportion	0.4
+MTNH/		2	a bribe	0.059
+MTNJM/		2	than the loins	0.043
+MTQ[	hif	2	it tastes sweet	0.5
+MTQ[	qal	2	they became sweet	0.333
+MV</		2	planting place(s)	0.333
+MV</		3	my planting(s)	0.167
+MV</		4	place	0.167
+MV<MJM/		2	his delicious	0.25
+MV<MJM/		3	food(s)	0.125
+MV>[	peal	2	it came	0.125
+MV>[	peal	3	it arrived	0.125
+MVH/		2	O tribe	0.004
+MVH/		3	of arrows	0.004
+MVH/		4	his own	0.004
+MVH=/		2	bier	0.034
+MVH==/		2	beneath	0.053
+MVMN/		2	treasures	0.4
+MVPXT/		2	shawl	0.5
+MVR[	hif	2	I sent rain	0.188
+MVR[	hif	3	he had caused rain	0.125
+MVR[	hif	4	about to rain down	0.125
+MVR[	hif	5	about to bring rain	0.062
+MW<D/		2	your appointed place	0.009
+MW<D/		3	signal	0.004
+MW<YH/		2	counsels	0.143
+MW>B/		2	O Moab	0.017
+MWCB/		2	the location	0.045
+MWCB/		3	(the) resident	0.023
+MWCB/		4	the habitable places	0.023
+MWC[	hif	2	I have ceased	0.333
+MWC[	qal	2	it will cease	0.059
+MWG[	hit	2	they will flow with	0.333
+MWK[	qal	2	impoverished	0.2
+MWLDT/		2	one born	0.136
+MWLDT/		3	birth(s)	0.091
+MWLDT/		4	offspring	0.045
+MWL[	nif	2	definitely (be circumcised)	0.062
+MWL[	qal	2	people had circumcised	0.167
+MWR>/		2	terror	0.364
+MWR[	hif	2	changes	0.273
+MWR[	hif	3	actually (exchange)	0.182
+MWR[	hif	4	anyone will exchange	0.091
+MWSDH/		2	the foundations	0.5
+MWSR/		2	the training	0.02
+MWSR/		3	a warning	0.02
+MWSR/		4	instruction	0.02
+MWT/		2	O death	0.007
+MWT/		3	his own	0.007
+MWT/		4	than death	0.007
+MWTR/		2	the advantage	0.333
+MWT[	hif	2	about to put to death	0.011
+MWT[	hif	3	he caused to die	0.011
+MWT[	hif	4	who] bring death	0.011
+MWT[	hif	5	putting	0.011
+MWT[	hof	2	were] about to be put to death	0.029
+MWT[	piel	2	put to death	0.167
+MWT[	qal	2	someone will die	0.005
+MWT[	qal	3	than	0.002
+MWT[	qal	4	dying	0.002
+MWV/		2	pole	0.25
+MWV/		3	yoke-bar	0.25
+MWVH/		2	poles	0.083
+MWV[	nif	2	may they be dropped	0.043
+MWV[	qal	2	utterly (shake)	0.091
+MWV[	qal	3	they shook	0.091
+MWV[	qal	4	it has slipped	0.091
+MWV[	qal	5	sways	0.091
+MWY>/		10	their points	0.038
+MWY>/		11	a spring	0.038
+MWY>/		12	a mine	0.038
+MWY>/		2	springs	0.115
+MWY>/		3	goings out	0.115
+MWY>/		4	exits	0.115
+MWY>/		5	the export	0.077
+MWY>/		6	the outlet	0.077
+MWY>/		7	forth	0.077
+MWY>/		8	a going forth	0.077
+MWY>/		9	of departure	0.038
+MWY>H/		2	origins	0.5
+MWYQ/		2	lump	0.5
+MXBRT/		2	joining	0.25
+MXBT/		2	tray	0.2
+MXBT/		3	cake	0.2
+MXCBH/		2	their own schemes	0.02
+MXCBT/		2	design	0.286
+MXCBT/		3	invention	0.143
+MXH[	nif	2	it will be wiped away	0.111
+MXH[	qal	2	she wipes clean	0.143
+MXH[	qal	3	completely (wipe out)	0.048
+MXH[	qal	4	someone wipes clean	0.048
+MXH[	qal	5	he will wipe away	0.048
+MXJH/		2	a raw spot	0.25
+MXJH/		3	sustenance	0.25
+MXJH/		4	reviving	0.25
+MXLH=/		2	the dance	0.125
+MXLJ=/		2	Mahlite	0.083
+MXLQT/		2	portions	0.027
+MXMD/		2	things	0.231
+MXMD/		3	desirable thing	0.231
+MXMD/		4	my desirable	0.077
+MXMD/		5	desirableness(es)	0.077
+MXNH/		2	company	0.005
+MXRT/		2	their next	0.031
+MXRT/		3	day	0.031
+MXTH/		2	fire-pans	0.455
+MXYJT/		2	than (the) half	0.062
+MXYJT/		3	the middle	0.062
+MY/		2	be] like chaff	0.125
+MY<R/		2	time	0.2
+MY<R/		3	a small thing	0.2
+MY<R/		4	a small number	0.2
+MY>[	hif	2	about to deliver	0.25
+MY>[	nif	2	actually (be found)	0.007
+MY>[	qal	2	[one	0.012
+MY>[	qal	3	[those	0.008
+MY>[	qal	4	people found	0.004
+MY>[	qal	5	they will come upon	0.004
+MY>[	qal	6	you will meet	0.004
+MY>[	qal	7	people will find	0.004
+MY>[	qal	8	brings out	0.004
+MY>[	qal	9	someone found	0.004
+MYB/		2	the standing-place	0.2
+MYB/		3	office	0.1
+MYBT/		2	stump	0.5
+MYH/		2	bread(s)	0.075
+MYR/		2	distress	0.333
+MYR/		3	places	0.333
+MYWH/		2	order	0.006
+MYWLH/		2	hollow	0.083
+MYWR=/		2	siege work	0.042
+MZ<R/		2	fewness	0.5
+MZBX/		2	O altar	0.003
+MZMH/		2	purpose	0.211
+MZMH/		3	of evil devices	0.105
+MZMH/		4	plan	0.053
+MZMH/		5	thoughts	0.053
+MZMH/		6	wickedness	0.053
+MZMRH/		2	knives	0.25
+MZMRH/		3	your pruning	0.25
+MZRH/		2	a winnowing fork	0.5
+MZRQ/		2	like the bowls	0.031
+N<L/		2	a pair of sandals	0.091
+N<M/		2	Favor	0.286
+N<R/		2	our young	0.004
+N<R/		3	children	0.004
+N<R=/		2	than youth	0.25
+N<RH/		2	the female servants	0.016
+N<R[	nif	2	I will shake myself free	0.333
+N<R[	piel	2	may he shake out	0.333
+N<R[	qal	2	I shook out	0.25
+N<R[	qal	3	shaken out	0.25
+N>P[	qal	2	adulterer	0.188
+N>P[	qal	3	of adulteresses	0.188
+N>WH/		2	lovely	0.444
+N>Y[	piel	2	[those	0.231
+N>Y[	piel	3	indeed (declare contemptible)	0.154
+N>Y[	piel	4	they treated with contempt	0.077
+NB<[	hif	2	it ferments	0.111
+NBL/		2	the foolish women	0.056
+NBLH/		2	folly	0.231
+NBL[	piel	2	treat with contempt	0.333
+NBL[	qal	2	surely (wear out)	0.105
+NBL[	qal	3	withered fruit	0.053
+NBL[	qal	4	it crumbles away	0.053
+NBL[	qal	5	you have been foolish	0.053
+NBV[	hif	2	people look	0.015
+NCB[	hif	2	he makes blow	0.5
+NCK=[	qal	2	[those	0.5
+NCK[	qal	2	who is] bitten	0.333
+NCL[	qal	2	he will clear away	0.333
+NCL[	qal	3	it will slip off	0.167
+NCL[	qal	4	it will drop off	0.167
+NCMH/		2	breathing thing	0.167
+NCMH/		3	thing	0.083
+NCP[	qal	2	he blows	0.5
+NCQ[	piel	2	kiss	0.4
+NCQ[	qal	2	I want to kiss	0.048
+NCR/		2	than eagles	0.115
+NDBH/		2	your freewill	0.115
+NDBH/		3	offerings	0.077
+NDBH/		4	of voluntariness(es)	0.038
+NDBH/		5	offering	0.038
+NDB[	hit	2	they made a contribution	0.231
+NDB[	hit	3	offering of freewill offerings	0.154
+NDB[	hit	4	offered	0.077
+NDD[	qal	2	fluttering	0.095
+NDD[	qal	3	wanderers	0.048
+NDJB/		2	willing	0.16
+NDJBH/		2	dignity	0.333
+NDP[	qal	2	may you drive about	0.5
+NDR/		2	your votive	0.05
+NDR/		3	your votive offerings	0.017
+NDR/		4	offerings	0.017
+NDR[	qal	2	make vows	0.097
+NDX[	hif	2	banish	0.231
+NDX[	hif	3	he thrust aside	0.154
+NDX[	hif	4	he enticed away	0.077
+NDX[	hif	5	I will drive out	0.077
+NDX[	hif	6	they have driven away	0.077
+NDX[	hif	7	have you driven out	0.077
+NDX[	nif	2	they had been driven away	0.136
+NDX[	nif	3	you will be drawn aside	0.091
+NDX[	nif	4	who is] outcast	0.091
+NDX[	nif	5	it will be impelled	0.045
+NDX[	nif	6	going astray	0.045
+NF>[	hif	2	they will cause to bring	0.5
+NF>[	hit	2	it lifts itself up	0.111
+NF>[	hit	3	are] the raises himself	0.111
+NF>[	nif	2	raised	0.091
+NF>[	nif	3	ever (be taken away)	0.061
+NF>[	nif	4	exalted	0.061
+NF>[	piel	2	lifting	0.25
+NF>[	piel	3	he had exalted	0.125
+NF>[	piel	4	someone will take away	0.125
+NF>[	piel	5	carry	0.125
+NF>[	qal	10	certainly (forgive)	0.002
+NF>[	qal	11	someone will lift up	0.002
+NF>[	qal	12	it arises	0.002
+NF>[	qal	13	someone will carry away	0.002
+NF>[	qal	14	people will raise	0.002
+NF>[	qal	15	receive	0.002
+NF>[	qal	2	bringing	0.004
+NF>[	qal	3	endure	0.004
+NF>[	qal	4	someone took	0.002
+NF>[	qal	5	people lifted up	0.002
+NF>[	qal	6	carrier	0.002
+NF>[	qal	7	someone will carry off	0.002
+NF>[	qal	8	O bear	0.002
+NF>[	qal	9	actually (carry)	0.002
+NFG[	hif	2	they overtook	0.156
+NFG[	hif	3	certainly (overtake)	0.031
+NFJ>/		2	the chief	0.008
+NFJ>/		3	ruler	0.008
+NFJ>/		4	O princes	0.008
+NG<[	qal	2	stricken	0.019
+NG<[	qal	3	it arrived	0.019
+NG<[	qal	4	about to touch	0.01
+NG<[	qal	5	people touched	0.01
+NGC[	hif	2	they brought	0.062
+NGC[	nif	2	he approached	0.118
+NGC[	nif	3	near	0.059
+NGC[	nif	4	he will come near	0.059
+NGC[	nif	5	it has drawn near	0.059
+NGC[	qal	2	draw	0.047
+NGD[	hif	2	he reported	0.006
+NGD[	hif	3	actually (tell)	0.003
+NGD[	hif	4	you have made known	0.003
+NGD[	hif	5	about to tell	0.003
+NGD[	hif	6	certainly (tell)	0.003
+NGD[	hof	2	fully (tell)	0.029
+NGD[	hof	3	fully (be told)	0.029
+NGF[	nif	2	it will oppress	0.25
+NGF[	nif	3	he was oppressed	0.25
+NGF[	qal	2	he will press	0.105
+NGF[	qal	3	he exacted	0.053
+NGF[	qal	4	the oppresses	0.053
+NGF[	qal	5	you drive hard	0.053
+NGF[	qal	6	ruler	0.053
+NGF[	qal	7	of a driver	0.053
+NGH[	hif	2	it will make shine	0.333
+NGJD/		2	of nobles	0.023
+NGJD/		3	the supervisor	0.023
+NGJD/		4	commanders	0.023
+NGJNH/		2	song	0.214
+NGJNH/		3	taunt songs	0.071
+NGJNH/		4	music	0.071
+NGP/		2	of striking	0.143
+NGP[	nif	2	totally (defeated)	0.043
+NGP[	qal	2	he defeated	0.143
+NGP[	qal	3	about to strike	0.095
+NGR[	hif	2	people	0.2
+NGR[	nif	2	it was stretched out	0.25
+NGR[	nif	3	torrents	0.25
+NGR[	nif	4	it has poured itself	0.25
+NHG[	piel	2	he drove	0.2
+NHG[	piel	3	he will drive away	0.2
+NHG[	piel	4	you led	0.2
+NHG[	piel	5	he led forth	0.2
+NHG[	qal	10	guiding	0.053
+NHG[	qal	11	he has driven	0.053
+NHG[	qal	2	he drove	0.158
+NHG[	qal	3	he will lead away	0.105
+NHG[	qal	4	led	0.105
+NHG[	qal	5	he drove away	0.053
+NHG[	qal	6	they had driven them away	0.053
+NHG[	qal	7	he drives	0.053
+NHG[	qal	8	O lead	0.053
+NHG[	qal	9	they drive away	0.053
+NHJ/		2	a mourning song	0.286
+NHL[	piel	2	you have led	0.333
+NHMH/		2	the groaning	0.5
+NKH[	hif	10	than striking	0.003
+NKH[	hif	2	when struck down	0.006
+NKH[	hif	3	they wounded	0.006
+NKH[	hif	4	certainly (strike)	0.003
+NKH[	hif	5	someone	0.003
+NKH[	hif	6	he thrust	0.003
+NKH[	hif	7	when	0.003
+NKH[	hif	8	the [one	0.003
+NKH[	hif	9	someone will strike	0.003
+NKH[	hof	2	I was wounded	0.062
+NKL[	hit	2	deal cunningly	0.5
+NMR/		2	than leopards	0.167
+NPC/		2	mind	0.001
+NPC/		3	of emotion	0.001
+NPC/		4	[one	0.001
+NPH/		2	a sieve	0.25
+NPL[	hif	2	he will knock out	0.02
+NPL[	hif	3	make	0.02
+NPL[	hif	4	they let drop	0.02
+NPL[	hif	5	someone cast	0.02
+NPL[	hit	2	throw himself	0.2
+NPL[	qal	2	about to fall	0.003
+NPL[	qal	3	people fall?	0.003
+NPL[	qal	4	certainly (fall)	0.003
+NPQ[	peal	2	it went out	0.333
+NPQ[	peal	3	they went forth	0.167
+NPX[	hif	2	I have caused to breathe out	0.5
+NPX[	qal	2	he blew	0.222
+NPX[	qal	3	blown upon	0.222
+NPX[	qal	4	it has panted	0.111
+NPY[	qal	2	it was scattered	0.4
+NPY[	qal	3	it dispersed	0.2
+NQB[	qal	2	pierced	0.3
+NQB[	qal	3	designate	0.1
+NQB[	qal	4	he bored	0.1
+NQB[	qal	5	the dignitaries	0.1
+NQB[	qal	6	will anyone pierce?	0.1
+NQC[	piel	2	may he strike	0.5
+NQD/		2	sheep-tenders	0.5
+NQDJM/		2	cakes	0.333
+NQH[	nif	2	be free	0.25
+NQH[	nif	3	it will be emptied	0.125
+NQH[	nif	4	he will be purged	0.083
+NQH[	nif	5	I am innocent	0.042
+NQH[	piel	2	leave	0.067
+NQH[	piel	3	I left unpunished	0.067
+NQH[	piel	4	acquit	0.067
+NQH[	piel	5	I will be acquitted	0.067
+NQJ/		2	free from guilt	0.023
+NQJ/		3	an exempt	0.023
+NQJWN/		2	cleanness	0.2
+NQM[	hit	2	an avenger	0.4
+NQM[	qal	2	certainly (avenge)	0.083
+NQP[	hif	2	encircling	0.267
+NQP[	hif	3	you will round off	0.067
+NQP[	hif	4	it has gone around	0.067
+NQP[	hif	5	go	0.067
+NQP[	hif	6	they had gone round	0.067
+NQP[	hif	7	he has closed	0.067
+NQR[	piel	2	it has pierced	0.333
+NRD/		2	nard plants	0.333
+NS/		2	warning sign	0.048
+NS<[	hif	2	they quarried	0.25
+NS<[	hif	3	you uprooted	0.25
+NS<[	hif	4	you will set aside	0.125
+NS<[	qal	2	marching	0.008
+NS<[	qal	3	about to set out	0.008
+NS<[	qal	4	setting out	0.008
+NS<[	qal	5	he pulled out	0.008
+NS<[	qal	6	anyone will pull out	0.008
+NSH[	piel	2	it attempted?	0.074
+NSH[	piel	3	putting to the test	0.037
+NSH[	piel	4	someone attempt?	0.037
+NSJK=/		2	images	0.5
+NSK[	qal	2	he has cast	0.286
+NSK[	qal	3	I have installed	0.143
+NSX[	qal	2	he tears down	0.5
+NTC[	qal	2	about	0.077
+NTC[	qal	3	about to pluck up	0.077
+NTK[	hif	2	melt	0.5
+NTK[	nif	2	you will be melted	0.25
+NTK[	nif	3	about to be poured out	0.125
+NTK[	qal	2	it will pour out	0.143
+NTN[	hof	2	he was put	0.25
+NTN[	nif	2	certainly (be given)	0.024
+NTN[	nif	3	it will be given forth	0.012
+NTN[	nif	4	it has been appointed	0.012
+NTN[	nif	5	let it be permitted	0.012
+NTN[	nif	6	it will be set	0.012
+NTN[	qal	10	someone assigned	0.001
+NTN[	qal	11	about to make	0.001
+NTN[	qal	12	they gave over	0.001
+NTN[	qal	13	people will give forth	0.001
+NTN[	qal	14	men give	0.001
+NTN[	qal	15	I will place	0.001
+NTN[	qal	16	they presented	0.001
+NTN[	qal	17	people will requite	0.001
+NTN[	qal	18	people have made	0.001
+NTN[	qal	19	you will extend	0.001
+NTN[	qal	2	really (give)	0.001
+NTN[	qal	20	beat	0.001
+NTN[	qal	21	it yields produce	0.001
+NTN[	qal	22	she supplies	0.001
+NTN[	qal	23	than to give	0.001
+NTN[	qal	24	people have given forth	0.001
+NTN[	qal	25	to give over	0.001
+NTN[	qal	26	people had given	0.001
+NTN[	qal	3	than	0.001
+NTN[	qal	4	he will provide	0.001
+NTN[	qal	5	utters	0.001
+NTN[	qal	6	it will yield	0.001
+NTN[	qal	7	generously (give)	0.001
+NTN[	qal	8	certainly (give)	0.001
+NTN[	qal	9	they had dedicated	0.001
+NTQ[	nif	2	they were drawn out	0.2
+NTQ[	nif	3	they have been separated	0.1
+NTQ[	nif	4	they have been snapped	0.1
+NTQ[	nif	5	he is torn away	0.1
+NTQ[	piel	2	they had torn apart	0.1
+NTQ[	piel	3	will it pull up	0.1
+NTQ[	piel	4	you will tear out	0.1
+NTR[	hif	2	to unfasten	0.2
+NTR[	hif	3	he has made jump	0.2
+NTR[	hif	4	setting free	0.2
+NTR[	hif	5	may he loosen	0.2
+NTY[	nif	2	they will be broken down	0.333
+NTY[	piel	2	people pulled down	0.167
+NTY[	qal	2	he has torn down	0.12
+NTY[	qal	3	he tore down	0.08
+NTY[	qal	4	he broke down	0.08
+NTY[	qal	5	I will tear down	0.04
+NV</		2	your planting	0.5
+NV<[	qal	2	firmly fixed	0.022
+NV<[	qal	3	he will pitch	0.022
+NVC[	nif	2	they are loose	0.167
+NVC[	nif	3	she has been abandoned	0.167
+NVC[	qal	2	he left	0.16
+NVC[	qal	3	it spread out	0.08
+NVC[	qal	4	he will leave	0.08
+NVC[	qal	5	reject	0.08
+NVC[	qal	6	drawn	0.04
+NVH[	hif	2	bend down	0.045
+NVH[	hif	3	turn	0.03
+NVH[	hif	4	he has extended	0.03
+NVH[	hif	5	people pitched	0.015
+NVH[	hif	6	may people stretch out	0.015
+NVH[	qal	2	declines	0.007
+NVH[	qal	3	about to extend	0.007
+NVH[	qal	4	about to stretch out	0.007
+NVH[	qal	5	bend down	0.007
+NVH[	qal	6	I have turned	0.007
+NVH[	qal	7	holding out	0.007
+NVP[	hif	2	they will drip	0.125
+NVP[	hif	3	the prophesier	0.125
+NVP[	qal	2	they drip	0.333
+NVP[	qal	3	dripping	0.222
+NW<[	hif	2	she has shaken	0.333
+NW<[	hif	3	let him disturb	0.111
+NW<[	hif	4	make	0.111
+NW<[	qal	2	sway	0.125
+NW<[	qal	3	wildly (stagger)	0.125
+NW<[	qal	4	a wanderer	0.083
+NW<[	qal	5	they shook	0.083
+NW<[	qal	6	quivering	0.042
+NW<[	qal	7	shake	0.042
+NW<[	qal	8	really (wander)	0.042
+NW<[	qal	9	they swing	0.042
+NW>[	hif	2	he will forbid	0.143
+NW>[	hif	3	they discouraged	0.143
+NW>[	hif	4	he frustrates	0.143
+NW>[	hif	5	let it refuse	0.143
+NWD[	hif	2	he will wag	0.5
+NWD[	hit	2	bemoaning itself	0.25
+NWD[	hit	3	you shook yourself	0.25
+NWD[	hit	4	they will shudder	0.25
+NWD[	qal	2	take flight	0.222
+NWD[	qal	3	a fugitive	0.111
+NWD[	qal	4	it sways	0.056
+NWD[	qal	5	you will waver	0.056
+NWD[	qal	6	fluttering	0.056
+NWH/		2	the abode	0.031
+NWH/		3	O abode	0.031
+NWM[	qal	2	anyone will slumber	0.167
+NWP[	hif	2	wields	0.133
+NWP[	hif	3	brandishing	0.1
+NWP[	hif	4	anyone has wielded	0.033
+NWP[	hif	5	the [one	0.033
+NWP[	hif	6	about to brandish	0.033
+NWS[	hif	2	will they put to flight?	0.333
+NWS[	hif	3	hide	0.333
+NWS[	qal	2	actually (flee)	0.007
+NXC=/		2	omens	0.5
+NXCT/		2	fetters	0.05
+NXCT/		3	bronze fetters	0.007
+NXC[	piel	2	they observed the signs	0.1
+NXH[	qal	2	you have guided	0.167
+NXH[	qal	3	you led	0.167
+NXL/		2	the valley	0.007
+NXL/		3	two rivers	0.007
+NXL/		4	a shaft	0.007
+NXL[	hif	2	you will cause to inherit	0.167
+NXL[	hif	3	he leaves an inheritance to	0.083
+NXL[	hit	2	you will give as an inheritance	0.167
+NXL[	hit	3	you will give as possession	0.167
+NXL[	piel	2	apportion as an inheritance to	0.25
+NXL[	qal	2	you will possess	0.074
+NXL[	qal	3	they received their inheritance	0.074
+NXL[	qal	4	divide for possession	0.074
+NXL[	qal	5	they possessed	0.037
+NXM[	hit	2	he has compassion	0.286
+NXM[	hit	3	he will change his mind	0.143
+NXM[	hit	4	I will gain relief	0.143
+NXM[	nif	2	I will ease myself	0.021
+NXM[	nif	3	I am grieved	0.021
+NXM[	piel	2	someone comforts	0.028
+NXWCH/		2	copper	0.1
+NYB[	hif	2	he fixed	0.053
+NYB[	hif	3	make straight	0.053
+NYB[	hif	4	setting up	0.053
+NYB[	hif	5	they erected	0.053
+NYB[	hif	6	he made to stand up	0.053
+NYB[	hof	2	it has been fixed	0.5
+NYB[	nif	2	was] appointed	0.039
+NYB[	nif	3	it stood upright	0.02
+NYB[	nif	4	which] stands firm	0.02
+NYB[	nif	5	taken a stand	0.02
+NYH[	nif	2	ruined	0.222
+NYH[	nif	3	has it become ruined?	0.222
+NYJB/		2	a pillar	0.091
+NYJB/		3	an overseer	0.091
+NYL[	hif	2	a deliverer	0.09
+NYL[	hif	3	he has taken away	0.014
+NYL[	hif	4	certainly (deliver)	0.014
+NYL[	hif	5	at all (deliver)	0.007
+NYL[	hif	6	certainly (rescue)	0.007
+NYL[	hif	7	he will tear out	0.007
+NYL[	piel	2	they will deliver	0.25
+NYR[	qal	2	watchmen	0.065
+NYR[	qal	3	maintaining	0.022
+NYR[	qal	4	besieged	0.022
+NYR[	qal	5	secret	0.022
+NYR[	qal	6	besiegers	0.022
+NYR[	qal	7	O watcher	0.022
+NYR[	qal	8	a watchman	0.022
+NZH[	hif	2	he will startle	0.05
+NZJD/		2	food	0.167
+NZJR/		2	of the consecrated one	0.125
+NZJR/		3	your untrimmed vine	0.062
+NZJR/		4	vines	0.062
+NZJR/		5	of high rank	0.062
+NZM/		2	earrings	0.118
+NZR/		2	hair	0.04
+NZR[	hif	2	you will keep separate	0.4
+P<L/		2	activity	0.031
+P<L/		3	acquisition	0.031
+P<LH/		2	work	0.143
+P<LH/		3	deeds	0.143
+P<M/		2	the hoof-beats	0.008
+P<M/		3	an anvil	0.008
+P<R[	qal	2	people have opened wide	0.25
+P>H/		2	belong] to side	0.024
+P>H/		3	the forehead	0.012
+P>R/		2	the head-wraps	0.143
+P>RH=/		2	boughs	0.167
+P>R[	hit	2	he will get glory for himself	0.286
+P>R[	hit	3	honor yourself	0.143
+P>R[	piel	2	he glorifies	0.25
+PCTH/		2	wick	0.5
+PCV[	hif	2	skin	0.182
+PCV[	hif	3	skinning	0.091
+PCV[	qal	2	you will make a raid	0.083
+PCV[	qal	3	it attacks	0.042
+PCXWR/		2	O Pashhur	0.071
+PDH[	nif	2	she had been released	0.333
+PDH[	qal	2	certainly (redeem)	0.024
+PDH[	qal	3	certainly (ransom)	0.024
+PDWT/		2	redemption	0.5
+PG</		2	chance	0.5
+PG<[	hif	2	he will make entreaty	0.167
+PG<[	hif	3	interposed	0.167
+PG<[	hif	4	I will cause to plead	0.167
+PG<[	hif	5	they had made entreaty	0.167
+PG<[	hif	6	assailant	0.167
+PG<[	qal	2	they met	0.056
+PG<[	qal	3	he reached	0.028
+PG<[	qal	4	people will molest	0.028
+PGC[	qal	2	they will meet	0.4
+PGR/		2	carcasses	0.045
+PL>J/		2	wonderful	0.5
+PLCT/		2	O Philistia	0.25
+PLCTJ/		2	O Philistines	0.003
+PLGC/		2	paramours	0.027
+PLGH/		2	streams	0.333
+PLH[	hif	2	I will make separate	0.25
+PLH[	hif	3	he has made separate	0.25
+PLJL/		2	judges	0.333
+PLJV/		2	O fugitives	0.053
+PLJV=/		2	survivors	0.2
+PLJV=/		3	escapees	0.2
+PLJV=/		4	O escapees	0.2
+PLJVH/		2	the escaped thing	0.036
+PLL=[	piel	2	I judged	0.333
+PLL[	hit	2	will he intercede	0.013
+PLL[	hit	3	about to pray	0.013
+PLL[	hit	4	may someone pray	0.013
+PLX/		2	slice	0.5
+PNH/		2	his own	0.001
+PNH/		3	forwards	0.001
+PNH[	hif	2	he turned	0.429
+PNH[	hof	2	turned	0.5
+PNH[	piel	2	you made clear	0.25
+PNH[	piel	3	people will make clear	0.125
+PNH[	qal	2	faces	0.086
+PNH[	qal	3	you turned to look	0.009
+PNH[	qal	4	anyone turns	0.009
+PQDH/		2	office	0.062
+PQDH/		3	the visitation	0.031
+PQDH/		4	store	0.031
+PQDH/		5	care	0.031
+PQDH/		6	their muster	0.031
+PQDWN/		2	store	0.333
+PQD[	hif	2	I entrust	0.12
+PQD[	hof	2	it was entrusted	0.125
+PQD[	hof	3	it will be visited	0.125
+PQD[	hotp	2	they were mustered	0.25
+PQD[	nif	2	it was empty	0.143
+PQD[	nif	3	they were appointed	0.095
+PQD[	nif	4	you will be mustered	0.048
+PQD[	pual	2	I have been caused to miss	0.5
+PQD[	qal	10	people	0.005
+PQD[	qal	11	someone should injure	0.005
+PQD[	qal	12	they will miss	0.005
+PQD[	qal	13	people will miss	0.005
+PQD[	qal	14	I will give attention to	0.005
+PQD[	qal	15	you sought	0.005
+PQD[	qal	2	attend to	0.01
+PQD[	qal	3	[those	0.005
+PQD[	qal	4	the expenses	0.005
+PQD[	qal	5	someone enrolled	0.005
+PQD[	qal	6	you will pay attention	0.005
+PQD[	qal	7	actually (miss)	0.005
+PQD[	qal	8	we missed	0.005
+PQD[	qal	9	he deposited	0.005
+PQJD/		2	an officer	0.154
+PQJD/		3	deputy	0.077
+PQJD/		4	appointees	0.077
+PQJD/		5	the representative	0.077
+PQX/		2	clear-sighted	0.5
+PR</		2	hair	0.5
+PR<H/		2	O Pharaoh	0.004
+PR<[	hif	2	he had allowed lack of restraint	0.5
+PR<[	qal	2	you ignored	0.25
+PR<[	qal	3	running wild	0.083
+PR<[	qal	4	acted as leaders	0.083
+PR<[	qal	5	I will refrain	0.083
+PR<[	qal	6	avoid	0.083
+PR<[	qal	7	neglect	0.083
+PRC/		2	a horseman	0.053
+PRC/		3	warhorses	0.035
+PRCH/		2	the full account	0.5
+PRC[	pual	2	making clear	0.5
+PRDS/		2	parks	0.333
+PRDS/		3	forest	0.333
+PRD[	hit	2	they have become dislocated	0.25
+PRD[	hit	3	they are separated	0.25
+PRD[	nif	2	it divided	0.083
+PRF[	piel	2	scatters	0.25
+PRF[	qal	2	they have chopped up	0.019
+PRF[	qal	3	breaks	0.019
+PRH[	hif	2	about	0.2
+PRH[	hif	3	he made fruitful	0.2
+PRH[	qal	2	bearing fruit	0.2
+PRH[	qal	3	fruit-bearing	0.05
+PRJ/		2	produce	0.017
+PRJY/		2	violent	0.4
+PRJY/		3	of the violent ones	0.2
+PRM[	qal	2	torn	0.333
+PRQ/		2	plunder	0.5
+PRQ[	hit	2	tear off from yourselves	0.333
+PRQ[	hit	3	they were torn off	0.333
+PRQ[	qal	2	tears away	0.333
+PRR[	hif	2	actually (break)	0.05
+PRR[	hif	3	you annul	0.05
+PRR[	hif	4	someone has broken	0.025
+PRR[	hif	5	people have broken	0.025
+PRR[	hif	6	they go wrong	0.025
+PRR[	hif	7	it will fail	0.025
+PRR[	hof	2	it will be frustrated	0.333
+PRS[	hif	2	having hooves	0.083
+PRS[	qal	2	people will break	0.5
+PRT/		2	Perath	0.062
+PRX/		2	bud	0.118
+PRX[	hif	2	you cause to sprout	0.2
+PRX[	hif	3	I make sprout	0.2
+PRX[	hif	4	it will show buds	0.2
+PRX[	qal	2	he will flourish	0.069
+PRY[	qal	2	he has broken through	0.07
+PRY[	qal	3	people have broken out	0.023
+PRY[	qal	4	it broke out	0.023
+PRY[	qal	5	he breaks open	0.023
+PRY[	qal	6	they will burst open	0.023
+PRY[	qal	7	he burst out	0.023
+PRY[	qal	8	he distributed	0.023
+PRZH/		2	the open regions	0.333
+PSL/		2	my carved	0.032
+PSX[	qal	2	he passed over	0.2
+PSX[	qal	3	limping	0.2
+PT/		2	crumbs	0.273
+PT=/		2	forehead	0.5
+PT>M		2	suddenness	0.04
+PTH[	piel	2	entice	0.167
+PTH[	piel	3	he will seduce	0.083
+PTH[	piel	4	about	0.083
+PTH[	pual	2	he will be persuaded	0.333
+PTH[	qal	2	silly	0.2
+PTH[	qal	3	a simple	0.2
+PTH[	qal	4	it was gullible	0.2
+PTH[	qal	5	opens	0.2
+PTJL/		2	threads	0.091
+PTL[	nif	2	I have wrestled	0.333
+PTWX/		2	engraving	0.182
+PTX/		2	O doors	0.012
+PTX/		3	gates	0.006
+PTX=[	piel	2	about to engrave	0.125
+PTX[	nif	2	be let loose	0.111
+PTX[	nif	3	they will be unstopped	0.056
+PTX[	piel	2	he unharnessed	0.059
+PTX[	piel	3	set free	0.059
+PTX[	qal	2	generously (open)	0.021
+PTX[	qal	3	about to open	0.021
+PTX[	qal	4	someone will open	0.011
+PTX[	qal	5	wide (open)	0.011
+PTX[	qal	6	people	0.011
+PWC[	qal	2	they paw the ground	0.333
+PWC[	qal	3	you will skip about	0.333
+PWG[	qal	2	it grows numb	0.333
+PWK/		2	antimony	0.5
+PWX[	qal	2	it will pant	0.182
+PWX[	qal	3	I will blow	0.091
+PWX[	qal	4	they inflame	0.091
+PX=/		2	(the) bird-trap	0.08
+PXD[	piel	2	fears	0.5
+PXD[	qal	2	it will be in awe	0.091
+PXD[	qal	3	they were afraid	0.091
+PXZ[	qal	2	insolent	0.5
+PYH[	qal	2	set	0.133
+PYH[	qal	3	free	0.067
+PZ/		2	of pure gold	0.444
+PZ/		3	gold	0.111
+Q>T/		2	owl	0.4
+QB<[	qal	2	robbing	0.4
+QBB[	qal	2	at all (curse)	0.125
+QBH/		2	stomach	0.5
+QBL[	piel	2	they took	0.3
+QBL[	piel	3	take	0.1
+QBR/		2	his own	0.03
+QBR/		3	site	0.015
+QBR[	qal	2	certainly (bury)	0.014
+QBWRH/		2	his own	0.071
+QBY[	piel	2	[those	0.03
+QBY[	piel	3	about to gather	0.03
+QBY[	qal	2	they gathered together	0.032
+QBY[	qal	3	about to gather	0.032
+QBY[	qal	4	collect	0.032
+QC/		2	become] (into) stubble	0.062
+QCH/		2	stiff	0.194
+QCH/		3	fierce	0.056
+QCH/		4	stern	0.056
+QCH/		5	difficult	0.028
+QCH/		6	cruel	0.028
+QCH[	hif	2	he made stubborn	0.1
+QCH[	hif	3	he made hard	0.1
+QCH[	hif	4	harden	0.1
+QCH[	hif	5	I will make stubborn	0.05
+QCH[	hif	6	you have made difficult	0.05
+QCH[	hif	7	has he shown stubbornness	0.05
+QCR/		2	treason	0.312
+QCR[	nif	2	it was joined together	0.5
+QCR[	qal	2	people conspired	0.061
+QCR[	qal	3	she tied	0.03
+QCR[	qal	4	conspirators	0.03
+QCT/		2	of the bowmen	0.013
+QCT/		3	rainbow	0.013
+QCX[	hif	2	it treats harshly	0.5
+QDC/		2	holy	0.002
+QDC/		3	holy person	0.002
+QDC/		4	his own	0.002
+QDC[	hif	2	treat	0.045
+QDC[	hif	3	setting apart	0.045
+QDC[	hif	4	setting apart as holy	0.023
+QDC[	hif	5	set	0.023
+QDC[	hit	2	they will make themselves holy	0.042
+QDC[	hit	3	sanctify yourselves	0.042
+QDC[	hit	4	purifying herself	0.042
+QDC[	piel	2	you honored as holy	0.015
+QDC[	piel	3	I will show holy	0.015
+QDC[	piel	4	make holy	0.015
+QDC[	qal	2	they became holy	0.1
+QDC[	qal	3	it should be set apart	0.1
+QDC[	qal	4	it become holy?	0.1
+QDM/		2	long ago	0.025
+QDM/		3	front	0.013
+QDM/		4	forward	0.013
+QDM/		5	the beginning	0.013
+QDM/		6	beginnings	0.013
+QDWC/		2	O	0.009
+QDWC/		3	O holy	0.009
+QHL[	hif	2	he called together	0.05
+QHL[	hif	3	they made assemble	0.05
+QHL[	hif	4	he will summon an assembly	0.05
+QJY/		2	fruit	0.15
+QL<[	qal	2	about to sling forth	0.5
+QLH=[	nif	2	he will be dishonored	0.2
+QLL[	hif	2	he treated with contempt	0.167
+QLL[	hif	3	treat with contempt	0.083
+QLL[	nif	2	I will demean myself	0.091
+QLL[	nif	3	they will prove swift	0.091
+QLL[	piel	2	[one	0.026
+QLL[	piel	3	bringing a curse	0.026
+QLL[	piel	4	he has shaken	0.026
+QLL[	piel	5	he has sharpened	0.026
+QLL[	qal	2	you are insignificant	0.25
+QLL[	qal	3	they abated?	0.167
+QLL[	qal	4	she became insignificant	0.083
+QLL[	qal	5	I have become insignificant	0.083
+QLWN/		2	O disgrace	0.059
+QNH/		2	a stalk	0.032
+QNH/		3	shaft	0.032
+QNH/		4	cane	0.032
+QNH/		5	become] (into) reed	0.016
+QNH/		6	scale	0.016
+QNH/		7	arm	0.016
+QNH=[	qal	2	I have acquired	0.25
+QNH=[	qal	3	you created	0.25
+QNH[	qal	2	the [one	0.014
+QNH[	qal	3	owner	0.014
+QNH[	qal	4	people will buy	0.014
+QNH[	qal	5	[those	0.014
+QNH[	qal	6	let him get	0.014
+QNJN/		2	property	0.4
+QNJN/		3	creature	0.1
+QNN[	piel	2	they made nests	0.25
+QP>[	qal	2	are] thickening	0.5
+QR<[	nif	2	it was torn apart	0.4
+QR<[	nif	3	it tore	0.2
+QR<[	qal	2	he has torn away	0.019
+QR<[	qal	3	about to tear away	0.019
+QR<[	qal	4	I tore away	0.019
+QR<[	qal	5	you tear open	0.019
+QR>[	qal	2	anyone	0.003
+QR>[	qal	3	someone will invite	0.002
+QR>[	qal	4	someone has proclaimed	0.002
+QR>[	qal	5	people summoned	0.002
+QR>[	qal	6	calling forth	0.002
+QR>[	qal	7	about to summon	0.002
+QR>[	qal	8	about to proclaim	0.002
+QR>[	qal	9	people have read aloud	0.002
+QRB/		2	within	0.009
+QRB/		3	middle	0.005
+QRB/		4	the inward part	0.005
+QRB[	hif	2	he drew near	0.013
+QRB[	hif	3	people will present	0.013
+QRB[	hif	4	someone will present	0.006
+QRB[	hif	5	bring	0.006
+QRB[	nif	2	you will bring yourselves near	0.5
+QRB[	piel	2	they have brought near	0.429
+QRB[	piel	3	they have drawn near	0.143
+QRB[	qal	2	draw	0.011
+QRC/		2	boards	0.02
+QRH[	hif	2	he made happen	0.333
+QRH[	nif	2	he will meet	0.333
+QRH[	nif	3	I found myself	0.167
+QRH[	qal	2	it chanced on	0.167
+QRJH/		2	than a town	0.034
+QRQ</		2	the bottom	0.125
+QRWB/		2	warriors	0.029
+QRWB/		3	O near	0.014
+QRWB/		4	nearby	0.014
+QRX/		2	frost	0.286
+QRX==/		2	O Korah	0.027
+QRXT/		2	spot	0.25
+QVN=/		2	insignificant	0.07
+QVRT/		2	smoke	0.017
+QVRT/		3	perfume	0.017
+QVR[	hif	2	smoke	0.016
+QVR[	hif	3	makers of smoke	0.016
+QVR[	piel	2	people made smoke	0.049
+QWH[	qal	2	wait for	0.2
+QWL/		2	than sounds	0.002
+QWM[	hif	2	station	0.023
+QWM[	hif	3	about to establish	0.008
+QWM[	hif	4	people set up	0.008
+QWM[	hif	5	certainly (raise)	0.008
+QWM[	hif	6	it has made rise	0.008
+QWM[	hif	7	[one	0.008
+QWM[	hit	2	[those	0.25
+QWM[	hit	3	[one	0.25
+QWM[	hof	2	he was raised up	0.333
+QWM[	hof	3	it was carried out	0.333
+QWM[	piel	2	confirm	0.286
+QWM[	piel	3	impose	0.286
+QWM[	piel	4	fulfill	0.071
+QWM[	piel	5	strengthen	0.071
+QWM[	qal	2	it was confirmed	0.004
+QWM[	qal	3	get up	0.004
+QWM[	qal	4	it was set	0.002
+QWM[	qal	5	than	0.002
+QWM[	qal	6	anyone will arise	0.002
+QWM[	qal	7	they were fixed	0.002
+QWM[	qal	8	certainly (established)	0.002
+QWM[	qal	9	someone will arise	0.002
+QWRH/		2	my roof	0.2
+QWY[	qal	2	people felt dread	0.25
+QWY[	qal	3	feeling dread	0.125
+QYB/		2	extremities	0.333
+QYJN/		2	O rulers	0.25
+QYJR/		2	harvest time	0.02
+QYJR/		3	time	0.02
+QYR=[	qal	2	someone will reap	0.031
+QYR[	qal	2	it became short	0.083
+QYW/		2	boundaries	0.333
+QYY[	piel	2	he cuts in two	0.111
+R<<[	hif	2	still (do evil)	0.015
+R<<[	hif	3	they have made evil	0.015
+R<<[	hif	4	O evil-doers	0.015
+R<<[	hif	5	exceedingly (do evil)	0.015
+R<<[	qal	2	is it sad	0.111
+R<=/		2	O friends	0.005
+R<===/		2	badness	0.263
+R<===/		3	sadness	0.105
+R<BWN/		2	of famine	0.333
+R<C/		2	shaking	0.176
+R<C/		3	rattling	0.176
+R<C/		4	of rumbling	0.118
+R<C/		5	a din	0.059
+R<C/		6	quaking	0.059
+R<C[	hif	2	made shake	0.167
+R<C[	hif	3	I caused to tremble	0.167
+R<C[	hif	4	I will shake	0.167
+R<C[	hif	5	you have made quake	0.167
+R<H=[	qal	2	feeding	0.4
+R<NN/		2	fresh	0.105
+R<P[	qal	2	they dripped	0.333
+R<WT/		2	its neighbor	0.25
+R<WT/		3	her fellow	0.25
+R>C/		2	best	0.005
+R>C/		3	the beginnings	0.003
+R>C/		4	O leaders	0.003
+R>C/		5	sum(s)	0.002
+R>CJT/		2	than	0.041
+R>CWN/		2	foremost	0.007
+R>CWN/		3	chief	0.007
+R>H[	hif	2	about to show	0.105
+R>H[	hif	3	you have made see	0.053
+R>H[	nif	2	people will present themselves	0.01
+R>H[	qal	2	clearly (see)	0.001
+R>H[	qal	3	really (look)	0.001
+R>H[	qal	4	[one	0.001
+R>H[	qal	5	anyone will see	0.001
+R>H[	qal	6	people have seen	0.001
+R>H[	qal	7	of sight	0.001
+R>H[	qal	8	chosen	0.001
+R>J/		2	of appearance	0.25
+R>J/		3	a spectacle	0.25
+R>J/		4	sight	0.25
+R>M/		2	wild oxen	0.333
+R>WBN/		2	the son of Reuben	0.028
+R>WBN/		3	O Reuben	0.014
+RB/		2	O great	0.002
+RB/		3	than many	0.002
+RB<=/		2	(the) fourth part	0.286
+RB=/		2	the numerous things	0.007
+RB=/		3	as became numerous	0.007
+RB=/		4	than greatness	0.007
+RBBH/		2	ten	0.188
+RBBH/		3	thousand	0.062
+RBBH/		4	than ten thousand	0.062
+RBH[	hif	2	who] made much	0.013
+RBH[	hif	3	he will make much	0.007
+RBH[	hif	4	to make many	0.007
+RBH[	piel	2	make numerous	0.25
+RBH[	piel	3	you have made great	0.25
+RBH[	qal	2	they were numerous	0.036
+RBH[	qal	3	to be many	0.018
+RBH[	qal	4	you grew	0.018
+RBH[	qal	5	they became great	0.018
+RBH[	qal	6	they grow	0.018
+RBY/		2	resting place	0.25
+RBY[	hif	2	about to set	0.25
+RBY[	qal	2	crouching	0.045
+RC</		2	O wicked	0.004
+RC<[	hif	2	condemn	0.053
+RC<[	qal	2	I am guilty	0.333
+RC<[	qal	3	be wicked	0.111
+RCP/		2	plague	0.286
+RCP/		3	bolts	0.143
+RDH=[	qal	2	they are ruling	0.5
+RDH[	qal	2	tread	0.05
+RDM[	nif	2	dazed	0.286
+RDM[	nif	3	he had fallen asleep	0.143
+RDP[	qal	2	people pursued	0.009
+RDP[	qal	3	he puts to flight	0.009
+RDP[	qal	4	someone pursues	0.009
+RDP[	qal	5	O pursue	0.009
+RDP[	qal	6	will we persecute	0.009
+RG<[	hif	2	I will act in a moment	0.25
+RG<[	hif	3	to give rest to	0.25
+RG<[	hif	4	I will make in a moment	0.125
+RG<[	hif	5	give	0.125
+RG<[	qal	2	it has become hard	0.25
+RG<[	qal	3	he stirred up	0.25
+RGL/		2	of both feet	0.004
+RGL[	piel	2	spy	0.417
+RGL[	piel	3	he has slandered	0.042
+RGM[	qal	2	people will stone	0.077
+RGZ/		2	wrath	0.143
+RGZ/		3	the rumbling	0.143
+RGZ/		4	excitement	0.143
+RGZ[	hif	2	I will make tremble	0.167
+RGZ[	hif	3	to cause disquiet	0.167
+RGZ[	hif	4	who] shakes	0.167
+RGZ[	hif	5	provokers	0.167
+RGZ[	qal	2	stir up	0.036
+RGZ[	qal	3	it is excited	0.036
+RGZ[	qal	4	you were enraged	0.036
+RHV/		2	tresses	0.25
+RJB/		2	quarreling	0.034
+RJB/		3	cause	0.034
+RJB/		4	lawsuit	0.017
+RJB/		5	a controversy	0.017
+RJB/		6	complaint	0.017
+RJBH/		2	the contentions	0.5
+RJB[	hif	2	contend	0.5
+RJB[	qal	2	make a complaint	0.019
+RJB[	qal	3	I will oppose	0.019
+RJB[	qal	4	about to conduct	0.019
+RJB[	qal	5	contest a lawsuit	0.019
+RJB[	qal	6	case	0.019
+RJQ[	hif	2	emptying	0.188
+RJQ[	hif	3	he drew out	0.062
+RJQ[	hif	4	keeping empty	0.062
+RJR/		2	slime	0.5
+RJX/		2	smell	0.052
+RJX/		3	aroma	0.017
+RJX/		4	fragrance	0.017
+RJX/		5	scent	0.017
+RK/		2	gentle	0.067
+RKB/		2	of an upper mill-stone	0.017
+RKB/		3	an upper millstone	0.008
+RKB=/		2	a horseman	0.333
+RKB[	hif	2	make ride	0.083
+RKB[	hif	3	I will cause to draw	0.083
+RKB[	qal	2	you have ridden	0.035
+RKB[	qal	3	O riders	0.018
+RKB[	qal	4	they mounted	0.018
+RKB[	qal	5	he rode in a chariot	0.018
+RKB[	qal	6	ride forth	0.018
+RKK[	qal	2	it was soft	0.5
+RKLH/		2	merchandise	0.25
+RKS[	qal	2	they bound	0.5
+RKWC/		2	equipment	0.036
+RMF/		2	moving thing	0.059
+RMF[	qal	2	it moves about	0.059
+RMH=[	piel	2	betray	0.333
+RMH[	qal	2	a shooter	0.5
+RMJH/		2	of deceit	0.286
+RMM=[	nif	2	get away	0.25
+RMS[	qal	2	trampler	0.083
+RMWN/		2	tree	0.031
+RMWN/		3	pomegranate tree	0.031
+RNH/		2	a cry of entreaty	0.061
+RNNH/		2	of cries of joy	0.25
+RNN[	hif	2	shout for joy	0.2
+RNN[	hif	3	sing for joy	0.2
+RNN[	hif	4	I made sing for joy	0.2
+RNN[	piel	2	they will cry out for joy	0.071
+RNN[	qal	2	it cries aloud	0.158
+RNN[	qal	3	they shouted	0.053
+RNN[	qal	4	sang	0.053
+RP>[	nif	2	be repaired	0.062
+RP>[	piel	2	fully (heal)	0.125
+RP>[	piel	3	he repaired	0.125
+RP>[	qal	2	about to heal	0.036
+RP>[	qal	3	someone will heal	0.036
+RP>[	qal	4	repair	0.036
+RP>[	qal	5	healers	0.036
+RPD[	piel	2	refresh	0.5
+RPH/		2	feeble	0.25
+RPH[	hif	2	let drop	0.25
+RPH[	hif	3	be quiet	0.167
+RPH[	hif	4	abandon	0.083
+RPH[	hif	5	let go	0.083
+RPH[	hit	2	shows himself idle	0.333
+RPH[	hit	3	you have shown yourself without courage	0.333
+RPH[	piel	2	they let drop	0.4
+RPH[	piel	3	he loosens	0.2
+RPH[	qal	2	they dropped	0.214
+RPH[	qal	3	it is sinking	0.143
+RPH[	qal	4	he withdrew	0.071
+RPH[	qal	5	it relaxed	0.071
+RPH[	qal	6	it will be disheartened	0.071
+RQ<[	piel	2	people	0.5
+RQ<[	qal	2	stamp	0.4
+RQD[	piel	2	jolting	0.333
+RQMH/		2	multicolored	0.182
+RW<[	hif	2	he will raise a war-cry	0.025
+RW<[	hif	3	sound an alarm	0.025
+RW<[	hif	4	people shout	0.025
+RW<[	hit	2	they shout for joy	0.333
+RW<[	hit	3	I shout in triumph	0.333
+RWC[	qal	2	they are in want	0.045
+RWM[	hif	2	he took up	0.012
+RWM[	hif	3	[those	0.012
+RWM[	hif	4	remove	0.012
+RWM[	hif	5	it sets on high	0.012
+RWM[	hof	2	it is lifted up	0.333
+RWM[	hof	3	it was removed	0.333
+RWM[	piel	2	O	0.077
+RWM[	piel	3	it lifted up	0.077
+RWM[	pual	2	exalted	0.5
+RWM[	qal	2	to be lifted up	0.078
+RWM[	qal	3	haughty	0.031
+RWM[	qal	4	they will arise	0.016
+RWX=/		2	relief	0.5
+RWXH/		2	relief	0.5
+RWX[	hif	2	delighting	0.222
+RWY[	hif	2	bring quickly	0.25
+RWY[	hif	3	it will cause to run	0.25
+RWY[	hif	4	they brought quickly	0.25
+RXB/		2	spacious	0.048
+RXB/		3	place	0.048
+RXB/		4	a arrogant	0.048
+RXB/		5	extensive	0.048
+RXB==/		2	square	0.047
+RXB==/		3	space	0.047
+RXB==/		4	the open space	0.047
+RXB==/		5	its public	0.023
+RXB[	hif	2	make large	0.095
+RXB[	hif	3	he has made space	0.048
+RXB[	hif	4	someone has made large	0.048
+RXB[	hif	5	do you make wide	0.048
+RXB[	hif	6	he has made large	0.048
+RXB[	hif	7	they have opened wide	0.048
+RXB[	hif	8	it makes space	0.048
+RXB[	qal	2	it will be enlarged	0.333
+RXB[	qal	3	it was broad	0.333
+RXM[	piel	2	they have mercy	0.071
+RXM[	pual	2	he will be shown mercy	0.5
+RXQ[	hif	2	far away	0.143
+RXQ[	hif	3	they had gone far	0.048
+RXQ[	hif	4	go far away	0.048
+RXQ[	hif	5	they had gone far away	0.048
+RXQ[	hif	6	I want to be far away	0.048
+RXQ[	hif	7	put	0.048
+RXQ[	hif	8	you will remove	0.048
+RXQ[	hif	9	make far away	0.048
+RXQ[	piel	2	you have extended	0.25
+RXQ[	piel	3	it has made far away	0.25
+RXQ[	piel	4	let them put far away	0.25
+RXQ[	qal	2	they became distant	0.069
+RXWQ/		2	O distant	0.013
+RXWQ/		3	rechokim	0.013
+RXY[	qal	2	he has washed away	0.015
+RYH[	qal	2	the favored	0.033
+RYH[	qal	3	they take delight	0.033
+RYH[	qal	4	he has taken pleasure in	0.033
+RYH[	qal	5	acceptable	0.033
+RYH[	qal	6	he took pleasure	0.033
+RYH[	qal	7	delight	0.033
+RYX[	nif	2	I will be killed	0.5
+RYX[	piel	2	murderers	0.4
+RYX[	qal	2	a murderer	0.026
+RZN[	qal	2	O rulers	0.167
+S<D[	qal	2	support	0.25
+SBB[	hif	10	about to turn round	0.032
+SBB[	hif	11	he had caused to go round	0.032
+SBB[	hif	12	let us surround	0.032
+SBB[	hif	2	they brought round	0.129
+SBB[	hif	3	he changed	0.097
+SBB[	hif	4	he caused to go around	0.065
+SBB[	hif	5	bring round	0.065
+SBB[	hif	6	go around	0.065
+SBB[	hif	7	turn over	0.065
+SBB[	hif	8	you have turned around	0.032
+SBB[	hif	9	he removed	0.032
+SBB[	hof	2	turning	0.333
+SBB[	hof	3	changed	0.167
+SBB[	nif	2	they will be turned over	0.1
+SBB[	piel	2	to change	0.167
+SBB[	piel	3	she will surround	0.167
+SBB[	qal	2	goes around	0.027
+SBB[	qal	3	it turned around	0.027
+SBB[	qal	4	around	0.027
+SBB[	qal	5	circling around	0.027
+SBB[	qal	6	they gathered round	0.014
+SBB[	qal	7	it will come round	0.014
+SBB[	qal	8	it will change	0.014
+SBB[	qal	9	circling	0.014
+SBJB/		2	surroundings	0.009
+SBJB/		3	circuit	0.003
+SBJB/		4	around about	0.003
+SBL=/		2	the forced labor	0.333
+SBLWT/		2	the forced labor	0.333
+SBL[	qal	2	carry a load	0.2
+SDJN/		2	garments	0.25
+SGLH/		2	treasure	0.25
+SGR[	nif	2	they were closed	0.125
+SGR[	qal	2	about] to shut	0.028
+SGR[	qal	3	people closed	0.028
+SGR[	qal	4	shutting	0.028
+SGR[	qal	5	they shut the door	0.028
+SGR[	qal	6	someone will shut	0.028
+SGR[	qal	7	lance	0.028
+SGWR=/		2	fine gold	0.5
+SJG/		2	dross	0.125
+SK/		2	refuge	0.25
+SKH/		2	Tabernacles	0.097
+SKH/		3	canopy	0.032
+SKH/		4	his pavilion	0.032
+SKH/		5	thicket	0.032
+SKK[	hif	2	he has made inaccessible	0.143
+SKK[	hif	3	he shut off	0.143
+SKN[	hif	2	you know intimately	0.25
+SKN[	hif	3	be reconciled	0.25
+SKN[	qal	2	a nurse	0.25
+SKN[	qal	3	steward	0.125
+SKWT/		2	towards	0.059
+SL</		2	than rock	0.017
+SLJXH/		2	forgiveness	0.333
+SLL[	qal	2	pile	0.1
+SLL[	qal	3	lift up	0.1
+SLP[	piel	2	it perverts	0.286
+SLQ[	haf	2	take up	0.5
+SLQ[	peal	2	coming up	0.2
+SLT/		2	flour	0.038
+SLT/		3	its fine	0.019
+SM/		2	spices	0.125
+SMK[	qal	2	sustaining	0.194
+SMK[	qal	3	he laid	0.083
+SMK[	qal	4	firm	0.028
+SMK[	qal	5	a sustainer	0.028
+SMK[	qal	6	support	0.028
+SMK[	qal	7	it has lain	0.028
+SPD[	qal	2	mourners	0.036
+SPH[	nif	2	he will be carried away	0.111
+SPH[	nif	3	who is] captured	0.111
+SPH[	qal	2	it has dwindled away	0.167
+SPH[	qal	3	snatch	0.167
+SPJX/		2	grain	0.25
+SPN[	qal	2	reserved	0.167
+SPQ[	qal	2	I slapped	0.167
+SPQ[	qal	3	it will splash	0.167
+SPQ[	qal	4	slap	0.167
+SPQ[	qal	5	he claps	0.167
+SPR/		2	the record	0.005
+SPR=/		2	of a muster-officer	0.019
+SPR=/		3	of Sophrites	0.019
+SPR[	piel	2	I count	0.032
+SPR[	piel	3	people recount	0.016
+SPR[	qal	2	measure	0.04
+SPR[	qal	3	people will count	0.04
+SPR[	qal	4	you have taken account of	0.04
+SPR[	qal	5	the scribe	0.04
+SPXT/		2	skin	0.5
+SQL[	piel	2	clear	0.333
+SQL[	qal	2	really (stone)	0.167
+SQL[	qal	3	certainly (stone)	0.167
+SRR[	qal	2	rebellious	0.412
+SRR[	qal	3	rebels	0.118
+SRWX/		2	projecting	0.25
+SRWX/		3	overhung	0.25
+STM[	qal	2	kept secret	0.3
+STM[	qal	3	keep secret	0.2
+STR/		2	secret	0.029
+STR/		3	of secret places	0.029
+STR[	hif	2	certainly (hide)	0.028
+STR[	hif	3	to conceal	0.028
+STR[	nif	2	she will be undiscovered	0.034
+SWD/		2	secret counsel	0.095
+SWD/		3	secret	0.095
+SWD/		4	gathering	0.048
+SWD/		5	assembly	0.048
+SWPH/		2	like the storm-wind	0.071
+SWR[	hif	2	he has taken away	0.017
+SWR[	hif	3	he left undone	0.008
+SWR[	hif	4	about to remove	0.008
+SWR[	hif	5	they take away	0.008
+SWR[	hif	6	people remove	0.008
+SWR[	hif	7	they will abolish	0.008
+SWR[	hof	2	about to be removed	0.2
+SWR[	hof	3	it was abolished	0.2
+SWS/		2	a swallow	0.007
+SXB[	qal	2	we will drag	0.2
+SXB[	qal	3	drag away	0.2
+SXB[	qal	4	people will drag	0.2
+SXR/		2	trading profit	0.286
+SXR[	qal	2	let them go about in	0.118
+SXR[	qal	3	go	0.059
+SXR[	qal	4	O trader	0.059
+SXR[	qal	5	they have gone about	0.059
+T<B[	hif	2	they do abominably	0.5
+T<B[	nif	2	abhorrent	0.333
+T<B[	piel	2	loathe	0.182
+T<B[	piel	3	utterly (abhor)	0.091
+T<B[	piel	4	you made abominable	0.091
+T<B[	piel	5	he abhorred	0.091
+T<H[	hif	2	leading astray	0.231
+T<H[	hif	3	they caused to err	0.231
+T<H[	hif	4	mislead	0.154
+T<H[	hif	5	they caused to wander	0.077
+T<H[	nif	2	he has been led astray	0.5
+T<LH/		2	trench	0.333
+T<LH/		3	channels	0.222
+T<NWG/		2	luxury	0.2
+T<R/		2	the knife	0.077
+T<WDH/		2	attestation	0.333
+T>/		2	the guardroom	0.154
+T>R/		2	appearance	0.2
+T>WH/		2	a delight	0.05
+TBNJT/		2	a likeness	0.25
+TBNJT/		3	the copy	0.05
+TBNJT/		4	an image	0.05
+TBNJT/		5	structure	0.05
+TBW>H/		2	harvest(s)	0.024
+TBW>H/		3	revenue	0.024
+TC>H/		2	shouting(s)	0.5
+TCWBH/		2	answers	0.25
+TJC/		2	goats	0.25
+TJMN=/		2	O Teman	0.091
+TKLJT/		2	completeness	0.2
+TKLT/		2	violet material	0.02
+TKNJT/		2	a pattern	0.5
+TM/		2	complete	0.133
+TM/		3	my perfect	0.133
+TM/		4	quiet	0.067
+TM=/		2	innocence	0.143
+TM=/		3	his completeness	0.048
+TMJD/		2	regularity	0.02
+TMJM/		2	integrity	0.033
+TMJM/		3	blamelessness	0.011
+TMK[	qal	2	they supported	0.211
+TMK[	qal	3	holding	0.158
+TMK[	qal	4	he grasped	0.105
+TMK[	qal	5	they have held firm	0.053
+TMK[	qal	6	[those	0.053
+TMK[	qal	7	let it hold fast to	0.053
+TMK[	qal	8	she lays hold of	0.053
+TMK[	qal	9	let people support	0.053
+TMM[	hif	2	they ceased	0.143
+TMM[	hif	3	I will make an end of	0.143
+TMM[	hif	4	you make blameless	0.143
+TMM[	qal	2	we have met our end	0.044
+TMM[	qal	3	I will be blameless	0.022
+TMM[	qal	4	let them be destroyed	0.022
+TMRWQ/		2	a cleansing	0.25
+TMWRH/		2	substitute	0.333
+TNJN/		2	monster	0.25
+TNJN/		3	O sea monsters	0.083
+TNW>H/		2	occasions	0.5
+TNWBH/		2	the produce	0.2
+TNWPH/		2	the brandishing	0.067
+TNWPH/		3	the wave-offerings	0.033
+TNWR/		2	a fire pot	0.067
+TNWR/		3	a furnace	0.067
+TP>RT/		2	boasting	0.02
+TPF[	nif	2	you will be captured	0.2
+TPF[	qal	10	grasp	0.025
+TPF[	qal	11	sheathed	0.025
+TPF[	qal	2	handled	0.05
+TPF[	qal	3	player	0.025
+TPF[	qal	4	skilled	0.025
+TPF[	qal	5	catch	0.025
+TPF[	qal	6	certainly (capture)	0.025
+TPF[	qal	7	he arrested	0.025
+TPF[	qal	8	you have taken hold of	0.025
+TPF[	qal	9	O occupy	0.025
+TPL=/		2	sham	0.5
+TPR[	qal	2	they sewed together	0.333
+TQ<[	nif	2	will he strike himself	0.333
+TQ<[	qal	2	he had pitched	0.033
+TQ<[	qal	3	she drove	0.033
+TQ<[	qal	4	they fixed	0.033
+TQ<[	qal	5	he pitched tent	0.017
+TQ<[	qal	6	as sounds	0.017
+TQ<[	qal	7	had been] driven	0.017
+TQ<[	qal	8	they have given a blast	0.017
+TQ<[	qal	9	you have struck	0.017
+TQP/		2	authority	0.333
+TR</		2	the door	0.5
+TRJN/		2	two	0.5
+TRN/		2	flagstaff	0.333
+TRW<H/		2	battle-cry	0.056
+TRW<H/		3	a war cry	0.028
+TW<H/		2	confusion	0.5
+TW<PWT/		2	peaks	0.25
+TW<PWT/		3	of heaps	0.25
+TWB[	haf	2	he sent back	0.25
+TWB[	haf	3	send	0.25
+TWCB/		2	your resident	0.071
+TWCB/		3	alien	0.071
+TWDH/		2	choir	0.062
+TWDH/		3	confession	0.031
+TWDH/		4	praise	0.031
+TWDH/		5	thanksgivings	0.031
+TWDH/		6	thanksgiving choirs	0.031
+TWL</		2	worms	0.333
+TWL<T/		2	O worm	0.026
+TWLDWT/		2	genealogies	0.316
+TWR[	hif	2	he makes a search	0.5
+TWR[	qal	2	seek out	0.091
+TWR[	qal	3	the merchants	0.091
+TWR[	qal	4	you will go about	0.045
+TWR[	qal	5	I had selected	0.045
+TWR[	qal	6	it explores	0.045
+TWR[	qal	7	discover	0.045
+TWR[	qal	8	I searched	0.045
+TWR[	qal	9	examine	0.045
+TWY>WT/		2	the exits	0.043
+TWY>WT/		3	escapes	0.043
+TWY>WT/		4	sources	0.043
+TXNH/		2	favor	0.08
+TXT/		2	below	0.003
+TXTJ/		2	O lower parts	0.053
+V<M/		2	sense	0.154
+V<M/		3	the decree	0.077
+VB<T/		2	finger ring	0.02
+VB<T/		3	signet-rings	0.02
+VB<[	hof	2	they were planted	0.333
+VB<[	qal	2	it sank	0.333
+VB<[	qal	3	let me sink	0.167
+VBX=/		2	cook	0.062
+VHR=/		2	purity	0.333
+VHR[	hit	2	we have cleansed ourselves	0.053
+VHR[	piel	2	he will declare pure	0.133
+VHR[	piel	3	declare	0.033
+VHR[	piel	4	pure	0.033
+VHR[	piel	5	people purified	0.033
+VHR[	qal	2	she has become pure	0.029
+VJRH/		2	of stones	0.143
+VJRH/		3	a battlement	0.143
+VL>[	qal	2	multicolored	0.143
+VM>[	piel	2	make	0.071
+VM>[	piel	3	people had defiled	0.024
+VM>[	qal	2	uncleanness	0.013
+VPR/		2	claws	0.5
+VRJPH/		2	animal	0.111
+VRJPH/		3	torn flesh	0.111
+VRP=/		2	the fresh	0.5
+VRP[	qal	2	actually (tear)	0.05
+VRP[	qal	3	he has torn to pieces	0.05
+VRP[	qal	4	it tore	0.05
+VRP[	qal	5	it has torn	0.05
+VWB/		2	fine	0.007
+VWB/		3	kind	0.004
+VWB/		4	than good	0.002
+VWB/		5	pure	0.002
+VWB=/		2	its good	0.031
+VWBH/		2	thing	0.031
+VWBH/		3	deeds	0.015
+VWL[	hof	2	everyone is hurled down	0.25
+VWR/		2	a row of stones	0.038
+VWX[	qal	2	overlay	0.111
+XB>[	hif	2	she had hidden	0.25
+XB>[	hit	2	had] hidden themselves	0.2
+XB>[	hit	3	they become hard	0.1
+XBC[	piel	2	he restrains	0.5
+XBC[	qal	2	wrapped round	0.037
+XBC[	qal	3	will he govern	0.037
+XBL=/		2	measured portions	0.04
+XBL=/		3	a company	0.04
+XBL=/		4	the allotted portions	0.02
+XBL===/		2	pain(s)	0.5
+XBL[	qal	2	taken as pledges	0.167
+XBL[	qal	3	hold	0.167
+XBL[	qal	4	actually (take as pledge)	0.083
+XBL[	qal	5	anyone will take as pledge	0.083
+XBL[	qal	6	you have held in pledge	0.083
+XBQ[	qal	2	folding	0.333
+XBR/		2	united	0.083
+XBR/		3	than	0.083
+XBR[	hit	2	made an alliance	0.5
+XBR[	piel	2	join together	0.25
+XBR[	pual	2	it was joined	0.25
+XBR[	pual	3	he is united	0.25
+XBR[	qal	2	casts	0.2
+XBR[	qal	3	they joined together	0.1
+XBWRH/		2	welt	0.143
+XCB[	nif	2	they were thought	0.033
+XCB[	piel	2	it plans	0.231
+XCB[	piel	3	I thought about	0.154
+XCB[	piel	4	they settled accounts	0.077
+XCB[	piel	5	they plot	0.077
+XCB[	piel	6	it thought	0.077
+XCB[	qal	10	anyone considers	0.015
+XCB[	qal	11	people will plan	0.015
+XCB[	qal	12	of an inventor	0.015
+XCB[	qal	2	he reckons	0.03
+XCB[	qal	3	it considers	0.03
+XCB[	qal	4	designers	0.015
+XCB[	qal	5	they value	0.015
+XCB[	qal	6	anyone has valued	0.015
+XCB[	qal	7	people have planned	0.015
+XCB[	qal	8	esteemed	0.015
+XCB[	qal	9	may he think	0.015
+XCH[	hif	2	making quiet	0.111
+XCH[	qal	2	they were still	0.143
+XCKH/		2	darkness(es)	0.167
+XCK[	hif	2	he will bring darkness	0.167
+XCK[	hif	3	he made dark	0.167
+XCK[	hif	4	it is dark	0.167
+XCK[	qal	2	it has become dark	0.182
+XCK[	qal	3	it is dark	0.182
+XCK[	qal	4	may they grow dim	0.182
+XCK[	qal	5	it grew dark	0.091
+XCK[	qal	6	they have grown dim	0.091
+XCQ[	qal	2	he desired	0.25
+XDC=/		2	its new	0.004
+XDL/		2	who refrains	0.333
+XDL/		3	transient	0.333
+XDL[	qal	2	it has stopped	0.018
+XDQ/		2	of thorn	0.5
+XDR/		2	the inner	0.029
+XDR/		3	be] from inner rooms	0.029
+XFK[	nif	2	he is spared	0.5
+XFK[	qal	2	refrain	0.08
+XFK[	qal	3	he kept back	0.08
+XFK[	qal	4	anyone restrained	0.04
+XFK[	qal	5	withholds	0.04
+XGG[	qal	2	celebrating	0.067
+XGG[	qal	3	they staggered	0.067
+XGWRH/		2	loin coverings	0.2
+XJ/		2	one	0.017
+XJ/		3	living one	0.008
+XJ/		4	raw	0.004
+XJ/		5	person	0.004
+XJDH/		2	difficult matters	0.118
+XJDH/		3	parables	0.059
+XJDH/		4	intrigue(s)	0.059
+XJH[	hif	2	restore to life	0.227
+XJH[	piel	2	preserve	0.293
+XJH[	piel	3	I restore to life	0.049
+XJH[	piel	4	they will cause to grow	0.024
+XJH[	qal	2	people live	0.005
+XJJM/		2	than	0.014
+XJJM/		3	kinsfolk	0.007
+XJL==/		2	the fortress	0.125
+XJL==[	qal	2	she is in anguish	0.5
+XJL[	hit	2	she agonized	0.5
+XJL[	piel	2	brought	0.2
+XJL[	piel	3	it causes labor pains to	0.2
+XJL[	piel	4	you brought forth	0.2
+XJL[	pual	2	they are made to tremble	0.2
+XJL[	qal	2	he was in severe pain	0.095
+XJL[	qal	3	people will be in anguish	0.048
+XJL[	qal	4	writhe in pain	0.048
+XJL[	qal	5	they writhe	0.048
+XJL[	qal	6	they writhed in agony	0.048
+XJQ/		2	the bottom	0.026
+XJYWN/		2	external	0.042
+XJYWN/		3	outside	0.042
+XKJM/		2	the wise	0.143
+XKM/		10	your skilled	0.008
+XKM/		2	men	0.016
+XKM/		3	shrewd	0.008
+XKM/		4	O wise	0.008
+XKM/		5	a prudent	0.008
+XKM/		6	of learned ones	0.008
+XKM/		7	man	0.008
+XKM/		8	person	0.008
+XKM/		9	of wise people	0.008
+XKMH/		2	than wisdom	0.014
+XKMWNJ/		2	of Hacmoni	0.5
+XKM[	hit	2	make yourself wise	0.5
+XKM[	pual	2	made wise	0.5
+XKM[	qal	2	act wisely	0.053
+XL/		2	of profaneness	0.286
+XL/		3	thing	0.143
+XL/		4	a profane area	0.143
+XLB/		2	than milk	0.045
+XLC[	qal	2	O defeat	0.333
+XLC[	qal	3	he was weak	0.333
+XLD/		2	world	0.4
+XLH[	hif	2	he made sick	0.25
+XLH[	hif	3	they became sick	0.25
+XLH[	nif	2	of sickness	0.125
+XLH[	nif	3	they have wearied themselves	0.125
+XLH[	nif	4	they were sickened	0.125
+XLH[	nif	5	I was sick	0.125
+XLH[	piel	2	he has made sick	0.059
+XLH[	qal	2	he became sick	0.226
+XLH[	qal	3	weak	0.161
+XLH[	qal	4	severe	0.065
+XLH[	qal	5	feels pain	0.032
+XLH[	qal	6	he became ill	0.032
+XLH[	qal	7	you became weak	0.032
+XLJ/		2	an affliction	0.042
+XLJPH/		2	relays	0.083
+XLJPH/		3	relief	0.083
+XLL/		2	a profaned	0.032
+XLL/		3	O profane	0.011
+XLL/		4	wounded	0.011
+XLL/		5	than slain	0.011
+XLL[	hif	2	she will profane herself	0.036
+XLL[	hif	3	he will violate	0.018
+XLL[	hif	4	when begins	0.018
+XLL[	hif	5	when began	0.018
+XLL[	piel	2	[those	0.018
+XLL[	piel	3	they will put to use	0.018
+XLL[	piel	4	about to profane	0.018
+XLM[	qal	2	the dreamer	0.125
+XLP[	hif	2	they will renew	0.25
+XLP[	hif	3	we will substitute	0.125
+XLP[	hif	4	it will sprout afresh	0.125
+XLP[	hif	5	it will show newness	0.125
+XLP[	qal	2	it will pass away	0.143
+XLP[	qal	3	sweep on	0.071
+XLP[	qal	4	they have overstepped	0.071
+XLP[	qal	5	it swept on	0.071
+XLP[	qal	6	it passed over	0.071
+XLP[	qal	7	they have passed on	0.071
+XLP[	qal	8	it has passed away	0.071
+XLQ/		2	the territory	0.045
+XLQ/		3	of land	0.015
+XLQ/		4	my possession	0.015
+XLQ/		5	part	0.015
+XLQ/		6	reward	0.015
+XLQH/		2	a portion of ground	0.087
+XLQH=/		2	smoothness	0.5
+XLQ[	piel	2	he distributed	0.136
+XLQ[	piel	3	I will allot a portion	0.045
+XLQ[	piel	4	than to divide	0.045
+XLQ[	qal	2	he had assigned	0.214
+XLQ[	qal	3	they apportioned	0.071
+XLQ[	qal	4	he gave a share	0.071
+XLQ[	qal	5	distribute	0.071
+XLQ[	qal	6	he had plundered	0.071
+XLY[	nif	2	delivered	0.4
+XLY[	nif	3	be equipped	0.2
+XLY[	piel	2	people will tear out	0.143
+XLY[	piel	3	tears out	0.143
+XLY[	qal	2	they draw out	0.105
+XLY[	qal	3	of the drawn off	0.053
+XLY[	qal	4	you will take off	0.053
+XLY[	qal	5	he has withdrawn	0.053
+XMDH/		2	(the) desirable thing	0.062
+XMDH/		3	the precious thing	0.062
+XMD[	qal	2	do they delight in?	0.071
+XMH/		2	wrath	0.016
+XMH/		3	fever	0.008
+XMH/		4	poison	0.008
+XMH=/		2	heat	0.167
+XMJCJT/		2	the fifth part	0.5
+XMN/		2	incense altars	0.125
+XMR/		2	mortar	0.167
+XMR/		3	a heap	0.056
+XMR=/		2	heaps	0.154
+XNH/		2	O Hannah	0.077
+XNH[	qal	2	to decline	0.007
+XNJT/		2	his own	0.043
+XNK[	qal	2	train	0.333
+XNNJH/		2	O Hananiah	0.038
+XNN[	piel	2	he will make favorable	0.333
+XNN[	qal	2	showing favor	0.326
+XNN[	qal	3	he has shown favor to	0.023
+XNN[	qal	4	certainly (show favor)	0.023
+XNV[	qal	2	people embalmed	0.25
+XNV[	qal	3	it has ripened	0.25
+XNWK/		2	Hanoch	0.4
+XPCJ/		2	set free	0.071
+XPF[	pual	2	he is searched for	0.5
+XPF[	qal	2	searching	0.333
+XPF[	qal	3	let us examine	0.333
+XPN/		2	of your hands	0.167
+XPN/		3	the hollow	0.167
+XPR=[	qal	2	spy out	0.158
+XPR=[	qal	3	you will dig	0.105
+XPR=[	qal	4	people had dug	0.053
+XPR=[	qal	5	you will be well protected	0.053
+XPR=[	qal	6	they paw	0.053
+XPR=[	qal	7	it spies out	0.053
+XPY[	qal	2	(take pleasure)?	0.07
+XPY[	qal	3	someone desires	0.014
+XPY[	qal	4	he will be willing	0.014
+XQ/		2	portion	0.016
+XQ/		3	a custom	0.008
+XQ/		4	order(s)	0.008
+XQ/		5	conditions	0.008
+XQ/		6	than	0.008
+XQ/		7	an allotted portion	0.008
+XQH/		2	fixed order(s)	0.019
+XQH/		3	a prescribed portion	0.01
+XQH/		4	of appointments	0.01
+XQQ[	piel	2	commanders	0.4
+XQQ[	piel	3	they enact	0.2
+XQQ[	qal	2	the commanders	0.167
+XQQ[	qal	3	who] decree	0.167
+XQQ[	qal	4	cutting	0.167
+XQR/		2	searchings	0.083
+XQR[	nif	2	they will be explored	0.25
+XQR[	nif	3	it will be searched	0.25
+XQR[	qal	2	I will sound out	0.067
+XQR[	qal	3	they will make a search	0.067
+XRB/		2	knives	0.005
+XRB/		3	O sword	0.005
+XRB/		4	tool	0.002
+XRB=/		2	dryness	0.188
+XRB=/		3	a drought	0.125
+XRB=/		4	of devastation	0.062
+XRB=/		5	of destruction	0.062
+XRB==/		2	dry	0.2
+XRBH/		2	dry ground	0.125
+XRB[	hif	2	he dries up	0.25
+XRB[	hif	3	I dry up	0.167
+XRB[	hif	4	desolates	0.083
+XRB[	hif	5	I will lay waste	0.083
+XRB[	hif	6	[those	0.083
+XRB[	hif	7	it laid waste	0.083
+XRB[	nif	2	laid waste	0.5
+XRB[	qal	2	utterly (desolate)	0.118
+XRC==/		2	heights	0.333
+XRC[	hif	2	will they silence?	0.027
+XRC[	hif	3	I kept quiet	0.027
+XRC[	qal	2	be deaf	0.286
+XRDH/		2	care	0.111
+XRDH/		3	trembling(s)	0.111
+XRD[	hif	2	he routed	0.062
+XRD[	hif	3	make tremble	0.062
+XRD[	qal	2	you have taken care	0.043
+XRF/		2	fragments	0.059
+XRH[	qal	2	really (burn)	0.012
+XRJC/		2	time	0.333
+XRJC/		3	plowing	0.333
+XRJV/		2	purses	0.5
+XRM/		2	dedicated person	0.034
+XRM[	hif	2	totally	0.103
+XRM[	hif	3	he will dedicate to destruction	0.051
+XRM[	hof	2	it will be forfeited	0.333
+XRPH/		2	become] (into) a reproach	0.014
+XRP[	piel	2	it despised	0.036
+XRP[	qal	2	it reproaches	0.333
+XRV/		2	a stylus	0.5
+XRWN/		2	fury	0.024
+XRY[	qal	2	he sharpened	0.4
+XSD/		2	favor	0.013
+XSJD/		2	O	0.067
+XSM[	qal	2	blocking the way of	0.5
+XSR[	hif	2	he deprives	0.5
+XSR[	qal	2	decreasing	0.118
+XT=/		2	filled with terror	0.5
+XTJ/		2	Hethite	0.021
+XTM[	qal	2	he puts a seal	0.1
+XTN/		2	sons-in-law	0.1
+XTN[	hit	2	he became son-in-law	0.182
+XTN[	qal	2	mother-in-law	0.045
+XTR[	qal	2	they rowed	0.125
+XTT[	nif	2	they are shattered	0.103
+XTT[	nif	3	it will be broken	0.034
+XTT[	nif	4	they will be terrified	0.034
+XTT[	nif	5	he was in awe	0.034
+XTT[	qal	2	it is cracked	0.059
+XV>H/		2	sin offering	0.125
+XV>[	hif	2	he missed	0.032
+XV>[	hit	2	they are bewildered	0.111
+XV>[	piel	2	you will make a sin offering	0.091
+XV>[	piel	3	a sin offering	0.091
+XV>[	piel	4	they made a sin offering	0.091
+XV>[	qal	2	I will be culpable	0.011
+XV>[	qal	3	you will miss	0.006
+XV>[	qal	4	[one	0.006
+XVB[	qal	2	cut	0.25
+XVB[	qal	3	wood-cutters	0.125
+XVR/		2	a rod	0.5
+XWC[	hif	2	he will make haste	0.25
+XWC[	hif	3	I want to make haste	0.25
+XWC[	qal	2	makes haste	0.154
+XWC[	qal	3	hurried	0.077
+XWC[	qal	4	I have made haste	0.077
+XWC[	qal	5	agitation	0.077
+XWL/		2	than sand	0.136
+XWL[	qal	2	they whirled about	0.333
+XWL[	qal	3	let them whirl	0.222
+XWL[	qal	4	it writhed	0.111
+XWMH/		2	the city wall	0.008
+XWMH/		3	O wall	0.008
+XWP/		2	become] (into) a harbor	0.143
+XWS[	qal	2	you had compassion	0.273
+XWS[	qal	3	let it look with regret	0.045
+XWV/		2	a line	0.286
+XWY/		2	our open	0.007
+XX/		2	nose ring	0.143
+XYB[	qal	2	dig	0.091
+XYB[	qal	3	cut	0.091
+XYB[	qal	4	digging out	0.045
+XYB[	qal	5	I have cut in pieces	0.045
+XYB[	qal	6	striking	0.045
+XYB[	qal	7	she has hewn	0.045
+XYH[	qal	2	it reaches	0.125
+XYH[	qal	3	they will divide in half	0.125
+XZH=/		2	an agreement	0.059
+XZH=/		3	O seer	0.059
+XZH[	qal	2	you will select	0.019
+XZH[	qal	3	they will behold	0.019
+XZJR/		2	wild boar	0.143
+XZJZ/		2	thunder-clouds	0.333
+XZQ/		2	a person strong	0.019
+XZQ=/		2	our own	0.2
+XZQJH/		2	Hizkiah	0.077
+XZQ[	hif	2	the repairers	0.018
+XZQ[	hif	3	let anyone take hold	0.009
+XZQ[	hif	4	I have taken hold	0.009
+XZQ[	hif	5	the [one	0.009
+XZQ[	hif	6	he will prevail	0.009
+XZQ[	hif	7	they will display strength	0.009
+XZQ[	hif	8	he displayed strength	0.009
+XZQ[	hit	2	strongly	0.037
+XZQ[	piel	2	he made strong	0.111
+XZQ[	piel	3	about to make strong	0.019
+XZQ[	piel	4	they make firm	0.019
+XZQ[	qal	2	it was severe	0.064
+XZQ[	qal	3	they became strong	0.026
+XZQ[	qal	4	it was secure	0.026
+XZQ[	qal	5	it urged	0.013
+XZQ[	qal	6	he took hold	0.013
+XZQ[	qal	7	it was firm	0.013
+XZQ[	qal	8	it prevailed over	0.013
+XZWT/		2	conspicuousness	0.4
+XZWT/		3	agreement	0.2
+Y<DH/		2	chains	0.333
+Y<D[	qal	2	she will climb	0.143
+Y<D[	qal	3	they had stepped	0.143
+Y<D[	qal	4	they walk	0.143
+Y<D[	qal	5	he strode	0.143
+Y<H[	qal	2	bending	0.25
+Y<H[	qal	3	lying down	0.25
+Y<H[	qal	4	tilt	0.25
+Y<JR/		2	little	0.053
+Y<QH/		2	calling out	0.048
+Y<Q[	qal	2	she cried for help	0.043
+Y<Q[	qal	3	crying out for help	0.021
+YB>/		2	of warfare	0.033
+YDJQ/		2	O righteous	0.016
+YDJQ/		3	correct	0.005
+YDQH/		2	his own	0.007
+YDQH/		3	a right	0.007
+YDQ[	hif	2	the [one	0.091
+YDQ[	hif	3	vindicate	0.091
+YDQ[	hif	4	I will declare right	0.091
+YDQ[	hif	5	turn to righteousness	0.091
+YDQ[	piel	2	justified	0.333
+YDQ[	qal	2	will he be acquitted	0.045
+YHL[	qal	2	they neigh	0.286
+YHL[	qal	3	it cried aloud	0.143
+YHRJM/		2	like the noon(s)	0.043
+YHRJM/		3	than noon(s)	0.043
+YJD/		2	game	0.077
+YJD=/		2	their sustenance	0.25
+YJD=/		3	food	0.25
+YJDWN/		2	O Sidon	0.091
+YJH/		2	region	0.125
+YJH/		3	a desert	0.062
+YJH/		4	drought	0.062
+YJR==/		2	envoys	0.333
+YJWN=/		2	road markers	0.333
+YJWN=/		3	a marker	0.333
+YJWN==/		2	O Zion	0.039
+YJY/		2	salt	0.067
+YJYT/		2	the hair	0.25
+YL</		2	boards	0.075
+YL</		3	ribs	0.05
+YLJ/		2	roasted meat	0.333
+YLM/		2	own	0.062
+YLX[	hif	2	makes prosperous	0.026
+YLX[	hif	3	he will grant success	0.026
+YLX[	qal	2	it rushed	0.36
+YLX[	qal	3	it was profitable	0.08
+YLX[	qal	4	they rushed ahead	0.04
+YLYL/		2	of whirring	0.5
+YMD/		2	acres	0.133
+YMT[	hif	2	[those	0.167
+YMX[	hif	2	it causes to grow	0.154
+YMX[	hif	3	he made sprout	0.077
+YMX[	hif	4	to sprout	0.077
+YMX[	piel	2	it had grown	0.25
+YN/		2	barbs	0.333
+YNP[	qal	2	tightly (wind up)	0.5
+YNWR/		2	waterfalls	0.5
+YPJRH/		2	diadem	0.333
+YPN[	nif	2	it has been concealed	0.333
+YPN[	qal	2	I have hidden	0.043
+YPN[	qal	3	you have kept	0.043
+YPRN/		2	a point	0.5
+YPWN/		2	O north wind	0.007
+YPWR/		2	poultry	0.025
+YR/		2	anxiety	0.034
+YR/		3	tight	0.034
+YR<T/		2	his skin	0.086
+YR<T/		3	disease	0.029
+YR<[	pual	2	the has a serious skin disease	0.067
+YR<[	qal	2	has a skin disease	0.2
+YR=/		2	distresses	0.014
+YR=/		3	than	0.014
+YR=/		4	distress	0.014
+YR==/		2	than flint	0.5
+YRH/		2	the distresses	0.014
+YRH/		3	adversity	0.014
+YRJX/		2	the underground chamber	0.25
+YRP[	piel	2	refines	0.5
+YRP[	qal	2	thoroughly (refine)	0.083
+YRP[	qal	3	goldsmiths	0.083
+YRP[	qal	4	silversmith	0.042
+YRP[	qal	5	about	0.042
+YRP[	qal	6	test	0.042
+YRR=[	qal	2	the harasser	0.16
+YRR=[	qal	3	treat as foes	0.08
+YRR=[	qal	4	people	0.08
+YRR=[	qal	5	make a rival wife	0.04
+YRR=[	qal	6	attacks	0.04
+YRR=[	qal	7	treating as foes	0.04
+YRR=[	qal	8	they will trouble	0.04
+YRR=[	qal	9	O foes	0.04
+YRR[	hif	2	they caused distress	0.25
+YRR[	hif	3	harassed	0.25
+YRR[	hif	4	in labor	0.167
+YRR[	qal	2	they are restricted	0.069
+YRR[	qal	3	locked up	0.034
+YRR[	qal	4	it is narrow	0.034
+YRR[	qal	5	you will be cramped	0.034
+YRR[	qal	6	ties	0.034
+YRWR/		2	the bundle	0.143
+YWH[	piel	2	commission	0.008
+YWH[	piel	3	you have given command	0.003
+YWH[	piel	4	someone appointed	0.003
+YWP[	hif	2	he caused to float	0.5
+YWQ[	hif	2	the oppresses	0.222
+YWQ[	hif	3	she pressed	0.111
+YWR/		2	form	0.014
+YWR=[	qal	2	treat	0.333
+YWR=[	qal	3	as a foe	0.333
+YWR[	qal	2	he secured	0.067
+YWR[	qal	3	shutting up	0.033
+YWR[	qal	4	they tied up	0.033
+YWR[	qal	5	you will confine	0.033
+YWR[	qal	6	we will shut up	0.033
+YWY[	hif	2	may people flourish	0.143
+YWY[	hif	3	it will shine	0.143
+YX/		2	clear	0.25
+YX/		3	scorching	0.25
+YX/		4	dazzling	0.25
+YXJX/		2	places	0.2
+YXQ[	piel	2	jests	0.143
+YXQ[	piel	3	he made sport	0.143
+Z<M[	qal	2	accursed	0.1
+Z<M[	qal	3	cursed	0.1
+Z<M[	qal	4	he will direct indignation	0.1
+Z<P[	qal	2	it rages	0.25
+Z<P[	qal	3	looking thin	0.25
+Z<P[	qal	4	he was enraged	0.25
+Z<QH/		2	than cry	0.056
+Z<Q[	hif	2	he called out to	0.286
+Z<Q[	hif	3	people cry out	0.143
+Z<Q[	qal	2	I summoned	0.018
+Z<Q[	qal	3	they cried for help	0.018
+Z>B/		2	wolves	0.286
+Z>B/		3	than wolves	0.143
+ZBWB/		2	flies	0.5
+ZBWLN/		2	O Zebulun	0.022
+ZBX/		2	than sacrifice	0.012
+ZD/		2	presumptuous	0.077
+ZDWN/		2	O presumption	0.091
+ZH		2	what	0.054
+ZH		3	than this one	0.027
+ZH		4	than this	0.027
+ZHR/		2	the shining	0.5
+ZJD[	hif	2	he had cooked	0.143
+ZKH[	piel	2	will he keep pure	0.333
+ZKH[	qal	2	I be clean?	0.25
+ZKK[	qal	2	they were bright	0.333
+ZKR[	hif	2	recorder	0.243
+ZKR[	hif	3	someone will bring to remembrance	0.027
+ZKR[	hif	4	cause	0.027
+ZKR[	hif	5	he has brought to remembrance	0.027
+ZKR[	hif	6	offers as a memorial	0.027
+ZKR[	qal	2	people will remember	0.006
+ZKR[	qal	3	certainly (remember)	0.006
+ZL<PH/		2	burning indignation	0.333
+ZLL[	qal	2	worthless	0.333
+ZMH/		2	evil purposes	0.034
+ZMH/		3	evil intent	0.034
+ZMM[	qal	2	I have resolved	0.154
+ZMM[	qal	3	they will plan	0.077
+ZMN/		2	appointed times	0.143
+ZMRJ/		2	O Zimri	0.071
+ZMWRH/		2	branch	0.4
+ZMWRH/		3	their vine	0.2
+ZNB/		2	the stumps	0.091
+ZNH[	hif	2	he made prostitute	0.333
+ZNH[	hif	3	they will make prostitute	0.111
+ZNH[	hif	4	making	0.111
+ZNH[	qal	2	commit fornication	0.021
+ZNH[	qal	3	continually (prostitute itself)	0.021
+ZNWNJM/		2	than the prostitution(s)	0.083
+ZNX[	qal	2	you have spurned	0.091
+ZNX[	qal	3	it has excluded	0.091
+ZQN/		2	than old	0.006
+ZQN/		3	O old	0.006
+ZQNH/		2	age	0.167
+ZQNJM/		2	of old age(s)	0.5
+ZQN[	hif	2	he will be old	0.5
+ZQN[	qal	2	he became old	0.045
+ZQQ[	qal	2	they refine	0.5
+ZR</		2	O offspring	0.009
+ZR</		3	of the descendant	0.005
+ZR<[	hif	2	she will bear a child	0.333
+ZR<[	nif	2	she will be impregnated	0.167
+ZR<[	qal	2	bears seed	0.048
+ZR<[	qal	3	O sow	0.024
+ZR<[	qal	4	people have sown	0.024
+ZRBBL/		2	O Zerubbabel	0.095
+ZRH[	piel	2	winnowing	0.118
+ZRH[	piel	3	I will spread	0.059
+ZRH[	pual	2	spread out	0.5
+ZRH[	qal	2	scatter	0.333
+ZRH[	qal	3	you will disperse	0.167
+ZRM/		2	a storm	0.333
+ZRW</		2	his own arm	0.011
+ZRW</		3	O arm	0.011
+ZRW<=/		2	sown in it	0.5
+ZRX[	qal	2	it rose	0.056
+ZRX[	qal	3	it has risen	0.056
+ZRX[	qal	4	it shone	0.056
+ZRX[	qal	5	it shines	0.056
+ZWB[	qal	2	discharging	0.381
+ZWB[	qal	3	suffers a discharge	0.024
+ZWB[	qal	4	they flow away	0.024
+ZWJT/		2	be] like corners	0.5
+ZXL[	qal	2	I was anxious	0.333

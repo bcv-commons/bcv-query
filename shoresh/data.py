@@ -468,14 +468,45 @@ def _lex_sense_table() -> dict:
     return out
 
 
+# Served gloss-language NAME -> iso639-3 basename (for per-language sense-override files).
+_GLOSS_LANG_ISO = {
+    "English": "eng", "German": "deu", "Danish": "dan", "Dutch": "nld", "French": "fra",
+    "Indonesian": "ind", "Portuguese": "por", "Spanish": "spa", "Swahili": "swa",
+    "Amharic": "amh", "Chinese-Simplified": "cmn-Hans", "Chinese-Traditional": "cmn-Hant",
+}
+
+
+@lru_cache(maxsize=None)
+def _sense_i18n(iso: str) -> dict:
+    """{(lex, stem, sense): localized gloss} from resources/senses/senses_i18n/<iso>.tsv — the
+    non-dominant (polysemous sub-)sense translations. Empty until a language file is filled (the
+    dominant sense localizes for free via the per-stem gloss). Memoized per language."""
+    out: dict = {}
+    if not iso:
+        return out
+    p = _resources_dir() / "senses" / "senses_i18n" / f"{iso}.tsv"
+    if not p.exists():
+        return out
+    with p.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#"):
+                continue
+            c = line.rstrip("\n").split("\t")
+            if len(c) >= 4 and c[0] != "lex":
+                out[(c[0], c[1], c[2])] = c[3]
+    return out
+
+
 def _lex_senses(code: str, lang: str = "English") -> list[dict]:
     """Per-lexeme, per-stem Hebrew-context senses behind a Hebrew Strong's (homographs split,
     binyan-aware). Each: {lex, stems: {qal: [{sense,gloss,share}], …}}. The DOMINANT sense's
     label is the curated per-stem gloss in `lang` (multilingual — sense identity is Hebrew,
-    label is pluggable); sub-senses keep the English (cleaned-MACULA) label. Empty for Greek."""
+    label is pluggable); sub-senses use senses_i18n/<lang> if present, else the English label.
+    Empty for Greek."""
     if not code.startswith("H"):
         return []
     table = _lex_sense_table()
+    ov = _sense_i18n(_GLOSS_LANG_ISO.get(lang, "")) if lang != "English" else {}
     out = []
     for lex in _strong_to_lex().get(code, []):
         if lex not in table:
@@ -483,10 +514,14 @@ def _lex_senses(code: str, lang: str = "English") -> list[dict]:
         stems = {}
         for stem, senses in table[lex].items():
             ss = [dict(s) for s in senses]
-            if lang != "English" and ss:                       # relabel the dominant sense
+            if lang != "English" and ss:                       # dominant: reuse the per-stem gloss
                 g = resolve_word_gloss("hbo", lang, lex, stem or None)
                 if g:
                     ss[0] = {**ss[0], "gloss": g}
+            for i in range(1, len(ss)):                        # sub-senses: per-language override
+                g = ov.get((lex, stem, ss[i]["sense"]))
+                if g:
+                    ss[i] = {**ss[i], "gloss": g}
             stems[stem] = ss
         out.append({"lex": lex, "stems": stems})
     return out
