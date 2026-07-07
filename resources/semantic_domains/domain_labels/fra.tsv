@@ -1,0 +1,666 @@
+# source=UBS MARBLE SDBG (Louw-Nida) domain-name mapping; license=CC-BY-SA (UBS open-license); reference-only
+code	label
+001001	Univers, Création
+001002	Régions au-dessus de la Terre
+001003	Régions sous la surface de la Terre
+001004	Corps célestes
+001005	Objets de l'atmosphère
+001006	La surface de la Terre
+001007	Reliefs
+001008	Dépressions et cavités
+001009	Terres contrastant avec la mer
+001010	Masses d'eau
+001011	Zones sociopolitiques
+001012	Zones administratives gouvernementales
+001013	Zones inhabitées ou peu peuplées
+001014	Centres de population
+001015	Pâturages et terres cultivées
+001016	Voies de circulation : routes, rues, chemins, etc.
+002001	Éléments
+002003	Feu
+002004	Eau
+002005	Terre, boue, sable, roche
+002006	Pierres et substances précieuses et semi-précieuses
+002007	Métaux
+003001	Plantes [Sens général]
+003002	Arbres
+003003	Plantes qui ne sont pas des arbres
+003004	Fruits Parties de plantes
+003005	Parties de plantes autres que les fruits
+003006	Bois et produits dérivés du bois
+004001	Animaux
+004002	Oiseaux
+004003	Insectes
+004004	Reptiles et autres « bestioles rampantes »
+004005	Poissons et autres créatures marines
+005001	Aliments
+005002	Condiments
+006001	Artefacts [Sens général]
+006002	Instruments utilisés en agriculture et en élevage
+006003	Instruments utilisés pour la pêche
+006004	Instruments utilisés pour attacher et fixer
+006005	Pièges, collets
+006006	Instruments utilisés pour punir et exécuter
+006007	Armes et armures
+006008	Bateaux et parties de bateaux
+006009	Véhicules
+006010	Instruments utilisés pour marquer et écrire
+006011	Monnaie et unités monétaires
+006012	Instruments de musique
+006013	Images et idoles
+006014	Lumières et supports de lumière
+006015	Mobilier
+006016	Récipients
+006017	Tissus, cuir et objets fabriqués à partir de ces matériaux
+006018	Parures
+006019	Produits végétaux
+006020	Médicaments
+006021	Parfums et encens
+006022	Instruments de mesure
+006023	Divers
+007001	Constructions [Sens général]
+007002	Bâtiments
+007003	Parties et zones des bâtiments
+007004	Constructions ouvertes
+007005	Constructions destinées à retenir l'eau
+007006	Murs et clôtures
+007007	Constructions diverses
+007008	Matériaux de construction
+008001	Corps
+008002	Parties du corps
+008003	Produits physiologiques du corps
+009001	Êtres humains
+009002	Hommes
+009003	Femmes
+009004	Enfants
+009005	Personnes pour lesquelles on éprouve une affection particulière
+010001	Groupes et membres de groupes de personnes considérées comme apparentées par le sang, mais sans référence particulière aux générations successives
+010002	Relations de parenté impliquant des générations successives
+010003	Relations de parenté de la même génération
+010004	Relations de parenté fondées sur le mariage
+011001	Généralités
+011002	Socio-religieux
+011003	Socio-politiques
+011004	Ethnico-culturelles
+011005	Philosophiques
+012001	Êtres surnaturels
+012002	Pouvoirs surnaturels
+013001	État
+013002	Changement d'état
+013003	Exister
+013004	Se produire
+014001	Conditions météorologiques
+014002	Vent
+014003	Pluie
+014004	Tonnerre et éclairs
+014005	Manifestations impliquant des liquides et des masses sèches
+014006	Lumière
+014007	Ténèbres
+014008	Brûler
+014009	Son
+014010	Mouvement de la Terre
+015001	Se déplacer, aller/venir
+015002	Voyager, faire un voyage
+015003	Passer, traverser, contourner
+015004	Quitter, partir, fuir, échapper, envoyer
+015005	S'approcher
+015006	Venir, arriver
+015007	Revenir
+015008	Entrer
+015009	Monter
+015010	Descendre/Monter
+015011	Descendre
+015012	Tomber
+015013	Rassembler, faire venir ensemble
+015014	Se disperser, se disperser
+015015	Venir/Aller avant
+015016	Venir/Aller devant
+015017	Venir/Aller derrière
+015018	Contourner, entourer
+015019	Venir/Aller avec, voyager avec
+015020	Suivre, accompagner
+015021	Poursuivre, suivre
+015022	Rouler, transporter
+015023	Diriger, apporter, prendre
+015024	Porter, soutenir, supporter
+015025	Tirer, extraire, traîner/glisser
+015026	Lancer, jeter, projeter
+015027	Mouvement rapide
+015028	Mouvement orienté vers un but
+015029	Marcher, faire un pas
+015030	Courir
+015031	Sauter, bondir
+015032	Danser
+015033	Voler
+015034	Nager
+015035	Rouler
+016	Mouvement non linéaire
+017001	Être debout
+017002	S'asseoir
+017003	S'agenouiller
+017004	Se prosterner
+017005	Se prosterner en signe de révérence ou de supplication
+017006	Incliner [pour manger]
+017007	S'allonger
+017008	Se pencher, se redresser
+018001	Saisir, tenir
+018002	Fixer, coller
+019001	Frapper, donner un coup
+019002	Transpercer, couper
+019003	Fendre, déchirer
+019004	Casser, briser
+019005	Presser
+019006	Creuser
+020001	Violence
+020002	Blesser, blesser
+020003	Détruire
+020004	Tuer
+021001	Danger
+021002	S'exposer au danger
+021003	Sécurité, à l'abri du danger
+021004	Devenir en sécurité, à l'abri du danger
+021005	Rendre en sécurité, à l'abri du danger
+021006	Sauver au sens religieux
+022001	Problèmes, épreuves, détresse
+022002	Vivre des difficultés, des épreuves
+022003	Provoquer des difficultés, des épreuves
+022004	Difficile, dur
+022005	Soulagement des difficultés
+022006	Facile, léger
+022007	Circonstances ou état favorables
+023001	Manger, boire
+023002	Processus impliquant la bouche, autres que manger et boire
+023003	Naissance, procréation
+023004	Relations sexuelles
+023005	Sommeil, éveil
+023006	Fatigue, repos
+023007	Vivre, mourir
+023008	Santé, vigueur, force
+023009	Maladie, affaiblissement
+023010	Respirer, souffle
+023011	Grandir, croissance
+023012	Mûrir, produire des fruits, porter des graines
+023013	Pourrir, se décomposer
+024001	Voir
+024002	Entendre
+024003	Sentir
+024004	Goûter
+024005	Toucher, sentir
+024006	Douleur, souffrance
+024007	Perception sensorielle générale
+025001	Désirer, vouloir, souhaiter
+025002	Désirer fortement
+025003	Amour, affection, compassion
+025004	Espérer, avoir hâte de
+025005	Être disposé
+025006	Être impatient, être sérieux, d’une manière dévouée
+025007	Content, satisfait
+025008	Acceptable, être satisfait de
+025009	Reconnaissance, gratitude
+025010	Apprécier, prendre plaisir à, aimer faire
+025011	Heureux, content, joyeux
+025012	Rire, pleurer, gémir
+025013	Encouragement, consolation
+025014	Courage, audace
+025015	Patience, endurance, persévérance
+025016	Offenser, être offensé
+025017	Détester
+025018	Honte, déshonneur, humiliation
+025019	Fierté [légitime]
+025020	Surprise, étonnement
+025021	Inquiétude, anxiété, détresse, paix
+025022	Peur, terreur, alarme
+025023	Chagrin, regret
+025024	Découragement
+026	Facultés psychologiques
+027001	Apprendre
+027002	Apprendre l'emplacement de quelque chose
+027003	Apprendre quelque chose contre quelqu'un
+027004	Essayer d’apprendre
+027005	Être disposé à apprendre
+027006	Être prêt à apprendre, prêter attention
+027007	Reconnaître
+028001	Connaître
+028002	Connu [le contenu de la connaissance]
+028003	Bien connu, clairement montré, révélé
+028004	Pouvant être connu
+028005	Ne pouvant être connu, secret
+029001	Stockage d’informations
+029002	Se souvenir
+029003	Ne pas se souvenir, oublier
+029004	Se souvenir et réagir par une action appropriée
+030001	Penser, Pensée
+030002	Réfléchir, avec le but implicite de répondre de façon appropriée
+030003	Penser concernant les éventualités futures
+030004	Avoir l'intention, se proposer, planifier
+030005	Décider, conclure
+030006	Choisir, sélectionner, préférer
+030007	Distinguer, Évaluer, Juger
+031001	Avoir une opinion, Avoir un point de vue
+031002	Avoir un point de vue erroné, Se tromper
+031003	Être d'accord, consentir
+031004	Reconnaissance
+031005	Supposer, penser que c'est possible
+031006	Croire que c'est vrai
+031007	Accepter comme vrai
+031008	Changer d'avis concernant la vérité
+031009	Faire confiance, compter sur
+031010	Être croyant, la foi chrétienne
+032001	Comprendre
+032002	Venir à comprendre
+032003	Facilité ou difficulté à comprendre
+032004	Capacité de compréhension
+032005	Manque de capacité de compréhension
+033001	Langage
+033002	Mot, passage
+033003	Types de discours
+033004	Niveaux de langue
+033005	Langue écrite
+033006	Parler, discuter
+033007	Chanter, se lamenter
+033008	Garder le silence
+033009	Nom
+033010	Interpréter, signifier, expliquer
+033011	Converser, discuter
+033012	Demander, solliciter
+033013	Prier
+033014	Questionner, répondre
+033015	Informer, annoncer
+033016	Affirmer, déclarer
+033017	Enseigner
+033018	Dire la vérité, dire le mensonge
+033019	Prêcher, proclamer
+033020	Témoigner, attester
+033021	Professer son allégeance
+033022	Admettre, confesser, nier
+033023	Accepter
+033024	Prédire, deviner l'avenir
+033025	Promettre
+033026	Menacer
+033027	Conseiller
+033028	Exhorter, persuader
+033029	Appeler
+033030	Inviter
+033031	Insister
+033032	Commander, ordonner
+033033	Loi, règlement, ordonnance
+033034	Recommander, proposer
+033035	Intercéder
+033036	Merci
+033037	Louer
+033038	Fléchir
+033039	Se vanter
+033040	Paroles insensées
+033041	Se plaindre
+033042	Insulter, calomnier
+033043	Commérer
+033044	Se moquer, ridiculiser
+033045	Critiquer
+033046	Réprimander
+033047	Avertir
+033048	Accuser, blâmer
+033049	Défendre, excuser
+033050	Contester, débattre
+033051	Discuter, se quereller
+033052	S'opposer, contredire
+033053	Prophétiser
+033054	Jurer, faire prêter serment, faire vœu
+033055	Bénir, maudire
+033056	Communication non verbale
+034001	Associé
+034002	Rejoindre, commencer à s'associer
+034003	Appartenir à, être inclus dans la composition de, être exclu de
+034004	Limiter ou éviter l'association
+034005	Établir ou confirmer une relation
+034006	Rendre visite
+034007	Accueillir, recevoir
+034008	Faire preuve d'hospitalité
+034009	Embrasser, étreindre
+034010	Mariage, divorce
+035001	Aider
+035002	Servir
+035003	Subvenir aux besoins, soutenir
+035004	Prendre soin de, s'occuper de
+035005	Confier à la garde de
+035006	Élever, éduquer
+035007	Adopter
+035008	Déserter, abandonner
+036001	Guider, diriger
+036002	Discipliner, former
+036003	Obéir, désobéir
+036004	Suivre, être un disciple
+037001	Contrôler, restreindre
+037002	Contraindre, forcer
+037003	Exercer son autorité
+037004	Régner, gouverner
+037005	Attribuer un rôle ou une fonction
+037006	Saisir, mettre en détention
+037007	Remettre, trahir
+037008	Emprisonner
+037009	Garder, surveiller
+037010	Libérer, affranchir
+038001	Punir
+038002	Récompenser, récompenser
+039001	Opposition, hostilité
+039002	Division
+039003	Résistance
+039004	Céder
+039005	Conflit, lutte
+039006	Vengeance
+039007	Rébellion
+039008	Émeute
+039009	Persécution
+039010	Attaque
+039011	Embuscade
+039012	Conquête
+040001	Réconciliation
+040002	Pardon
+041001	Comportement, conduite
+041002	Coutume, tradition
+041003	Modèles particuliers de comportement
+041004	Imitation du comportement
+041005	Changement de comportement
+042001	Fonction
+042002	Faire, accomplir
+042003	Fabriquer, créer
+042004	Travail, labeur
+042005	Artisanat, commerce
+043	Agriculture
+044	Élevage, pêche
+045	Bâtir, construire
+046	Activités ménagères
+047001	Mouvement de liquides ou de masses
+047002	Utilisation de liquides
+047003	Application et retrait de liquides ou de masses
+048	Activités impliquant des tissus
+049	Activités impliquant les vêtements et la parure
+050	Concours et jeux
+051	Fêtes
+052	Funérailles et enterrement
+053001	Pratique religieuse
+053002	Offrande, sacrifice
+053003	Purifier, nettoyer
+053004	Souiller, rendre impur, profaner
+053005	Baptiser
+053006	Consacrer, dédier
+053007	Adorer, vénérer
+053008	Jeûner
+053009	Rôles et fonctions
+053010	Magie
+053011	Exorcisme
+053012	Sacrilège
+054	Activités maritimes
+055001	Armer
+055002	Combattre
+055003	Armée
+055004	Soldats, officiers
+055005	Prisonniers de guerre
+056001	Cour de justice
+056002	Procès, affaire
+056003	Accusation
+056004	Audience judiciaire, enquête
+056005	Juger, condamner, acquitter
+056006	Obtenir justice
+056007	Avocat, juriste
+056008	Condamner à une peine
+057	Posséder, transférer, échanger
+057001	Avoir, posséder, propriété, propriétaire
+057002	Avoir suffisamment
+057003	Être riche, être prospère
+057004	Trésor
+057005	Besoin, manque
+057006	Être pauvre, être dans le besoin, pauvreté
+057007	Prendre, obtenir, gagner, perdre
+057008	Donner
+057009	Recevoir
+057010	Échanger
+057011	Dépenser, gaspiller
+057012	Payer, prix, coût
+057013	Louer, mettre en location
+057014	Taxe, tribut
+057015	Vendre, acheter, prix
+057016	Gagner, faire des affaires
+057017	Prêter, prêt, intérêt, emprunter, banque
+057018	Detter, dette, annuler
+057019	Être un fardeau financier
+057020	Tenir des registres
+057021	Voler, dérober
+058001	Nature, caractère
+058002	Apparence en tant que manifestation extérieure de la forme
+058003	Principes ou caractéristiques fondamentaux définissant la nature de quelque chose
+058004	Classe, genre
+058005	Type ou catégorie identique ou équivalent
+058006	Genre ou classe différent
+058007	Distinctif, unique
+058008	Insolite, différent de l'ordinaire
+058009	Motif, modèle, exemple et représentation correspondante
+058010	Archétype, type correspondant [antitype]
+058011	Nouveau, Ancien [essentiellement non temporel]
+059001	Beaucoup, Peu [Comptables]
+059002	Beaucoup, Peu [Masses, Collectifs, Extensions]
+059003	Tous, N'importe lequel, Chacun, Chaque [Totalité]
+059004	Plein, Vide
+059005	Assez, Suffisant
+059006	Abondance, Excès, Économie
+059007	Augmentation, Diminution
+059008	Ajouter, Soustraire
+060001	Nombre, Innombrable
+060002	Un, deux, trois, etc. [Cardinaux]
+060003	Premier, deuxième, troisième, etc. [Ordinaux]
+060004	Moitié, tiers, quart [Part fractionnaire]
+060005	Une fois, deux fois, trois fois, etc. [Cardinaux du temps]
+060006	Double, quatre fois plus, etc. [Multiples]
+060007	Paire, groupe [Collectifs numérotés]
+061	Séquence
+062001	Assembler, Disposer [d'objets physiques]
+062002	Organiser [d'événements et d'états]
+063001	Entier
+063002	Unir
+063003	Mélanger
+063004	Partie
+063005	Reste
+063006	Diviser
+063007	Séparer
+064	Comparaison
+065001	Précieux, sans valeur
+065002	Digne, indigne
+065003	Bon, Mauvais
+065004	Utile, inutile
+065005	Avantageuse, pas avantageux
+065006	Important, sans importance
+066	Approprié, inapproprié
+067001	Un point de temps sans référence à d'autres points de temps : le temps, l'occasion, Toujours, Souvent
+067002	Un point de temps avec référence à d'autres points de temps : Avant, Il y a longtemps, Maintenant, En même temps, Quand, Environ, Après
+067003	Un point de temps avec référence à la durée : Début, Fin
+067004	Un moment dans le temps en référence à des unités de temps : l'aube, midi, minuit, tard
+067005	Durée du temps sans référence à des moments ou à des unités de temps : le temps, passer du temps, toujours, éternel, ancien, immédiatement, jeune
+067006	Durée du temps en référence à un moment donné : jusqu'à, retard, encore, depuis
+067007	Durée du temps en référence à une unité de temps : pendant, en, tandis que, tout au long
+067008	Unités de temps indéfinies : âge, durée de vie, intervalle, période
+067009	Unités de temps définies : année, mois, semaine, jour, heure
+067010	Unités de temps en référence à d’autres unités ou moments : hier, aujourd’hui, demain
+068001	Commencer, démarrer
+068002	Continuer
+068003	Terminer, finir, réussir
+068004	Cesser, s’arrêter
+068005	Essayer, tenter
+068006	Faire intensément ou extensivement
+068007	Rapidité, soudaineté
+069001	Affirmation
+069002	Négation
+069003	Négation combinée avec clitique
+069004	Marqueurs pour une réponse affirmative aux questions
+069005	Marqueurs pour une réponse négative aux questions
+070	Réel, irréel
+071001	Possible, impossible
+071002	Probable, improbable
+071003	Certain, incertain
+071004	Devrait, il faut
+071005	Nécessaire, inutile
+072001	Vrai, Faux
+072002	Précis, inexact
+073	Authentique, Faux
+074	Capable, Apte
+075	Adéquat, qualifié
+076	Puissance, Force
+077	Prêt, Préparé
+078001	Beaucoup, Peu [Degré positif-négatif]
+078002	Plus que, moins que [Degré comparatif]
+078003	Environ, Approximativement, Presque, À peine [Degré approximatif]
+078004	Complètement, Assez [Degré complet]
+078005	Jusqu’à, Autant que, Au point que [Degré marqué]
+079001	Physique [Matériel], Spirituel
+079002	Naturel [Humain], Spirituel
+079003	Solide, Liquide
+079004	Beau, Laid
+079005	Magnifique
+079006	Transparent
+079007	Couleur
+079008	Doux, Amer, Insipide
+079009	Parfum, Odeur
+079010	Propre, Sale
+079011	Taché, Immaculé
+079012	Imparfait, parfait
+079013	Fort, faible
+079014	Chaud, tiède, froid
+079015	Humide, sec
+079016	Irrégulier [rugueux], régulier [lisse]
+079017	Droit, tordu
+079018	Formes bidimensionnelles et tridimensionnelles
+079019	Tranchant
+079020	Pur, non altéré, non dilué
+079021	Doux, tendre
+079022	Masculin, féminin
+079023	Formes
+079024	Ouvert, fermé
+079025	Recouvert
+079026	Enveloppé
+079027	Enroulé
+079028	Grand, petit
+079029	Parfait
+080001	Espace, lieu
+080002	Limites, frontières de l'espace
+081001	Mesure, mesurer
+081002	Haut, bas, profond
+081003	Long, court, loin
+081004	Étroit, large
+081005	Mesures spécifiques du volume
+081006	Mesures spécifiques de la longueur
+082001	Nord, sud, est, ouest
+082002	Gauche, droite, tout droit, opposé
+083001	Ici, Là
+083002	Où, Quelque part, Partout
+083003	Parmi, Entre, Dans, À l'intérieur
+083004	Autour, Aux alentours, À l'extérieur
+083005	À, À côté de, Près de, Loin de
+083006	Devant, Face à face, Derrière, Derrière
+083007	Opposé, Contre, En face de, Au loin, à l'extérieur
+083008	Sur, Au-dessus de, À la surface de
+083009	Au-dessus, En dessous
+083010	Au-delà, De l'autre côté de
+084001	Extension à partir d'une source
+084002	Extension vers un but
+084003	Extension le long d'un chemin
+085001	Être dans un lieu
+085002	Mettre, placer
+085003	Rester, demeurer
+085004	Laisser dans un lieu
+085005	Habiter, résider
+086001	Lourd, léger
+086002	Livre, talent [unités de poids spécifiques]
+087	Statut
+087001	Position, rang
+087002	Honneur ou respect en relation avec le statut
+087003	Statut ou rang élevé [y compris les personnes de haut rang]
+087004	Statut ou rang faible [y compris les personnes de bas rang]
+087005	Esclave, libre
+088001	Bonté
+088002	Juste, vertueux
+088003	Saint, pur
+088004	Parfait, perfection
+088005	Honnêteté, sincérité
+088006	Modestie, bienséance
+088007	Humilité
+088008	Douceur, douceur d'esprit
+088009	Gentillesse, dureté
+088010	Miséricorde, impitoyable
+088011	Maîtrise de soi, manque de maîtrise de soi
+088012	Comportement sensé, comportement insensé
+088013	Comportement mature
+088014	Comportement pacifique
+088015	Mauvais, malfaisant, nuisible, préjudiciable
+088016	Maltraiter
+088017	Agir avec dureté
+088018	Agir en dehors de la loi
+088019	Exploiter
+088020	Agir de manière honteuse
+088021	Duper, égarer, tromper
+088022	Envie, jalousie
+088023	Rancunier, garder rancune
+088024	Colère, être indigné
+088025	Mépriser, dédaigner, mépriser
+088026	Haine, haineux
+088027	Arrogance, hautaineté, fierté
+088028	Entêtement
+088029	Hypocrisie, faux-semblant
+088030	Faire preuve de favoritisme, de préjugés
+088031	Être un fouineur
+088032	Paresse, oisiveté
+088033	Mode de vie extravagant, mode de vie intempérant
+088034	Impureté
+088035	Licence, perversion
+088036	Comportement sexuel répréhensible
+088037	L'ivresse
+088038	Péché, actes répréhensibles, culpabilité
+089003	Dérivation
+089004	Spécification
+089005	Relations impliquant des correspondances [isomorphismes]
+089006	Base
+089007	Cause et/ou motif
+089008	Résultat
+089009	But
+089010	Condition
+089011	Concession
+089012	Moyens
+089013	Circonstances particulières
+089014	Manière
+089015	Addition séquentielle
+089016	Distribution
+089017	Addition
+089018	Lien
+089019	Équivalence
+089020	Association
+089021	Dissociation
+089022	Relation combinative
+089023	Contraste
+089024	Relation alternative
+089025	Substance
+090001	Agent, personnel ou impersonnel, causatif ou immédiat, direct ou indirect
+090002	Instrument
+090003	Source d'un événement ou d'une activité
+090004	Responsabilité
+090005	Participant au point de vue
+090006	Contenu
+090007	Garant Participant avec serments
+090008	Opposition
+090009	Bienfait
+090010	Raison de la participation
+090011	Agent d'un événement numérique
+090012	Agent dans un rôle causal marqué par des verbes
+090013	Expérimenter
+090014	Provoquer Vivre
+091001	Marqueurs de transition
+091002	Marqueurs d'emphase
+091003	Marqueurs d'attention
+091004	Marqueur d'adresse directe
+091005	Marqueurs de clauses identitaires et explicatives [Exégétique]
+092001	Locuteur
+092002	Conférencier et personnes associées au conférencier [exclusif et inclusif]
+092003	Récepteur, Récepteurs
+092004	Sujet de la parole ou de l'écriture
+092005	Référence réciproque
+092006	Référence relative
+092007	Référence démonstrative ou déictique
+092008	Complément emphatique
+093001	Personnes
+093002	Lieux

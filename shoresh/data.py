@@ -281,36 +281,35 @@ def _strong_domains() -> dict:
     return out
 
 
-@lru_cache(maxsize=1)
-def _domain_label_i18n() -> dict:
-    """code -> {lang: label} from resources/semantic_domains/grc_labels.tsv (en/es/fr/zh-hans
-    from UBS open-license CC-BY-SA; id authored via scripts/build_domain_labels_id.py). Localizes
-    the NT domain label. Columns are read dynamically, so adding a language column needs no change."""
+@lru_cache(maxsize=None)
+def _domain_labels(col: str) -> dict:
+    """code -> localized label for ONE language, from resources/semantic_domains/domain_labels/
+    <col>.tsv. Per-language FILES (scalable: a new language is a new file, not a wider table),
+    memoized per language so only the requested one is loaded."""
     out: dict = {}
-    p = _resources_dir() / "semantic_domains" / "grc_labels.tsv"
+    p = _resources_dir() / "semantic_domains" / "domain_labels" / f"{col}.tsv"
     if not p.exists():
         return out
     with p.open(encoding="utf-8") as fh:
-        header = next(fh, "").rstrip("\n").split("\t")   # code, en, es, fr, zh-hans
-        cols = header[1:]
         for line in fh:
-            parts = line.rstrip("\n").split("\t")
-            if not parts or not parts[0]:
+            if line.startswith("#"):
                 continue
-            out[parts[0]] = {c: v for c, v in zip(cols, parts[1:]) if v}
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) == 2 and parts[0] != "code":
+                out[parts[0]] = parts[1]
     return out
 
 
-# gloss_lang (word_glosses filename) -> grc_labels.tsv column; absent -> English label.
-_DOMAIN_LANG_COL = {"English": "en", "Spanish": "es", "French": "fr",
-                    "Chinese-Simplified": "zh-hans", "Indonesian": "id"}
+# gloss_lang (word_glosses filename) -> domain_labels/<iso639-3>.tsv basename; absent -> English.
+_DOMAIN_LANG_COL = {"English": "eng", "Spanish": "spa", "French": "fra",
+                    "Chinese-Simplified": "cmn-Hans", "Indonesian": "ind", "German": "deu"}
 
 
 def _localize_domain(code: str, en_label: str, gloss_lang: str) -> str:
     col = _DOMAIN_LANG_COL.get(gloss_lang)
-    if not col or col == "en":
+    if not col or col == "eng":
         return en_label
-    return _domain_label_i18n().get(code, {}).get(col) or en_label
+    return _domain_labels(col).get(code) or en_label
 
 
 def _dominant_domain(dd: list, min_share: float = 0.6) -> tuple | None:

@@ -41,14 +41,21 @@ Louw-Nida domain. Native SDBH and bridged SDBG are *different taxonomies* — a
 lexeme can legitimately differ across them (chesed: SDBH `core`=Faithfulness,
 bridged `sdbg`=Mercy — both true; the LXX rendered חֶסֶד with ἔλεος).
 
-## Domain-name localization — `grc_labels.tsv`
-`code → en, es, fr, zh-hans, id` — the localized **name** of each Louw-Nida domain, used by
-shoresh `/verse` (`_localize_domain`, keyed by `gloss_lang`) to show the NT domain in-language.
-The `en/es/fr/zh-hans` columns are mined from UBS MARBLE (same licence caveat as above). The
-**`id` (Indonesian)** column is *authored* — UBS ships no Indonesian, so the 664 labels were
-translated from the English (see `bcv-RAG/scripts/build_domain_labels_id.py`; re-run it to rebuild
-the column). Being a fresh translation, `id` is not UBS-encumbered. `_domain_label_i18n()` reads the
-columns dynamically, so adding another language is just another column + a `_DOMAIN_LANG_COL` entry.
+## Domain-name localization — `domain_labels/<iso639-3>.tsv`
+The localized **name** of each Louw-Nida domain, used by shoresh `/verse` (`_localize_domain`,
+keyed by `gloss_lang`) to show the NT domain in-language. **One file per language** (`code · label`),
+iso639-3-named — *scalable*: a new language is a new **file**, not a new column in an ever-widening
+table (mirrors `../concept_surfaces/`). Files: `eng · spa · fra · cmn-Hans · ind · deu`.
+
+- `eng/spa/fra/cmn-Hans` — mined from UBS MARBLE (same licence caveat as above; reference-only).
+- `ind` (Indonesian), `deu` (German) — **authored** translations of the English labels (UBS ships
+  neither), via `bcv-RAG/scripts/build_domain_labels_{id,de}.py` (read the code list from `eng.tsv`,
+  re-run to rebuild). Being fresh translations, they are not UBS-encumbered. Each file carries a
+  `# source/license` header.
+
+To add a language: drop an `<iso639-3>.tsv` (or a `<iso639-3>-<Script>` BCP-47 name for a script
+variant) + a `_DOMAIN_LANG_COL` entry in shoresh `data.py`. `_domain_labels(col)` loads only the
+requested language's file, memoized.
 
 ## Taxonomy caveat
 SDBG (Greek) and SDBH (Hebrew) are **different** domain systems — codes are **not

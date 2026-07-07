@@ -1,23 +1,25 @@
-"""Add an Indonesian (`id`) column to resources/semantic_domains/grc_labels.tsv.
+"""Write resources/semantic_domains/domain_labels/ind.tsv (per-language file — scalable, one
+file per language, not a widening column in a shared table).
 
 UBS MARBLE (the source of the en/es/fr/zh-hans columns) does not ship Indonesian
 Louw-Nida domain names — same gap as German. So the `id` labels below are authored
 (human/LLM translation of the 664 English domain names, keyed by the stable Louw-Nida
 code). Zero paid-API cost; the file stays the source of truth and is read read-only by
-shoresh `_localize_domain` once `_DOMAIN_LANG_COL["Indonesian"] = "id"` is wired.
+shoresh `_localize_domain` once `_DOMAIN_LANG_COL["Indonesian"] = "ind"` is wired.
 
-Idempotent: re-running rewrites the `id` column from LABELS_ID (adds it if absent).
+Idempotent: re-running rewrites domain_labels/ind.tsv from LABELS_ID (code list from eng.tsv).
 
   python -m scripts.build_domain_labels_id
 """
 from __future__ import annotations
 
-import csv
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TSV = ROOT / "resources" / "semantic_domains" / "grc_labels.tsv"
+DL = ROOT / "resources" / "semantic_domains" / "domain_labels"   # per-language label files
+HEADER = ("# source=authored translation of the English labels "
+          "(build_domain_labels_id.py); license=CC-BY-SA; not UBS-encumbered\n")
 
 # code -> Indonesian Louw-Nida domain label (see module docstring).
 LABELS_ID: dict[str, str] = {
@@ -688,39 +690,36 @@ LABELS_ID: dict[str, str] = {
 }
 
 
+def _base_english() -> dict:
+    """code -> English label (canonical code list + fallback), from domain_labels/eng.tsv."""
+    out: dict = {}
+    with (DL / "eng.tsv").open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#"):
+                continue
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) == 2 and parts[0] != "code":
+                out[parts[0]] = parts[1]
+    return out
+
+
 def main() -> int:
-    with TSV.open(encoding="utf-8", newline="") as fh:
-        reader = csv.reader(fh, delimiter="\t")
-        rows = list(reader)
-    header, data = rows[0], rows[1:]
-    if "id" in header:
-        id_idx = header.index("id")
-    else:
-        header.append("id")
-        id_idx = len(header) - 1
-        for r in data:
-            r.append("")
-
+    base = _base_english()
     missing = []
-    for r in data:
-        code = r[0]
-        label = LABELS_ID.get(code)
-        if not label:
-            missing.append(code)
-            label = r[header.index("en")]        # graceful: fall back to English
-        while len(r) <= id_idx:
-            r.append("")
-        r[id_idx] = label
-
-    with TSV.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.writer(fh, delimiter="\t")
-        writer.writerow(header)
-        writer.writerows(data)
-
-    print(f"grc_labels.tsv: wrote id column for {len(data)} rows "
+    DL.mkdir(parents=True, exist_ok=True)
+    with (DL / "ind.tsv").open("w", encoding="utf-8") as fh:
+        fh.write(HEADER)
+        fh.write("code\tlabel\n")
+        for code, en in base.items():
+            label = LABELS_ID.get(code)
+            if not label:
+                missing.append(code)
+                label = en                       # graceful: fall back to English
+            fh.write(f"{code}\t{label}\n")
+    print(f"domain_labels/ind.tsv: {len(base)} labels "
           f"({len(missing)} fell back to English)", file=sys.stderr)
     if missing:
-        print("  missing id for:", ", ".join(missing[:20]), file=sys.stderr)
+        print("  missing for:", ", ".join(missing[:20]), file=sys.stderr)
     return 0
 
 
