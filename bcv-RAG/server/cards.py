@@ -195,8 +195,54 @@ class SpeakerStrategy(CardStrategy):
 
 
 # ── Entity ─────────────────────────────────────────────────────────────────────────────────
-_REL_NOUN = {"father-of": "father", "mother-of": "mother",
-             "sibling-of": "sibling", "partner-of": "partner"}
+# Genealogy phrase templates per gloss-language (keyed BY language → scalable: a new language is
+# a new key, not a wider table). Each is the role phrase with a {name} slot; the code appends
+# " → {related}". The English grammar ("of" genitive, "+s" plural, father→children inversion)
+# does NOT transfer, so each language spells the phrase out. `reverse` = the match IS the
+# {relation} of {name}; `forward` = {name}'s outbound relations (father/mother → children).
+# Missing language / relation falls back to English. Add a language: add its 8 phrases.
+_REL_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
+    "English": {
+        "reverse": {"father-of": "father of {name}", "mother-of": "mother of {name}",
+                    "sibling-of": "sibling of {name}", "partner-of": "partner of {name}"},
+        "forward": {"father-of": "children of {name}", "mother-of": "children of {name}",
+                    "sibling-of": "siblings of {name}", "partner-of": "partners of {name}"}},
+    "German": {
+        "reverse": {"father-of": "Vater von {name}", "mother-of": "Mutter von {name}",
+                    "sibling-of": "Geschwister von {name}", "partner-of": "Partner von {name}"},
+        "forward": {"father-of": "Kinder von {name}", "mother-of": "Kinder von {name}",
+                    "sibling-of": "Geschwister von {name}", "partner-of": "Partner von {name}"}},
+    "Spanish": {
+        "reverse": {"father-of": "padre de {name}", "mother-of": "madre de {name}",
+                    "sibling-of": "hermano de {name}", "partner-of": "pareja de {name}"},
+        "forward": {"father-of": "hijos de {name}", "mother-of": "hijos de {name}",
+                    "sibling-of": "hermanos de {name}", "partner-of": "parejas de {name}"}},
+    "French": {
+        "reverse": {"father-of": "père de {name}", "mother-of": "mère de {name}",
+                    "sibling-of": "frère ou sœur de {name}", "partner-of": "partenaire de {name}"},
+        "forward": {"father-of": "enfants de {name}", "mother-of": "enfants de {name}",
+                    "sibling-of": "frères et sœurs de {name}", "partner-of": "partenaires de {name}"}},
+    "Portuguese": {
+        "reverse": {"father-of": "pai de {name}", "mother-of": "mãe de {name}",
+                    "sibling-of": "irmão de {name}", "partner-of": "parceiro de {name}"},
+        "forward": {"father-of": "filhos de {name}", "mother-of": "filhos de {name}",
+                    "sibling-of": "irmãos de {name}", "partner-of": "parceiros de {name}"}},
+    "Dutch": {
+        "reverse": {"father-of": "vader van {name}", "mother-of": "moeder van {name}",
+                    "sibling-of": "broer of zus van {name}", "partner-of": "partner van {name}"},
+        "forward": {"father-of": "kinderen van {name}", "mother-of": "kinderen van {name}",
+                    "sibling-of": "broers en zussen van {name}", "partner-of": "partners van {name}"}},
+    "Danish": {
+        "reverse": {"father-of": "far til {name}", "mother-of": "mor til {name}",
+                    "sibling-of": "søskende til {name}", "partner-of": "partner til {name}"},
+        "forward": {"father-of": "børn af {name}", "mother-of": "børn af {name}",
+                    "sibling-of": "søskende til {name}", "partner-of": "partnere til {name}"}},
+    "Indonesian": {
+        "reverse": {"father-of": "ayah dari {name}", "mother-of": "ibu dari {name}",
+                    "sibling-of": "saudara dari {name}", "partner-of": "pasangan dari {name}"},
+        "forward": {"father-of": "anak dari {name}", "mother-of": "anak dari {name}",
+                    "sibling-of": "saudara dari {name}", "partner-of": "pasangan dari {name}"}},
+}
 _LOOKUP_STOP = {"who", "what", "where", "when", "why", "how", "the", "is", "was", "were", "are",
                 "a", "an", "did", "does"}
 
@@ -223,7 +269,7 @@ def _entity_facts(db, entity_query: dict, lang: str = "en") -> dict | None:
         summary = re.split(r"(?<=[.!?])\s", desc)[0][:160] if desc else ""
     except Exception:
         pass
-    data = {"name": ename, "type": etype, "summary": summary}
+    data = {"name": ename, "type": etype, "summary": summary, "lang": lang}
     relation = (entity_query or {}).get("relation")
     if relation:
         reverse = relation.endswith("-rev")                          # "-rev" = inbound to the match
@@ -244,15 +290,14 @@ def _entity_facts(db, entity_query: dict, lang: str = "en") -> dict | None:
 def _entity_line(data: dict) -> str:
     if data.get("relation"):
         rel = data["relation"]; reverse = rel.endswith("-rev")
-        noun = _REL_NOUN.get(rel[:-4] if reverse else rel, rel)
+        base = rel[:-4] if reverse else rel
+        direction = "reverse" if reverse else "forward"
+        tmpl = _REL_TEMPLATES.get(_gloss_lang(data.get("lang", "en")), _REL_TEMPLATES["English"])
+        role = (tmpl[direction].get(base)                            # localized phrase for this role
+                or _REL_TEMPLATES["English"][direction].get(base)   # else the English one
+                or f"{base} of {{name}}")                           # else a generic fallback
         rels = ", ".join(data.get("related") or []) or "—"
-        if reverse:                                                  # "father of David → Jesse"
-            phrase = f"{noun} of {data['name']} → {rels}"
-        elif noun in ("father", "mother"):                          # forward father/mother = children
-            phrase = f"children of {data['name']} → {rels}"
-        else:
-            phrase = f"{noun}s of {data['name']} → {rels}"
-        return "ENTITY — " + phrase
+        return "ENTITY — " + role.format(name=data["name"]) + f" → {rels}"
     line = f"{data['name']} ({data['type']})"
     if data.get("summary"):
         line += f": {data['summary']}"
