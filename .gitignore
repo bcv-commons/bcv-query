@@ -97,6 +97,9 @@ shoresh/lxx/lxx.db-*
 # MACULA: parsed per-token semantics db (re-derivable via macula.parse)
 shoresh/macula/macula-spine.db
 shoresh/macula/macula-spine.db-*
+# MACULA: lexeme-anchored spine export (re-derivable via macula.build_spine_words; data-contract §1)
+shoresh/macula/lexeme-spine.db
+shoresh/macula/lexeme-spine.db-*
 
 # clause vectors (built at runtime onto the /data volume; local: SHORESH_DATA)
 shoresh/data/
@@ -108,3 +111,9 @@ deploy/deploy.local.env
 bcv-RAG/data/
 resources/occurrences/*.db
 resources/occurrences/*.npz
+
+# === aligner: experiment artifacts (promoted to resources/ only after the benchmark gate) ===
+aligner/out/
+# MACULA: BHSA↔MACULA occurrence bridge (re-derivable via macula.build_bridge)
+shoresh/macula/bhsa-macula-bridge.db
+shoresh/macula/bhsa-macula-bridge.db-*
