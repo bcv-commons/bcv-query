@@ -1172,3 +1172,59 @@ def semantic_field(strong: str, limit: int = 12) -> dict:
         flat = sorted(merged.values(), key=lambda e: -e["score"])[:limit]
         return {"strong": code, "field": flat, "lexemes": lexemes}
     return {"strong": code, "field": _semantic_field_map().get(code, [])[:limit]}
+
+
+# ---------- intertextual links: OT-in-NT quotations (X1) + synoptic parallels (X2) ----------
+
+@lru_cache(maxsize=1)
+def _quotations_index() -> tuple[dict, dict]:
+    """(forward nt_ref→[link], reverse ot_ref→[link]) from ot_nt_quotations/quotations.tsv."""
+    fwd: dict = collections.defaultdict(list)
+    rev: dict = collections.defaultdict(list)
+    p = _resources_dir() / "ot_nt_quotations" / "quotations.tsv"
+    if p.exists():
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if ln.startswith("#") or ln.startswith("nt_ref"):
+                continue
+            f = ln.split("\t")   # nt_ref ot_ref confidence vrs n_shared score shared_strongs
+            if len(f) >= 7:
+                nt, ot = f[0], f[1]
+                fwd[nt].append({"ref": ot, "confidence": f[2], "vrs": f[3],
+                                "n_shared": int(f[4]), "score": float(f[5]), "shared_strongs": f[6]})
+                rev[ot].append({"ref": nt, "confidence": f[2], "vrs": f[3],
+                                "n_shared": int(f[4]), "score": float(f[5]), "shared_strongs": f[6]})
+    return fwd, rev
+
+
+def quotations(book: str, chapter: int, verse: int) -> dict:
+    """OT-in-NT quotation links for a verse (X1), both directions: `quotes` = OT verses this NT verse
+    quotes; `quoted_by` = NT verses that quote this OT verse. Empty lists where none (a valid answer)."""
+    ref = f"{book.upper()} {chapter}:{verse}"
+    fwd, rev = _quotations_index()
+    return {"ref": ref,
+            "quotes": sorted(fwd.get(ref, []), key=lambda e: -e["score"]),
+            "quoted_by": sorted(rev.get(ref, []), key=lambda e: -e["score"])}
+
+
+@lru_cache(maxsize=1)
+def _parallels_index() -> dict:
+    """ref→[parallel] (symmetric) from synoptic_parallels/parallels.tsv."""
+    idx: dict = collections.defaultdict(list)
+    p = _resources_dir() / "synoptic_parallels" / "parallels.tsv"
+    if p.exists():
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if ln.startswith("#") or ln.startswith("ref_a"):
+                continue
+            f = ln.split("\t")   # ref_a ref_b confidence n_shared score shared_strongs
+            if len(f) >= 6:
+                common = {"confidence": f[2], "n_shared": int(f[3]), "score": float(f[4]),
+                          "shared_strongs": f[5]}
+                idx[f[0]].append({"ref": f[1], **common})
+                idx[f[1]].append({"ref": f[0], **common})
+    return idx
+
+
+def parallels(book: str, chapter: int, verse: int) -> dict:
+    """Synoptic Gospel parallels for a verse (X2): the same passage in the other Gospels."""
+    ref = f"{book.upper()} {chapter}:{verse}"
+    return {"ref": ref, "parallels": sorted(_parallels_index().get(ref, []), key=lambda e: -e["score"])}

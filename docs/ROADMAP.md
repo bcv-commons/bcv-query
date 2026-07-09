@@ -200,9 +200,10 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
 
 ### Phase 4 — breadth (intertextual / names / relational)
 
-- **X1 · OT-in-NT quotations** — 🟢 **UNBLOCKED** (`lxx_bridge` is live + pinned) —
-  match NT Greek against the LXX (Greek OT) → quotation links far beyond TSK.
-  (A ready-made OT-NT reference map also exists — see catalog.) *Headline feature, short build.*
+- **X1 · OT-in-NT quotations** — 🟢 **BUILT + SERVED** (`resources/ot_nt_quotations/`,
+  `shoresh/lxx/build_quotations.py`; endpoint `/quotations/{book}/{ch}/{v}`, both directions) —
+  IDF-cosine over shared LXX content Strong's; LXX→MT Psalm versification; confidence tiers.
+  6,594 links, 8/12 on known quotations.
 - **N1 · Proper-noun lexicon** per language — 🟢 **BUILT** (`resources/proper_nouns/`,
   `macula.build_proper_nouns`) — 3,415 name Strong's (622 NT/Greek) × 19 langs, **typed**
   person/place/other via **TIPNR** (CC-BY) ∪ STEPBible `Np`, merging original + curated-gloss +
@@ -216,8 +217,7 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
 - **X2 · Synoptic Gospel parallels** — 🟢 **BUILT** (`resources/synoptic_parallels/`,
   `macula.build_synoptic`) — IDF-cosine over shared content Greek Strong's (the X1 technique, within
   the Gospels). 3,388 pairs (1,248 high-conf), 6/6 on known parallels; by-Gospel distribution tracks
-  synoptic theory (MAT-MRK/LUK-MAT dominate, John independent). Remaining = wire into `/verse` or a
-  `/parallels/{ref}` endpoint.
+  synoptic theory (MAT-MRK/LUK-MAT dominate, John independent). **Served**: `/parallels/{book}/{ch}/{v}`.
 - **T1 · Timeline + geography** (viz.bible / OpenBible geocoding) → "passages set
   in Galilee", "what happened around the time of X".
 

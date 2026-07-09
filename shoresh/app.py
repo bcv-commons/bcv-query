@@ -119,6 +119,8 @@ def root() -> dict:
             "/frame/{book}/{chapter}/{verse}/word/{idx}",
             "/framesearch?role=&arg_strong=&verb_strong=&book=",
             "/participants/{book}/{chapter}/{verse}",
+            "/quotations/{book}/{chapter}/{verse}",
+            "/parallels/{book}/{chapter}/{verse}",
         ],
         "docs": "../docs/original-language-anchoring.md",
     }
@@ -497,6 +499,21 @@ def get_field(strong: str, limit: int = 12) -> dict:
     Strong's conflates several lexemes it returns them split under `lexemes` (each with its own
     field); `field` stays a flat merged list."""
     return data.semantic_field(strong, limit=min(limit, 30))
+
+
+@app.get("/quotations/{book}/{chapter}/{verse}")
+def get_quotations(book: str, chapter: int, verse: int) -> dict:
+    """OT-in-NT quotations (X1) for a verse, both directions: `quotes` = OT verses an NT verse quotes
+    (via LXX Strong's overlap); `quoted_by` = NT verses that quote this OT verse. Each link carries a
+    confidence tier + shared Strong's. Empty lists where none."""
+    return data.quotations(book, chapter, verse)
+
+
+@app.get("/parallels/{book}/{chapter}/{verse}")
+def get_parallels(book: str, chapter: int, verse: int) -> dict:
+    """Synoptic Gospel parallels (X2) for a verse — the same passage in the other Gospels, by shared
+    content Greek Strong's. Each carries a confidence tier + shared Strong's. Empty where none."""
+    return data.parallels(book, chapter, verse)
 
 
 @app.get("/morph")
