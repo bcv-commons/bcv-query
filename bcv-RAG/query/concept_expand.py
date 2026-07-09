@@ -346,6 +346,35 @@ def _proper_noun_index(lang: str = "eng") -> dict[str, list[tuple[str, str]]]:
     return {s: list(codes.items()) for s, codes in idx.items()}
 
 
+@lru_cache(maxsize=1)
+def _proper_noun_names_eng() -> dict[str, str]:
+    """{padded_strong: canonical English name} from the N1 lexicon — bridges a cross-lingually
+    recognized name Strong's to the (English-keyed) entity graph. Prefers the curated English gloss."""
+    path = _PROPER_NOUNS_DIR / "proper_nouns.tsv"
+    out: dict[str, str] = {}
+    if not path.exists():
+        return out
+    rank = {"gloss": 2, "aligned": 1, "tipnr": 0}   # prefer the curated English gloss name
+    best: dict[str, int] = {}
+    with path.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#") or line.startswith("strong\t"):
+                continue
+            p = line.rstrip("\n").split("\t")   # strong translit type lang surface source weight
+            if len(p) < 6 or p[3] != "eng":
+                continue
+            code, surface, r = _normalize_code(p[0]), p[4].strip(), rank.get(p[5], 0)
+            if surface and (code not in best or r > best[code]):
+                best[code] = r
+                out[code] = surface
+    return out
+
+
+def proper_noun_english_name(code: str) -> str | None:
+    """Canonical English name for a proper-noun Strong's (for entity-graph lookup)."""
+    return _proper_noun_names_eng().get(_normalize_code(code))
+
+
 def proper_noun_matches(text: str, lang: str = "eng", cap: int = 4) -> list[tuple[str, str]]:
     """Proper nouns found in a query → [(padded_strong, type), …], deduped, capped. High-confidence:
     a whole-token match against the N1 lexicon (any language / morphological variant)."""

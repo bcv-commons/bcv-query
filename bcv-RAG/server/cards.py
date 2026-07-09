@@ -317,19 +317,29 @@ class EntityStrategy(CardStrategy):
     def build(self, analysis, db, query, lang) -> dict | None:
         eq = getattr(analysis, "entity_query", None)
         if not (eq and eq.get("name")):
-            name = self._lookup_name(db, query)
+            name = self._lookup_name(db, query, lang)
             if not name:
                 return None
             eq = {"name": name}
         return _entity_facts(db, eq, lang)
 
     @staticmethod
-    def _lookup_name(db, query: str) -> str | None:
+    def _lookup_name(db, query: str, lang: str = "en") -> str | None:
+        # 1) an English-capitalized token that IS an entity (fast path)
         for c in re.findall(r"\b([A-Z][a-z]+)\b", query or ""):
             if c.lower() in _LOOKUP_STOP:
                 continue
             if db.execute("SELECT 1 FROM entities WHERE LOWER(name)=LOWER(?) LIMIT 1", (c,)).fetchone():
                 return c
+        # 2) cross-lingual (N1): recognize a name in ANY language / morphological variant → its
+        #    English canonical name → the (English-keyed) entity graph. Enables the entity card for
+        #    "qui est Jésus", "¿quién es David?", lowercase, and inflected forms.
+        from query.concept_expand import proper_noun_matches, proper_noun_english_name
+        for code, _typ in proper_noun_matches(query or "", lang):
+            eng = proper_noun_english_name(code)
+            if eng and db.execute("SELECT 1 FROM entities WHERE LOWER(name)=LOWER(?) LIMIT 1",
+                                   (eng,)).fetchone():
+                return eng
         return None
 
     def to_synthesis(self, data, analysis) -> str | None:

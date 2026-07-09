@@ -208,7 +208,9 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   person/place/other via **TIPNR** (CC-BY) ∪ STEPBible `Np`, merging original + curated-gloss +
   attested-`aligned_lex` surfaces. **Wired into the analyzer**: `concept_expand.proper_noun_matches`
   recognizes names in a query (any lang/variant) → high-confidence `strongs:` tags, keyness-floor
-  exempt. Remaining = feed the resolved name + `type` into the name-bridge / a "who/where is X" path.
+  exempt; **and into the entity card** — `EntityStrategy._lookup_name` bridges a cross-lingually
+  recognized name → its English canonical name → the entity graph ("qui est Jésus" → the Jesus card).
+  ✅ Core done. Optional next = resolve directly on the entity's stored `extendedStrongs` (robustness).
 - **X2 · Synoptic Gospel parallels** — passage-parallel index across Matt/Mark/Luke.
 - **T1 · Timeline + geography** (viz.bible / OpenBible geocoding) → "passages set
   in Galilee", "what happened around the time of X".
