@@ -10,15 +10,15 @@
     "llm:scholarly-prior"
   ],
   "confidence_tiers": {
-    "high": 6,
-    "recall": 36795,
-    "prior": 19
+    "high": 505,
+    "recall": 27850,
+    "prior": 1402
   },
-  "lexemes": 3805,
-  "edges": 36820,
+  "lexemes": 3014,
+  "edges": 29757,
   "topk": 10,
   "min_cos": 0.3,
   "min_occ": 3,
-  "content_sha256": "45ea4e1364983d90c4cb5a27206ddf1fc919be3b7ecc7f460205ea87fe5f8f6f",
+  "content_sha256": "06b38d98226d4bd5532c9f5bd3c4c356a2dc1a96d5657056c4f94cc0e3042fc4",
   "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick."
 }

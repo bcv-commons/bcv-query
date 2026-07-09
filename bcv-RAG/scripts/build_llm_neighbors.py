@@ -53,9 +53,28 @@ def _load_dotenv() -> None:
             os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
 
 
+STEP_SPINE = ROOT / "shoresh" / "spine" / "spine.db"   # STEPBible morph → proper-noun flag
+
+
+def _proper_strongs() -> set:
+    """H#### proper nouns (STEPBible morph `Np` dominant) — don't waste LLM calls on names; the model
+    chains genealogy/nation lists as bogus synonyms. Must match build_semantic_neighbors' exclusion."""
+    if not STEP_SPINE.exists():
+        return set()
+    import collections
+    db = sqlite3.connect(f"file:{STEP_SPINE}?mode=ro", uri=True)
+    tot, prop = collections.Counter(), collections.Counter()
+    for strong, morph in db.execute("SELECT strong, morph FROM spine_words WHERE strong IS NOT NULL"):
+        s = f"H{int(strong):04d}"; tot[s] += 1
+        if morph and "Np" in morph:
+            prop[s] += 1
+    return {s for s in tot if prop[s] > 0.5 * tot[s]}
+
+
 def load_lexemes() -> list[dict]:
     """One entry per Hebrew content Strong's (the LLM's natural granularity): {strong, lemma, hint}.
-    Rolls the homograph-precise lexemes up to Strong's; a representative lemma/gloss per code."""
+    Rolls the homograph-precise lexemes up to Strong's; proper nouns excluded (names aren't neighbors)."""
+    proper = _proper_strongs()
     db = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
     seen: dict[str, dict] = {}
     for strong, lemma, gloss in db.execute(
@@ -63,7 +82,7 @@ def load_lexemes() -> list[dict]:
             "WHERE is_content=1 AND strong IS NOT NULL AND lexeme LIKE 'hbo:%' "
             "ORDER BY book, chapter, verse, idx"):
         code = f"H{int(strong):04d}"
-        if code not in seen:
+        if code not in seen and code not in proper:
             seen[code] = {"strong": code, "lemma": lemma or "", "hint": (gloss or "").replace(".", " ")}
     return list(seen.values())
 
@@ -117,10 +136,19 @@ def main() -> None:
     _load_dotenv()
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--limit", type=int, default=0, help="cap #lexemes (0 = all)")
+    ap.add_argument("--only", type=Path, help="restrict to target Strong's listed in this file (one H#### per line)")
+    ap.add_argument("--redo", action="store_true", help="with --only: drop those targets' existing edges and re-query (upgrade with a better model)")
     ap.add_argument("--dry-run", action="store_true", help="print the first prompt and exit (no spend)")
     a = ap.parse_args()
 
     entries = load_lexemes()
+    if a.only:                                         # cascade: restrict to a chosen subset
+        keep = {ln.strip() for ln in a.only.read_text(encoding="utf-8").splitlines() if ln.strip()}
+        entries = [e for e in entries if e["strong"] in keep]
+        if a.redo and OUT.exists():                    # re-query these on the current (e.g. Opus) model:
+            kept = [ln for ln in OUT.read_text(encoding="utf-8").splitlines()   # drop their old edges first
+                    if ln.startswith("#") or ln.split("\t")[0] not in keep]
+            OUT.write_text("\n".join(kept) + "\n", encoding="utf-8")
     if a.limit:
         entries = entries[:a.limit]
     done = set()
@@ -128,7 +156,8 @@ def main() -> None:
         done = {ln.split("\t")[0] for ln in OUT.read_text(encoding="utf-8").splitlines()
                 if ln and not ln.startswith("#")}
     todo = [e for e in entries if e["strong"] not in done]
-    print(f"[llm-neighbors] {len(todo)}/{len(entries)} lexemes to do ({len(done)} cached)", file=sys.stderr)
+    print(f"[llm-neighbors] model={MODEL}  {len(todo)}/{len(entries)} lexemes to do "
+          f"({len(done)} cached)", file=sys.stderr)
 
     if a.dry_run:
         print(PROMPT + json.dumps(todo[:BATCH], ensure_ascii=False, indent=1))
@@ -137,12 +166,12 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     if not OUT.exists():
         OUT.write_text("# source=llm; semantic neighbors (syn|ant) anchored on the Hebrew lemma\n"
-                       "target\trelation\tneighbor\n", encoding="utf-8")
+                       "target\trelation\tneighbor\tmodel\n", encoding="utf-8")
     with OUT.open("a", encoding="utf-8") as fh:
         for i in range(0, len(todo), BATCH):
             edges = call_llm(todo[i:i + BATCH])
             for t, rel, n in edges:
-                fh.write(f"{t}\t{rel}\t{n}\n")
+                fh.write(f"{t}\t{rel}\t{n}\t{MODEL}\n")     # per-edge model provenance
             fh.flush()
             print(f"[llm-neighbors] {i+BATCH}/{len(todo)} · +{len(edges)} edges", file=sys.stderr)
 

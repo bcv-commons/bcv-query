@@ -47,8 +47,28 @@ _STOP = set("the a an of to and in be is was were for from with his her its thei
             "he she it they them who which what will would shall not no".split())
 
 
+STEP_SPINE = ROOT / "shoresh" / "spine" / "spine.db"   # STEPBible morph → proper-noun flag (CC-BY)
+
+
+def proper_strongs() -> set:
+    """H#### strongs that are proper nouns (STEPBible morph `Np` dominant) — excluded from the pack:
+    they aren't semantic-field words, and LLMs chain genealogy/nation lists as bogus 'synonyms'."""
+    if not STEP_SPINE.exists():
+        return set()
+    db = sqlite3.connect(f"file:{STEP_SPINE}?mode=ro", uri=True)
+    tot, prop = collections.Counter(), collections.Counter()
+    for strong, morph in db.execute("SELECT strong, morph FROM spine_words WHERE strong IS NOT NULL"):
+        s = f"H{int(strong):04d}"
+        tot[s] += 1
+        if morph and "Np" in morph:
+            prop[s] += 1
+    return {s for s in tot if prop[s] > 0.5 * tot[s]}
+
+
 def lexeme_vectors():
-    """MACULA lexeme -> (unit centroid, strong, top gloss). Content lexemes with >= MIN_OCC clauses."""
+    """MACULA lexeme -> (unit centroid, strong, top gloss). Content lexemes with >= MIN_OCC clauses,
+    proper nouns excluded."""
+    proper = proper_strongs()
     z = np.load(EMB, allow_pickle=True)
     V, C = z["vectors"], z["contexts"]                     # load each array ONCE (npz re-decompresses per access)
     clause_vec = {c: V[i] for i, c in enumerate(C)}        # clause text -> vector
@@ -85,11 +105,14 @@ def lexeme_vectors():
         norm = np.linalg.norm(c)
         if norm == 0:
             continue
+        s = strong_of[lexeme]
+        hstrong = f"H{s:04d}" if s is not None else ""
+        if hstrong in proper:                       # drop proper nouns (names aren't semantic-field)
+            continue
         lexemes.append(lexeme)
         mat.append(c / norm)
         top_gloss = gloss_ct[lexeme].most_common(1)[0][0] if gloss_ct[lexeme] else ""
-        s = strong_of[lexeme]
-        meta[lexeme] = (f"H{s:04d}" if s is not None else "", top_gloss)   # H#### to join lxx/domains
+        meta[lexeme] = (hstrong, top_gloss)         # H#### to join lxx/domains
     return lexemes, np.vstack(mat).astype(np.float32), meta
 
 
