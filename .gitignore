@@ -124,3 +124,5 @@ resources/semantic_neighbors/*.parquet
 resources/semantic_neighbors/llm_edges.tsv
 # prior_nt_lex: per-language NT-gap dictionary (derived from published aligned-lex + lxx_bridge); regenerable
 resources/prior_nt_lex/*.parquet
+# prior_pack: language-independent leverage bundle (regenerable); manifest+README committed
+resources/prior_pack/*.parquet

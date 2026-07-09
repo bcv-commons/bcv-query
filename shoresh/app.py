@@ -476,8 +476,19 @@ def get_concept(word: str, limit: int = 5) -> dict:
             "translit": m["translit"], "lang": m["lang"],
             "total_occurrences": conc["count"],
             "sample": conc["occurrences"][:5],
+            # CC0 data-derived semantic field (synonyms/same-field + antonyms) — the MARBLE-free
+            # 'related words' signal from the semantic-neighbors pack (see /field).
+            "field": data.semantic_field(m["strong"])["field"],
         })
     return {"concept": word, "entries": entries}
+
+
+@app.get("/field/{strong}")
+def get_field(strong: str, limit: int = 12) -> dict:
+    """Semantic field for a Strong's: data-derived (CC0) related codes — synonyms/same-field words
+    plus antonyms, each with gloss + relation + confidence. A MARBLE-free alternative to /domain
+    (Louw-Nida). Hebrew/OT for now (from the semantic-neighbors pack)."""
+    return data.semantic_field(strong, limit=min(limit, 30))
 
 
 @app.get("/morph")

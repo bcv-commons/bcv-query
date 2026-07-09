@@ -1,0 +1,18 @@
+{
+  "dataset": "prior_pack",
+  "anchor": "MACULA lexeme (CC-BY)",
+  "license": "CC-BY-4.0",
+  "rows": 14720,
+  "with_keyness": 14045,
+  "with_lxx": 3759,
+  "with_senses": 6872,
+  "with_neighbors": 3011,
+  "components": {
+    "keyness_sha256": "8e780f7159b43d9fa10d4c16935043c1115ae564a6b3b719d458bd7340314d80",
+    "lxx_bridge_sha256": "97c1c2a8df1f33069ecd88dab3a1b7ff179e900236ac41cd4d93f12ec5d40cff",
+    "neighbors_sha256": "cfe009d21991aa2cd6ac57809452da1c6c63e0aedc4362492b2a0488182dfa44",
+    "spine_sha256": "dc353d340215339093f453d8765af1fabf8b444dcd917b4d73a3d056b22ebb31"
+  },
+  "content_sha256": "4fb4ef9d3c23ce6ae96bae2bb565fe4e2f1a1e27b6da5224962b14ff9934728c",
+  "note": "language-independent; CC-BY (MACULA lexeme + lxx_bridge); label-free (no MARBLE)."
+}

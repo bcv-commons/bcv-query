@@ -1106,3 +1106,31 @@ def lxx_bridge(strong: str, limit: int = 50) -> dict:
         "hebrew_verses": len(by_verse),
         "greek_translations": translations,
     }
+
+
+@lru_cache(maxsize=1)
+def _semantic_field_map() -> dict:
+    """resources/semantic_neighbors/by_strong.tsv -> {padded Strong's: [neighbor dicts]}.
+
+    A data-derived, **CC0** 'related words' signal (the semantic-neighbors pack, high+prior tiers):
+    synonyms / same-field words + antonyms, re-derived from context embeddings + LXX + gloss + an LLM
+    scholarly prior — a MARBLE-free alternative to the NC Louw-Nida/SDBH domains."""
+    p = _resources_dir() / "semantic_neighbors" / "by_strong.tsv"
+    out: dict = {}
+    if p.exists():
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if ln.startswith("#") or ln.startswith("strong"):
+                continue
+            f = ln.split("\t")
+            if len(f) >= 6:
+                out.setdefault(f[0], []).append(
+                    {"strong": f[1], "gloss": f[2], "relation": f[3],
+                     "confidence": f[4], "score": float(f[5])})
+    return out
+
+
+def semantic_field(strong: str, limit: int = 12) -> dict:
+    """Semantically near Strong's for a code (synonyms/same-field + antonyms), CC0 + data-derived.
+    Sorted by score; each neighbor carries gloss + relation (similar|antonym) + confidence tier."""
+    code = _norm_strong(strong)
+    return {"strong": code, "field": _semantic_field_map().get(code, [])[:limit]}

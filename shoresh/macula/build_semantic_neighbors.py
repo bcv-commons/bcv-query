@@ -215,12 +215,47 @@ def build(validate: bool, llm_edges=None):
         "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick.",
     }
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    _write_by_strong(rows)                            # committed service form for shoresh /field, /concept
     print(f"[neighbors] {len(rows)} edges (high={tier['high']} recall={tier['recall']} "
           f"prior={tier['prior']}) -> {dest}", file=sys.stderr)
 
     if validate:
         _validate(rows, meta)
     return manifest
+
+
+def _write_by_strong(rows):
+    """Committed service form: resources/semantic_neighbors/by_strong.tsv — high+prior tiers rolled
+    lexeme→Strong's, with the neighbor's English gloss, for the shoresh /field + /concept endpoints
+    (which key on Strong's). Small + tracked (the parquet is the bulk/gitignored form)."""
+    import re
+    gl = {}
+    gp = ROOT / "resources" / "strongs_gloss.tsv"
+    if gp.exists():
+        for ln in gp.read_text(encoding="utf-8").splitlines()[1:]:
+            p = ln.split("\t")
+            if len(p) >= 2:
+                gl.setdefault(p[0], p[1])
+
+    def hs(lx):
+        m = re.search(r"(\d+)", lx or "")
+        return f"{'G' if lx.startswith('grc') else 'H'}{int(m.group(1)):04d}" if m else ""
+
+    best = {}
+    for lx, nb, score, _src, conf, rel in rows:
+        if conf == "recall":
+            continue
+        a, b = hs(lx), hs(nb)
+        if not a or not b or a == b:
+            continue
+        if (a, b) not in best or score > best[(a, b)][2]:
+            best[(a, b)] = (rel, conf, score)
+    lines = sorted(((a, b, gl.get(b, ""), rel, conf, round(sc, 3))
+                    for (a, b), (rel, conf, sc) in best.items()), key=lambda r: (r[0], -r[5]))
+    (OUT_DIR / "by_strong.tsv").write_text(
+        "# semantic field per Strong's (high+prior tiers, rolled from lexeme neighbors); CC0\n"
+        "strong\tneighbor\tneighbor_gloss\trelation\tconfidence\tscore\n"
+        + "\n".join("\t".join(map(str, r)) for r in lines) + "\n", encoding="utf-8")
 
 
 def _load_llm_edges(path):
