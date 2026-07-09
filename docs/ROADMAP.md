@@ -209,9 +209,15 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   attested-`aligned_lex` surfaces. **Wired into the analyzer**: `concept_expand.proper_noun_matches`
   recognizes names in a query (any lang/variant) → high-confidence `strongs:` tags, keyness-floor
   exempt; **and into the entity card** — `EntityStrategy._lookup_name` bridges a cross-lingually
-  recognized name → its English canonical name → the entity graph ("qui est Jésus" → the Jesus card).
-  ✅ Core done. Optional next = resolve directly on the entity's stored `extendedStrongs` (robustness).
-- **X2 · Synoptic Gospel parallels** — passage-parallel index across Matt/Mark/Luke.
+  recognized name → the entity graph ("qui est Jésus" → the Jesus card). ✅ **Done, incl. robustness:**
+  resolves on the entity's own `extendedStrongs` (Strong's-direct, name-spelling-independent) with the
+  English-name bridge as fallback; diacritic folding (`_fold`: harakat/niqqud/accents) so vowel-pointed
+  variants match (يَسُوعُ → G2424).
+- **X2 · Synoptic Gospel parallels** — 🟢 **BUILT** (`resources/synoptic_parallels/`,
+  `macula.build_synoptic`) — IDF-cosine over shared content Greek Strong's (the X1 technique, within
+  the Gospels). 3,388 pairs (1,248 high-conf), 6/6 on known parallels; by-Gospel distribution tracks
+  synoptic theory (MAT-MRK/LUK-MAT dominate, John independent). Remaining = wire into `/verse` or a
+  `/parallels/{ref}` endpoint.
 - **T1 · Timeline + geography** (viz.bible / OpenBible geocoding) → "passages set
   in Galilee", "what happened around the time of X".
 
@@ -228,9 +234,10 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   (`openscriptures/GreekResources`, NT+LXX), because the current `lxx.db` is CATSS-NC and can't feed a
   CC0 artifact. LXX `lexid` is now captured (internal) but Greek's homograph rate is ~1.6%, so the value
   is the *Greek coverage*, not precision. Full plan: `internal-docs/greek-lexeme-and-neighbors.md`.
-- **M1 · Multi-word expressions → Strong's** — 🟢 **UNBLOCKED** (mine `aligned-lex`) — consecutive
-  surfaces aligning to the same Strong's set ("Espíritu Santo" → G4151+G0040) so the analyzer
-  detects multi-word concepts.
+- **M1 · Multi-word expressions → Strong's** — 🟡 **RE-BLOCKED** — the premise ("mine `aligned-lex`")
+  is wrong: `aligned_lex` surfaces are single tokens (0 multi-word), so consecutive surface→same-Strong's
+  can't be recovered from it. Needs the **positional** alignment corpus (Clear-Bible Alignments with
+  token offsets) or an original-side collocation miner (consecutive original words → their Strong's set).
 - **D1 · Discourse connectives / coreference** — γάρ/οὖν/δέ, כִּי for argument
   flow; participant coreference to resolve "he/they" across a narrative.
 - **V1 · Versification map** — canonical ↔ edition verse-offset table (Hebrew vs

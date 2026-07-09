@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import unicodedata
 from functools import lru_cache
 from pathlib import Path
 
@@ -320,6 +321,14 @@ def _reverse_gloss(lang: str = "en") -> dict[str, list[tuple[str, int]]]:
     return result
 
 
+def _fold(s: str) -> str:
+    """Strip combining diacritics (Arabic harakat, Hebrew niqqud, Latin accents) so vowel-pointed /
+    accented name variants match on the base skeleton — يَسُوعُ ≡ يسوع, José ≡ Jose. Applied to both
+    the proper-noun index keys and the query tokens so they normalize identically."""
+    return "".join(c for c in unicodedata.normalize("NFD", s or "")
+                   if unicodedata.category(c) != "Mn")
+
+
 @lru_cache(maxsize=8)
 def _proper_noun_index(lang: str = "eng") -> dict[str, list[tuple[str, str]]]:
     """{name_surface_lower: [(strong_code, type), …]} for one language, from the N1 proper-noun
@@ -339,7 +348,7 @@ def _proper_noun_index(lang: str = "eng") -> dict[str, list[tuple[str, str]]]:
             p = line.rstrip("\n").split("\t")  # strong translit type lang surface source weight
             if len(p) < 5 or p[3] != lang:
                 continue
-            surface = p[4].strip().lower()
+            surface = _fold(p[4].strip()).lower()
             if len(surface) < 2:
                 continue
             idx.setdefault(surface, {}).setdefault(p[0], p[2])
@@ -383,7 +392,7 @@ def proper_noun_matches(text: str, lang: str = "eng", cap: int = 4) -> list[tupl
         return []
     out: list[tuple[str, str]] = []
     seen: set[str] = set()
-    for w in re.findall(r"[一-鿿]|[\w]{2,}", text.lower()):
+    for w in re.findall(r"[一-鿿]|[\w]{2,}", _fold(text).lower()):   # fold: harakat/accents drop out
         for code, typ in idx.get(w, []):
             if typ == "other":          # TIPNR "other" = titles (governor…), not names — skip
                 continue

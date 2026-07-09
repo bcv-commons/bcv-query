@@ -304,6 +304,30 @@ def _entity_line(data: dict) -> str:
     return "ENTITY — " + line
 
 
+_ENTITY_BY_STRONG: dict[str, str] | None = None
+
+
+def _strong_to_entity(db) -> dict[str, str]:
+    """{rolled_strong: entity_name} parsed once from the graph's TIPNR metadata (`extendedStrongs`).
+    Robust resolution: match a recognized name on the SAME Strong's the entity was ingested with,
+    independent of English name-string spelling. Process-lifetime cache (the graph is read-only)."""
+    global _ENTITY_BY_STRONG
+    if _ENTITY_BY_STRONG is None:
+        m: dict[str, str] = {}
+        for name, meta in db.execute(
+                "SELECT name, metadata FROM entities WHERE metadata LIKE ?", ("%extendedStrongs%",)):
+            try:
+                d = json.loads(meta or "{}")
+            except Exception:
+                continue
+            for nm in d.get("names") or []:
+                mm = re.match(r"^([HG])0*(\d+)", (nm.get("extendedStrongs") or "").strip())
+                if mm:
+                    m.setdefault(f"{mm.group(1)}{int(mm.group(2)):04d}", name)
+        _ENTITY_BY_STRONG = m
+    return _ENTITY_BY_STRONG
+
+
 class EntityStrategy(CardStrategy):
     """Entity — who/what summary + a one-hop relation ANSWER (genealogy). Its own strategy: entity
     facts ground the prose even on a bare lookup (the relation answer IS the answer) → NO
@@ -331,11 +355,15 @@ class EntityStrategy(CardStrategy):
                 continue
             if db.execute("SELECT 1 FROM entities WHERE LOWER(name)=LOWER(?) LIMIT 1", (c,)).fetchone():
                 return c
-        # 2) cross-lingual (N1): recognize a name in ANY language / morphological variant → its
-        #    English canonical name → the (English-keyed) entity graph. Enables the entity card for
-        #    "qui est Jésus", "¿quién es David?", lowercase, and inflected forms.
+        # 2) cross-lingual (N1): recognize a name in ANY language / morphological variant → the
+        #    entity graph. Enables the entity card for "qui est Jésus", "¿quién es David?", lowercase,
+        #    and inflected forms. Resolve ROBUSTLY on the entity's own Strong's; fall back to the
+        #    English-name bridge for names TIPNR didn't tag on the graph side.
         from query.concept_expand import proper_noun_matches, proper_noun_english_name
+        by_strong = _strong_to_entity(db)
         for code, _typ in proper_noun_matches(query or "", lang):
+            if code in by_strong:
+                return by_strong[code]
             eng = proper_noun_english_name(code)
             if eng and db.execute("SELECT 1 FROM entities WHERE LOWER(name)=LOWER(?) LIMIT 1",
                                    (eng,)).fetchone():
