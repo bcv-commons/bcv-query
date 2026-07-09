@@ -9,7 +9,9 @@ semantic-neighbors pack. Keyed on the MACULA lexeme → one build serves every t
 """
 from __future__ import annotations
 
+import argparse
 import collections
+import glob
 import hashlib
 import json
 import re
@@ -28,7 +30,25 @@ NEIGHBORS = ROOT / "resources" / "semantic_neighbors" / "neighbors.parquet"
 OUT_DIR = ROOT / "resources" / "prior_pack"
 
 
-def build():
+def _xling_confidence(aligned_dir: Path) -> dict:
+    """lexeme -> # of published aligned-lex languages that align it with a hi_conf dominant surface.
+    A language-independent alignability prior (high = stable cross-lingual anchor; low = fragile,
+    high-frequency/broad word). Computed from the aligner's published `aligned-lex` partitions."""
+    lex_hi: collections.Counter = collections.Counter()
+    for p in sorted(glob.glob(f"{aligned_dir}/iso=*/data.parquet")):
+        top: dict = {}
+        for r in pq.read_table(p, columns=["lexeme", "share", "hi_conf"]).to_pylist():
+            lx = r["lexeme"]
+            if lx not in top or r["share"] > top[lx][0]:
+                top[lx] = (r["share"], r["hi_conf"])
+        for lx, (_sh, hc) in top.items():
+            if hc >= 0.5:
+                lex_hi[lx] += 1
+    return lex_hi
+
+
+def build(aligned_dir: Path | None = None):
+    xling = _xling_confidence(aligned_dir) if aligned_dir and Path(aligned_dir).exists() else None
     sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
 
     # 1. distinct lexemes (representative strong/lemma/is_content); testament from the lang prefix
@@ -91,6 +111,7 @@ def build():
             "lxx_hebrew": order(g2h.get(s, [])) if d["testament"] == "NT" else [],
             "senses": senses,
             "neighbors": sorted(nb.get(lexeme, []), key=lambda x: -x["score"]),
+            "xling_confidence": (xling.get(lexeme, 0) if xling is not None else None),
         })
 
     sense_struct = pa.list_(pa.struct([("stem", pa.string()), ("sense", pa.string()),
@@ -108,6 +129,7 @@ def build():
         "lxx_hebrew": pa.array([r["lxx_hebrew"] for r in rows], pa.list_(pa.string())),
         "senses": pa.array([r["senses"] for r in rows], sense_struct),
         "neighbors": pa.array([r["neighbors"] for r in rows], nb_struct),
+        "xling_confidence": pa.array([r["xling_confidence"] for r in rows], pa.int32()),
     })
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     dest = OUT_DIR / "prior_pack.parquet"
@@ -122,6 +144,7 @@ def build():
         "with_lxx": sum(1 for r in rows if r["lxx_greek"] or r["lxx_hebrew"]),
         "with_senses": sum(1 for r in rows if r["senses"]),
         "with_neighbors": sum(1 for r in rows if r["neighbors"]),
+        "with_xling": sum(1 for r in rows if r["xling_confidence"]),
         "components": {
             "keyness_sha256": _sha(KEYNESS), "lxx_bridge_sha256": _sha(LXX),
             "neighbors_sha256": _sha(NEIGHBORS), "spine_sha256": _sha(SPINE),
@@ -132,9 +155,13 @@ def build():
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"prior_pack: {len(rows)} lexemes -> {dest}")
     print(f"  keyness {manifest['with_keyness']} · lxx {manifest['with_lxx']} · "
-          f"senses {manifest['with_senses']} · neighbors {manifest['with_neighbors']}")
+          f"senses {manifest['with_senses']} · neighbors {manifest['with_neighbors']} · "
+          f"xling {manifest['with_xling']}")
     return manifest
 
 
 if __name__ == "__main__":
-    build()
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--aligned-lex-dir", type=Path, default=None,
+                    help="local mirror of published aligned-lex (iso=*/data.parquet) → adds xling_confidence")
+    build(ap.parse_args().aligned_lex_dir)

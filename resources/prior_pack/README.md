@@ -11,6 +11,9 @@ priors. Built once (language-independent) via `shoresh/macula/build_prior_pack.p
 | `lxx_greek` / `lxx_hebrew` | cross-testament bridge (OT→Greek / NT→Hebrew), freq-ordered |
 | `senses` | `[{stem, sense, share}]` — sense inventory / prior distribution (OT) |
 | `neighbors` | `[{lexeme, score, relation, confidence}]` — semantic field (OT) |
+| `xling_confidence` | # of published `aligned-lex` languages that align this lexeme with a hi_conf dominant (0–7); high=stable anchor, low=fragile |
 
 Consumed: gloss (keyness+lxx+senses extend/clean the mined dict); neural (neighbors tie-break + senses).
 Publish to `bcv-commons/strongs` as a `priors` config. `neighbors`/`senses` are OT-only for now.
+
+`xling_confidence` is derived from the aligner's published `aligned-lex` (the loop-back); rebuild with `--aligned-lex-dir <mirror>` when partitions change.
