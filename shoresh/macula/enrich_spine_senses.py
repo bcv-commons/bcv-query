@@ -31,23 +31,28 @@ def _add_col(db: sqlite3.Connection, name: str, decl: str) -> None:
 
 def enrich(spine_path: Path, bridge_path: Path, hbo_path: Path) -> tuple[int, int]:
     db = sqlite3.connect(spine_path)
-    for c, d in (("sense", "TEXT"), ("sense_conf", "REAL"), ("sense_source", "TEXT")):
+    # `lex` + `stem` (binyan) carried alongside `sense` so a consumer emits shoresh's canonical
+    # sense key (lex, stem, sense) natively — BHSA-anchored, binyan-aware (senses/hbo_lex.tsv).
+    for c, d in (("lex", "TEXT"), ("stem", "TEXT"),
+                 ("sense", "TEXT"), ("sense_conf", "REAL"), ("sense_source", "TEXT")):
         _add_col(db, c, d)
 
     hbo = sqlite3.connect(f"file:{hbo_path}?mode=ro", uri=True)
-    sense_by_node = {node: (sense, conf, src) for node, sense, conf, src in hbo.execute(
-        "SELECT node, sense, sense_conf, sense_source FROM occurrence "
+    occ_by_node = {node: (lex, stem or "", sense, conf, src)
+                   for node, lex, stem, sense, conf, src in hbo.execute(
+        "SELECT node, lex, stem, sense, sense_conf, sense_source FROM occurrence "
         "WHERE sense IS NOT NULL AND sense != ''")}
 
     bridge = sqlite3.connect(f"file:{bridge_path}?mode=ro", uri=True)
     updates = []
     for node, key in bridge.execute("SELECT node, key FROM bridge"):
-        s = sense_by_node.get(node)
-        if s:
-            updates.append((s[0], s[1], s[2], key))
+        o = occ_by_node.get(node)
+        if o:
+            updates.append((o[0], o[1], o[2], o[3], o[4], key))
 
     db.executemany(
-        "UPDATE spine_words SET sense=?, sense_conf=?, sense_source=? WHERE key=?", updates)
+        "UPDATE spine_words SET lex=?, stem=?, sense=?, sense_conf=?, sense_source=? WHERE key=?",
+        updates)
     db.commit()
     total = db.execute("SELECT count(*) FROM spine_words").fetchone()[0]
     withsense = db.execute("SELECT count(*) FROM spine_words WHERE sense IS NOT NULL").fetchone()[0]
