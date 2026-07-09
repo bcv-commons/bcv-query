@@ -1,0 +1,24 @@
+{
+  "dataset": "semantic_neighbors",
+  "anchor": "MACULA lexeme (CC-BY)",
+  "testament": "OT/Hebrew",
+  "license": "CC0-1.0",
+  "signals": [
+    "emb:bge-m3 clause centroids",
+    "lxx:shared-greek",
+    "gloss:overlap",
+    "llm:scholarly-prior"
+  ],
+  "confidence_tiers": {
+    "high": 6,
+    "recall": 36795,
+    "prior": 19
+  },
+  "lexemes": 3805,
+  "edges": 36820,
+  "topk": 10,
+  "min_cos": 0.3,
+  "min_occ": 3,
+  "content_sha256": "45ea4e1364983d90c4cb5a27206ddf1fc919be3b7ecc7f460205ea87fe5f8f6f",
+  "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick."
+}

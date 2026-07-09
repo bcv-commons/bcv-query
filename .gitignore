@@ -119,3 +119,6 @@ aligner/out/
 # MACULA: BHSA↔MACULA occurrence bridge (re-derivable via macula.build_bridge)
 shoresh/macula/bhsa-macula-bridge.db
 shoresh/macula/bhsa-macula-bridge.db-*
+# semantic_neighbors: CC0 derived pack — bulk parquet regenerable, manifest+README committed
+resources/semantic_neighbors/*.parquet
+resources/semantic_neighbors/llm_edges.tsv
