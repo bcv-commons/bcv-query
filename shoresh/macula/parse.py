@@ -76,12 +76,15 @@ def _parse_ref(ref: str):
 
 
 # Per-language column aliases (the two TSVs name a few fields differently).
+# `stem` = verbal stem (Hebrew binyan) — a CC-BY grammatical field, distinct from the NC MARBLE
+# domain/sense columns we skip. Carried so downstream can key senses on (lexeme, stem) with a clean
+# (non-BHSA) binyan. Greek has no binyan; its `stem` is empty/NA there.
 COLS = {
     "grc": {"lemma": "lemma", "strong": "strong", "gloss": "gloss", "text": "text",
-            "role": "role", "class": "class",
+            "role": "role", "class": "class", "stem": "stem",
             "refcols": ["referent", "subjref"]},
     "hbo": {"lemma": "lemma", "strong": "strongnumberx", "gloss": "gloss", "text": "text",
-            "role": "role", "class": "class",
+            "role": "role", "class": "class", "stem": "stem",
             "refcols": ["participantref", "subjref"]},
 }
 
@@ -101,7 +104,8 @@ def _ingest(con: sqlite3.Connection, path: Path, lang: str) -> tuple[int, int, i
         words.append((k, r.get("xml:id", ""), lang, book, ch, vs, word,
                       r.get(c["lemma"], ""), r.get(c["strong"], ""), r.get(c["gloss"], ""),
                       r.get(c["text"], ""), r.get(c.get("role", ""), "") or "",
-                      r.get(c.get("class", ""), "") or ""))
+                      r.get(c.get("class", ""), "") or "",
+                      r.get(c.get("stem", ""), "") or ""))
         nw += 1
         # frame: "A0:<id>;<id> A1:<id>" → one row per (role, arg)
         for token in (r.get("frame", "") or "").split():
@@ -118,7 +122,7 @@ def _ingest(con: sqlite3.Connection, path: Path, lang: str) -> tuple[int, int, i
                 ak = _key(a)
                 if ak:
                     refs.append((k, ak, kind)); nr += 1
-    con.executemany("INSERT OR IGNORE INTO macula_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", words)
+    con.executemany("INSERT OR IGNORE INTO macula_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", words)
     con.executemany("INSERT INTO frames VALUES (?,?,?)", frames)
     con.executemany("INSERT INTO refs VALUES (?,?,?)", refs)
     return nw, nf, nr
@@ -133,7 +137,7 @@ def build() -> None:
     con.executescript("""
         CREATE TABLE macula_words(key TEXT PRIMARY KEY, xml_id TEXT, lang TEXT,
             book TEXT, chapter INT, verse INT, word INT,
-            lemma TEXT, strong TEXT, gloss TEXT, text TEXT, role TEXT, class TEXT);
+            lemma TEXT, strong TEXT, gloss TEXT, text TEXT, role TEXT, class TEXT, stem TEXT);
         CREATE TABLE frames(verb_key TEXT, role TEXT, arg_key TEXT);
         CREATE TABLE refs(src_key TEXT, tgt_key TEXT, kind TEXT);
     """)
