@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 """Proper-noun lexicon (roadmap N1) — localized name renderings per biblical name Strong's.
 
-A name Strong's (person/place) → how that name is written across languages, from two signals:
+A name Strong's (person/place/other) → how that name is written across languages, from three signals:
+  • **tipnr**    — the authoritative proper-name set: OT+NT, **typed** (person/place/other) + the
+                   original Hebrew/Greek surface (`STEPBible-Data` TIPNR, CC-BY; staged via
+                   `bcv-RAG/ingest/tipnr.py`). This is what brings **NT Greek names** in.
   • **gloss**    — the curated, localized name + transliteration (`strongs_gloss.tsv`, per language)
   • **aligned**  — names actually attested in real translations (`aligned_lex/<iso>.tsv`, empirical)
 
-Proper nouns are identified by STEPBible's `Np` morph (`proper_strongs()`), so this is **OT/Hebrew for
-now** — MACULA Greek carries no proper-noun flag, so NT Greek names need TIPNR (CC-BY) or STEP TAGNT
-(roadmap N1 = the full version; see internal-docs). The lexicon lets the analyzer recognize a name in a
-query (any language) → map to its Strong's → retrieve + drive the name-bridge.
+The proper-noun set is TIPNR ∪ STEPBible `Np` morph (`proper_strongs()`), so it now spans **OT + NT**.
+The lexicon lets the analyzer recognize a name in a query (any language) → map to its Strong's → retrieve
++ drive the name-bridge; the `type` column distinguishes people/places/other.
 
   python -m macula.build_proper_nouns          # -> resources/proper_nouns/proper_nouns.tsv
 """
 from __future__ import annotations
 
 import collections
+import json
+import re
 import sys
 from pathlib import Path
 
@@ -25,11 +29,43 @@ from macula.build_semantic_neighbors import proper_strongs  # noqa: E402
 
 GLOSS = ROOT / "resources" / "strongs_gloss.tsv"
 ALIGNED_DIR = ROOT / "resources" / "aligned_lex"
+TIPNR_DIR = ROOT / "bcv-RAG" / "ingest" / "_staging" / "tipnr"
+TIPNR_FILES = {"person": "TIPNR_people.json", "place": "TIPNR_places.json", "other": "TIPNR_other.json"}
 OUT_DIR = ROOT / "resources" / "proper_nouns"
 
 MIN_COUNT = 2       # an aligned surface needs this many attestations (drop one-off alignment noise)
 MIN_SHARE = 0.10    # …and this share of the Strong's alignments
 TOPK = 8            # aligned surfaces kept per (strong, lang)
+_TYPE_RANK = {"person": 3, "place": 2, "other": 1}   # if a code appears under several, keep the strongest
+
+
+def _roll(code: str) -> str | None:
+    """extendedStrongs 'H0671b' / 'G2953' -> rolled 'H0671' / 'G2953' (join key for gloss/aligned)."""
+    m = re.match(r"^([HG])0*(\d+)", (code or "").strip())
+    return f"{m.group(1)}{int(m.group(2)):04d}" if m else None
+
+
+def _load_tipnr():
+    """({rolled_strong: type}, {rolled_strong: [orig Hebrew/Greek surface, …]}) from staged TIPNR JSON.
+
+    Empty if not staged (fetch via `python -m ingest.tipnr` in bcv-RAG). BOM-prefixed UTF-8."""
+    types: dict = {}
+    orig: dict = collections.defaultdict(list)
+    for typ, fname in TIPNR_FILES.items():
+        p = TIPNR_DIR / fname
+        if not p.exists():
+            continue
+        for e in json.loads(p.read_text(encoding="utf-8-sig")):
+            for nm in e.get("names", []):
+                code = _roll(nm.get("extendedStrongs"))
+                if not code:
+                    continue
+                if code not in types or _TYPE_RANK[typ] > _TYPE_RANK[types[code]]:
+                    types[code] = typ
+                hg = (nm.get("Hebrew_Greek") or "").strip()
+                if hg and hg not in orig[code]:
+                    orig[code].append(hg)
+    return types, orig
 
 
 def _load_glosses(proper):
@@ -79,39 +115,49 @@ def _load_aligned(proper):
 
 
 def build():
-    proper = proper_strongs()
+    np_proper = proper_strongs()                       # STEPBible Np (Hebrew, untyped)
+    tipnr_type, tipnr_orig = _load_tipnr()             # TIPNR (OT+NT, typed) + original surfaces
+    proper = set(np_proper) | set(tipnr_type)
     gloss_by, translit = _load_glosses(proper)
     aligned_by = _load_aligned(proper)
-    print(f"[proper-nouns] {len(proper)} name Strong's · "
+    ng = sum(1 for s in proper if s.startswith("G"))
+    print(f"[proper-nouns] {len(proper)} name Strong's ({ng} NT/Greek) · TIPNR-typed {len(tipnr_type)} · "
           f"{len(gloss_by)} with a gloss · {len(aligned_by)} with aligned surfaces", file=sys.stderr)
 
     rows = []
     for strong in sorted(proper):
         tr = translit.get(strong, "")
-        seen: set = set()                                  # (lang, surface) dedup across sources
+        typ = tipnr_type.get(strong, "name")           # 'name' = untyped (Np-only, no TIPNR entry)
+        lang0 = "hbo" if strong.startswith("H") else "grc"
+        seen: set = set()                              # (lang, surface) dedup across sources
+        for orig in tipnr_orig.get(strong, []):        # original Hebrew/Greek spelling
+            if (lang0, orig) not in seen:
+                seen.add((lang0, orig))
+                rows.append((strong, tr, typ, lang0, orig, "tipnr", 1.0))
         for lang, names in gloss_by.get(strong, {}).items():
             for name in names:
                 if (lang, name) not in seen:
                     seen.add((lang, name))
-                    rows.append((strong, tr, lang, name, "gloss", 1.0))
+                    rows.append((strong, tr, typ, lang, name, "gloss", 1.0))
         for lang, surfs in aligned_by.get(strong, {}).items():
             for surface, share, _c in surfs:
                 if (lang, surface) not in seen:
                     seen.add((lang, surface))
-                    rows.append((strong, tr, lang, surface, "aligned", round(share, 3)))
+                    rows.append((strong, tr, typ, lang, surface, "aligned", round(share, 3)))
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with (OUT_DIR / "proper_nouns.tsv").open("w", encoding="utf-8") as fh:
         fh.write("# Proper-noun lexicon (roadmap N1): biblical name Strong's -> localized renderings; "
-                 "shoresh macula.build_proper_nouns. OT/Hebrew (STEPBible Np); NT Greek needs TIPNR.\n")
-        fh.write("strong\ttranslit\tlang\tsurface\tsource\tweight\n")
-        for strong, tr, lang, surface, src, w in rows:
-            fh.write(f"{strong}\t{tr}\t{lang}\t{surface}\t{src}\t{w}\n")
+                 "shoresh macula.build_proper_nouns. OT+NT via TIPNR (CC-BY) ∪ STEPBible Np.\n")
+        fh.write("strong\ttranslit\ttype\tlang\tsurface\tsource\tweight\n")
+        for strong, tr, typ, lang, surface, src, w in rows:
+            fh.write(f"{strong}\t{tr}\t{typ}\t{lang}\t{surface}\t{src}\t{w}\n")
 
-    langs = sorted({r[2] for r in rows})
+    langs = sorted({r[3] for r in rows})
     covered = len({r[0] for r in rows})
-    print(f"[proper-nouns] {len(rows)} renderings · {covered} names · {len(langs)} langs "
-          f"({', '.join(langs)}) -> {OUT_DIR/'proper_nouns.tsv'}", file=sys.stderr)
+    bytype = collections.Counter(tipnr_type.get(s, "name") for s in {r[0] for r in rows})
+    print(f"[proper-nouns] {len(rows)} renderings · {covered} names "
+          f"({dict(bytype)}) · {len(langs)} langs -> {OUT_DIR/'proper_nouns.tsv'}", file=sys.stderr)
     return rows
 
 

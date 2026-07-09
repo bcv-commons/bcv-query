@@ -1,37 +1,40 @@
 # Proper-noun lexicon (N1)
 
-`proper_nouns.tsv` — each biblical **name** Strong's (person/place) → how that name is written across
-languages. Built by `shoresh/macula/build_proper_nouns.py`. Lets the analyzer recognize a name in a
-query (in any language) → map to its Strong's → retrieve + drive the name-bridge.
+`proper_nouns.tsv` — each biblical **name** Strong's (person/place/other) → how that name is written
+across languages. Built by `shoresh/macula/build_proper_nouns.py`. Lets the analyzer recognize a name in
+a query (in any language) → map to its Strong's → retrieve + drive the name-bridge; the `type` column
+distinguishes people/places/other.
 
 ## Columns
 | col | meaning |
 |---|---|
-| `strong` | name Strong's (`H1732`) |
-| `translit` | romanized name, language-independent anchor (`da.vid`) |
-| `lang` | ISO code |
+| `strong` | name Strong's (`H1732`, `G2424`) |
+| `translit` | romanized name, language-independent anchor (`da.vid`, `Iēsous`) |
+| `type` | `person` · `place` · `other` (from TIPNR) · `name` (untyped — STEPBible `Np` only) |
+| `lang` | ISO code (`hbo`/`grc` = the original-language spelling) |
 | `surface` | a rendering of the name in that language |
-| `source` | `gloss` = curated localized name (`strongs_gloss.tsv`) · `aligned` = attested in a real translation (`aligned_lex/`) |
-| `weight` | `1.0` for gloss · alignment `share` for aligned |
+| `source` | `tipnr` = original Heb/Greek surface · `gloss` = curated localized name (`strongs_gloss.tsv`) · `aligned` = attested in a real translation (`aligned_lex/`) |
+| `weight` | `1.0` for tipnr/gloss · alignment `share` for aligned |
 
-## Two complementary signals
-- **`gloss`** — the canonical name per language, broad coverage (14 langs incl. amh/cmn/rus). Authoritative but one form.
+## Three complementary signals
+- **`tipnr`** — the authoritative proper-name set (STEPBible-Data TIPNR): OT **and NT**, typed, with the
+  original Hebrew/Greek surface (Ἰησοῦς, דָּוִד). This is what brings NT Greek names in.
+- **`gloss`** — the canonical name per language, broad coverage (19 langs incl. amh/cmn/rus).
 - **`aligned`** — names *actually attested* in translations, including morphological variants a query
-  might use: Arabic clitic forms (دَاوُدُ / وَدَاوُدُ / لِدَاوُدَ), English `david's`. Empirical, per-language.
+  might use: Arabic clitic forms (يَسُوعُ / وَيَسُوعُ / لِيَسُوعَ), English `david's`. Empirical, per-language.
 
-Consumers pick: `source=gloss` for the canonical name, `source=aligned` (or both) for recognition recall.
+Consumers pick: `type` to filter people vs places; `source=tipnr|gloss` for canonical forms,
+`source=aligned` (or all) for recognition recall.
 
-## Coverage & scope
-1,485 name Strong's · 1,218 with aligned surfaces · 17,187 renderings · 14 languages.
+## Coverage
+3,415 name Strong's (622 NT/Greek) · person 2,172 / place 1,074 / other 141 / untyped 28 · 43,078
+renderings · 19 languages.
 
-**OT / Hebrew only.** Proper nouns are identified by STEPBible's `Np` morph (`proper_strongs()`), which
-is Hebrew. MACULA Greek carries **no proper-noun flag** (Δαυίδ/Ἰησοῦς are just `noun`), so **NT Greek
-names are not yet covered** — that needs **TIPNR** (Tyndale proper names, CC-BY; also gives
-person/place/people-group typing) or STEP TAGNT. That is the full N1 (see
-`internal-docs/greek-lexeme-and-neighbors.md` neighbourhood / roadmap N1); this file is the unblocked
-OT down-payment, and its join code is reused by the full version.
-
-## Rebuild
+## Build dependency
+The proper-noun **set + typing** come from **TIPNR** (`STEPBible-Data`, CC-BY), staged at
+`bcv-RAG/ingest/_staging/tipnr/` (gitignored). It's staged as a side-effect of bcv-RAG's TIPNR ingest:
 ```bash
-python -m macula.build_proper_nouns     # -> resources/proper_nouns/proper_nouns.tsv
+cd bcv-RAG && python -m ingest.tipnr    # fetches TIPNR_{people,places,other}.json into _staging/tipnr/
+cd shoresh && python -m macula.build_proper_nouns   # -> resources/proper_nouns/proper_nouns.tsv
 ```
+Without TIPNR staged it falls back to STEPBible `Np` (OT-Hebrew only, all `type=name`).

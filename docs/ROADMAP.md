@@ -203,9 +203,11 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
 - **X1 · OT-in-NT quotations** — 🟢 **UNBLOCKED** (`lxx_bridge` is live + pinned) —
   match NT Greek against the LXX (Greek OT) → quotation links far beyond TSK.
   (A ready-made OT-NT reference map also exists — see catalog.) *Headline feature, short build.*
-- **N1 · Proper-noun lexicon** per language — 🟢 **UNBLOCKED** (published `aligned-lex` +
-  the `Np` morph flag) — surfaces aligning to person/place Strong's → localized name lists;
-  extends the name-bridge and lets the analyzer recognize names in queries.
+- **N1 · Proper-noun lexicon** per language — 🟢 **BUILT** (`resources/proper_nouns/`,
+  `macula.build_proper_nouns`) — 3,415 name Strong's (622 NT/Greek) × 19 langs, **typed**
+  person/place/other via **TIPNR** (CC-BY) ∪ STEPBible `Np`, merging original + curated-gloss +
+  attested-`aligned_lex` surfaces. Remaining = wire into the bcv-RAG analyzer (query name-recognition)
+  + the name-bridge.
 - **X2 · Synoptic Gospel parallels** — passage-parallel index across Matt/Mark/Luke.
 - **T1 · Timeline + geography** (viz.bible / OpenBible geocoding) → "passages set
   in Galilee", "what happened around the time of X".
