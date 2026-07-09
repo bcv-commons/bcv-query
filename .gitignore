@@ -111,6 +111,8 @@ deploy/deploy.local.env
 bcv-RAG/data/
 resources/occurrences/*.db
 resources/occurrences/*.npz
+resources/hbo.db
+resources/hbo.db-*
 
 # === aligner: experiment artifacts (promoted to resources/ only after the benchmark gate) ===
 aligner/out/
