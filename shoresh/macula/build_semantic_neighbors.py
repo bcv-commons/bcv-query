@@ -216,6 +216,7 @@ def build(validate: bool, llm_edges=None):
     }
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     _write_by_strong(rows)                            # committed service form for shoresh /field, /concept
+    _write_by_lexeme(rows, meta)                       # homograph-precise service form (same, split by lexeme)
     print(f"[neighbors] {len(rows)} edges (high={tier['high']} recall={tier['recall']} "
           f"prior={tier['prior']}) -> {dest}", file=sys.stderr)
 
@@ -255,6 +256,36 @@ def _write_by_strong(rows):
     (OUT_DIR / "by_strong.tsv").write_text(
         "# semantic field per Strong's (high+prior tiers, rolled from lexeme neighbors); CC0\n"
         "strong\tneighbor\tneighbor_gloss\trelation\tconfidence\tscore\n"
+        + "\n".join("\t".join(map(str, r)) for r in lines) + "\n", encoding="utf-8")
+
+
+def _write_by_lexeme(rows, meta):
+    """Homograph-precise service form: resources/semantic_neighbors/by_lexeme.tsv — the same high+prior
+    field as by_strong.tsv, but NOT rolled: each row keeps the source + neighbor **lexeme** (MACULA
+    anchor) and its own gloss. 64% of Strong's numbers cover >1 lexeme, so `by_strong` merges distinct
+    words' neighbors into one blurred list; this form lets shoresh split /field + /concept by lexeme
+    (and fall back to by_strong for Greek / lexeme-less codes). meta[lexeme] = (H####/G####, top_gloss)."""
+    import re
+
+    def hs(lx):
+        m = re.search(r"(\d+)", lx or "")
+        return f"{'G' if lx.startswith('grc') else 'H'}{int(m.group(1)):04d}" if m else ""
+
+    best = {}
+    for lx, nb, score, _src, conf, rel in rows:
+        if conf == "recall" and rel != "antonym":   # keep high+prior; antonyms live in recall
+            continue
+        if lx == nb:
+            continue
+        if (lx, nb) not in best or score > best[(lx, nb)][2]:
+            best[(lx, nb)] = (rel, conf, score)
+    lines = sorted(
+        ((hs(lx), lx, meta.get(lx, ("", ""))[1], hs(nb), nb, meta.get(nb, ("", ""))[1], rel, conf, round(sc, 3))
+         for (lx, nb), (rel, conf, sc) in best.items()),
+        key=lambda r: (r[0], r[1], -r[8]))
+    (OUT_DIR / "by_lexeme.tsv").write_text(
+        "# semantic field per MACULA lexeme (high+prior tiers, homograph-precise); CC0\n"
+        "strong\tlexeme\tlexeme_gloss\tneighbor_strong\tneighbor_lexeme\tneighbor_gloss\trelation\tconfidence\tscore\n"
         + "\n".join("\t".join(map(str, r)) for r in lines) + "\n", encoding="utf-8")
 
 

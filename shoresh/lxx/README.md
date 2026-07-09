@@ -30,6 +30,7 @@ OT verses join **LXX ↔ spine ↔ BHSA** on `(book, chapter, verse, strong)`:
 | `surface` | accented Greek (`ἀρχῇ`) |
 | `plain` | monotonic, de-accented form (`αρχη`) — matches Greek-model orthography, via `spine.common.to_modern_form` |
 | `strong` | Strong's number (int; first `<S>` after the `<m>` tag) — NULL for rare untagged words |
+| `lexid` | eliranwong analytical-lexicon **lexeme id** (second `<S>`; ὁ = 73459 everywhere) — homograph-precise *within* the LXX, but **opaque** (not Strong's, not MACULA `grc:`). Greek's homograph rate is ~1.6% so it rarely differs from `strong` (only 4 Strong's split in the whole LXX); kept for internal precision. Do NOT feed derived CC0/CC-BY artifacts — CATSS-NC. See `internal-docs/greek-lexeme-and-neighbors.md`. |
 | `morph`, `pos` | CCAT/Packard code (`N.DSF`) and head POS (`N`) |
 | `is_content` | POS ∈ {N, V, A} — same content rule as the spine |
 | `canonical` | 1 = the 39 OT books (join the spine); 0 = deuterocanon |

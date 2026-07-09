@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS lxx_words (
   surface    TEXT NOT NULL,
   plain      TEXT NOT NULL,
   strong     INTEGER,
+  lexid      INTEGER,
   morph      TEXT,
   pos        TEXT,
   is_content INTEGER NOT NULL,
@@ -92,12 +93,20 @@ CREATE TABLE IF NOT EXISTS lxx_words (
   PRIMARY KEY (book, chapter, verse, idx)
 );
 CREATE INDEX IF NOT EXISTS idx_lxx_strong ON lxx_words(strong);
+CREATE INDEX IF NOT EXISTS idx_lxx_lexid ON lxx_words(lexid);
 CREATE INDEX IF NOT EXISTS idx_lxx_book ON lxx_words(book, chapter, verse);
 """
 
 
 def parse_word(tok: str):
-    """One inline token -> (surface, strong|None, morph|None, pos)."""
+    """One inline token -> (surface, strong|None, lexid|None, morph|None, pos).
+
+    Token: SURFACE<S>wordid</S><m>lxx.MORPH</m><S>strong</S><S>lexid</S>. The Strong's number
+    is the FIRST <S> after <m>; the lexid (eliranwong analytical-lexicon lexeme id) is the SECOND
+    — an opaque, homograph-precise lexeme key WITHIN the LXX (consistent per lexeme: ὁ is always
+    73459). It is NOT a Strong's rollup and NOT MACULA's `grc:` key, so it only groups LXX-internal
+    occurrences by lexeme; joining it out needs a crosswalk. Greek's homograph rate is ~1.6%, so it
+    rarely differs from Strong's — kept for internal precision where it does."""
     wm = _WORD.match(tok)
     if not wm:
         return None
@@ -107,17 +116,20 @@ def parse_word(tok: str):
     mm = _MORPH.search(tok)
     morph = mm.group(1) if mm else None
     pos = morph.split(".")[0] if morph else ""
-    strong = None
+    strong = lexid = None
     mpos = tok.find("<m>")
-    if mpos >= 0:                       # Strong's = first <S> after <m>
+    if mpos >= 0:                       # Strong's = first <S> after <m>; lexid = second
         sm = _STRONG.search(tok, mpos)
         if sm:
             strong = int(sm.group(1))
-    return surface, strong, morph, pos
+            lm = _STRONG.search(tok, sm.end())
+            if lm:
+                lexid = int(lm.group(1))
+    return surface, strong, lexid, morph, pos
 
 
 def iter_words(src: Path, wanted: set[str] | None):
-    """Yield (book, chapter, verse, idx, surface, strong, morph, pos) rows."""
+    """Yield (book, chapter, verse, idx, surface, strong, lexid, morph, pos) rows."""
     with src.open(encoding="utf-8") as fh:
         for line in fh:
             parts = line.rstrip("\n").split("\t")
@@ -138,9 +150,9 @@ def iter_words(src: Path, wanted: set[str] | None):
                 parsed = parse_word(tok)
                 if not parsed:
                     continue
-                surface, strong, morph, pos = parsed
+                surface, strong, lexid, morph, pos = parsed
                 idx += 1
-                yield (code, int(ch), int(v), idx, surface, strong, morph, pos)
+                yield (code, int(ch), int(v), idx, surface, strong, lexid, morph, pos)
 
 
 def fetch(src: Path | None) -> Path:
@@ -166,13 +178,13 @@ def build(wanted: set[str] | None, src: Path | None) -> None:
                " WHERE book IN (%s)" % ",".join("?" * len(wanted))),
                tuple(wanted) if wanted else ())
     n = 0
-    for (code, ch, v, idx, surface, strong, morph, pos) in iter_words(source, wanted):
+    for (code, ch, v, idx, surface, strong, lexid, morph, pos) in iter_words(source, wanted):
         db.execute(
             "INSERT OR REPLACE INTO lxx_words "
-            "(book,chapter,verse,idx,surface,plain,strong,morph,pos,is_content,canonical) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            "(book,chapter,verse,idx,surface,plain,strong,lexid,morph,pos,is_content,canonical) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
             (code, ch, v, idx, surface, to_modern_form(surface, "grc"),
-             strong, morph, pos, 1 if pos in CONTENT_POS else 0, _canon_of(code)),
+             strong, lexid, morph, pos, 1 if pos in CONTENT_POS else 0, _canon_of(code)),
         )
         n += 1
     db.commit()

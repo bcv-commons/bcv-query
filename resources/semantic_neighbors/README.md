@@ -20,6 +20,21 @@ everything for broad concept expansion; **exclude `relation=antonym`** from any 
 `manifest.json` (committed) carries the counts + `content_sha256`. Hebrew/OT only (the context
 embeddings are Hebrew clauses).
 
+## Committed service forms (small, tracked — the parquet is the bulk/gitignored source)
+Two flattened views of the `high`+`prior` tiers (plus antonyms), for the shoresh `/field` + `/concept`
+endpoints:
+
+- **`by_strong.tsv`** — rolled lexeme→Strong's (`strong, neighbor, neighbor_gloss, relation,
+  confidence, score`). Fallback / legacy form. **Lossy for meaning:** 64% of Strong's numbers cover
+  >1 lexeme, so it *merges* distinct words' fields (`H0352` = ram **and** oak **and** pillar → one
+  blurred list).
+- **`by_lexeme.tsv`** — homograph-precise, **not** rolled (`strong, lexeme, lexeme_gloss,
+  neighbor_strong, neighbor_lexeme, neighbor_gloss, relation, confidence, score`). Keeps each MACULA
+  lexeme separate with its own gloss + neighbors. `semantic_field()` serves this split under
+  `lexemes` and falls back to `by_strong` for Greek / lexeme-less codes.
+
+Both regenerate from `neighbors.parquet` (`_write_by_strong` / `_write_by_lexeme`).
+
 ## How it's derived (all clean sources)
 - **`emb`** *(empirical, primary)* — each lexeme's occurrence **clauses** are bge-m3 embeddings
   (`occurrences/context_emb.npz`); mean-pool per lexeme → centroid; **mean-center** to remove the

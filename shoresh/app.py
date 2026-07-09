@@ -471,15 +471,21 @@ def get_concept(word: str, limit: int = 5) -> dict:
     entries = []
     for m in gloss["matches"][:limit]:
         conc = data.concordance(m["strong"], limit=10)
-        entries.append({
+        # CC0 data-derived semantic field (synonyms/same-field + antonyms) — the MARBLE-free
+        # 'related words' signal from the semantic-neighbors pack (see /field).
+        sf = data.semantic_field(m["strong"])
+        entry = {
             "strong": m["strong"], "gloss": m["gloss"],
             "translit": m["translit"], "lang": m["lang"],
             "total_occurrences": conc["count"],
             "sample": conc["occurrences"][:5],
-            # CC0 data-derived semantic field (synonyms/same-field + antonyms) — the MARBLE-free
-            # 'related words' signal from the semantic-neighbors pack (see /field).
-            "field": data.semantic_field(m["strong"])["field"],
-        })
+            "field": sf["field"],
+        }
+        # Homograph-precise split (when this Strong's conflates >1 lexeme) so a caller can pick the
+        # sense matching the queried concept instead of the blurred merge.
+        if len(sf.get("lexemes", [])) > 1:
+            entry["field_by_lexeme"] = sf["lexemes"]
+        entries.append(entry)
     return {"concept": word, "entries": entries}
 
 
@@ -487,7 +493,9 @@ def get_concept(word: str, limit: int = 5) -> dict:
 def get_field(strong: str, limit: int = 12) -> dict:
     """Semantic field for a Strong's: data-derived (CC0) related codes — synonyms/same-field words
     plus antonyms, each with gloss + relation + confidence. A MARBLE-free alternative to /domain
-    (Louw-Nida). Hebrew/OT for now (from the semantic-neighbors pack)."""
+    (Louw-Nida). Hebrew/OT for now (from the semantic-neighbors pack). Homograph-aware: when a
+    Strong's conflates several lexemes it returns them split under `lexemes` (each with its own
+    field); `field` stays a flat merged list."""
     return data.semantic_field(strong, limit=min(limit, 30))
 
 

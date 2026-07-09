@@ -1129,8 +1129,46 @@ def _semantic_field_map() -> dict:
     return out
 
 
+@lru_cache(maxsize=1)
+def _semantic_field_by_lexeme_map() -> dict:
+    """resources/semantic_neighbors/by_lexeme.tsv -> {padded Strong's: [ {lexeme, gloss, field:[…]} ]}.
+
+    Homograph-precise form of _semantic_field_map: a Strong's that conflates several MACULA lexemes
+    (64% do) keeps them SPLIT — each lexeme with its own gloss + neighbor list — instead of merged into
+    one blurred field. Same CC0 semantic-neighbors pack, keyed on the finer lexeme anchor."""
+    p = _resources_dir() / "semantic_neighbors" / "by_lexeme.tsv"
+    grouped: dict = {}
+    if p.exists():
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if ln.startswith("#") or ln.startswith("strong"):
+                continue
+            f = ln.split("\t")   # strong lexeme lexeme_gloss n_strong n_lexeme n_gloss relation confidence score
+            if len(f) >= 9:
+                lexes = grouped.setdefault(f[0], {})
+                lex = lexes.setdefault(f[1], {"lexeme": f[1], "gloss": f[2], "field": []})
+                lex["field"].append({"strong": f[3], "lexeme": f[4], "gloss": f[5],
+                                     "relation": f[6], "confidence": f[7], "score": float(f[8])})
+    return {s: list(g.values()) for s, g in grouped.items()}
+
+
 def semantic_field(strong: str, limit: int = 12) -> dict:
     """Semantically near Strong's for a code (synonyms/same-field + antonyms), CC0 + data-derived.
-    Sorted by score; each neighbor carries gloss + relation (similar|antonym) + confidence tier."""
+    Sorted by score; each neighbor carries gloss + relation (similar|antonym) + confidence tier.
+
+    Homograph-aware: a Strong's that conflates several lexemes returns them split under `lexemes`
+    (each with its own gloss + field) — 64% of Strong's cover >1 lexeme, so the rolled-up field blurs
+    distinct words (H0352 = ram / oak / pillar). `field` stays a flat merged list for backward
+    compatibility; Greek / lexeme-less codes fall back to the rolled by_strong form (no `lexemes`)."""
     code = _norm_strong(strong)
+    groups = _semantic_field_by_lexeme_map().get(code)
+    if groups:
+        lexemes = [{"lexeme": g["lexeme"], "gloss": g["gloss"], "field": g["field"][:limit]}
+                   for g in groups]
+        merged: dict = {}                                   # flat backward-compat view: best score per neighbor
+        for g in groups:
+            for e in g["field"]:
+                if e["strong"] not in merged or e["score"] > merged[e["strong"]]["score"]:
+                    merged[e["strong"]] = e
+        flat = sorted(merged.values(), key=lambda e: -e["score"])[:limit]
+        return {"strong": code, "field": flat, "lexemes": lexemes}
     return {"strong": code, "field": _semantic_field_map().get(code, [])[:limit]}

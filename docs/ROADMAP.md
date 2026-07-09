@@ -200,30 +200,38 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
 
 ### Phase 4 — breadth (intertextual / names / relational)
 
-- **X1 · OT-in-NT quotations** — derivable with shoresh's existing **LXX bridge**:
+- **X1 · OT-in-NT quotations** — 🟢 **UNBLOCKED** (`lxx_bridge` is live + pinned) —
   match NT Greek against the LXX (Greek OT) → quotation links far beyond TSK.
-  (A ready-made OT-NT reference map also exists — see catalog.)
-- **N1 · Proper-noun lexicon** per language — surfaces aligning to person/place
-  Strong's → localized name lists; extends the name-bridge and lets the analyzer
-  recognize names in queries.
+  (A ready-made OT-NT reference map also exists — see catalog.) *Headline feature, short build.*
+- **N1 · Proper-noun lexicon** per language — 🟢 **UNBLOCKED** (published `aligned-lex` +
+  the `Np` morph flag) — surfaces aligning to person/place Strong's → localized name lists;
+  extends the name-bridge and lets the analyzer recognize names in queries.
 - **X2 · Synoptic Gospel parallels** — passage-parallel index across Matt/Mark/Luke.
 - **T1 · Timeline + geography** (viz.bible / OpenBible geocoding) → "passages set
   in Galilee", "what happened around the time of X".
 
 ### Phase 5 — depth
 
-- **A1 · Concept-association graph** — `Strong's → frequently co-occurring
-  Strong's`, from the corpus clauses or alignment co-occurrence. Powers "related
-  concepts" and sense disambiguation. An interpretable, Strong's-anchored
-  word2vec.
-- **M1 · Multi-word expressions → Strong's** — mine consecutive surfaces aligning
-  to the same Strong's set ("Espíritu Santo" → G4151+G0040, חֶסֶד) so the analyzer
+- **A1 · Concept-association graph** — 🟢 **LARGELY DONE** — the CC0 **semantic-neighbors pack**
+  (context embeddings + LXX + LLM prior, agreement-tiered) *is* this "interpretable Strong's-anchored
+  word2vec"; live in `/field` + `/concept`, now **homograph-precise** (served split by MACULA lexeme —
+  `by_lexeme.tsv` — since 64% of Strong's conflate >1 lexeme). Remaining = coverage (see
+  `internal-docs/domain-replacement-roadmap.md`) and the Greek side (G1 below).
+- **G1 · Greek-side semantic neighbors (CC0)** — 🔵 **SCOPED, not started** — the neighbors pack is
+  Hebrew-only (Hebrew clause centroids). Extending it to Greek *and publishing CC0* needs a **CATSS-free**
+  LXX (public-domain **Swete** — already our zero-CATSS fallback) + **open lemmas**
+  (`openscriptures/GreekResources`, NT+LXX), because the current `lxx.db` is CATSS-NC and can't feed a
+  CC0 artifact. LXX `lexid` is now captured (internal) but Greek's homograph rate is ~1.6%, so the value
+  is the *Greek coverage*, not precision. Full plan: `internal-docs/greek-lexeme-and-neighbors.md`.
+- **M1 · Multi-word expressions → Strong's** — 🟢 **UNBLOCKED** (mine `aligned-lex`) — consecutive
+  surfaces aligning to the same Strong's set ("Espíritu Santo" → G4151+G0040) so the analyzer
   detects multi-word concepts.
 - **D1 · Discourse connectives / coreference** — γάρ/οὖν/δέ, כִּי for argument
   flow; participant coreference to resolve "he/they" across a narrative.
 - **V1 · Versification map** — canonical ↔ edition verse-offset table (Hebrew vs
-  English Psalms, superscription offsets). Quiet but foundational infra — and a
-  **prerequisite for the [aligner](aligner-plan.md)**.
+  English Psalms, superscription offsets). Quiet but foundational infra. The aligner now runs but
+  **skips Psalms** without it — so V1 specifically unblocks Psalm alignment (aligner lives in its own
+  repo, `bcv-commons/strongs-aligner`).
 
 ---
 
@@ -256,10 +264,23 @@ converge to **one gloss source both read** — avoid two divergent copies.
 ## The aligner
 
 A whole sibling effort — word-align *any* translation to the Strong's-bearing
-original, generalizing how `aligned_lex` is built to any language. It's the
-largest force-multiplier here and has its own design doc:
-**→ [aligner-plan.md](aligner-plan.md)**. (Depends on **V1**, the versification
-map.)
+original, generalizing how `aligned_lex` is built to any language. **Extracted to
+its own repo: `github.com/bcv-commons/strongs-aligner`** (GPLv3); design + plan
+live there now.
+
+**Status — the shoresh↔aligner data loop is live (2026-07):**
+- **Aligner → HF (published):** `bcv-commons/aligned-lex` (CC0), `bcv-commons/senses-attested`
+  (CC-BY, lexeme-anchored, label-free) — eflomal alignments for 7 / 5 languages.
+- **shoresh → aligner leverage (published, complete):** `bcv-commons/prior-pack` — one
+  language-independent artifact per lexeme (keyness · LXX bridge · sense inventory · CC0
+  semantic-neighbors · cross-lingual `xling_confidence`), plus four documented recipes (LXX NT-gap,
+  keyness-filter, sense-surface, gap-map) the aligner runs on data it already owns. **No per-language
+  files needed from us** — see the operator handover (`internal-docs/aligner-handover.md`).
+- **By-product landed in shoresh:** the CC0 semantic-neighbors pack now serves `/field` + `/concept`
+  (a MARBLE-free "related words" signal, synonyms + antonyms) — *alongside* the NC domains for now;
+  full domain replacement is a deferred, phased track (`internal-docs/domain-replacement-roadmap.md`).
+- **Aligner's turn:** run its gloss + neural modes consuming `prior-pack` → publish
+  `method=gloss/neural/ensemble`. (Its NT-gap leverage wants OT partitions published for all langs.)
 
 ---
 
