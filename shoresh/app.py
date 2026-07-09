@@ -121,6 +121,7 @@ def root() -> dict:
             "/participants/{book}/{chapter}/{verse}",
             "/quotations/{book}/{chapter}/{verse}",
             "/parallels/{book}/{chapter}/{verse}",
+            "/versify/{scheme}/{book}/{chapter}/{verse}",
         ],
         "docs": "../docs/original-language-anchoring.md",
     }
@@ -514,6 +515,14 @@ def get_parallels(book: str, chapter: int, verse: int) -> dict:
     """Synoptic Gospel parallels (X2) for a verse — the same passage in the other Gospels, by shared
     content Greek Strong's. Each carries a confidence tier + shared Strong's. Empty where none."""
     return data.parallels(book, chapter, verse)
+
+
+@app.get("/versify/{scheme}/{book}/{chapter}/{verse}")
+def get_versify(scheme: str, book: str, chapter: int, verse: int) -> dict:
+    """Versification (V1): normalize a verse ref to the KJV standard, given its tradition `scheme`
+    (`hebrew` = Masoretic, `lxx` = Septuagint, `kjv` = identity). Returns `standard_ref` (→ KJV) and
+    `from_standard_ref` (KJV → this scheme). From STEPBible TVTMS."""
+    return data.versify(scheme, book, chapter, verse)
 
 
 @app.get("/morph")

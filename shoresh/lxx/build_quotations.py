@@ -37,27 +37,35 @@ def _ref(book, ch, v):
     return f"{book} {ch}:{v}"
 
 
-def _psalm_lxx_to_mt(ch):
-    """LXX Psalm chapter -> (Masoretic/English chapter, safe?).
+# LXX Psalm chapters whose mapping to KJV involves a merge/split (9|10, 114|115, 116, 147|148) — a
+# verse in one of these that the single-verse V1 scheme doesn't list is genuinely uncertain (needs the
+# range map), so we flag it. Everywhere else, "not in the scheme" = identity with the KJV standard.
+_LXX_PSALM_MERGE = {9, 113, 114, 115, 146, 147}
 
-    The LXX Psalter is numbered one behind the Hebrew across two clean blocks (from the
-    9|10 merge and the 114|115 merge). Chapter-level shift only; verse numbers are stable
-    inside these blocks. The merge/split boundary Psalms (9, 113, 114, 115, 146, 147) need a
-    verse-level map (roadmap V1) — we leave those in LXX numbering and flag them unsafe.
-    """
-    if 10 <= ch <= 112 or 116 <= ch <= 145:   # clean −1 blocks
-        return ch + 1, True
-    if 1 <= ch <= 8 or 148 <= ch <= 150:       # identity blocks
-        return ch, True
-    return ch, False                           # 9, 113, 114, 115, 146, 147 — merge/split
+_LXX_KJV: dict | None = None
 
 
-def _to_mt(book, ch, v):
-    """Normalize an LXX OT ref to Masoretic/English numbering. Returns (book, ch, v, vrs)."""
-    if book == "PSA":
-        mt_ch, safe = _psalm_lxx_to_mt(ch)
-        return book, mt_ch, v, ("mt" if safe else "lxx?")
-    return book, ch, v, "mt"
+def _to_standard(book, ch, v):
+    """Normalize an LXX OT ref to the KJV standard via the V1 `lxx` versification scheme
+    (`resources/versification/schemes/lxx.tsv`, from STEPBible TVTMS). Returns (book, ch, v, vrs)."""
+    global _LXX_KJV
+    if _LXX_KJV is None:
+        _LXX_KJV = {}
+        p = ROOT / "resources" / "versification" / "schemes" / "lxx.tsv"
+        if p.exists():
+            for ln in p.read_text(encoding="utf-8").splitlines():
+                if ln.startswith("#") or ln.startswith("source_ref"):
+                    continue
+                f = ln.split("\t")
+                if len(f) >= 2:
+                    _LXX_KJV[f[0]] = f[1]
+    std = _LXX_KJV.get(f"{book} {ch}:{v}")
+    if std:
+        b, rest = std.split(" ", 1)
+        c, vv = rest.split(":")
+        return b, c, vv, "kjv"
+    vrs = "lxx?" if (book == "PSA" and ch in _LXX_PSALM_MERGE) else "kjv"
+    return book, str(ch), str(v), vrs
 
 
 def build():
@@ -118,10 +126,11 @@ def build():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with (OUT_DIR / "quotations.tsv").open("w", encoding="utf-8") as fh:
         fh.write("# OT-in-NT quotations via LXX Strong's overlap (IDF-weighted); shoresh lxx.build_quotations\n")
-        fh.write("# ot_ref is Masoretic/English numbering; vrs=lxx? marks a boundary Psalm left in LXX numbering (needs V1 verse-map)\n")
+        fh.write("# ot_ref is KJV-standard (normalized from LXX via the V1 lxx versification scheme); "
+                 "vrs=lxx? marks a residual merge-Psalm verse not in the single-verse scheme\n")
         fh.write("nt_ref\tot_ref\tconfidence\tvrs\tn_shared\tscore\tshared_strongs\n")
         for nt, ot, n, sc, sh in final:
-            b, ch, v, vrs = _to_mt(*ot)
+            b, ch, v, vrs = _to_standard(*ot)
             conf = "high" if sc >= STRONG_SCORE else "med"
             fh.write(f"{_ref(*nt)}\t{_ref(b, ch, v)}\t{conf}\t{vrs}\t{n}\t{sc}\t"
                      f"G{','.join(f'{s:04d}' for s in sorted(sh))}\n")

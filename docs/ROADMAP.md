@@ -240,10 +240,14 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   token offsets) or an original-side collocation miner (consecutive original words → their Strong's set).
 - **D1 · Discourse connectives / coreference** — γάρ/οὖν/δέ, כִּי for argument
   flow; participant coreference to resolve "he/they" across a narrative.
-- **V1 · Versification map** — canonical ↔ edition verse-offset table (Hebrew vs
-  English Psalms, superscription offsets). Quiet but foundational infra. The aligner now runs but
-  **skips Psalms** without it — so V1 specifically unblocks Psalm alignment (aligner lives in its own
-  repo, `bcv-commons/strongs-aligner`).
+- **V1 · Versification** — 🟢 **BUILT (core)** — a **KJV-standard scheme registry**
+  (`resources/versification/`, `shoresh/versification/build.py` from STEPBible TVTMS CC-BY):
+  per-scheme diffs → KJV, `hebrew` (2,031) + `lxx` (5,386). Resolver `to_standard`/`from_standard` +
+  `/versify/{scheme}/{book}/{ch}/{v}`. **Wired into X1** (OT refs → KJV; retired the hardcoded Psalm
+  map + `vrs=lxx?`, 15→0). Versification is now a **per-version property** (each Bible declares its
+  scheme, external metadata — see `internal-docs/bibles-recipe-layer.md`). Remaining: (a) auto-tag our
+  corpora + spec the bibles-layer `versification` field; (b) hand the aligner the `hebrew` Psalm map to
+  unblock Psalm alignment; (c) ranges/sub-verses + Latin/NT (out of v1 scope).
 
 ---
 

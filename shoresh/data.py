@@ -1228,3 +1228,45 @@ def parallels(book: str, chapter: int, verse: int) -> dict:
     """Synoptic Gospel parallels for a verse (X2): the same passage in the other Gospels."""
     ref = f"{book.upper()} {chapter}:{verse}"
     return {"ref": ref, "parallels": sorted(_parallels_index().get(ref, []), key=lambda e: -e["score"])}
+
+
+# ---------- versification (V1): normalize any tradition's verse ref to the KJV standard ----------
+
+@lru_cache(maxsize=8)
+def _versification_maps(scheme: str) -> tuple[dict, dict]:
+    """(source→standard, standard→source) diff maps for a scheme vs the KJV standard. Empty =
+    identity. Built from STEPBible TVTMS (resources/versification/schemes/<scheme>.tsv)."""
+    fwd: dict = {}
+    rev: dict = {}
+    p = _resources_dir() / "versification" / "schemes" / f"{scheme}.tsv"
+    if p.exists():
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if ln.startswith("#") or ln.startswith("source_ref"):
+                continue
+            f = ln.split("\t")
+            if len(f) >= 2:
+                fwd[f[0]] = f[1]
+                rev.setdefault(f[1], f[0])
+    return fwd, rev
+
+
+def to_standard(scheme: str, ref: str) -> str:
+    """A scheme's verse ref (`PSA 15:8`) → the KJV-standard ref. Identity for kjv / unlisted refs."""
+    if not scheme or scheme == "kjv":
+        return ref
+    return _versification_maps(scheme)[0].get(ref, ref)
+
+
+def from_standard(scheme: str, ref: str) -> str:
+    """KJV-standard ref → a scheme's ref. Identity for kjv / unlisted refs."""
+    if not scheme or scheme == "kjv":
+        return ref
+    return _versification_maps(scheme)[1].get(ref, ref)
+
+
+def versify(scheme: str, book: str, chapter: int, verse) -> dict:
+    """Resolve a (scheme, book, chapter, verse) against the KJV standard, both directions."""
+    ref = f"{book.upper()} {chapter}:{verse}"
+    return {"scheme": scheme, "ref": ref, "standard": "kjv",
+            "standard_ref": to_standard(scheme, ref),
+            "from_standard_ref": from_standard(scheme, ref)}
