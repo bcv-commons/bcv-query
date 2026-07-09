@@ -362,12 +362,16 @@ class EntityStrategy(CardStrategy):
         from query.concept_expand import proper_noun_matches, proper_noun_english_name
         by_strong = _strong_to_entity(db)
         for code, _typ in proper_noun_matches(query or "", lang):
-            if code in by_strong:
-                return by_strong[code]
+            # Canonical-name FIRST: a Strong's isn't unique to one entity (G2424 tags both Jesus and
+            # the "Jesus Barabbas" variant; G2501/Joseph also tags Barnabas), so the curated English
+            # name is the correct disambiguator. Strong's-direct is the FALLBACK for names TIPNR
+            # didn't align to an English entity name.
             eng = proper_noun_english_name(code)
             if eng and db.execute("SELECT 1 FROM entities WHERE LOWER(name)=LOWER(?) LIMIT 1",
                                    (eng,)).fetchone():
                 return eng
+            if code in by_strong:
+                return by_strong[code]
         return None
 
     def to_synthesis(self, data, analysis) -> str | None:
