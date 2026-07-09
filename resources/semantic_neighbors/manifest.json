@@ -19,6 +19,6 @@
   "topk": 10,
   "min_cos": 0.3,
   "min_occ": 3,
-  "content_sha256": "74e5f9dc497596c25f53f821d44d04ce061c05136e2678f89479457d64dea5ea",
+  "content_sha256": "73630f4303821a9a1015a32fa84bef903fc94ee189ad28f7ddd819a5380f8e71",
   "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick."
 }

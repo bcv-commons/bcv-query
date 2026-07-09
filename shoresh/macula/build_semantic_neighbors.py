@@ -243,7 +243,7 @@ def _write_by_strong(rows):
 
     best = {}
     for lx, nb, score, _src, conf, rel in rows:
-        if conf == "recall":
+        if conf == "recall" and rel != "antonym":   # keep high+prior; but antonyms live in recall
             continue
         a, b = hs(lx), hs(nb)
         if not a or not b or a == b:
