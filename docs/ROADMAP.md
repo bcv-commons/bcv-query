@@ -206,8 +206,9 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
 - **N1 · Proper-noun lexicon** per language — 🟢 **BUILT** (`resources/proper_nouns/`,
   `macula.build_proper_nouns`) — 3,415 name Strong's (622 NT/Greek) × 19 langs, **typed**
   person/place/other via **TIPNR** (CC-BY) ∪ STEPBible `Np`, merging original + curated-gloss +
-  attested-`aligned_lex` surfaces. Remaining = wire into the bcv-RAG analyzer (query name-recognition)
-  + the name-bridge.
+  attested-`aligned_lex` surfaces. **Wired into the analyzer**: `concept_expand.proper_noun_matches`
+  recognizes names in a query (any lang/variant) → high-confidence `strongs:` tags, keyness-floor
+  exempt. Remaining = feed the resolved name + `type` into the name-bridge / a "who/where is X" path.
 - **X2 · Synoptic Gospel parallels** — passage-parallel index across Matt/Mark/Luke.
 - **T1 · Timeline + geography** (viz.bible / OpenBible geocoding) → "passages set
   in Galilee", "what happened around the time of X".

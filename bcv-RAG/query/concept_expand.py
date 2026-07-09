@@ -13,6 +13,12 @@ A Spanish query "amor" maps to G0026/H0160 just like English "love".
 Words not found in the index for ANY language carry no biblical retrieval
 signal and are effectively stop words.
 
+Proper nouns (N1) get a separate, HIGH-confidence path: `proper_noun_matches()` /
+`_proper_noun_index()` read the typed proper-noun lexicon (resources/proper_nouns/,
+OT+NT via TIPNR ∪ STEPBible Np) and `expand_concepts` emits recognized names ahead of
+concept tags, EXEMPT from the keyness floor — a name is precise by identity ("Cyprus" is
+a low-salience word but an exact retrieval anchor → G2953).
+
 Runs at $0, <1ms after the one-time per-language load.
 """
 from __future__ import annotations
@@ -54,6 +60,10 @@ _ALIGNED_PRIMARY_SHARE = 0.10
 # inverse of aligned_lex. Used to expand a query word to every in-language
 # rendering of its concept before FTS (recall on prose / other-language Bibles).
 _CONCEPT_SURFACES_DIR = resource_path("concept_surfaces")
+# N1 proper-noun lexicon (resources/proper_nouns/proper_nouns.tsv): name surface → Strong's + type,
+# across 19 langs + morphological variants. Recognized names expand at HIGH confidence (keyness-floor
+# exempt) since a proper noun is precise by identity.
+_PROPER_NOUNS_DIR = resource_path("proper_nouns")
 # Keep only surfaces that genuinely render the concept (surface→Strong's share);
 # higher than the reverse-index floor since these go straight into the FTS query.
 _SURFACE_MIN_SHARE = 0.15
@@ -310,6 +320,53 @@ def _reverse_gloss(lang: str = "en") -> dict[str, list[tuple[str, int]]]:
     return result
 
 
+@lru_cache(maxsize=8)
+def _proper_noun_index(lang: str = "eng") -> dict[str, list[tuple[str, str]]]:
+    """{name_surface_lower: [(strong_code, type), …]} for one language, from the N1 proper-noun
+    lexicon (`resources/proper_nouns/proper_nouns.tsv`). Names are recognized across 19 languages +
+    attested morphological variants and carry a `type` (person/place/other/name). Distinct from the
+    gloss index: it is *filtered to proper nouns* and used at HIGH confidence, bypassing the keyness
+    floor (a recognized name is precise by identity, not by biblical-salience)."""
+    path = _PROPER_NOUNS_DIR / "proper_nouns.tsv"
+    if not path.exists():
+        return {}
+    lang = canon(lang)
+    idx: dict[str, dict[str, str]] = {}
+    with path.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#") or line.startswith("strong\t"):
+                continue
+            p = line.rstrip("\n").split("\t")  # strong translit type lang surface source weight
+            if len(p) < 5 or p[3] != lang:
+                continue
+            surface = p[4].strip().lower()
+            if len(surface) < 2:
+                continue
+            idx.setdefault(surface, {}).setdefault(p[0], p[2])
+    return {s: list(codes.items()) for s, codes in idx.items()}
+
+
+def proper_noun_matches(text: str, lang: str = "eng", cap: int = 4) -> list[tuple[str, str]]:
+    """Proper nouns found in a query → [(padded_strong, type), …], deduped, capped. High-confidence:
+    a whole-token match against the N1 lexicon (any language / morphological variant)."""
+    idx = _proper_noun_index(canon(lang))
+    if not idx:
+        return []
+    out: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for w in re.findall(r"[一-鿿]|[\w]{2,}", text.lower()):
+        for code, typ in idx.get(w, []):
+            if typ == "other":          # TIPNR "other" = titles (governor…), not names — skip
+                continue
+            norm = _normalize_code(code)
+            if norm not in seen:
+                seen.add(norm)
+                out.append((norm, typ))
+                if len(out) >= cap:
+                    return out
+    return out
+
+
 def _normalize_code(code: str) -> str:
     """H430 → H0430 (4-digit padded); strip a sense suffix (H2403a → H2403).
 
@@ -533,9 +590,20 @@ def expand_concepts(fts_query: str, existing_tags: list[str],
         matches.sort(key=lambda m: -m[0])
         candidates.extend(matches[:max_per_word])
 
-    # Across all words, keep the most distinctive tags overall
+    # Proper nouns (N1): recognized names expand at HIGH confidence, ahead of the keyness-gated
+    # concept tags and EXEMPT from the keyness floor — a name is precise by identity (David/Cyprus
+    # have low biblical-salience yet are exact retrieval anchors). They take priority slots.
+    name_tags: list[str] = []
+    for norm, _typ in proper_noun_matches(fts_query, lang, cap=max_total):
+        tag = f"strongs:{norm}"
+        if tag not in existing_strongs and tag not in seen:
+            seen.add(tag)
+            name_tags.append(tag)
+
+    # Across all words, keep the most distinctive concept tags overall
     candidates.sort(key=lambda m: -m[0])
-    return [tag for _, tag in candidates[:max_total]]
+    concept_tags = [tag for _, tag in candidates if tag not in name_tags]
+    return (name_tags + concept_tags)[:max_total]
 
 
 def term_strongs(text: str, lang: str = "eng", cap: int = 12) -> list[str]:
