@@ -24,10 +24,60 @@ import pyarrow.parquet as pq
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 SPINE = HERE / "lexeme-spine.db"
+MACULA = HERE / "macula-spine.db"
 KEYNESS = ROOT / "resources" / "strongs_keyness.tsv"
 LXX = ROOT / "resources" / "lxx_bridge.tsv"
+GLOSS = ROOT / "resources" / "strongs_gloss.tsv"
 NEIGHBORS = ROOT / "resources" / "semantic_neighbors" / "neighbors.parquet"
 OUT_DIR = ROOT / "resources" / "prior_pack"
+
+# MACULA `class` -> normalized cross-language POS (wishlist #1 set). `name` is applied on top for
+# proper nouns (from the N1 set). CC-BY (MACULA).
+_POS_MAP = {"noun": "noun", "verb": "verb", "adj": "adj", "adv": "adv", "pron": "pron",
+            "prep": "prep", "conj": "conj", "cj": "conj", "det": "det", "art": "det", "num": "num",
+            "ptcl": "particle", "ij": "particle", "intj": "particle", "om": "particle", "rel": "pron"}
+_CONTENT_POS = {"noun", "verb", "adj", "adv", "num", "name"}
+
+
+def _grammar(info: dict) -> dict:
+    """lexeme -> {pos, translit, word_class} (wishlist #1/#5/#6). POS = dominant MACULA `class` per
+    (lang, strong), `name` overriding via the N1 proper-noun set; translit from strongs_gloss;
+    word_class = content|function from POS. All CC-BY."""
+    from macula.build_semantic_neighbors import proper_strongs   # OT Np proper nouns (grammatical)
+    from macula.build_proper_nouns import _load_tipnr            # OT+NT TIPNR names
+    # name = grammatical proper noun (Np-dominant) OR a TIPNR person/place. Exclude TIPNR "other"
+    # (titles/theonyms like elohim), which are common nouns that get translated, not transliterated.
+    tipnr_types = _load_tipnr()[0]
+    names = set(proper_strongs()) | {c for c, t in tipnr_types.items() if t in ("person", "place")}
+
+    m = sqlite3.connect(f"file:{MACULA}?mode=ro", uri=True)
+    cls_ct: dict = collections.defaultdict(collections.Counter)
+    for lang, strong, cls in m.execute(
+            "SELECT lang, strong, class FROM macula_words WHERE class != '' AND strong != ''"):
+        digits = re.sub(r"\D", "", str(strong))
+        if digits:
+            cls_ct[(lang, int(digits))][cls] += 1
+    dom = {k: c.most_common(1)[0][0] for k, c in cls_ct.items()}
+
+    translit: dict = {}
+    if GLOSS.exists():
+        with GLOSS.open(encoding="utf-8") as fh:
+            next(fh, None)
+            for ln in fh:
+                p = ln.rstrip("\n").split("\t")
+                if len(p) >= 4 and p[3] == "eng" and p[2] and p[0] not in translit:
+                    translit[p[0]] = p[2]
+
+    out = {}
+    for lexeme, d in info.items():
+        lang = "grc" if lexeme.startswith("grc:") else "hbo"
+        digits = re.sub(r"\D", "", lexeme.split(":", 1)[1]) if ":" in lexeme else ""
+        pos = _POS_MAP.get(dom.get((lang, int(digits)), ""), "") if digits else ""
+        if d["strong"] in names and pos in ("noun", ""):       # proper noun overrides raw class
+            pos = "name"
+        wc = "content" if pos in _CONTENT_POS else ("function" if pos else "")
+        out[lexeme] = {"pos": pos, "translit": translit.get(d["strong"], ""), "word_class": wc}
+    return out
 
 
 def _xling_confidence(aligned_dir: Path) -> dict:
@@ -95,10 +145,14 @@ def build(aligned_dir: Path | None = None):
             nb[r["lexeme"]].append({"lexeme": r["neighbor_lexeme"], "score": float(r["score"]),
                                     "relation": r["relation"], "confidence": r["confidence"]})
 
+    # 5b. grammar: dominant POS (name-aware), transliteration, content/function class
+    gram = _grammar(info)
+
     # 6. assemble
     rows = []
     for lexeme, d in info.items():
         s = d["strong"]
+        g = gram.get(lexeme, {})
         senses = []
         tot = sum(sense_ct[lexeme].values())
         for (stem, sense), c in sense_ct[lexeme].most_common():
@@ -106,6 +160,8 @@ def build(aligned_dir: Path | None = None):
         rows.append({
             "lexeme": lexeme, "strong": s, "testament": d["testament"],
             "is_content": d["is_content"], "lemma": d["lemma"],
+            "pos": g.get("pos", ""), "translit": g.get("translit", ""),
+            "word_class": g.get("word_class", ""),
             "keyness": keyness.get(s),
             "lxx_greek": order(h2g.get(s, [])) if d["testament"] == "OT" else [],
             "lxx_hebrew": order(g2h.get(s, [])) if d["testament"] == "NT" else [],
@@ -124,6 +180,9 @@ def build(aligned_dir: Path | None = None):
         "testament": pa.array([r["testament"] for r in rows], pa.string()),
         "is_content": pa.array([r["is_content"] for r in rows], pa.bool_()),
         "lemma": pa.array([r["lemma"] for r in rows], pa.string()),
+        "pos": pa.array([r["pos"] for r in rows], pa.string()),
+        "translit": pa.array([r["translit"] for r in rows], pa.string()),
+        "word_class": pa.array([r["word_class"] for r in rows], pa.string()),
         "keyness": pa.array([r["keyness"] for r in rows], pa.float32()),
         "lxx_greek": pa.array([r["lxx_greek"] for r in rows], pa.list_(pa.string())),
         "lxx_hebrew": pa.array([r["lxx_hebrew"] for r in rows], pa.list_(pa.string())),

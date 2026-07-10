@@ -7,6 +7,9 @@ priors. Built once (language-independent) via `shoresh/macula/build_prior_pack.p
 | column | meaning |
 |---|---|
 | `lexeme` / `strong` / `testament` / `is_content` / `lemma` | the lexeme + rollup |
+| `pos` | normalized POS `{noun,verb,adj,adv,pron,prep,conj,det,num,name,particle}` — dominant MACULA class; `name` = grammatical proper noun (Np) or TIPNR person/place (elohim/theos stay `noun`; YHWH/David/Jesus = `name`) |
+| `translit` | romanized form (`da.vid`, `Iēsous`) — for gap-name / cross-script matching |
+| `word_class` | `content` \| `function`, derived from `pos` |
 | `keyness` | biblical-salience (function-word filter); null for non-content |
 | `lxx_greek` / `lxx_hebrew` | cross-testament bridge (OT→Greek / NT→Hebrew), freq-ordered |
 | `senses` | `[{stem, sense, share}]` — sense inventory / prior distribution (OT) |
