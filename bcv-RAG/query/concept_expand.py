@@ -13,6 +13,10 @@ A Spanish query "amor" maps to G0026/H0160 just like English "love".
 Words not found in the index for ANY language carry no biblical retrieval
 signal and are effectively stop words.
 
+Multi-word expressions (M1) get a HIGH-confidence phrase path: `mwe_matches()` recognizes a phrase in
+the query (2–4-word n-gram, longest wins), emits its whole Strong's set, and consumes the span so the
+phrase's words don't re-expand ("bear fruit" → {G2592,G2590,G5342}, not also "bear"/"fruit").
+
 Proper nouns (N1) get a separate, HIGH-confidence path: `proper_noun_matches()` /
 `_proper_noun_index()` read the typed proper-noun lexicon (resources/proper_nouns/,
 OT+NT via TIPNR ∪ STEPBible Np) and `expand_concepts` emits recognized names ahead of
@@ -65,6 +69,10 @@ _CONCEPT_SURFACES_DIR = resource_path("concept_surfaces")
 # across 19 langs + morphological variants. Recognized names expand at HIGH confidence (keyness-floor
 # exempt) since a proper noun is precise by identity.
 _PROPER_NOUNS_DIR = resource_path("proper_nouns")
+# M1 multi-word expressions (resources/multiword_expressions/<lang>.tsv): target phrase → Strong's set.
+# A recognized phrase expands at HIGH confidence (keyness-floor exempt) and its span is consumed so its
+# individual words aren't re-expanded separately.
+_MWE_DIR = resource_path("multiword_expressions")
 # Keep only surfaces that genuinely render the concept (surface→Strong's share);
 # higher than the reverse-index floor since these go straight into the FTS query.
 _SURFACE_MIN_SHARE = 0.15
@@ -405,6 +413,57 @@ def proper_noun_matches(text: str, lang: str = "eng", cap: int = 4) -> list[tupl
     return out
 
 
+@lru_cache(maxsize=8)
+def _mwe_index(lang: str = "eng") -> dict[str, list[str]]:
+    """{phrase: [padded_strong, …]} — high-precision multi-word expressions (M1). `phrasal` always;
+    `fertility` only with count ≥ 5 (low-count fertility is alignment noise). See
+    resources/multiword_expressions/."""
+    path = _MWE_DIR / f"{canon(lang)}.tsv"
+    if not path.exists():
+        return {}
+    idx: dict[str, list[str]] = {}
+    with path.open(encoding="utf-8") as fh:
+        for ln in fh:
+            if ln.startswith("#") or ln.startswith("surface"):
+                continue
+            p = ln.rstrip("\n").split("\t")   # surface strongs lexemes kind confidence count methods
+            if len(p) < 6:
+                continue
+            surface, strongs, kind = p[0], p[1], p[3]
+            try:
+                count = int(p[5])
+            except ValueError:
+                continue
+            if kind == "fertility" and count < 5:
+                continue
+            idx[surface] = [_normalize_code(s) for s in strongs.split(",") if s]
+    return idx
+
+
+def mwe_matches(text: str, lang: str = "eng", cap: int = 3) -> list[tuple[str, str]]:
+    """Multi-word expressions in a query → [(padded_strong, phrase), …]. Scans 2–4-word n-grams,
+    LONGEST match wins (a matched phrase consumes its span so sub-spans don't also fire)."""
+    idx = _mwe_index(canon(lang))
+    if not idx:
+        return []
+    words = re.findall(r"[\w]+", text.lower())
+    out: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    covered: set[int] = set()
+    for n in (4, 3, 2):                               # longest phrases first
+        for i in range(len(words) - n + 1):
+            if any(j in covered for j in range(i, i + n)):
+                continue
+            phrase = " ".join(words[i:i + n])
+            if phrase in idx:
+                for code in idx[phrase]:
+                    if code not in seen:
+                        seen.add(code)
+                        out.append((code, phrase))
+                covered.update(range(i, i + n))
+    return out[:cap] if cap else out
+
+
 def _normalize_code(code: str) -> str:
     """H430 → H0430 (4-digit padded); strip a sense suffix (H2403a → H2403).
 
@@ -576,8 +635,20 @@ def expand_concepts(fts_query: str, existing_tags: list[str],
         return []
 
     existing_strongs = {t for t in existing_tags if t.startswith("strongs:")}
+
+    # M1 multi-word expressions FIRST: emit the phrase's whole Strong's set (keyness-exempt) and strip
+    # the phrase span so its words don't also expand individually — "bear fruit" → {G2592,G2590,G5342},
+    # not also "bear"/"fruit". Names/concepts fill the remaining slots.
+    mwe_tags: list[str] = []
+    remaining = fts_query.lower()
+    for norm, phrase in mwe_matches(fts_query, lang, cap=max_total):
+        remaining = remaining.replace(phrase, " ")
+        tag = f"strongs:{norm}"
+        if tag not in existing_strongs and tag not in mwe_tags:
+            mwe_tags.append(tag)
+
     # CJK characters are meaningful as single chars; Latin needs 2+
-    words = re.findall(r"[一-鿿]|[\w]{2,}", fts_query.lower())
+    words = re.findall(r"[一-鿿]|[\w]{2,}", remaining)
 
     # Sort words: exact-match (quality=2) words first, so content words
     # like "grace" get expanded before function words like "sobre"
@@ -595,7 +666,7 @@ def expand_concepts(fts_query: str, existing_tags: list[str],
 
     # Collect candidate tags with their keyness, then keep the most
     # distinctive — limited tag slots go to the strongest biblical concepts.
-    seen: set[str] = set()
+    seen: set[str] = set(mwe_tags)
     candidates: list[tuple[float, str]] = []
     for w in words:
         forms = [w]
@@ -628,20 +699,20 @@ def expand_concepts(fts_query: str, existing_tags: list[str],
         matches.sort(key=lambda m: -m[0])
         candidates.extend(matches[:max_per_word])
 
-    # Proper nouns (N1): recognized names expand at HIGH confidence, ahead of the keyness-gated
-    # concept tags and EXEMPT from the keyness floor — a name is precise by identity (David/Cyprus
-    # have low biblical-salience yet are exact retrieval anchors). They take priority slots.
-    name_tags: list[str] = []
+    # Priority tags = MWE phrases (computed above) + proper nouns (N1). Names expand at HIGH confidence,
+    # keyness-floor exempt — a name is precise by identity (David/Cyprus have low biblical-salience yet
+    # are exact retrieval anchors).
+    priority_tags: list[str] = list(mwe_tags)
     for norm, _typ in proper_noun_matches(fts_query, lang, cap=max_total):
         tag = f"strongs:{norm}"
         if tag not in existing_strongs and tag not in seen:
             seen.add(tag)
-            name_tags.append(tag)
+            priority_tags.append(tag)
 
     # Across all words, keep the most distinctive concept tags overall
     candidates.sort(key=lambda m: -m[0])
-    concept_tags = [tag for _, tag in candidates if tag not in name_tags]
-    return (name_tags + concept_tags)[:max_total]
+    concept_tags = [tag for _, tag in candidates if tag not in priority_tags]
+    return (priority_tags + concept_tags)[:max_total]
 
 
 def term_strongs(text: str, lang: str = "eng", cap: int = 12) -> list[str]:

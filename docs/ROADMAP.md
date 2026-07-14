@@ -234,10 +234,13 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   (`openscriptures/GreekResources`, NT+LXX), because the current `lxx.db` is CATSS-NC and can't feed a
   CC0 artifact. LXX `lexid` is now captured (internal) but Greek's homograph rate is ~1.6%, so the value
   is the *Greek coverage*, not precision. Full plan: `internal-docs/greek-lexeme-and-neighbors.md`.
-- **M1 · Multi-word expressions → Strong's** — 🟡 **RE-BLOCKED** — the premise ("mine `aligned-lex`")
-  is wrong: `aligned_lex` surfaces are single tokens (0 multi-word), so consecutive surface→same-Strong's
-  can't be recovered from it. Needs the **positional** alignment corpus (Clear-Bible Alignments with
-  token offsets) or an original-side collocation miner (consecutive original words → their Strong's set).
+- **M1 · Multi-word expressions → Strong's** — 🟢 **BUILT (revised scope)** — the new
+  `bcv-commons/lexeme-alignments` carries the aligner's **contiguous multi-word surfaces** (the old
+  `aligned-lex` had none), so M1 is now mineable: `resources/multiword_expressions/<iso>.tsv`
+  (`build_multiword.py`) — target phrase → original lexeme(s), `phrasal` (multi-lexeme, e.g.
+  `bear fruit → {G2592,G2590,G5342}`) + `fertility` (single-lexeme, `only begotten ← G3439`). ~21k over
+  11 langs (~1.3k phrasal). Type-level so precision-filtered (content + same-testament + count); phrasal
+  = high precision, fertility = threshold on `count`. Remaining = wire into the analyzer's phrase detection.
 - **D1 · Discourse connectives / coreference** — γάρ/οὖν/δέ, כִּי for argument
   flow; participant coreference to resolve "he/they" across a narrative.
 - **V1 · Versification** — 🟢 **BUILT (core)** — a **KJV-standard scheme registry**
