@@ -153,12 +153,19 @@ specific verse, or to re-aggregate yourself.
 **`source`** — which dataset (→ attribution/license): `clear-alignments`,
 `ubs-dict`, `stepbible`, `inhouse-llm`.
 
-**`review`** — `human-verified` vs `machine`. Distinct from method: it answers
+**`review`** — `human-verified` · `machine` · `source-defective`. Distinct from method: it answers
 "did a person check this," not "how was it made."
+
+### Data quality
+A few source alignments are internally scrambled (correct verse, wrong per-token target). These are
+**quarantined, not dropped**: their files carry `quality=source-defective` (TSV `#`-header + Parquet
+schema metadata) and every `review` cell is `source-defective`, so filtering on `review=human-verified`
+excludes them. Currently quarantined: **`rus`** (Clear RUSSYN, OT position-shift). Prefer
+`review=human-verified` for benchmark/gold use.
 
 ## Languages
 
-- **Aligned surfaces (10):** `arb asm ben eng fra hau hin por rus spa`
+- **Aligned surfaces (10):** `arb asm ben eng fra hau hin por rus spa` (`rus` quarantined — see above)
 - **Glosses (12):** the above + `cmn-Hans cmn-Hant` (`spa` also merges its LLM glosses)
 
 ## Licenses

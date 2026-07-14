@@ -26,7 +26,18 @@ Three tiers (the per-occurrence file is canonical; the other two are roll-ups):
   source_id = Clear/BCVW original-language token id (e.g. n40010030011)
   share     = P(strong|surface): this code's fraction of the surface's alignments
   methods   = ;-set of methods that attest the pair (ensemble agreement)
-  review    = human-verified (any manual alignment) else machine
+  review    = human-verified (any manual alignment) · machine · source-defective (quarantined, below)
+
+Source-quality quarantine (see internal-docs/clear-rus-defect.md):
+  A language whose Clear alignment is internally scrambled (right verse word-bag, wrong per-token
+  target) must not be republished as trustworthy gold. Such languages are listed in DEFECTIVE and
+  are QUARANTINED, not dropped: every tier file gets `quality=source-defective` in its header and the
+  surfaces `review` column becomes `source-defective`, so a consumer filtering on `human-verified`
+  excludes it and nobody reads it as clean gold. `rus` (Clear RUSSYN) is position-shifted across the
+  whole OT. The real fix (substitute the aligner's method=eflomal) is a follow-up that needs that data
+  ingested; until then this flag is the honest stop-gap. The DEFECTIVE set is currently a hand-curated
+  list from the aligner's diagnosis — swap in an auto-gate (positional-vs-lexical health) once the
+  eflomal reference lands.
 
 Usage:
   python3 scripts/build_strongs_words.py                 # all cached languages
@@ -51,6 +62,12 @@ CACHE = HERE / ".cache" / "alignments" / "extracted"
 OUT = HERE.parent / "resources" / "strongs"
 LEMMA_TSV = HERE / "strong_lemma.tsv"
 DATASET_SOURCE = "clear-alignments (github.com/Clear-Bible/Alignments)"
+
+# Languages whose Clear source alignment is internally scrambled → quarantined (flagged, not trusted).
+# Hand-curated from the aligner's diagnosis (2026-07-13); see internal-docs/clear-rus-defect.md.
+# Replace with an auto-gate (positional-vs-lexical health) once the eflomal reference is ingested.
+DEFECTIVE = {"rus"}
+DEFECTIVE_REASON = "source-defective"
 
 _WORD = re.compile(r"\w", re.UNICODE)
 
@@ -82,10 +99,11 @@ def _clean(surface: str) -> str:
     return s
 
 
-def _header(fh, tier: str, code: str, versions: list[str]) -> None:
+def _header(fh, tier: str, code: str, versions: list[str], quality: str | None = None) -> None:
     today = _dt.date.today().isoformat()
+    q = f"quality={quality}; " if quality else ""
     fh.write(
-        f"# dataset=strongs/{tier}; lang={code}; "
+        f"# dataset=strongs/{tier}; lang={code}; {q}"
         f"source={DATASET_SOURCE}; base_text={'+'.join(versions)}; "
         f"license=see resources/strongs/README.md; date={today}\n"
     )
@@ -96,6 +114,8 @@ def build_language(data_dir: Path, iso3: str, code: str,
     versions = discover_versions(data_dir, iso3)
     if not versions:
         return {}
+    # Quarantine a source-defective language (flag, don't drop): mark every tier header + review col.
+    quality = DEFECTIVE_REASON if iso3 in DEFECTIVE else None
 
     (OUT / "attestations").mkdir(parents=True, exist_ok=True)
     (OUT / "surfaces_by_method").mkdir(parents=True, exist_ok=True)
@@ -110,7 +130,7 @@ def build_language(data_dir: Path, iso3: str, code: str,
     occ = 0
     att_path = OUT / "attestations" / f"{code}.tsv"
     with att_path.open("w", encoding="utf-8") as att:
-        _header(att, "attestations", code, versions)
+        _header(att, "attestations", code, versions, quality)
         att.write("strong\tlemma\tsurface\tref\ttarget_id\tsource_id\t"
                   "method\tsource_corpus\tbase_text\n")
         for version in versions:
@@ -138,7 +158,7 @@ def build_language(data_dir: Path, iso3: str, code: str,
 
     # Tier 2 — full, per method
     with (OUT / "surfaces_by_method" / f"{code}.tsv").open("w", encoding="utf-8") as fh:
-        _header(fh, "surfaces_by_method", code, versions)
+        _header(fh, "surfaces_by_method", code, versions, quality)
         fh.write("strong\tlemma\tsurface\tmethod\tsource_corpus\tbase_text\tcount\n")
         for (strong, surf, method, src, base), cnt in sorted(by_method.items()):
             fh.write(f"{strong}\t{lemma_of.get(strong,'')}\t{surf}\t{method}\t"
@@ -147,7 +167,7 @@ def build_language(data_dir: Path, iso3: str, code: str,
     # Tier 1 — friendly collapsed
     rows = 0
     with (OUT / "surfaces" / f"{code}.tsv").open("w", encoding="utf-8") as fh:
-        _header(fh, "surfaces", code, versions)
+        _header(fh, "surfaces", code, versions, quality)
         fh.write("strong\tlemma\tsurface\tcount\tshare\tmethods\treview\n")
         # group by surface so share denominators are stable, then by count desc
         by_surf: dict[str, list] = defaultdict(list)
@@ -157,12 +177,14 @@ def build_language(data_dir: Path, iso3: str, code: str,
             total = len(surf_total[surf]) or 1
             for strong, cnt in sorted(by_surf[surf], key=lambda x: -x[1]):
                 methods = sorted(pair_methods[(surf, strong)])
-                review = "human-verified" if "manual" in methods else "machine"
+                # quarantined language → source-defective overrides the human/machine verdict, so any
+                # consumer taking `review=human-verified` excludes the scrambled gold.
+                review = quality or ("human-verified" if "manual" in methods else "machine")
                 fh.write(f"{strong}\t{lemma_of.get(strong,'')}\t{surf}\t{cnt}\t"
                          f"{cnt/total:.3f}\t{';'.join(methods)}\t{review}\n")
                 rows += 1
 
-    return {"versions": versions, "occurrences": occ,
+    return {"versions": versions, "occurrences": occ, "quality": quality or "ok",
             "pairs": len(pair_ids), "surfaces_rows": rows}
 
 
@@ -204,9 +226,14 @@ def main() -> None:
 
     print("\n=== strongs summary ===", file=sys.stderr)
     for code, iso3, st in summary:
+        flag = "  ⚠ QUARANTINED (source-defective)" if st.get("quality") not in (None, "ok") else ""
         print(f"  {code:4} {iso3:4} {'+'.join(st['versions']):14} "
               f"occ={st['occurrences']:>8} pairs={st['pairs']:>7} "
-              f"rows={st['surfaces_rows']:>7}", file=sys.stderr)
+              f"rows={st['surfaces_rows']:>7}{flag}", file=sys.stderr)
+    quarantined = [code for code, _iso3, st in summary if st.get("quality") not in (None, "ok")]
+    if quarantined:
+        print(f"\n⚠ quarantined (flagged source-defective, not trusted as gold): "
+              f"{', '.join(quarantined)} — see internal-docs/clear-rus-defect.md", file=sys.stderr)
 
 
 if __name__ == "__main__":

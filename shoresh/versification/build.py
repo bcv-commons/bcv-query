@@ -35,6 +35,20 @@ TVTMS_URL = ("https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/
 SCHEMES = {"hebrew": "Hebrew", "lxx": "Greek"}
 _REF = re.compile(r"^([1-4A-Za-z]{2,4})\.(\d+):(\d+|Title)$")   # Gen.6:1 / Psa.3:Title
 
+# The generic single-verse extraction is reliable only for the protestant OT books whose versification
+# has ONE consistent layout. Excluded here (need dedicated per-book reconciliation against the canonical
+# `.vrs` — see internal-docs/vrs-reconciliation/):
+#   • the deuterocanon — Greek Esther (`Esg`/`ESG`), Daniel-Greek (`DAG`), 2 Esdras (`2ES`), Odes (`ODA`)
+#   • the two protestant books with EMBEDDED Greek additions — **Esther** (Addition A–F) and **Daniel**
+#     (Song of the Three `S3Y`, Susanna `SUS`, Bel `BEL`). TVTMS carries multiple incompatible layouts
+#     for these (Greek / GreekUndivided / GreekIntegrated / Greek2) + additions as sub-verses; the
+#     `SourceType contains "Greek"` filter would conflate them into garbage (this produced the broken
+#     `ESG`/`DAN→S3Y` rows). NT rows that leak via compound Greek SourceTypes are also out of scope.
+_OT_BOOKS = {"GEN", "EXO", "LEV", "NUM", "DEU", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI", "2KI",
+             "1CH", "2CH", "EZR", "NEH", "JOB", "PSA", "PRO", "ECC", "SNG", "ISA", "JER",
+             "LAM", "EZK", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB", "ZEP",
+             "HAG", "ZEC", "MAL"}   # EST + DAN excluded (embedded Greek additions — dedicated handling)
+
 
 def fetch(src: Path | None) -> Path:
     if src:
@@ -71,6 +85,9 @@ def build(src: Path | None = None):
             continue
         stype, sref, stdref, action = c[0].strip(), c[1].strip(), c[2].strip(), c[3].strip()
         if "." not in sref or ":" not in sref:
+            continue
+        # protestant OT only — deuterocanon (ESG/DAG/2ES/ODA) needs dedicated per-book handling
+        if sref.split(".", 1)[0].upper() not in _OT_BOOKS:
             continue
         # v1: clean single-verse remaps only — skip ranges/subverses (';' '-' '!')
         if any(ch in sref or ch in stdref for ch in (";", "-", "!")):
