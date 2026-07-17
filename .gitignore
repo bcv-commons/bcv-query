@@ -99,6 +99,10 @@ shoresh/macula/macula-spine.db
 shoresh/macula/macula-spine.db-*
 # MACULA: lexeme-anchored spine export (re-derivable via macula.build_spine_words; data-contract §1)
 shoresh/macula/lexeme-spine.db
+
+# interlinear: downloaded gbt/study-app source + built dbs (all re-derivable via interlinear.fetch +
+# .build_hebrew_greek / .build_gloss — see shoresh/interlinear/README.md)
+shoresh/interlinear/data/
 shoresh/macula/lexeme-spine.db-*
 
 # clause vectors (built at runtime onto the /data volume; local: SHORESH_DATA)

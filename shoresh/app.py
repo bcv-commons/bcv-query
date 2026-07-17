@@ -32,8 +32,10 @@ from slowapi.middleware import SlowAPIMiddleware
 
 import corpus
 import data
+from interlinear import serve as interlinear
 from macula import data as macula
 from ratelimit import limiter
+from references import BOOK_NUMBERS
 
 logger = logging.getLogger("shoresh")
 
@@ -122,6 +124,10 @@ def root() -> dict:
             "/quotations/{book}/{chapter}/{verse}",
             "/parallels/{book}/{chapter}/{verse}",
             "/versify/{scheme}/{book}/{chapter}/{verse}",
+            "/interlinear/chapter/{book}/{chapter}",
+            "/interlinear/word/{word_id}?lang=eng",
+            "/interlinear/languages",
+            "/interlinear/similar/{strong}",
         ],
         "docs": "../docs/original-language-anchoring.md",
     }
@@ -673,6 +679,58 @@ def search(q: str, lang: str = "hbo", k: int = 10,
         resp["original_query"] = original_query
         resp["translate"] = translate
     return resp
+
+
+@app.get("/interlinear/chapter/{book}/{chapter}")
+def get_interlinear_chapter(book: str, chapter: int) -> dict:
+    """Per-occurrence Hebrew/Greek interlinear words for a chapter (text, Strong's code), from
+    globalbibletools/data (CC0-1.0) — a Python port of the gbt-data-api /chapter endpoint. Full-text
+    translation lines (eng_bsb.db) aren't ported yet — see shoresh/interlinear/README.md."""
+    book_id = BOOK_NUMBERS.get(book.upper())
+    if book_id is None:
+        raise HTTPException(400, f"unknown book '{book}'")
+    words = interlinear.get_chapter(book_id, chapter)
+    if words is None:
+        raise HTTPException(503, "interlinear hebrew_greek.db not built — see shoresh/interlinear/README.md")
+    return {"book": book.upper(), "chapter": chapter, "words": words}
+
+
+@app.get("/interlinear/word/{word_id}")
+def get_interlinear_word(word_id: int, lang: str = "eng") -> dict:
+    """A single interlinear word: text, Strong's code + root, grammar code, and its CONTEXTUAL
+    (per-occurrence, human-edited) gloss in `lang` — distinct from /gloss's dictionary-level gloss.
+    `lang` defaults to eng; null gloss if that language has no db built or no gloss recorded here."""
+    word = interlinear.get_word(word_id)
+    if word is None:
+        raise HTTPException(404, f"word id '{word_id}' not found")
+    return {
+        "id": word_id,
+        "text": word["text"],
+        "strongsCode": word["strongsCode"],
+        "strongsRoot": word["strongsRoot"],
+        "grammar": word["grammar"],
+        "isRtl": word["strongsCode"].startswith("H"),
+        "gloss": interlinear.get_gloss(lang, word_id),
+        "lang": lang,
+    }
+
+
+@app.get("/interlinear/languages")
+def get_interlinear_languages() -> dict:
+    """Language codes with a built per-occurrence gloss db (globalbibletools/data coverage)."""
+    return {"languages": interlinear.list_languages()}
+
+
+@app.get("/interlinear/similar/{strong}")
+def get_interlinear_similar(strong: str, limit: int = 200) -> dict:
+    """Up to `limit` deduplicated verse refs containing this Strong's code (from the interlinear
+    source), plus the true total count. Complements /word/{strong}'s full per-occurrence concordance
+    with a lighter, verse-deduplicated view."""
+    limit = min(limit, 200)
+    verse_ids = interlinear.get_verse_ids_for_strongs(strong, limit)
+    total = interlinear.count_verses_for_strongs(strong)
+    verses = [interlinear.extract_reference_from_verse_id(v) for v in verse_ids]
+    return {"strong": strong, "verses": verses, "total": total}
 
 
 UPLOAD_SECRET = os.environ.get("UPLOAD_SECRET", "")
