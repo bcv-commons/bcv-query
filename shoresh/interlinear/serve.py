@@ -3,27 +3,31 @@
 build_gloss.py produce. Core contract only: `/chapter`, `/word`, `/languages`, `/similar`.
 
 No dependency on any externally-fetched pre-baked .db beyond hebrew_greek.db/gloss/*.db (built here,
-from globalbibletools/data). Translation text (`translationLines`) and lexicon meanings
-(`lexiconMeanings`) deliberately do NOT come from study-app's bundled eng_bsb.db/sdbh.db/sdbg.db —
-see shoresh/interlinear/README.md and internal-docs/gbt-alignment-handover.md:
-- `translationLines`: currently `[]` — was sourced from study-app's eng_bsb.db snapshot, dropped in
-  favor of waiting for BSB-publishing's own pipeline (in-flight staleness + display-format fixes
-  requested upstream) rather than depending on an unmaintained third-hand copy.
-- `lexiconMeanings`: now built from shoresh's own in-house, already-licensed UBS-derived
-  resources/senses/ tables (data.lexicon_meanings_for_strongs) instead of fetched sdbh.db/sdbg.db.
+from globalbibletools/data). Lexicon meanings (`lexiconMeanings`) deliberately do NOT come from
+study-app's bundled sdbh.db/sdbg.db — see shoresh/interlinear/README.md and
+internal-docs/gbt-alignment-handover.md; built instead from shoresh's own in-house, already-licensed
+UBS-derived resources/senses/ tables (data.lexicon_meanings_for_strongs).
+
+`translationLines` is built from BSB-publishing/bsb-data-output's base/display/ (per-chapter English
+word-span JSON, CC0) + base/headings.jsonl (section/parallel-passage headings) — fetched by
+interlinear.fetch.fetch_bsb. Was study-app's eng_bsb.db snapshot until 2026-07-17, dropped for being
+an unmaintained third-hand copy; wired to bsb-data-output once its staleness + elided-word-display
+fixes shipped upstream (both confirmed) — see internal-docs/gbt-alignment-handover.md.
 
 Word ids are packed BBCCCVVVWW (book, chapter, verse, word-in-verse) — same USFM book numbering as
 shoresh/references.BOOK_NUMBERS (verified: GEN=1, EXO=2, MAT=40, matching gbt's own book ids).
 """
 from __future__ import annotations
 
+import collections
+import json
 import sqlite3
 from functools import lru_cache
 from pathlib import Path
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from references import BOOK_NUMBERS, book_name, norm_strong  # noqa: E402
+from references import BOOK_NUMBERS, book_name, encode, norm_strong  # noqa: E402
 
 from interlinear.language_names import LANGUAGE_NAMES
 from interlinear.normalization import remove_punctuation
@@ -31,6 +35,8 @@ from interlinear.normalization import remove_punctuation
 HERE = Path(__file__).resolve().parent
 HG_DB = HERE / "data" / "hebrew_greek.db"
 GLOSS_DIR = HERE / "data" / "gloss"
+BSB_DISPLAY_DIR = HERE / "data" / "bsb" / "base" / "display"
+BSB_HEADINGS_PATH = HERE / "data" / "bsb" / "base" / "headings.jsonl"
 
 BOOK_CODE_BY_ID = {v: k for k, v in BOOK_NUMBERS.items()}
 
@@ -184,14 +190,53 @@ def count_verses_for_text(text: str) -> int:
     return row["total"] if row else 0
 
 
+@lru_cache(maxsize=1)
+def _bsb_headings() -> dict[tuple[str, int], list[dict]]:
+    """{(book_code, chapter): [{before_v, level, text}, ...]} from base/headings.jsonl, sorted by
+    before_v ascending (so get_translation_chapter can walk both lists in one pass)."""
+    out: dict[tuple[str, int], list[dict]] = collections.defaultdict(list)
+    if not BSB_HEADINGS_PATH.exists():
+        return out
+    with BSB_HEADINGS_PATH.open(encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            h = json.loads(line)
+            out[(h["b"], h["c"])].append({"before_v": h["before_v"], "level": h["level"], "text": h["text"]})
+    for key in out:
+        out[key].sort(key=lambda h: h["before_v"])
+    return out
+
+
 def get_translation_chapter(book_id: int, chapter: int) -> list[dict]:
-    """English translation lines for a chapter — always `[]` for now. Was sourced from study-app's
-    bundled eng_bsb.db snapshot; deliberately dropped (2026-07-17) rather than depend on that
-    unmaintained third-hand copy — see shoresh/interlinear/README.md and
-    internal-docs/gbt-alignment-handover.md. Wire this to BSB-publishing's own pipeline once its
-    in-flight staleness/display-format fixes ship; signature kept stable so that's a body-only
-    change, no caller update needed."""
-    return []
+    """English (Berean Standard Bible) lines for a chapter, from bsb-data-output's per-chapter
+    display/ word-span files + headings.jsonl, interleaved by verse — headings emitted immediately
+    before the verse they're anchored to (`before_v`), then the verse's own reconstructed text.
+    `[]` if bsb-data-output isn't fetched (see interlinear.fetch.fetch_bsb) or has no data for this
+    book/chapter (e.g. book code mismatch)."""
+    book_code = BOOK_CODE_BY_ID.get(book_id)
+    if book_code is None:
+        return []
+    path = BSB_DISPLAY_DIR / book_code / f"{book_code}{chapter}.json"
+    if not path.exists():
+        return []
+    eng = json.loads(path.read_text(encoding="utf-8")).get("eng", {})
+    headings = _bsb_headings().get((book_code, chapter), [])
+
+    out: list[dict] = []
+    h_i = 0
+    for verse_str in sorted(eng, key=int):
+        verse = int(verse_str)
+        while h_i < len(headings) and headings[h_i]["before_v"] <= verse:
+            h = headings[h_i]
+            out.append({"reference": encode(book_code, chapter, verse), "text": h["text"], "format": h["level"]})
+            h_i += 1
+        # Word spans already carry their own inter-word spacing as explicit [" ", null] entries;
+        # elided (zero-surface-form) spans carry "" — plain concatenation reconstructs the verse.
+        text = "".join(span[0] for span in eng[verse_str]).strip()
+        out.append({"reference": encode(book_code, chapter, verse), "text": text, "format": "m"})
+    return out
 
 
 def get_gloss(lang: str, word_id: int) -> str | None:

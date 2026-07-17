@@ -27,6 +27,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DATA_DIR = HERE / "data" / "gbt"
 STRONGS_DATA_DIR = HERE / "data" / "strongs-data"
+BSB_DATA_DIR = HERE / "data" / "bsb"
 
 # Pinned commit (matches the clone this was evaluated against — see the design conversation this
 # module came from). Re-pin deliberately: bump this SHA, re-run fetch + build, re-verify coverage.
@@ -44,17 +45,25 @@ STUDY_APP_STRONGS_BASE = (
     "database_builder/lib/src/hebrew_greek/strongs_data/{filename}"
 )
 
-def fetch(commit: str | None = None) -> Path:
-    """Download + extract the pinned globalbibletools/data commit to DATA_DIR. Idempotent — a
-    `commit`-stamped marker file skips re-download if already present at that exact pin."""
-    commit = commit or os.environ.get("GBT_DATA_COMMIT") or GBT_DATA_COMMIT
-    marker = DATA_DIR / ".commit"
-    if DATA_DIR.exists() and marker.exists() and marker.read_text().strip() == commit:
-        print(f"[interlinear] already fetched at {commit[:8]}, skipping", file=sys.stderr)
-        return DATA_DIR
+# BSB-publishing/bsb-data-output — English (Berean Standard Bible) translation lines for
+# /interlinear/chapter's translationLines. base/display/ (CC0) has per-chapter word spans with an
+# explicit elided-word marker (fixed 2026-07-17, previously a literal "-" placeholder); base/
+# headings.jsonl (unchanged path) has section/parallel-passage headings. Small repo (~15MB) — a full
+# tarball fetch is simpler than the ~1,189 individual per-chapter raw-file requests this now takes,
+# same reasoning as globalbibletools/data above.
+BSB_DATA_OUTPUT_COMMIT = "a0bcfbbcfe217c66f31b1c886dd95c4424061e0e"
+BSB_DATA_OUTPUT_URL = "https://github.com/BSB-publishing/bsb-data-output/archive/{commit}.tar.gz"
 
-    url = GBT_DATA_URL.format(commit=commit)
-    print(f"[interlinear] downloading globalbibletools/data @ {commit[:8]} …", file=sys.stderr)
+
+def _fetch_tarball(url: str, dest_dir: Path, commit: str, label: str) -> Path:
+    """Download + extract a GitHub tarball at a pinned commit to dest_dir. Idempotent — a
+    commit-stamped marker file skips re-download if already present at that exact pin."""
+    marker = dest_dir / ".commit"
+    if dest_dir.exists() and marker.exists() and marker.read_text().strip() == commit:
+        print(f"[interlinear] {label} already fetched at {commit[:8]}, skipping", file=sys.stderr)
+        return dest_dir
+
+    print(f"[interlinear] downloading {label} @ {commit[:8]} …", file=sys.stderr)
     with tempfile.NamedTemporaryFile(suffix=".tar.gz") as tmp:
         urllib.request.urlretrieve(url, tmp.name)
         with tempfile.TemporaryDirectory() as extract_dir:
@@ -62,16 +71,23 @@ def fetch(commit: str | None = None) -> Path:
                 tf.extractall(extract_dir)  # noqa: S202 (trusted, pinned source)
             # GitHub tarballs extract to a single top-level "<repo>-<sha>/" dir
             (extracted,) = Path(extract_dir).iterdir()
-            if DATA_DIR.exists():
+            if dest_dir.exists():
                 import shutil
-                shutil.rmtree(DATA_DIR)
-            DATA_DIR.parent.mkdir(parents=True, exist_ok=True)
-            extracted.rename(DATA_DIR)
+                shutil.rmtree(dest_dir)
+            dest_dir.parent.mkdir(parents=True, exist_ok=True)
+            extracted.rename(dest_dir)
 
     marker.write_text(commit)
+    return dest_dir
+
+
+def fetch(commit: str | None = None) -> Path:
+    """Download + extract the pinned globalbibletools/data commit to DATA_DIR."""
+    commit = commit or os.environ.get("GBT_DATA_COMMIT") or GBT_DATA_COMMIT
+    out = _fetch_tarball(GBT_DATA_URL.format(commit=commit), DATA_DIR, commit, "globalbibletools/data")
     n_langs = sum(1 for d in DATA_DIR.iterdir() if d.is_dir() and not d.name.startswith("."))
-    print(f"[interlinear] fetched {n_langs} language dirs -> {DATA_DIR}", file=sys.stderr)
-    return DATA_DIR
+    print(f"[interlinear] {n_langs} language dirs -> {DATA_DIR}", file=sys.stderr)
+    return out
 
 
 def fetch_strongs_data(commit: str | None = None) -> Path:
@@ -92,6 +108,15 @@ def fetch_strongs_data(commit: str | None = None) -> Path:
     return STRONGS_DATA_DIR
 
 
+def fetch_bsb(commit: str | None = None) -> Path:
+    """Download + extract the pinned BSB-publishing/bsb-data-output commit to BSB_DATA_DIR."""
+    commit = commit or os.environ.get("BSB_DATA_OUTPUT_COMMIT") or BSB_DATA_OUTPUT_COMMIT
+    return _fetch_tarball(
+        BSB_DATA_OUTPUT_URL.format(commit=commit), BSB_DATA_DIR, commit, "BSB-publishing/bsb-data-output"
+    )
+
+
 if __name__ == "__main__":
     fetch()
     fetch_strongs_data()
+    fetch_bsb()
