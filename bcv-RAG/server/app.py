@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 
 from indexer.env import load_env
-from server.cors import allowed_origins
+from server.cors import allowed_origin_regex, allowed_origins
 from server.ratelimit import limiter
 from server.routes import ask as ask_route
 from server.routes import branched as branched_route
@@ -47,6 +47,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins(),
+    allow_origin_regex=allowed_origin_regex(),
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
     allow_credentials=False,

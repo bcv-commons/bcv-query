@@ -72,6 +72,8 @@ def build(in_path: Path, out_path: Path) -> tuple[int, int]:
             lemma TEXT, is_content INTEGER NOT NULL, morph TEXT,
             gloss TEXT, role TEXT,
             stem TEXT,                   -- verbal stem (Hebrew binyan), CC-BY — clean sense-key dim
+            person TEXT, number TEXT, gender TEXT, case_ TEXT, tense TEXT, voice TEXT,
+            mood TEXT, degree TEXT, state TEXT,   -- structured morphology (wishlist #2); "" = n/a
             PRIMARY KEY (book, chapter, verse, idx)
         );
         CREATE UNIQUE INDEX ix_ls_key ON spine_words(key);
@@ -84,10 +86,12 @@ def build(in_path: Path, out_path: Path) -> tuple[int, int]:
     # share `word` (e.g. וּמִלְמַעְלָה = 5 rows, word=1), ordered by the globally-unique `key`. So idx
     # is a running per-verse position in key order — one row per MACULA token — not `word`.
     rows, content_rows, content_with_strong = [], 0, 0
-    q = ("SELECT lang, book, chapter, verse, key, text, strong, lemma, gloss, role, class, stem "
+    q = ("SELECT lang, book, chapter, verse, key, text, strong, lemma, gloss, role, class, stem, "
+         "person, number, gender, case_, tense, voice, mood, degree, state "
          "FROM macula_words ORDER BY book, chapter, verse, key")
     idx, prev = 0, None
-    for lang, book, ch, v, key, text, strong, lemma, gloss, role, cls, stem in src.execute(q):
+    for (lang, book, ch, v, key, text, strong, lemma, gloss, role, cls, stem,
+         person, number, gender, case_, tense, voice, mood, degree, state) in src.execute(q):
         cvk = (book, ch, v)
         idx = idx + 1 if cvk == prev else 0
         prev = cvk
@@ -97,9 +101,10 @@ def build(in_path: Path, out_path: Path) -> tuple[int, int]:
         s_roll = rollup_strong(strong, lang, eq)
         content_with_strong += is_content and s_roll is not None
         rows.append((book, ch, v, idx, key, text, lexeme, s_roll, lemma, is_content,
-                     "", gloss, role, stem or ""))   # morph "" (MACULA carries none); stem = binyan
+                     "", gloss, role, stem or "",    # morph "" (kept empty; structured cols replace it)
+                     person, number, gender, case_, tense, voice, mood, degree, state))
 
-    db.executemany("INSERT INTO spine_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+    db.executemany("INSERT INTO spine_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
 
     in_sha = hashlib.sha256(in_path.read_bytes()).hexdigest()
     db.executemany("INSERT INTO spine_meta VALUES (?,?)", [

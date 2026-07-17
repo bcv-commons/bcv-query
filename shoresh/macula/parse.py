@@ -16,9 +16,15 @@ Hebrew 12 digits / book ≤39).
 
 Tables:
   macula_words(key PK, xml_id, lang, book, chapter, verse, word, lemma, strong,
-               gloss, text, role, class)
+               gloss, text, role, class, stem,
+               person, number, gender, case, tense, voice, mood, degree, state)
   frames(verb_key, role, arg_key)              -- one row per (verb, role, argument)
   refs(src_key, tgt_key, kind)                 -- referent / subjref / participantref
+
+Structured morphology (wishlist #2): both MACULA TSVs carry person/number/gender as decomposed
+columns already — no code-string parsing needed, just selection. Greek additionally has
+case/tense/voice/mood/degree; Hebrew additionally has `state` (construct/absolute). Grammatical
+fields (CC-BY), not the NC MARBLE sense/domain columns.
 """
 from __future__ import annotations
 
@@ -88,6 +94,11 @@ COLS = {
             "refcols": ["participantref", "subjref"]},
 }
 
+# Structured morphology fields: `person`/`number`/`gender` are named identically in both TSVs;
+# case/tense/voice/mood/degree exist only in Greek, `state` only in Hebrew — r.get(...) yields ""
+# on the other language, which is the correct "not applicable" value (not a parse failure).
+MORPH_FIELDS = ("person", "number", "gender", "case", "tense", "voice", "mood", "degree", "state")
+
 
 def _ingest(con: sqlite3.Connection, path: Path, lang: str) -> tuple[int, int, int]:
     c = COLS[lang]
@@ -105,7 +116,8 @@ def _ingest(con: sqlite3.Connection, path: Path, lang: str) -> tuple[int, int, i
                       r.get(c["lemma"], ""), r.get(c["strong"], ""), r.get(c["gloss"], ""),
                       r.get(c["text"], ""), r.get(c.get("role", ""), "") or "",
                       r.get(c.get("class", ""), "") or "",
-                      r.get(c.get("stem", ""), "") or ""))
+                      r.get(c.get("stem", ""), "") or "",
+                      *(r.get(f, "") or "" for f in MORPH_FIELDS)))
         nw += 1
         # frame: "A0:<id>;<id> A1:<id>" → one row per (role, arg)
         for token in (r.get("frame", "") or "").split():
@@ -122,7 +134,7 @@ def _ingest(con: sqlite3.Connection, path: Path, lang: str) -> tuple[int, int, i
                 ak = _key(a)
                 if ak:
                     refs.append((k, ak, kind)); nr += 1
-    con.executemany("INSERT OR IGNORE INTO macula_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", words)
+    con.executemany("INSERT OR IGNORE INTO macula_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", words)
     con.executemany("INSERT INTO frames VALUES (?,?,?)", frames)
     con.executemany("INSERT INTO refs VALUES (?,?,?)", refs)
     return nw, nf, nr
@@ -137,7 +149,9 @@ def build() -> None:
     con.executescript("""
         CREATE TABLE macula_words(key TEXT PRIMARY KEY, xml_id TEXT, lang TEXT,
             book TEXT, chapter INT, verse INT, word INT,
-            lemma TEXT, strong TEXT, gloss TEXT, text TEXT, role TEXT, class TEXT, stem TEXT);
+            lemma TEXT, strong TEXT, gloss TEXT, text TEXT, role TEXT, class TEXT, stem TEXT,
+            person TEXT, number TEXT, gender TEXT, case_ TEXT, tense TEXT, voice TEXT,
+            mood TEXT, degree TEXT, state TEXT);
         CREATE TABLE frames(verb_key TEXT, role TEXT, arg_key TEXT);
         CREATE TABLE refs(src_key TEXT, tgt_key TEXT, kind TEXT);
     """)
