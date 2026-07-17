@@ -44,3 +44,9 @@ RUN python -m spine.parse
 COPY references.py ./
 COPY macula/ ./macula/
 RUN python -m macula.parse
+
+# interlinear: per-occurrence Hebrew/Greek + contextual glosses → hebrew_greek.db +
+# gloss/*.db. Each build step fetches its own (pinned) source data first, idempotently.
+COPY interlinear/ ./interlinear/
+RUN python -m interlinear.build_hebrew_greek \
+ && python -m interlinear.build_gloss
