@@ -163,13 +163,16 @@ def build(source_data_dir: Path | None = None, output_db_path: Path | None = Non
 	db.executemany("INSERT INTO verses (_id, text, grammar, strongs) VALUES (?, ?, ?, ?)", rows)
 
 	# idx_normalized / idx_no_punctuation: upstream schema (search support). idx_verses_strongs /
-	# idx_strongs_code: added for the /similar/:strongsCode-equivalent lookup — without them it's a
-	# full table scan of the ~448k-row verses table regardless of how common the Strong's code is.
+	# idx_strongs_code: /similar mode=root (strongs->verses join direction). idx_verses_text:
+	# /similar mode=exact (text->verses join direction) — one index per join direction, per
+	# API_CONTRACT.md's guidance; without either, its respective mode is a full table scan of the
+	# ~448k-row verses table regardless of how common the Strong's code / text is.
 	db.executescript("""
 		CREATE INDEX idx_normalized ON text (normalized);
 		CREATE INDEX idx_no_punctuation ON text (no_punctuation);
 		CREATE INDEX idx_verses_strongs ON verses (strongs);
 		CREATE INDEX idx_strongs_code ON strongs (code);
+		CREATE INDEX idx_verses_text ON verses (text);
 	""")
 	db.commit()
 	db.close()

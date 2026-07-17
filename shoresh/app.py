@@ -32,11 +32,12 @@ from slowapi.middleware import SlowAPIMiddleware
 
 import corpus
 import data
+from interlinear import normalization
 from interlinear import serve as interlinear
 from interlinear.morphology import expand_grammar
 from macula import data as macula
 from ratelimit import limiter
-from references import BOOK_NUMBERS
+from references import BOOK_NUMBERS, norm_strong
 
 logger = logging.getLogger("shoresh")
 
@@ -741,15 +742,48 @@ def get_interlinear_languages() -> dict:
 
 
 @app.get("/interlinear/similar/{strong}")
-def get_interlinear_similar(strong: str, limit: int = 200) -> dict:
-    """Up to `limit` deduplicated verse refs containing this Strong's code (from the interlinear
-    source), plus the true total count. Complements /word/{strong}'s full per-occurrence concordance
-    with a lighter, verse-deduplicated view."""
+def get_interlinear_similar(strong: str, mode: str = "root", text: str = "", limit: int = 200) -> dict:
+    """Up to `limit` deduplicated verses matching `strong`, plus the true total count and each
+    verse's full word sequence with the match highlighted. Two modes:
+    - `root` (default): every word sharing `strong`'s Strong's code, regardless of surface form.
+    - `exact`: every word whose text exactly matches `text` (required), ignoring punctuation/case —
+      independent of Strong's code. `strong` is still used for the response's `root` field either way.
+    Complements /word/{strong}'s full per-occurrence concordance with a lighter, verse-deduplicated,
+    in-context view."""
     limit = min(limit, 200)
-    verse_ids = interlinear.get_verse_ids_for_strongs(strong, limit)
-    total = interlinear.count_verses_for_strongs(strong)
-    verses = [interlinear.extract_reference_from_verse_id(v) for v in verse_ids]
-    return {"strong": strong, "verses": verses, "total": total}
+    if mode == "exact":
+        if not text:
+            raise HTTPException(400, "mode=exact requires a non-empty text= query param")
+        verse_ids = interlinear.get_verse_ids_for_text(text, limit)
+        total = interlinear.count_verses_for_text(text)
+        norm_text = normalization.remove_punctuation(text)
+    else:
+        mode = "root"
+        code = norm_strong(strong)
+        verse_ids = interlinear.get_verse_ids_for_strongs(strong, limit)
+        total = interlinear.count_verses_for_strongs(strong)
+        norm_text = None
+
+    verses = []
+    for verse_id in verse_ids:
+        ref = interlinear.extract_reference_from_verse_id(verse_id)
+        ref["words"] = [
+            {
+                "id": w["id"],
+                "text": w["text"],
+                "highlighted": (w["strongsCode"] == code) if mode == "root" else (w["noPunctuation"] == norm_text),
+            }
+            for w in interlinear.get_verse_words(verse_id)
+        ]
+        verses.append(ref)
+
+    return {
+        "root": interlinear.get_strong_root(strong),
+        "total": total,
+        "verses": verses,
+        "strong": strong,
+        "mode": mode,
+    }
 
 
 UPLOAD_SECRET = os.environ.get("UPLOAD_SECRET", "")

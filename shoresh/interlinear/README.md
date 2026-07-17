@@ -47,8 +47,11 @@ HEAD. All `.db` files + the fetched `data/gbt/` are gitignored, rebuilt from sou
   human-readable `grammarExpanded`), sense-level `lexiconMeanings` (from shoresh's own in-house
   `resources/senses/` tables — see the deviation note below), contextual gloss in `lang`
 - `GET /interlinear/languages` — `{code, name}` for every gloss `.db` built
-- `GET /interlinear/similar/{strong}` — deduplicated verse list (with `bookName`) + total count for
-  a Strong's code
+- `GET /interlinear/similar/{strong}?mode=root|exact&text=<word>&limit=` — `root` mode (default):
+  every verse sharing `strong`'s Strong's code; `exact` mode: every verse containing `text` exactly
+  (punctuation/case-insensitive), independent of Strong's code. Deduplicated verse list (with
+  `bookName` + each verse's full `words[]`, matching word `highlighted`) + true total + the
+  Strong's code's `root` word
 
 Word ids are packed `BBCCCVVVWW` (book/chapter/verse/word) — same USFM book numbering as
 `references.BOOK_NUMBERS` (verified: GEN=1, EXO=2, MAT=40, matching gbt's own book ids exactly, no
@@ -91,9 +94,6 @@ uses `grammar` for the binyan/stem instead, since we do have that).
   own dictionary gold) — paused. The per-occurrence data here revealed a richer design question than
   a flat gloss merge (see the many-to-many alignment finding below) that changes what the fallback
   layer should even consume; picking this back up depends on that being resolved first.
-- **`mode=root|exact&text=` params, a `root` field, and per-verse `words[].highlighted` flags on
-  `/similar`** — reportedly expected by a newer version of the `web-app` client, but not present in
-  the `API_CONTRACT.md` this port was built against. Not implemented pending an updated contract.
 
 ## An important finding, not yet acted on here
 

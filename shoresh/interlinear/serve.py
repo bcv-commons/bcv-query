@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from references import BOOK_NUMBERS, book_name, norm_strong  # noqa: E402
 
 from interlinear.language_names import LANGUAGE_NAMES
+from interlinear.normalization import remove_punctuation
 
 HERE = Path(__file__).resolve().parent
 HG_DB = HERE / "data" / "hebrew_greek.db"
@@ -35,6 +36,7 @@ BOOK_CODE_BY_ID = {v: k for k, v in BOOK_NUMBERS.items()}
 
 _WORD_ID_BOOK_MULT = 100_000_000
 _WORD_ID_CHAPTER_MULT = 100_000
+_WORD_ID_VERSE_MULT = 100
 
 
 def _ro(path: Path) -> sqlite3.Connection | None:
@@ -111,6 +113,75 @@ def get_word(word_id: int) -> dict | None:
         (word_id,),
     ).fetchone()
     return dict(row) if row else None
+
+
+def get_strong_root(strongs_code: str) -> str | None:
+    """The root/lemma word for a Strong's code — the only place a Strong's-code-derived value is
+    surfaced to /similar's caller (`root`), per API_CONTRACT.md."""
+    db = _hg_db()
+    if db is None:
+        return None
+    row = db.execute("SELECT root FROM strongs WHERE code = ? LIMIT 1", (norm_strong(strongs_code),)).fetchone()
+    return row["root"] if row else None
+
+
+def word_id_verse_bounds(verse_id: int) -> tuple[int, int]:
+    """verse_id is packed BCCCVVV; word ids sharing it are packed BBCCCVVVWW — same book/chapter/
+    verse, `WW` (00-99) free for the word-in-verse index."""
+    book_id = verse_id // 1_000_000
+    remainder = verse_id % 1_000_000
+    chapter = remainder // 1_000
+    verse = remainder % 1_000
+    lower = book_id * _WORD_ID_BOOK_MULT + chapter * _WORD_ID_CHAPTER_MULT + verse * _WORD_ID_VERSE_MULT
+    return lower, lower + _WORD_ID_VERSE_MULT
+
+
+def get_verse_words(verse_id: int) -> list[dict]:
+    """A verse's full word sequence, in order — id/text/strongsCode/noPunctuation (the last for
+    /similar's mode=exact highlighting, not exposed to the client)."""
+    db = _hg_db()
+    if db is None:
+        return []
+    lower, upper = word_id_verse_bounds(verse_id)
+    rows = db.execute(
+        """SELECT v._id AS id, t.text AS text, t.no_punctuation AS noPunctuation, l.code AS strongsCode
+           FROM verses v
+           JOIN text t ON v.text = t._id
+           JOIN strongs l ON v.strongs = l._id
+           WHERE v._id >= ? AND v._id < ?
+           ORDER BY v._id ASC""",
+        (lower, upper),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_verse_ids_for_text(text: str, limit: int) -> list[int]:
+    """Distinct BCCCVVV verse ids containing a word whose text exactly matches `text`, ignoring
+    punctuation/case (mode=exact) — requires idx_verses_text, built by build_hebrew_greek.py, or
+    this is a full table scan (same reasoning as get_verse_ids_for_strongs's mode=root query, just
+    the other join direction: text->verses instead of strongs->verses)."""
+    db = _hg_db()
+    if db is None:
+        return []
+    rows = db.execute(
+        """SELECT DISTINCT (v._id / 100) AS verseId
+           FROM verses v JOIN text t ON v.text = t._id
+           WHERE t.no_punctuation = ? ORDER BY verseId ASC LIMIT ?""",
+        (remove_punctuation(text), limit),
+    ).fetchall()
+    return [r["verseId"] for r in rows]
+
+
+def count_verses_for_text(text: str) -> int:
+    db = _hg_db()
+    if db is None:
+        return 0
+    row = db.execute(
+        """SELECT COUNT(DISTINCT (v._id / 100)) AS total
+           FROM verses v JOIN text t ON v.text = t._id WHERE t.no_punctuation = ?""",
+        (remove_punctuation(text),),
+    ).fetchone()
+    return row["total"] if row else 0
 
 
 def get_translation_chapter(book_id: int, chapter: int) -> list[dict]:
