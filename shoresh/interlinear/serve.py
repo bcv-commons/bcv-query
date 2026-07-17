@@ -16,7 +16,7 @@ from pathlib import Path
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from references import BOOK_NUMBERS  # noqa: E402
+from references import BOOK_NUMBERS, norm_strong  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 HG_DB = HERE / "data" / "hebrew_greek.db"
@@ -124,7 +124,7 @@ def get_verse_ids_for_strongs(strongs_code: str, limit: int) -> list[int]:
         """SELECT DISTINCT (v._id / 100) AS verseId
            FROM verses v JOIN strongs l ON v.strongs = l._id
            WHERE l.code = ? ORDER BY verseId ASC LIMIT ?""",
-        (strongs_code, limit),
+        (norm_strong(strongs_code), limit),
     ).fetchall()
     return [r["verseId"] for r in rows]
 
@@ -136,7 +136,7 @@ def count_verses_for_strongs(strongs_code: str) -> int:
     row = db.execute(
         """SELECT COUNT(DISTINCT (v._id / 100)) AS total
            FROM verses v JOIN strongs l ON v.strongs = l._id WHERE l.code = ?""",
-        (strongs_code,),
+        (norm_strong(strongs_code),),
     ).fetchone()
     return row["total"] if row else 0
 

@@ -25,7 +25,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from spine.common import FILENUM
-from references import encode, decode
+from references import encode, decode, norm_strong as _norm_strong
 
 HERE = Path(__file__).resolve().parent
 LXX_DB = HERE / "lxx" / "lxx.db"
@@ -404,11 +404,6 @@ def keyness_of(code: str) -> dict | None:
     return out
 
 
-def _norm_strong(s: str) -> str:
-    m = re.match(r"^([GgHh])0*(\d+)", s.strip())
-    return f"{m.group(1).upper()}{int(m.group(2)):04d}" if m else s.strip().upper()
-
-
 @lru_cache(maxsize=1)
 def _strong_to_lex() -> dict[str, list[str]]:
     """{padded Strong's: [BHSA lex, ...]} — reverse of word_freq/hbo_strong.tsv. Lets a
@@ -437,7 +432,7 @@ def _stem_senses(code: str, lang: str = "English") -> list[dict]:
     table, stem_cols, _gc = _gloss_table("hbo", lang)
     en_table = en_cols = None
     out = []
-    for lex in _strong_to_lex().get(_pad_strong(code), []):
+    for lex in _strong_to_lex().get(_norm_strong(code), []):
         row = table.get(lex)
         senses = {c: _real_gloss(row.get(c)) for c in stem_cols if row and _real_gloss(row.get(c))}
         if not senses and lang != "English":            # fall back to English per-stem for this lex
@@ -601,8 +596,9 @@ def _tw_articles() -> dict[str, list[dict]]:
 
 def tw_articles(strong: str) -> dict:
     """Translation-Words article(s) explaining a Strong's number, ranked."""
-    articles = _tw_articles().get(strong.strip(), [])
-    return {"strong": strong, "count": len(articles), "articles": articles}
+    code = _norm_strong(strong)
+    articles = _tw_articles().get(code, [])
+    return {"strong": code, "count": len(articles), "articles": articles}
 
 
 # ---------- S1: speaker / red-letter index ----------
@@ -746,7 +742,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
                         w["gloss"] = re.split(r"[;,]", loc)[0].strip()
                 if senses.get(code):                       # binyan-correct sense (OT, hbo.db)
                     w["sense"] = senses[code]
-                dd = doms.get(_pad_strong(code)) if code else None
+                dd = doms.get(_norm_strong(code)) if code else None
                 if dd:                                     # dominant Louw-Nida domain (Greek, per-strong)
                     best = _dominant_domain(dd)            # top-domain gate + finer subdomain label
                     if best:
@@ -871,12 +867,6 @@ def _hbo_path() -> Path:
     return Path(env) if env else _resources_dir() / "occurrences" / "hbo.db"
 
 
-def _pad_strong(s: str) -> str:
-    """hbo.db keys Strong's zero-padded to 4 digits (H0430); normalize any input to match."""
-    s = s.strip().upper()
-    return f"{s[0]}{int(s[1:]):04d}" if len(s) > 1 and s[1:].isdigit() else s
-
-
 def _sense_groups(rows) -> list[dict]:
     """Group occurrence rows (lex/stem/sense + book/chapter/verse) by (lex, stem, sense) → each a
     binyan-correct sense with its label, count, and sample refs. Count-sorted."""
@@ -908,15 +898,16 @@ def sense_concordance(strong: str, limit: int = 5000) -> dict:
         return {"error": "hbo.db unavailable (OT linguistic core not shipped)"}
     rows = con.execute(
         "SELECT book, chapter, verse, lex, stem, sense FROM occurrence WHERE strong=? "
-        "ORDER BY node LIMIT ?", (_pad_strong(strong), limit)).fetchall()
+        "ORDER BY node LIMIT ?", (_norm_strong(strong), limit)).fetchall()
     con.close()
     return {"strong": strong, "language": "hbo", **(gloss_of(strong) or {}),
             "senses": _sense_groups(rows)}
 
 
-def lexeme_profile(lex: str) -> dict:
-    """A BHSA-lexeme profile (the granular anchor a shared Strong's conflates): every stem × sense ×
-    count × sample refs, from hbo.db."""
+_STRONG_LOOKALIKE = re.compile(r"^[GgHh]\d")
+
+
+def _lexeme_profile_one(lex: str) -> dict:
     con = _ro(_hbo_path())
     if con is None:
         return {"error": "hbo.db unavailable (OT linguistic core not shipped)"}
@@ -928,6 +919,25 @@ def lexeme_profile(lex: str) -> dict:
         return {"error": f"no occurrences for lex {lex!r}"}
     return {"lex": lex, "strong": sorted({r["strong"] for r in rows if r["strong"]}),
             "total": len(rows), "senses": _sense_groups(rows)}
+
+
+def lexeme_profile(lex: str) -> dict:
+    """A BHSA-lexeme profile (the granular anchor a shared Strong's conflates): every stem × sense ×
+    count × sample refs, from hbo.db. `lex` is normally the BHSA lex-id, but a Hebrew Strong's code
+    (H####) is also accepted — resolved via the reverse Strong's->lexeme map (_strong_to_lex). Since
+    one Strong's code can conflate several homograph lexemes (733 Hebrew codes do), a Strong's lookup
+    may fan out into multiple profiles rather than silently picking one."""
+    if _STRONG_LOOKALIKE.match(lex.strip()):
+        code = _norm_strong(lex)
+        if code.startswith("G"):
+            return {"error": f"BHSA is Hebrew-only — Greek Strong's {code!r} has no BHSA lexeme"}
+        lexes = _strong_to_lex().get(code, [])
+        if not lexes:
+            return {"error": f"no occurrences for Strong's {code!r} (not found in the BHSA lexeme map)"}
+        if len(lexes) == 1:
+            return _lexeme_profile_one(lexes[0])
+        return {"strong": code, "lexemes": [_lexeme_profile_one(l) for l in lexes]}
+    return _lexeme_profile_one(lex)
 
 
 def _verse_sense_map(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dict:
@@ -967,7 +977,7 @@ def _strong_sense_by_ref(strong: str) -> dict:
     out: dict = {}
     for r in con.execute(
             "SELECT book, chapter, verse, lex, stem, sense FROM occurrence WHERE strong=? ORDER BY node",
-            (_pad_strong(strong),)):
+            (_norm_strong(strong),)):
         ref = f"{r['book']} {r['chapter']}:{r['verse']}"
         if ref in out:
             continue

@@ -162,12 +162,18 @@ def get_senses(strong: str) -> dict:
     return result
 
 
-@app.get("/lexeme/{lex}")
+@app.get("/lexeme/{lex:path}")
 def get_lexeme(lex: str) -> dict:
     """BHSA-lexeme profile (the granular anchor a shared Strong's conflates): every stem × sense ×
-    count × sample refs, from hbo.db. `lex` is the BHSA lex-id (URL-encode the [ < > = chars)."""
+    count × sample refs, from hbo.db. `lex` is normally the BHSA lex-id (URL-encode the [ < > = chars;
+    a literal or %2F-encoded `/` both work — many BHSA lex-ids end in one, e.g. `R>CJT/`); a Hebrew
+    Strong's code (H0430) is also accepted and resolved to its lexeme(s) — if the code conflates
+    multiple homograph lexemes, the response is `{strong, lexemes: [profile, ...]}` instead of a
+    single profile."""
     result = data.lexeme_profile(lex)
     if "error" in result:
+        if "Hebrew-only" in result["error"]:
+            raise HTTPException(400, result["error"])
         raise HTTPException(404 if "no occurrences" in result["error"] else 503, result["error"])
     return result
 

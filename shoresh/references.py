@@ -129,6 +129,22 @@ def _seed_aliases() -> None:
 _seed_aliases()
 
 
+_STRONG_RE = re.compile(r"^([GgHh])0*(\d+)([A-Za-z]?)")
+
+
+def norm_strong(s: str) -> str:
+    """Canonical Strong's form: uppercase prefix, zero-padded 4-digit number, lowercase
+    homograph suffix if present (H0430, G0026, H1254a). Tolerant of case, missing/extra
+    leading zeros and a trailing letter (h430 / H0430 / H430A all -> H0430). Unrecognized
+    input is returned upper-stripped rather than raising — callers treat a non-match as
+    "not found" downstream, not a parse error here."""
+    m = _STRONG_RE.match(s.strip())
+    if not m:
+        return s.strip().upper()
+    prefix, num, suffix = m.groups()
+    return f"{prefix.upper()}{int(num):04d}{suffix.lower()}"
+
+
 def encode(book_code: str, chapter: int, verse: int) -> int:
     """Encode (book_code, chapter, verse) → BBCCCVVV integer."""
     book = BOOK_NUMBERS.get(book_code.upper())
