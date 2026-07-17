@@ -52,12 +52,12 @@ STUDY_APP_STRONGS_BASE = (
 # tarball fetch is simpler than the ~1,189 individual per-chapter raw-file requests this now takes,
 # same reasoning as globalbibletools/data above.
 #
-# Re-pinned 2026-07-17 (a0bcfbb -> dcaf1b0): the first pin still had systemic corruption in `eng`
-# spans (visible [bracket]/{brace} markup, literal "vvv" garbage tokens, duplicated-Strong's
-# ellipsis spans — reported upstream). Verified at dcaf1b0 across the full Bible (1,189 chapters,
-# 30,969 verses): all three bug classes gone; one narrower residual (~92 verses, 0.3%) reported
-# separately — see internal-docs/gbt-alignment-handover.md.
-BSB_DATA_OUTPUT_COMMIT = "dcaf1b0bfa1aa91394d52613e7aac67b3b058478"
+# Re-pinned 2026-07-17 (a0bcfbb -> dcaf1b0 -> 90bab7c): dcaf1b0 fixed the systemic corruption
+# ([bracket]/{brace} markup, "vvv" garbage, duplicated-Strong's ellipsis spans) but left a ~92-verse
+# (0.3%) residual (a stray ". . ."/"-" from an incomplete elision), reported separately. 90bab7c is
+# the publisher's follow-up fix — verified across the full Bible (1,189 chapters, 30,969 verses):
+# zero flagged verses, including the residual set. See internal-docs/gbt-alignment-handover.md.
+BSB_DATA_OUTPUT_COMMIT = "90bab7c30aff44693f059be5cfd5813d66bba8a7"
 BSB_DATA_OUTPUT_URL = "https://github.com/BSB-publishing/bsb-data-output/archive/{commit}.tar.gz"
 
 
