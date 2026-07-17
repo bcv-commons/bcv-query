@@ -51,7 +51,13 @@ STUDY_APP_STRONGS_BASE = (
 # headings.jsonl (unchanged path) has section/parallel-passage headings. Small repo (~15MB) — a full
 # tarball fetch is simpler than the ~1,189 individual per-chapter raw-file requests this now takes,
 # same reasoning as globalbibletools/data above.
-BSB_DATA_OUTPUT_COMMIT = "a0bcfbbcfe217c66f31b1c886dd95c4424061e0e"
+#
+# Re-pinned 2026-07-17 (a0bcfbb -> dcaf1b0): the first pin still had systemic corruption in `eng`
+# spans (visible [bracket]/{brace} markup, literal "vvv" garbage tokens, duplicated-Strong's
+# ellipsis spans — reported upstream). Verified at dcaf1b0 across the full Bible (1,189 chapters,
+# 30,969 verses): all three bug classes gone; one narrower residual (~92 verses, 0.3%) reported
+# separately — see internal-docs/gbt-alignment-handover.md.
+BSB_DATA_OUTPUT_COMMIT = "dcaf1b0bfa1aa91394d52613e7aac67b3b058478"
 BSB_DATA_OUTPUT_URL = "https://github.com/BSB-publishing/bsb-data-output/archive/{commit}.tar.gz"
 
 
