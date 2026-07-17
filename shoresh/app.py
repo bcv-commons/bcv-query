@@ -712,9 +712,10 @@ def get_interlinear_chapter(book: str, chapter: int) -> dict:
 @app.get("/interlinear/word/{word_id}")
 def get_interlinear_word(word_id: int, lang: str = "eng") -> dict:
     """A single interlinear word: text, Strong's code + root, grammar code (raw + human-readable
-    expansion), SDBH/SDBG lexicon meanings, and its CONTEXTUAL (per-occurrence, human-edited) gloss
-    in `lang` — distinct from /gloss's dictionary-level gloss. `lang` defaults to eng; null gloss if
-    that language has no db built or no gloss recorded here."""
+    expansion), sense-level lexicon meanings (from shoresh's own in-house UBS-derived senses/
+    resources — see data.lexicon_meanings_for_strongs), and its CONTEXTUAL (per-occurrence, human-
+    edited) gloss in `lang` — distinct from /gloss's dictionary-level gloss. `lang` defaults to eng;
+    null gloss if that language has no db built or no gloss recorded here."""
     word = interlinear.get_word(word_id)
     if word is None:
         raise HTTPException(404, f"word id '{word_id}' not found")
@@ -726,7 +727,7 @@ def get_interlinear_word(word_id: int, lang: str = "eng") -> dict:
         "grammar": word["grammar"],
         "grammarExpanded": expand_grammar(word["grammar"]),
         "isRtl": word["strongsCode"].startswith("H"),
-        "lexiconMeanings": interlinear.get_meanings_for_strongs(word["strongsCode"]),
+        "lexiconMeanings": data.lexicon_meanings_for_strongs(word["strongsCode"], lemma=word["strongsRoot"]),
         "gloss": interlinear.get_gloss(lang, word_id),
         "lang": lang,
     }

@@ -45,10 +45,10 @@ COPY references.py ./
 COPY macula/ ./macula/
 RUN python -m macula.parse
 
-# interlinear: per-occurrence Hebrew/Greek + contextual glosses → hebrew_greek.db + gloss/*.db,
-# plus the pre-baked eng_bsb.db (BSB translation text) / sdbh.db / sdbg.db (SDBH/SDBG lexicon)
-# assets fetched from the same pinned study-app commit. Each build step fetches its own (pinned)
-# source data first, idempotently.
+# interlinear: per-occurrence Hebrew/Greek + contextual glosses → hebrew_greek.db + gloss/*.db.
+# No dependency on the study-app eng_bsb.db/sdbh.db/sdbg.db assets previously fetched here — see
+# interlinear/serve.py's module docstring. Each build step fetches its own (pinned) source data
+# first, idempotently.
 COPY interlinear/ ./interlinear/
 RUN python -m interlinear.fetch \
  && python -m interlinear.build_hebrew_greek \

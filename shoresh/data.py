@@ -463,6 +463,68 @@ def _lex_sense_table() -> dict:
     return out
 
 
+@lru_cache(maxsize=1)
+def _grc_sense_table() -> dict[str, list[dict]]:
+    """{Strong's: [{sense, gloss, count, share}, ...]} — the older Strong's-keyed Greek sense
+    inventory (resources/senses/grc.tsv). Same UBS-derived data as SDBG, already in-house."""
+    out: dict[str, list[dict]] = collections.defaultdict(list)
+    p = _resources_dir() / "senses" / "grc.tsv"
+    if p.exists():
+        with p.open(encoding="utf-8") as fh:
+            next(fh, None)
+            for line in fh:
+                c = line.rstrip("\n").split("\t")
+                if len(c) == 5:
+                    out[c[0]].append(
+                        {"sense": c[1], "gloss": c[2], "count": int(c[3]), "share": round(float(c[4]), 3)})
+    return out
+
+
+def _sense_num(sense: str) -> int:
+    return int(re.sub(r"\D", "", sense) or 0)
+
+
+def lexicon_meanings_for_strongs(strong: str, lemma: str | None = None) -> list[dict]:
+    """Sense-level 'lexicon meanings' for a Strong's code, in the same shape as the SDBH/SDBG
+    `meanings` table (lexId/lemma/grammar/definitionShort/comments/glosses) — but built from
+    shoresh's own already-licensed, already-in-house UBS-derived resources/senses/ tables, not an
+    externally fetched .db. One entry per distinct sense. `lexId` is a locally-synthesized stable
+    int (NOT SDBH's own numbering, which we don't carry) — base Strong's number + a running index
+    over this call's own entries, so it's unique within the response but NOT stable across
+    entries being added/reordered upstream; `grammar`/`comments` aren't available at this
+    granularity in our resources, so are always null (Hebrew uses `grammar` for the binyan/stem
+    instead, since we do have that)."""
+    code = _norm_strong(strong)
+    base = _sense_num(code)
+    out: list[dict] = []
+    if code.startswith("G"):
+        for n, row in enumerate(_grc_sense_table().get(code, [])):
+            out.append({
+                "lexId": base * 1000 + n,
+                "lemma": lemma,
+                "grammar": None,
+                "definitionShort": row["gloss"],
+                "comments": None,
+                "glosses": row["gloss"],
+            })
+    elif code.startswith("H"):
+        table = _lex_sense_table()
+        n = 0
+        for lex in _strong_to_lex().get(code, []):
+            for stem, senses in table.get(lex, {}).items():
+                for row in senses:
+                    n += 1
+                    out.append({
+                        "lexId": base * 1000 + n,
+                        "lemma": lemma,
+                        "grammar": stem or None,
+                        "definitionShort": row["gloss"],
+                        "comments": None,
+                        "glosses": row["gloss"],
+                    })
+    return out
+
+
 # Served gloss-language NAME -> iso639-3 basename (for per-language sense-override files).
 _GLOSS_LANG_ISO = {
     "English": "eng", "German": "deu", "Danish": "dan", "Dutch": "nld", "French": "fra",

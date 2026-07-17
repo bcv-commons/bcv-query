@@ -25,11 +25,20 @@ https://github.com/BSB-publishing/bsb-data-output (CC0 + CC-BY 4.0)
   morphology); for CC0-only deploys swap to `vector-db/index-pd/` once
   that artifact ships.
 - `base/headings.jsonl` — section + parallel-passage headings.
+
+Pinned to a commit SHA (below), same discipline as shoresh's macula/lxx/spine/interlinear fetches —
+NOT a live fetch of `main`, so an upstream push never silently changes what a re-run of this ingest
+picks up. Re-pin deliberately (bump BSB_DATA_OUTPUT_COMMIT, re-fetch, re-verify) once the publisher's
+in-flight fixes land: (1) the repo is currently ~5 months behind `bsb2usfm`'s latest release, an
+update has been requested; (2) `base/display/*.jsonl` (not consumed here yet, but relevant if this
+ever needs word-level Strong's alignment rather than verse-level) leaks the elided-word placeholder
+into naively-concatenated text — see internal-docs/gbt-alignment-handover.md for both.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -49,7 +58,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = REPO_ROOT / "indexer" / "index.db"
 DEFAULT_STAGING = REPO_ROOT / "ingest" / "_staging" / "bsb"
 
-BASE_RAW = "https://raw.githubusercontent.com/BSB-publishing/bsb-data-output/main"
+# Pinned commit (2026-01-19, the last known publish before the requested refresh) — override via
+# $BSB_DATA_OUTPUT_COMMIT for a deliberate re-pin, never point this back at `main`.
+BSB_DATA_OUTPUT_COMMIT = "f2a801c20284c8bbbffd1b83e049f4a1515552cb"
+BASE_RAW = (
+    f"https://raw.githubusercontent.com/BSB-publishing/bsb-data-output/"
+    f"{os.environ.get('BSB_DATA_OUTPUT_COMMIT', BSB_DATA_OUTPUT_COMMIT)}"
+)
 URLS: dict[str, str] = {
     "bible-index.jsonl": f"{BASE_RAW}/base/index-cc-by/bible-index.jsonl",
     "headings.jsonl":    f"{BASE_RAW}/base/headings.jsonl",
