@@ -39,6 +39,15 @@ STUDY_APP_STRONGS_BASE = (
     "database_builder/lib/src/hebrew_greek/strongs_data/{filename}"
 )
 
+# eng_bsb.db (Berean Standard Bible, public domain) / sdbh.db / sdbg.db (SDBH/SDBG lexicon
+# meanings, CC-BY-SA-4.0 — an accepted license here) are pre-baked SQLite assets bundled with the
+# study-app Flutter app (not derived from the `data` repo's JSON), but ARE real git blobs (verified
+# not LFS pointers) at the same pinned study-app commit as the strongs-data text files above — so
+# they're fetchable + pinnable the same way, not vendored.
+ASSETS_DIR = HERE / "data" / "assets"
+STUDY_APP_ASSETS_BASE = "https://raw.githubusercontent.com/globalbibletools/study-app/{commit}/assets/databases/{filename}"
+ASSET_FILES = ("eng_bsb.db", "sdbh.db", "sdbg.db")
+
 
 def fetch(commit: str | None = None) -> Path:
     """Download + extract the pinned globalbibletools/data commit to DATA_DIR. Idempotent — a
@@ -88,6 +97,25 @@ def fetch_strongs_data(commit: str | None = None) -> Path:
     return STRONGS_DATA_DIR
 
 
+def fetch_study_app_assets(commit: str | None = None) -> Path:
+    """Download eng_bsb.db / sdbh.db / sdbg.db from the pinned study-app commit. Same idempotent-
+    marker pattern as fetch()/fetch_strongs_data() above."""
+    commit = commit or os.environ.get("STUDY_APP_COMMIT") or STUDY_APP_COMMIT
+    marker = ASSETS_DIR / ".commit"
+    if ASSETS_DIR.exists() and marker.exists() and marker.read_text().strip() == commit:
+        print(f"[interlinear] study-app assets already fetched at {commit[:8]}, skipping", file=sys.stderr)
+        return ASSETS_DIR
+
+    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    for filename in ASSET_FILES:
+        url = STUDY_APP_ASSETS_BASE.format(commit=commit, filename=filename)
+        urllib.request.urlretrieve(url, ASSETS_DIR / filename)
+    marker.write_text(commit)
+    print(f"[interlinear] fetched study-app assets @ {commit[:8]} -> {ASSETS_DIR}", file=sys.stderr)
+    return ASSETS_DIR
+
+
 if __name__ == "__main__":
     fetch()
     fetch_strongs_data()
+    fetch_study_app_assets()

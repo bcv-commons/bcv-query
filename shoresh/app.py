@@ -33,6 +33,7 @@ from slowapi.middleware import SlowAPIMiddleware
 import corpus
 import data
 from interlinear import serve as interlinear
+from interlinear.morphology import expand_grammar
 from macula import data as macula
 from ratelimit import limiter
 from references import BOOK_NUMBERS
@@ -689,23 +690,31 @@ def search(q: str, lang: str = "hbo", k: int = 10,
 
 @app.get("/interlinear/chapter/{book}/{chapter}")
 def get_interlinear_chapter(book: str, chapter: int) -> dict:
-    """Per-occurrence Hebrew/Greek interlinear words for a chapter (text, Strong's code), from
-    globalbibletools/data (CC0-1.0) — a Python port of the gbt-data-api /chapter endpoint. Full-text
-    translation lines (eng_bsb.db) aren't ported yet — see shoresh/interlinear/README.md."""
+    """Per-occurrence Hebrew/Greek interlinear words + English (Berean Standard Bible) translation
+    lines for a chapter — a Python port of the gbt-data-api /chapter endpoint. `hebrewGreekWords`/
+    `translationLines` match the data-api contract's field names exactly; `book` deliberately stays
+    the 3-letter USFM code (not the contract's numeric book id) for consistency with every other
+    shoresh route — see shoresh/interlinear/README.md."""
     book_id = BOOK_NUMBERS.get(book.upper())
     if book_id is None:
         raise HTTPException(400, f"unknown book '{book}'")
     words = interlinear.get_chapter(book_id, chapter)
     if words is None:
         raise HTTPException(503, "interlinear hebrew_greek.db not built — see shoresh/interlinear/README.md")
-    return {"book": book.upper(), "chapter": chapter, "words": words}
+    return {
+        "book": book.upper(),
+        "chapter": chapter,
+        "hebrewGreekWords": words,
+        "translationLines": interlinear.get_translation_chapter(book_id, chapter),
+    }
 
 
 @app.get("/interlinear/word/{word_id}")
 def get_interlinear_word(word_id: int, lang: str = "eng") -> dict:
-    """A single interlinear word: text, Strong's code + root, grammar code, and its CONTEXTUAL
-    (per-occurrence, human-edited) gloss in `lang` — distinct from /gloss's dictionary-level gloss.
-    `lang` defaults to eng; null gloss if that language has no db built or no gloss recorded here."""
+    """A single interlinear word: text, Strong's code + root, grammar code (raw + human-readable
+    expansion), SDBH/SDBG lexicon meanings, and its CONTEXTUAL (per-occurrence, human-edited) gloss
+    in `lang` — distinct from /gloss's dictionary-level gloss. `lang` defaults to eng; null gloss if
+    that language has no db built or no gloss recorded here."""
     word = interlinear.get_word(word_id)
     if word is None:
         raise HTTPException(404, f"word id '{word_id}' not found")
@@ -715,7 +724,9 @@ def get_interlinear_word(word_id: int, lang: str = "eng") -> dict:
         "strongsCode": word["strongsCode"],
         "strongsRoot": word["strongsRoot"],
         "grammar": word["grammar"],
+        "grammarExpanded": expand_grammar(word["grammar"]),
         "isRtl": word["strongsCode"].startswith("H"),
+        "lexiconMeanings": interlinear.get_meanings_for_strongs(word["strongsCode"]),
         "gloss": interlinear.get_gloss(lang, word_id),
         "lang": lang,
     }
@@ -723,7 +734,8 @@ def get_interlinear_word(word_id: int, lang: str = "eng") -> dict:
 
 @app.get("/interlinear/languages")
 def get_interlinear_languages() -> dict:
-    """Language codes with a built per-occurrence gloss db (globalbibletools/data coverage)."""
+    """{code, name} for every language with a built per-occurrence gloss db (globalbibletools/data
+    coverage) — name falls back to the raw code where no display name is confirmed."""
     return {"languages": interlinear.list_languages()}
 
 

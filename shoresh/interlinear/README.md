@@ -1,9 +1,11 @@
 # interlinear/ — per-occurrence Hebrew/Greek + contextual glosses
 
-Ports `example/aleph/data-api`'s core contract into shoresh (Python/FastAPI, reading the same
-portable SQLite files — no `better-sqlite3`/Node dependency). Source: **globalbibletools/data**
-(CC0-1.0 — org-wide default license, no per-repo override; the one exception, SDBH/SDBG lexicon
-data, is CC-BY-SA-4.0 and is *not* included here — see "Deferred" below).
+Ports `example/aleph/data-api`'s full `API_CONTRACT.md` into shoresh (Python/FastAPI, reading the
+same portable SQLite files — no `better-sqlite3`/Node dependency). Source: **globalbibletools/data**
+(CC0-1.0 — org-wide default license, no per-repo override) for the per-occurrence words/glosses;
+**globalbibletools/study-app** (same pinned-commit discipline) for the pre-baked `eng_bsb.db`
+(Berean Standard Bible, public domain) and `sdbh.db`/`sdbg.db` (SDBH/SDBG lexicon meanings,
+CC-BY-SA-4.0 — an accepted license here).
 
 ## What this is, concretely
 
@@ -16,7 +18,7 @@ context, not the dictionary form "come."
 ## Build pipeline
 
 ```bash
-python -m interlinear.fetch                          # pinned commit -> interlinear/data/gbt/
+python -m interlinear.fetch                          # gbt data + strongs-data + eng_bsb/sdbh/sdbg.db
 python -m interlinear.build_hebrew_greek              # -> data/hebrew_greek.db (448,269 words)
 python -m interlinear.build_gloss eng spa fra por are  # -> data/gloss/<lang>.db
 python -m interlinear.build_gloss                      # every real gloss language found (~38)
@@ -37,29 +39,44 @@ HEAD. All `.db` files + the fetched `data/gbt/` are gitignored, rebuilt from sou
 
 ## Endpoints (in `shoresh/app.py`)
 
-- `GET /interlinear/chapter/{book}/{chapter}` — every word's text + Strong's code for a chapter
-- `GET /interlinear/word/{word_id}?lang=eng` — one word: text, Strong's + root, grammar code, contextual gloss in `lang`
-- `GET /interlinear/languages` — which gloss `.db`s are built
-- `GET /interlinear/similar/{strong}` — deduplicated verse list + total count for a Strong's code
+- `GET /interlinear/chapter/{book}/{chapter}` — every word's text + Strong's code
+  (`hebrewGreekWords`) plus English (Berean Standard Bible) translation lines (`translationLines`)
+  for a chapter
+- `GET /interlinear/word/{word_id}?lang=eng` — one word: text, Strong's + root, grammar code (raw +
+  human-readable `grammarExpanded`), SDBH/SDBG `lexiconMeanings`, contextual gloss in `lang`
+- `GET /interlinear/languages` — `{code, name}` for every gloss `.db` built
+- `GET /interlinear/similar/{strong}` — deduplicated verse list (with `bookName`) + total count for
+  a Strong's code
 
 Word ids are packed `BBCCCVVVWW` (book/chapter/verse/word) — same USFM book numbering as
 `references.BOOK_NUMBERS` (verified: GEN=1, EXO=2, MAT=40, matching gbt's own book ids exactly, no
 translation table needed).
 
+## Deliberate deviation from `example/aleph/data-api`'s `API_CONTRACT.md`
+
+That contract (written for a SvelteKit `web-app` client, not shoresh) specifies `:book` on
+`/chapter/:book/:chapter` as a numeric id (1–66). This port keeps the 3-letter USFM code instead
+(`GEN`, not `1`) — every other shoresh route (`/verse`, `/coref`, `/frame`, …) takes book this way,
+case-insensitively, and breaking that consistency for one endpoint to match an external client's
+convention wasn't worth it. Response field *names* (`hebrewGreekWords`, `translationLines`,
+`bookName`, `{code, name}` for languages) do follow the contract exactly, since those don't collide
+with any existing shoresh convention. If a caller needs the numeric-book-id contract verbatim, that's
+a one-line adapter on their side (`BOOK_NUMBERS`-equivalent lookup), not a shoresh change.
+
+One content (not format) difference, not adapted: shoresh's own book-name resource returns "Song of
+Songs" for SNG where `data-api`'s `BOOK_NAMES_BY_ID` says "Song of Solomon" — `bookName`/`bookId`
+here reuse shoresh's single existing book-name source rather than a second hardcoded list, so this
+one title differs from the original data-api's output.
+
 ## Deferred — not in this port
 
-- **`eng_bsb.db` (full Berean Standard Bible text)** and **`sdbh.db`/`sdbg.db` (SDBH/SDBG lexicon
-  meanings)** — these are pre-baked *assets* bundled with the original Flutter app, not derived from
-  the `globalbibletools/data` JSON this module builds from, so they're not reproducible via the pinned
-  fetch here. `sdbh`/`sdbg` are also CC-BY-SA-4.0 (a specified license override, not the org's CC0
-  default) and likely overlap shoresh's existing `/domain?axis=sdbg` (UBS domain-mining) data —
-  worth reconciling rather than importing a second parallel copy. Not started.
-- **`morphology.js`'s grammar-code expansion** ("N-mpc" → human-readable) — `grammar` is returned as
-  the raw code only; the display expansion wasn't ported.
 - **The 3-tier gloss resolver** (occurrence-precise → lexeme-aligner statistical fallback → shoresh's
   own dictionary gold) — paused. The per-occurrence data here revealed a richer design question than
   a flat gloss merge (see the many-to-many alignment finding below) that changes what the fallback
   layer should even consume; picking this back up depends on that being resolved first.
+- **`mode=root|exact&text=` params, a `root` field, and per-verse `words[].highlighted` flags on
+  `/similar`** — reportedly expected by a newer version of the `web-app` client, but not present in
+  the `API_CONTRACT.md` this port was built against. Not implemented pending an updated contract.
 
 ## An important finding, not yet acted on here
 
