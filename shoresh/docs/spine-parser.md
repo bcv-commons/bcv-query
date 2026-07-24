@@ -81,22 +81,30 @@ force-aligning superscription vocabulary onto real verse-1 target words for psal
 title has no separate verse (this parser only isolates it into verse 0 for ~64 of ~116 titled
 psalms; the rest, e.g. Psalm 23, merge title + content into verse 1).
 
-Built in `spine/superscriptions.py`, combining two already-available sources (no new Hebrew
-vocabulary hand-transcribed):
-- UHB's own `\d` marker (already captured as verse 0 above) directly gives the ~64 split cases.
-- BSB-publishing/bsb-data-output's `headings.jsonl` `level:"d"` entries (pinned fetch, independent
-  of Hebrew versification) say WHICH psalms have a title at all — including the merged cases UHB
-  doesn't separate. For those, the boundary within verse 1 is found via a vocabulary built
-  empirically from the ~64 known verse-0 tokens (Strong's numbers appearing in ≥5 distinct psalm
-  titles — `MIN_TITLE_CHAPTERS` — filters out incidental words from a few longer narrative-style
-  titles, e.g. "the LORD" in Psalm 18's title, which would otherwise false-positive-match the start
-  of Psalm 23's real content, "The LORD is my shepherd").
+Built in `spine/superscriptions.py` from two trustworthy sources — no frequency-based or
+otherwise-guessed heuristic anywhere; every flag traces back to an actual marked structural
+boundary:
+- UHB's own `\d` marker (already captured as verse 0 above) directly gives the ~64 split cases —
+  ground truth from the source text's own markup.
+- BHSA's own **clause segmentation** reliably isolates the title as its own first clause for the
+  other ~52 (the merged case, e.g. Psalm 23: clause 1 = "מזמור לדוד", clause 2 = "יהוה רעי" —
+  genuine ETCBC syntactic annotation, verified directly against a local BHSA checkout for all 52,
+  not an inference from surrounding text; BHSA has no *feature* literally named "superscription" —
+  confirmed by direct search — but its clause boundaries capture the same distinction structurally).
+  The exact Strong's sequence for each of these 52 clauses was extracted once (BHSA word-node ids
+  match `resources/occurrences/hbo.db`'s own `node` column exactly, confirmed directly) and
+  committed as `spine/psalm_superscription_clauses.tsv` — a static resource, not re-derived at
+  build time (the local BHSA text-fabric checkout is a heavy, occasional dependency, same
+  reasoning as `bhsa-macula-bridge.db`). One genuine BHSA→Strong's crosswalk gap was found and
+  patched during extraction (the "choirmaster/director" lexeme has zero Strong's mapping anywhere
+  in `hbo.db`; cross-verified as H5329 via UHB's own already-reliable verse=0 data elsewhere).
+- BSB-publishing/bsb-data-output's `headings.jsonl` `level:"d"` entries confirm WHICH psalms have
+  a title at all (all 116, cross-checked against both sources above).
 
-Verified: 115/116 titled psalms get at least one token flagged; the one miss (Psalm 72, a
-standalone one-word "of Solomon" attribution) is a genuinely rare case with no recurring
-vocabulary to key off — left unflagged rather than guessed, since under-flagging (leaves a token
-as ordinary content) is a much safer failure mode here than over-flagging (steals a real content
-token's alignment).
+Verified: 116/116 titled psalms get at least one token flagged, on both this db and
+`macula/lexeme-spine.db` (which reuses the same two sources via `all_chapter_vocab` — see that
+file's own build script). A chapter with no ground truth from either source is left unflagged
+rather than guessed.
 
 ## Out of scope
 

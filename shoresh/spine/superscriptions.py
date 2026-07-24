@@ -1,28 +1,37 @@
 """Psalm superscription detection — marks which spine.db tokens belong to a Psalm's title
 (e.g. "A Psalm of David") rather than its actual body content.
 
-Two already-available sources combine to make this both accurate and cheap — neither alone is
-enough:
+Two trustworthy sources combine to cover all 116 titled psalms, with NO frequency-based or
+otherwise-guessed heuristic anywhere in this module — every flag traces back to an actual marked
+structural boundary, not an inference:
 
-1. UHB's own USFM `\\d` marker (parsed by parse.py into spine.db's verse=0) already isolates the
-   title for the ~64 psalms where Masoretic tradition gives it a separate verse (e.g. Psalm 3:
-   "A Psalm of David, when he fled..." is verse 0; "LORD, how many are my foes" is verse 1). But
-   it only covers about half of titled psalms.
-2. BSB-publishing/bsb-data-output's `headings.jsonl` `level:"d"` entries are a purpose-built,
-   versification-independent superscription tag (confirmed: covers both the UHB-split case AND
-   the merged case, e.g. Psalm 23, where UHB's own verse 1 contains BOTH the title and "The LORD
-   is my shepherd" with no verse 0 at all — see internal-docs/gbt-alignment-handover.md). This
-   tells us WHICH psalms have a title, but not where it ends within a merged verse 1.
+1. UHB's own USFM `\\d` marker (parsed by parse.py into spine.db's verse=0) isolates the title for
+   the ~64 psalms where Masoretic tradition gives it a separate verse (e.g. Psalm 3: "A Psalm of
+   David, when he fled..." is verse 0; "LORD, how many are my foes" is verse 1). Ground truth,
+   directly from the source text's own markup.
+2. For the ~52 psalms Masoretic tradition merges into verse 1 (e.g. Psalm 23), BHSA's own CLAUSE
+   segmentation reliably isolates the title as its own first clause — verified directly against
+   the local BHSA text-fabric checkout for all 52 (e.g. Psalm 23:1 splits into clause "מזמור לדוד"
+   + clause "יהוה רעי" + clause "לא אחסר"; Psalm 72:1's single-word title "לשלמה" is its own
+   clause too). This is genuine ETCBC syntactic annotation, not a "superscription" *feature* (none
+   exists — confirmed by direct search) and not an inference from surrounding text. The exact
+   Strong's sequence for each of the 52 clauses was extracted once via BHSA + resources/
+   occurrences/hbo.db (BHSA's own word-node ids, confirmed to match hbo.db's `node` column
+   exactly) and committed as psalm_superscription_clauses.tsv — a static resource, not something
+   re-derived at build time (the local BHSA text-fabric checkout is a heavy, occasional dependency
+   unsuited to routine builds, same reasoning as bhsa-macula-bridge.db).
 
-Combined: for a titled psalm with no verse=0, the title's own vocabulary — built empirically from
-the already-known verse=0 tokens of OTHER psalms, not hand-transcribed Hebrew — lets us find the
-leading run of verse=1 tokens that belong to the title without guessing at spelling.
+BSB-publishing/bsb-data-output's `headings.jsonl` `level:"d"` entries still do one job here: they
+say WHICH psalms have a title at all (confirming both sources above cover all 116, and catching
+the rare edge case neither source would reveal alone).
 
   python -m spine.superscriptions      # standalone check: prints coverage counts, no db writes
 """
 from __future__ import annotations
 
+import csv
 import json
+import re
 import sys
 import urllib.request
 from pathlib import Path
@@ -36,6 +45,11 @@ HERE = Path(__file__).resolve().parent
 HEADINGS_COMMIT = "90bab7c30aff44693f059be5cfd5813d66bba8a7"
 HEADINGS_URL = "https://raw.githubusercontent.com/BSB-publishing/bsb-data-output/{commit}/base/headings.jsonl"
 HEADINGS_PATH = HERE / "data" / "bsb-headings.jsonl"
+
+# Committed resource (NOT gitignored/fetched) — see this module's docstring for how it was built.
+CLAUSE_VOCAB_PATH = HERE / "psalm_superscription_clauses.tsv"
+
+_STRONG_DIGITS = re.compile(r"\d+")
 
 
 def fetch_headings(commit: str | None = None) -> Path:
@@ -70,25 +84,77 @@ def psalms_with_superscription(headings_path: Path | None = None) -> set[int]:
     return chapters
 
 
-# Minimum number of DISTINCT psalms a Strong's number must appear in (at verse==0) to count as
-# genuine superscription vocabulary, not an incidental word from a longer narrative-style title
-# (e.g. Psalm 18's "...Of David the servant of the LORD, who sang to the LORD..."). Verified: with
-# this threshold, "the LORD" (H3068, appears in only 4 titles) is correctly excluded — it would
-# otherwise false-positive-match the start of Psalm 23's real content ("The LORD is my shepherd").
-# Every formulaic term (מזמור/לדוד/למנצח/משכיל/נגינות/לאסף/לבני קרח/...) clears this easily (5-50
-# psalms); one-off narrative words from the handful of longer historical titles don't.
-MIN_TITLE_CHAPTERS = 5
+def load_clause_vocab(path: Path | None = None) -> dict[int, set[int]]:
+    """{chapter: {strong, ...}} from the committed BHSA-clause-derived resource — the exact,
+    non-blank Strong's numbers of each of the 52 merged-title psalms' superscription clause.
+    Bound-morpheme prefix nodes (BHSA splits ל/ה/ב/ו into their own word nodes, same as MACULA)
+    are blank in the source TSV and skipped here — see classify_leading_run's own bound-morpheme
+    handling for how a *different* tokenization (MACULA's) passes through them instead."""
+    path = path or CLAUSE_VOCAB_PATH
+    out: dict[int, set[int]] = {}
+    if not path.exists():
+        return out
+    with path.open(encoding="utf-8") as fh:
+        for row in csv.DictReader(fh, delimiter="\t"):
+            strongs = set()
+            for s in row["strong_sequence"].split(","):
+                s = s.strip()
+                if s:
+                    m = _STRONG_DIGITS.search(s)
+                    if m:
+                        strongs.add(int(m.group()))
+            if strongs:
+                out[int(row["chapter"])] = strongs
+    return out
+
+
+def classify_leading_run(tokens: list[tuple[int, int | None, bool]], vocab: set[int]) -> set[int]:
+    """Core algorithm, shared across producers with different tokenizations (spine.db, MACULA's
+    finer sub-word tokens — the two don't share an `idx` scheme, so this operates on whichever
+    (idx, strong, is_bound_morpheme) triples a caller hands it for ONE verse, not on a specific
+    schema).
+
+    `tokens`: [(idx, strong, is_bound_morpheme), ...] for a single verse (any order). `vocab` is
+    the EXACT, trustworthy Strong's set for that specific chapter's title (from verse=0 or
+    load_clause_vocab — never a cross-chapter frequency-filtered guess).
+    `is_bound_morpheme`: True for a token that's a grammatical prefix/suffix split into its own
+    row rather than fused onto its content word (MACULA's and BHSA's tokenization does this — a
+    preposition like ל/"of" gets its own row with no lexical Strong's of its own; spine.db fuses
+    these, so its caller always passes False). Such a token doesn't need to be in `vocab` itself —
+    it's transparently included as long as the very next token is.
+
+    Returns the set of idx values in the title's leading run: walk from the lowest idx while
+    strong is in `vocab` (or the token is a bound morpheme immediately followed by one that is) —
+    stop at the first token that's neither."""
+    ordered = sorted(tokens, key=lambda t: t[0])
+    flagged: set[int] = set()
+    for i, (idx, strong, bound) in enumerate(ordered):
+        if strong in vocab:
+            flagged.add(idx)
+        elif bound and i + 1 < len(ordered) and ordered[i + 1][1] in vocab:
+            flagged.add(idx)
+        else:
+            break
+    return flagged
+
+
+def all_chapter_vocab(spine_db_path: Path) -> dict[int, set[int]]:
+    """{chapter: {strong, ...}} covering all ~116 titled psalms — spine.db's own verse=0 ground
+    truth (vocab_from_spine_db) for the ~64 UHB splits, merged with load_clause_vocab's BHSA-clause
+    ground truth for the ~52 merged-into-verse-1 psalms neither source alone covers."""
+    merged = dict(load_clause_vocab())
+    merged.update(vocab_from_spine_db(spine_db_path))  # verse=0 takes priority where both exist
+    return merged
 
 
 def mark_superscriptions(records: list) -> None:
     """Mutate `records` (spine.parse.SpineWord instances) in place, setting `is_superscription`
     for Psalm title tokens. No-ops (no network fetch) if `records` has no PSA words. Two cases per
     titled chapter:
-    - verse==0 already present (UHB's own `\\d` split, e.g. Psalm 3): mark all of it.
+    - verse==0 already present (UHB's own `\\d` split, e.g. Psalm 3): mark all of it directly.
     - no verse==0 (title merged into verse 1, e.g. Psalm 23): mark the leading run of verse==1
-      tokens whose Strong's number is in the vocabulary observed across MIN_TITLE_CHAPTERS+ other
-      psalms' verse==0 — stop at the first token outside that vocabulary (the start of real
-      content)."""
+      tokens whose Strong's number is in that SPECIFIC chapter's BHSA-clause-derived exact
+      vocabulary (load_clause_vocab) — never a cross-chapter guess."""
     psa = [w for w in records if w.book == "PSA"]
     if not psa:
         return
@@ -98,11 +164,7 @@ def mark_superscriptions(records: list) -> None:
     if not titled:
         return
 
-    chapters_by_strong: dict[int, set[int]] = {}
-    for w in psa:
-        if w.verse == 0 and w.strong is not None:
-            chapters_by_strong.setdefault(w.strong, set()).add(w.chapter)
-    vocab = {s for s, chapters in chapters_by_strong.items() if len(chapters) >= MIN_TITLE_CHAPTERS}
+    clause_vocab = load_clause_vocab()
     has_verse0 = {w.chapter for w in psa if w.verse == 0}
 
     for w in psa:
@@ -115,23 +177,36 @@ def mark_superscriptions(records: list) -> None:
             verse1_by_chapter.setdefault(w.chapter, []).append(w)
 
     for chapter, words in verse1_by_chapter.items():
-        ordered = sorted(words, key=lambda w: w.index)
-        start = 0
-        # Tolerate exactly one unrecognized leading token if immediately followed by a
-        # recognized one — a rare genre-designation word before a common author attribution
-        # (e.g. Psalm 17/86 "A Prayer of David": תפלה/"prayer" appears in only 3 titles, below
-        # MIN_TITLE_CHAPTERS, but the לדוד/"of David" right after it clears it easily).
-        if ordered and ordered[0].strong not in vocab and len(ordered) > 1 and ordered[1].strong in vocab:
-            ordered[0].is_superscription = True
-            start = 1
-        for w in ordered[start:]:
-            if w.strong in vocab:
-                w.is_superscription = True
-            else:
-                break
+        vocab = clause_vocab.get(chapter)
+        if not vocab:
+            continue  # no ground truth for this chapter — leave unflagged, don't guess
+        by_idx = {w.index: w for w in words}
+        flagged = classify_leading_run([(w.index, w.strong, False) for w in words], vocab)
+        for idx in flagged:
+            by_idx[idx].is_superscription = True
+
+
+def vocab_from_spine_db(spine_db_path: Path) -> dict[int, set[int]]:
+    """{chapter: {strong, ...}} — the EXACT Strong's set for every psalm where spine.db's
+    superscription flag came from UHB's own verse=0 marker (built by spine.parse, which runs
+    before this), i.e. ground truth, not inferred."""
+    import sqlite3
+    if not spine_db_path.exists():
+        return {}
+    con = sqlite3.connect(f"file:{spine_db_path}?mode=ro", uri=True)
+    reliable_by_chapter: dict[int, set[int]] = {}
+    for chapter, strong in con.execute(
+        "SELECT chapter, strong FROM spine_words WHERE book='PSA' AND verse=0 AND strong IS NOT NULL"
+    ):
+        reliable_by_chapter.setdefault(chapter, set()).add(strong)
+    con.close()
+    return reliable_by_chapter
 
 
 if __name__ == "__main__":
     fetch_headings()
     titled = psalms_with_superscription()
+    clause_vocab = load_clause_vocab()
     print(f"[spine] {len(titled)} psalms with a genuine title heading", file=sys.stderr)
+    print(f"[spine] {len(clause_vocab)} covered by the BHSA-clause resource (merged-verse case)",
+          file=sys.stderr)
