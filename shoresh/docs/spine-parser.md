@@ -73,6 +73,31 @@ conjunction, DOM) as noise.
   the spine verse via the `019` versification map (~4% of verses differ;
   e.g. Genesis 32).
 
+## `is_superscription` (Psalms only)
+
+`spine_words.is_superscription` flags Hebrew tokens belonging to a Psalm's title ("A Psalm of
+David") rather than its actual body content — requested by the lexeme-aligner team, who were
+force-aligning superscription vocabulary onto real verse-1 target words for psalms where the
+title has no separate verse (this parser only isolates it into verse 0 for ~64 of ~116 titled
+psalms; the rest, e.g. Psalm 23, merge title + content into verse 1).
+
+Built in `spine/superscriptions.py`, combining two already-available sources (no new Hebrew
+vocabulary hand-transcribed):
+- UHB's own `\d` marker (already captured as verse 0 above) directly gives the ~64 split cases.
+- BSB-publishing/bsb-data-output's `headings.jsonl` `level:"d"` entries (pinned fetch, independent
+  of Hebrew versification) say WHICH psalms have a title at all — including the merged cases UHB
+  doesn't separate. For those, the boundary within verse 1 is found via a vocabulary built
+  empirically from the ~64 known verse-0 tokens (Strong's numbers appearing in ≥5 distinct psalm
+  titles — `MIN_TITLE_CHAPTERS` — filters out incidental words from a few longer narrative-style
+  titles, e.g. "the LORD" in Psalm 18's title, which would otherwise false-positive-match the start
+  of Psalm 23's real content, "The LORD is my shepherd").
+
+Verified: 115/116 titled psalms get at least one token flagged; the one miss (Psalm 72, a
+standalone one-word "of Solomon" attribution) is a genuinely rare case with no recurring
+vocabulary to key off — left unflagged rather than guessed, since under-flagging (leaves a token
+as ordinary content) is a much safer failure mode here than over-flagging (steals a real content
+token's alignment).
+
 ## Out of scope
 
 - The rigorous per-node BHSA-version map (only needed for exact

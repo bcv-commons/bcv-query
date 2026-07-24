@@ -29,6 +29,7 @@ from spine.common import (
     content_strong_field, head_pos, is_content, load_equivalences, morph_body,
     norm_strong,
 )
+from spine.superscriptions import mark_superscriptions
 
 HERE = Path(__file__).resolve().parent
 DB_PATH = HERE / "spine.db"
@@ -49,6 +50,7 @@ class SpineWord:
     lemma: str
     morph: str
     is_content: bool
+    is_superscription: bool = False   # Psalm title token — see spine.superscriptions
 
 
 def fetch_book(code: str, lang: str) -> str:
@@ -116,15 +118,16 @@ def write_sqlite(records: list[SpineWord], db_path: Path) -> None:
             book TEXT NOT NULL, chapter INTEGER NOT NULL, verse INTEGER NOT NULL,
             idx INTEGER NOT NULL, surface TEXT NOT NULL, strong INTEGER,
             lemma TEXT, morph TEXT, is_content INTEGER NOT NULL,
+            is_superscription INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY (book, chapter, verse, idx)
         );
         CREATE INDEX ix_spine_strong ON spine_words(strong);
         CREATE TABLE spine_meta (key TEXT PRIMARY KEY, value TEXT);
     """)
     db.executemany(
-        "INSERT INTO spine_words VALUES (?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO spine_words VALUES (?,?,?,?,?,?,?,?,?,?)",
         [(w.book, w.chapter, w.verse, w.index, w.surface, w.strong, w.lemma,
-          w.morph, int(w.is_content)) for w in records],
+          w.morph, int(w.is_content), int(w.is_superscription)) for w in records],
     )
     db.executemany("INSERT INTO spine_meta VALUES (?,?)", [
         ("uhb_tag", UHB_TAG), ("ugnt_tag", UGNT_TAG), ("words", str(len(records))),
@@ -159,6 +162,11 @@ def main() -> None:
         warnings.extend(check_fidelity(words, code, lang))
         content = sum(1 for w in words if w.is_content)
         print(f"  {code} ({lang}): {len(words)} words, {content} content", file=sys.stderr)
+
+    mark_superscriptions(records)
+    n_super = sum(1 for w in records if w.is_superscription)
+    if n_super:
+        print(f"  {n_super} superscription tokens flagged (Psalms)", file=sys.stderr)
 
     write_sqlite(records, args.out)
     print(f"\n{len(records)} words -> {args.out}")
