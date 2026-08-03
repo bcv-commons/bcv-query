@@ -51,6 +51,12 @@ _GLOSSES_LLM_DIR = resource_path("llm_strongs_glosses")
 # translation actually renders each original word — unioned into the reverse
 # index above the LLM glosses. See scripts/build_aligned_all.py.
 _ALIGNED_DIR = resource_path("aligned_lex")
+# Automated complement (~924 languages vs. the ~10 manually-aligned above) — mined from
+# bcv-commons/lexeme-alignments (the aligner's own published output; see
+# scripts/build_aligned_lex_hf.py). Only consulted when a language has no manual file: the manual
+# set is the higher-trust source where both exist, never overwritten or merged with this one — same
+# provenance-separation the aligner's own dataset uses (method/base_text tags, additive union).
+_ALIGNED_HF_DIR = resource_path("aligned_lex_hf")
 # Drop a (surface, code) pair below this fraction of the surface's alignments —
 # the long tail of 1-off alignment artifacts (also kills high-frequency function
 # surfaces like "de", whose every spurious code has tiny share).
@@ -296,6 +302,8 @@ def _reverse_gloss(lang: str = "en") -> dict[str, list[tuple[str, int]]]:
     # languages whose gloss coverage is thin — revisit en once retrieval
     # resource-diversity is addressed.
     aligned_path = _ALIGNED_DIR / f"{lang}.tsv"
+    if not aligned_path.exists():
+        aligned_path = _ALIGNED_HF_DIR / f"{lang}.tsv"
     if lang != "eng" and aligned_path.exists():
         with aligned_path.open(encoding="utf-8") as fh:
             si = ci = sh = None  # surface / strong / share column indices

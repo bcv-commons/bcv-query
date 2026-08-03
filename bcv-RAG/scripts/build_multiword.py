@@ -20,8 +20,13 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-OUT = HERE.parent / "resources" / "multiword_expressions"
-PRIOR = HERE.parent / "resources" / "prior_pack" / "prior_pack.parquet"
+sys.path.insert(0, str(HERE))
+from resource_paths import resource_path  # noqa: E402 — Docker-safe; see build_aligned_lex_hf.py's
+# comment for why HERE.parent/"resources" doesn't survive a Docker image (currently latent here —
+# not run in any Dockerfile — but fixed for consistency since it's the same pattern).
+
+OUT = resource_path("multiword_expressions")
+PRIOR = resource_path("prior_pack") / "prior_pack.parquet"
 
 MIN_COUNT = 2         # a (surface→lexeme) pair needs this many alignments
 MIN_SHARE = 0.10      # …and this P(lexeme|surface) to be a real component

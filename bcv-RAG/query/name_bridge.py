@@ -23,13 +23,19 @@ from resource_paths import resource_path
 from lang import canon
 
 _ALIGNED_DIR = resource_path("aligned_lex")
+# Automated complement (~924 languages) — see concept_expand.py's _ALIGNED_HF_DIR for the same
+# manual-first, HF-fallback rationale.
+_ALIGNED_HF_DIR = resource_path("aligned_lex_hf")
 
 
 @lru_cache(maxsize=16)
 def _surface_to_strong(lang: str) -> dict[str, str]:
-    """Dominant Strong's per surface form, from aligned_lex/<lang>.tsv
-    (columns: surface, strong, count, share). {} if the file is absent."""
+    """Dominant Strong's per surface form, from aligned_lex/<lang>.tsv (or aligned_lex_hf/<lang>.tsv
+    if no manual file exists for this language) — columns: surface, strong, count, share, .... {} if
+    neither file is present."""
     p = _ALIGNED_DIR / f"{canon(lang)}.tsv"
+    if not p.exists():
+        p = _ALIGNED_HF_DIR / f"{canon(lang)}.tsv"
     if not p.exists():
         return {}
     best: dict[str, tuple[str, float]] = {}

@@ -34,6 +34,16 @@ COPY bcv-RAG/lang.py           /app/lang.py
 # via resource_paths.resource_path() (BCV_RESOURCES_DIR set below).
 COPY resources /app/resources
 
+# aligned_lex_hf: bcv-commons/lexeme-alignments (HF, CC0-1.0), ~924 languages as of 2026-07 —
+# fetched fresh at every image build (too large to commit — ~2GB at the manual aligned_lex/'s
+# per-language rate — so this is the only place it can come from; matches shoresh/Dockerfile.base's
+# fetch-at-build-time pattern for anything too large/live to check in). huggingface_hub/pyarrow
+# aren't needed at runtime past this step, but kept installed rather than multi-stage-stripped —
+# not worth the complexity for two packages.
+COPY bcv-RAG/scripts/build_aligned_lex_hf.py /app/scripts/build_aligned_lex_hf.py
+RUN pip install --no-cache-dir huggingface_hub pyarrow \
+ && python3 /app/scripts/build_aligned_lex_hf.py
+
 ENV HOME=/root
 ENV PYTHONUNBUFFERED=1
 ENV INDEX_DB_PATH=/data/index.db

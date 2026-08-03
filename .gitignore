@@ -45,6 +45,11 @@ claude_desktop_config.json
 # === bcv-RAG: generated data (re-derivable) ===
 bcv-RAG/examples/
 bcv-RAG/ingest/_staging/
+# aligned_lex_hf: bcv-commons/lexeme-alignments (HF) ingest, ~924 languages (scripts/build_aligned_lex_hf.py)
+# — too large to commit (~2GB at the existing aligned_lex/ per-language rate); re-derivable, pinned
+# to whatever's published on HF at ingest time. Contrast with resources/aligned_lex/ (~10 languages,
+# Clear-Bible-manual-sourced, small enough to commit, kept tracked).
+resources/aligned_lex_hf/
 # languages.db builder: downloaded source cache + the built .db (re-derivable; .tsv stay tracked)
 resources/languages/_raw/
 resources/languages/*.db

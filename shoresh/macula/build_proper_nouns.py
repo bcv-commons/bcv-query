@@ -29,6 +29,11 @@ from macula.build_semantic_neighbors import proper_strongs  # noqa: E402
 
 GLOSS = ROOT / "resources" / "strongs_gloss.tsv"
 ALIGNED_DIR = ROOT / "resources" / "aligned_lex"
+# aligned_lex_hf: bcv-commons/lexeme-alignments (HF), ~924 languages — automated complement to the
+# manual ALIGNED_DIR (~10 languages). Same "never silently merge" rule as bcv-RAG's concept_expand.py/
+# name_bridge.py: a language present in ALIGNED_DIR (manual, higher trust) is never mixed with its
+# aligned_lex_hf counterpart — only languages absent from ALIGNED_DIR fall back to it.
+ALIGNED_HF_DIR = ROOT / "resources" / "aligned_lex_hf"
 TIPNR_DIR = ROOT / "bcv-RAG" / "ingest" / "_staging" / "tipnr"
 TIPNR_FILES = {"person": "TIPNR_people.json", "place": "TIPNR_places.json", "other": "TIPNR_other.json"}
 OUT_DIR = ROOT / "resources" / "proper_nouns"
@@ -88,10 +93,15 @@ def _load_glosses(proper):
 
 
 def _load_aligned(proper):
-    """{strong: {lang: [(surface, share, count)]}} from aligned_lex/<iso>.tsv, names only, thresholded."""
+    """{strong: {lang: [(surface, share, count)]}} from aligned_lex/<iso>.tsv (manual, preferred) with
+    aligned_lex_hf/<iso>.tsv (automated) filling in languages the manual set doesn't cover — names only,
+    thresholded."""
+    manual = {p.stem: p for p in ALIGNED_DIR.glob("*.tsv")}
+    hf = {p.stem: p for p in (ALIGNED_HF_DIR.glob("*.tsv") if ALIGNED_HF_DIR.exists() else [])}
+    paths = {**hf, **manual}   # manual wins on lang collision
+
     by: dict = collections.defaultdict(lambda: collections.defaultdict(list))
-    for path in sorted(ALIGNED_DIR.glob("*.tsv")):
-        lang = path.stem
+    for lang, path in sorted(paths.items()):
         cand: dict = collections.defaultdict(list)
         with path.open(encoding="utf-8") as fh:
             for line in fh:
