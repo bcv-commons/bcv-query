@@ -202,6 +202,67 @@ def _fetch_content_file(repo: str, book_code: str, lang_dir: str) -> list[dict] 
     return None
 
 
+# ---------- Flat (non-book-anchored) repos ----------
+#
+# Most Aquifer repos shard content one file per canonical book (`NN.content.json`,
+# NN = 01-66), which `_fetch_content_file` above assumes. A few repos are organized
+# differently — AquiferOpenBibleDictionary shards alphabetically (`001..026`, one
+# per letter-group) and DictionaryBibleThemes shards one file per theme
+# (`0000..0999`) — neither maps to a book number, so book-anchored fetching 404s
+# on every request. These repos need every `<lang>/json/*.content.json` file
+# listed directly (GitHub contents API) and fetched by its own path rather than
+# a number we derive from a book code.
+
+def _list_content_files(repo: str, lang_dir: str) -> list[str]:
+    """Every `*.content.json` path under `<lang_dir>/json/` in one repo (empty if absent)."""
+    r = httpx.get(f"{GITHUB_API}/repos/{ORG}/{repo}/contents/{lang_dir}/json",
+                  headers=_gh_headers(), timeout=TIMEOUT)
+    if r.status_code != 200:
+        return []
+    try:
+        data = r.json()
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(data, list):
+        return []
+    return [e["path"] for e in data if e.get("type") == "file" and e.get("name", "").endswith(".content.json")]
+
+
+def _fetch_content_file_by_path(repo: str, path: str) -> list[dict] | None:
+    for branch in BRANCH_CANDIDATES:
+        try:
+            r = httpx.get(f"{RAW_BASE}/{ORG}/{repo}/{branch}/{path}", timeout=TIMEOUT, follow_redirects=True)
+        except httpx.HTTPError:
+            continue
+        if r.status_code == 200:
+            try:
+                data = r.json()
+                return data if isinstance(data, list) else None
+            except json.JSONDecodeError:
+                return None
+    return None
+
+
+def ingest_flat_repo(repo: str, staging: Path, *, lang: str = "en") -> dict:
+    """Stage every article in one flat (non-book-anchored) repo, for `lang`."""
+    lang_dir = _AQUIFER_LANG.get(lang, lang)
+    paths = _list_content_files(repo, lang_dir)
+    print(f"  {repo}/{lang_dir}: {len(paths)} content files", file=sys.stderr)
+    if not paths:
+        return {"repo": repo, "lang": lang, "files": 0, "articles": 0}
+
+    articles: list[dict] = []
+    with ThreadPoolExecutor(max_workers=PARALLEL_FETCHERS) as pool:
+        futures = [pool.submit(_fetch_content_file_by_path, repo, p) for p in paths]
+        for fut in as_completed(futures):
+            data = fut.result()
+            if data:
+                articles.extend(data)
+
+    staged = _stage_articles(staging, repo, articles, lang)
+    return {"repo": repo, "lang": lang, "files": len(paths), "articles": staged}
+
+
 # ---------- HTML → plain text ----------
 
 class _TextExtractor(HTMLParser):
@@ -472,10 +533,24 @@ def main() -> int:
                     help="include the default-skipped Aquifer repos (Door43 mirrors + alternative full-Bible translations)")
     ap.add_argument("--staging", type=Path,
                     default=Path(__file__).resolve().parent / "_staging" / "aquifer")
+    ap.add_argument("--flat-repos", action="append",
+                    help="fetch these repos as a flat file list instead of per-book "
+                         "(repeatable; for repos not sharded by canonical book number, "
+                         "e.g. AquiferOpenBibleDictionary, DictionaryBibleThemes)")
     args = ap.parse_args()
 
     from indexer.env import load_env
     load_env()
+
+    if args.flat_repos:
+        results = [ingest_flat_repo(r, args.staging, lang=args.lang) for r in args.flat_repos]
+        print(json.dumps({
+            "lang": args.lang,
+            "staged": results,
+            "staging_dir": str(args.staging / args.lang),
+            "build_with": f"python -m indexer.build --source {args.staging}",
+        }, indent=2))
+        return 0
 
     books = [b.upper() for b in args.book] if args.book else \
         sorted(BOOK_NUMBERS, key=BOOK_NUMBERS.get)
