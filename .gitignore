@@ -140,3 +140,7 @@ resources/prior_pack/*.parquet
 # (bcv-commons); manifest/README stay committed, same pattern as prior_pack above.
 resources/proper_nouns/*.tsv
 shoresh/versification/data/
+# bdb_roots: cached pinned fetch of OpenScriptures/HebrewLexicon's LexicalIndex.xml (re-derivable via
+# shoresh/macula/build_bdb_roots.py); the derived resources/bdb_roots/root_groups.tsv stays committed.
+shoresh/macula/data/LexicalIndex.xml
+shoresh/macula/data/hebrew_synsets.xml

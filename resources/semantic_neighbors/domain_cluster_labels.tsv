@@ -1,0 +1,477 @@
+# LLM-proposed labels for domain_clusters.tsv's numbered clusters (claude-haiku-4-5-20251001). Labels are
+# a convenience NAME for a cluster formed by clean signals — the LLM did not decide
+# membership. See label_domain_clusters.py.
+cluster_id	label	size	sample_glosses
+119	Rejoicing and Exultation	33	rejoice, rejoicing, rejoicing, shout, shout, neighing, rejoicing, laughing
+51	Gathering and Assembly	32	gather, ingathering, gather, storehouse, gathering, collecting, collection, rabble
+322	Vision and Prophecy	31	see, seer, vision, vision, vision, vision, dream, be healthy
+92	Geographical Features	29	channel, refrain, mire, swamp, plain, Valley (of Jericho), Valley, coast
+158	Freedom and Liberty	29	river, produce, mother-of-pearl, thistle, south, liberty, swallow, be free
+18	Animals and Strength	28	strength, meadow, ram, deer, doe, arches, doe, oak
+42	Measurement and Garments	28	cubit, tribute, go, go, toll, span, extend, handbreadth
+52	Baking and Bread	28	bake, swell, dough, boil, cooked, bun, knead, food
+88	Fire and Burning	28	carbuncle, burn, fire, kindle, burn, burning, burn, burning
+94	Seeking and Digging	28	meet, seek, request, seek, search, mole, search, search
+330	Deception and Falsehood	28	deceptive, mock, mockery, smear, lie, lie, deceive, lie
+82	Hand and Arm	27	arm, urge, finger, thumb, footstool, arm, palm, hand
+85	Shame and Contempt	27	despise, contempt, contempt, be ashamed, shame, shame, shame, be ashamed
+95	Livestock and Herds	27	herdsman, cattle, enquire, cattle, morning, seeking, scourging, hoe
+142	Body and Sustenance	27	good news, bear tidings, flesh, sinew, single, blood, flatbread, wine
+14	Love and Desire	26	be willing, papyrus, desire, love, lover, beloved, love, consent
+114	Goats and Grains	26	bank, kid, kid, wheat, shear, rye, tear off, lentil
+155	Wisdom and Knowledge	26	understand, understanding, knowledge, knowledge, knowledge, be wise, wise, wisdom
+267	Garments and Coverings	26	clothing, act treacherously, treachery, treachery, treacherous, cover, covering, covering
+279	Birds and Melancholy	26	languish, dismay, sorrow, fly, kite, hawk, stork, ostrich
+282	Dwelling and Settlement	26	sojourn, whelp, whelp, sojourner, Geruth, camp, vault, dwell
+48	Anger and Jealousy	25	be angry, heron, face, be indignant, indignation, enrage, rage, vexed
+91	Breaking and Tearing	25	repair, breach, breach, break up, bekah, cut down, burst, neck
+263	Falling and Ruin	25	slope, slope, Slopes (of Pisgah), cast, captivity, cast a lot, axe, stumble
+46	Vocal Expression	24	sigh, sighing, groan, groaning, gecko, cry out, outcry, wail
+93	Musical Instruments and Vessels	24	flask, be luxuriant, flute, bottle, trumpet, blow, jar, ruby
+181	Concealment and Hiding	24	hide, hide, hide, wrap, covering, secrecy, hiding-place, treasure
+53	Darkness	23	late, gloom, darkness, darkness, darkness, darken, darkness, obscure
+461	Pouring and Emptying	23	void, become vain, vanity, melting, twist, pour, casting, casting
+472	Strength and Authority	23	might, might, lord, queen, man, mighty, lady, strengthen
+3	Might and Grandeur	22	mighty, mighty, fly, wing, pinion, great, be glorious, robe
+10	Rulership and Dominion	22	king, dominion, rule, rule, leader, ruler, eunuch, lord
+12	Land and Territory	22	land, coastland, earth, land, place, judge, judgment, judge
+29	Fear and Anxiety	22	terror, dismay, trouble, terror, be anxious, anxiety, trembling, horror
+144	Striking and Crushing	22	threshing floor, beat, tread, threshing, ibex, thin, curtain, crush
+204	Compassion and Petition	22	belly, ask, petition, beauty, favor, gracious, entreat, favor
+209	Desire and Longing	22	desire, desire, desire, delight, desire, desire, ring, spoke
+321	Encounter and Coldness	22	bowl, target, accident, rafter, cool, fall on, chance, meet
+32	Food and Eating	21	food, eat, food, food, swallow up, swallowing, eat, food
+43	Trust and Hope	21	plumbline, trust, security, trust, trust, security, seek refuge, waiting
+115	Contempt and Cursing	21	curse, despise, contempt, reviling, taunt, blaspheme, taunt, autumn
+121	Desolation and Ruin	21	breast, dry, dry, drought, desolation, dry ground, drought, wormwood
+311	Restraint and Control	21	chief, joint, reserve, hold in, withhold, grow dim, easing, restrain
+313	Oppression and Crushing	21	trample, crush, oppress, oppress, oppression, subjugation, oppression, trampling
+317	Distress and Confinement	21	enemy, be disheartened, purse, constraint, distress, pillar, distress, siege
+20	Light and Luminosity	20	light, light, flame, light, Urim, use lightning, shine, splendor
+39	Disability and Impairment	20	silence, mute, sheaf, stack, deaf, blindness, blind, blind
+54	Dangerous Animals	20	wild beast, falcon, viper, wreath, Leviathan, wreath, threshold, serpent
+65	Marriage and Family	20	betroth, woman, daughter, virgin, virginity, mother-in-law, relative, son-in-law
+69	Wine and Intoxication	20	cluster, unripe grape, vileness, tendril, shake, oppression, salted, leaven
+87	Mourning and Lamentation	20	mourn, mourning, mourning, balsam, weep, bitterly, weeping, weeping
+105	Elevation and Exaltation	20	exult, high, height, high, haughtiness, height, lift, build
+156	Dissolution and Decay	20	put out, quench, melt, despairing, liquefy, despair, melt, decay
+163	Rest and Quiet	20	rest, repose, rest, be refreshed, disturb, moment, restful, be wide
+228	Beauty and Goodness	20	be pleasing, pleasant, goodness, be good, be beautiful, beautiful, pretty, precious
+287	Spreading and Bending	20	bend (down), perversion, spread, spreading, spreading-place, spread, stretch, turn aside
+296	Weights and Measures	20	berry, neck, cud, gerah, throat, drag, Plain (of Jericho), talent
+27	Hatred and Loathing	19	be hostile, enmity, stink, stench, foul weed, sour grapes, abhor, loathing
+41	Community and Body	19	people, back, back, back, nation, body, shut, body
+56	Movement and Possession	19	time, armlet, quiver, tread, drachma, elevation, honour, arrow
+149	Judgment and Contention	19	stir up, judge, judgment, judge, opponent, strife, contention, province
+178	Scattering and Breaking	19	scatter, scatter, Horite, dip, pitchfork, scattering wind, war-club, shattering
+221	Agriculture and Crafts	19	farmer, destroyed, silence, silence, plowing, sun, Potsherd (Gate), grind
+264	Writing and Recording	19	piece, letter, stylus, pine, write, write, writing, inscription
+292	Redemption and Rescue	19	redeem, redemption, deliverance, court, salvation, save, salvation, salvation
+305	Service and Ministry	19	maidservant, minister, priest, priesthood, work, message, work, deed
+354	Burden and Weight	19	compute, yoke, yoke, tribute, number, taskworker, burden, laden
+373	Mixed and Scattered Things	19	fodder, mix, stand, gnat, shoot, mixed drink, mix, mixture
+451	Death and Killing	19	die, kill, slaughter, Slaughter, die, death, death, sling
+0	Destruction and Loss	18	perish, destroy, destruction, something lost, destruction, destruction, destruction, devote
+1	Animals and Enclosures	18	crib, fatten, stall, pluck, stall, lion, lion, this
+31	Honor and Heaviness	18	cruel, cruel, cruel, honor, noble, honor, heaviness, heavy
+35	Trees and Wood	18	tree, reinforced, cedar, cedar, cypress, cypress, cistern, rush
+37	Idols and Images	18	idol, idol, liquid, horror, figure, idol, idol, shudder
+50	Binding and Constraint	18	chains, bond, bond, prisoner, prisoner, bind, injunction, injunction
+90	Plundering and Theft	18	plunder, plunder, plunder, plunder, robbery, violence, violence, steal
+148	Fullness and Satisfaction	18	sufficiency, breastpiece, fill, full, fullness, setting, fruit, setting
+153	Planning and Counsel	18	girdle, plan, plan, devise, account, artwork, explanation, invention
+187	Association and Joining	18	wound, unite, spell, fellow, companion, associate, spot, associate
+198	Compassion and Sickness	18	pity, be sick, be weak, sickness, spare, compassion, be gracious, sickness
+205	Consecration and Holiness	18	hook, trained, dedicate, dedication, devote, devoted thing, net, net
+212	Measures and Quantities	18	ephah, bath, waste, precipice, hin, pitch, aggitate, wine
+225	Fear and Trembling	18	terrible, dismay, terror, terrify, terror, confuse, tremble, trembling
+235	Toil and Weariness	18	evil, toil, weary, be weary, toil, weary, weariness, faint
+298	Fire and Heat	18	fire, foundation, coal, brimstone, heat, scorch, parched, flame
+301	Commerce and Trade	18	cut off, unjust-gain, sell, merchandise, acquaintance, sale, sale, merchandise
+310	Speech and Words	18	top, say, word, word, word, speak rashly, speak, decree
+335	Sending and Expulsion	18	drive out, produce, eviction, thrust, falling, thrust, divorce, pasture
+36	Beginning and Head	17	tame, teach, produce thousands, cattle, thousand, forehead, greave, head
+109	Elevated Objects and Forms	17	cup, Gibeath-(elohim), bud, mountain, flint, capital, flute, elevation
+126	Riding Animals and Chariots	17	camel, donkey, chariot, chariot, swallow, mare, colt, wild donkey
+129	Boundaries and Edges	17	border, border, border, twists, twisted, end, cleave, side
+140	Animals and Life	17	animal, Behemoth, Fish (Gate), fish, multiply, fisher, fishhook, fish
+183	Pledges and Evening	17	pledge, pledge, mast, sea, merchandise, west, pledge, lend
+239	Nakedness and Exposure	17	barefoot, nakedness, nakedness, Maareh, naked, be exposed, naked, uncover
+253	Remnants and Survival	17	advantage, peg, remain, remainder, abundance, advantage, lobe, advantage
+266	Aromatic and Cosmetic Substances	17	aloe, spice, frankincense, whiten, white, poplar, moon, brick
+297	Trembling and Movement	17	tremble, shake, shaking, castanets, wander, wandering, shake, sprinkle
+328	Companionship and Pasturing	17	force, arm, companion, pasture, pasturing, neighbor, neighbor, thought
+371	Maritime and Dissolution	17	fleet, fleet, garment, fold, embryo, solitary, pilot, mallow
+390	Growth and Flourishing	17	sprout, flee, spark, flower, shine, branch, sprout, flower
+436	Celestial Bodies and Atmosphere	17	hot, heat, heat, warm, pillar, month, moon, star
+466	Giving and Adornment	17	gift, give, burden, gift, gift, gift, temple servant, give
+11	Colors and Peoples	16	red, reddish, Edomite, red, greenish, Caphtorim, Moabite, Meunite
+17	Foolishness	16	fool(ish), foolish, folly, stupid, fool, Orion, stupidity, be stupid
+47	Suffering and Pain	16	lamentation, suffer, sorrow, pain, pain, pain, torment, hurt
+58	Textiles and Dyes	16	redden, hyssop, weave, shuttle, purple, purple, crimson, tooth
+78	Metals and Materials	16	tin, iron, gold, silver, bronze, bronze, bronze, dross
+113	Glory and Splendor	16	greatness, glory, glory, adornment, beauty, precious, be precious, preciousness
+137	Pursuit and Connection	16	seek, cleave, joint, cleaving, burn, inflammation, kind, kind
+164	Cessation and Weakness	16	cessation, reject, cease, world, rejected, tendril, leave, leave
+168	Blessing and Testimony	16	bless, blessed, happy, step, shine, brightness, cry out, perpetuity
+185	Twisted Fibers and Cords	16	band, Mahalab, thread, wrestling, weave, leafy, cord, neck
+208	Division and Portions	16	allotted, divide, portion, smooth, smooth, portion, flattery, division
+215	Wealth and Property	16	be ready, substance, mighty, hoard, wealth, strong, livestock, purchase
+260	Alteration and Exchange	16	destruction, change, pass, search, plot, double, change, knife
+336	Seals and Ornaments	16	cease, complete, signet, ornament, jewelry, seal, seal, ring
+342	Defilement and Uncleanness	16	defile, defilement, flow, discharge, pollute, profane, profaneness, profaneness
+438	Loud Sounds and Roaring	16	make noise, roar, crowd, sound, groan, roaring, groaning, roar
+462	Lowliness and Humiliation	16	subdue, footstool, be humble, bundle, bend, sink, lowly, bow
+67	Selection and Purity	15	explain, youth, chosen, choose, youth, pure, grain, cleanness
+72	Guarding and Watching	15	watch, defend, Guard, lookout, custody, charge, keep, watch
+122	Circular Objects and Waste	15	wheel, heap, wheel, wheel, head, bowl, turned, border
+135	Speech and Natural Features	15	because, bee, sanctuary, word, pestilence, pasture, cause, raft
+186	Conflict and Arrangement	15	embrace, folding, intestine, fight, war, battle, plan, rank
+231	Procreation and Youth	15	son, conceive, pregnant, conception, child, conceive, beget, youth
+255	Weapons and Protection	15	Beth-gilgal, Garden (of Uzza), garden, spear, sword, helmet, javelin, deliver
+294	Oil and Prosperity	15	flask, strong, prosper, fat, ashes, beaten, expanded, anoint
+309	Elevation and Height	15	lifting, ascent, thought, go out, cost, ascend, Most High, ascend
+320	Cutting and Covering	15	chop, hew, curtain, be ill, hewing, portico, covering, covering
+346	Signs and Wonders	15	mark, sign, look, standard, phylacteries, wonder, wonder, Banner
+381	Firstborn and Offerings	15	firstborn, firstfruit, birthright, early fig, firstborn, be, young camel, young camel
+387	Opening and Access	15	key, opening, start, open, open, open, seeing, opening
+418	Division and Interior	15	Gad, quiet, bosom, divide, middle, half, arrow, half
+427	Purity and Cleansing	15	pure, clean, glass, be clean, pure, be pure, purity, purifying
+440	Sin and Error	15	be guilty, guilty, sin, sinner, blemish, wickedness, mistake, be wicked
+2	Poverty and Affliction	14	needy, widow, widowhood, crushed, crushing, poor, hair, languish
+7	Military and Binding	14	band, gird, gird, spoil, rescue, loin, portion, cord
+8	Evil and Misfortune	14	mist, firebrand, calamity, harm, desire, misfortune, mischief, be sick
+21	East and Origin	14	born, fall, be, rise, dawning, East (Gate), ancient, east
+64	Dimension and Measurement	14	health, prolong, slow, long, length, thickness, broad, thickness
+73	Storage and Enclosure	14	treasure, store, surround, chamber, cavern, hole, gain, chamber
+98	Praise and Madness	14	madness, madness, praise, Day Star, praise, shine, sing, give thanks
+102	Pride and Arrogance	14	proud, rise up, proud, pride, pride, pride, majesty, proud
+117	Captivity and Removal	14	make plain, captivity, Heglam, captivity, tablet, drag, rag, wrap
+118	Cutting and Shearing	14	fleece, fleece, shear, stock, determine, decree, shave, wise
+132	Divination and Sorcery	14	medium, magician, spiritist, practice sorcery, sorcery, sorcerer, whisper, charm
+152	Doors and Entrances	14	entrance, come (in), bar, door, creature, entrance, doorpost, bolt
+244	Lying Down and Resting	14	bed, lay, bed, bed, resting, bed, bed, mate
+248	Rain and Precipitation	14	hail, algum, almug, hail, rain, rain, rain, dew
+261	Atonement and Redemption	14	atone, Chephar, ransom, atonement, mercy seat, lift, forgive, forgiving
+273	Breaking and Refusal	14	refuse, refusing, refusing, birth, wave, forbid, break, break
+304	Skin Disease and Affliction	14	bright, bright spot, defile, veil, scab, plague, scab, scab
+312	Crookedness and Perversion	14	overturn, contrariness, overthrow, crooked, overthrow, stocks, crooked place, pervert
+315	Hunger and Thirst	14	hunger, famine, hip, step, step, thirst, thirsty, thirst
+323	Increase and Multiplication	14	add, malign, abundance, much, greatness, bite, interest, remain
+375	Destruction and Ruin	14	ruins, ruins, overthrow, Destruction, destruction, destruction, mutilation, tear
+393	Textiles and Fine Materials	14	alone, linen, bluster, be alone, isolation, fine linen, only, flax
+394	Law and Command	14	law, statute, statute, feed, command, commandment, justice, edict
+455	Recompense and Completion	14	recompense, recompense, wean, avenge, vengeance, vengeance, peace, recompense
+5	Containers and Utensils	13	vessel, snatch up, shovel, sweep away, fork, bowl, censer, bowl
+9	Stone and Authority	13	stone, wheel, lord, socket, Lord, God, God, god
+81	Life and Living	13	chalk, alive, living, live, live, vigorous, beast, living
+103	Existence and Rising	13	existence, awake, place, refuge, rouse, excitement, kamai, adversary
+111	Fortifications and Greatness	13	citadel, citadel, palace, fortress, great, magnify, growing, greatness
+112	Wealth and Power	13	be stained, gold, terror, mighty, dreadful, ruthless, pure gold, be refined
+138	Hearing and Sound	13	listen, weapon, ear, report, hearing, guard, listen, attentiveness
+189	Festivals and Cessation	13	leap, feast, terror, celebrate, trade, feast, annihilation, Passover
+193	Time and Temporal Division	13	agree, time, renew, New (Gate), month, day, answer, cohabitation
+278	Turning and Circular Motion	13	surround, Ephraimite, twist, surrounding, surrounds, turn, strike, shaking
+319	Incense and Altar Worship	13	high place, sacrifice, altar, fumigation, censer, be angry, smoking, smoke
+327	Speech Organs and Speech	13	glide, slander, palate, tongue, slander, tongue, interest, loan
+399	Hunting and Trapping	13	fowler, snare, snare, stronghold, siegework, net, snare, snare
+4	Dust and Ashes	12	dust, aromatic powder, sack, ashes, Dung (Gate), sheepfold, throw, dust
+40	Rain and Sharp Objects	12	autumn rain, shoot, learn, disciple, rain, oxgoad, scorch, tooth
+77	Pit and Underground Spaces	12	well, pit, spring, spring, fountain, roundness, prison, pit
+96	Fleeing and Refuge	12	flee, fleeing, refuge, fugitive, refuge, refuge, fugitive, security
+179	Sowing and Planting	12	sowing, sow, seed, seed, vegetable, sowing, plantation, bloodshed
+293	Bitterness	12	bitterness, bitterness, bitter, bitterness, bitterness, bitterness, bitter, provoke
+302	Faithfulness and Reliability	12	artisan, faithful, faithfulness, be faithful, artisan, faithfulness, brought up, pillar
+316	Walls and Vegetation	12	wall up, wall, wall, grass, abode, grass, green, green
+344	Dripping and Flowing	12	drip, dripping, flood, bubble, flow, pendant, drip, drop
+349	Wind and Spirit	12	flood, storm, discharge, amber, pant, breath, whirlwind, rage
+355	Enclosure and Boundary	12	fine linen, shutter, border, greyhound, wound, locksmith, perimeter, enclosure
+368	Agricultural Produce	12	grain, Olives, oil, study, bear fruit, fruit, fruit, harvest
+424	Water and Refreshment	12	fresh, vigor, cupbearer, trough, quench, watered, abundance, rafter
+44	Strength and Power	11	strong, strengthen, strong, strength, strength, prevail, strengthen, be able
+104	Locusts and Crop Destruction	11	locust, locust, locust, locust, locust, locust, consume, gravel
+157	Piercing and Wounding	11	pierce, common, window, bore, slain, thrust, hole, wound
+159	Rebuke and Discipline	11	rebuke, rebuke, rebuke, faultfinder, discipline, rebuke, discipline, discipline
+161	Thought and Meditation	11	mutter, remove, moaning, meditation, Higgaion, whisper, willow, thought
+172	Music and Song	11	song, mountain goat, melody, best, song, melody, mocking, music
+176	Sexual Immorality	11	wages, wickedness, fornicate, fornication, fornication, prostitute, be unfaithful, commit adultery
+177	Old Age	11	be old, old, beard, old age, extreme age, old age, aged, be gray
+217	Deficiency and Lack	11	dimish, lack, lacking, poverty, lack, deficiency, recess, need
+250	Sleep and Dreams	11	be healthy, dream, sleep, sleeping, Yeshanah, slumber, drowsiness, sleep
+251	Righteousness	11	pious, uprightness, upright, uprightness, uprightness, straightforward, upright, righteous
+259	Royal Authority	11	throne, throne, kingship, reign, Queen (of Sheba), royalty, queen, kingdom
+265	Heart and Emotion	11	wail, fat tail, kidney, heart, heart, encourage, heart, heart
+275	Construction and Form	11	build, build, building, building, building, likeness, structure, shear
+334	Labor and Wages	11	price, morrow, work, wage, work, work, wages, hired
+341	Oath and Vow	11	swear, oath, be willing, voluntariness, noble, honor, vow, vow
+400	Affliction and Humility	11	contrite, furrow, be occupied, poor, humility, affliction, affliction, severity
+410	Grief and Comfort	11	greenery, Abib, comfort, sorry, repentance, comfort, burn, burning
+445	Slaughter and Sacrifice	11	sacrifice, slaughter, slaughter, guard, slaughtered, cook, slaughter, break the neck
+6	Objects and Animals	10	owl, cup, blow, twilight, bat, pelican, quiver, reeling
+19	Haste and Betrothal	10	hasten, hasten, hasten, hurry, haste, thrust, hasten, pay brideprice
+68	Kinship and Offspring	10	mother, young, son, daughter, seed, child, mince, propagate
+86	Testing and Refining	10	assayer, tower, test, watchtower, testing, refine, crucible, test
+97	Blessing and Bowing	10	bless, knee, blessing, Pool, bow, leg, bow, bow
+100	Precious Stones	10	sardius, flash, briar, gem, jasper, jasper, emerald, sapphire
+107	Human Persons	10	man, man, pupil, human, man, Married, master, mistress
+147	Dwelling and Duration	10	dwell, circle, generation, Israel, pile, conduct, perpetuity, forever
+171	Viticulture and Fruit	10	vine, branch, vineyard, extortioner, pruner, snuffer, pressing, sweet
+210	Injustice and Violence	10	injure, violence, unjust one, act unjustly, injustice, unjust, iniquity, wickedness
+242	Standing and Support	10	stand, set, office, foothold, stand, stand, post, support
+256	Foundation and Injury	10	establish, bun, basin, wound, foundation, base, smite, smitten
+285	Smallness	10	little, little, little, little, little, youth, be little, be small
+307	Dwelling and Nesting	10	egg, habitation, habitation, be lovely, habitation, lovely, beautify, pasture
+329	Weight and Honor	10	burden, respect, smoke, tribute, libation, lift, burden, leader
+340	Foolishness and Abomination	10	be senseless, foolish, folly, lewdness, refuse, abomination, detest, detestation
+350	Completion and Cessation	10	end, longing, consumption, article, failing, utensil, perfection, cease
+359	Division and Splitting	10	cleft, cleft, crevice, cleft, lop, division, divided, bough
+360	Crowns and Surrounding	10	surround, crown, capital, headgear, turban, surround, crown, headdress
+378	Motion and Advancement	10	pitch, go, journey, quarry, set out, surpassing, ancient, proceed
+13	Foundation and Beginning	9	found, beginning, Foundation, foundation, foundation, foundation, appointment, foundation
+24	Possession and Inheritance	9	possession, possess, possession, possession, possession, possession, inherit, inheritance
+25	Sequence and Posteriority	9	back, delay, another, last, another, end, latter, another
+49	Causation and Movement	9	because of, ford, for the sake of, produce, pass, side, fury, ford
+62	Path and Travel	9	way, way, walk, journey, highway, highway, track, path
+71	Creation and Formation	9	create, fat, creation, form, intention, member, hairstyle, beating
+79	Separation and Division	9	separate, piece, bdellium, separate place, be distinguished, separate, grain, declare
+89	Fortification and Cultivation	9	old-growth, vintage, gather, gold, enclosure, stronghold, drought, prune
+136	Grinding and Crushing	9	fig cake, grinding, grind, cleave, millstone, cluster, shrivel, millstone
+139	Dairy and Sweetness	9	honey, hump, milk, curd, honeycomb, honey, flow, honeycomb
+151	Water Drawing and Branching	9	draw (up, bucket, branch, well, branch, thickly branched, draw, intertwine
+154	Comparison and Analogy	9	resemble, likeness, riddle, riddle, liken, proverb, likeness, calculate
+160	Perfume and Ointment	9	spice, ointment pot, ointment, mix, spice, spice, perfumer, perfumery
+167	Sacrifice and Offering	9	food offering, guilt (offering), sacrifice, offering, drink offering, burnt offering, offering, peace offering
+201	Body Parts and Sides	9	breast, thigh, flank, side, side, overflow, street, leg
+220	Cutting and Division	9	cut, piece, cutting, isolation, sharp, incision, decide, pip
+252	Fortification and Structure	9	siegework, station, entrenchment, guard, pillar, pillar, hilt, garrison
+271	Grasping and Taking	9	take, teaching, prey, tong, taking, ware, receive, battering-ram
+272	Weight and Balance	9	ponder, balance, swaying, weight, weight, level, envy, balance
+318	Striking and Naming	9	curse, hammer, hammer, pierce, socket, female, hammer, curse
+332	Apostasy and Return	9	rebellious, faithlessness, return, turning back, backsliding, returning, captivity, return
+361	Luxury and Pleasure	9	delicacy, delicacy, voluptuous, luxuriate, delicacy, delight, delight, dainty
+403	Canaanite Peoples	9	Amorite, Girgashite, Hivite, Hittite, Jebusite, Canaanite, Perizzite, Sidonian
+423	Rest and Aroma	9	holiday, resting, Nohah, rest, quietness, descended, soothing, smell
+448	Adversity and Opposition	9	become old, old, old, Belial, decrepit, oppose, Satan, accusation
+57	Concealment and Ambush	8	ambush, ambush, ambush, skill, window, hide, hiding, ambush
+59	Water and Vegetation	8	pool, grieved, bulrush, swallow, reed, Red (Sea), branch, ark
+66	Approach and Proximity	8	come, come (in), approach, present, battle, approaching, nearness, near
+184	Distress and Movement	8	twist, sand, rampart, agony, anguish, dance, dance, envoy
+190	Girding and Belts	8	girdle, gird, gird, ephod, ephod, belted, belt, girding
+229	Covering and Interior	8	overspread, inner parts, coating, ship, cover, ceiling, treasure, insipid
+245	Departure and Origin	8	come out, offspring, entrance, exit, going forth, promote, offspring, outgoing
+249	Tribal and Ethnic Groups	8	Hagri, Jezreel, Ishmaelite, Ithrite, Carmelite, Netophathite, Kenite, Kenizzite
+283	Corners and Angles	8	corner, granary, Angle, plane, Corner (Gate), jewel, cassia, scrape
+290	Buildings and Structures	8	tent, place, palace, champion, roof, temple, lodging, inner
+308	Heaps and Ruins	8	heap, twist, ruin, distortion, ruin, mound, be eminent, lock
+314	Oversight and Accountability	8	Muster (Gate), Muster (Gate), reckon, punishment, deposit, oversight, precept, overseer
+324	Rebellion and Disobedience	8	rebel, rebellion, rebellious, rebel, Egypt, revolt, rebel, transgress
+347	Spots and Particles	8	hail, spotted, spot, speckled, crumb, bead, striped, fit
+431	Ornamental Plants and Columns	8	crocus, pomegranate, lily, column, palm, palm, palm, signpost
+23	Seizing and Control	7	grasp, strengthen, possess, capture, capture, take, capture
+125	Actions and Behaviors	7	deed, furnace, wantonness, deed, abuse, gleaning, caprice
+133	Weakness and Desiccation	7	weaken, weak, weak, wither, dry, dry land, dry land
+169	Strangeness and Foreignness	7	look, be a stranger, loathsome, recognize, misfortune, foreign, foreign
+367	Youth and Infancy	7	sapling, shoot, shoot, suckle, nurse, infant, infant
+419	Numbers and Enumeration	7	square, fourth, fourth, fourth, thirty, do three, third
+454	Kingship and Rule	7	king, queen, kingdom, rule, governor, dominion, ruling
+457	Physical Properties and Objects	7	reserve, bone, bone, sharp, mantle, smooth, rug
+470	Completeness and Wholeness	7	end, soundness, complete, integrity, integrity, unblemished, finish
+16	Sacred Structures	6	tent, box, ark, meeting, habitation, tabernacle
+33	Travel and Provision	6	journey, caravan, ration, go, feed, food
+70	Sin and Transgression	6	guiltiness, sin, sin, sin, iniquity, transgression
+106	Baldness	6	bald, baldness, make bald, bald, bald spot, baldness
+110	Agricultural and Division	6	coriander, fortune, cut, band, furrow, furrow
+143	Sickness and Affliction	6	be sick, sick, illness, faint, ink, disease
+146	Dwelling and Duration	6	lodge, house, dwell, generation, dwelling, continuance
+165	Striking and Affliction	6	plague, gore, goring, strike, plague, smite
+170	Memory and Maleness	6	memorial, male, remember, memorial, male, memorial
+202	Supporting and Holding	6	sustain, support, support, support, support, grasp
+257	Completeness and Wholeness	6	all, entire, perfect, perfection, perfection, perfection
+270	Vision and Spatial Orientation	6	Lehi, watch, eye, face, border, appearance
+277	Covenant and Circumcision	6	covenant, circumcise, circumcision, be uncircumcised, uncircumcised, haaraloth
+343	Leading and Movement	6	go, driving, lead, guide, watering, lead
+358	Enclosures and Shelters	6	hedge, throng, lair, booth, fence, booth
+385	Sensory Perception and Motion	6	double, trouble, beat, bell, spirit, smell
+120	Brightness and Adornment	5	trumpet, polish, beauty, clearness, pavilion
+188	Healing and Treatment	5	saddle, healing, heal, remedy, healing
+197	Restraint Devices	5	thistle, thicket, hook, bridle, Metheg-ammah
+218	Division and Separation	5	divide, vulture, hoof, cleave, cleft
+233	Torn and Consumed Things	5	tear, prey, fresh-plucked, torn animal, carcass
+247	Honor and Glory	5	honor, honor, splendor, honorable, honor
+281	Descent and Lowering	5	go down, be poor, descent, color, descend
+300	Arrangement and Order	5	row, encampment, porch, order, rank
+326	Distance and Separation	5	remove, distance, distant, remove, removed
+333	Striking and Beating	5	oar, rove, whip, scourge, oar
+337	Sweetness	5	sweetness, sweet, be sweet, sweetness, sweetness
+348	Forgetting	5	forget, forgetfulness, forget, forget, forgetful
+376	Smoothness and Reflection	5	smooth, gleam, plate, thought, thought
+401	Brightness and Dryness	5	dazzling, be dazzling, bare, parched, scorched
+414	Fastening and Binding	5	hook, loop, stoop, clasp, ankle
+471	Sound and Contact	5	reach, touch, trumpet, blow, blast
+22	Kinship	4	brother, brotherhood, Ahohite, sister
+162	Movement and Walking	4	step, go, traveller, procession
+191	Sharpness	4	sharp, be sharp, point, sharpen
+199	Whiteness	4	white, white cloth, pale, white
+236	Judahite Identity	4	become a Jew, Judahite wife, Jew, Judahite
+254	Woven Materials	4	quilt, sieve, grate, cloth
+303	Pointed or Rough Objects	4	nail, nail, bristle up, rough
+306	Labor and Service	4	work, make, servant, service
+325	Running and Movement	4	go, race, running, run
+365	High Places and Offerings	4	burnt offering, Most High, Most High, roof
+369	Sluggishness and Lethargy	4	be sluggish, sluggish, sluggishness, sluggishness
+370	Twisted and Crooked	4	catch, twist, crooked, crooked
+407	Burial and Tombs	4	spice, tomb, bury, grave
+422	Pride and Arrogance	4	insolence, assertive, proud, pride
+426	Malnutrition and Wasting	4	starve, lean, leanness, wasting
+439	Woven and Interlaced Forms	4	filigree, weave, agony, checkered
+30	Strength and Sustenance	3	be manly, foundation, raisin bun
+45	Speech and Offering	3	say, lamb, command
+61	Movement and Access	3	come, go, entrance
+63	Strength and Worship	3	hero, altar, altar
+108	Elevated and Formed Things	3	humpbacked, cheese, peak
+123	Objects and Magnitude	3	wheel, great, scroll
+130	Hand and Grasping	3	fist, sweep away, clod
+134	Sacrifice and Offering	3	sacrifice, sacrifice, altar
+141	Materials and Substances	3	gold, clay, iron
+182	Wrongdoing and Harm	3	crime, destroy, harm
+195	Measurement and Geometry	3	mark, circle, compass
+200	Sight and Perception	3	see, vision, visibility
+203	Sin and Atonement	3	sin offering, sin, sin offering
+207	Weakness and Debility	3	weakness, weaken, weak
+223	Uncovering and Stripping	3	strip, little flock, exposing
+226	Wrapping and Binding	3	bandage, entwine, swaddling
+230	Swelling and Protrusion	3	tumor, swell, hill
+234	Levirate Relations	3	be brother-in-law, brother-in-law, sister-in-law
+258	Spices and Hidden Things	3	cummin, hidden, dill
+269	Twisted and Bent	3	be devious, almond, perversity
+280	Stress and Instability	3	distress, totter, pressure
+295	Counting and Valuing	3	reckon, mina, number
+339	Prophecy	3	prophesy, prophesying, prophet
+353	Interwoven Vegetation	3	interweave, thicket, thicket
+380	Recklessness	3	be reckless, recklessness, recklessness
+383	Division	3	divide, half, division
+389	Village Settlement	3	village, villager, villager
+395	Filth	3	excrement, filthy, filth
+411	Rolling Motion	3	roll, anguish, porcupine
+430	Binding Together	3	bind, roughness, conspiracy
+460	Good and Pleasant	3	fair, acceptable, dawn
+463	Climbing Plants	3	tendril, sorrel, vine
+26	Constraint and Position	2	shut, lefthanded
+28	Physical Strength	2	strength, strength
+34	Desire and Weight	2	crave, burden
+38	Proximal Demonstratives	2	these, these
+55	Binding and Conveyance	2	bandage, carriage
+60	Rapid Movement	2	go, run
+74	Conflict	2	sedition, strive
+75	Compensation	2	wages, hire
+76	Displeasure	2	bad, be displeased
+80	Haste	2	hastely, dismay
+83	Movement	2	come (in), go
+84	Emptiness	2	emptiness, emptiness
+99	Blessing	2	bless, knee
+101	Division	2	cut up, part
+116	Healing	2	cure, cure
+124	Disclosure	2	reveal, captivity
+127	Chopping Tools	2	axe, axe
+128	Breaking	2	break, crushed grain
+131	Ethnic Groups	2	Geshurite, Maacathite
+145	Quietness	2	silence, silence
+150	Crushing	2	crush, pounding
+166	Dowry	2	endow, dowry
+173	Appointment and Time	2	appoint, time
+174	Musical Performance	2	music, singer
+175	Tail	2	cut off the tail, tail
+180	Affection and Intimacy	2	breast, love
+192	Rejoicing and Joy	2	rejoice, joy
+194	Obligation and Risk	2	endanger, debtor
+196	Speech and Explanation	2	declaration, explain
+206	Dullness	2	dull, dullness
+211	Bending	2	curve, turn away
+213	Fifth Part	2	take the fifth part, fifth
+214	Strangulation	2	strangle, strangling
+216	Muzzling	2	muzzle, muzzle
+219	Bosom	2	bosom, bosom
+222	Need	2	need, requirement
+224	Collection	2	hub, collection
+227	Goodness	2	be good, fine
+232	Load or Weight	2	burden, burden
+237	Doves	2	dove, turtledove
+238	Perspiration	2	sweat, sweat
+240	Registration or Genealogy	2	enroll, genealogy
+241	Respiration	2	breathe, breathing
+243	Knowledge or Certainty	2	know, certain
+246	Fire or Combustion	2	burn, burning
+262	Warrior Groups	2	Cherethite, Pelethite
+268	Garment and Clothing	2	garment, clothe
+274	Cheerfulness and Joy	2	be cheerful, cheer
+276	Excrement and Waste	2	dung, dunghill
+284	Eating and Food	2	feed, food
+286	Sweeping and Cleaning	2	sweep, broom
+288	Spinning and Textiles	2	spin, yarn
+289	Speech and Communication	2	word, speak
+291	Salt and Seasoning	2	eat salt, salt
+299	Outcome	2	gain, cease
+331	Lending	2	loan, debt
+338	Transfer	2	gift, give
+345	Breaking	2	break, fallow ground
+351	Cutting	2	cut, piece
+352	Treading	2	boot, tread
+356	Completion	2	be fulfilled, end
+357	Scraping	2	scrape, offscouring
+362	Injustice	2	pervert, oppression
+363	Advice	2	counsel, counsel
+364	Adornment	2	tinkle, anklet
+366	Movement	2	going down, come
+372	Uprooting	2	be uprooted, root
+374	Pleasantness	2	please, sweet
+377	Place Names	2	Ashterathite, Ashteroth-karnaim
+379	Abundance	2	be abundant, abundance
+382	Small Containers	2	vial, trickle
+384	Service and Labor	2	serve, service
+386	Surface Marking	2	peel, stripe
+388	Gourds and Vessels	2	gourd, gourd
+391	Division and Fracture	2	divide, broken
+392	Interpretation and Meaning	2	interpret, interpretation
+396	Desire and Will	2	will, thing
+397	Swelling and Distension	2	swell, swollen
+398	Ambush	2	ambush, ambush
+402	Color	2	Sahar, tawny
+404	Vessel	2	pot, jar
+405	Conduit	2	water, pipe
+406	Shelter	2	kab, tent
+408	Season	2	summer, summer
+409	Kill	2	slay, slaughter
+412	Anger	2	be angry, wrath
+413	Confrontation	2	approach, war
+415	Insect and Eye Movement	2	wink, stinging fly
+416	Cucumber	2	cucumber field, cucumber
+417	Cover or Spread	2	covering, spread
+420	Anger	2	enrage, rage
+421	Crowd or Multitude	2	throng, throng
+425	Elevation	2	rise, height
+428	Moisture and Freshness	2	be moist, fresh
+429	Fluid Discharge	2	run, spittle
+432	Liquid Movement	2	drop, moisten
+433	Mental States	2	pleasure, thought
+434	Filth	2	mud, foul
+435	Piercing Tools	2	awl, bore
+437	Binding Materials	2	bind, broom
+441	Enclosure	2	hedge, hedge
+442	Motion and Offering	2	travel, present
+443	Cutting Tools	2	saw, row
+444	Water Motion	2	swim, swimming
+446	Bird Species	2	gull, illness
+447	Deviation	2	swerve, rebellion
+449	Whitening Substances	2	whitewash, lime
+450	Pointed Objects	2	thorn, spear
+452	Removal	2	extract, afterbirth
+453	Safety and Comfort	2	be safe, ease
+456	Wholeness	2	be complete, peace
+458	Contemptuous Speech	2	whisper, derision
+459	Disgust and Aversion	2	disgusting, horror
+464	Twisting and Binding	2	thong, twist
+465	Celebration and Feasting	2	feast, drink
+467	Planting and Growth	2	transplant, shoot
+468	Desire and Yearning	2	long for, longing
+469	Duality and Doubling	2	twin, be double
+15	Movement	1	go

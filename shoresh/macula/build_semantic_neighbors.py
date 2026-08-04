@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import collections
 import hashlib
+import itertools
 import json
 import re
 import sqlite3
@@ -39,10 +40,17 @@ LXX = ROOT / "resources" / "lxx_bridge.tsv"
 DOMAINS = ROOT / "resources" / "semantic_domains" / "hbo.tsv"
 OUT_DIR = ROOT / "resources" / "semantic_neighbors"
 LLM_EDGES = OUT_DIR / "llm_edges.tsv"        # method=llm layer (bcv-RAG/scripts/build_llm_neighbors.py)
+ALIGNED_HF_DIR = ROOT / "resources" / "aligned_lex_hf"   # bcv-commons/lexeme-alignments, ~924 languages
+BDB_ROOTS = ROOT / "resources" / "bdb_roots" / "root_groups.tsv"   # public-domain BDB etymological roots
+PARALLELISM = ROOT / "resources" / "parallelism" / "parallelism_pairs.tsv"   # T'OMIM + our own detection
 
 MIN_OCC = 3        # a lexeme needs this many clause vectors for a stable centroid
 TOPK = 10          # neighbors kept per lexeme
 MIN_COS = 0.30     # cosine floor (post mean-centering scale)
+XLING_MIN_LANGS = 3        # a Hebrew Strong's pair needs >= this many INDEPENDENT languages
+                           # co-rendering it via the same surface to count as corroborated
+XLING_MIN_COUNT = 2        # per-language quality floor, matches build_aligned_lex_hf.py's own bar
+XLING_MIN_SHARE = 0.10
 _STOP = set("the a an of to and in be is was were for from with his her its their this that "
             "he she it they them who which what will would shall not no".split())
 
@@ -52,12 +60,21 @@ STEP_SPINE = ROOT / "shoresh" / "spine" / "spine.db"   # STEPBible morph → pro
 
 def proper_strongs() -> set:
     """H#### strongs that are proper nouns (STEPBible morph `Np` dominant) — excluded from the pack:
-    they aren't semantic-field words, and LLMs chain genealogy/nation lists as bogus 'synonyms'."""
+    they aren't semantic-field words, and LLMs chain genealogy/nation lists as bogus 'synonyms'.
+
+    BUG FIXED 2026-08: spine.db's `strong` column is a bare integer shared across BOTH testaments
+    (Hebrew H1746 and Greek G1746 are unrelated words that collide on the same digits) — the
+    un-filtered query below used to mix Greek rows into the Np-majority vote for every Hebrew Strong's
+    number that happens to collide with a Greek one, diluting real proper-name majorities below the
+    50% threshold (verified: H1746 "Dumah" was 4/32 Np-tagged once 28 unrelated Greek verb rows were
+    included, so it silently failed to get excluded). Filter to Hebrew-only rows via `morph LIKE
+    'He,%'` — spine.db's own morph strings are language-prefixed ("He,..." / "Gr,...")."""
     if not STEP_SPINE.exists():
         return set()
     db = sqlite3.connect(f"file:{STEP_SPINE}?mode=ro", uri=True)
     tot, prop = collections.Counter(), collections.Counter()
-    for strong, morph in db.execute("SELECT strong, morph FROM spine_words WHERE strong IS NOT NULL"):
+    for strong, morph in db.execute(
+            "SELECT strong, morph FROM spine_words WHERE strong IS NOT NULL AND morph LIKE 'He,%'"):
         s = f"H{int(strong):04d}"
         tot[s] += 1
         if morph and "Np" in morph:
@@ -65,12 +82,45 @@ def proper_strongs() -> set:
     return {s for s in tot if prop[s] > 0.5 * tot[s]}
 
 
-def lexeme_vectors():
-    """MACULA lexeme -> (unit centroid, strong, top gloss). Content lexemes with >= MIN_OCC clauses,
-    proper nouns excluded."""
+def non_content_strongs() -> set:
+    """H#### strongs that spine.db's OWN (Hebrew-only) is_content majority-vote says are NOT content
+    words, but lexeme-spine.db's MACULA-derived is_content=1 lets through anyway. Found 2026-08: MACULA
+    tags Hebrew demonstrative pronouns (זֹאת "this", אֵלֶּה "these") as class='adj' (adjectival usage),
+    and _CONTENT_CLASSES = {noun, verb, adj} doesn't distinguish that from genuine descriptive
+    adjectives — 34 Strong's leak through this way (verified count). Cross-referencing spine.db's own
+    is_content flag (computed independently, from STEPBible tagging, not MACULA's class field) catches
+    these without needing to fix MACULA's class scheme itself."""
+    if not STEP_SPINE.exists():
+        return set()
+    db = sqlite3.connect(f"file:{STEP_SPINE}?mode=ro", uri=True)
+    tot, content = collections.Counter(), collections.Counter()
+    for strong, is_content, morph in db.execute(
+            "SELECT strong, is_content, morph FROM spine_words WHERE strong IS NOT NULL AND morph LIKE 'He,%'"):
+        s = f"H{int(strong):04d}"
+        tot[s] += 1
+        content[s] += is_content
+    return {s for s in tot if content[s] <= 0.5 * tot[s]}
+
+
+def lexeme_vectors(emb_path: Path = EMB, sense_split: bool = False):
+    """MACULA lexeme (or lexeme#sense, if sense_split) -> (unit centroid, strong, top gloss). Content
+    lexemes with >= MIN_OCC clauses, proper nouns excluded. emb_path override lets this run against an
+    alternative embedding model (e.g. BEREL) without touching the default bge-m3 file — dimension is
+    read from the file itself, not assumed, since BEREL (768) and bge-m3 (1024) differ.
+
+    sense_split: aggregate centroids per (lexeme, sense) instead of per whole lexeme, using hbo.db's
+    own per-occurrence `sense` column (resources/senses/hbo_lex.tsv's cluster boundaries — Hebrew-
+    context-embedding-derived, not MACULA/UBS — see bcv-commons-export-candidates.md). Rationale:
+    Louw-Nida domains are assigned PER SENSE, not per word — a polysemous lexeme's one blended centroid
+    (averaged across all its senses) structurally can't land near any single domain. Occurrences with
+    no sense value (~47% of hbo.db) fall back to one shared '_nosense' bucket for that lexeme. LXX/gloss
+    corroboration still applies per-STRONG (shared across all senses of a lexeme) — a known simplification,
+    not sense-aware itself, but harmless since it only adds score, never gates which pairs are candidates."""
     proper = proper_strongs()
-    z = np.load(EMB, allow_pickle=True)
+    non_content = non_content_strongs()
+    z = np.load(emb_path, allow_pickle=True)
     V, C = z["vectors"], z["contexts"]                     # load each array ONCE (npz re-decompresses per access)
+    dim = V.shape[1]
     clause_vec = {c: V[i] for i, c in enumerate(C)}        # clause text -> vector
 
     sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
@@ -83,36 +133,42 @@ def lexeme_vectors():
             node2lex[node] = key2lex[key]
 
     hbo = sqlite3.connect(f"file:{HBO}?mode=ro", uri=True)
-    acc: dict = collections.defaultdict(lambda: [np.zeros(1024, np.float32), 0])
+    acc: dict = collections.defaultdict(lambda: [np.zeros(dim, np.float32), 0])
     strong_of, gloss_ct = {}, collections.defaultdict(collections.Counter)
-    for node, context, gloss in hbo.execute("SELECT node, context, gloss FROM occurrence"):
+    query = "SELECT node, context, gloss, sense FROM occurrence" if sense_split \
+        else "SELECT node, context, gloss FROM occurrence"
+    for row in hbo.execute(query):
+        node, context, gloss = row[0], row[1], row[2]
         lx = node2lex.get(node)
         v = clause_vec.get(context)
         if lx is None or v is None:
             continue
         lexeme, strong = lx
-        acc[lexeme][0] += v
-        acc[lexeme][1] += 1
-        strong_of[lexeme] = strong
+        key = f"{lexeme}#{row[3]}" if sense_split and row[3] else (f"{lexeme}#_nosense" if sense_split else lexeme)
+        acc[key][0] += v
+        acc[key][1] += 1
+        strong_of[key] = strong
         if gloss:
-            gloss_ct[lexeme][gloss] += 1
+            gloss_ct[key][gloss] += 1
 
     lexemes, mat, meta = [], [], {}
-    for lexeme, (vsum, n) in acc.items():
+    for key, (vsum, n) in acc.items():
         if n < MIN_OCC:
             continue
         c = vsum / n
         norm = np.linalg.norm(c)
         if norm == 0:
             continue
-        s = strong_of[lexeme]
+        s = strong_of[key]
         hstrong = f"H{s:04d}" if s is not None else ""
         if hstrong in proper:                       # drop proper nouns (names aren't semantic-field)
             continue
-        lexemes.append(lexeme)
+        if hstrong in non_content:                  # drop function words MACULA misclassified as content
+            continue
+        lexemes.append(key)
         mat.append(c / norm)
-        top_gloss = gloss_ct[lexeme].most_common(1)[0][0] if gloss_ct[lexeme] else ""
-        meta[lexeme] = (hstrong, top_gloss)         # H#### to join lxx/domains
+        top_gloss = gloss_ct[key].most_common(1)[0][0] if gloss_ct[key] else ""
+        meta[key] = (hstrong, top_gloss)            # H#### to join lxx/domains
     return lexemes, np.vstack(mat).astype(np.float32), meta
 
 
@@ -120,8 +176,10 @@ def _gloss_tokens(g: str) -> set:
     return {w for w in re.findall(r"[a-z]+", (g or "").lower()) if w not in _STOP and len(w) > 2}
 
 
-def build(validate: bool, llm_edges=None):
-    lexemes, M, meta = lexeme_vectors()
+def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = OUT_DIR,
+          emb_label: str = "bge-m3 clause centroids", sense_split: bool = False, use_xling: bool = True,
+          use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = True):
+    lexemes, M, meta = lexeme_vectors(emb_path, sense_split=sense_split)
     print(f"[neighbors] {len(lexemes)} content lexemes with >= {MIN_OCC} clauses", file=sys.stderr)
     # Mean-center to kill embedding anisotropy: clause centroids all lean toward one "generic biblical
     # clause" direction, which makes everything ~0.94 cosine. Subtracting the global mean removes that
@@ -157,6 +215,71 @@ def build(validate: bool, llm_edges=None):
     for lx, (s, _) in meta.items():
         strong2lex[s].append(lx)
 
+    # poetic-parallelism structural pairs (T'OMIM + our own detection, resources/parallelism/) — real
+    # signal, previously built (candidate #7) but never wired in as an active corroborator, only used
+    # as a separate validation benchmark. Merge its antonyms into the existing `ant` set (parallelism's
+    # own relation-labeling already cross-referenced the same LLM signal, so this is consistent, not
+    # circular) so antithetic-parallelism pairs get caught the same way LLM-flagged antonyms are.
+    parallelism_syn, parallelism_ant = _load_parallelism_pairs() if use_parallelism else (set(), set())
+    ant = ant | parallelism_ant
+    print(f"[neighbors] parallelism: {len(parallelism_syn)} likely-synonym, {len(parallelism_ant)} "
+          f"likely-antonym structural pairs" + ("" if use_parallelism else " (disabled)"), file=sys.stderr)
+
+    # xling corroboration (free, no LLM spend): two Hebrew Strong's rendered by the SAME surface across
+    # many independent languages (aligned_lex_hf). Same principle as `lxx` above, scaled from one
+    # translation tradition (Greek/LXX) to ~924. Was in the original 4-signal design, never built until
+    # now — see bcv-commons-export-candidates.md.
+    xling_strong_pairs = _load_xling_pairs() if use_xling else {}
+    print(f"[neighbors] xling: {len(xling_strong_pairs)} Strong's pairs corroborated by "
+          f">= {XLING_MIN_LANGS} independent languages" + ("" if use_xling else " (disabled)"),
+          file=sys.stderr)
+
+    # BDB etymological root-groups (public domain, resources/bdb_roots/) — validated 2026-08 at 50.6%
+    # SDBH-domain agreement, better than this project's own clustering, at ~10x the scale. No corroboration
+    # threshold needed (root grouping is already expert etymological judgment, unlike xling's raw
+    # cross-lingual co-occurrence) — see build_bdb_roots.py.
+    bdb_root_pairs = _load_bdb_root_pairs() if use_bdb else set()
+    print(f"[neighbors] bdb_roots: {len(bdb_root_pairs)} Strong's pairs sharing an etymological root"
+          + ("" if use_bdb else " (disabled)"), file=sys.stderr)
+
+    # Hebrew WordNet synset co-membership — genuinely independent of UBS MARBLE; modern-register, which
+    # was flagged as a risk (the one prior check that favored bge-m3 over BEREL). Measured 2026-08: its
+    # own prior-tier edges score 89.7% SDBH agreement (better than bdb_root's 50.6%) — the register
+    # mismatch did not materialize as a quality problem. Its contribution to cluster-level Louvain
+    # quality is modest (small relative to bdb_root's volume: ~860 vs ~9,150 prior edges) but net
+    # positive on both coverage and quality — kept on by default, unlike xling.
+    hwn_pairs = _load_hwn_pairs() if use_hwn else set()
+    print(f"[neighbors] hwn: {len(hwn_pairs)} Strong's pairs sharing a Hebrew WordNet synset"
+          + ("" if use_hwn else " (disabled)"), file=sys.stderr)
+
+    # Coverage extension: xling/bdb_roots need no embedding, so they can name lexemes OUTSIDE the pack
+    # (too few occurrences to get a stable centroid) — the same coverage gap un-restricting the paid LLM
+    # run would close, at zero cost. Pull a representative (lexeme, gloss) for every Hebrew content
+    # Strong's from lexeme-spine.db directly (not the embedding pack) and extend meta/strong2lex with any
+    # out-of-pack Strong's that actually appear in one of these pairs — no point adding ones that don't.
+    xling_strongs = {s for pair in xling_strong_pairs for s in pair}
+    bdb_strongs = {s for pair in bdb_root_pairs for s in pair}
+    parallelism_strongs = {s for pair in parallelism_syn for s in pair}
+    hwn_strongs = {s for pair in hwn_pairs for s in pair}
+    out_of_pack = ((xling_strongs | bdb_strongs | parallelism_strongs | hwn_strongs)
+                   - set(strong2lex) - proper_strongs() - non_content_strongs())
+    if out_of_pack and SPINE.exists():
+        sp2 = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+        rep: dict[str, tuple[str, str]] = {}
+        for lexeme, strong, gloss in sp2.execute(
+                "SELECT lexeme, strong, gloss FROM spine_words "
+                "WHERE is_content=1 AND strong IS NOT NULL AND lexeme LIKE 'hbo:%'"):
+            hs = f"H{int(strong):04d}"
+            if hs in out_of_pack and hs not in rep:
+                rep[hs] = (lexeme, gloss or "")
+        for hs, (lexeme, gloss) in rep.items():
+            meta[lexeme] = (hs, gloss)
+            gloss_tok[lexeme] = _gloss_tokens(gloss)
+            strong2lex[hs].append(lexeme)
+        print(f"[neighbors] coverage extension (xling + bdb_roots + parallelism + hwn): "
+              f"+{len(rep)}/{len(out_of_pack)} out-of-pack lexemes now reachable (no embedding)",
+              file=sys.stderr)
+
     # embedding kNN (cosine = dot of unit vectors) — tiered against the LLM prior
     rows, emb_pairs = [], set()
     for i, lx in enumerate(lexemes):
@@ -174,6 +297,14 @@ def build(validate: bool, llm_edges=None):
             if gloss_tok[lx] and gloss_tok[lx] & gloss_tok.get(nb, set()):
                 sources.append("gloss"); score = min(1.0, score + 0.1)
             pair = frozenset((meta[lx][0], meta[nb][0]))         # strong-level
+            if pair in xling_strong_pairs:
+                sources.append("xling"); score = min(1.0, score + 0.1)
+            if pair in bdb_root_pairs:
+                sources.append("bdb_root"); score = min(1.0, score + 0.1)
+            if pair in parallelism_syn:
+                sources.append("parallelism"); score = min(1.0, score + 0.1)
+            if pair in hwn_pairs:
+                sources.append("hwn"); score = min(1.0, score + 0.1)
             relation, conf = "similar", "recall"
             if pair in ant:                                      # LLM says OPPOSITE — emb false positive
                 relation = "antonym"
@@ -193,10 +324,64 @@ def build(validate: bool, llm_edges=None):
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     rows.append((lx, nb, 0.5, "llm", "prior", "similar"))
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    # xling-only PRIOR edges — synonymy corroborated across independent languages but the embedding
+    # didn't surface it (or one side has no embedding at all — the coverage-extension lexemes added
+    # above). Score scales gently with corroboration strength (more independent languages = more
+    # trust), capped below the LLM-agreement floor since it's a single (if broad) signal, not a
+    # cross-checked one. Free — no API spend, unlike the equivalent LLM coverage run.
+    xling_rows = 0
+    for pair, n_langs in xling_strong_pairs.items():
+        a, b = tuple(pair)
+        for lx in strong2lex.get(a, []):
+            for nb in strong2lex.get(b, []):
+                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                    score = min(0.45, 0.25 + 0.02 * n_langs)
+                    rows.append((lx, nb, round(score, 3), "xling", "prior", "similar"))
+                    xling_rows += 1
+    print(f"[neighbors] xling-only prior edges: {xling_rows}", file=sys.stderr)
+
+    # bdb_root-only PRIOR edges — same-root pairs the embedding didn't surface (or couldn't, for
+    # coverage-extension lexemes). Flat score (not corroboration-scaled like xling) since root grouping
+    # is a single expert-curated fact, not a statistical count — validated at 50.6% SDBH agreement,
+    # roughly on par with the LLM-only prior tier, so scored similarly.
+    bdb_rows = 0
+    for pair in bdb_root_pairs:
+        a, b = tuple(pair)
+        for lx in strong2lex.get(a, []):
+            for nb in strong2lex.get(b, []):
+                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                    rows.append((lx, nb, 0.5, "bdb_root", "prior", "similar"))
+                    bdb_rows += 1
+    print(f"[neighbors] bdb_root-only prior edges: {bdb_rows}", file=sys.stderr)
+
+    # parallelism-only PRIOR edges — structural pairs (T'OMIM expert-verified or our own detection) the
+    # embedding didn't surface. Flat score, same tier as bdb_root — both are single expert/structural
+    # facts, not statistical counts.
+    parallelism_rows = 0
+    for pair in parallelism_syn:
+        a, b = tuple(pair)
+        for lx in strong2lex.get(a, []):
+            for nb in strong2lex.get(b, []):
+                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                    rows.append((lx, nb, 0.5, "parallelism", "prior", "similar"))
+                    parallelism_rows += 1
+    print(f"[neighbors] parallelism-only prior edges: {parallelism_rows}", file=sys.stderr)
+
+    # hwn-only PRIOR edges — same tier as bdb_root/parallelism, but EXPERIMENTAL (see caution above).
+    hwn_rows = 0
+    for pair in hwn_pairs:
+        a, b = tuple(pair)
+        for lx in strong2lex.get(a, []):
+            for nb in strong2lex.get(b, []):
+                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                    rows.append((lx, nb, 0.5, "hwn", "prior", "similar"))
+                    hwn_rows += 1
+    print(f"[neighbors] hwn-only prior edges: {hwn_rows}", file=sys.stderr)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
     import pyarrow as pa, pyarrow.parquet as pq
     c = list(zip(*rows)) if rows else ([], [], [], [], [], [])
-    dest = OUT_DIR / "neighbors.parquet"
+    dest = out_dir / "neighbors.parquet"
     pq.write_table(pa.table({"lexeme": pa.array(c[0], pa.string()),
                              "neighbor_lexeme": pa.array(c[1], pa.string()),
                              "score": pa.array(c[2], pa.float32()),
@@ -208,15 +393,19 @@ def build(validate: bool, llm_edges=None):
     manifest = {
         "dataset": "semantic_neighbors", "anchor": "MACULA lexeme (CC-BY)", "testament": "OT/Hebrew",
         "license": "CC0-1.0",
-        "signals": ["emb:bge-m3 clause centroids", "lxx:shared-greek", "gloss:overlap", "llm:scholarly-prior"],
+        "signals": [f"emb:{emb_label}", "lxx:shared-greek", "gloss:overlap", "llm:scholarly-prior",
+                   f"xling:shared-surface (>= {XLING_MIN_LANGS} langs, aligned_lex_hf)",
+                   "bdb_root:shared-etymological-root (public domain, OpenScriptures/HebrewLexicon)",
+                   "parallelism:poetic-structural-pair (T'OMIM CC BY 4.0 + our own BHSA half_verse detection)"]
+                   + (["hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007, experimental)"] if use_hwn else []),
         "confidence_tiers": {"high": tier["high"], "recall": tier["recall"], "prior": tier["prior"]},
         "lexemes": len(lexemes), "edges": len(rows), "topk": TOPK, "min_cos": MIN_COS, "min_occ": MIN_OCC,
         "content_sha256": hashlib.sha256(dest.read_bytes()).hexdigest(),
         "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick.",
     }
-    (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    _write_by_strong(rows)                            # committed service form for shoresh /field, /concept
-    _write_by_lexeme(rows, meta)                       # homograph-precise service form (same, split by lexeme)
+    (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    _write_by_strong(rows, out_dir)                     # committed service form for shoresh /field, /concept
+    _write_by_lexeme(rows, meta, out_dir)                # homograph-precise service form (same, split by lexeme)
     print(f"[neighbors] {len(rows)} edges (high={tier['high']} recall={tier['recall']} "
           f"prior={tier['prior']}) -> {dest}", file=sys.stderr)
 
@@ -225,7 +414,7 @@ def build(validate: bool, llm_edges=None):
     return manifest
 
 
-def _write_by_strong(rows):
+def _write_by_strong(rows, out_dir: Path = OUT_DIR):
     """Committed service form: resources/semantic_neighbors/by_strong.tsv — high+prior tiers rolled
     lexeme→Strong's, with the neighbor's English gloss, for the shoresh /field + /concept endpoints
     (which key on Strong's). Small + tracked (the parquet is the bulk/gitignored form)."""
@@ -253,13 +442,13 @@ def _write_by_strong(rows):
             best[(a, b)] = (rel, conf, score)
     lines = sorted(((a, b, gl.get(b, ""), rel, conf, round(sc, 3))
                     for (a, b), (rel, conf, sc) in best.items()), key=lambda r: (r[0], -r[5]))
-    (OUT_DIR / "by_strong.tsv").write_text(
+    (out_dir / "by_strong.tsv").write_text(
         "# semantic field per Strong's (high+prior tiers, rolled from lexeme neighbors); CC0\n"
         "strong\tneighbor\tneighbor_gloss\trelation\tconfidence\tscore\n"
         + "\n".join("\t".join(map(str, r)) for r in lines) + "\n", encoding="utf-8")
 
 
-def _write_by_lexeme(rows, meta):
+def _write_by_lexeme(rows, meta, out_dir: Path = OUT_DIR):
     """Homograph-precise service form: resources/semantic_neighbors/by_lexeme.tsv — the same high+prior
     field as by_strong.tsv, but NOT rolled: each row keeps the source + neighbor **lexeme** (MACULA
     anchor) and its own gloss. 64% of Strong's numbers cover >1 lexeme, so `by_strong` merges distinct
@@ -283,10 +472,128 @@ def _write_by_lexeme(rows, meta):
         ((hs(lx), lx, meta.get(lx, ("", ""))[1], hs(nb), nb, meta.get(nb, ("", ""))[1], rel, conf, round(sc, 3))
          for (lx, nb), (rel, conf, sc) in best.items()),
         key=lambda r: (r[0], r[1], -r[8]))
-    (OUT_DIR / "by_lexeme.tsv").write_text(
+    (out_dir / "by_lexeme.tsv").write_text(
         "# semantic field per MACULA lexeme (high+prior tiers, homograph-precise); CC0\n"
         "strong\tlexeme\tlexeme_gloss\tneighbor_strong\tneighbor_lexeme\tneighbor_gloss\trelation\tconfidence\tscore\n"
         + "\n".join("\t".join(map(str, r)) for r in lines) + "\n", encoding="utf-8")
+
+
+def _load_bdb_root_pairs() -> set[frozenset]:
+    """{frozenset({H_a, H_b}), ...} — Hebrew Strong's pairs sharing a Brown-Driver-Briggs etymological
+    root (resources/bdb_roots/root_groups.tsv, public domain via OpenScriptures/HebrewLexicon CC-BY-4.0,
+    see build_bdb_roots.py). Validated 2026-08: same-root pairs share an SDBH domain 50.6% of the time
+    (2,731/5,397 checkable pairs) — better than this project's own from-scratch clustering (45.1%), at
+    much larger scale. No corroboration-count threshold needed (unlike xling) — root grouping IS already
+    expert etymological judgment, not something to additionally statistically corroborate."""
+    if not BDB_ROOTS.exists():
+        return set()
+    by_root: dict[str, set[str]] = collections.defaultdict(set)
+    with BDB_ROOTS.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#") or line.startswith("root_id\t"):
+                continue
+            p = line.rstrip("\n").split("\t")
+            if len(p) >= 2 and p[1].startswith("H"):
+                by_root[p[0]].add(p[1])
+    pairs: set[frozenset] = set()
+    for strongs in by_root.values():
+        for a, b in itertools.combinations(sorted(strongs), 2):
+            pairs.add(frozenset((a, b)))
+    return pairs
+
+
+def _load_parallelism_pairs() -> tuple[set[frozenset], set[frozenset]]:
+    """(syn_pairs, ant_pairs) from resources/parallelism/parallelism_pairs.tsv — poetic-parallelism
+    structural pairs (T'OMIM expert-verified, CC BY 4.0, + our own BHSA half_verse detection; see
+    build_parallelism_pairs.py). Only likely_synonym/likely_antonym are used, both already
+    cross-referenced against the independent LLM signal in that file's own build. `unclassified` pairs
+    (parallelism found the pair, but nothing independently judged relation) are deliberately SKIPPED
+    here — Hebrew poetry uses antithetic parallelism as often as synonymous, and mixing unclassified
+    pairs back in as a blanket 'similar' signal would reintroduce the exact antithetic-contamination
+    problem that file's relation-labeling was built to solve."""
+    syn, ant = set(), set()
+    if not PARALLELISM.exists():
+        return syn, ant
+    with PARALLELISM.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#") or line.startswith("strong_a\t"):
+                continue
+            p = line.rstrip("\n").split("\t")
+            if len(p) < 5:
+                continue
+            a, b, relation = p[0], p[1], p[4]
+            if relation == "likely_synonym":
+                syn.add(frozenset((a, b)))
+            elif relation == "likely_antonym":
+                ant.add(frozenset((a, b)))
+    return syn, ant
+
+
+def _load_hwn_pairs() -> set[frozenset]:
+    """{frozenset({H_a, H_b}), ...} — Hebrew WordNet synset co-membership (Ordan & Wintner, U. Haifa
+    2007), bare-consonant-matched to biblical Strong's (see build_hwn_benchmark.py, same matching
+    logic reused here). CAUTION (2026-08 finding): HWN is MODERN Hebrew vocabulary — the one
+    independent check that favored generic bge-m3 over BEREL, plausibly because its register doesn't
+    match what BEREL specializes in. Using it as an active signal here is a deliberate experiment, not
+    an assumed win like bdb_root/parallelism — measure before trusting; if it doesn't help (or hurts),
+    drop it rather than keep it out of momentum. Using it as a signal also means it's no longer a clean
+    independent validator for any pair it directly produces — T'OMIM and the internal SDBH check remain
+    unaffected."""
+    try:
+        from macula.build_hwn_benchmark import load_bare_to_strongs, load_hwn_synsets, to_modern_form
+    except ImportError:
+        return set()
+    synsets = load_hwn_synsets()
+    bare2strongs = load_bare_to_strongs()
+    pairs: set[frozenset] = set()
+    for _sid, _pos, lemmas in synsets:
+        strongs: set[str] = set()
+        for lem in lemmas:
+            strongs |= bare2strongs.get(to_modern_form(lem, "hbo"), set())
+        for a, b in itertools.combinations(sorted(strongs), 2):
+            pairs.add(frozenset((a, b)))
+    return pairs
+
+
+def _load_xling_pairs(min_langs: int = XLING_MIN_LANGS) -> dict[frozenset, int]:
+    """{frozenset({H_a, H_b}): n_langs} — Hebrew Strong's pairs empirically co-rendered by the SAME
+    target-language surface, corroborated across >= min_langs INDEPENDENT languages
+    (resources/aligned_lex_hf/<lang>.tsv, bcv-commons/lexeme-alignments — CC0, ~924 languages).
+
+    Same corroboration principle as the existing `lxx` signal (two Hebrew lexemes mapping to the same
+    Greek Strong's via the LXX are near) — but scaled from ONE independent translation tradition
+    (Greek) to ~924. Was in the original 4-signal design (semantic-neighbors-pack.md) but never built;
+    this fills that gap. Free (no LLM spend) — a real alternative/complement to paying for LLM
+    coverage over unembedded lexemes, though it only surfaces SYNONYMY (antonyms never share a
+    rendering), unlike the LLM layer which also flags antonyms to demote embedding false-positives."""
+    pair_langs: dict[frozenset, set[str]] = collections.defaultdict(set)
+    if not ALIGNED_HF_DIR.exists():
+        return {}
+    for path in sorted(ALIGNED_HF_DIR.glob("*.tsv")):
+        lang = path.stem
+        surface_strongs: dict[str, set[str]] = collections.defaultdict(set)
+        with path.open(encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("#") or line.startswith("surface"):
+                    continue
+                p = line.rstrip("\n").split("\t")
+                if len(p) < 4:
+                    continue
+                surface, strong = p[0].strip(), p[1].strip()
+                if not surface or not strong.startswith("H"):
+                    continue
+                try:
+                    count, share = int(p[2]), float(p[3])
+                except ValueError:
+                    continue
+                if count >= XLING_MIN_COUNT and share >= XLING_MIN_SHARE:
+                    surface_strongs[surface].add(strong)
+        for strongs in surface_strongs.values():
+            if len(strongs) < 2:
+                continue
+            for a, b in itertools.combinations(sorted(strongs), 2):
+                pair_langs[frozenset((a, b))].add(lang)
+    return {pair: len(langs) for pair, langs in pair_langs.items() if len(langs) >= min_langs}
 
 
 def _load_llm_edges(path):
@@ -335,8 +642,41 @@ def main():
     ap.add_argument("--validate", action="store_true", help="score vs NC domains (internal yardstick)")
     ap.add_argument("--llm-edges", type=Path, default=LLM_EDGES if LLM_EDGES.exists() else None,
                     help="method=llm syn/ant edges to tier against (default: semantic_neighbors/llm_edges.tsv)")
+    ap.add_argument("--emb", type=Path, default=EMB,
+                    help="clause-embedding .npz to use (default: context_emb.npz / bge-m3). Pass an "
+                         "alternative (e.g. context_emb__dicta_il_BEREL_3_0.npz) to experiment with a "
+                         "different embedding model — dimension is read from the file, no code change needed.")
+    ap.add_argument("--out-dir", type=Path, default=OUT_DIR,
+                    help="output dir (default: resources/semantic_neighbors/). Use a separate dir for "
+                         "--emb experiments so they never overwrite the production pack.")
+    ap.add_argument("--emb-label", default=None,
+                    help="manifest label for the emb signal (default: derived from --emb's filename)")
+    ap.add_argument("--sense-split", action="store_true",
+                    help="cluster per (lexeme, sense) using resources/senses/hbo_lex.tsv's cluster "
+                         "boundaries (hbo.db's sense column), not one blended centroid per whole lexeme")
+    ap.add_argument("--no-xling", action="store_true",
+                    help="skip the xling signal (aligned_lex_hf cross-lingual corroboration). Useful "
+                         "for a clustering-input build — validated (2026-08) that mixing xling's large "
+                         "volume of prior-tier edges into Louvain clustering hurts quality; its coverage-"
+                         "extension value is for direct lookups, not proven as clustering fuel.")
+    ap.add_argument("--no-bdb", action="store_true",
+                    help="skip the bdb_root signal (BDB etymological root-groups, public domain). "
+                         "Validated (2026-08) at 50.6%% SDBH-domain agreement — better than this "
+                         "project's own clustering — with no known downside as clustering fuel (unlike "
+                         "xling); default is ON.")
+    ap.add_argument("--no-parallelism", action="store_true",
+                    help="skip the parallelism signal (T'OMIM + our own poetic-structural pairs, "
+                         "candidate #7). Only likely_synonym/likely_antonym are used; default is ON.")
+    ap.add_argument("--no-hwn", action="store_true",
+                    help="skip the hwn signal (Hebrew WordNet, Ordan & Wintner 2007, modern Hebrew). "
+                         "Independent of UBS MARBLE; register-mismatch risk did not materialize as a "
+                         "quality problem (validated 2026-08 at 89.7%% on its own prior-tier edges); "
+                         "default is ON.")
     a = ap.parse_args()
-    build(a.validate, a.llm_edges)
+    label = a.emb_label or ("bge-m3 clause centroids" if a.emb == EMB else f"{a.emb.stem} clause centroids")
+    build(a.validate, a.llm_edges, emb_path=a.emb, out_dir=a.out_dir, emb_label=label,
+          sense_split=a.sense_split, use_xling=not a.no_xling, use_bdb=not a.no_bdb,
+          use_parallelism=not a.no_parallelism, use_hwn=not a.no_hwn)
 
 
 if __name__ == "__main__":

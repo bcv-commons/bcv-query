@@ -52,7 +52,12 @@ def _load_dotenv() -> None:
         line = line.strip()
         if line and not line.startswith("#") and "=" in line:
             k, v = line.split("=", 1)
-            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+            k = k.strip()
+            # plain setdefault() treats an EMPTY existing value as "already set" and refuses to
+            # override it — some harnesses pre-declare ANTHROPIC_API_KEY="" in the shell env for
+            # safety, which would otherwise silently defeat .env entirely.
+            if not os.environ.get(k):
+                os.environ[k] = v.strip().strip('"').strip("'")
 
 
 STEP_SPINE = ROOT / "shoresh" / "spine" / "spine.db"   # STEPBible morph → proper-noun flag

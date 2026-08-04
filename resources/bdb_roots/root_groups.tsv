@@ -1,0 +1,4964 @@
+# BDB (public domain, 1906) etymological root-groups, via OpenScriptures/HebrewLexicon (CC-BY-4.0, pinned 21c9add1). Words sharing root_id are etymologically related — validated at 50.6% SDBH-domain agreement (2026-08), see build_bdb_roots.py and domain-replacement-roadmap.md. NOT Louw-Nida/SDBH derived — independent free source.
+root_id	strong	xlit	gloss	pos
+aad	H0003	ʾēb	freshness	N
+aad	H0024	ʾābîb	green	N
+aaf	H0006	ʾābad	perish	V
+aaf	H0008	ʾōbēd	destruction	N
+aaf	H0009	ʾăbēdâ	a lost thing	N
+aaf	H0010	ʾbdh	Destruction	N
+aaf	H0011	ʾăbaddôn	Destruction	Np
+aaf	H0012	ʾabdān	destruction	N
+aaf	H0013	ʾobdan	destruction	N
+aan	H0014	ʾābâ	be willing	V
+aan	H0016	ʾēbeh	reed	N
+aan	H0034	ʾebyôn	in want	A
+aan	H0035	ʾăbîyônâ	caper-berry	N
+aao	H0001	ʾāb	father	N
+aao	H0085	ʾabrāhām	Abraham	Np
+aao	H0087	ʾabrām	Abram	Np
+acj	H0056	ʾābal	mourn	V
+acj	H0060	ʾēbel	mourning	N
+acj	H0057	ʾābēl	mourning	A
+acl	H0059	ʾābēl	Abel	Np
+acl	H0058	ʾābēl	a meadow	N
+acs	H0068	ʾeben	stone	N
+acs	H0070	ʾōben	wheel	N
+acs	H0072	ʾeben hāʿēzer	Ebenezer	N
+acx	H0075	ʾābas	feed	V
+acx	H0018	ʾēbûs	crib	N
+acx	H3965	maʾăbûs	granary	N
+ade	H0080	ʾābāq	dust	N
+ade	H0081	ʾăbāqâ	powders	N
+adi	H0047	ʾabbîr	mighty	A
+adi	H0046	ʾābîr	strong	A
+adi	H0083	ʾēber	pinions	N
+adi	H0082	ʾābar	fly	V
+adi	H0084	ʾebrâ	pinion	N
+aec	H0098	ʾăgam	troubled pool	N
+aec	H0099	ʾāgēm	sad	A
+aej	H0095	ʾăgôrâ	payment	N
+aej	H0107	ʾiggeret	letter	N
+aff	H0121	ʾādām	Adam	Np
+aff	H0120	ʾādām	man	N
+aff	H0127	ʾădāmâ	ground	N
+afg	H0123	ʾĕdôm	Edom	Np
+afg	H0122	ʾĕdōm	rosy	N
+afg	H0122	ʾādōm	red	A
+afg	H0119	ʾādōm	be red	V
+afg	H0124	ʾōdem	carnelian	N
+afg	H0125	ʾădamdām	reddish	A
+afg	H0132	ʾadmônî	red	A
+afg	H0130	ʾădōmî	Edomite	A
+afs	H0113	ʾādôn	lord	N
+afs	H0134	ʾeden	base	N
+afs	H0136	ʾădōnāy	lord	N
+agc	H0142	ʾādar	wide	V
+agc	H0117	ʾaddîr	majestic	A
+agc	H0145	ʾeder	amplitude	N
+agc	H0155	ʾadderet	glory	N
+agk	H0157	ʾāhēb	love	V
+agk	H0158	ʾahab	love	N
+agk	H0159	ʾōhab	amours	N
+agk	H0160	ʾahăbâ	love	N
+agy	H0167	ʾāhal	tent	V
+agy	H0168	ʾōhel	tent	N
+agy	H0170	ʾohŏlâ	Oholah	Np
+agy	H0172	ʾohŏlîbâ	Oholibah	Np
+ahm	H0108	ʾēd	mist	N
+ahm	H0181	ʾûd	brand	N
+ahm	H0182	ʾôdâ	cause	N
+ahm	H0343	ʾêd	distress	N
+ahp	H0184	ʾāwâ	sign	V
+ahp	H0226	ʾôt	sign	N
+ahq	H0183	ʾāwâ	incline	V
+ahq	H0176	ʾô	desire	N
+ahq	H0185	ʾawwâ	desire	N
+ahq	H3970	maʾăway	desire	N
+ahq	H8378	taʾăwâ	desire	N
+ahr	H0338	ʾî	jackal	N
+ahr	H0344	ʾayyâ	hawk	N
+ahw	H0188	ʾôy	woe!	Tj
+ahw	H0190	ʾôyâ	woe!	Tj
+aic	H0191	ʾĕwîl	foolish	A
+aic	H0196	ʾĕwilî	silly	A
+aic	H0200	ʾiwwelet	folly	N
+aid	H0193	ʾûl	body	N
+aid	H0193	ʾûl	leading man	N
+aid	H0197	ʾûlām	porch	N
+aid	H0352	ʾayil	leader	N
+aid	H0352	ʾayil	terebinth	N
+aid	H0352	ʾayil	projecting pillar	N
+aid	H0352	ʾayil	ram	N
+aid	H0354	ʾayyāl	hart	N
+aid	H0355	ʾayyālâ	hind	N
+aid	H0361	ʾêlām	porch	N
+aid	H0365	ʾayyelet	hind	N
+aid	H0424	ʾēlâ	terebinth	N
+aid	H0436	ʾēlôn	terebinth	N
+aiq	H0205	ʾāwen	trouble	N
+aiq	H8383	tĕʾunîm	toil	N
+ajb	H0215	ʾôr	be light	V
+ajb	H0216	ʾôr	light	N
+ajb	H0217	ʾûr	flame	N
+ajb	H0219	ʾôrâ	herb	N
+ajb	H0219	ʾôrâ	light	N
+ajb	H0224	ʾûrîm	Urim	N
+ajb	H0217	ʾurîm	region of light	N
+ajb	H3974	māʾôr	luminary	N
+ajb	H3975	mĕʾûrâ	light-hole	N
+ajp	H0227	ʾāz	at that time	D
+ajp	H0233	ʾăzay	then	D
+ajp	H0227	mēʾāz	from that time	D
+ajy	H0239	ʾāzan	weigh	V
+ajy	H3976	mōʾzēn	balances	N
+akb	H0240	ʾāzēn	implements	N
+akb	H0238	ʾāzan	give ear	V
+akb	H0241	ʾōzen	ear	N
+aki	H0247	ʾāzar	gird	V
+aki	H0232	ʾēzôr	waistcloth	N
+aks	H0259	ʾeḥād	one	A
+aks	H2297	ḥad	one	A
+aku	H0251	ʾāḥ	brother	N
+aku	H0264	ʾaḥăwâ	brotherhood	N
+aku	H0269	ʾāḥôt	sister	N
+ale	H0270	ʾāḥaz	grasp	V
+ale	H0272	ʾăḥuzzâ	possession	N
+amv	H0309	ʾāḥar	to remain behind	V
+amv	H0268	ʾāḥôr	the hinder side	N
+amv	H0312	ʾaḥēr	another	A
+amv	H0310	ʾaḥar	the hinder	D
+amv	H0314	ʾaḥărôn	coming after	A
+amv	H0310	ʾaḥăray	backwards	A
+amv	H0319	ʾaḥărît	after-part	N
+amv	H0322	ʾăḥōrannît	backwards	D
+amv	H3186	yāḥar	to remain behind	V
+anm	H0331	ʾāṭam	shut	V
+anm	H0330	ʾēṭûn	thread	N
+anp	H0332	ʾāṭar	shut up	V
+anp	H0334	ʾiṭṭēr	shut up	A
+anu	H0335	ʾay	where?	D
+anu	H0346	ʾayyēh	where?	D
+anu	H0349	ʾêk	how?	D
+anu	H0349	ʾêkâ	how?	D
+anu	H0351	ʾêkōh	where	D
+anu	H0349	ʾêkākâ	How?	D
+anu	H0370	ʾayin	whence?	D
+anu	H0375	ʾêpōh	what place?	D
+anu	H0575	ʾān	where?	D
+anv	H0340	ʾāyab	be hostile to	V
+anv	H0341	ʾāyab	be hostile to	N
+anv	H0342	ʾêbâ	enmity	N
+anv	H0347	ʾîyôb	Job	Np
+aoj	H0353	ʾĕyāl	help	N
+aoj	H0360	ʾĕyālût	power	N
+apa	H0366	ʾāyōm	terrible	A
+apa	H0367	ʾêmâ	terror	N
+apf	H0369	ʾayin	nothing	D
+apf	H0371	ʾîn	is it not?	D
+apl	H0376	ʾîš	man	N
+apl	H0380	ʾîšôn	pupil	N
+aqg	H0398	ʾākal	eat	V
+aqg	H0396	ʾăkîlâ	an eating	N
+aqg	H0400	ʾōkel	food	N
+aqg	H0402	ʾoklâ	food	N
+aqg	H3978	maʾăkāl	food	N
+aqg	H3979	maʾăkelet	knife	N
+aqg	H3980	maʾăkōlet	fuel	N
+aqg	H4361	makkōlet	food-stuff	N
+aqm	H0404	ʾākap	press	V
+aqm	H0405	ʾekep	pressure	N
+aqt	H0417	ʾelgābîš	hail	N
+aqt	H0418	ʾalgûmmîm	sandal-wood	N
+aqt	H0484	ʾalmuggîm	almug	N
+aqt	H0510	ʾalqûm	band of soldiers	N
+arj	H0421	ʾālâ	wail	V
+arj	H0451	ʾalyâ	fat tail	N
+ark	H0422	ʾālâ	swear	V
+ark	H0423	ʾālâ	oath	N
+ark	H8381	taʾălâ	curse	N
+arm	H0410	ʾēl	god	N
+arm	H0433	ʾĕlōah	god	N
+arm	H0430	ʾĕlōhîm	gods	N
+atj	H0427	ʾallâ	oak	N
+atj	H0437	ʾallôn	oak	N
+atk	H0434	ʾĕlûl	good for nothing	A
+atk	H0457	ʾĕlîl	insufficiency	N
+ato	H0481	ʾālam	bind	V
+ato	H0483	ʾillēm	dumb	A
+ato	H0482	ʾēlem	silence	N
+ato	H0485	ʾălumâ	sheaf	N
+aui	H0505	ʾelep	thousand	N
+aui	H0441	ʾallûp	chief	N
+aui	H0503	ʾālap	thousand	V
+aul	H0502	ʾālap	learn	V
+aul	H0441	ʾallûp	tame	A
+aul	H0504	ʾelep	cattle	N
+avm	H0535	ʾāmal	be weak	V
+avm	H0537	ʾămēlāl	feeble	A
+avm	H0536	ʾumlal	sick	A
+avq	H0517	ʾēm	mother	N
+avq	H0520	ʾammâ	foundation	N
+avq	H0520	ʾammâ	ell	N
+avq	H0523	ʾummâ	tribe	N
+avu	H0539	ʾāman	confirm	V
+avu	H0527	ʾāmôn	artificer	N
+avu	H0525	ʾāmôn	artificer	N
+avu	H0530	ʾĕmûnâ	firmness	N
+avu	H0529	ʾēmun	trusting	N
+avu	H0543	ʾāmēn	verily	D
+avu	H0542	ʾāmmān	master-workman	N
+avu	H0544	ʾōmen	faithfulness	N
+avu	H0548	ʾămānâ	faith	N
+avu	H0547	ʾōmĕnâ	confirm	N
+avu	H0546	ʾomnâ	verily	D
+avu	H0545	ʾomnâ	bringing up	N
+avu	H0552	ʾumnām	verily	D
+avu	H0551	ʾomnām	verily	D
+avu	H0571	ʾĕmet	firmness	N
+awf	H0553	ʾāmēṣ	be stout	V
+awf	H0533	ʾammîṣ	mighty	A
+awf	H0554	ʾāmōṣ	strong	A
+awf	H0555	ʾōmeṣ	strength	N
+awf	H0556	ʾamṣâ	strength	N
+awf	H3981	maʾămāṣ	power	N
+awn	H0559	ʾāmar	utter	V
+awn	H0534	ʾāmîr	top	N
+awn	H0561	ʾēmer	utterance	N
+awn	H0562	ʾōmer	utterance	N
+awn	H0565	ʾimrâ	utterance	N
+awn	H0565	ʾemrâ	utterance	N
+awn	H3982	maʾămar	word	N
+axd	H0579	ʾānâ	be opportune	V
+axd	H8385	taʾănâ	occasion	N
+axd	H8385	tōʾănâ	opportunity	N
+axe	H0578	ʾānâ	mourn	V
+axe	H0592	ʾănîyâ	mourning	N
+axe	H8386	taʾănîyâ	mourning	N
+axf	H0590	ʾŏnî	ships	N
+axf	H0591	ʾŏnîyâ	a ship	N
+axj	H0584	ʾānaḥ	sigh	V
+axj	H0585	ʾănāḥâ	sighing	N
+axl	H0587	ʾănaḥnû	we	Pp
+axl	H5168	naḥnû	we	Pp
+axw	H0599	ʾānap	be angry	V
+axw	H0601	ʾănāpâ	unclean bird	N
+axw	H0639	ʾap	nostril	N
+axy	H0602	ʾānaq	cry	V
+axy	H0603	ʾănāqâ	crying	N
+axy	H0604	ʾănāqâ	ferret	N
+ayt	H0622	ʾāsap	gather	V
+ayt	H0614	ʾāsîp	ingathering	N
+ayt	H0624	ʾāsōp	store	N
+ayt	H0625	ʾōsēp	gathering	N
+ayt	H0626	ʾăsēpâ	a collecting	N
+ayt	H0627	ʾăsuppâ	collection	N
+ayt	H0628	ʾăsapsup	collection	N
+azc	H0631	ʾāsar	tie	V
+azc	H0612	ʾēsûr	band	N
+azc	H0616	ʾassîr	prisoners	N
+azc	H0615	ʾāsîr	bondman	N
+azc	H0632	ʾissār	bond	N
+azc	H4147	môsēr	band	N
+azc	H4562	māsōret	bond of the covenant	N
+azj	H0640	ʾāpad	gird on ephod	V
+azj	H0642	ʾăpuddâ	ephod	N
+azj	H0646	ʾēpôd	ephod	N
+azm	H0644	ʾāpâ	bake	V
+azm	H3989	maʾăpeh	thing baked	N
+azv	H0648	ʾāpîl	late	A
+azv	H0651	ʾāpēl	gloomy	A
+azv	H0652	ʾōpel	darkness	N
+azv	H0653	ʾăpēlâ	darkness	N
+azv	H3990	maʾăpēl	darkness	N
+azv	H3991	maʾpēlĕyâ	deep darkness	N
+azz	H0212	ʾôpān	wheel	N
+azz	H0655	ʾōpen	circumstance	N
+bab	H0656	ʾāpēs	cease	V
+bab	H0657	ʾepes	ceasing	N
+bab	H0657	ʾōpes	the soles	N
+bai	H0662	ʾāpaq	hold	V
+bai	H0650	ʾāpîq	channel	N
+bam	H0666	ʾăpēr	covering	N
+bam	H0668	ʾappiryôn	sedan	N
+bbc	H0679	ʾaṣṣîl	joining	N
+bbc	H0678	ʾāṣîl	side	N
+bbc	H0681	ʾēṣel	conjunction	R
+bbc	H0680	ʾāṣal	lay aside	V
+bbi	H0686	ʾāṣar	lay up	V
+bbi	H0214	ʾôṣār	treasure	N
+bbr	H0693	ʾārab	lie in wait	V
+bbr	H0695	ʾereb	ambuscade	N
+bbr	H0696	ʾōreb	ambuscade	N
+bbr	H0699	ʾărubbâ	lattice	N
+bbr	H0698	ʾārĕbâ	artifice	N
+bbr	H3993	maʾărāb	ambush	N
+bcd	H0707	ʾārag	weave	V
+bcd	H0708	ʾereg	loom	N
+bcd	H0710	ʾargĕwān	purple	N
+bcd	H0713	ʾargāmān	purple	N
+bcl	H0717	ʾārâ	pluck	V
+bcl	H0220	ʾăwērâ	manger	N
+bcl	H0738	ʾărî	lion	N
+bcl	H0738	ʾaryēh	lion	N
+bcl	H0723	ʾuryâ	manger	N
+bcm	H0741	ʾăriʾêl	hearth	N
+bcm	H0691	ʾerʾēl	heroes	N
+bcm	H0740	ʾărîʾēl	Ariel	Np
+bcm	H0739	ʾărîʾēl	lion of God	N
+bcm	H2025	harʾēl	hearth	N
+bcy	H0729	ʾārûz	firm	A
+bcy	H0730	ʾerez	cedar	N
+bcy	H0731	ʾarzâ	cedar-panels	N
+bda	H0732	ʾāraḥ	wander	V
+bda	H0734	ʾōraḥ	way	N
+bda	H0737	ʾăruḥâ	meal	N
+bda	H0736	ʾōrĕḥâ	travelling company	N
+bds	H0748	ʾārak	be long	V
+bds	H0724	ʾărûkâ	healing	N
+bds	H0750	ʾārēk	long	A
+bds	H0752	ʾārōk	long	A
+bds	H0753	ʾōrek	length	N
+ber	H0779	ʾārar	curse	V
+ber	H3994	mĕʾērâ	a curse	N
+bey	H0784	ʾēš	fire	N
+bey	H0799	ʾešdāt	fire	N
+bey	H0801	ʾiššeh	an offering made by fire	N
+bey	H0800	ʾeššâ	from their fire	N
+bff	H0793	ʾešed	foundation	N
+bff	H0794	ʾăšēdâ	foundation	N
+bgi	H0816	ʾāšam	offend	V
+bgi	H0818	ʾāšēm	guilty	A
+bgi	H0817	ʾāšām	offence	N
+bgi	H0819	ʾašmâ	wrong-doing	N
+bhd	H0833	ʾāšar	go straight	V
+bhd	H0838	ʾăšûr	step	N
+bhd	H0835	ʾešer	happiness	N
+bhd	H0838	ʾaššur	step	N
+bhd	H0836	ʾāšēr	Asher	Np
+bhd	H0837	ʾōšer	happiness	N
+bhd	H0842	ʾăšērâ	grove. Compare	Np
+bhd	H0839	ʾăšurîm	cedar tree	N
+bhd	H8391	tĕʾaššûr	box-tree	N
+bhn	H0377	ʾšš	be a man	V
+bhn	H0808	ʾāšîš	raisin-cake	N
+bhn	H0809	ʾăšîšâ	raisin-cake	N
+bhy	H0857	ʾātâ	come	V
+bhy	H2978	ʾîtôn	entrance	N
+biw	H0874	bāʾar	make distinct	V
+biw	H0875	bĕʾēr	well	N
+biw	H0877	bōʾr	cistern	N
+biw	H0883	bĕʾēr laḥay rōʾî	Beer-lahai-roi	Np
+biw	H0884	bĕʾēr šebaʿ	Beer-shebah	Np
+biw	H0953	bôr	pit	N
+bji	H0887	bāʾaš	have a bad smell	V
+bji	H0889	bĕʾōš	stench	N
+bji	H0890	boʾšâ	stinking weeds	N
+bji	H0891	bĕʾušîm	stinking	N
+bjs	H0898	bāgad	act treacherously	V
+bjs	H0899	beged	garment	N
+bjs	H0899	beged	treachery	N
+bjs	H0900	bōgĕdôt	men of treachery	N
+bjs	H0901	bāgôd	treacherous	A
+bkd	H0909	bādad	be separate	V
+bkd	H0905	bad	separation	N
+bkd	H0910	bādād	isolation	N
+bki	H0914	bādal	be divided	V
+bki	H0913	bĕdîl	alloy	N
+bki	H0915	bādāl	piece	N
+bki	H0916	bĕdōlaḥ	bdellium	N
+bki	H3995	mibdālâ	separate place	N
+bko	H0919	bedeq	fissure	N
+bko	H0918	bādaq	mend	V
+bku	H0926	bāhal	tremble	V
+bku	H0928	behālâ	dismay	N
+bkw	H0929	bĕhēmâ	beast	N
+bkw	H0930	bĕhēmôt	behemoth	N
+ble	H0925	bāhîr	bright	A
+ble	H0934	baheret	brightness	N
+blg	H0935	bôʾ	come in	V
+blg	H0872	biʾâ	entrance	N
+blg	H3996	mābôʾ	entrance	N
+blg	H3997	mĕbôʾâ	entrance	N
+blg	H4126	môbāʾ	in-coming	N
+blg	H8393	tĕbûʾâ	product	N
+blj	H0936	bûz	despise	V
+blj	H0937	bûz	contempt	N
+blj	H0939	bûzâ	contempt	N
+blo	H0943	bûk	perplex	V
+blo	H3998	mĕbûkâ	confusion	N
+bls	H0947	bûs	tread down	V
+bls	H2983	yĕbûsî	Jebusite	N
+bls	H4001	mĕbûsâ	down-treading	N
+bls	H8395	tĕbûsâ	down-treading	N
+blx	H0950	bûqâ	emptiness	N
+blx	H4003	mĕbûqâ	emptiness	N
+bmf	H0954	bôš	be ashamed	V
+bmf	H0955	bûšâ	shame	N
+bmf	H1317	bošnâ	shame	N
+bmf	H1322	bōšet	shame	N
+bmf	H4016	mābôš	his privates	N
+bmk	H0959	bāzâ	despise	V
+bmk	H0960	bāzōh	despise	V
+bmk	H0963	bizzāyôn	contempt	N
+bmk	H5240	nĕmibzeh	despise	A
+bmm	H0962	bāzaz	spoil	V
+bmm	H0897	bag	spoiling	N
+bmm	H0957	baz	spoiling	N
+bmm	H0961	bizzâ	spoil	N
+bnc	H0974	bāḥan	examine	V
+bnc	H0971	baḥûn	their siege-towers	N
+bnc	H0969	bāḥôn	assayer	N
+bnc	H0975	baḥan	watch-tower	N
+bnc	H0976	bōḥan	testing	N
+bne	H0977	bāḥar	choose	V
+bne	H0970	bāḥûr	young man	N
+bne	H0979	bĕḥûrîm	youth	N
+bne	H0972	bāḥîr	chosen	N
+bne	H4004	mibḥôr	choice	N
+bne	H4005	mibḥār	choicest	N
+bnh	H0981	bāṭâ	speak rashly	V
+bnh	H4008	mibṭāʾ	rash utterance	N
+bnk	H0982	bāṭaḥ	trust	V
+bnk	H0983	beṭaḥ	security	N
+bnk	H0985	biṭḥâ	trusting	N
+bnk	H0986	biṭṭāḥôn	trust	N
+bnk	H0987	baṭṭuḥôt	security	N
+bnk	H4009	mibṭāḥ	confidence	N
+bnx	H0015	bāyay	entreat	Tj
+bnx	H0994	bî	I pray	T
+bny	H0995	bîn	discern	V
+bny	H0996	bên	interval	R
+bny	H0998	bînâ	understanding	N
+bny	H1004	bêt	between	N
+bny	H1143	bēnayim	interval	N
+bny	H4000	mābôn	discern	N
+bny	H8394	tĕbûnâ	understanding	N
+boc	H1002	bîrâ	castle	N
+boc	H1003	bîrānît	fortress	N
+bog	H1004	bayit	house	N
+bog	H1035	bêt leḥem	Bethlehem	Np
+bog	H1008	bēyt-ʾēl	Beth-el	Np
+bog	H1055	bîtān	house	N
+bqi	H1058	bākâ	weep	V
+bqi	H0439	ʾallôn bākût	weeping	N
+bqi	H1059	bekeh	a weeping	N
+bqi	H1065	bĕkî	weeping	N
+bqi	H1068	bĕkît	weeping	N
+bqu	H1069	bākar	give the birthright	V
+bqu	H1060	bĕkôr	first-born	N
+bqu	H1063	bikkûrâ	first ripe fig	N
+bqu	H1073	bikkûrâ	first ripe fig	N
+bqu	H1061	bikkûrîm	first-fruits	N
+bqu	H1067	bĕkîrâ	first-born	N
+bqu	H1070	beker	young camel	N
+bqu	H1062	bĕkōrâ	right of first-born	N
+bqu	H1072	bikrâ	young camel	N
+bre	H1082	bālag	gleam	V
+bre	H4010	mablîgît	smiling	N
+brj	H1089	bālah	trouble	V
+brj	H1091	ballāhâ	terror	N
+brk	H1086	bālâ	become old and worn out	V
+brk	H1077	bal	not	D
+brk	H1087	bāleh	worn out	A
+brk	H1094	bĕlôʾ	worn out things	N
+brk	H1097	bĕlî	wearing out	D
+brk	H1099	bĕlîmâ	nothingness	N
+brk	H1100	bĕlîyaʿal	worthlessness	N
+brk	H1107	bilʿădê	not unto	R
+brk	H1115	biltî	failure	T
+brk	H8399	tablît	destruction	N
+brx	H1101	bālal	mingle	V
+brx	H1098	bĕlîl	fodder	N
+brx	H1101	bālal	to give provender	V
+brx	H7642	šabbĕlûl	snail	N
+brx	H8397	tebel	confusion	N
+brx	H8400	tĕballul	confusion	N
+bse	H1104	bālaʿ	swallow down	V
+bse	H1105	belaʿ	swallowing	N
+bse	H1109	bilʿām	Balaam	Np
+bse	H1109	bilʿām	Bileam	Np
+bss	H1121	bēn	son	N
+bss	H1144	binyāmîn	Benjamin	Np
+bss	H1323	bat	daughter	N
+btg	H1129	bānâ	build	V
+btg	H1140	binyâ	structure	N
+btg	H1146	binyān	structure	N
+btg	H4011	mibneh	structure	N
+btg	H8403	tabnît	construction	N
+btz	H1154	beser	unripe	N
+btz	H1155	bōser	unripe	N
+bun	H1166	bāʿal	marry	V
+bun	H1078	bēl	Bel	Np
+bun	H1168	baʿal	Baal	Np
+bun	H1167	baʿal	owner	N
+bun	H1172	baʿălâ	mistress	N
+bvq	H1197	bāʿar	be brutish	V
+bvq	H1165	bĕʿîr	beasts	N
+bvq	H1198	baʿar	brutishness	N
+bvr	H1197	bāʿar	burn	V
+bvr	H1200	bĕʿērâ	burning	N
+bvx	H1204	bāʿat	fall upon	V
+bvx	H1161	biʿûtîm	terrors	N
+bvx	H1205	bĕʿātâ	terror	N
+bwj	H1214	bāṣaʿ	cut off	V
+bwj	H1215	beṣaʿ	gain made by violence	N
+bwk	H1206	bōṣ	mire	N
+bwk	H1207	biṣṣâ	swamp	N
+bwm	H1216	bāṣēq	swell	V
+bwm	H1217	bāṣēq	dough	N
+bwr	H1219	bāṣar	cut off	V
+bwr	H1208	bāṣôr	vintage	N
+bwr	H1210	bāṣîr	vintage	N
+bwr	H1220	beṣer	precious ore	N
+bwr	H6869	baṣṣārâ	dearth	N
+bwr	H1223	boṣrâ	enclosure	N
+bwr	H1225	biṣṣārôn	stronghold	N
+bwr	H1226	baṣṣōret	dearth	N
+bwr	H4013	mibṣār	fortification	N
+bxg	H1234	bāqaʿ	cleave	V
+bxg	H1233	bĕqîaʿ	fissure	N
+bxg	H1235	beqaʿ	half	N
+bxg	H1237	biqʿâ	valley	N
+bxi	H1238	bāqaq	empty	V
+bxi	H1228	baqbuq	flask	N
+bxk	H1239	bāqar	inquire	V
+bxk	H0951	bôqēr	herdsman	N
+bxk	H1241	bāqār	cattle	N
+bxk	H1242	bōqer	morning	N
+bxk	H1243	baqqārâ	a seeking	N
+bxk	H1244	biqqōret	punishment	N
+bxp	H1245	bāqaš	seek	V
+bxp	H1246	baqqāšâ	request	N
+bxx	H1254	bārāʾ	be fat	V
+bxx	H1274	bĕrî	fat	A
+bxx	H1277	bārîʾ	fat	A
+bxy	H1254	bārāʾ	shape	V
+bxy	H1278	bĕrîʾâ	a creation	N
+byg	H1258	bārad	hail	V
+byg	H1259	bārād	hail	N
+byg	H1261	bārōd	spotted	A
+byh	H1262	bārâ	eat	V
+byh	H1267	bārût	food	N
+byh	H1279	biryâ	food	N
+bys	H1272	bāraḥ	go through	V
+bys	H1280	bĕrîaḥ	bar	N
+bys	H1281	bārîaḥ	fleeing	A
+bys	H4015	mibrāḥ	flight	N
+bzi	H1288	bārak	kneel	V
+bzi	H1290	berek	knee	N
+bzi	H1295	bĕrēkâ	pool	N
+bzi	H1293	bĕrākâ	blessing	N
+bzr	H1299	bāraq	flash	V
+bzr	H1300	bāraq	flash	V
+bzr	H1300	bārāq	lightning	N
+bzr	H1301	bārāq	Barak	Np
+bzr	H1303	barqānîm	briers	N
+bzr	H1304	bārĕqat	gem	N
+bzr	H1304	bāreqet	emerald	N
+bzz	H1305	bārar	purify	V
+bzz	H1249	bar	pure	A
+bzz	H1250	bar	grain	N
+bzz	H1250	bār	field	N
+bzz	H1252	bōr	cleanness	N
+bzz	H1253	bōr	lye	N
+bzz	H1257	barburîm	fowl	N
+bzz	H1287	bōrît	lye	N
+caa	H1265	bĕrôš	cypress	N
+caa	H1266	bĕrôt	cypress	N
+cag	H1310	bāšal	boil	V
+cag	H1311	bāšēl	cooked	A
+cag	H4018	mĕbaššĕlôt	cooking-places	N
+cak	H1314	beśem	spice	N
+cak	H1313	bōśem	spice	N
+caq	H1319	bāśar	bear tidings	V
+caq	H1320	bāśār	flesh	N
+caq	H1309	bĕśōrâ	tidings	N
+cbe	H1330	bĕtûlâ	virgin	N
+cbe	H1331	bĕtûlîm	virginity	N
+cbi	H1334	bātar	cut in two	V
+cbi	H1335	beter	part	N
+cbn	H1324	bat	bath	N
+cbn	H1327	battâ	precipice	N
+cbn	H1326	bātâ	end	N
+cbs	H1342	gāʾâ	rise up	V
+cbs	H1341	gēʾ	proud	A
+cbs	H1343	gēʾeh	proud	A
+cbs	H1344	gēʾâ	pride	N
+cbs	H1346	gaʾăwâ	majesty	N
+cbs	H1347	gāʾôn	exaltation	N
+cbs	H1348	gēʾût	majesty	N
+cbs	H1349	gaʾăyôn	proud	A
+cbs	H1466	gēwâ	pride	N
+cbz	H1351	gāʾal	defile	V
+cbz	H1352	gōʾel	defiling	N
+cca	H1350	gāʾal	redeem	V
+cca	H1350	gĕʾûlay	redemption	N
+cca	H1353	gĕʾullâ	kin	N
+ccl	H1361	gābah	be high	V
+ccl	H1362	gābōah	high	A
+ccl	H1364	gābōah	high	A
+ccl	H1363	gōbah	height	N
+ccl	H1365	gabhût	haughtiness	N
+ccp	H1357	gēb	locust	N
+ccp	H1462	gōbay	locusts	N
+ccp	H1462	gôb	locusts	N
+ccw	H1371	gibbēaḥ	having a bald forehead	A
+ccw	H1372	gabbaḥat	bald forehead	N
+cdk	H1366	gĕbûl	border	N
+cdk	H1367	gĕbûlâ	border	N
+cdk	H1379	gābal	bound	V
+cdk	H1383	gablut	twisting	N
+cdk	H4020	migbālōt	twisted	N
+cdo	H1385	gĕbînâ	curd	N
+cdo	H1384	gibbēn	crook-backed	A
+cdo	H1386	gabnōn	peak	N
+cdr	H1375	gābîaʿ	cup	N
+cdr	H1389	gibʿâ	hill	N
+cdr	H1392	gibʿōl	bud	N
+cdr	H4021	migbāʿôt	head-gear	N
+cee	H1396	gābar	be strong	V
+cee	H1368	gibbôr	strong	A
+cee	H1369	gĕbûrâ	strength	N
+cee	H1376	gĕbîr	lord	N
+cee	H1377	gĕbîrâ	mistress	N
+cee	H1397	geber	man	N
+cee	H1399	geber	man	N
+cee	H1404	gĕberet	mistress	N
+cep	H1413	gādad	penetrate	V
+cep	H1407	gad	coriander	N
+cep	H1408	gad	that troop	Np
+cep	H1409	gād	fortune	N
+cep	H1417	gĕdûd	furrow	N
+cep	H1416	gĕdûd	band	N
+cep	H1418	gĕdûdâ	furrow	N
+cer	H1415	gādâ	bank	N
+cer	H1423	gĕdî	kid	N
+cer	H1429	gĕdîyâ	kids	N
+cer	H1428	gidyâ	bank	N
+cfl	H1431	gādal	grow up	V
+cfl	H1419	gādôl	great	A
+cfl	H1420	gĕdûllâ	greatness	N
+cfl	H1432	gādēl	becoming great	A
+cfl	H1433	gōdel	greatness	N
+cfl	H1434	gĕdilîm	twisted threads	N
+cfl	H4024	migdôl	tower	N
+cfl	H4026	migdāl	tower	N
+cfr	H1438	gādaʿ	hew	V
+cfr	H1439	gidʿôn	Gideon	Np
+cfv	H1442	gādap	revile	V
+cfv	H1422	gĕdûpâ	taunt	N
+cfv	H1421	giddûpîm	revilings	N
+cfz	H1443	gādar	wall up	V
+cfz	H1444	geder	wall	N
+cfz	H1447	gādēr	wall	N
+cfz	H1449	gĕdērâ	Gederah	Np
+cfz	H1448	gĕdērâ	wall	N
+cgk	H1455	gāhâ	depart	V
+cgk	H1456	gēhâ	healing	N
+cgq	H1461	gûb	dig	V
+cgq	H1356	gēb	beam	N
+cgq	H1356	gēb	pit	N
+cgr	H1463	gôg	Gog	Np
+cgr	H4031	māgôg	Magog	Np
+cgv	H1460	gēw	midst	N
+cgv	H1460	gēw	back	N
+cgv	H1458	gaw	back	N
+cgv	H1465	gēwâ	back	N
+cgv	H1471	gôy	nation	N
+cgv	H1472	gĕwîyâ	body	N
+chf	H1477	gûnî	Gunite	A
+chf	H1476	gûnî	Guni	Np
+chj	H1479	gûp	shut	V
+chj	H1480	gûpâ	body	N
+chm	H1481	gûr	dread	V
+chm	H4032	māgôr	fear	N
+chm	H4034	mĕgôrâ	fear	N
+chp	H1481	gûr	stir up strife	V
+chp	H1484	gôr	whelp	N
+chp	H1482	gûr	whelp	N
+chq	H1481	gûr	sojourn	V
+chq	H1616	gēr	sojourner	N
+chq	H1628	gērût	lodging	N
+chq	H4033	māgôr	sojourning-place	N
+chq	H4035	mĕgûrâ	store-house	N
+chq	H4460	mammĕgurôt	granary	N
+chy	H1491	gāzâ	cut	V
+chy	H1496	gāzît	cutting	N
+cib	H1494	gāzaz	shear	V
+cib	H1488	gēz	shearing	N
+cib	H1492	gizzâ	fleece	N
+cif	H1497	gāzal	tear away	V
+cif	H1499	gēzel	robbery	N
+cif	H1498	gāzēl	robbery	N
+cif	H1500	gĕzēlâ	plunder	N
+cip	H1504	gāzar	cut	V
+cip	H1506	gezer	part	N
+cip	H1509	gĕzērâ	separation	N
+cip	H1508	gizrâ	cutting	N
+cip	H4037	magzērâ	cutting instrument	N
+cje	H1518	gîaḥ	burst forth	V
+cje	H1521	gîḥôn	Gihon	Np
+cji	H1523	gîl	rejoice	V
+cji	H1524	gîl	circle	N
+cji	H1524	gîl	rejoicing	N
+cji	H1525	gîlâ	rejoicing	N
+ckc	H1540	gālâ	uncover	V
+ckc	H1473	gôlâ	exiles	N
+ckc	H1546	gālût	exile	N
+ckc	H1549	gillāyôn	table	N
+ckr	H1556	gālal	roll	V
+ckr	H1561	gēl	dung	N
+ckr	H1530	gal	heap	N
+ckr	H1536	gilgāl	wheel	N
+ckr	H1537	gilgāl	Gilgal	Np
+ckr	H1534	galgal	wheel	N
+ckr	H1538	gulgōlet	skull	N
+ckr	H1531	gullâ	basin	N
+ckr	H1543	gullâ	basin	N
+ckr	H1544	gillûl	idols	N
+ckr	H1550	gālîl	turning	A
+ckr	H1550	gālîl	cylinder	N
+ckr	H1552	gĕlîlâ	circuit	N
+ckr	H1553	gĕlîlôt	Geliloth	Np
+ckr	H1557	gālāl	dung	N
+ckr	H4039	mĕgillâ	roll	N
+ckx	H1563	gālam	wrap up	V
+ckx	H1545	gĕlôm	wrapping	N
+ckx	H1564	gōlem	embryo	N
+ckx	H1565	galmûd	hard	A
+clb	H1568	gilʿād	Gilead	Np
+clb	H1569	gilʿādî	Giladite	A
+clg	H1572	gāmāʾ	swallow	V
+clg	H1573	gōmeʾ	rush	N
+clp	H1580	gāmal	deal fully	V
+clp	H1576	gĕmûl	dealing	N
+clp	H1578	gĕmûlâ	dealing	N
+clp	H1581	gāmāl	camel	N
+clp	H8408	tagmûl	benefit	N
+clt	H1571	gam	also	D
+clt	H4041	mĕgammâ	accumulation	N
+clv	H1584	gāmar	end	V
+clv	H1586	gōmer	Gomer	Np
+cma	H1589	gānab	steal	V
+cma	H1590	gannāb	thief	N
+cma	H1591	gĕnēbâ	thing stolen	N
+cmj	H1598	gānan	cover	V
+cmj	H1588	gan	enclosure	N
+cmj	H1594	ginnâ	garden	N
+cmj	H1593	gannâ	garden	N
+cmj	H4043	māgēn	shield	N
+cmj	H4042	māgan	deliver up	V
+cmj	H4044	mĕginnâ	covering	N
+cmo	H1602	gāʿal	abhor	V
+cmo	H1604	gōʿal	loathing	N
+cmq	H1605	gāʿar	rebuke	V
+cmq	H1606	gĕʿārâ	rebuke	N
+cmq	H4045	migʿeret	rebuke	N
+cnn	H1624	gārâ	stir up	V
+cnn	H1627	gārôn	neck	N
+cnn	H8409	tigrâ	contention	N
+cnr	H1629	gāraz	cut	V
+cnr	H1631	garzen	axe	N
+cnw	H1486	gôrāl	lot	N
+cnw	H1632	gārōl	harsh	A
+cnz	H1633	gāram	lay aside	V
+cnz	H1634	gerem	bone	N
+cnz	H1633	gāram	break bones	V
+cod	H1638	gāras	be crushed	V
+cod	H1643	gereś	a crushing	N
+coe	H1639	gāraʿ	diminish	V
+coe	H4052	migrāʿâ	recess	N
+cof	H1640	gārap	sweep away	V
+cof	H0106	ʾegrōp	fist	N
+cof	H4053	megrāpâ	shovel	N
+coh	H1641	gārar	drag	V
+coh	H1620	gargar	berry	N
+coh	H1621	gargĕrôt	neck	N
+coh	H1625	gērâ	cud	N
+coh	H1626	gērâ	a weight	N
+coh	H4050	mĕgērâ	saw	N
+cok	H1644	gāraš	drive out	V
+cok	H1646	gĕrûšâ	expulsion	N
+cok	H1645	gereš	thing thrust	N
+cok	H4054	migrāš	common	N
+cov	H1653	gešem	rain	N
+cov	H1652	gāšam	shower violently	V
+cov	H1656	gōšem	rain	N
+coy	H1650	gĕšûr	Geshur	Np
+coy	H1651	gĕšûrî	Geshurite	A
+cpj	H1669	dāʾēb	become faint	V
+cpj	H1670	dĕʾābâ	faintness	N
+cpj	H1671	dĕʾābôn	faintness	N
+cpm	H1672	dāʾag	be anxious	V
+cpm	H1674	dĕʾāgâ	anxiety	N
+cpq	H1675	dāʾâ	fly swiftly	V
+cpq	H1676	dāʾâ	kite	N
+cpq	H1772	dayyâ	falcon	N
+cpq	H7201	rāʾâ	kite	N
+cpv	H1680	dābab	move gently	V
+cpv	H1677	dōb	bear	N
+cpv	H1681	dibbâ	whispering	N
+cqi	H1692	dābaq	cling	V
+cqi	H1694	debeq	joining	N
+cqi	H1695	dābēq	clinging	A
+cqj	H1696	dābar	speak	V
+cqj	H1682	dĕbôrâ	bee	N
+cqj	H1688	dĕbîr	Debir	Np
+cqj	H1687	dĕbîr	hindmost chamber	N
+cqj	H1699	dibbēr	speaking	N
+cqj	H1698	deber	pestilence	N
+cqj	H1697	dābār	speech	N
+cqj	H1699	dōber	pasture	N
+cqj	H1700	dibrâ	cause	N
+cqj	H1702	dōbĕrôt	floats	N
+cqj	H1703	dabberet	word	N
+cqj	H4057	midbār	mouth	N
+cqj	H4057	midbār	wilderness	N
+cqu	H1706	dĕbaš	honey	N
+cqu	H1707	dabbešet	mass	N
+cqy	H1711	dāgâ	multiply	V
+cqy	H1709	dāg	fish	N
+cqy	H1710	dāgâ	fish	N
+cqy	H1728	dawwāg	fisher	N
+cqy	H1729	dûgâ	fishing	N
+cqy	H1770	dîg	fish for	V
+cqy	H1771	dayyāg	fisher	N
+crc	H1713	dāgal	look	V
+crc	H1714	degel	standard	N
+crc	H1713	dāgal	carry	V
+crn	H1725	dāhar	rush	V
+crn	H1726	dahărâ	rushing	N
+crn	H8410	tidhār	elm	N
+crv	H1733	dōdâ	aunt	N
+crv	H1732	dāwid	David	Np
+crv	H1730	dôd	beloved	N
+crv	H1731	dûd	pot	N
+crv	H1736	dûday	mandrake	N
+csb	H1738	dāwâ	be ill	V
+csb	H1739	dāweh	faint	A
+csb	H1741	dĕway	illness	N
+csb	H1742	dawwāy	faint	A
+csb	H1773	dĕyô	ink	N
+csb	H4064	madweh	sickness	N
+csf	H1743	dûk	pound	V
+csf	H4085	mĕdōkâ	mortar	N
+csh	H1745	dûmâ	silence	N
+csh	H1747	dûmîyâ	silence	N
+csh	H1748	dûmām	silence	N
+csr	H1752	dûr	heap up	V
+csr	H1755	dôr	period	N
+csr	H1754	dûr	circle	N
+csr	H4071	mĕdûrâ	pile	N
+css	H1758	dûš	tread	V
+css	H1786	dayiš	threshing	N
+css	H1788	dîšōn	pygarg	N
+css	H4098	mĕdušâ	that which is threshed	N
+cst	H1760	dāḥâ	push	V
+cst	H1762	dĕḥî	stumbling	N
+cst	H4072	midḥeh	means of stumbling	N
+csy	H1765	dāḥap	drive	V
+csy	H4073	madḥēpâ	thrust	N
+cta	H1767	day	sufficiency	N
+cta	H4078	madday	sufficiency	D
+ctj	H1777	dîn	judge	V
+ctj	H1779	dîn	judgment	N
+ctj	H1781	dayyān	judge	N
+ctj	H4066	mādôn	strife	N
+ctj	H4079	mādôn	strife	N
+ctj	H4082	mĕdînâ	province	N
+ctj	H4090	mĕdān	strife	N
+ctw	H1792	dākāʾ	crush	V
+ctw	H1793	dakkāʾ	dust	N
+ctw	H1793	dakkāʾ	contrite	A
+cty	H1794	dākâ	collapse	V
+cty	H1796	dŏkî	crushing	N
+cua	H1790	dak	crushed	A
+cua	H1795	dakkâ	crushing	N
+cug	H1802	dālâ	draw	V
+cug	H1817	dāl	door	N
+cug	H1817	dālâ	door	N
+cug	H1805	dĕlî	bucket	N
+cug	H1808	dālîyôt	branch	N
+cug	H1817	delet	door	N
+cun	H1809	dālal	hang	V
+cun	H1800	dal	low	A
+cun	H1803	dallâ	hair	N
+cun	H1803	dallâ	the poor	N
+cuq	H1811	dālap	drop	V
+cuq	H1812	delep	a dropping	N
+cus	H1814	dālaq	burn	V
+cus	H1816	dalleqet	inflammation	N
+cuw	H1820	dāmâ	cease	V
+cuw	H1824	dŏmî	cessation	N
+cux	H1819	dāmâ	be like	V
+cux	H1823	dĕmût	likeness	N
+cux	H1825	dimyōn	likeness	N
+cvd	H1826	dāmam	be dumb	V
+cvd	H1822	dummâ	one silenced	N
+cvd	H1827	dĕmāmâ	whisper	N
+cvg	H1828	dōmen	dung	N
+cvg	H4087	madmēnâ	dung-place	N
+cvj	H1830	dāmaʿ	weep	V
+cvj	H1831	demaʿ	juice	N
+cvj	H1832	dimʿâ	tears	N
+cwh	H1854	dāqaq	crush	V
+cwh	H1851	daq	thin	A
+cwh	H1852	dōq	veil	N
+cwj	H1856	dāqar	pierce	V
+cwj	H4094	madqārâ	piercing	N
+cwy	H1869	dārak	tread	V
+cwy	H1870	derek	way	N
+cwy	H1871	darkĕmôn	drachma	N
+cwy	H4096	midrāk	treading-	N
+cxe	H1858	dar	pearl	N
+cxe	H1863	dardar	thistles	N
+cxe	H1864	dārôm	south	N
+cxe	H1866	dĕrôr	swallow	N
+cxe	H1865	dĕrôr	a flowing	N
+cxf	H1875	dāraš	resort to	V
+cxf	H4097	midrāš	study	N
+cxh	H1876	dāšāʾ	sprout	V
+cxh	H1877	dešeʾ	grass	N
+cxj	H1878	dāšēn	be fat	V
+cxj	H1880	dešen	fatness	N
+cxj	H1879	dāšēn	fat	A
+cxu	H1892	hebel	vapour	N
+cxu	H1891	hābal	act emptily	V
+cyd	H1897	hāgâ	moan	V
+cyd	H1899	hegeh	a rumbling	N
+cyd	H1900	hāgût	meditation	N
+cyd	H1902	higgāyôn	resounding music	N
+cyp	H1906	hēd	joyous	N
+cyp	H1908	hădad	Hadad	Np
+cyp	H1959	hêdād	shout	N
+czf	H1921	hādar	swell	V
+czf	H1925	heder	ornament	N
+czf	H1926	hādār	ornament	N
+czf	H1927	hădārâ	adornment	N
+czx	H1933	hāwâ	become	V
+czx	H1942	hawwâ	desire	N
+czx	H1943	hōwâ	ruin	N
+czx	H1962	hayyâ	destruction	N
+czx	H3050	yāh	Jah	Np
+czx	H3068	yhwh	Jehovah	Np
+dad	H1949	hûm	murmur	V
+dad	H4103	mĕhûmâ	tumult	N
+dag	H1951	hûn	be easy	V
+dag	H1952	hôn	wealth	N
+dba	H1973	hālĕʾâ	out there	D
+dba	H1972	hālāʾ	removed far off	V
+dbi	H1980	hālak	go	V
+dbi	H1978	hālîk	step	N
+dbi	H1979	hălîkâ	a going	N
+dbi	H1982	hēlek	traveller	N
+dbi	H3212	yālak	go	V
+dbi	H4109	mahălāk	walk	N
+dbi	H4108	mahălāk	walk	N
+dbi	H8418	tahălûkâ	procession	N
+dbk	H1984	hālal	shine	V
+dbk	H1966	hêlēl	shining one	N
+dbl	H1984	hālal	be boastful	V
+dbl	H1947	hôlēlâ	madness	N
+dbl	H1948	hôlēlût	folly	N
+dbl	H1974	hillûl	rejoicing	N
+dbl	H1984	hālal	be boastful	V
+dbl	H4110	mahălāl	praise	N
+dbl	H8416	tĕhillâ	praise	N
+dbp	H1986	hālam	strike	V
+dbp	H1989	halmût	hammer	N
+dbp	H3095	yahălōm	jasper	N
+dbp	H4112	mahălumôt	strokes	N
+dbv	H1993	hāmâ	murmur	V
+dbv	H1995	hāmôn	sound	N
+dbv	H1998	hemyâ	sound	N
+dcj	H2005	hēn	lo!	Tj
+dcj	H2009	hinnēh	lo!	Tm
+dcj	H2008	hēnnâ	hither	D
+dct	H2015	hāpak	turn	V
+dct	H2016	hepek	the contrary	N
+dct	H2017	hōpek	the contrary	N
+dct	H2018	hăpēkâ	overthrow	N
+dct	H2019	hăpakpak	crooked	A
+dct	H4114	mahpēkâ	overthrow	N
+dct	H4115	mahpeket	stocks	N
+dct	H8419	tahpukâ	perversity	N
+ddf	H2026	hārag	kill	V
+ddf	H2027	hereg	slaughter	N
+ddf	H2028	hărēgâ	slaughter	N
+ddi	H2029	hārâ	conceive	V
+ddi	H2030	hārâ	pregnant	A
+ddi	H2030	hārîyâ	pregnant	A
+ddi	H2032	hērāyôn	conception	N
+ddt	H2040	hāras	throw down	V
+ddt	H2034	hărîsâ	ruin	N
+ddt	H2035	hărîsût	overthrow	N
+ddt	H2041	heres	overthrow	N
+ddv	H2022	har	mountain	N
+ddv	H2042	hārār	mountain	N
+deb	H2048	hātal	deceive	V
+deb	H2049	hătulîm	mockery	N
+dez	H2063	zōʾt	this	Pd
+dez	H2088	zeh	this	Pd
+dfc	H2064	zābad	bestow upon	V
+dfc	H2065	zebed	endowment	N
+dfp	H2076	zābaḥ	slaughter for sacrifice	V
+dfp	H2077	zebaḥ	sacrifice	N
+dfp	H4196	mizbēaḥ	altar	N
+dfu	H2082	zābal	exalt	V
+dfu	H2074	zĕbûlun	Zebulun	Np
+dfu	H2073	zĕbul	elevation	N
+dgf	H2094	zāhar	be light	V
+dgf	H2096	zōhar	shining	N
+dgn	H2100	zûb	flow	V
+dgn	H2101	zôb	issue	N
+dgp	H2106	zāwît	corner	N
+dgp	H4200	māzû	garner	N
+dgq	H2123	zîz	moving things	N
+dgq	H4201	mĕzûzâ	door-post	N
+dgy	H2109	zûn	feed	V
+dgy	H4202	māzôn	food	N
+dgz	H2111	zûaʿ	tremble	V
+dgz	H2113	zĕwāʿâ	a trembling	N
+dgz	H2189	zaʿăwâ	a trembling	N
+dhb	H2115	zûr	press down and out	V
+dhb	H2116	zûreh	press down and out	V
+dhb	H2213	zēr	circlet	N
+dhb	H2223	zarzîr	girded	N
+dhb	H4205	māzôr	wound	N
+dhd	H2114	zûr	be loathsome	V
+dhd	H2214	zārāʾ	loathsome thing	N
+dhk	H2102	zîd	boil up	V
+dhk	H2086	zēd	insolent	A
+dhk	H2087	zādôn	insolence	N
+dhk	H2121	zêdôn	insolent	A
+dhk	H5138	nāzîd	thing sodden	N
+did	H2141	zākak	be bright	V
+did	H2134	zak	pure	A
+did	H2137	zĕkûkît	glass	N
+dig	H2142	zākar	remember	V
+dig	H0234	ʾazkārâ	memorial-offering	N
+dig	H2138	zākûr	male	N
+dig	H2143	zēker	remembrance	N
+dig	H2145	zākār	male	N
+dig	H2146	zikkārôn	memorial	N
+dig	H2148	zĕkaryāhû	Zachariah	Np
+dip	H2151	zālal	shake	V
+dip	H2150	zalzal	tendrils	N
+diq	H2151	zālal	be light	V
+diq	H2149	zullût	worthlessness	N
+djc	H2161	zāmam	consider	V
+djc	H2154	zimmâ	plan	N
+djc	H2162	zāmām	plan	N
+djc	H4209	mĕzimmâ	purpose	N
+djf	H2163	zāman	be fixed	V
+djf	H2165	zĕmān	appointed time	N
+djh	H2168	zāmar	trim	V
+djh	H2156	zĕmôrâ	branch	N
+djh	H2159	zāmîr	trimming	N
+djh	H4211	mazmērâ	pruning-knife	N
+djh	H4212	mĕzammeret	snuffers	N
+dji	H2167	zāmar	make music	V
+dji	H2158	zāmîr	song	N
+dji	H2172	zimrâ	melody	N
+dji	H2176	zimrāt	melody	N
+dji	H4210	mizmôr	melody	N
+djj	H2169	zemer	mountain-sheep	N
+djj	H2173	zimrâ	choice products	N
+djt	H2179	zānab	cut off	V
+djt	H2180	zānāb	tail	N
+dju	H2181	zānâ	commit fornication	V
+dju	H2183	zĕnûnîm	fornication	N
+dju	H2184	zĕnût	fornication	N
+dju	H2185	zōnôt	commit fornication	N
+dju	H8457	taznût	fornication	N
+dki	H2194	zāʿam	be indignant	V
+dki	H2195	zaʿam	indignation	N
+dkl	H2196	zāʿap	be out of humour	V
+dkl	H2197	zaʿap	storming	N
+dkl	H2198	zāʿēp	out of humour	A
+dkm	H2199	zāʿaq	cry	V
+dkm	H2201	zĕʿāqâ	cry	N
+dko	H2191	zĕʿêr	a little	N
+dko	H4213	mizʿār	a little	N
+dkx	H2205	zāqēn	old	A
+dkx	H2204	zāqēn	be old	V
+dkx	H2206	zāqān	chin	N
+dkx	H2207	zōqen	old age	N
+dkx	H2209	ziqnâ	old age	N
+dkx	H2208	zĕqunîm	old age	N
+dlc	H0246	ʾăzēq	manacle	N
+dlc	H2131	zēq	fetter	N
+dlf	H2215	zārab	be burnt	V
+dlf	H2216	zĕrubbābel	Zerubbabel	Np
+dli	H2219	zārâ	scatter	V
+dli	H4215	mĕzāreh	scatter	N
+dli	H4214	mizreh	pitch-fork	N
+dlp	H2224	zāraḥ	rise	V
+dlp	H0249	ʾezrāḥ	a native	N
+dlp	H2225	zeraḥ	dawning	N
+dlp	H4217	mizrāḥ	place of sunrise	N
+dlt	H2229	zāram	pour forth in floods	V
+dlt	H2230	zerem	flood of rain	N
+dlt	H2231	zirmâ	issue	N
+dlx	H2232	zāraʿ	sow	V
+dlx	H2221	zērûaʿ	sowing	N
+dlx	H2235	zērōaʿ	vegetable	N
+dlx	H2233	zeraʿ	sowing	N
+dlx	H2235	zērĕʿōn	sown	N
+dlx	H3157	yizrĕʿeʾl	Jezreel	Np
+dlx	H4218	mizrāʿ	place of sowing	N
+dly	H0248	ʾezrôaʿ	arm	N
+dly	H2220	zĕrôaʿ	arm	N
+dmb	H2236	zāraq	to toss	V
+dmb	H4219	mizrāq	bowl	N
+dmk	H2244	ḥābāʾ	withdraw	V
+dmk	H4224	maḥăbēʾ	hiding-place	N
+dmk	H4224	maḥăbōʾ	refuge	N
+dml	H2245	ḥābab	love	V
+dml	H2243	ḥōb	bosom	N
+dmn	H2247	ḥābâ	withdraw	V
+dmn	H2253	ḥebyôn	hiding	N
+dmz	H2254	ḥābal	act (ruinously) corruptly	V
+dmz	H2256	ḥebel	destruction	N
+dna	H2254	ḥābal	travail	V
+dna	H2258	ḥăbōl	pledge	N
+dna	H2260	ḥibbēl	mast	N
+dna	H2256	ḥēbel	pain	N
+dna	H2256	ḥebel	cord	N
+dna	H2254	ḥābal	bind	V
+dna	H2259	ḥōbēl	sailor	N
+dna	H2258	ḥăbōlâ	pledge	N
+dna	H2256	ḥōbĕlîm	union	N
+dnk	H2263	ḥābaq	clasp	V
+dnk	H2264	ḥibbuq	a clasping	N
+dnq	H2266	ḥābar	unite	V
+dnq	H2250	ḥabbûrâ	stripe	N
+dnq	H2267	ḥeber	company	N
+dnq	H2271	ḥabbār	associate	N
+dnq	H2270	ḥābēr	united	N
+dnq	H2272	ḥăbarburâ	stripe	N
+dnq	H2274	ḥebrâ	association	N
+dnq	H2275	ḥebrôn	Hebron	Np
+dnq	H2275	ḥebrôn	Hebron	Np
+dnq	H2278	ḥăberet	consort	N
+dnq	H2279	ḥōberet	a thing that joins	N
+dnq	H4226	mĕḥabbĕrâ	binder	N
+dnq	H4225	maḥberet	thing joined	N
+doa	H2281	ḥăbittîm	flat cakes	N
+doa	H4227	maḥăbat	flat plate	N
+doj	H2287	ḥāgag	make a pilgrimage	V
+doj	H2282	ḥag	festival-gathering	N
+doj	H2283	ḥāggāʾ	reeling	N
+dov	H2296	ḥāgar	gird	V
+dov	H2290	ḥăgôr	belt	N
+dov	H2289	ḥāgôr	girt	N
+dov	H2290	ḥăgôrâ	girdle	N
+dov	H4228	maḥăgōret	girding	N
+doz	H2300	ḥādad	be sharp	V
+doz	H2299	ḥad	sharp	A
+doz	H2303	ḥaddûd	sharpened	A
+dpb	H2302	ḥādâ	rejoice	V
+dpb	H2304	ḥedwâ	joy	N
+dph	H2308	ḥādal	cease	V
+dph	H2309	ḥedel	cessation	N
+dph	H2310	ḥādēl	forbearing	A
+dpo	H2314	ḥādar	surround	V
+dpo	H2315	ḥeder	chamber	N
+dpq	H2318	ḥādaš	renew	V
+dpq	H2319	ḥādāš	new	A
+dpq	H2320	ḥōdeš	newness	N
+dpw	H2325	ḥûb	be guilty	V
+dpw	H2326	ḥôb	debt	N
+dpy	H2328	ḥûg	draw round	V
+dpy	H2329	ḥûg	vault	N
+dpy	H4230	mĕḥûgâ	circle-instrument	N
+dqb	H2330	ḥûd	propound a riddle	V
+dqb	H2420	ḥîdâ	riddle	N
+dqe	H2331	ḥāwâ	tell	V
+dqe	H0262	ʾaḥwâ	declaration	N
+dql	H2337	ḥāwāḥ	brier	N
+dql	H2336	ḥôaḥ	brier	N
+dql	H2397	ḥaḥ	hook	N
+dqr	H2342	ḥûl	whirl	V
+dqr	H2344	ḥôl	sand	N
+dqr	H2427	ḥîl	a writhing	N
+dqr	H2427	ḥîlâ	anguish	N
+dqr	H2430	ḥêlâ	rampart	N
+dqr	H2426	ḥēl	rampart	N
+dqr	H2479	ḥalḥālâ	anguish	N
+dqr	H4234	māḥôl	dance	N
+dqr	H4246	mĕḥôlâ	dancing	N
+drb	H2351	ḥûṣ	the outside	N
+drb	H2435	ḥîṣôn	outer	A
+drf	H2357	ḥāwar	be white	V
+drf	H2353	ḥûr	white stuff	N
+drf	H2355	ḥôrāy	white stuff	N
+drf	H2751	ḥōrî	white bread	N
+drp	H2363	ḥûš	haste	V
+drp	H2440	ḥîš	quickly	D
+drp	H2439	ḥîš	haste	V
+drv	H2372	ḥāzâ	see	V
+drv	H2335	ḥôzay	seer	N
+drv	H2374	ḥōzeh	seer	N
+drv	H2377	ḥāzôn	vision	N
+drv	H2378	ḥāzôt	in the visions	N
+drv	H2380	ḥāzût	vision	N
+drv	H2384	ḥizzāyôn	vision	N
+drv	H4237	meḥĕzâ	light	N
+drv	H4236	maḥăzeh	vision	N
+dsn	H2388	ḥāzaq	be firm	V
+dsn	H2391	ḥēzeq	strength	N
+dsn	H2390	ḥāzēq	powerful	A
+dsn	H2389	ḥāzāq	strong	A
+dsn	H2392	ḥōzeq	strength	N
+dsn	H2393	ḥezqâ	strength	N
+dsn	H2394	ḥozqâ	strength	N
+dsy	H2398	ḥāṭāʾ	miss	V
+dsy	H2399	ḥēṭĕʾ	sin	N
+dsy	H2400	ḥaṭṭāʾ	sinful	N
+dsy	H2401	ḥăṭāʾâ	sin	N
+dsy	H2403	ḥaṭṭāʾâ	sinful thing	N
+dsy	H2403	ḥaṭṭāʾt	sin	N
+dty	H2421	ḥāyâ	live	V
+dty	H2416	ḥay	kinsfolk	N
+dty	H2416	ḥay	alive	A
+dty	H2416	ḥayyâ	living thing	N
+dty	H2416	ḥayyâ	community	N
+dty	H2422	ḥāyeh	having the vigour of life	A
+dty	H2424	ḥayyût	living widows	N
+dty	H2425	ḥāyay	live	V
+dty	H2416	ḥayyîm	life	N
+dty	H4241	miḥyâ	preservation of life	N
+dud	H2342	ḥîl	be firm	V
+dud	H2428	ḥayil	strength	N
+duv	H2447	ḥaklîlî	dark	A
+duv	H2448	ḥaklilût	dulness	N
+duz	H2449	ḥākam	be wise	V
+duz	H2450	ḥākām	wise	A
+duz	H2451	ḥokmâ	wisdom	N
+duz	H2454	ḥokmôt	wisdom	N
+dvg	H2456	ḥālāʾ	be sick	V
+dvg	H8463	taḥăluʾîm	diseases	N
+dwa	H2470	ḥālâ	be weak	V
+dwa	H2483	ḥŏlî	sickness	N
+dwa	H4245	maḥăleh	sickness	N
+dwa	H4245	maḥălâ	sickness	N
+dwa	H4251	maḥălûy	sickness	N
+dwb	H2470	ḥālâ	mollify	V
+dwb	H4257	maḥălat	‘Machalath’	N
+dwc	H2481	ḥălî	ornament	N
+dwc	H2484	ḥelyâ	jewelry	N
+dww	H2490	ḥālal	pollute	V
+dww	H2455	ḥōl	profaneness	N
+dww	H2486	ḥālîlâ	ad profanum!	Tj
+dww	H2491	ḥālāl	profaned	A
+dww	H8462	tĕḥillâ	beginning	N
+dwy	H2490	ḥālal	bore	V
+dwy	H2471	ḥallâ	a kind of cake	N
+dwy	H2474	ḥallôn	window	N
+dwy	H2485	ḥālîl	flute	N
+dwy	H2490	ḥālal	play the pipe	V
+dwy	H2491	ḥālāl	pierced	N
+dwy	H4247	mĕḥillâ	hole	N
+dxd	H2492	ḥālam	dream	V
+dxd	H2472	ḥălôm	dream	N
+dxk	H2498	ḥālap	pass on	V
+dxk	H2475	ḥălôp	a passing away	N
+dxk	H2487	ḥălîpâ	a change	N
+dxk	H2500	ḥēlep	exchange	N
+dxk	H4252	maḥălāp	knife	N
+dxk	H4253	maḥălāpâ	plait	N
+dxm	H2502	ḥālaṣ	draw off	V
+dxm	H2488	ḥălîṣâ	what is stripped off	N
+dxm	H4254	maḥălāṣâ	robe of state	N
+dxn	H2502	ḥālaṣ	equip	V
+dxn	H2504	ḥālāṣ	loins	N
+dxu	H2505	ḥālaq	be smooth	V
+dxu	H2506	ḥēleq	smoothness	N
+dxu	H2511	ḥallāq	smooth	A
+dxu	H2512	ḥalluq	smooth	A
+dxu	H2509	ḥālāq	smooth	A
+dxu	H2514	ḥălaqqâ	smoothness	N
+dxu	H2513	ḥelqâ	smooth part	N
+dxu	H2519	ḥălaqlaqqôt	smoothness	N
+dxu	H5555	selaʿ hammaḥlĕqôt	smoothness	N
+dxv	H2505	ḥālaq	divide	V
+dxv	H2506	ḥēleq	portion	N
+dxv	H2515	ḥăluqqâ	part	N
+dxv	H2513	ḥelqâ	portion	N
+dxv	H4256	maḥălōqet	division	N
+dyj	H2522	ḥālaš	be weak	V
+dyj	H2476	ḥălûšâ	weakness	N
+dyj	H2523	ḥallāš	weak	A
+dyr	H2530	ḥāmad	desire	V
+dyr	H2531	ḥemed	desire	N
+dyr	H2532	ḥemdâ	desire	N
+dyr	H2532	ḥămûdâ	desirableness	N
+dyr	H2530	ḥămûdâ	desirableness	N
+dyr	H4261	maḥmād	desire	N
+dyr	H4262	maḥmōd	desirable	N
+dyx	H2346	ḥômâ	wall	N
+dyx	H2524	ḥām	husband’s father	N
+dyx	H2545	ḥămôt	husband’s mother	N
+dzq	H2550	ḥāmal	spare	V
+dzq	H2551	ḥemlâ	compassion	N
+dzq	H4263	maḥmāl	thing pitied	N
+dzs	H2552	ḥāmam	be warm	V
+dzs	H2525	ḥām	hot	A
+dzs	H2527	ḥōm	heat	N
+dzs	H2535	ḥammâ	heat	N
+dzs	H2553	ḥammān	sun-pillar	N
+dzu	H2554	ḥāmas	treat violently	V
+dzu	H2555	ḥāmās	violence	N
+dzu	H8464	taḥmās	male ostrich	N
+dzw	H2556	ḥāmēṣ	be sour	V
+dzw	H2548	ḥāmîṣ	seasoned	A
+dzw	H2557	ḥāmēṣ	that which is leavened	N
+dzw	H2558	ḥōmeṣ	vinegar	N
+dzz	H2556	ḥāmaṣ	be ruthless	V
+dzz	H2541	ḥāmôṣ	the ruthless	N
+eab	H2559	ḥāmaq	turn away	V
+eab	H2542	ḥammûq	curving	N
+eae	H2560	ḥāmar	ferment	V
+eae	H2564	ḥēmār	bitumen	N
+eae	H2561	ḥemer	wine	N
+eae	H2560	ḥāmar	cover with asphalt	V
+eae	H2563	ḥōmer	cement	N
+eaf	H2560	ḥāmar	be red	V
+eaf	H2543	ḥămôr	(he)-ass	N
+eaf	H3180	yaḥmûr	roebuck	N
+eak	H2565	ḥămôr	heap	N
+eak	H2563	ḥōmer	heap	N
+eak	H2563	ḥōmer	homer	N
+eas	H2549	ḥămîšî	fifth	Ao
+eas	H2568	ḥāmēš	five	N
+eas	H2567	ḥāmaš	and he shall fifth	V
+eas	H2569	ḥōmeš	fifth part	N
+eas	H2572	ḥămiššîm	fifty	N
+ebi	H2583	ḥānâ	decline	V
+ebi	H2588	ḥānût	cell	N
+ebi	H2595	ḥănît	spear	N
+ebi	H4264	maḥăneh	encampment	N
+ebi	H8466	taḥănâ	encamping	N
+ebo	H2590	ḥānaṭ	spice	V
+ebo	H2406	ḥiṭṭâ	wheat	N
+ebo	H2590	ḥănuṭîm	embalming	N
+ebu	H2596	ḥānak	train up	V
+ebu	H2443	ḥakkâ	hook	N
+ebu	H2593	ḥānîk	trained	A
+ebu	H2598	ḥănukkâ	dedication	N
+ecc	H2603	ḥānan	shew favour	V
+ecc	H2433	ḥîn	grace	N
+ecc	H2580	ḥēn	favour	N
+ecc	H2587	ḥannûn	gracious	A
+ecc	H2589	ḥannôt	shew favour	V
+ecc	H2594	ḥănînâ	favour	N
+ecc	H2600	ḥinnām	out of favour	D
+ecc	H8467	tĕḥinnâ	favour	N
+ecc	H8469	taḥănûn	supplication for favour	N
+eci	H2610	ḥānēp	be polluted	V
+eci	H2611	ḥānēp	profane	A
+eci	H2612	ḥōnep	profaneness	N
+eci	H2613	ḥănuppâ	profaneness	N
+ecm	H2614	ḥānaq	strangle	V
+ecm	H4267	maḥănāq	strangling	N
+ecr	H2616	ḥāsad	be reproached	V
+ecr	H2617	ḥesed	shame	N
+ecs	H2616	ḥāsad	be good	V
+ecs	H2617	ḥesed	goodness	N
+ecs	H2623	ḥāsîd	kind	A
+ecs	H2624	ḥăsîdâ	stork	N
+ecu	H2620	ḥāsâ	seek refuge	V
+ecu	H2622	ḥāsût	refuge	N
+ecu	H4268	maḥsseh	refuge	N
+edb	H2628	ḥāsal	finish off	V
+edb	H2625	ḥāsîl	locust	N
+edc	H2629	ḥāsam	stop up	V
+edc	H4269	maḥsôm	muzzle	N
+edd	H2630	ḥāsan	be strong	V
+edd	H2626	ḥăsîn	strong	A
+edd	H2634	ḥāsōn	strong	A
+edd	H2633	ḥōsen	wealth	N
+edk	H2637	ḥāsēr	lack	V
+edk	H2639	ḥeser	want	N
+edk	H2638	ḥāsēr	needy	A
+edk	H2640	ḥōser	want	N
+edk	H2642	ḥesrôn	thing lacking	N
+edk	H4270	maḥsôr	need	N
+edt	H2648	ḥāpaz	be in trepidation	V
+edt	H2649	ḥippāzôn	trepidation	N
+edz	H2653	ḥopap	enclose	V
+edz	H2348	ḥôp	shore	N
+edz	H2646	ḥuppâ	canopy	N
+eed	H2654	ḥāpēṣ	delight in	V
+eed	H2656	ḥēpeṣ	delight	N
+eed	H2655	ḥāpēṣ	delighting in	A
+eek	H2658	ḥāpar	dig	V
+eek	H2661	ḥăpōr	mole	N
+eek	H6512	pērâ	mole	N
+eep	H2666	ḥāpaš	be free	V
+eep	H2667	ḥōpeš	wide-spread	N
+eep	H2668	ḥupšâ	freedom	N
+eep	H2670	ḥopšî	free	A
+eep	H2669	ḥopšît	freedom	N
+eeq	H2664	ḥāpaś	search	V
+eeq	H2665	ḥēpeś	a	N
+eew	H2672	ḥāṣab	hew	V
+eew	H4274	maḥṣēb	hewing	N
+eex	H2673	ḥāṣâ	divide	V
+eex	H2676	ḥāṣôt	division	N
+eex	H2677	ḥăṣî	half	N
+eex	H2678	ḥēṣî	arrow	N
+eex	H4275	meḥĕṣâ	half	N
+eex	H4276	maḥăṣît	half	N
+efk	H2683	ḥēṣen	bosom	N
+efk	H2684	ḥōṣen	bosom	N
+efm	H2686	ḥāṣaṣ	divide	V
+efm	H2671	ḥēṣ	arrow	N
+efm	H2686	ḥāṣaṣ	archers	V
+efm	H2687	ḥāṣāṣ	gravel	N
+efv	H2689	ḥăṣōṣĕrâ	clarion	N
+efv	H2690	ḥāṣar	sound a clarion	V
+efx	H2681	ḥāṣîr	settled abode	N
+efx	H2691	ḥāṣēr	settled abode	N
+egr	H2710	ḥāqaq	cut in	V
+egr	H2706	ḥōq	something prescribed	N
+egr	H2708	ḥuqqâ	something prescribed	N
+egr	H2711	ḥēqeq	something prescribed	N
+egu	H2713	ḥāqar	search	V
+egu	H2714	ḥēqer	searching	N
+egu	H4278	meḥqār	range	N
+eha	H2716	ḥereʾ	dung	N
+eha	H4280	maḥărāʾâ	draught house	N
+ehd	H2717	ḥārēb	be waste	V
+ehd	H2720	ḥārēb	waste	A
+ehd	H2722	ḥōrēb	Horeb	Np
+ehd	H2721	ḥōreb	desolation	N
+ehd	H2723	ḥorbâ	waste	N
+ehe	H2717	ḥārēb	be dry	V
+ehe	H2720	ḥārēb	dry	A
+ehe	H2721	ḥōreb	dryness	N
+ehe	H2724	ḥārābâ	dry ground	N
+ehe	H2725	ḥērābôn	drought	N
+ehg	H2717	ḥārab	attack	V
+ehg	H2719	ḥereb	sword	N
+ehs	H2729	ḥārad	tremble	V
+ehs	H2730	ḥārēd	trembling	A
+ehs	H2731	ḥărādâ	trembling	N
+ehw	H2734	ḥārâ	burn	V
+ehw	H2740	ḥārôn	anger	N
+ehw	H2750	ḥŏrî	burning	N
+ehw	H8474	taḥārâ	burn	V
+ein	H2747	ḥereṭ	graving-tool	N
+ein	H2748	ḥarṭōm	engraver	N
+eji	H2763	ḥāram	ban	V
+eji	H2764	ḥērem	devoted thing	N
+eji	H2768	ḥermôn	Hermon	Np
+ejj	H2763	ḥāram	slit	V
+ejj	H2764	ḥērem	net	N
+eka	H2778	ḥārap	reproach	V
+eka	H2781	ḥerpâ	reproach	N
+eke	H2778	ḥārap	remain in harvest time	V
+eke	H2779	ḥōrep	harvest-time	N
+ekg	H2782	ḥāraṣ	cut	V
+ekg	H2742	ḥārûṣ	sharp	A
+ekg	H2742	ḥārûṣ	trench	N
+ekg	H2742	ḥārûṣ	strict decision	N
+ekg	H2757	ḥārîṣ	a cut	N
+ekg	H2785	ḥarṣannîm	grape-kernels	N
+ekn	H2787	ḥārar	be hot	V
+ekn	H2746	ḥarḥur	violent heat	N
+ekn	H2788	ḥārēr	parched place	N
+ekp	H2356	ḥōr	hole	N
+ekp	H2352	ḥur	crevice	N
+ekv	H2790	ḥārēš	be silent	V
+ekv	H2795	ḥērēš	deaf	A
+ekv	H2791	ḥereš	silently	D
+ekw	H2790	ḥāraš	cut in	V
+ekw	H2758	ḥārîš	ploughing	N
+ekw	H2796	ḥārāš	graver	N
+ekw	H2794	ḥōrēš	cut in	V
+ekw	H2798	ḥărāšîm	cut in	N
+ekw	H2799	ḥărōšet	carving	N
+ekw	H4281	maḥărēšâ	ploughshare	N
+ekw	H4282	maḥărešet	ploughshare	N
+elc	H2775	ḥeres	an eruptive disease	N
+elc	H2777	ḥarsît	potsherd	N
+elc	H2789	ḥereś	earthenware	N
+elk	H2803	ḥāšab	think	V
+elk	H2805	ḥēšeb	ingenious work	N
+elk	H2810	ḥiššābôn	device	N
+elk	H2808	ḥešbôn	reckoning	N
+elk	H4284	maḥăšābâ	thought	N
+ely	H2821	ḥāšak	be or grow dark	V
+ely	H2823	ḥāšōk	obscure	A
+ely	H2822	ḥōšek	darkness	N
+ely	H2825	ḥăšēkâ	darkness	N
+ely	H2824	ḥeškâ	darkness	N
+ely	H4285	maḥšāk	dark place	N
+emo	H2834	ḥāśap	strip off	V
+emo	H2835	ḥāśip	two little flocks of goats	N
+emo	H4286	maḥśōp	a laying bare	N
+ems	H2836	ḥāšaq	be attached to	V
+ems	H2838	ḥāšûq	fillet	N
+ems	H2839	ḥiššuq	spoke	N
+ems	H2837	ḥēšeq	desire	N
+ems	H2836	ḥāšaq	furnish with fillets	V
+emu	H2840	ḥiššur	nave	N
+emu	H2841	ḥašrâ	collection	N
+end	H2846	ḥātâ	snatch up	V
+end	H4289	maḥtâ	fire-holder	N
+enj	H2853	ḥātal	entwine	V
+enj	H2848	ḥittûl	bandage	N
+enj	H2854	ḥătullâ	swaddling-band	N
+enm	H2856	ḥātam	seal	V
+enm	H2368	ḥōtām	seal	N
+enm	H2858	ḥōtemet	signet-ring	N
+ens	H2859	ḥātan	make oneself a daughter’s husband	V
+ens	H2860	ḥātān	daughter’s husband	N
+ens	H2859	ḥōtēn	give	N
+ens	H2861	ḥătunnâ	marriage	N
+env	H2862	ḥātap	seize	V
+env	H2863	ḥetep	prey	N
+enw	H2864	ḥātar	dig	V
+enw	H4290	maḥteret	breaking in	N
+enz	H2865	ḥātat	be shattered	V
+enz	H2844	ḥat	shattered	N
+enz	H2844	ḥat	terror	N
+enz	H2847	ḥittâ	terror	N
+enz	H2849	ḥatḥat	terror	N
+enz	H2851	ḥittît	terror	N
+enz	H2866	ḥătat	terror	N
+enz	H4288	mĕḥittâ	terror	N
+eob	H2894	ṭēʾṭēʾ	and I will sweep it with the besom of destruction	V
+eob	H4292	maṭʾăṭēʾ	broom	N
+eoj	H2873	ṭābaḥ	slaughter	V
+eoj	H2874	ṭebaḥ	slaughtering	N
+eoj	H2876	ṭabbāḥ	cook	N
+eoj	H2878	ṭibḥâ	thing slaughtered	N
+eoj	H2879	ṭabbāḥâ	female cook	N
+eoj	H4293	maṭbēaḥ	slaughtering-place	N
+eoq	H2883	ṭābaʿ	sink	V
+eoq	H2885	ṭabbaʿat	signet	N
+epa	H2891	ṭāhēr	be clean	V
+epa	H2890	ṭĕhôr	clean	A
+epa	H2889	ṭāhôr	clean	A
+epa	H2892	ṭŏhār	clearness	N
+epa	H2892	ṭōhar	purity	N
+epa	H2893	ṭohŏrâ	purifying	N
+epf	H2895	ṭôb	pleasing	V
+epf	H2896	ṭôb	a good thing	N
+epf	H2896	ṭôb	pleasant	A
+epf	H2898	ṭûb	good things	N
+epf	H2896	ṭôbâ	welfare	N
+epl	H2901	ṭāwâ	spin	V
+epl	H4299	maṭweh	that which is spun	N
+epm	H2902	ṭûaḥ	over-spread	V
+epm	H2910	ṭuḥôt	inward parts	N
+epm	H2915	ṭîaḥ	a coating	N
+epp	H2904	ṭûl	hurl	V
+epp	H2925	ṭalṭēlâ	a hurling	N
+epq	H2905	ṭûr	row	N
+epq	H2918	ṭîrâ	encampment	N
+epx	H2912	ṭāḥan	grind	V
+epx	H2911	ṭĕḥôn	grinding-mill	N
+eqk	H2922	ṭĕlāʾ	lamb	N
+eqk	H2924	ṭāleh	lamb	N
+eqr	H2930	ṭāmēʾ	be unclean	V
+eqr	H2931	ṭāmēʾ	unclean	A
+eqr	H2930	ṭāmĕʾâ	uncleanness	N
+eqr	H2932	ṭumʾâ	uncleanness	N
+eqw	H2934	ṭāman	hide	V
+eqw	H4301	maṭmôn	hidden treasure	N
+erc	H2938	ṭāʿam	taste	V
+erc	H2940	ṭaʿam	taste	N
+erc	H4303	maṭʿām	tasty food	N
+erh	H2946	ṭāpaḥ	extend	V
+erh	H2947	ṭepaḥ	a span	N
+erh	H2948	ṭōpaḥ	span	N
+erh	H2949	ṭippuḥîm	dandling	N
+erh	H4304	miṭpaḥat	cloak	N
+erm	H2952	ṭāpap	trip	V
+erm	H2945	ṭap	children	N
+ers	H2959	ṭāraḥ	toil	V
+ers	H2960	ṭōraḥ	burden	N
+erv	H2962	ṭerem	not yet	D
+erv	H2958	ṭĕrôm	not yet	D
+erx	H2963	ṭārap	tear	V
+erx	H2964	ṭerep	prey	N
+erx	H2965	ṭārāp	fresh-plucked	A
+erx	H2966	ṭĕrēpâ	animal torn	N
+est	H2986	yābal	conduct	V
+est	H0180	ʾûbal	stream	N
+est	H0944	bûl	produce	N
+est	H2981	yĕbûl	produce	N
+est	H2990	yabbāl	running	N
+est	H2988	yābāl	watercourse	N
+est	H3104	yôbēl	ram	N
+est	H3105	yûbal	stream	N
+est	H8398	tēbēl	world	N
+esz	H2992	yābam	do duty of	V
+esz	H2993	yābām	husband’s brother	N
+esz	H2994	yĕbēmet	sister-in-law	N
+eth	H3001	yābēš	be dry	V
+eth	H3002	yābēš	dry	A
+eth	H3004	yabbāšâ	dry land	N
+eth	H3006	yabbešet	dry ground	N
+etp	H3009	yāgab	till	V
+etp	H3010	yāgēb	field	N
+ets	H3013	yāgâ	suffer	V
+ets	H3015	yāgôn	grief	N
+ets	H8424	tûgâ	grief	N
+eub	H3021	yāgēaʿ	toil	V
+eub	H3018	yĕgîaʿ	toil	N
+eub	H3019	yāgîaʿ	weary	A
+eub	H3023	yāgēaʿ	weary	A
+eub	H3022	yāgāʿ	gain	N
+eub	H3024	yĕgiʿâ	wearying	N
+euf	H3025	yāgōr	be afraid	V
+euf	H3016	yāgôr	fearing	A
+euk	H3033	yĕdidût	love	N
+euk	H3039	yādîd	a song of love	N
+euk	H3039	yādîd	beloved	A
+eum	H3034	yādâ	throw	V
+eum	H1960	huyyĕdôt	songs of praise	N
+eum	H8426	tôdâ	thanksgiving	N
+euy	H3045	yādaʿ	know	V
+euy	H1843	dēaʿ	knowledge	N
+euy	H1844	dēʿâ	knowledge	N
+euy	H1847	daʿat	knowledge	N
+euy	H3049	yiddĕʿōnî	familiar spirit	N
+euy	H4069	maddûaʿ	wherefore?	D
+euy	H4093	maddāʿ	knowledge	N
+euy	H4130	mōdaʿat	kindred	N
+euy	H4129	môdaʿ	kinsman	N
+eve	H3051	yāhab	give	V
+eve	H1890	habhāb	gift	N
+eve	H3053	yĕhāb	lot	N
+evn	H3063	yĕhûdâ	Judah	Np
+evn	H3054	yāhad	become a Jew	V
+evn	H3057	yĕhudîyâ	Jehudijah	Ag
+evn	H3064	yĕhûdî	Jew	Ag
+evn	H3066	yĕhûdît	in Jewish	A
+exs	H3117	yôm	day	N
+exs	H3119	yômām	daytime	D
+ezh	H2188	zēʿâ	sweat	N
+ezh	H3154	yezaʿ	sweat	N
+ezo	H3161	yāḥad	be united	V
+ezo	H3162	yaḥad	unitedness	N
+ezo	H3162	yāḥĕdāw	together	D
+ezo	H3173	yāḥîd	only	A
+fad	H3176	yāḥal	wait	V
+fad	H3175	yāḥîl	waiting	A
+fad	H8431	tôḥelet	hope	N
+fag	H3179	yāḥam	be hot	V
+fag	H2534	ḥēmâ	heat	N
+fag	H2529	ḥēmâ	heat	N
+far	H3188	yaḥaś	genealogy	N
+far	H3187	yāḥaś	enroll oneself	V
+fat	H3190	yāṭab	be good	V
+fat	H4315	mêṭāb	the best	N
+fbc	H3198	yākaḥ	decide	V
+fbc	H8433	tôkēḥâ	rebuke	N
+fbc	H8433	tôkaḥat	argument	N
+fbi	H3205	yālad	bear	V
+fbi	H2056	wālād	offspring	N
+fbi	H3206	yeled	child	N
+fbi	H3207	yaldâ	girl	N
+fbi	H3208	yaldût	childhood	N
+fbi	H3209	yillôd	born	A
+fbi	H3211	yālîd	born	A
+fbi	H4138	môledet	kindred	N
+fbi	H8435	tôlēdôt	generations	N
+fbq	H3213	yālal	howl	V
+fbq	H3214	yĕlēl	howling	N
+fbq	H3215	yĕlālâ	howling	N
+fcj	H3220	yām	sea	N
+fcj	H3222	yēmim	hot springs	N
+fcl	H0541	ʾāman	go to	V
+fcl	H3225	yāmîn	right hand	N
+fcl	H3227	yĕmînî	right	A
+fcl	H3227	yĕmînî	right hand	A
+fcl	H3231	yāman	go to	V
+fcl	H3233	yĕmānî	right hand	A
+fcl	H8486	têmān	south	N
+fcl	H8487	têmān	south	Np
+fcy	H3243	yānaq	suck	V
+fcy	H3126	yônēq	young plant	N
+fcy	H3127	yôneqet	young shoot	N
+fcy	H3242	yĕnîqâ	sucker	N
+fdb	H3245	yāsad	establish	V
+fdb	H3246	yĕsud	foundation	N
+fdb	H3247	yĕsôd	foundation	N
+fdb	H3248	yĕsûdâ	foundation	N
+fdb	H4144	môsād	foundation	N
+fdb	H4143	mûsād	foundation	N
+fdb	H4146	môsādâ	foundation	N
+fdb	H4145	mûsādâ	foundation	N
+fdb	H4328	mĕyussādâ	foundation	N
+fdb	H4527	massad	foundation	N
+fdl	H3256	yāsar	discipline	V
+fdl	H3250	yissôr	one who reproves	N
+fdl	H4148	mûsār	discipline	N
+fdl	H4561	mōsār	discipline	N
+fdo	H3259	yāʿad	appoint	V
+fdo	H4150	môʿēd	appointed time	N
+fdo	H4151	môʿād	appointed place	N
+fdo	H4152	mûʿādâ	cities appointed	N
+fdo	H5712	ʿēdâ	congregation	N
+fdq	H3261	yāʿâ	sweep together	V
+fdq	H3257	yāʿ	shovel	N
+feg	H3277	yāʿēl	mountain-goat	N
+feg	H3280	yaʿălâ	mountain-goat	N
+fem	H3283	yāʿēn	ostrich	N
+fem	H3284	yaʿănâ	greed	N
+fer	H3286	yāʿēp	be weary	V
+fer	H3288	yĕʿāp	weariness	N
+fer	H3287	yāʿēp	weary	A
+fet	H3289	yāʿaṣ	advise	V
+fet	H4156	môʿēṣâ	counsel	N
+fet	H6098	ʿēṣâ	counsel	N
+ffa	H3293	yaʿar	wood	N
+ffa	H3264	yaʿar	wood	N
+ffb	H3293	yaʿar	honeycomb	N
+ffb	H3295	yaʿrâ	honeycomb	N
+ffl	H3302	yāpâ	be fair	V
+ffl	H3303	yāpeh	fair	A
+ffl	H3304	yĕpēh-pîyâ	pretty	A
+ffl	H3308	yŏpî	beauty	N
+ffp	H3306	yāpaḥ	breathe	V
+ffp	H3307	yāpēaḥ	breathing out	A
+ffv	H3313	yāpaʿ	shine out	V
+ffv	H3314	yipʿâ	brightness	N
+fga	H3318	yāṣāʾ	go out	V
+fga	H3329	yāṣîʾ	coming forth	A
+fga	H4161	môṣāʾ	place of going forth	N
+fga	H4163	môṣāʾâ	family descent	N
+fga	H6631	ṣeʾĕṣāʾ	issue	N
+fga	H8444	tôṣāʾâ	outgoing	N
+fgl	H3331	yāṣaʿ	lay	V
+fgl	H3326	yāṣûaʿ	couch	N
+fgl	H3326	yāṣîaʿ	flat surface	N
+fgl	H4702	maṣṣāʿ	couch	N
+fgm	H3332	yāṣaq	pour	V
+fgm	H3333	yĕṣuqâ	a casting	N
+fgm	H4165	mûṣāq	a casting	N
+fgm	H4166	mûṣeqet	poured	N
+fgq	H3335	yāṣar	form	V
+fgq	H3336	yēṣer	form	N
+fgq	H3338	yĕṣurîm	forms	N
+fgv	H3341	yāṣat	kindle	V
+fgv	H6702	ṣût	kindle	V
+fgz	H3344	yāqad	be kindled	V
+fgz	H3350	yĕqôd	a burning	N
+fgz	H4168	môqēd	burning mass	N
+fgz	H4169	môqĕdâ	hearth	N
+fhu	H3365	yāqar	be precious	V
+fhu	H3357	yaqqîr	very precious	A
+fhu	H3366	yĕqār	preciousness	N
+fhu	H3368	yāqār	precious	A
+fhw	H3369	yāqōš	lay a bait	V
+fhw	H3352	yāqôš	bait-layer	N
+fhw	H3353	yāqûš	entangled	N
+fhw	H4170	môqēš	a bait	N
+fhz	H3372	yārēʾ	fear	V
+fhz	H3373	yārēʾ	fearing	A
+fhz	H3374	yirʾâ	fear	N
+fhz	H4172	môrāʾ	fear	N
+fhz	H4172	môrâ	appoint terror	N
+fik	H3381	yārad	come down	V
+fik	H4174	môrād	descent	N
+fin	H3384	yārâ	throw	V
+fin	H3138	yôreh	early rain	N
+fin	H4175	môreh	rain	N
+fin	H4176	môreh	teacher	N
+fin	H8452	tôrâ	direction	N
+fin	H8451	tôrâ	direction	N
+fiw	H3391	yeraḥ	month	N
+fiw	H3394	yārēaḥ	moon	N
+fjm	H3409	yārēk	thigh	N
+fjm	H3411	yarkâ	flank	N
+fjr	H3415	yāraʿ	quiver	V
+fjr	H3407	yĕrîʿâ	curtain	N
+fjw	H3387	yārôq	green thing	N
+fjw	H3418	yereq	green	N
+fjw	H3419	yārāq	herbs	N
+fjw	H3420	yērāqôn	mildew	N
+fjw	H3422	yĕraqraq	greenish	A
+fka	H3423	yāraš	take possession of	V
+fka	H3424	yĕrēšâ	a possession	N
+fka	H3425	yĕruššâ	a possession	N
+fka	H4180	môrāš	a possession	N
+fka	H4181	môrāšâ	a possession	N
+fka	H7568	rešet	net	N
+fke	H3427	yāšab	sit	V
+fke	H4186	môšāb	seat	N
+fke	H7675	šebet	seat	N
+fke	H7871	šîbâ	sojourn	N
+fke	H8453	tôšāb	sojourner	N
+flh	H3456	yāšam	be desolate	V
+flh	H3451	yĕšîmâ	desolation	N
+flh	H3452	yĕšîmôn	waste	N
+fli	H3455	yāśam	place	V
+fli	H3426	yēš	being	T
+flp	H3462	yāšēn	sleep	V
+flp	H3463	yāšēn	sleeping	A
+flp	H3465	yāšān	old	A
+flp	H8142	šēnâ	sleep	N
+flp	H8153	šĕnāt	sleep	N
+flu	H3467	yāšaʿ	deliver	V
+flu	H3444	yĕšûʿâ	salvation	N
+flu	H3468	yēšaʿ	deliverance	N
+flu	H4190	môšāʿâ	saving acts	N
+flu	H7771	šôaʿ	free	A
+flu	H8668	tĕšûʿâ	deliverance	N
+fmc	H3474	yāšar	be smooth	V
+fmc	H3477	yāšār	straight	A
+fmc	H3476	yōšer	straightness	N
+fmc	H3483	yĕšārâ	uprightness	N
+fmc	H3484	yĕšurûn	Jeshurun	Np
+fmc	H4334	mîšôr	level place	N
+fmc	H4339	mêšār	evenness	N
+fmm	H3453	yāšîš	aged	A
+fmm	H3486	yāšēš	aged	A
+fnd	H3498	yātar	remain over	V
+fnd	H3148	yôtēr	superiority	N
+fnd	H3499	yeter	remainder	N
+fnd	H3499	yeter	cord	N
+fnd	H3502	yitrâ	abundance	N
+fnd	H3504	yitrôn	advantage	N
+fnd	H3508	yōteret	appendage	N
+fnd	H4195	môtār	abundance	N
+fnd	H4340	mêtār	cord	N
+fnr	H3510	kāʾab	be in pain	V
+fnr	H3511	kĕʾēb	pain	N
+fnr	H4341	makʾôb	pain	N
+fnw	H3513	kābēd	be heavy	V
+fnw	H3516	kābēd	liver	N
+fnw	H3515	kābēd	heavy	A
+fnw	H3514	kōbed	weight	N
+fnw	H3517	kĕbēdut	heaviness	N
+fnw	H3519	kābôd	abundance	N
+fnw	H3520	kābôd	glorious	A
+fnw	H3520	kĕbûddâ	abundance	N
+fop	H3527	kābar	be much	V
+fop	H3524	kabbîr	great	A
+fop	H3529	kĕbār	Chebar. Compare	Np
+fop	H3528	kĕbār	already	D
+fop	H3530	kibrâ	distance	N
+fop	H4342	makbîr	be much	V
+foq	H3523	kābîr	netted	N
+foq	H3531	kĕbārâ	a sieve	N
+foq	H4345	mikbār	grating	N
+foq	H4346	makbēr	a netted cloth	N
+fou	H3532	kebeś	lamb	N
+fou	H3535	kibśâ	ewe-lamb	N
+fou	H3775	keśeb	lamb	N
+fov	H3533	kābaš	subdue	V
+fov	H3534	kebeš	footstool	N
+fpa	H3537	kad	jar	N
+fpa	H3539	kadkōd	ruby	N
+fpa	H3590	kîdôd	spark	N
+fpj	H3543	kāhâ	be dim	V
+fpj	H3544	kēheh	dim	A
+fpj	H3545	kēhâ	dimming	N
+fpm	H3547	kāhan	act as priest	V
+fpm	H3548	kōhēn	priest	N
+fpm	H3550	kĕhunnâ	priesthood	N
+fpq	H3554	kāwâ	burn	V
+fpq	H3555	kĕwîyâ	branding	N
+fpq	H3587	kî	burning	N
+fpq	H4348	mikwâ	burnt-spot	N
+fpy	H3559	kûn	be firm	V
+fpy	H3561	kawwān	cake	N
+fpy	H3651	kēn	right	A
+fpy	H4349	mākôn	fixed place	N
+fpy	H4350	mĕkônâ	fixed resting-place	N
+fpy	H4369	mĕkunâ	fixed resting-place	N
+fpy	H8499	tĕkûnâ	arrangement	N
+fpy	H8498	tĕkûnâ	arrangement	N
+fqe	H3738	kûr	bore	V
+fqe	H4380	mĕkērâ	sword	N
+fqe	H4351	mĕkōrâ	origin	N
+fqf	H3564	kûr	smelting-pot	N
+fqf	H3595	kîyōr	pot	N
+fqf	H3600	kîr	cooking-furnace	N
+fqf	H3733	kār	basket-saddle	N
+fqh	H3568	kûš	Cush	Np
+fqh	H3569	kûšî	Cushite	A
+fqh	H3571	kûšît	a Cushite woman	A
+fqq	H3576	kāzab	lie	V
+fqq	H0391	ʾakzāb	deceptive	A
+fqq	H3577	kāzāb	lie	N
+fqv	H0393	ʾakzār	cruel	A
+fqv	H0394	ʾakzārî	cruel	A
+fqv	H0395	ʾakzĕrîyût	cruelty	N
+frd	H3584	kāḥaš	be disappointing	V
+frd	H3586	keḥāš	deceptive	A
+frd	H3585	kaḥaš	lying	N
+fsd	H3607	kālāʾ	shut up	V
+fsd	H3608	keleʾ	confinement	N
+fsd	H3610	kilʾayim	two kinds	N
+fsd	H3628	kĕlîʾ	prison	N
+fsd	H4356	miklâ	enclosure	N
+fsi	H3611	keleb	dog	N
+fsi	H3619	kĕlûb	basket	N
+fsn	H3615	kālâ	be complete	V
+fsn	H3616	kāleh	failing	A
+fsn	H3617	kālâ	completion	N
+fsn	H3627	kĕlî	article	N
+fsn	H3631	killāyôn	failing	N
+fsn	H4357	miklâ	completeness	N
+fsn	H8502	tiklâ	completeness	N
+fsn	H8503	taklît	end	N
+fth	H3634	kālal	complete	V
+fth	H3605	kōl	the whole	N
+fth	H3632	kālîl	entire	A
+fth	H4358	miklôl	perfection	N
+fth	H4359	miklāl	completeness	N
+fth	H4360	maklul	a thing made perfect	N
+fti	H3618	kallâ	daughter-in-law	N
+fti	H3623	kĕlûlâ	betrothal	N
+ftj	H3637	kālam	be humiliated	V
+ftj	H3639	kĕlimmâ	insult	N
+ftj	H3640	kĕlimmût	ignominy	N
+ftv	H3646	kammōn	cummin	N
+ftv	H4362	mikmān	hidden stores	N
+ftz	H4364	mikmār	net	N
+ftz	H4364	makmōr	net	N
+ftz	H4365	mikmeret	net	N
+ftz	H4365	mikmōret	net	N
+fun	H3654	kēn	gnat	N
+fun	H3657	kannâ	support	N
+fun	H3661	kānan	support	N
+fur	H3664	kānas	gather	V
+fur	H4370	miknās	drawers	N
+fus	H3665	kānaʿ	be humble	V
+fus	H3666	kinʿâ	bundle	N
+fuv	H3667	kĕnaʿan	Canaan	Np
+fuv	H3667	kĕnaʿan	merchant	N
+fuv	H3669	kĕnaʿănî	Kenaanite	N
+fuv	H3669	kĕnaʿănî	trader	N
+fvb	H3670	kānap	be cornered	V
+fvb	H3671	kānāp	wing	N
+fvi	H3680	kāsâ	cover	V
+fvi	H3681	kāsûy	covering	N
+fvi	H3682	kĕsût	covering	N
+fvi	H4374	mĕkasseh	covering	N
+fvi	H4372	mikseh	covering	N
+fvs	H3688	kāsal	be stupid	V
+fvs	H3684	kĕsîl	stupid fellow	N
+fvs	H3685	kĕsîl	Orion	N
+fvs	H3687	kĕsîlût	stupidity	N
+fvs	H3689	kesel	loins	N
+fvs	H3690	kislâ	trust	N
+fwa	H3697	kāsam	shear	V
+fwa	H3698	kussemet	spelt	N
+fwa	H3765	kirsēm	tear off	V
+fwc	H3699	kāsas	compute	V
+fwc	H4371	mekes	computation	N
+fwc	H4373	miksâ	computation	N
+fwe	H3700	kāsap	long	V
+fwe	H3701	kesep	silver	N
+fwi	H3707	kāʿas	be vexed	V
+fwi	H3708	kaʿas	vexation	N
+fwi	H3708	kaʿaś	vexation	N
+fwv	H3717	kāpal	double	V
+fwv	H3718	kepel	the double	N
+fwv	H4375	makpēlâ	Machpelah	Np
+fww	H3719	kāpan	be hungry	V
+fww	H3720	kāpān	hunger	N
+fwz	H3721	kāpap	bend	V
+fwz	H3709	kap	hollow	N
+fwz	H3712	kippâ	branch	N
+fxi	H3722	kipper	cover over	V
+fxi	H3724	kōper	the price of a life	N
+fxi	H3725	kippurîm	atonement	N
+fxi	H3727	kappōret	propitiatory	N
+fxj	H3722	kāpar	and thou shalt pitch it with pitch	V
+fxj	H3724	kōper	pitch	N
+fxk	H3715	kĕpîr	young lion	N
+fxk	H3715	kĕpîrîm	villages	N
+fxk	H3723	kāpār	village	N
+fxk	H3724	kōper	El Ḥenna	N
+fxk	H3724	kōper	village	N
+fxy	H3738	kārâ	dig	V
+fxy	H3741	kārâ	cistern	N
+fxy	H4379	mikreh	pit	N
+fya	H3739	kārâ	give a feast	V
+fya	H3740	kērâ	a feast	N
+fyo	H3754	kerem	vineyard	N
+fyo	H3755	kāram	tend vineyards	V
+fzb	H3766	kāraʿ	bow down	V
+fzb	H3767	keraʿ	leg	N
+fzd	H3769	kārar	dancing	V
+fzd	H3733	kar	he-lamb	N
+fzd	H3753	kirkārâ	dromedary	N
+fzh	H3772	kārat	cut off	V
+fzh	H3748	kĕrîtût	divorcement	N
+fzh	H3773	kārutâ	cut off	N
+fzq	H3782	kāšal	stumble	V
+fzq	H3781	kaššîl	axe	N
+fzq	H3783	kiššālôn	a stumbling	N
+fzq	H4383	mikšôl	a stumbling	N
+fzq	H4384	makšēlâ	overthrown mass	N
+fzv	H3785	kešep	sorcery	N
+fzv	H3786	kaššāp	sorcerer	N
+fzv	H3784	kāšap	practice sorcery	V
+fzx	H3787	kāšēr	be advantageous	V
+fzx	H3574	kôšārâ	prosperity	N
+fzx	H3601	kîšôr	distaff	N
+fzx	H3788	kišrôn	skill	N
+gaa	H3789	kātab	write	V
+gaa	H3791	kĕtāb	writing	N
+gaa	H3793	kĕtōbet	a writing	N
+gaa	H4385	miktāb	writing	N
+gap	H3803	kātar	surround	V
+gap	H3804	keter	crown	N
+gap	H3805	kōteret	capital	N
+gar	H3806	kātaš	pound	V
+gar	H4389	maktēš	Maktesh	N
+gar	H4388	maktēš	mortar	N
+gas	H3807	kātat	beat	V
+gas	H3795	kātît	beaten	A
+gas	H4386	mĕkittâ	the crushed	N
+gbb	H3811	lāʾâ	be weary	V
+gbb	H4972	mattĕlāʾâ	weariness	N
+gbb	H8513	tĕlāʾâ	weariness	N
+gbe	H4397	malʾāk	messenger	N
+gbe	H4399	mĕlāʾkâ	occupation	N
+gbe	H4400	malʾākût	message	N
+gbr	H3820	lēb	inner man	N
+gbr	H3820	lēb qāmāy	Leb Qamay	Np
+gbr	H3823	libbēb	make cakes	V
+gbr	H3824	lēbāb	inner man	N
+gbr	H3823	lābab	encourage	V
+gbr	H3834	lĕbibâ	cakes	N
+gbr	H3826	libbâ	heart	N
+gcb	H3835	lābēn	be white	V
+gcb	H3835	lāban	make brick	V
+gcb	H3836	lābān	white	A
+gcb	H3843	lĕbēnâ	brick	N
+gcb	H3840	lĕbēnâ	brick	N
+gcb	H3842	lĕbānâ	moon	N
+gcb	H3828	lĕbōnâ	frankincense	N
+gcb	H3839	libneh	poplar	N
+gcb	H3844	lĕbānôn	Lebanon	Np
+gcb	H4404	malbēn	brick-mould	N
+gcr	H3847	lābēš	put on	V
+gcr	H3830	lĕbûš	garment	N
+gcr	H4403	malbûš	raiment	N
+gcr	H8516	tilbōšet	raiment	N
+gcw	H3827	labbâ	flame	N
+gcw	H3851	lahab	flame	N
+gcw	H3852	lehābâ	flame	N
+gcw	H7957	šalhebet	flame	N
+gde	H3857	lāhaṭ	blaze up	V
+gde	H3858	lahaṭ	flame	N
+gdj	H3863	lû	if	C
+gdj	H3884	lûlēʾ	if not	C
+gdp	H3880	liwyâ	wreath	N
+gdp	H3882	liwyātān	serpent	N
+gdp	H3914	lōyâ	wreath	N
+gdr	H3868	lûz	turn aside	V
+gdr	H3869	lûz	almond-tree	N
+gdr	H3891	lāzût	deviation	N
+gdz	H3874	lûṭ	wrap closely	V
+gdz	H3814	lāʾṭ	secrecy	N
+gdz	H3875	lôṭ	envelope	N
+gdz	H3909	lāṭ	secrecy	N
+gej	H3885	lûn	murmur	V
+gej	H8519	tĕlunnâ	murmuring	N
+gek	H3885	lûn	lodge	V
+gek	H4411	mālôn	lodging-place	N
+gek	H4412	mĕlûnâ	lodge	N
+gel	H3886	lûaʿ	swallow	V
+gel	H3930	lōaʿ	throat	N
+gem	H3886	lûaʿ	talk wildly	V
+gem	H3216	yālaʿ	talk wildly	V
+geu	H3893	lēaḥ	moisture	N
+geu	H3892	laḥ	moist	A
+gfa	H3898	lāḥam	use as food	V
+gfa	H3899	leḥem	bread	N
+gfb	H3898	lāḥam	fight	V
+gfb	H3894	lĕḥûm	intestines	N
+gfb	H3901	lāḥem	then	N
+gfb	H4421	milḥāmâ	battle	N
+gff	H3905	lāḥaṣ	squeeze	V
+gff	H3906	laḥaṣ	oppression	N
+gfh	H3907	lāḥaš	whisper	V
+gfh	H3908	laḥaš	a whispering	N
+gfr	H3887	lîṣ	scorn	V
+gfr	H3944	lāṣôn	scorning	N
+gfr	H3945	lāṣaṣ	scorn	V
+gfr	H4426	mĕlîṣâ	satire	N
+gfy	H3920	lākad	capture	V
+gfy	H3921	leked	a taking	N
+gfy	H4434	malkōdet	a catching instrument	N
+ggc	H3925	lāmad	exercise in	V
+ggc	H3928	limmud	taught	A
+ggc	H4451	malmēd	ox-goad	N
+ggc	H8527	talmîd	scholar	N
+ggk	H3932	lāʿag	mock	V
+ggk	H3933	laʿag	mocking	N
+ggk	H3934	lāʿēg	mocking	A
+ggz	H3947	lāqaḥ	take	V
+ggz	H3948	leqaḥ	learning	N
+ggz	H4455	malqôaḥ	booty	N
+ggz	H4455	malqôaḥ	jaw	N
+ggz	H4457	melqāḥayim	tongs	N
+ggz	H4727	miqqāḥ	a taking	N
+ggz	H4728	maqqāḥâ	ware	N
+ghc	H3950	lāqaṭ	pick	V
+ghc	H3219	yalqûṭ	receptacle	N
+ghc	H3951	leqeṭ	gleaning	N
+ghg	H3954	leqeš	after-growth	N
+ghg	H3953	lāqaš	take the aftermath	V
+ghg	H4456	malqôš	latter-rain	N
+ghq	H3956	lāšôn	tongue	N
+ghq	H3960	lāšan	use the tongue	V
+ghz	H3967	mēʾâ	hundred	N
+ghz	H3968	mēʾâ	Meah	N
+gir	H3985	māʾēn	refuse	V
+gir	H3987	mēʾēn	refractory	A
+gir	H3986	māʾēn	refusing	A
+git	H3988	māʾas	reject	V
+git	H3973	māʾôs	refuse	N
+gke	H4022	meged	excellence	N
+gke	H4030	migdānâ	choice thing	N
+gln	H4058	mādad	measure	V
+gln	H4055	mad	measure	N
+gln	H4059	mādad	measure	V
+gln	H4060	middâ	measure	N
+gln	H4067	mādôn	measure	N
+gln	H4461	mēmad	measurement	N
+gnr	H4116	māhar	hasten	V
+gnr	H4106	māhîr	quick	A
+gnr	H4118	mahēr	quickly	D
+gnr	H4118	mahēr	hastening	A
+gnr	H4120	mĕhērâ	haste	N
+gnv	H4116	māhar	acquire by paying purchase-price	V
+gnv	H4117	māhar	acquire by paying purchase-price	V
+gnv	H4119	mōhar	purchase-price	N
+gob	H4124	môʾāb	Moab	Np
+gob	H4125	môʾābî	Moabitish	A
+goj	H4131	môṭ	totter	V
+goj	H4132	môṭ	shaking	N
+goj	H4133	môṭâ	pole	N
+gon	H4135	mûl	circumcise	V
+gon	H4139	mûlâ	circumcision	N
+gpy	H4171	mûr	change	V
+gpy	H8545	tĕmûrâ	exchange	N
+gqs	H4191	mût	die	V
+gqs	H4194	māwet	death	N
+gqs	H4463	māmôt	death	N
+gqs	H8546	tĕmûtâ	death	N
+gsl	H4229	māḥâ	strike	V
+gsl	H4239	mĕḥî	the stroke of his battering ram	N
+gsw	H4220	mēaḥ	fatling	N
+gsw	H4221	mōaḥ	marrow	N
+gsw	H4229	māḥâ	full of marrow	V
+guf	H4272	māḥaṣ	smite through	V
+guf	H4273	maḥaṣ	severe wound	N
+gum	H4242	mĕḥîr	price	N
+gum	H4279	māḥār	to-morrow	N
+gum	H4283	moḥŏrāt	the morrow	N
+gvn	H4306	māṭar	rain	N
+gvn	H4305	māṭar	rain	V
+gwj	H4327	mîn	kind	N
+gwj	H8544	tĕmûnâ	likeness	N
+gwn	H4330	mîṣ	squeezing	N
+gwn	H4160	mēṣ	squeezer	N
+gyi	H4376	mākar	sell	V
+gyi	H4377	meker	merchandise	N
+gyi	H4465	mimkār	sale	N
+gyi	H4466	mimkeret	sale	N
+gyx	H4390	mālēʾ	be full	V
+gyx	H4393	mĕlōʾ	fulness	N
+gyx	H4394	milluʾ	setting	N
+gyx	H4392	mālēʾ	full	A
+gyx	H4395	mĕlēʾâ	fulness	N
+gyx	H4396	milluʾâ	setting	N
+gyx	H4402	millēʾt	setting	N
+gzu	H4414	mālaḥ	tear away	V
+gzu	H4418	melaḥ	rag	N
+gzv	H4408	mallûaḥ	mallow	N
+gzv	H4417	melaḥ	salt	N
+gzv	H4419	mallāḥ	mariner	N
+gzv	H4414	mālaḥ	salt	V
+gzv	H4420	mĕlēḥâ	saltness	N
+gzz	H4422	mālaṭ	slip away	V
+gzz	H4423	meleṭ	mortar	N
+haj	H4410	mĕlûkâ	kingship	N
+haj	H4428	melek	king	N
+haj	H4427	mālak	be king	V
+haj	H4432	mōlek	Molech. Compare	Np
+haj	H4436	malkâ	queen	N
+haj	H4438	malkût	royalty	N
+haj	H4442	malkî-ṣedeq	Melchizedek	Np
+haj	H4446	mĕleket	queen	N
+haj	H4467	mamlākâ	kingdom	N
+haj	H4468	mamlākût	kingdom	N
+hay	H4448	mālal	rub	V
+hay	H4425	mĕlîlâ	ear	N
+haz	H4135	mālal	circumcise	V
+haz	H5243	nāmal	circumcise	V
+hbb	H4448	mālal	speak	V
+hbb	H4405	millâ	word	N
+hcm	H4487	mānâ	count	V
+hcm	H4488	māneh	maneh	N
+hcm	H4490	mānâ	part	N
+hcm	H4489	mōneh	counted number	N
+hcm	H4497	mānôn	thankless one	N
+hcm	H4507	mĕnî	number	Np
+hcm	H4521	mĕnāt	portion	N
+hel	H4537	māsak	mix	V
+hel	H4469	mimsāk	mixed drink	N
+hel	H4538	mesek	mixture	N
+hex	H4549	māsas	dissolve	V
+hex	H4523	mās	despairing	A
+hex	H4531	massâ	despair	N
+hex	H8557	temes	melting	N
+hfw	H4571	māʿad	slip	V
+hfw	H4154	mûʿedet	slip	N
+hfw	H5976	ʿāmad	slip	V
+hge	H4578	mēʿeh	internal organs	N
+hge	H4579	māʿâ	grain	N
+hgr	H4591	māʿaṭ	be small	V
+hgr	H4592	mĕʿaṭ	a little	A
+hhe	H4603	māʿal	act unfaithfully	V
+hhe	H4598	mĕʿîl	robe	N
+hhe	H4604	maʿal	unfaithful	N
+hlc	H4696	mēṣaḥ	brow	N
+hlc	H4697	miṣḥâ	greave	N
+hlt	H4693	māṣôr	besieged places	Np
+hlt	H4714	miṣrayim	Egypt	Np
+hnc	H4743	māqaq	decay	V
+hnc	H4716	maq	decay	N
+hnp	H4760	murʾâ	crop	N
+hnp	H4806	mĕrîʾ	fatling	N
+hoj	H4775	mārad	rebel	V
+hoj	H4777	mered	rebellion	N
+hoj	H4780	mardût	rebellion	N
+hoq	H4784	mārâ	be contentious	V
+hoq	H4805	mĕrî	rebellion	N
+hpj	H4803	māraṭ	make smooth	V
+hpj	H4153	môʿadyâ	Moadiah. Compare	Np
+hpj	H4593	māʿōṭ	make smooth	N
+hqr	H4838	māraq	scour	V
+hqr	H4795	mārûq	a scraping	N
+hqr	H8562	tamrûq	scouring	N
+hqx	H4843	mārar	be bitter	V
+hqx	H4470	memer	bitterness	N
+hqx	H4472	mamrôr	bitter thing	N
+hqx	H4751	mar	bitter	A
+hqx	H4753	mōr	myrrh	N
+hqx	H4786	mōrâ	bitterness of spirit	N
+hqx	H4787	morrâ	bitterness	N
+hqx	H4814	mĕrîrût	bitterness	N
+hqx	H4815	mĕrîrî	bitter	A
+hqx	H4844	mārōr	bitter thing	N
+hqx	H4845	mĕrērâ	gall	N
+hqx	H4846	mĕrōrâ	bitter thing	N
+hqx	H8563	tamrûr	bitterness	N
+hsr	H4886	māšaḥ	smear	V
+hsr	H4473	mimšaḥ	cherub of expansion	N
+hsr	H4888	mišḥâ	unction	N
+hsr	H4888	māšĕḥâ	consecrated portion	N
+hsr	H4899	māšîaḥ	anointed	N
+htj	H4900	māšak	draw	V
+htj	H4901	mešek	a drawing	N
+htj	H4189	mōšeket	cord	N
+htu	H4910	māšal	rule	V
+htu	H4474	mimšāl	dominion	N
+htu	H4475	memšālâ	rule	N
+htu	H4915	mōšel	dominion	N
+htv	H4911	māšal	represent	V
+htv	H4914	mĕšōl	by-word	N
+htv	H4911	māšal	use a proverb	V
+htv	H4912	māšāl	proverb	N
+htv	H4915	mōšel	likeness	N
+hvj	H4476	mimšāq	possession	N
+hvj	H4943	mešeq	acquisition	N
+hwd	H4964	meteg	bridle	N
+hwd	H4965	meteg hāʾammâ	Metheg-ammah	N
+hwi	H4969	mātaḥ	spread out	V
+hwi	H0572	ʾamtaḥat	sack	N
+hwz	H4985	mātōq	become sweet	V
+hwz	H4477	mamtaqqîm	sweetness	N
+hwz	H4966	mātôq	sweet	A
+hwz	H4986	meteq	sweetness	N
+hwz	H4988	mātōq	become sweet	V
+hwz	H4987	mōteq	sweetness	N
+hxn	H4998	nāʾâ	be comely	V
+hxn	H5000	nāʾweh	comely	A
+hxr	H5002	nĕʾum	utterance	N
+hxr	H5001	nāʾam	utter a prophecy	V
+hxt	H5003	nāʾap	commit adultery	V
+hxt	H5004	niʾup	adultery	N
+hxt	H5005	naʾăpûp	adultery	N
+hxv	H5006	nāʾaṣ	contemn	V
+hxv	H5007	nĕʾāṣâ	contempt	N
+hxv	H5007	neʾāṣâ	contempt	N
+hxy	H5008	nāʾaq	groan	V
+hxy	H5009	nĕʾāqâ	groan	N
+hyd	H5012	nābāʾ	prophesy	V
+hyd	H5016	nĕbûʾâ	prophecy	N
+hyd	H5030	nābîʾ	spokesman	N
+hyd	H5031	nĕbîʾâ	prophetess	N
+hyq	H5027	nābaṭ	look	V
+hyq	H4007	mabbāṭ	expectation	N
+hyx	H5034	nābēl	sink down	V
+hyx	H5038	nĕbēlâ	carcass	N
+hyy	H5034	nābal	be senseless	V
+hyy	H5036	nābāl	foolish	A
+hyy	H5039	nĕbālâ	senselessness	N
+hyy	H5040	nablût	immodesty	N
+hzg	H5042	nābaʿ	flow	V
+hzg	H4002	mabbûaʿ	spring	N
+hzl	H5046	nāgad	be conspicuous	V
+hzl	H5048	neged	what is conspicuous	R
+hzl	H5057	nāgîd	leader	N
+hzm	H5050	nāgah	shine	V
+hzm	H5051	nōgah	brightness	N
+hzm	H5054	nĕgōhâ	brightness	N
+hzr	H5055	nāgaḥ	push	V
+hzr	H5056	naggāḥ	addicted to goring	A
+hzv	H5059	nāgan	touch	V
+hzv	H4485	mangînâ	mocking	N
+hzv	H5058	nĕgînâ	music	N
+hzx	H5060	nāgaʿ	touch	V
+hzx	H5061	negaʿ	stroke	N
+hzz	H5062	nāgap	strike	V
+hzz	H4046	maggēpâ	blow	N
+hzz	H5063	negep	blow	N
+iaf	H5068	nādab	incite	V
+iaf	H5071	nĕdābâ	voluntariness	N
+iaf	H5081	nādîb	inclined	A
+iaf	H5082	nĕdîbâ	nobility	N
+iaj	H5074	nādad	retreat	V
+iaj	H5079	niddâ	impurity	N
+iaj	H5076	nĕdûd	tossing	N
+iaj	H5206	nîdâ	removal	N
+iaq	H5080	nādaḥ	impel	V
+iaq	H4065	maddûaḥ	a thing to draw aside	N
+iax	H5087	nādar	vow	V
+iax	H5088	neder	vow	N
+iaz	H5090	nāhag	drive	V
+iaz	H4491	minhāg	driving	N
+ibb	H5091	nāhâ	wail	V
+ibb	H5092	nĕhî	wailing	N
+ibb	H5093	nihyâ	lamentation	N
+ibb	H5204	nî	wailing	N
+ibe	H5095	nāhal	lead	V
+ibe	H5097	nahălōl	pasture	N
+ibi	H5098	nāham	growl	V
+ibi	H5099	naham	growling	N
+ibi	H5100	nĕhāmâ	growling	N
+ibl	H5102	nāhar	flow	V
+ibl	H5104	nāhār	stream	N
+ibm	H5102	nāhar	shine	V
+ibm	H4492	minhārâ	channel	N
+ibm	H5105	nĕhārâ	light	N
+ibp	H5106	nûʾ	hinder	V
+ibp	H8569	tĕnûʾâ	opposition	N
+ibr	H5107	nûb	bear fruit	V
+ibr	H5108	nôb	fruit	N
+ibr	H5108	nîb	fruit	N
+ibr	H8570	tĕnûbâ	fruit	N
+ibv	H5110	nûd	move to and fro	V
+ibv	H4493	mānôd	a shaking	N
+ibv	H5112	nôd	wandering	N
+ibv	H5205	nîd	quivering motion	N
+icc	H5116	nāweh	dwelling	A
+icc	H5116	nāweh	abode of shepherd	N
+icc	H5115	nāwâ	dwell	V
+icc	H4999	nāwâ	pasture	N
+icf	H5117	nûaḥ	rest	V
+icf	H2010	hănāḥâ	a giving of rest	N
+icf	H3240	yānaḥ	rest	V
+icf	H4494	mānôaḥ	resting-place	N
+icf	H4496	mĕnûḥâ	resting-place	N
+icf	H5118	nûaḥ	resting-place	N
+icf	H5146	nōaḥ	Noah	Np
+icf	H5183	naḥat	quietness	N
+icf	H5207	nîḥōaḥ	a quieting	N
+icj	H5123	nûm	be drowsy	V
+icj	H5124	nûmâ	somnolence	N
+icj	H8572	tĕnûmâ	slumber	N
+icl	H5125	nûn	propagate	V
+icl	H5209	nîn	offspring	N
+icn	H5127	nûs	flee	V
+icn	H4498	mānôs	flight	N
+icn	H4499	mĕnûsâ	flight	N
+icn	H5211	nîs	flee	N
+ico	H5128	nûaʿ	quiver	V
+ico	H4517	mĕnaʿănēaʿ	rattle	N
+icr	H5130	nûp	move to and fro	V
+icr	H5299	nāpâ	sieve	N
+icr	H8573	tĕnûpâ	a swinging	N
+ict	H5131	nôp	elevation	N
+ict	H5299	nāpâ	height	N
+ict	H5316	nepet	height	N
+icw	H4501	mĕnôrâ	lampstand	N
+icw	H5216	nîr	lamp	N
+icw	H5216	nēr	lamp	N
+idh	H5144	nāzar	dedicate	V
+idh	H4502	minzār	consecrated	N
+idh	H5139	nāzîr	one consecrated	N
+idh	H5145	nēzer	consecration	N
+idh	H5144	nāzar	be a Nazarite	V
+idy	H5155	nĕḥîlâ	flute	N
+idy	H5157	nāḥal	get as a possession	V
+idy	H5159	naḥălâ	possession	N
+ied	H5162	nāḥam	be sorry	V
+ied	H5150	niḥûm	consoled	N
+ied	H5164	nōḥam	sorrow	N
+ied	H5165	neḥāmâ	comfort	N
+ied	H8575	tanḥûm	consolation	N
+iel	H5156	nāḥîr	nostril	N
+iel	H5170	naḥar	a snorting	N
+iel	H5170	naḥărâ	snorting	N
+iep	H5172	nāḥaš	practice divination	V
+iep	H5173	naḥaš	divination	N
+ieu	H5153	nāḥûš	of bronze	A
+ieu	H5154	nĕḥûšâ	copper	N
+ieu	H5178	nĕḥōšet	copper	N
+ifd	H5181	nāḥēt	go down	V
+ifd	H5183	naḥat	descent	N
+ifd	H5185	nāḥēt	descending	A
+iff	H5186	nāṭâ	stretch out	V
+iff	H4296	miṭṭâ	couch	N
+iff	H4294	maṭṭeh	branch	N
+iff	H4295	maṭṭâ	downwards	D
+iff	H4297	muṭṭeh	that which is perverted	N
+iff	H4298	muṭṭâ	spreading	N
+ifl	H5190	nāṭal	lift	V
+ifl	H5187	nāṭîl	laden	A
+ifl	H5192	nēṭel	burden	N
+ifn	H5193	nāṭaʿ	plant	V
+ifn	H4302	maṭṭāʿ	place	N
+ifn	H5195	nāṭîaʿ	plant	N
+ifn	H5194	neṭaʿ	plantation	N
+ifp	H5197	nāṭap	drop	V
+ifp	H5188	nĕṭîpâ	drop	N
+ifp	H5198	nāṭāp	drop	N
+ifp	H5198	nāṭāp	gum	N
+ifu	H5201	nāṭar	keep	V
+ifu	H4307	maṭṭārâ	guard	N
+ifv	H5203	nāṭaš	leave	V
+ifv	H5189	nĕṭîšâ	twig	N
+igj	H5214	nîr	break up	V
+igj	H5215	nîr	the tillable	N
+igm	H5217	nākāʾ	smite	V
+igm	H5218	nākēʾ	a stricken spirit	A
+igm	H5218	nākāʾ	stricken	A
+igm	H5219	nĕkōʾt	a spice	N
+igt	H5221	nākâ	smite	V
+igt	H4347	makkâ	blow	N
+igt	H5222	nēkeh	smitten ones	A
+igt	H5223	nākēh	smitten	A
+igt	H3559	nākôn	blow	N
+iha	H5226	nēkaḥ	front	D
+iha	H5228	nākōaḥ	straight	A
+iha	H5227	nōkaḥ	front	D
+iha	H5229	nĕkōḥâ	straight	A
+ihd	H5230	nākal	be crafty	V
+ihd	H3596	kîlay	knave	N
+ihd	H5231	nēkel	wiliness	N
+ihi	H5234	nākar	regard	V
+ihi	H1971	hakkārâ	look	N
+ihi	H4378	makkār	acquaintance	N
+ihj	H5236	nēkār	that which is foreign	N
+ihj	H5235	neker	misfortune	N
+ihj	H5234	nākar	act as foreign	V
+ihj	H5237	nokrî	foreign	A
+ihm	H5239	nālâ	complete	V
+ihm	H4512	minleh	gain	N
+iib	H5254	nāsâ	test	V
+iib	H4531	massâ	test	N
+iig	H5259	nāsak	weave	V
+iig	H4541	massēkâ	woven stuff	N
+iig	H4545	masseket	web	N
+iih	H5258	nāsak	pour out	V
+iih	H4541	massēkâ	molten metal	N
+iih	H5257	nāsîk	libation	N
+iih	H5262	nesek	drink-offering	N
+iii	H5258	nāsak	set	V
+iii	H5257	nāsîk	prince	N
+iik	H5264	nāsas	be high	V
+iik	H5251	nēs	standard	N
+iil	H5265	nāsaʿ	pull out	V
+iil	H4550	massaʿ	pulling up	N
+iil	H4551	massāʿ	quarry	N
+iix	H5274	nāʿal	bar	V
+iix	H4514	manʿûl	bolt	N
+iix	H4515	minʿāl	bolt	N
+iix	H5275	naʿal	sandal	N
+iix	H5274	nāʿal	furnish with sandals	V
+iiz	H5276	nāʿēm	be pleasant	V
+iiz	H4516	manʿammîm	delicacies	N
+iiz	H5273	nāʿîm	pleasant	A
+iiz	H5278	nōʿam	delightfulness	N
+iiz	H5282	naʿămān	pleasantness	N
+ijp	H5287	nāʿar	shake	V
+ijp	H5289	naʿar	shaking	N
+ijp	H5296	nĕʿōret	tow	N
+ijr	H5271	nĕʿûrôt	youth	N
+ijr	H5271	nĕʿûrîm	youth	N
+ijr	H5288	naʿar	boy	N
+ijr	H5290	nōʿar	youth	N
+ijr	H5291	naʿărâ	girl	N
+ike	H5301	nāpaḥ	breathe	V
+ike	H4646	mappāḥ	breathing out	N
+ike	H4647	mappuaḥ	bellows	N
+ike	H8598	tappûaḥ	apple-tree	N
+ikk	H5307	nāpal	fall	V
+ikk	H4651	mappāl	refuse	N
+ikk	H4654	mappēlâ	fallen	N
+ikk	H4654	mappālâ	ruin	N
+ikk	H4658	mappelet	carcass	N
+ikk	H5309	nēpel	untimely birth	N
+iko	H5310	nāpaṣ	shatter	V
+iko	H4661	mappēṣ	war-club	N
+iko	H4660	mappāṣ	shattering	N
+iko	H5311	nepeṣ	driving storm	N
+iks	H5315	nepeš	soul	N
+iks	H5314	nāpaš	take breath	V
+ild	H5324	nāṣab	take one’s stand	V
+ild	H4673	maṣṣāb	standing-place	N
+ild	H4674	muṣṣāb	palisade	N
+ild	H4675	miṣṣābâ	guard	N
+ild	H4676	maṣṣēbâ	pillar	N
+ild	H4678	maṣṣebet	pillar	N
+ild	H5325	niṣṣāb	fixed	N
+ild	H5333	nĕṣîb	pillar	N
+ilg	H5132	nāṣâ	fly	V
+ilg	H5133	nôṣâ	plumage	N
+ilh	H5327	nāṣâ	struggle	V
+ilh	H4683	maṣṣâ	strife	N
+ilh	H4695	maṣṣût	quarrel	N
+ilk	H5329	nāṣaḥ	be pre-eminent	V
+ilk	H5331	nēṣaḥ	eminence	N
+ilq	H5337	nāṣal	strip	V
+ilq	H2020	haṣṣālâ	deliverance	N
+ils	H5340	nāṣaṣ	shine	V
+ils	H5213	nîṣôṣ	spark	N
+ils	H5322	nēṣ	flower	N
+ils	H5328	niṣṣâ	blossom	N
+ils	H5339	niṣṣān	blossom	N
+ils	H5132	nāṣaṣ	bloom	V
+ilw	H5341	nāṣar	watch	V
+ilw	H5336	nṣyr	preserved	A
+ima	H5344	nāqab	pierce	V
+ima	H4717	maqqābâ	hammer	N
+ima	H4718	maqqebet	hammer	N
+ima	H4718	maqqebet	hole	N
+ima	H5345	neqeb	bezel	N
+ima	H5347	nĕqēbâ	female	N
+imf	H5348	nāqōd	speckled	A
+imf	H5351	nĕquddâ	point	N
+imf	H5350	niqqûd	what is crumbled	N
+imi	H5352	nāqâ	be empty	V
+imi	H4518	mĕnaqqîyâ	sacrificial bowl	N
+imi	H5355	nāqî	clean	A
+imi	H5355	nāqîʾ	innocent	A
+imi	H5356	niqqāyôn	innocency	N
+imq	H5358	nāqam	avenge	V
+imq	H5359	nāqām	vengeance	N
+imq	H5360	nĕqāmâ	vengeance	N
+imu	H5362	nāqap	go around	V
+imu	H5364	niqpâ	encircling rope	N
+imv	H5362	nāqap	strike off	V
+imv	H5363	nōqep	striking off	N
+imz	H5365	nāqar	bore	V
+imz	H5366	nĕqārâ	hole	N
+inj	H5378	nāšāʾ	lend on interest	V
+inj	H4855	maššāʾ	lending on interest	N
+inj	H4859	maššāʾâ	loan	N
+ink	H5377	nāšāʾ	beguile	V
+ink	H4860	maššāʾôn	guile	N
+ink	H4876	maššûʾâ	deceptions	N
+inm	H5375	nāśāʾ	lift	V
+inm	H4853	maśśāʾ	load	N
+inm	H4853	maśśāʾ	utterance	N
+inm	H4856	maśśōʾ	lifting up	N
+inm	H4858	maśśāʾâ	the uplifted	N
+inm	H4864	maśʾēt	uprising	N
+inm	H4984	mitnaśśēʾ	lift	N
+inm	H5379	niśśēʾt	lift	N
+inm	H5385	nĕśûʾâ	what is borne about	N
+inm	H5387	nāśîʾ	rising mist	N
+inm	H5387	nāśîʾ	one lifted up	N
+inm	H7613	śĕʾēt	exaltation	N
+inm	H7721	śôʾ	lift	V
+inm	H7863	śîʾ	loftiness	N
+inr	H5383	nāšâ	lend	V
+inr	H4874	maššeh	loan	N
+inr	H5386	nĕšî	debt	N
+ins	H5382	nāšâ	forget	V
+ins	H5388	nĕšîyâ	forgetfulness	N
+ins	H7876	šāyâ	the Rock which begat thee thou forgattest	V
+ioa	H5391	nāšak	bite	V
+ioa	H5392	nešek	interest	N
+ioa	H5391	nāšak	pay	V
+ioe	H5395	nāšam	pant	V
+ioe	H5397	nĕšāmâ	breath	N
+ioe	H8580	tinšemet	hard breather	N
+ioh	H5398	nāšap	blow	V
+ioh	H3244	yanšûp	strident	N
+ioh	H5399	nešep	twilight	N
+ioj	H5401	nāšaq	handle	V
+ioj	H5402	nešeq	equipment	N
+iok	H5401	nāšaq	kiss	V
+iok	H5390	nĕšîqâ	kiss	N
+ior	H5408	nātaḥ	cut up	V
+ior	H5409	nētaḥ	piece	N
+iov	H5413	nātak	pour forth	V
+iov	H2046	hittûk	a melting	N
+iow	H5414	nātan	give	V
+iow	H4976	mattān	gift	N
+iow	H4979	mattānâ	gift	N
+iow	H4991	mattat	gift	N
+iow	H5411	nĕtînîm	Nethinim	N
+ipf	H5423	nātaq	pull	V
+ipf	H5424	neteq	scab	N
+ipn	H5431	sāʾan	tread	V
+ipn	H5430	sĕʾôn	sandal	N
+ips	H5433	sābāʾ	imbibe	V
+ips	H5433	sābāʾ	drunkards	V
+ips	H5435	sōbeʾ	drink	N
+ipv	H5437	sābab	turn about	V
+ipv	H4141	mûsāb	encompassing	N
+ipv	H4142	mûsabbâ	turn about	A
+ipv	H4524	mēsab	that which surrounds	N
+ipv	H5252	nĕsibbâ	turn	N
+ipv	H5438	sibbâ	turn of affairs	N
+ipv	H5439	sābîb	circuit	N
+iqa	H5440	sābak	interweave	V
+iqa	H5442	sĕbak	thicket	N
+iqa	H5441	sĕbōk	in the thicket of trees	N
+iqe	H5445	sābal	bear a heavy load	V
+iqe	H5447	sēbel	load	N
+iqe	H5449	sabbāl	burden-bearer	N
+iqe	H5448	sōbel	burden	N
+iqe	H5450	siblâ	burden	N
+iqe	H5451	sibbōlet	ear of wheat	N
+iqr	H5462	sāgar	shut	V
+iqr	H4525	masgēr	locksmith	N
+iqr	H4526	misgeret	border	N
+iqr	H5458	sĕgôr	enclosure	N
+iqr	H5474	sûgar	cage	N
+iqz	H4528	misdĕrôn	porch	N
+iqz	H5468	sēder	arrangement	N
+iqz	H7713	śĕdērâ	row	N
+irc	H5469	sahar	roundness	N
+irc	H5470	sōhar	roundness	N
+ire	H5253	sûg	move away	V
+ire	H5472	sûg	move away	V
+ire	H5509	sîg	a moving back	N
+ire	H7734	śûg	move away	V
+ire	H7873	śîg	a moving back	N
+irf	H5473	sûg	fence about	V
+irf	H7735	śûg	fence about	V
+irl	H4533	masweh	veil	N
+irl	H5497	sût	vesture	N
+irq	H5526	sûk	hedge	V
+irq	H4534	mĕsûkâ	hedge	N
+irr	H5480	sûk	pour	V
+irr	H0610	ʾāsûk	flask	N
+irr	H3251	yāsak	pour	V
+irt	H5483	sûs	horse	N
+irt	H5484	sûsâ	mare	N
+isa	H5486	sûp	come to an end	V
+isa	H5490	sôp	end	N
+isa	H5492	sûpâ	storm-wind	N
+isd	H5493	sûr	turn aside	V
+isd	H3249	yswr	departing	A
+isd	H5494	sûr	turn aside	N
+isd	H5627	sārâ	turning aside	N
+isi	H5498	sāḥab	drag	V
+isi	H5499	sĕḥābâ	rag	N
+isk	H5500	sāḥâ	scrape	V
+isk	H5501	sĕḥî	offscouring	N
+isq	H5503	sāḥar	go around	V
+isq	H4536	misḥār	merchandise	N
+isq	H5504	saḥar	traffic	N
+isq	H5505	sāḥar	traffic	N
+isq	H5506	sĕḥōrâ	merchandise	N
+isq	H5507	sōḥērâ	buckler	N
+isq	H5508	sōḥeret	tile	N
+ito	H5526	sākak	weave together	V
+ito	H5519	sak	throng	N
+ito	H5520	sōk	thicket	N
+ito	H5521	sukkâ	thicket	N
+ito	H5523	sukkôt	Succoth	Np
+ito	H5526	sōkēk	protector	N
+itp	H5526	sākak	overshadow	V
+itp	H4329	mûsāk	covered	N
+itp	H4539	māsāk	covering	N
+itp	H4540	mĕsukâ	that with which one is covered	N
+itt	H5528	sākal	be foolish	V
+itt	H5529	sekel	folly	N
+itt	H5530	sākāl	fool	N
+itt	H5531	siklût	folly	N
+itt	H5531	siklût	folly	N
+itz	H5532	sākan	be of use	V
+itz	H4543	miskĕnôt	supply	N
+iuq	H5545	sālaḥ	forgive	V
+iuq	H5546	sallāḥ	ready to forgive	A
+iuq	H5547	sĕlîḥâ	forgiveness	N
+iuu	H5549	sālal	lift up	V
+iuu	H4546	mĕsillâ	highway	N
+iuu	H4547	maslûl	highway	N
+iuu	H5542	selâ	lift up	V
+iuu	H5550	sōlĕlâ	mound	N
+iuu	H5551	sullām	ladder	N
+iuv	H5536	sal	basket	N
+iuv	H5552	salsillâ	basket	N
+ivf	H5557	sālap	twist	V
+ivf	H5558	selep	crookedness	N
+ivq	H5568	sāmar	bristle up	V
+ivq	H4548	masmēr	nail	N
+ivq	H4930	maśmĕrâ	nail	N
+ivq	H5569	sāmār	bristling	A
+iwe	H5582	sāʿad	support	V
+iwe	H4552	misʿād	support	N
+iwj	H5585	sāʿîp	cleft	N
+iwj	H5588	sēʿēp	divided	A
+iwj	H5586	sāʿap	lop off boughs	V
+iwj	H5587	sĕʿippâ	division	N
+iwj	H5589	sĕʿappâ	bough	N
+iwj	H5634	sarʿappâ	bough	N
+iwn	H5590	sāʿar	storm	V
+iwn	H5591	saʿar	tempest	N
+iwn	H5591	sĕʿārâ	tempest	N
+iwt	H5594	sāpad	wail	V
+iwt	H4553	mispēd	wailing	N
+iww	H4939	miśpāḥ	outpouring	N
+iww	H5599	sāpîaḥ	growth from spilled kernels	N
+iww	H5599	sāpîaḥ	outpouring	N
+iwx	H4555	mispāḥâ	long veil	N
+iwx	H4556	mispaḥat	scruf	N
+iwx	H5597	sappaḥat	eruption	N
+iwx	H5596	śippaḥ	cause a scab upon	V
+ixg	H5603	sāpan	cover	V
+ixg	H5600	sĕpînâ	vessel	N
+ixg	H5604	sippun	ceiling	N
+ixg	H8226	śāpan	cover	V
+ixi	H5592	sap	threshhold	N
+ixi	H5592	sap	basin	N
+ixi	H5605	sāpap	stand at	V
+ixj	H5606	sāpaq	slap	V
+ixj	H5607	śepeq	hand-clapping	N
+ixm	H5612	sēper	missive	N
+ixm	H4557	mispār	number	N
+ixm	H5610	sĕpār	enumeration	N
+ixm	H5608	sāpar	count	V
+ixm	H5608	sōpēr	enumerator	N
+ixm	H5615	sĕpōrâ	number	N
+ixm	H5612	siprâ	book	N
+iye	H5628	sāraḥ	go free	V
+iye	H5629	seraḥ	excess	N
+iym	H5637	sārar	be stubborn	V
+iym	H5620	sar	stubborn	A
+iyr	H5641	sātar	hide	V
+iyr	H4563	mistôr	place of shelter	N
+iyr	H4565	mistār	secret place	N
+iyr	H4564	mastēr	hiding	N
+iyr	H5643	sēter	covering	N
+iyr	H5643	sitrâ	shelter	N
+izb	H5647	ʿābad	work	V
+izb	H4566	maʿbād	work	N
+izb	H5652	ʿăbād	work	N
+izb	H5650	ʿebed	slave	N
+izb	H5656	ʿăbōdâ	labour	N
+izb	H5657	ʿăbuddâ	service	N
+izb	H5659	ʿabdût	servitude	N
+izo	H5666	ʿābâ	be thick	V
+izo	H4568	maʿăbeh	thickness	N
+izo	H5672	ʿăbî	thickness	N
+izu	H5667	ʿăbôṭ	pledge	N
+izu	H5670	ʿābaṭ	take a pledge	V
+izu	H5671	ʿabṭîṭ	weight of pledges	N
+jab	H5674	ʿābar	pass over	V
+jab	H4569	maʿăbār	ford	N
+jab	H4569	maʿăbārâ	ford	N
+jab	H5668	ʿābûr	for the sake of	R
+jab	H5669	ʿābûr	produce	N
+jab	H5676	ʿēber	region across	N
+jab	H5674	ʿābar	be arrogant	V
+jab	H5679	ʿăbārâ	ford	N
+jab	H5678	ʿebrâ	overflow	N
+jab	H5680	ʿibrî	Hebrew	Ng
+jam	H5686	ʿābat	wind	V
+jam	H5687	ʿābôt	interwoven	A
+jam	H5688	ʿăbōt	twisted	N
+jan	H5689	ʿāgab	have inordinate affection	V
+jan	H5690	ʿāgāb	sensuous	N
+jan	H5691	ʿăgābâ	lustfulness	N
+jan	H5748	ʿûgāb	reed-instrument	N
+jav	H4570	maʿgāl	entrenchment	N
+jav	H5694	ʿāgîl	hoop	N
+jav	H5695	ʿēgel	calf	N
+jav	H5696	ʿāgōl	round	A
+jav	H5699	ʿăgālâ	cart	N
+jav	H5697	ʿeglâ	heifer	N
+jbo	H5710	ʿādâ	ornament	V
+jbo	H5716	ʿădî	ornaments	N
+jbp	H5710	ʿādâ	pass on	V
+jbp	H5704	ʿad	as far as	R
+jbp	H5706	ʿad	booty	N
+jbp	H5703	ʿad	perpetuity	N
+jcm	H4574	maʿădān	dainty	N
+jcm	H5719	ʿādîn	voluptuous	A
+jcm	H5730	ʿēden	luxury	N
+jcm	H5727	ʿādan	luxuriate	V
+jcm	H5730	ʿednâ	delight	N
+jcx	H5737	ʿādar	hoe	V
+jcx	H4576	maʿdēr	hoe	N
+jcy	H5737	ʿādar	be lacking	V
+jcy	H5739	ʿēder	flock	N
+jdd	H5645	ʿāb	dark cloud	N
+jdd	H5743	ʿûb	becloud	V
+jdi	H4580	māʿôg	cake	N
+jdi	H5692	ʿugâ	disc of bread	N
+jdi	H5746	ʿûg	bake	V
+jdm	H5749	ʿûd	return	V
+jdm	H5707	ʿēd	witness	N
+jdm	H5713	ʿēdâ	testimonies	N
+jdm	H5713	ʿēdâ	testimony	N
+jdm	H5715	ʿēdût	testimony	N
+jdm	H5750	ʿôd	a going round	D
+jdm	H5749	ʿûd	bear witness	V
+jdm	H8584	tĕʿûdâ	testimony	N
+jdp	H5753	ʿāwâ	bend	V
+jdp	H1164	bĕʿî	ruin	N
+jdp	H4596	mĕʿî	ruin-heap	N
+jdp	H5754	ʿawwâ	distortion	N
+jdp	H5773	ʿiwʿîm	distorting	N
+jdp	H5856	ʿî	ruin	N
+jdr	H5753	ʿāwâ	commit iniquity	V
+jdr	H5771	ʿāwōn	iniquity	N
+jds	H5756	ʿûz	take refuge	V
+jds	H4581	māʿôz	place of safety	N
+jec	H5763	ʿûl	give suck	V
+jec	H5764	ʿûl	sucking child	N
+jed	H5760	ʿăwîl	unjust one	N
+jed	H5767	ʿawwāl	unjust	N
+jed	H5766	ʿāwel	injustice	N
+jed	H5765	ʿāwal	act wrongfully	V
+jed	H5766	ʿawlâ	injustice	N
+jed	H5932	ʿalwâ	injustice	N
+jej	H6030	ʿûn	dwell	V
+jej	H4583	māʿôn	dwelling	N
+jej	H4585	mĕʿōnâ	den	N
+jen	H4155	mûʿāp	gloom	N
+jen	H4588	māʿûp	darkness	N
+jen	H5890	ʿêpâ	darkness	N
+jen	H5774	tĕʿupâ	gloom	N
+jeo	H5774	ʿûp	fly	V
+jeo	H5775	ʿôp	flying creatures	N
+jeo	H6079	ʿapʿap	eyelid	N
+jes	H5781	ʿûq	totter	V
+jes	H4157	mûʿāqâ	compression	N
+jes	H6125	ʿāqâ	pressure	N
+jeu	H5786	ʿāwar	make blind	V
+jeu	H5787	ʿiwwēr	blind	A
+jeu	H5788	ʿiwwārôn	blindness	N
+jeu	H5788	ʿawweret	blindness	N
+jew	H5783	ʿûr	be exposed	V
+jew	H4589	māʿôr	nakedness	N
+jew	H4636	maʿărōm	naked thing	N
+jew	H5903	ʿêrōm	naked	A
+jew	H6174	ʿārôm	naked	A
+jex	H5782	ʿûr	rouse oneself	V
+jex	H5892	ʿîr	excitement	N
+jfc	H5791	ʿāwat	be bent	V
+jfc	H5792	ʿawwātâ	subversion	N
+jfm	H5800	ʿāzab	leave	V
+jfm	H5801	ʿizzābôn	wares	N
+jfm	H5805	ʿăzûbâ	forsakenness	N
+jfx	H5810	ʿāzaz	be strong	V
+jfx	H5794	ʿaz	strong	A
+jfx	H5797	ʿōz	strength	N
+jfx	H5807	ʿĕzûz	strength	N
+jfx	H5808	ʿizzûz	mighty	A
+jfx	H5822	ʿoznîyâ	osprey	N
+jgp	H5826	ʿāzar	help	V
+jgp	H5828	ʿēzer	help	N
+jgp	H5833	ʿezrâ	help	N
+jhd	H5844	ʿāṭâ	wrap oneself	V
+jhd	H4594	maʿăṭeh	wrap	N
+jhi	H5848	ʿāṭap	envelop oneself (Aramaism)	V
+jhi	H4595	maʿăṭāpâ	overtunic	N
+jhl	H5849	ʿāṭar	surround	V
+jhl	H5849	ʿāṭar	crown	V
+jhl	H5850	ʿăṭārâ	crown	N
+jia	H5860	ʿîṭ	scream	V
+jia	H5860	ʿîṭ	dart greedily	V
+jia	H5861	ʿayiṭ	bird	N
+jin	H5869	ʿayin	spring	N
+jin	H4599	maʿyān	spring	N
+jio	H5869	ʿayin	eye	N
+jio	H5770	ʿîn	eye	V
+jjh	H5888	ʿîp	be faint	V
+jjh	H5889	ʿāyēp	faint	A
+jkk	H5914	ʿekes	anklet	N
+jkk	H5913	ʿākas	shake bangles	V
+jkm	H5916	ʿākar	stir up	V
+jkm	H5911	ʿākôr	disturbance	N
+jkx	H5927	ʿālâ	go up	V
+jkx	H4605	maʿal	higher part	D
+jkx	H4607	mōʿal	lifting	N
+jkx	H4608	maʿăleh	ascent	N
+jkx	H4609	maʿălâ	step	N
+jkx	H4609	maʿălâ	what comes up	N
+jkx	H4610	maʿălēh ʿaqrabbîm	ascent	N
+jkx	H5921	ʿal	above	R
+jkx	H5920	ʿal	top	N
+jkx	H5929	ʿāleh	leaf	N
+jkx	H5930	ʿōlâ	whole burnt-offering	N
+jkx	H5930	ʿōlâ	ascent	N
+jkx	H5940	ʿĕlî	pestle	N
+jkx	H5942	ʿillî	upper	A
+jkx	H5944	ʿălîyâ	roof-chamber	N
+jkx	H5945	ʿelyôn	high	A
+jkx	H5945	ʿelyôn	Highest	N
+jkx	H8585	tĕʿālâ	healing	N
+jkx	H8585	tĕʿālâ	water-course	N
+jlg	H5937	ʿālaz	exult	V
+jlg	H5938	ʿālēz	exultant	A
+jlg	H5947	ʿallîz	exultant	A
+jlu	H5953	ʿālal	insert	V
+jlu	H5923	ʿōl	yoke	N
+jlu	H5948	ʿălîl	furnace	N
+jlv	H5953	ʿālal	act severely	V
+jlv	H4611	maʿălāl	deed	N
+jlv	H5949	ʿălîlâ	wantonness	N
+jlv	H5950	ʿălîlîyâ	deed	N
+jlv	H5953	ʿālal	glean	V
+jlv	H5955	ʿōlēlôt	gleaning	N
+jlv	H8586	taʿălûlîm	wantonness	N
+jlx	H5768	ʿôlēl	child	N
+jlx	H5953	ʿālal	act the child	V
+jma	H5956	ʿālam	conceal	V
+jma	H8587	taʿălummâ	hidden thing	N
+jmb	H5934	ʿālûmîm	youth	N
+jmb	H5958	ʿelem	young man	N
+jmb	H5959	ʿalmâ	young woman	N
+jmc	H5769	ʿôlām	long duration	N
+jmc	H5865	ʿêlôm	long duration	N
+jmk	H5968	ʿālap	cover	V
+jmk	H5969	ʿulpeh	cover	A
+jmm	H5970	ʿālaṣ	rejoice	V
+jmm	H5951	ʿălîṣût	exultation	N
+jmo	H5973	ʿim	with	R
+jmo	H5973	mēʿim	from with	R
+jmo	H5971	ʿam	kinsman	N
+jmo	H5978	ʿimmād	with	R
+jmo	H5980	ʿummâ	juxtaposition	R
+jmo	H6005	ʿimmānûʾēl	Immanuel	Np
+jms	H5975	ʿāmad	take one’s stand	V
+jms	H4612	maʿămād	office	N
+jms	H4613	moʿŏmād	standing-ground	N
+jms	H5977	ʿōmed	standing-place	N
+jms	H5979	ʿemdâ	standing-ground	N
+jms	H5982	ʿammûd	pillar	N
+jna	H5983	ʿammôn	Ammon	Np
+jna	H5984	ʿammônî	Ammonite	A
+jna	H5985	ʿammônît	Ammonite	A
+jnq	H5998	ʿāmal	labour	V
+jnq	H6001	ʿāmēl	toiling	A
+jnq	H6001	ʿāmēl	laborer	N
+jnq	H5999	ʿāmāl	trouble	N
+jny	H6006	ʿāmas	load	V
+jny	H4614	maʿămāsâ	load	N
+jod	H6009	ʿāmōq	be deep	V
+jod	H4615	maʿămaqqîm	depths	N
+jod	H6010	ʿēmeq	vale	N
+jod	H6012	ʿāmēq	deep	A
+jod	H6013	ʿāmōq	deep	A
+jod	H6011	ʿōmeq	depth	N
+jol	H5995	ʿāmîr	swath	N
+jol	H6014	ʿimmēr	bind sheaves	V
+jol	H6016	ʿōmer	omer	N
+jol	H6016	ʿōmer	sheaf	N
+jox	H6026	ʿānōg	be soft	V
+jox	H6028	ʿānōg	dainty	A
+jox	H6027	ʿōneg	dantiness	N
+jox	H8588	taʿănûg	daintiness	N
+joz	H6029	ʿānad	bind around	V
+joz	H4575	maʿădannôt	bonds	N
+jpb	H6031	ʿānâ	be occupied	V
+jpb	H4618	maʿănâ	place for task	N
+jpb	H6045	ʿinyān	occupation	N
+jpd	H6031	ʿānâ	be bowed down	V
+jpd	H6035	ʿānāw	poor	N
+jpd	H6038	ʿănāwâ	humility	N
+jpd	H6037	ʿanwâ	humility	N
+jpd	H6039	ʿĕnût	affliction	N
+jpd	H6040	ʿŏnî	affliction	N
+jpd	H6041	ʿānî	poor	A
+jpd	H8589	taʿănît	humiliation	N
+jpe	H6030	ʿānâ	answer	V
+jpe	H3282	yaʿan	purpose	C
+jpe	H4616	maʿan	purpose	R C
+jpe	H4617	maʿăneh	answer	N
+jpe	H5772	ʿōnâ	cohabitation	N
+jpe	H6256	ʿēt	time	N
+jpe	H6258	ʿattâ	now	D
+jpe	H6261	ʿittî	timely	A
+jpz	H6049	ʿānan	bring clouds	V
+jpz	H6051	ʿānān	cloud-mass	N
+jpz	H6053	ʿănānâ	cloud	N
+jqf	H6058	ʿānēp	full of branches	A
+jqf	H6057	ʿānāp	branch	N
+jqk	H6060	ʿănāq	necklace	N
+jqk	H6060	ʿănāq	neck	N
+jqk	H6059	ʿānaq	serve as necklace	V
+jqk	H6061	ʿānāq	Anak	N
+jqk	H6062	ʿănāqî	Anakim	A
+jqp	H6064	ʿānaš	fine	V
+jqp	H6066	ʿōneš	indemnity	N
+jqv	H6072	ʿāsas	press	V
+jqv	H6071	ʿāsîs	sweet wine	N
+jqy	H6075	ʿāpal	swell	V
+jqy	H6077	ʿōpel	Ophel	Np
+jqy	H6076	ʿōpel	mound	N
+jqy	H6076	ʿōpel	tumour	N
+jri	H6080	ʿāpar	and kept dusting	V
+jri	H6083	ʿāpār	dry earth	N
+jrj	H6082	ʿōper	young hart	N
+jrj	H5777	ʿōperet	lead	N
+jrr	H6087	ʿāṣab	shape	V
+jrr	H6089	ʿeṣeb	vessel	N
+jrr	H6091	ʿāṣāb	idol	N
+jrr	H6090	ʿōṣeb	idol	N
+jrs	H6087	ʿāṣab	hurt	V
+jrs	H4620	maʿăṣēbâ	place of pain	N
+jrs	H6089	ʿeṣeb	pain	N
+jrs	H6092	ʿāṣēb	toiler	N
+jrs	H6090	ʿōṣeb	pain	N
+jrs	H6093	ʿiṣṣābôn	pain	N
+jrs	H6094	ʿaṣṣebet	hurt	N
+jsf	H6086	ʿēṣ	tree	N
+jsf	H6097	ʿēṣâ	trees	N
+jsj	H6101	ʿāṣēl	be sluggish	V
+jsj	H6102	ʿāṣēl	sluggish	A
+jsj	H6103	ʿaṣlâ	sluggishness	N
+jsj	H6104	ʿaṣlût	indolence	N
+jsp	H6105	ʿāṣōm	be vast	V
+jsp	H6099	ʿāṣûm	mighty	A
+jsp	H6106	ʿeṣem	bone	N
+jsp	H6108	ʿōṣem	might	N
+jsp	H6109	ʿoṣmâ	might	N
+jsp	H8592	taʿăṣumâ	might	N
+jsx	H6113	ʿāṣar	restrain	V
+jsx	H4622	maʿṣôr	restraint	N
+jsx	H4623	maʿṣār	restraint	N
+jsx	H6114	ʿeṣer	restraint	N
+jsx	H6115	ʿōṣer	restraint	N
+jsx	H6116	ʿăṣārâ	assembly	N
+jtg	H3290	yaʿăqōb	Jacob	Np
+jtg	H6118	ʿēqeb	consequence	C?
+jtg	H6119	ʿāqēb	heel	N
+jtg	H6120	ʿāqēb	overreacher	A
+jtg	H6117	ʿāqab	follow at the heel	V
+jtg	H6121	ʿāqōb	steep	A
+jtg	H6121	ʿāqōb	fraudulent	A
+jtg	H6122	ʿoqbâ	insidiousness	N
+jto	H6127	ʿāqal	bend	V
+jto	H6128	ʿăqalqal	crooked	A
+jto	H6129	ʿăqallātôn	crooked	A
+jtx	H6131	ʿiqqēr	hamstring	V
+jtx	H6133	ʿēqer	offshoot	N
+jtx	H6131	ʿāqar	pluck up	V
+jtx	H6135	ʿāqār	barren	A
+jud	H6140	ʿāqaš	twist	V
+jud	H4625	maʿăqāš	twisted	N
+jud	H6141	ʿiqqēš	twisted	A
+jud	H6143	ʿiqqĕšût	crookedness	N
+juo	H6148	ʿārab	take on pledge	V
+juo	H4627	maʿărāb	articles of exchange	N
+juo	H6161	ʿărubbâ	thing exchanged	N
+juo	H6162	ʿērābôn	pledge	N
+juo	H8594	taʿărubâ	pledge	N
+jup	H6149	ʿārab	be sweet	V
+jup	H6156	ʿārēb	sweet	A
+juu	H4628	maʿărāb	west	N
+juu	H6153	ʿereb	set	N
+juu	H6150	ʿārab	become evening	V
+juv	H6154	ʿēreb	mixture	N
+juv	H6154	ʿēreb	woof	N
+juv	H6157	ʿārōb	swarm	N
+juw	H6158	ʿōrēb	raven	N
+juw	H6155	ʿărābâ	poplar	N
+jux	H6152	ʿărab	desert-plateau	N
+jux	H6152	ʿărāb	Arabia	Np
+jux	H6160	ʿărābâ	desert-plain	N
+jux	H6163	ʿărābî	steppe-dweller	N
+jvf	H6165	ʿārag	long for	V
+jvf	H6170	ʿărûgâ	garden terrace	N
+jvi	H6168	ʿārâ	be naked	V
+jvi	H4626	maʿar	bare	N
+jvi	H4629	maʿăreh	bare	N
+jvi	H6169	ʿārâ	bare place	N
+jvi	H6172	ʿerwâ	nakedness	N
+jvi	H6181	ʿeryâ	nakedness	N
+jvi	H8593	taʿar	razor	N
+jvz	H6186	ʿārak	arrange in order	V
+jvz	H4633	maʿărāk	arrangement	N
+jvz	H4634	maʿărākâ	row	N
+jvz	H4635	maʿăreket	row	N
+jvz	H6187	ʿērek	order	N
+jvz	H6186	ʿārak	value	V
+jwd	H6189	ʿārēl	having foreskin	A
+jwd	H6188	ʿāral	count as foreskin	V
+jwd	H6190	ʿorlâ	foreskin	N
+jwf	H6192	ʿāram	be heaped up	V
+jwf	H6194	ʿărēmâ	heap	N
+jwg	H6191	ʿārōm	be shrewd	V
+jwg	H6175	ʿārûm	crafty	A
+jwg	H6193	ʿōrem	craftiness	N
+jwg	H6195	ʿormâ	craftiness	N
+jwt	H6201	ʿārap	drip	V
+jwt	H6183	ʿārîp	cloud	N
+jwt	H6205	ʿărāpel	cloud	N
+jwv	H6202	ʿārap	break the neck	V
+jwv	H6203	ʿōrep	back of neck	N
+jwy	H6206	ʿāraṣ	cause to tremble	V
+jwy	H4637	maʿărāṣâ	awful shock	N
+jwy	H6178	ʿārûṣ	dreadful	A
+jwy	H6184	ʿārîṣ	awe-inspiring	A
+jxb	H6209	ʿārar	strip oneself	V
+jxb	H6176	ʿărôʿēr	juniper	N
+jxb	H6185	ʿărîrî	stripped	A
+jxb	H6199	ʿarʿār	stripped	A
+jxj	H6213	ʿāśâ	do	V
+jxj	H4639	maʿăśeh	deed	N
+jya	H6226	ʿāšēn	smoking	A
+jya	H6225	ʿāšan	smoke	V
+jya	H6227	ʿāšān	smoke	N
+jyd	H6231	ʿāšaq	oppress	V
+jyd	H4642	maʿăšaqqâ	extortionate act	N
+jyd	H6216	ʿāšôq	oppressor	N
+jyd	H6217	ʿāšûqîm	oppression	N
+jyd	H6233	ʿōšeq	oppression	N
+jyd	H6234	ʿošqâ	oppression	N
+jyi	H6238	ʿāšar	be rich	V
+jyi	H6223	ʿāšîr	rich	N
+jyi	H6239	ʿōšer	riches	N
+jym	H4643	maʿăśēr	tenth part	N
+jym	H6218	ʿāśôr	a ten	N
+jym	H6224	ʿăśîrî	tenth	A
+jym	H6235	ʿeśer	ten	N
+jym	H6237	ʿāśar	tale the tenth of	V
+jym	H6240	ʿāśār	ten	N
+jym	H6241	ʿiśśārôn	tenth part	N
+jym	H6242	ʿeśrîm	twenty	N
+jyp	H6244	ʿāšēš	waste away	V
+jyp	H6211	ʿāš	moth	N
+jyr	H6245	ʿāšat	think	V
+jyr	H6248	ʿaštût	thought	N
+jyr	H6249	ʿaštê	one	N
+jyr	H6250	ʿeštōnâ	thinking	N
+jys	H6245	ʿāšat	be smooth	V
+jys	H6219	ʿāšôt	smooth	A
+jys	H6247	ʿešet	plate	N
+jyy	H6253	ʿaštōret	Ashtoreth	Np
+jyy	H6252	ʿaštārôt	Asharoth	Np
+jyy	H6251	ʿaštārôt	young	N
+jyy	H6255	ʿaštĕrōt qarnayim	Ashtoreth Karnaim	Np
+jyy	H6254	ʿaštĕrātî	Ashterathite	A
+jzd	H6257	ʿātōd	be ready	V
+jzd	H6260	ʿattûd	he-goat	N
+jzd	H6259	ʿātûd	ready	A
+jzd	H6264	ʿātîd	ready	A
+jzv	H6275	ʿātaq	move	V
+jzv	H6267	ʿattîq	removed	A
+jzv	H6266	ʿātîq	eminent	A
+jzv	H6276	ʿātēq	valuable	A
+jzv	H6277	ʿātāq	forward	A
+jzy	H6280	ʿātar	be abundant	V
+jzy	H6283	ʿăteret	abundance	N
+jzz	H6279	ʿātar	pray	V
+jzz	H6282	ʿātār	suppliant	N
+kag	H6284	pāʾâ	cleave in pieces	V
+kag	H6285	pēʾâ	corner	N
+kaj	H6286	pāʾar	beautify	V
+kaj	H6287	pĕʾēr	head-dress	N
+kaj	H8597	tipʾārâ	beauty	N
+kak	H6286	piʾēr	go over the boughs	V
+kak	H6288	pōʾrâ	bough	N
+kak	H6289	pāʾrûr	gather a glow	N
+kak	H6288	pûrâ	boughs	N
+kat	H6293	pāgaʿ	meet	V
+kat	H4645	mipgāʿ	thing hit	N
+kat	H6294	pegaʿ	occurrence	N
+kaw	H6296	pāgar	be exhausted	V
+kaw	H6297	peger	corpse	N
+kay	H6299	pādâ	ransom	V
+kay	H6302	pādûyim	ransom	N
+kay	H6304	pĕdût	ransom	N
+kay	H6306	pidyôm	ransom	N
+kay	H6306	pidyôn	ransom	N
+kbk	H6310	peh	mouth	N
+kbk	H6366	pêâ	mouth	N
+kbk	H6374	pîpîyâ	mouth	N
+kbn	H6313	pûg	grow numb	V
+kbn	H2014	hăpûgâ	relaxation	N
+kbn	H6314	pûgat	benumbing	N
+kbp	H6315	pûaḥ	breathe	V
+kbp	H6368	pîaḥ	soot	N
+kcc	H6327	pûṣ	be dispersed	V
+kcc	H4650	mēpîṣ	scatterer	N
+kcc	H6327	mēpîṣ	scatterer	N
+kcc	H8600	tĕpôṣâ	your dispersions	N
+kce	H6328	pûq	reel	V
+kce	H6330	pûqâ	tottering	N
+kce	H6375	pîq	tottering of knees	N
+kcj	H6333	pûrâ	wine-press	N
+kcj	H6517	pārûr	pot	N
+kcr	H6338	pāzaz	be refined	V
+kcr	H6337	paz	refined	N
+kcy	H6342	pāḥad	dread	V
+kcy	H6344	paḥad	thigh	N
+kcy	H6343	paḥad	dread	N
+kcy	H6345	paḥdâ	dread	N
+kdc	H6348	pāḥaz	be wanton	V
+kdc	H6349	paḥaz	wantonness	N
+kdc	H6350	paḥăzût	recklessness	N
+kdf	H6341	paḥ	bird-trap	N
+kdf	H6341	paḥ	plate	N
+kdf	H6351	pāḥaḥ	ensnare	V
+kdj	H6354	paḥat	pit	N
+kdj	H6356	pĕḥetet	a boring	N
+kdr	H6362	pāṭar	separate	V
+kdr	H6358	pāṭûr	separate	A
+kdr	H6359	pāṭîr	separate	A
+kdr	H6363	peṭer	that which separates	N
+kdr	H6363	piṭrâ	fissure	N
+kek	H6378	pak	vial	N
+kek	H6379	pākâ	trickle	V
+keo	H4652	miplāʾâ	wondrous work	N
+keo	H6382	peleʾ	wonder	N
+keo	H6381	pālāʾ	be surpassing	V
+keo	H6383	pilʾî	wonderful	A
+keu	H6385	pālag	split	V
+keu	H4653	miplaggâ	classification	N
+keu	H6388	peleg	channel	N
+keu	H6390	pĕlaggâ	stream	N
+keu	H6391	pĕluggâ	division	N
+kfa	H6395	pālâ	be separated	V
+kfa	H6422	palmônî	a certain one	Pf
+kfa	H6423	pĕlōnî	a certain one	Pf
+kfe	H6398	pālaḥ	cleave	V
+kfe	H6400	pelaḥ	cleavage	N
+kfi	H6403	pālaṭ	escape	V
+kfi	H4655	miplāṭ	escape	N
+kfi	H6405	pallēṭ	deliverance	N
+kfi	H6412	pālîṭ	escaped one	N
+kfi	H6412	pālêṭ	refugee	N
+kfi	H6413	pĕlêṭâ	escape	N
+kfy	H6419	pālal	intervene	V
+kfy	H6414	pālîl	judge	N
+kfy	H6415	pĕlîlâ	office of judge	N
+kfy	H6416	pĕlîlî	for a judge	A
+kfy	H6417	pĕlîlîyâ	the giving a decision	N
+kfy	H8605	tĕpillâ	prayer	N
+kgf	H4657	miplāś	swaying	N
+kgf	H6425	peles	balance	N
+kgf	H6424	pālas	weigh	V
+kgg	H6426	pālaṣ	shudder	V
+kgg	H4656	mipleṣet	horrid thing	N
+kgg	H6427	pallāṣût	shuddering	N
+kgg	H8606	tipleṣet	shuddering	N
+kgs	H6437	pānâ	turn	V
+kgs	H3942	lipnāy	anterior	R
+kgs	H6440	pāneh	face	N
+kgs	H6441	pĕnîmâ	faceward	D
+kgs	H6442	pĕnîmî	inner	A
+kgx	H6434	pēn	corner	N
+kgx	H6438	pinnâ	corner	N
+kgx	H6443	pĕnînîm	corals	N
+khi	H6452	pāsaḥ	pass over	V
+khi	H6453	pesaḥ	passover	N
+khj	H6452	pāsaḥ	limp	V
+khj	H6455	pissēaḥ	lame	A
+khn	H6458	pāsal	hew	V
+khn	H6456	pāsîl	idol	N
+khn	H6459	pesel	idol	N
+khp	H6446	pas	flat	N
+khp	H6451	pissâ	abundance	N
+khr	H6463	pāʿâ	groan	V
+khr	H0660	ʾepʿeh	viper	N
+khu	H6466	pāʿal	do	V
+khu	H4659	mipʿāl	work	N
+khu	H4659	mipʿālâ	deed	N
+khu	H6467	pōʿal	doing	N
+khu	H6468	pĕʿullâ	work	N
+khz	H6470	pāʿam	thrust	V
+khz	H6471	paʿam	beat	N
+khz	H6472	paʿămōn	bell	N
+kig	H6478	pāṣal	peel	V
+kig	H6479	piṣlâ	peeled spot	N
+kik	H6481	pāṣaʿ	bruise	V
+kik	H6482	peṣaʿ	bruise	N
+kin	H6484	pāṣar	push	V
+kin	H6477	pĕṣîrâ	bluntness	N
+kio	H6485	pāqad	attend to	V
+kio	H4662	mipqād	muster	N
+kio	H4663	mipqād	Miphkad	N
+kio	H6486	pĕquddâ	oversight	N
+kio	H6487	piqqādôn	deposit	N
+kio	H6488	pĕqidut	oversight	N
+kio	H6490	piqqûd	precept	N
+kio	H6485	pĕqûdîm	musterings	N
+kio	H6496	pāqîd	commissioner	N
+kix	H6491	pāqaḥ	open	V
+kix	H6493	piqqēaḥ	seeing	A
+kix	H6495	pĕqaḥ-qôaḥ	opening	N
+kjb	H6497	peqāʿîm	ball-	N
+kjb	H6498	paqquʿōt	gourds	N
+kjl	H6504	pārad	divide	V
+kjl	H6507	pĕrudâ	grain	N
+kjm	H6505	pered	mule	N
+kjm	H6506	pirdâ	she-mule	N
+kjs	H6509	pārâ	bear fruit	V
+kjs	H6500	pārāʾ	bear fruit	V
+kjs	H6529	pĕrî	fruit	N
+kkb	H6519	pĕrāzâ	open region	N
+kkb	H6520	pĕrāzôn	rural population	N
+kkb	H6521	pĕrāzî	hamlet-dweller	N
+kkh	H6524	pāraḥ	bud	V
+kkh	H0667	ʾeprōaḥ	young one	N
+kkh	H6525	peraḥ	bud	N
+kkh	H6526	pirḥāḥ	brood	N
+kkm	H6527	pāraṭ	divide	V
+kkm	H6528	pereṭ	the broken off	N
+kkx	H6536	pāras	break	V
+kkx	H6538	peres	bearded vulture	N
+kkx	H6541	parsâ	hoof	N
+klf	H6546	peraʿ	leader	N
+klf	H6544	pāraʿ	act as leader	V
+klf	H6552	pirʿātôn	Pirathon	Np
+klf	H6553	pirʿātônî	Pirathonite	Ag
+klq	H6555	pāraṣ	break through	V
+klq	H6530	pārîṣ	violent one	N
+klq	H6556	pereṣ	bursting forth	N
+klw	H6561	pāraq	tear apart	V
+klw	H4665	mapreqet	neck	N
+klw	H6563	pereq	rapine	N
+klw	H6564	pārāq	fragment	N
+klz	H6565	pārar	break	V
+klz	H6331	pûr	break	V
+kma	H6499	par	young bull	N
+kma	H6510	pārâ	heifer	N
+kmd	H6567	pāraš	make distinct	V
+kmd	H6575	pārāšâ	exact statement	N
+kmf	H6566	pāraś	spread out	V
+kmf	H4666	miprāś	spreading out	N
+kmf	H6576	paršēz	a spreading his cloud upon it	V
+kmy	H6586	pāšaʿ	rebel	V
+kmy	H6588	pešaʿ	transgression	N
+kmz	H6585	pāśaʿ	step	V
+kmz	H4667	mipśāʿâ	stepping-region	N
+kmz	H6587	peśaʿ	step	N
+knj	H6601	pātâ	be spacious	V
+knj	H6601	pātâ	be simple	V
+knj	H6612	pĕtî	simplicity	N
+knj	H6612	petî	simple	A
+knj	H6615	pĕtayyût	silliness	N
+knr	H6605	pātaḥ	open	V
+knr	H4669	miptāḥ	opening	N
+knr	H4668	maptēaḥ	key	N
+knr	H6608	pētaḥ	opening	N
+knr	H6607	petaḥ	opening	N
+knr	H6610	pitḥôn	opening	N
+knr	H6609	pĕtîḥâ	drawn	N
+kns	H6605	pātaḥ	engrave	V
+kns	H6603	pittûaḥ	engraving	N
+kob	H6617	pātal	twist	V
+kob	H5319	naptûlîm	wrestlings	N
+kob	H6616	pātîl	cord	N
+kob	H6618	pĕtaltōl	tortuous	A
+kof	H4670	miptān	threshold	N
+kof	H6620	peten	serpent	N
+kog	H6621	petaʿ	suddenness	N
+kog	H6597	pitʾōm	suddenness	D
+koh	H6622	pātar	interpret	V
+koh	H6623	pitrôn	interpretation	N
+kom	H6626	pātat	break up	V
+kom	H6595	pat	fragment	N
+kom	H6595	pātôt	bit	N
+kox	H6633	ṣābāʾ	wage war	V
+kox	H6635	ṣābāʾ	army	N
+kox	H6635	ṣābāʾ	army	N
+kpe	H6638	ṣābâ	swell	V
+kpe	H6639	ṣābeh	swelling	A
+kpf	H6643	ṣĕbî	gazelle	N
+kpf	H6646	ṣĕbîyâ	female gazelle	N
+kpt	H6641	ṣābûaʿ	coloured	A
+kpt	H6648	ṣebaʿ	dye	N
+kpw	H6651	ṣābar	heap up	V
+kpw	H6652	ṣibbûr	heap	N
+kqc	H6658	ṣādâ	lie in wait	V
+kqc	H6660	ṣĕdîyâ	lying-in-wait	N
+kqk	H6662	ṣaddîq	just	A
+kqk	H6664	ṣedeq	rightness	N
+kqk	H6663	ṣādēq	be just	V
+kqk	H6666	ṣĕdāqâ	righteousness	N
+kqn	H6668	ṣāhēb	gleam	V
+kqn	H6669	ṣāhōb	gleaming	A
+kqq	H6670	ṣāhal	neigh	V
+kqq	H4684	maṣhālâ	neighing	N
+kqu	H3323	yiṣhār	fresh oil	N
+kqu	H6671	ṣāhar	press out oil	V
+kqu	H6672	ṣōhar	midday	N
+kqu	H6672	ṣōhar	roof	N
+kqx	H6627	ṣēʾâ	filth	N
+kqx	H6675	ṣōʾâ	filth	N
+kqx	H6674	ṣôʾ	filthy	A
+krb	H6679	ṣûd	hunt	V
+krb	H4679	mĕṣād	fastness	N
+krb	H4685	māṣôd	siege-works	N
+krb	H4685	māṣôd	hunting implement	N
+krb	H4685	mĕṣôdâ	net	N
+krb	H4685	mĕṣôdâ	fastness	N
+krb	H4686	mĕṣûdâ	net	N
+krb	H4686	mĕṣûdâ	fastness	N
+krb	H6718	ṣayid	hunting	N
+krb	H6719	ṣayyād	hunter	N
+krc	H6679	ṣûd	supply oneself with provisions	V
+krc	H6718	ṣayid	provision	N
+krc	H6720	ṣêdâ	provision	N
+krc	H6737	ṣāyar	supply oneself with provisions	V
+krd	H6680	ṣāwâ	lay charge	V
+krd	H4687	miṣwâ	commandment	N
+krd	H6673	ṣaw	command	N
+krd	H6725	ṣîyûn	sign-post	N
+kre	H6681	ṣāwaḥ	cry aloud	V
+kre	H6682	ṣĕwāḥâ	outcry	N
+krg	H4688	mĕṣôlâ	depth	N
+krg	H4699	mĕṣulâ	the basin	N
+krg	H6683	ṣûlâ	ocean-deep	N
+krj	H6684	ṣûm	abstain from food	V
+krj	H6685	ṣôm	fasting	N
+krn	H6687	ṣûp	flow	V
+krn	H6688	ṣûp	comb	N
+krn	H6824	ṣāpâ	out-flow	N
+krr	H6692	ṣûṣ	blossom	V
+krr	H6731	ṣîṣ	blossom	N
+krr	H6733	ṣîṣâ	blossom	N
+kru	H6694	ṣûq	pour out	V
+kru	H4690	māṣûq	molten support	N
+krv	H6693	ṣûq	constrain	V
+krv	H4164	mûṣāq	constraint	N
+krv	H4689	māṣôq	straitness	N
+krv	H4691	mĕṣûqâ	narrowness	N
+krv	H6695	ṣôq	constraint	N
+krv	H6695	ṣûqâ	pressure	N
+krx	H6696	ṣûr	fashion	V
+krx	H6699	ṣûrâ	form	N
+krx	H6736	ṣîr	image	N
+kry	H6696	ṣûr	confine	V
+kry	H4692	māṣôr	siege-enclosure	N
+kry	H4694	mĕṣûrâ	siege-works	N
+kry	H6887	ṣûr	confine	V
+ksn	H6705	ṣāḥaḥ	be dazzling	V
+ksn	H6703	ṣaḥ	dazzling	A
+ksn	H6706	ṣĕḥîaḥ	shining	N
+ksn	H6707	ṣĕḥîḥâ	scorched land	N
+ksn	H6708	ṣĕḥîḥî	shining	N
+ksn	H6710	ṣaḥṣāḥâ	scorched region	N
+ksv	H6711	ṣāḥaq	laugh	V
+ksv	H3327	yiṣḥāq	Isaac. Compare	Np
+ksv	H3446	yiśḥāq	Isaac. Compare	Np
+ksv	H6712	ṣĕḥōq	laughter	N
+ksz	H6713	ṣaḥar	reddish-gray	N
+ksz	H6715	ṣāḥōr	tawny	A
+ktk	H6723	ṣîyâ	dryness	N
+ktk	H6724	ṣāyôn	dryness	N
+kug	H6740	ṣālâ	roast	V
+kug	H6748	ṣālî	roasted	N
+kuj	H6745	ṣēlāḥâ	pot	N
+kuj	H6746	ṣĕlōḥît	jar	N
+kuj	H6747	ṣallaḥat	dish	N
+kuq	H6750	ṣālal	tingle	V
+kuq	H4698	mĕṣillâ	bell	N
+kuq	H4700	mĕṣiltayim	cymbals	N
+kuq	H6767	ṣĕlāṣal	whirring locust	N
+kuq	H6767	ṣilṣāl	whirring	N
+kuq	H6767	ṣiliṣāl	spear	N
+kuq	H6767	ṣelṣĕlîm	cymbals	N
+kus	H6751	ṣālal	be dark	V
+kus	H6738	ṣēl	shadow	N
+kus	H6752	ṣēlel	shadow	N
+kus	H6757	ṣalmāwet	death-shadow	N
+kve	H6760	ṣālaʿ	limp	V
+kve	H6761	ṣelaʿ	limping	N
+kvp	H6770	ṣāmēʾ	be thirsty	V
+kvp	H6771	ṣāmēʾ	thirsty	A
+kvp	H6772	ṣāmāʾ	thirst	N
+kvp	H6773	ṣimʾâ	parched condition	N
+kvp	H6774	ṣimmāʾôn	thirsty ground	N
+kvv	H6775	ṣāmad	bind	V
+kvv	H6776	ṣemed	couple	N
+kvv	H6781	ṣāmîd	bracelet	N
+kvv	H6781	ṣāmîd	cover	N
+kvz	H6779	ṣāmaḥ	sprout	V
+kvz	H6780	ṣemaḥ	sprout	N
+kwe	H6777	ṣammâ	woman’s veil	N
+kwe	H6782	ṣammîm	snare	N
+kwf	H6784	ṣāmaq	dry up	V
+kwf	H6778	ṣammûq	bunch of raisins	N
+kwh	H6785	ṣemer	wool	N
+kwh	H6788	ṣammeret	top	N
+kwl	H6789	ṣāmat	put an end to	V
+kwl	H6783	ṣĕmîtut	completion	N
+kwz	H6791	ṣēn	thorn	N
+kwz	H6793	ṣinnâ	hook	N
+kwz	H6796	ṣānîn	thorn	N
+kxb	H6793	ṣinnâ	shield	N
+kxb	H6803	ṣinṣenet	jar	N
+kxd	H6801	ṣānap	wrap	V
+kxd	H4701	miṣnepet	turban	N
+kxd	H6797	ṣānîp	turban	N
+kxd	H6802	ṣĕnēpâ	winding	N
+kxh	H6794	ṣinnôr	pipe	N
+kxh	H6804	ṣantĕrôt	pipes	N
+kxk	H6805	ṣāʿad	step	V
+kxk	H4703	miṣʿād	step	N
+kxk	H6806	ṣaʿad	step	N
+kxk	H6807	ṣĕʿādâ	marching	N
+kxl	H0685	ʾeṣʿādâ	step-chain	N
+kxl	H6807	ṣĕʿādâ	armlet	N
+kxy	H6817	ṣāʿaq	cry	V
+kxy	H6818	ṣĕʿāqâ	cry	N
+kya	H6819	ṣāʿar	be insignificant	V
+kya	H4704	miṣṣĕʿîrâ	little	N
+kya	H4705	miṣʿār	a small thing	N
+kya	H6810	ṣāʿîr	little	A
+kya	H6812	ṣĕʿîrâ	youth	N
+kyd	H6823	ṣāpâ	lay out	V
+kyd	H6826	ṣippûy	plating	N
+kyd	H6844	ṣāpît	rug	N
+kyd	H6858	ṣepet	plated capital	N
+kyf	H6822	ṣāpâ	look out	V
+kyf	H4707	miṣpeh	observatory	N
+kyf	H6836	ṣĕpîyâ	outlook-post	N
+kyp	H6835	ṣappaḥat	jar	N
+kyp	H6838	ṣĕpîḥit	flat cake	N
+kzb	H6845	ṣāpan	hide	V
+kzb	H4710	maṣpôn	hidden treasure	N
+kzb	H6828	ṣāpôn	north	N
+kzb	H6830	ṣĕpônî	northern	A
+kzb	H6840	ṣāpîn	treasure	N
+kzj	H6850	ṣāpap	chirp	V
+kzj	H6851	ṣapṣāpâ	willow	N
+laf	H6866	ṣārab	burn	V
+laf	H6867	ṣārāb	burning	A
+laf	H6867	ṣārebet	scab	N
+lba	H6879	ṣāraʿ	be stricken with leprosy	V
+lba	H6880	ṣirʿâ	hornets	N
+lba	H6883	ṣāraʿat	leprosy	N
+lbf	H6884	ṣārap	smelt	V
+lbf	H4715	maṣrēp	crucible	N
+lbf	H6885	ṣōrĕpî	goldsmiths	N
+lbk	H6887	ṣārar	bind	V
+lbk	H1222	bĕṣar	straits	N
+lbk	H3334	yāṣar	bind	V
+lbk	H4712	mēṣar	straits	N
+lbk	H6862	ṣar	straits	N
+lbk	H6862	ṣar	narrow	A
+lbk	H6869	ṣārâ	straits	N
+lbk	H6872	ṣĕrôr	bundle	N
+lbk	H6887	ṣārar	suffer distress	V
+lbl	H6887	ṣārar	shew hostility toward	V
+lbl	H6862	ṣar	adversary	A
+lbl	H6869	ṣārâ	vexer	N
+lbl	H6887	ṣārar	make a rival-wife	V
+lbm	H6862	ṣar	pebble	A
+lbm	H6864	ṣōr	knives of flint	N
+lbm	H6872	ṣĕrôr	pebble	N
+lbw	H6894	qab	ḳab	N
+lbw	H6898	qubbâ	large vaulted tent	N
+lca	H6896	qēbâ	stomach	N
+lca	H6897	qōbâ	stomach	N
+lcd	H6901	qābal	receive	V
+lcd	H6904	qĕbōl	battering-ram	N
+lcd	H6905	qābāl	presence	N
+lch	H6908	qābaṣ	gather	V
+lch	H6899	qibbûṣ	heap	N
+lch	H6910	qĕbuṣâ	a gathering	N
+lcm	H6912	qābar	bury	V
+lcm	H6913	qeber	grave	N
+lcm	H6900	qĕburâ	grave	N
+lcq	H6916	qiddâ	cassia	N
+lcq	H6936	qodqōd	head	N
+lcu	H6919	qādaḥ	be kindled	V
+lcu	H0688	ʾeqdāḥ	fiery glow	N
+lcu	H6920	qaddaḥat	fever	N
+lda	H6917	qādûm	ancient	N
+lda	H6921	qādîm	East	N
+lda	H6924	qēdem	eastward	D
+lda	H6924	qedem	front	N
+lda	H6923	qādam	come in front	V
+lda	H6926	qidmâ	front	N
+lda	H6927	qadmâ	antiquity	N
+lda	H6930	qadmôn	eastern	A
+lda	H6931	qadmōnî	former	A
+ldl	H6937	qādar	be dark	V
+ldl	H6940	qadrût	darkness	N
+ldl	H6941	qĕdōrannît	as mourners	D
+ldu	H4720	miqdāš	sacred place	N
+ldu	H6918	qādôš	sacred	A
+ldu	H6943	qedeš	Kedesh	Np
+ldu	H6945	qādēš	temple-prostitute	N
+ldu	H6946	qādēš	Kadesh. Compare	Np
+ldu	H6942	qādaš	be set apart	V
+ldu	H6944	qōdeš	apartness	N
+ldu	H6948	qĕdēšâ	temple-prostitute	N
+ldx	H6949	qāhâ	be blunt	V
+ldx	H5356	qēhāyôn	bluntness	N
+leb	H4721	maqhēl	assembly	N
+leb	H6950	qāhal	assemble as an assembly	V
+leb	H6951	qāhāl	assembly	N
+leb	H6952	qĕhillâ	assembly	N
+leb	H6953	qōhelet	collector	N
+leb	H7035	qālah	assemble as a	V
+lek	H6960	qāwâ	wait for	V
+lek	H4723	miqweh	hope	N
+lek	H6957	qaw	line	N
+lek	H6961	qwh	cord	N
+lek	H6978	qawqāw	might	N
+lek	H8615	tiqwâ	hope	N
+lek	H8615	tiqwâ	cord	N
+lel	H6960	qāwâ	collect	V
+lel	H4723	miqweh	collection	N
+lel	H4724	miqwâ	reservoir	N
+lep	H6962	qûṭ	feel a loathing	V
+lep	H5354	nāqaṭ	feel a loathing	V
+let	H6965	qûm	arise	V
+let	H3351	yĕqûm	substance	N
+let	H4725	māqôm	standing-place	N
+let	H6967	qômâ	height	N
+let	H6968	qômĕmîyût	uprightness	N
+let	H7009	qîm	adversary	N
+let	H7012	qîmâ	rising up	N
+let	H7054	qāmâ	standing grain	N
+let	H8617	tĕqûmâ	standing	N
+let	H8618	tĕqômēm	opponent	V
+lfc	H6975	qôṣ	thornbush	N
+lfc	H6977	qĕwuṣṣôt	locks	N
+lff	H6979	qûr	bore	V
+lff	H4726	māqôr	spring	N
+lfp	H6986	qeṭeb	destruction	N
+lfp	H6987	qōṭeb	destruction	N
+lft	H6991	qāṭal	slay	V
+lft	H6993	qeṭel	slaughter	N
+lfy	H6994	qāṭōn	be small	V
+lfy	H6995	qĕṭōn	little	N
+lfy	H6996	qāṭān	small	A
+lfy	H6996	qāṭōn	small	A
+lgd	H4729	miqṭār	place of sacrificial smoke	N
+lgd	H6999	muqṭār	incense	N
+lgd	H6999	mĕqaṭērâ	incense-altar	N
+lgd	H4730	miqṭeret	censer	N
+lgd	H6988	qĕṭôrâ	smoke of sacrifice	N
+lgd	H7002	qiṭṭēr	incense	N
+lgd	H6999	qāṭar	make sacrifices smoke	V
+lgd	H7004	qĕṭōret	smoke	N
+lgd	H7008	qîṭôr	thick smoke	N
+lgi	H6958	qîʾ	vomit up	V
+lgi	H6892	qēʾ	what is vomited up	N
+lgi	H6892	qîʾ	vomit	N
+lgq	H7013	qayin	spear	N
+lgq	H7015	qînâ	elegy	N
+lgq	H6969	qînēn	chant an elegy	V
+lgy	H6972	qyṣ	summer	N
+lgy	H7019	qayiṣ	summer	N
+lhm	H7034	qālâ	be lightly esteemed	V
+lhm	H7036	qālôn	ignominy	N
+lhn	H7033	qālâ	roast	V
+lhn	H7039	qālî	parched	N
+lhw	H7043	qālal	be slight	V
+lhw	H7022	qîqālôn	disgrace	N
+lhw	H7031	qal	light	A
+lhw	H6963	qōl	lightness	N
+lhw	H7044	qālāl	burnished	A
+lhw	H7045	qĕlālâ	curse	N
+lhw	H7052	qĕlōqēl	contemptible	A
+lia	H7046	qālas	mock	V
+lia	H7047	qeles	derision	N
+lia	H7048	qallāsâ	ridicule	N
+lif	H7049	qālaʿ	carve	V
+lif	H4734	miqlaʿat	carving	N
+lig	H7049	qālaʿ	sling	V
+lig	H7050	qelaʿ	curtain	N
+lig	H7050	qelaʿ	sling	N
+lig	H7051	qallāʿ	slinger	N
+lir	H7061	qāmaṣ	enclose with the hand	V
+lir	H7062	qōmeṣ	closed hand	N
+lit	H7057	qimmôś	thistles	N
+lit	H7063	qimmāśôn	thistles	N
+liy	H7067	qannāʾ	jealous	A
+liy	H7065	qānāʾ	be jealous	V
+liy	H7068	qinʾâ	ardour	N
+liy	H7072	qannôʾ	jealous	A
+ljc	H7069	qānâ	get	V
+ljc	H4735	miqneh	cattle	N
+ljc	H4736	miqnâ	purchase	N
+ljc	H7075	qinyān	thing got	N
+ljk	H7064	qēn	nest	N
+ljk	H7077	qinnēn	make a nest	V
+ljq	H4738	miqsām	divination	N
+ljq	H7081	qesem	divination	N
+ljq	H7080	qāsam	practise divination	V
+ljw	H7086	qĕʿārâ	dish	N
+ljw	H8258	šĕqaʿărûrâ	depression	N
+lkb	H7088	qāpad	gather together	V
+lkb	H7090	qippōd	porcupine	N
+lkb	H7089	qĕpādâ	shuddering	N
+lki	H7094	qāṣab	cut off	V
+lki	H7095	qeṣeb	cut	N
+lkm	H7096	qāṣâ	cut off	V
+lkm	H7097	qēṣeh	end	N
+lkm	H7097	qāṣeh	end	N
+lkm	H7098	qāṣâ	end	N
+lkm	H7099	qāṣû	end	N
+lkm	H7117	qĕṣāt	end	N
+lky	H7106	qāṣaʿ	scrape	V
+lky	H4741	maqṣuʿâ	scraping tool	N
+lky	H7102	qĕṣîʿâ	cassia	N
+lkz	H4740	miqṣōaʿ	place of corner-structure	N
+lkz	H4742	mĕquṣʿâ	place of corner-structure	N
+lkz	H7106	qāṣaʿ	cornered	V
+llc	H7107	qāṣap	be wroth	V
+llc	H7110	qeṣep	wrath	N
+lld	H7110	qeṣep	splinter	N
+lld	H7111	qĕṣāpâ	a snapping	N
+llf	H7112	qāṣaṣ	cut off	V
+llf	H7020	qîṣôn	at the end	A
+llf	H7093	qēṣ	end	N
+llg	H7114	qāṣēr	be short	V
+llg	H7116	qāṣēr	short	A
+llg	H7115	qōṣer	shortness	N
+lli	H7114	qāṣar	reap	V
+lli	H7105	qāṣîr	harvesting	N
+lli	H7105	qāṣîr	boughs	N
+lln	H7121	qārāʾ	call	V
+lln	H4744	miqrāʾ	convocation	N
+lln	H7124	qōrēʾ	partridge	N
+lln	H7148	qārîʾ	called	A
+lln	H7150	qĕrîʾâ	proclamation	N
+llo	H7122	qārāʾ	encounter	V
+llo	H7125	qirʾâ	encounter	N
+llu	H7126	qārab	come near	V
+llu	H7128	qĕrāb	battle	N
+llu	H7131	qārēb	approaching	A
+llu	H7138	qārōb	near	A
+llu	H7132	qirbâ	approach	N
+llu	H7133	qurbān	offering	N
+llu	H7133	qorbān	offering	N
+lmd	H7136	qārâ	encounter	V
+lmd	H4746	mĕqāreh	beam-work	N
+lmd	H4745	miqreh	accident	N
+lmd	H6982	qôrâ	rafter	N
+lmd	H7137	qāreh	chance	N
+lmd	H7136	qārâ	lay the beams of	V
+lmd	H7147	qĕrî	opposition	N
+lmd	H7151	qiryâ	town	N
+lmd	H7176	qeret	town	N
+lmi	H7139	qāraḥ	make bald	V
+lmi	H7142	qērēaḥ	bald	A
+lmi	H7144	qorḥâ	baldness	N
+lmi	H7146	qāraḥat	baldness of head	N
+lnc	H7161	qeren	horn	N
+lnc	H7160	qāran	shoot out horns	V
+lnh	H7164	qāras	bend down	V
+lnh	H7165	qeres	hook	N
+lnh	H7166	qarsōl	ankle	N
+lnk	H7167	qāraʿ	tear	V
+lnk	H7168	qeraʿ	torn piece	N
+lnm	H7169	qāraṣ	nip	V
+lnm	H7171	qereṣ	nipping	N
+lnq	H6979	qārar	be cold	V
+lnq	H4747	mĕqērâ	coolness	N
+lnq	H7119	qar	cool	A
+lnq	H7120	qōr	cold	N
+lnq	H7135	qārâ	coolness	N
+lny	H4750	miqšâ	place	N
+lny	H7180	qiššuʾâ	cucumber	N
+lod	H7181	qāšab	incline	V
+lod	H7182	qešeb	attentiveness	N
+lod	H7183	qaššāb	attentive	A
+lod	H7183	qaššub	hearkening	A
+lof	H7185	qāšâ	be hard	V
+lof	H7186	qāšeh	hard	A
+lof	H7190	qĕšî	stubbornness	N
+log	H4748	miqšeh	turner’s work	N
+log	H4749	miqšâ	hammered work	N
+loh	H7083	qeset	pot	N
+loh	H7184	qaśwâ	jug	N
+lot	H7194	qāšar	bind	V
+lot	H7195	qešer	conspiracy	N
+lot	H7196	qiššurîm	bands	N
+lox	H7179	qaš	stubble	N
+lox	H7197	qāšaš	gather stubble	V
+lpd	H7200	rāʾâ	see	V
+lpd	H3070	yĕhōwâ yirʾeh	see	N
+lpd	H4758	marʾeh	sight	N
+lpd	H4759	marʾâ	mirror	N
+lpd	H4759	marʾâ	vision	N
+lpd	H7202	rāʾeh	seeing	A
+lpd	H7203	rōʾeh	vision	N
+lpd	H7203	rōʾeh	seer	N
+lpd	H7205	rĕʾûbēn	Reuben	Np
+lpd	H7207	raʾăwâ	see	V
+lpd	H7212	rĕʾût	look	N
+lpd	H7209	rĕʾî	mirror	N
+lpd	H7210	rŏʾî	looking	N
+lpr	H7213	rāʾam	rise	V
+lpr	H7214	rĕʾēm	wild ox	N
+lpr	H7215	rāʾmôt	corals	N
+lpx	H7218	rōʾš	head	N
+lpx	H4761	mĕraʾăšāwōt	place at the head	N
+lpx	H4763	mĕraʾăšāwōt	place at the head	N
+lpx	H7221	riʾšâ	beginning-time	N
+lpx	H7222	rōʾšâ	top	N
+lpx	H7223	riʾšôn	former	A
+lpx	H7225	rēʾšît	beginning	N
+lpx	H7224	riʾšōnî	first	A
+lpx	H7226	raʾăšōt	place at the head	N
+lqi	H7232	rābab	shoot	V
+lqi	H7228	rab	archer	N
+lqj	H7231	rābab	be many	V
+lqj	H7227	rab	chief	N
+lqj	H7227	rab	much	A
+lqj	H7230	rōb	multitude	N
+lqj	H7233	rĕbābâ	multitude	N
+lqj	H7239	ribbô	ten thousand	N
+lqj	H7241	rĕbîbîm	copious showers	N
+lql	H7234	rābad	be-spread	V
+lql	H4765	marbād	spread	N
+lqo	H7235	rābâ	be much	V
+lqo	H0697	ʾarbeh	locust	N
+lqo	H4767	mirbâ	much	N
+lqo	H4766	marbeh	increasing	N
+lqo	H4768	marbît	increase	N
+lqo	H8635	tarbût	increase	N
+lqo	H8636	tarbît	increment	N
+lrc	H7252	rebaʿ	lie stretched out	V
+lrc	H7250	rābaʿ	lie stretched out	V
+lrh	H0702	ʾarbaʿ	four	N
+lrh	H0705	ʾarbāʿîm	forty	N
+lrh	H0706	ʾarbaʿtayim	four	D
+lrh	H7243	rĕbîʿî	fourth	A
+lrh	H7256	ribbēaʿ	pertaining to the fourth	A
+lrh	H7253	rebaʿ	fourth part	N
+lrh	H7251	rābaʿ	squared	V
+lrh	H7255	rōbaʿ	fourth part	N
+lrj	H7257	rābaṣ	stretch oneself out	V
+lrj	H4769	marbēṣ	reclining place	N
+lrj	H7258	rēbeṣ	place of	N
+lrq	H7264	rāgaz	be agitated	V
+lrq	H0712	ʾargaz	box	N
+lrq	H7268	raggāz	quivering	A
+lrq	H7267	rōgez	agitation	N
+lrq	H7269	rogzâ	a quivering	N
+lrt	H7272	regel	foot	N
+lrt	H4772	margĕlôt	place of the feet	N
+lrt	H7270	rāgal	foot it	V
+lrt	H7273	raglî	on foot	A
+lrt	H8637	tirgal	foot it	V
+lrz	H7275	rāgam	stone	V
+lrz	H4773	margēmâ	sling	N
+lrz	H7277	rigmâ	heap	N
+lsc	H7279	rāgan	murmur	V
+lsc	H5372	nirgān	murmur	V
+lsf	H7280	rāgaʿ	be at rest	V
+lsf	H4771	margôaʿ	rest	N
+lsf	H4774	margēʿâ	rest	N
+lsf	H7282	rāgēaʿ	restful	A
+lsg	H7280	rāgaʿ	disturb	V
+lsg	H7281	regaʿ	a moment	N
+lsj	H7283	rāgaš	be in tumult	V
+lsj	H7285	regeš	throng	N
+lsj	H7285	rigšâ	throng	N
+lsl	H7286	rādad	beat out	V
+lsl	H7289	rĕdîd	wide wrapper	N
+lsq	H7290	rādam	be in	V
+lsq	H8639	tardēmâ	deep sleep	N
+lss	H7291	rādap	pursue	V
+lss	H4783	murdāp	persecution	N
+lsv	H7292	rāhab	act stormily	V
+lsv	H4062	madhēbâ	boisterous	N
+lsv	H7293	rahab	storm	N
+lsv	H7294	rahab	Rahab	N
+lsv	H7295	rāhāb	proud	A
+lsv	H7296	rōhāb	pride	N
+lte	H7298	rahaṭ	lock	N
+lte	H7351	rāhîṭ	rafters	N
+ltg	H7300	rûd	wander restlessly	V
+ltg	H4788	mārôd	restlessness	N
+ltj	H7301	rāwâ	be saturated	V
+ltj	H7302	rāweh	watered	A
+ltj	H7310	rĕwāyâ	saturation	N
+ltj	H7377	rî	moisture	N
+ltl	H7304	rāwaḥ	be wide	V
+ltl	H7305	rewaḥ	room	N
+ltl	H7309	rĕwāḥâ	respite	N
+ltn	H7307	rûaḥ	breath	N
+ltn	H7306	rîaḥ	smell	V
+ltn	H7381	rêaḥ	scent	N
+ltr	H7311	rûm	be high	V
+ltr	H4791	mārôm	height	N
+ltr	H7315	rôm	on high	D
+ltr	H7312	rûm	height	N
+ltr	H7317	rômâ	haughtily	A
+ltr	H7318	rômām	extolling	N
+ltr	H7319	rômĕmâ	extolling	N
+ltr	H7427	rômēmût	uprising	N
+ltr	H7413	rāmâ	height	N
+ltr	H7419	rāmût	height	N
+ltr	H8641	tĕrûmâ	contribution	N
+ltr	H8642	tĕrûmîyâ	what belongs to a contribution	N
+ltz	H7321	rûaʿ	raise a shout	V
+ltz	H7452	rēaʿ	shouting	N
+ltz	H8643	tĕrûʿâ	shout of war	N
+lub	H7323	rûṣ	run	V
+lub	H4793	mērôṣ	running	N
+lub	H4794	mĕrûṣâ	running	N
+luc	H7326	rûš	be in want	V
+luc	H7389	rîš	poverty	N
+luc	H7389	rêš	poverty	N
+luf	H7329	rāzâ	be lean	V
+luf	H7330	rāzeh	lean	A
+luf	H7332	rāzôn	leanness	N
+luf	H7334	rāzî	leanness	N
+luj	H4797	mirzaḥ	cry	N
+luj	H4798	marzēaḥ	cry	N
+lum	H7336	rāzan	be weighty	V
+lum	H7333	rāzôn	potentate	N
+luo	H7337	rāḥab	be wide	V
+luo	H4800	merḥāb	broad	N
+luo	H7338	raḥab	breadth	N
+luo	H7342	rāḥāb	wide	A
+luo	H7341	rōḥab	breadth	N
+luo	H7339	rĕḥôb	broad open place	N
+lvk	H7349	raḥûm	compassionate	A
+lvk	H7358	reḥem	womb	N
+lvk	H7356	raḥam	womb	N
+lvk	H7355	rāḥam	love	V
+lvk	H7361	raḥămâ	womb	N
+lvk	H7356	raḥămîm	compassion	N
+lvk	H7362	raḥămānî	compassionate women	A
+lvs	H7364	rāḥaṣ	wash	V
+lvs	H7366	raḥaṣ	washing	N
+lvs	H7367	raḥṣâ	bathing place	N
+lvv	H7368	rāḥaq	be far	V
+lvv	H4801	merḥāq	distant place	N
+lvv	H7369	rāḥēq	removing	A
+lvv	H7350	rāḥōq	distant	A
+lvx	H7370	rāḥaš	keep moving	V
+lvx	H4802	marḥešet	stew-pan	N
+lvz	H7372	rāṭēb	be moist	V
+lvz	H7373	rāṭōb	moist	A
+lwi	H7378	rîb	strive	V
+lwi	H3377	yārēb	Jareb	N
+lwi	H3401	yārîb	opponent	N
+lwi	H4808	mĕrîbâ	strife	N
+lwi	H7379	rîb	strife	N
+lwq	H7324	rîq	make empty	V
+lwq	H7385	rîq	emptiness	N
+lwq	H7386	rêq	empty	A
+lwq	H7387	rêqām	emptily	D
+lwt	H7325	rîr	flow	V
+lwt	H7388	rîr	slimy juice	N
+lxc	H7392	rākab	mount and ride	V
+lxc	H4817	merkāb	chariot	N
+lxc	H4818	merkābâ	chariot	N
+lxc	H7393	rekeb	chariotry	N
+lxc	H7395	rakkāb	charioteer	N
+lxc	H7396	rikbâ	riding	N
+lxc	H7398	rĕkûb	chariot	N
+lxj	H7401	rākak	be tender	V
+lxj	H4816	mōrek	softness	N
+lxj	H7390	rak	tender	A
+lxj	H7391	rōk	tender	N
+lxk	H7402	rākal	go about	V
+lxk	H4819	markōlet	place of trade	N
+lxk	H7400	rākîl	slander	N
+lxk	H7404	rĕkullâ	trade	N
+lxo	H7405	rākas	bind	V
+lxo	H7406	rekes	roughness	N
+lxo	H7407	rōkes	snare	N
+lxr	H7408	rākaš	collect	V
+lxr	H7399	rĕkûš	property	N
+lxr	H7409	rekeš	steeds	N
+lxv	H7411	rāmâ	beguile	V
+lxv	H4820	mirmâ	deceit	N
+lxv	H7423	rĕmîyâ	deceit	N
+lxv	H8649	tormâ	in treachery	N
+lxv	H8649	tormît	deceitfulness	N
+lyp	H7415	rimmâ	worm	N
+lyp	H7311	rāmam	be wormy	V
+lys	H7429	rāmas	trample	V
+lys	H4823	mirmās	trampling-place	N
+lyu	H7430	rāmaś	creep	V
+lyu	H7431	remeś	creeping things	N
+lzf	H7444	rannēn	give a ringing cry	V
+lzf	H7438	rōn	ringing cry	N
+lzf	H7440	rinnâ	ringing cry	N
+lzf	H7442	rānan	give a ringing cry	V
+lzf	H7445	rĕnānâ	shout	N
+lzf	H7443	rĕnānîm	piercing cries	N
+lzp	H7450	rāsas	moisten	V
+lzp	H7447	rāsîs	drop	N
+lzy	H7456	rāʿēb	be hungry	V
+lzy	H7457	rāʿēb	hungry	A
+lzy	H7458	rāʿāb	famine	N
+lzy	H7459	rĕʿābôn	hunger	N
+mac	H7460	rāʿad	tremble	V
+mac	H7461	raʿad	trembling	N
+mac	H7461	rĕʿadâ	shudder	N
+mai	H7462	rāʿâ	associate with	V
+mai	H4828	mērēaʿ	friend	N
+mai	H7453	rēaʿ	friend	N
+mai	H7463	rēʿeh	friend	N
+mai	H7464	rēʿâ	companion	N
+mai	H7462	rāʿâ	be a special friend	V
+mai	H7468	rĕʿût	fellow	N
+mai	H7474	raʿyâ	companion	N
+maj	H7462	rāʿâ	pasture	V
+maj	H4829	mirʿeh	pasturage	N
+maj	H4830	marʿît	pasturing	N
+maj	H7471	rĕʿî	pasture	N
+maj	H7473	rōʿî	pasture	V
+mal	H7454	rēaʿ	purpose	N
+mal	H7469	rĕʿût	longing	N
+mal	H7475	raʿyôn	desire	N
+maw	H7477	rāʿal	quiver	V
+maw	H7478	raʿal	reeling	N
+maw	H7479	rĕʿālâ	veil	N
+maw	H8653	tarʿēlâ	reeling	N
+mbb	H7482	raʿam	thunder	N
+mbb	H7481	rāʿam	thunder	V
+mbb	H7483	raʿmâ	vibration	N
+mbj	H7489	rāʿaʿ	break	V
+mbj	H7465	rōʿâ	break	V
+mbk	H4827	mēraʿ	be evil	V
+mbk	H7451	raʿ	evil	N
+mbk	H7451	raʿ	bad	A
+mbk	H7455	rōaʿ	badness	N
+mbk	H7451	rāʿâ	evil	N
+mbk	H7489	rāʿaʿ	be evil	V
+mbo	H7493	rāʿaš	quake	V
+mbo	H7494	raʿaš	quaking	N
+mbq	H7495	rāpāʾ	heal	V
+mbq	H4832	marpēʾ	healing	N
+mbq	H7499	rĕpuʾâ	remedy	N
+mbq	H7500	ripʾût	healing	N
+mbw	H7502	rāpad	spread	V
+mbw	H7507	rĕpîdâ	support	N
+mbz	H7503	rāpâ	sink	V
+mbz	H7497	rĕpāʾîm	Rephaim	Np
+mbz	H7496	rĕpāʾîm	shades	N
+mbz	H7504	rāpeh	slack	A
+mbz	H7497	rāpâ	giant	Np
+mbz	H7510	ripyôn	sinking	N
+mcg	H7511	rāpas	stamp	V
+mcg	H4833	marpēś	befouled	N
+mcg	H7515	rāpaś	stamp	V
+mcr	H7521	rāṣâ	be pleased with	V
+mcr	H7522	rāṣôn	goodwill	N
+mcu	H7523	rāṣaḥ	murder	V
+mcu	H7524	reṣaḥ	shattering	N
+mcx	H7527	rāṣaʿ	bore	V
+mcx	H4836	marṣēaʿ	boring-instrument	N
+mda	H7528	rāṣap	fit together	V
+mda	H4837	marṣepet	pavement	N
+mda	H7531	riṣpâ	pavement	N
+mdb	H7529	reṣep	glowing stone	N
+mdb	H7531	riṣpâ	glowing stone	N
+mdf	H7533	rāṣaṣ	crush	V
+mdf	H4835	mĕrûṣâ	crushing	N
+mdf	H7518	raṣ	piece	N
+mdj	H7537	rāqēb	rot	V
+mdj	H7538	rāqāb	rottenness	N
+mdj	H7539	riqqābôn	decay	N
+mdt	H7543	rāqaḥ	mix	V
+mdt	H4840	merqāḥ	spice	N
+mdt	H4841	merqāḥâ	seasoning	N
+mdt	H4842	mirqaḥat	ointment-mixture	N
+mdt	H7547	raqqûaḥ	perfumery	N
+mdt	H7544	reqaḥ	spice	N
+mdt	H7546	raqqāḥ	ointment-maker	N
+mdt	H7545	rōqēaḥ	spice-mixture	N
+mdt	H7548	raqqāḥâ	ointment-maker	N
+mdz	H7551	rāqam	variegate	V
+mdz	H7553	riqmâ	variegated stuff	N
+meb	H7554	rāqaʿ	beat	V
+meb	H7555	riqqûaʿ	expansion	N
+meb	H7549	rāqîaʿ	extended surface	N
+mec	H7556	rāqaq	spit	V
+mec	H7536	rōq	spittle	N
+med	H7534	raq	emaciated	A
+med	H7535	raq	leanness	D
+med	H7541	raqqâ	the temple	N
+med	H7550	rāqîq	a thin cake	N
+mel	H4849	miršaʿat	wickedness	N
+mel	H7562	rešaʿ	wickedness	N
+mel	H7561	rāšaʿ	be wicked	V
+mel	H7563	rāšāʿ	wicked	A
+mel	H7564	rišʿâ	wickedness	N
+meu	H7570	rātaḥ	boil	V
+meu	H7571	retaḥ	boiling	N
+mew	H7573	rātam	bind	V
+mew	H7574	rōtem	broom-plant	N
+mez	H7576	rātaq	bind	V
+mez	H7569	rattôq	chain	N
+mez	H7572	rattîqâ	chain	N
+mez	H7577	rĕtuqâ	chain	N
+mff	H7579	šāʾab	draw	V
+mff	H4857	mašʾāb	drawing-place	N
+mfg	H7580	šāʾag	roar	V
+mfg	H7581	šĕʾāgâ	roaring	N
+mfj	H7582	šāʾâ	make a din	V
+mfj	H7584	šaʾăwâ	tempest	N
+mfj	H7588	šāʾôn	roar	N
+mfj	H7591	šĕʾîyâ	ruin	N
+mfj	H7612	šēʾt	din	N
+mfj	H8351	šēt	din	N
+mfs	H7592	šāʾal	ask	V
+mfs	H4862	mišʾālâ	request	N
+mfs	H7585	šĕʾôl	Shᵉ’ōl	N
+mfs	H7596	šĕʾēlâ	request	N
+mfw	H7599	šāʾan	be at ease	V
+mfw	H7600	šaʾănān	at ease	A
+mgd	H7604	šāʾar	remain	V
+mgd	H7605	šĕʾār	rest	N
+mgd	H7611	šĕʾērît	rest	N
+mge	H7607	šĕʾēr	flesh	N
+mge	H7608	šaʾărâ	flesh	N
+mgs	H7617	šābâ	take captive	V
+mgs	H7618	šĕbô	agate	N
+mgs	H7628	šĕbî	captivity	N
+mgs	H7628	šābî	captive	N
+mgs	H7633	šibyâ	captivity	N
+mgs	H7622	šĕbît	exile	N
+mhc	H7626	šēbeṭ	rod	N
+mhc	H8275	šarbîṭ	sceptre	N
+mhn	H7638	śābāk	lattice-work	N
+mhn	H7639	śĕbākâ	lattice-work	N
+mhn	H7730	śôbek	network	N
+mhq	H7635	šĕbûl	way	N
+mhq	H7640	šōbel	flowing skirt	N
+mhq	H7641	šibbōlet	ear	N
+mhq	H7641	šibbōlet	flowing stream	N
+mhv	H7644	šebnāʾ	Shebna	Np
+mhv	H7645	šĕbanyāhû	Shebaniah	Np
+mhz	H7651	šebaʿ	seven	N
+mhz	H7620	šābûaʿ	period of seven	N
+mhz	H7621	šĕbûʿâ	oath	N
+mhz	H7637	šĕbîʿî	seventh	Ao
+mhz	H7650	šābaʿ	swear	V
+mhz	H7657	šibʿîm	seventy	N
+mhz	H7658	šibʿānâ	seven	N
+mhz	H7659	šibʿātayim	seven-fold	N
+mid	H7646	śābēaʿ	be sated	V
+mid	H7649	śābēaʿ	sated	A
+mid	H7647	śābāʿ	plenty	N
+mid	H7648	śōbaʿ	satiety	N
+mid	H7653	śibʿâ	satiety	N
+mid	H7654	śobʿâ	satiety	N
+min	H7660	šābaṣ	weave in chequer	V
+min	H4865	mišbĕṣôt	chequered	N
+min	H7661	šābāṣ	hath seized me	N
+min	H8665	tašbēṣ	chequered	N
+mip	H3435	yišbāq	Ishbak	Np
+mip	H7733	šôbēq	Shobek	Np
+miu	H7665	šābar	break	V
+miu	H4867	mišbār	breaker	N
+miu	H4866	mašbēr	place of breach	N
+miu	H7668	šeber	corn	N
+miu	H7667	šeber	breaking	N
+miu	H7666	šābar	buy grain	V
+miu	H7670	šibbārôn	breaking	N
+miw	H7663	śābar	wait	V
+miw	H7664	śēber	hope	N
+mjd	H7673	šābat	cease	V
+mjd	H4868	mišbāt	cessation	N
+mjd	H7674	šebet	cessation	N
+mjd	H7676	šabbāt	Sabbath	N
+mjd	H7673	šābat	keep	V
+mjd	H7677	šabbātôn	sabbath observance	N
+mjh	H7679	śāgāʾ	grow	V
+mjh	H7685	śāgâ	grow	V
+mjh	H7689	śaggîʾ	great	A
+mji	H7682	śāgab	be high	V
+mji	H4869	miśgāb	secure height	N
+mji	H4869	miśgāb	Misgab	Np
+mjj	H7683	šāgag	go astray	V
+mjj	H7684	šĕgāgâ	sin of error	N
+mjm	H7686	šāgâ	go astray	V
+mjm	H4870	mišgeh	mistake	N
+mjm	H7691	šĕgîʾâ	error	N
+mjv	H7693	šāgēl	violate	V
+mjv	H7694	šēgāl	consort	N
+mjw	H7696	šāgaʿ	be mad	V
+mjw	H7697	šiggāʿôn	madness	N
+mke	H7703	šādad	deal violently with	V
+mke	H7701	šōd	violence	N
+mke	H7736	šûd	deal violently with	V
+mkh	H7699	šad	breast	N
+mkh	H7699	šōd	breast of a woman	N
+mkh	H7705	šiddâ	wife	N
+mko	H7709	šĕdēmâ	field	N
+mko	H8309	šĕrēmâ	field	N
+mkq	H7710	šādap	scorch	V
+mkq	H7711	šĕdēpâ	blighted thing	N
+mkq	H7711	šiddāpôn	blight	N
+mkv	H8337	šēš	six	N
+mkv	H8341	šiššâ	give sixth part of	V
+mkv	H8345	šiššî	sixth	N
+mkv	H8346	šiššîm	sixty	N
+mlh	H4875	mĕšôʾâ	desolation	N
+mlh	H7722	šôʾ	ravage	N
+mlh	H7722	šôʾâ	devastation	N
+mlh	H8663	tĕšuʾâ	noise	N
+mlk	H7725	šûb	turn back	V
+mlk	H4878	mĕšûbâ	turning back	N
+mlk	H7728	šôbēb	backturning	A
+mlk	H7726	šôbāb	backturning	A
+mlk	H7729	šûbâ	retirement	N
+mlk	H7870	šîbâ	restoration	N
+mlk	H8666	tĕšûbâ	return	N
+mlz	H7737	šāwâ	be even	V
+mlz	H7740	šāwēh	Shaveh	Np
+mmd	H7743	šûaḥ	sink down	V
+mmd	H7745	šûḥâ	pit	N
+mmd	H7845	šaḥat	pit	N
+mmd	H7882	šîḥâ	pit-fall	N
+mml	H7590	šûṭ	treat with despite	V
+mml	H7589	šĕʾāṭ	despite	N
+mmn	H7751	šûṭ	go about	V
+mmn	H4880	miššôṭ	oar	N
+mmn	H4880	māšôṭ	oar	N
+mmn	H7752	šôṭ	scourge	N
+mmn	H7751	šûṭ	row	V
+mmn	H7850	šōṭēṭ	scourge	N
+mmn	H7885	šayiṭ	rowing	N
+mmo	H7750	śûṭ	swerve	V
+mmo	H7846	śēṭ	swerver	N
+mmq	H7753	śûk	hedge up	V
+mmq	H4881	mĕśukâ	hedge	N
+mna	H7760	śûm	put	V
+mna	H8667	tĕśûmet	pledge	N
+mnh	H7773	šewaʿ	cry out	V
+mnh	H7768	šāwaʿ	cry out	V
+mnh	H7771	šôaʿ	cry	N
+mnh	H7775	šawʿâ	cry for help	N
+mnz	H7785	šôq	leg	N
+mnz	H7784	šûq	street	N
+moe	H7789	šûr	behold	V
+moe	H7790	šûr	foe	N
+moe	H8324	šôrēr	watcher	N
+mof	H7788	šûr	travel	V
+mof	H8670	tĕšûrâ	gift	N
+moh	H7794	šôr	a head of cattle	N
+moh	H7791	šûr	wall	N
+moh	H7791	šûrâ	row	N
+moh	H8284	šārâ	row	N
+moj	H7787	śûr	saw	V
+moj	H7795	śôrâ	in rows	N
+mon	H7797	śûś	exult	V
+mon	H4885	māśôś	exultation	N
+mon	H8342	śāśôn	exultation	N
+moq	H7799	šûšan	lily	N
+moq	H7800	šûšan	Shushan	Np
+moq	H7802	šûšan ʿēdût	Shushan-eduth	N
+mox	H7809	šāḥad	give a present	V
+mox	H7810	šōḥad	present	N
+moz	H7812	šāḥâ	bow down	V
+moz	H7816	šĕḥût	pit	N
+moz	H7825	šĕḥît	pit-fall	N
+mpa	H7811	śāḥâ	swim	V
+mpa	H7813	śāḥû	swimming	N
+mpe	H7817	šāḥaḥ	bow	V
+mpe	H7807	šaḥ	low	A
+mpf	H7819	šāḥaṭ	slaughter	V
+mpf	H7820	šāḥaṭ	slaughter	V
+mpf	H7819	šaḥăṭâ	the revolters are gone deep in slaughtering	N
+mpf	H7821	šĕḥîṭâ	slaying	N
+mpo	H7826	šaḥal	lion	N
+mpo	H7827	šĕḥēlet	scale	N
+mps	H7828	šaḥap	sea-mew	N
+mps	H7829	šaḥepet	wasting disease	N
+mpy	H7833	šāḥaq	rub away	V
+mpy	H7834	šaḥaq	dust	N
+mqa	H7832	śāḥaq	laugh	V
+mqa	H4890	miśḥaq	object of derision	N
+mqa	H7814	śĕḥōq	laughter	N
+mqd	H7835	šāḥar	be black	V
+mqd	H7815	šĕḥôr	blackness	N
+mqd	H7838	šāḥōr	black	A
+mqd	H7839	šaḥărût	blackness	N
+mqd	H7840	šĕḥarḥōr	blackish	A
+mqf	H4891	mišḥār	dawn	N
+mqf	H7837	šaḥar	dawn	N
+mqf	H7836	šāḥar	look early	V
+mql	H7843	šāḥat	go to ruin	V
+mql	H0516	ʾal tašḥēt	go to ruin	N
+mql	H4889	mašḥît	ruin	N
+mql	H4893	mišḥat	disfigurement	N
+mql	H4892	mašḥēt	destruction	N
+mql	H4893	māšĕḥāt	corruption	N
+mqp	H7849	šāṭaḥ	spread	V
+mqp	H4894	mišṭôaḥ	spreading	N
+mqp	H4894	mišṭāḥ	spreading-place	N
+mqs	H7852	śāṭam	bear a grudge	V
+mqs	H4895	maśṭēmâ	animosity	N
+mqv	H7853	śāṭan	be adversary	V
+mqv	H7854	śāṭān	adversary	N
+mqv	H7855	śiṭnâ	accusation	N
+mqz	H7857	šāṭap	overflow	V
+mqz	H7858	šeṭep	flood	N
+mqz	H8241	šeṣep	flood	N
+mrb	H4896	mišṭār	rule	N
+mrb	H7860	šōṭēr	official	N
+mri	H7867	śîb	be hoary	V
+mri	H7869	śêb	age	N
+mri	H7872	śêbâ	hoary head	N
+mrq	H7874	śîd	whitewash	V
+mrq	H7875	śîd	lime	N
+mrx	H7808	śēaḥ	thought	N
+mrx	H7878	śîaḥ	muse	V
+mrx	H7879	śîaḥ	complaint	N
+mrx	H7881	śîḥâ	reflection	N
+msh	H7890	šayin	urine	N
+msh	H8366	šātan	urinate	V
+msk	H7892	šîr	song	N
+msk	H7891	šîr	sing	V
+msk	H7892	šîrâ	song	N
+msm	H7893	šayiš	alabaster	N
+msm	H8336	šēš	alabaster	N
+msq	H7896	šît	put	V
+msq	H7897	šît	garment	N
+msq	H7898	šayit	thorn-bushes	N
+msq	H8356	šāt	foundation	N
+msu	H7901	šākab	lie down	V
+msu	H4904	miškāb	place of lying	N
+msu	H7902	šĕkābâ	lying	N
+msu	H7903	šĕkōbet	copulation	N
+msz	H4906	maśkît	show-piece	N
+msz	H7907	śekwî	appearance	N
+msz	H7914	śĕkîyâ	conspicuous	N
+mtg	H7911	šākaḥ	forget	V
+mtg	H7913	šākēaḥ	forgetting	A
+mtn	H5526	śākak	weave	V
+mtn	H7900	śōk	booth	N
+mtq	H7899	śēk	thorn	N
+mtq	H7905	śukkâ	barb	N
+mtr	H7921	šākōl	be bereaved	V
+mtr	H7921	mĕšakkelet	barrenness	N
+mtr	H7908	šĕkôl	bereavement	N
+mtr	H7909	šakkûl	bereaved	A
+mtr	H7921	šākûl	childless	A
+mtr	H7923	šikkulîm	bereavement	N
+mtt	H7919	śākal	be prudent	V
+mtt	H4905	maśkîl	contemplative poem	N
+mtt	H7922	śēkel	prudence	N
+mua	H7927	šĕkem	Shechem	Np
+mua	H7926	šĕkem	shoulder	N
+mua	H7925	šākam	start	V
+mua	H7929	šikmâ	shoulder	N
+muf	H7931	šākan	settle down	V
+muf	H4908	miškān	dwelling-place	N
+muf	H7933	šēken	dwelling	N
+muf	H7934	šākēn	inhabitant	A
+muj	H7937	šākar	be drunk	V
+muj	H7910	šikkōr	drunken	A
+muj	H7941	šēkār	intoxicating drink	N
+muj	H7943	šikkārôn	drunkenness	N
+mum	H7936	śākar	hire	V
+mum	H4909	maśkōret	wages	N
+mum	H7916	śākîr	hired	A
+mum	H7917	śĕkîrâ	hired	A
+mum	H7938	śeker	hire	N
+mum	H7939	śākār	hire	N
+muu	H7947	šālab	be bound	V
+muu	H7948	šalābbîm	joinings	N
+muy	H7950	šeleg	snow	N
+muy	H7949	šālag	snow	V
+mva	H7953	šālâ	draw out	V
+mva	H7988	šilyâ	after-birth	N
+mvb	H7951	šālâ	be quiet	V
+mvb	H7952	šālâ	be quiet	V
+mvb	H7961	šālēw	quiet	A
+mvb	H7959	šālû	ease	N
+mvb	H7962	šalwâ	quietness	N
+mvb	H7987	šĕlî	quietness	N
+mvu	H7971	šālaḥ	send	V
+mvu	H4916	mišlôaḥ	sending	N
+mvu	H4916	mišlaḥ	sending	N
+mvu	H4917	mišlaḥat	discharge	N
+mvu	H7976	šĕllûḥâ	shoot	N
+mvu	H7964	šillûḥîm	sending away	N
+mvu	H7973	šelaḥ	missile	N
+mwa	H7980	šālaṭ	domineer	V
+mwa	H7983	šilṭôn	mastery	N
+mwa	H7986	šalleṭet	having mastery	A
+mwa	H7989	šallîṭ	having mastery	A
+mwl	H7993	šālak	throw	V
+mwl	H7994	šālāk	cormorant	N
+mwl	H7995	šalleket	felling	N
+mwp	H7997	šālal	draw out	V
+mwp	H7758	šôlāl	barefoot	A
+mwq	H7997	šālal	spoil	V
+mwq	H7998	šālāl	prey	N
+mwv	H7999	šālēm	be complete	V
+mwv	H7966	šillûm	requital	N
+mwv	H7965	šālôm	completeness	N
+mwv	H8005	šillēm	recompense	N
+mwv	H8002	šelem	sacrifice for alliance	N
+mwv	H8003	šālēm	complete	A
+mwv	H7999	šālam	be in covenant of peace	V
+mwv	H8010	šĕlōmōh	Solomon	Np
+mwv	H8011	šillumâ	requital	N
+mwv	H8021	šalmōn	reward	N
+mxz	H7991	šālîš	sistrum	N
+mxz	H7991	šālîš	adjutant	N
+mxz	H7991	šālîš	third	N
+mxz	H7992	šĕlîšî	third	A
+mxz	H8029	šillēš	pertaining to the third	A
+mxz	H8027	šālaš	do a third time	V
+mxz	H7969	šālōš	a three	N
+mxz	H7970	šĕlōšîm	thirty	N
+mxz	H8032	šilšōm	three days ago	D
+myh	H8033	šām	there	D
+myh	H3074	yĕhōwâ šāmmâ	there	N
+myj	H8039	šimʾâ	Shimah. Compare	Np
+myj	H8043	šimʾām	Shimeam	Np
+myj	H8044	šamgar	Shamgar	Np
+mym	H8040	śĕmōʾl	the left	N
+mym	H8041	śimʾēl	take the left	V
+mym	H8042	śĕmāʾlî	left	A
+mzb	H8055	śāmaḥ	rejoice	V
+mzb	H8056	śāmēaḥ	glad	A
+mzb	H8057	śimḥâ	joy	N
+mzd	H8058	šāmaṭ	let drop	V
+mzd	H8059	šĕmiṭṭâ	a letting drop	N
+mzr	H8008	śalmâ	garment	N
+mzr	H8071	śimlâ	wrapper	N
+mzw	H8074	šāmēm	be desolated	V
+mzw	H4923	mĕšammâ	waste	N
+mzw	H8047	šammâ	waste	N
+mzw	H8076	šāmēm	devastated	A
+mzw	H8077	šĕmāmâ	a devastation	N
+mzw	H8077	šimāmâ	devastation	N
+mzw	H8078	šimmāmôn	appalment	N
+nad	H8080	šāmēn	grow fat	V
+nad	H0820	ʾašmannîm	among the stout	N
+nad	H4924	mišmān	fatness	N
+nad	H4924	mašmān	fat piece	N
+nad	H8081	šemen	fat	N
+nad	H8082	šāmēn	fat	A
+nad	H4924	šāmān	fat	N
+naf	H8066	šĕmînî	eighth	A
+naf	H8067	šĕmînît	eighth	N
+naf	H8083	šĕmōneh	eight	N
+naf	H8084	šĕmōnîm	an eighty	A
+nam	H8085	šāmaʿ	hear	V
+nam	H2045	hašmāʿût	a causing to hear	N
+nam	H4926	mišmāʿ	thing heard	N
+nam	H4928	mišmaʿat	obedient band	N
+nam	H8052	šĕmûʿâ	report	N
+nam	H8088	šēmaʿ	hearing	N
+nam	H8088	šemaʿ	sound	N
+nam	H8089	šōmaʿ	report	N
+nba	H8102	šēmeṣ	whisper	N
+nba	H8103	šimṣâ	whisper	N
+nbf	H8104	šāmar	keep	V
+nbf	H0821	ʾašmûrâ	watch	N
+nbf	H4929	mišmār	place of confinement	N
+nbf	H4931	mišmeret	guard	N
+nbf	H8107	šimmur	watching	N
+nbf	H8109	šĕmurâ	eye-lid	N
+nbf	H8108	šomrâ	guard	N
+nbf	H8111	šōmĕrôn	Samaria	Np
+nce	H8130	śānēʾ	hate	V
+nce	H8135	śinʾâ	hating	N
+nce	H8146	śānîʾ	hated	A
+ncl	H8138	šānâ	repeat	V
+ncl	H4932	mišneh	double	N
+ncl	H8136	šinʾān	repetition	N
+ncl	H8145	šēnî	second	Ao
+ncl	H8147	šĕnayim	two	N
+ncn	H8138	šānâ	change	V
+ncn	H8132	šānāʾ	change	V
+ncn	H8141	šānâ	year	N
+ncw	H8150	šānan	whet	V
+ncw	H8127	šēn	tooth	N
+ncw	H8143	šenhabbîm	ivory	N
+ncw	H8148	šĕnînâ	sharp	N
+ndb	H8155	šāsas	plunder	V
+ndb	H7601	šāʾas	plunder	V
+ndb	H4882	mĕšûsâ	booty	N
+ndb	H4933	mĕšissâ	booty	N
+ndd	H8156	šāsaʿ	divide	V
+ndd	H8157	šesaʿ	cleft	N
+nds	H4934	mišʿôl	hollow way	N
+nds	H8168	šōʿal	hollow hand	N
+ndw	H8172	šāʿan	lean	V
+ndw	H4937	mišʿēn	support	N
+ndw	H4937	mišʿān	support	N
+ndw	H4938	mišʿēnâ	support	N
+ndw	H4938	mišʿenet	staff	N
+ndx	H8173	šāʿaʿ	sport	V
+ndx	H8191	šaʿăšuʿîm	delight	N
+nea	H5587	śĕʿippîm	disquietings	N
+nea	H8312	śarʿappîm	disquieting thoughts	N
+nee	H8176	šāʿar	calculate	V
+nee	H8180	šaʿar	measure	N
+neh	H8179	šaʿar	gate	N
+neh	H7778	šōʿēr	porter	N
+nei	H8182	šōʿār	horrid	A
+nei	H8186	šaʿărûrâ	horror	N
+nei	H8186	šaʿărîrîyâ	fearful	N
+nen	H8175	śāʿar	sweep away	V
+nen	H8178	śaʿar	storm	N
+nen	H8183	śĕʿārâ	hurricane	N
+ner	H8165	śēʿîr	Seir	Np
+ner	H8165	śēʿîr	Seir	Np
+ner	H8163	śāʿîr	satyr	N
+ner	H8163	śāʿîr	he-goat	N
+ner	H8166	śĕʿîrâ	she-goat	N
+ner	H8181	śēʿār	hair	N
+ner	H8178	śaʿar	horror	N
+ner	H8163	śāʿir	hairy	A
+ner	H8175	śāʿar	bristle	V
+ner	H8184	śĕʿōrâ	barley	N
+ner	H8185	śaʿărâ	a hair	N
+nfc	H8192	šāpâ	sweep bare	V
+nfc	H8194	šĕpôt	cream	N
+nfc	H8205	šĕpî	bareness	N
+nfd	H0830	ʾašpōt	ash-heap	N
+nfd	H4942	mišpĕtayim	fire-places	N
+nfd	H8239	šāpat	set	V
+nfd	H8240	šĕpattāyim	stall	N
+nfl	H4940	mišpāḥâ	clan	N
+nfl	H8198	šipḥâ	maid	N
+nfp	H8199	šāpaṭ	judge	V
+nfp	H4941	mišpāṭ	judgment	N
+nfp	H8196	šĕpôṭ	judgment	N
+nfp	H8201	šepeṭ	judgment	N
+nfy	H8210	šāpak	pour out	V
+nfy	H8211	šepek	pouring	N
+nfy	H8212	šopkâ	male organ	N
+ngb	H8213	šāpēl	be low	V
+ngb	H8216	šēpel	low estate	N
+ngb	H8217	šāpāl	low	A
+ngb	H8219	šĕpēlâ	lowland	N
+ngb	H8218	šiplâ	humiliation	N
+ngb	H8220	šiplût	sinking	N
+ngq	H8228	šepaʿ	abundance	N
+ngq	H8229	šipʿâ	abundance	N
+ngw	H5606	śāpaq	suffice	V
+ngw	H5607	śēpeq	sufficiency	N
+ngz	H8231	šāpar	be beautiful	V
+ngz	H8233	šeper	beauty	N
+ngz	H7782	šōpār	horn	N
+ngz	H8235	šiprâ	fairness	N
+ngz	H8237	šaprîr	brightly-coloured	N
+nhk	H8245	šāqad	watch	V
+nhk	H8247	šāqēd	almond	N
+nhk	H8246	šāqad	cups shaped like almond	V
+nhn	H8248	šāqâ	cause to drink water	V
+nhn	H4945	mašqeh	irrigation	N
+nhn	H4945	mašqeh	butler	N
+nhn	H8249	šiqquw	drink	N
+nhn	H8250	šiqqûy	drink	N
+nhn	H8268	šōqet	watering-trough	N
+nht	H8252	šāqaṭ	be quiet	V
+nht	H8253	šeqeṭ	quietness	N
+nhv	H8254	šāqal	weigh	V
+nhv	H4946	mišqôl	heaviness	N
+nhv	H4948	mišqāl	weight	N
+nhv	H4949	mišqelet	levelling instrument	N
+nhv	H8255	šeqel	a weight	N
+nhx	H8257	šāqaʿ	sink	V
+nhx	H4950	mišqāʿ	what is settled	N
+nib	H4947	mašqôp	lintel	N
+nib	H8261	šāqûp	frame	N
+nib	H8260	šeqep	frame-work	N
+nie	H8251	šiqqûṣ	detested thing	N
+nie	H8262	šiqqēṣ	detest	V
+nie	H8263	šeqeṣ	detestation	N
+nif	H8264	šāqaq	run	V
+nif	H4944	maššāq	running	N
+nij	H8267	šeqer	deception	N
+nij	H8266	šāqar	do falsely	V
+nit	H8276	śārag	be intertwined	V
+nit	H8299	śārîg	tendril	N
+niw	H8277	śārad	escape	V
+niw	H8300	śārîd	survivor	N
+nix	H8278	śĕrād	plaited work	N
+nix	H8279	śered	stylus	N
+niz	H8281	šārâ	let loose	V
+niz	H8293	šērût	let loose	N
+njg	H8280	śārâ	persist	V
+njg	H3478	yiśrāʾēl	Israel	Np
+njq	H8295	śāraṭ	incise	V
+njq	H8296	śereṭ	incision	N
+njq	H8296	śāreṭet	incision	N
+nkf	H8308	śārak	twist	V
+nkf	H8288	śĕrôk	thong	N
+nkk	H8313	śārap	burn	V
+nkk	H4955	miśrāpâ	a burning	N
+nkk	H5635	sārap	burn	V
+nkk	H8314	śārāp	seraphim	N
+nkk	H8314	śārāp	serpent	N
+nkk	H8316	śĕrēpâ	burning	N
+nkq	H8317	šāraṣ	swarm	V
+nkq	H8318	šereṣ	swarmers	N
+nkr	H8319	šāraq	hiss	V
+nkr	H8292	šĕrîqâ	hissing	N
+nkr	H8322	šĕrēqâ	hissing	N
+nkw	H8291	śārōq	vine-tendrils	N
+nkw	H8320	śārōq	sorrel	N
+nkw	H8321	śōrēq	vine	N
+nkw	H8321	śōrēqâ	vine	N
+nlc	H8270	šōr	navel-string	N
+nlc	H8285	šērâ	bracelet	N
+nlc	H8306	šārîr	sinew	N
+nlc	H8307	šĕrîrût	firmness	N
+nlc	H8326	šōrer	navel-string	N
+nle	H7786	śûr	be prince	V
+nle	H8269	śar	chieftain	N
+nle	H8282	śārâ	princess	N
+nle	H8323	śārar	be prince	V
+nli	H8327	šāraš	deal with the roots	V
+nli	H8328	šōreš	root	N
+nlm	H8334	šārat	minister	V
+nlm	H8335	šārēt	ministry	N
+nmg	H8354	šātâ	drink	V
+nmg	H4960	mišteh	feast	N
+nmg	H8358	šĕtî	drinking	N
+nmg	H8360	šĕtîyâ	drinking	N
+nmn	H8362	šātal	transplant	V
+nmn	H8363	šātîl	transplanted shoot	N
+nna	H8373	tāʾab	long	V
+nna	H8375	taʾăbâ	longing	N
+nni	H8382	tāʾam	be double	V
+nni	H8380	tôʾām	twin	N
+nnp	H8388	tāʾar	incline	V
+nnp	H8388	tāʾar	draw in outline	V
+nnp	H8389	tōʾar	outline	N
+nod	H8401	teben	straw	N
+nod	H4963	matbēn	straw-heap	N
+nop	H8414	tōhû	formlessness	N
+nop	H8417	tohŏlâ	error	N
+npf	H8379	taʾăwâ	boundary	N
+npf	H8420	tāw	mark	N
+npf	H8427	tāwâ	make a mark	V
+npi	H8432	tāwek	midst	N
+npi	H8484	tîkôn	middle	A
+nqa	H8446	tûr	seek out	V
+nqa	H3491	yĕtûr	searching	N
+nqa	H8447	tôr	plait	N
+nqa	H8448	tôr	plait	N
+nrc	H8478	taḥat	the under part	N
+nrc	H8481	taḥtôn	lower	A
+nrc	H8482	taḥtî	lower	A
+nrz	H8496	tōk	injury	N
+nrz	H8501	tākāk	injury	N
+nsd	H8505	tākan	regulate	V
+nsd	H4971	matkōnet	measurement	N
+nsd	H8506	tōken	measurement	N
+nsd	H8508	toknît	measurement	N
+nsr	H8518	tālâ	hang	V
+nsr	H8522	tĕlî	quiver	N
+nsv	H2048	tālal	deride	V
+nsv	H4123	mahătallôt	illusions	N
+nsw	H8510	tēl	mound	N
+nsw	H8524	tālûl	exalted	A
+nsw	H8534	taltallîm	trailing bough	N
+ntd	H4459	maltāʿâ	teeth	N
+ntd	H4973	mĕtallĕʿôt	teeth	N
+ntd	H8438	tôlāʿ	worm	N
+ntd	H8438	tôlēʿâ	worm	N
+ntd	H8529	tālaʿ	clad in scarlet	V
+nti	H8539	tāmah	be astounded	V
+nti	H8541	timmāhôn	bewilderment	N
+ntv	H8552	tāmam	be complete	V
+ntv	H4974	mĕtōm	soundness	N
+ntv	H8535	tām	complete	A
+ntv	H8537	tōm	completeness	N
+ntv	H8538	tummâ	integrity	N
+ntv	H8549	tāmîm	complete	A
+nuf	H8490	tîmārâ	column	N
+nuf	H8558	tāmār	palm-tree	N
+nuf	H8560	tōmer	palm-tree	N
+nuf	H8561	timōrâ	palm	N
+nuf	H8564	tamrûr	sign-posts	N
+nun	H8566	tānâ	hire	V
+nun	H0866	ʾetnâ	hire	N
+nuz	H8565	tan	serpent	N
+nuz	H8577	tan	jackal	N
+nuz	H8568	tannâ	jackal	N
+nuz	H8577	tannîn	serpent	N
+nvd	H8441	tôʿēbah	abomination	N
+nvd	H8581	taʿāb	loathe	V
+nve	H8582	tāʿâ	err	V
+nve	H8442	tôʿâ	wandering	N
+nvo	H8591	tāʿaʿ	mock	V
+nvo	H8595	tēʿĕtuʿîm	mockery	N
+nwf	H8602	tāpēl	tasteless	A
+nwf	H8604	tiplâ	unsavouriness	N
+nwl	H8596	tōp	timbrel	N
+nwl	H8608	tāpap	sound the timbrel	V
+nxd	H8628	tāqaʿ	thrust	V
+nxd	H8619	tāqôaʿ	blast-instrument	N
+nxd	H8629	tēqaʿ	blast	N
+nxe	H8630	tāqēp	prevail over	V
+nxe	H8623	taqqîp	mighty	A
+nxe	H8633	tōqep	power	N
+nzt	H0311	ʾaḥar	after	D
+nzt	H0317	ʾoḥŏrî	another	A
+nzt	H0318	ʾoḥŏrên	and unto the last	D
+nzt	H0320	ʾaḥărît	end	N
+nzt	H0321	ʾoḥŏrān	another	A
+oao	H0560	ʾămar	say	V
+oao	H0563	ʾimmar	lamb	N
+oao	H3983	mēʾmar	word	N
+obg	H0613	ʾĕsûr	band	N
+obg	H0633	ʾĕsār	interdict	N
+ocq	H0888	bĕʾēš	be evil	V
+ocq	H0873	biʾyš	bad	N
+ocv	H0927	bĕhal	alarm	V
+ocv	H0924	bĕhîlû	haste	D
+odc	H1005	bayit	house	N
+odc	H0956	bît	lodge	V
+odj	H1124	bĕnâ	build	V
+odj	H1147	binyān	a building	N
+odm	H1156	bĕʿāʾ	ask	V
+odm	H1159	bāʿû	petition	N
+odu	H1289	bĕrak	kneel	V
+odu	H1291	bĕrak	knee	N
+oef	H1370	gĕbûrâ	might	N
+oef	H1400	gĕbar	man	N
+oef	H1401	gibbār	mighty one	N
+oel	H1505	gĕzar	cut	V
+oel	H1510	gĕzērâ	decree	N
+oeq	H1541	gĕlāʾ	reveal	V
+oeq	H1547	gālû	exile	N
+oeu	H1535	galgal	wheel	N
+oeu	H1560	gĕlāl	rolling	A
+oeu	H4040	mĕgillâ	roll	N
+ofd	H1684	dĕbaḥ	sacrifice	V
+ofd	H1685	dĕbaḥ	sacrifice	N
+ofd	H4056	madbaḥ	altar	N
+ofi	H1751	dûq	be shattered	V
+ofi	H1855	dĕqaq	be shattered	V
+ofj	H1753	dûr	dwell	V
+ofj	H1859	dār	generation	N
+ofj	H4070	mĕdôr	dwelling-place	N
+ofj	H4070	mĕdār	dwelling	N
+ofj	H8411	tĕdîrāʾ	continuance	N
+ofp	H1778	dîn	judge	V
+ofp	H1780	dîn	judgment	N
+ofp	H1782	dayyān	judge	N
+ofp	H1784	dînāyēʾ	Dinaite	Np
+ofp	H4083	mĕdînâ	district	N
+ofv	H1798	dĕkar	ram	N
+ofv	H1799	dikrôn	memorandum	N
+ofv	H1799	dākĕrān	register	N
+ogh	H0153	ʾedraʿ	force	N
+ogh	H1872	dĕraʿ	arm	N
+ogr	H1922	hădar	glorify	V
+ogr	H1923	hădar	honour	N
+ogu	H1946	hûk	go	V
+ogu	H1981	hălak	go	V
+ogu	H1983	hălāk	toll	N
+ohh	H2110	zûn	feed	V
+ohh	H4203	māzôn	food	N
+ohm	H2166	zĕman	time	N
+ohm	H2164	zĕman	agree together	V
+oho	H2170	zĕmār	music	N
+oho	H2171	zammār	singer	N
+ohz	H2255	ḥăbal	destroy	V
+ohz	H2248	ḥăbûlāʾ	hurtful act	N
+ohz	H2257	ḥăbāl	hurt	N
+oib	H2269	ḥăbar	fellow	N
+oib	H2273	ḥabrâ	fellow	N
+oik	H2324	ḥăwâ	declare	V
+oik	H0263	ʾaḥăwāyâ	a declaring	N
+oin	H2370	ḥăzâ	see	V
+oin	H2376	ḥĕzû	vision	N
+oin	H2379	ḥăzôt	sight	N
+ois	H2408	ḥăṭāy	sin	N
+ois	H2402	ḥaṭṭāʾâ	sin-offering	N
+ois	H2409	ḥaṭṭāyāʾ	sin-offering	N
+oiv	H2418	ḥăyāʾ	live	V
+oiv	H2417	ḥay	living	A
+oiv	H2423	ḥêwāʾ	beast	N
+oiy	H2445	ḥakkîm	wise man	A
+oiy	H2452	ḥokmâ	wisdom	N
+ojd	H2508	ḥălāq	portion	N
+ojd	H4255	maḥlĕqâ	class	N
+ojl	H2631	ḥăsan	take possession of	V
+ojl	H2632	ḥēsen	power	N
+ojx	H2818	ḥăšaḥ	need	V
+ojx	H2818	ḥăšaḥ	thing needed	N
+ojx	H2819	ḥašḥû	things needed	N
+okc	H2868	ṭĕʾēb	be good	V
+okc	H2869	ṭāb	good	N
+okm	H2939	ṭĕʿēm	feed	V
+okm	H2942	ṭĕʿēm	taste	N
+okm	H2941	ṭĕʿēm	taste	N
+okv	H3046	yĕdaʿ	know	V
+okv	H4486	mandaʿ	knowledge	N
+olg	H3272	yĕʿaṭ	advise	V
+olg	H3272	yāʿēṭ	counsellor	N
+olg	H5843	ʿēṭāʾ	counsel	N
+oli	H3321	yĕṣab	make certain	V
+oli	H3330	yaṣṣîb	certain	A
+olk	H3345	yĕqad	burn	V
+olk	H3346	yĕqēdāʾ	burning	N
+oln	H3367	yĕqār	honour	N
+oln	H3358	yaqqîr	honourable	A
+onb	H3790	kĕtab	write	V
+onb	H3792	kĕtāb	writing	N
+oni	H3825	lĕbab	heart	N
+oni	H3821	lēb	heart	N
+onl	H3848	lĕbēš	be clothed	V
+onl	H3831	lĕbûš	garment	N
+onu	H3964	māʾ	what?	Pi
+onu	H4101	mâ	what?	Pi
+oot	H4416	mĕlaḥ	salt	N
+oot	H4415	mĕlaḥ	eat salt	V
+oox	H4430	melek	king	N
+oox	H4433	malkâ	queen	N
+oox	H4437	malkû	royalty	N
+opb	H4449	mĕlal	speak	V
+opb	H4406	millâ	word	N
+oph	H4483	mĕnâ	number	V
+oph	H4484	mĕnēʾ	maneh	N
+oph	H4510	minyān	number	N
+opo	H4776	mĕrad	rebellion	N
+opo	H4779	mārād	rebellious	A
+opz	H5013	nbʾ	see	V
+opz	H5017	nĕbûʾâ	prophesying	N
+opz	H5029	nĕbîʾ	prophet	N
+oqf	H5047	nĕgad	stream	V
+oqf	H5049	neged	in front of	R
+ord	H5260	nĕsak	pour out	V
+ord	H5261	nĕsak	drink-offering	N
+ore	H5267	nĕsaq	come up	V
+ore	H5559	sĕlēq	come up	V
+org	H5312	nĕpaq	go	V
+org	H5313	nipqāʾ	outlay	N
+ort	H5415	nĕtan	give	V
+ort	H4978	mattĕnāʾ	gift	N
+osc	H5487	sûp	be fulfilled	V
+osc	H5491	sôp	end	N
+osf	H5609	sĕpar	book	N
+osf	H5613	sāpir	secretary	N
+osn	H5648	ʿăbad	make	V
+osn	H4567	maʿăbad	work	N
+osn	H5649	ʿăbad	slave	N
+osn	H5673	ʿăbîdâ	work	N
+otg	H5922	ʿal	upon	R
+otg	H5924	ʿēllāʾ	above	D
+otg	H5931	ʿillâ	matter	N
+otj	H5952	ʿălî	roof-chamber	N
+otj	H5943	ʿillay	highest	A
+otj	H5946	ʿelyôn	Supreme	A
+otj	H5928	ʿălāt	burnt-offering	N
+otn	H5954	ʿălal	go in	V
+otn	H4606	meʿāl	going in	N
+ouh	H6136	ʿiqqar	root	N
+ouh	H6132	ʿăqar	be rooted up	V
+oup	H6236	ʿăśar	a ten	N
+oup	H6243	ʿeśrîn	twenty	N
+oux	H6386	pĕlag	divide	V
+oux	H6387	pĕlag	half	N
+oux	H6392	pĕluggâ	division	N
+ova	H6399	pĕlaḥ	pay reverence to	V
+ova	H6402	polḥān	service	N
+ovo	H6590	pĕšar	interpret	V
+ovo	H6591	pĕšar	interpretation	N
+ovu	H6634	ṣĕbāʾ	be inclined	V
+ovu	H6640	ṣĕbû	thing	N
+owj	H6925	qŏdām	before	R
+owj	H6928	qadmâ	former time	N
+owj	H6933	qadmay	former	A
+owq	H6966	qûm	arise	V
+owq	H7010	qĕyām	statute	N
+owq	H7011	qayyām	enduring	A
+oxa	H7108	qĕṣap	be wroth	V
+oxa	H7109	qĕṣap	wrath	N
+oxb	H7113	qĕṣaṣ	cut off	V
+oxb	H7118	qĕṣāt	end	N
+oxe	H7127	qĕrēb	approach	V
+oxe	H7129	qĕrāb	war	N
+oxo	H7229	rab	great	A
+oxo	H7240	ribbô	myriad	N
+oxo	H7260	rabrab	great	A
+oxo	H7261	rabrĕbān	lord	N
+oxp	H7236	rĕbâ	grow great	V
+oxp	H7238	rĕbû	greatness	N
+oxt	H0703	ʾarbaʿ	four	N
+oxt	H7244	rĕbîʿî	fourth	A
+oxw	H7265	rĕgaz	enrage	V
+oxw	H7266	rĕgaz	rage	N
+oyc	H7308	rûaḥ	wind	N
+oyc	H7382	rêaḥ	smell	N
+oyd	H7313	rûm	rise	V
+oyd	H7314	rûm	height	N
+oyn	H7470	rĕʿû	good pleasure	N
+oyn	H7476	raʿyôn	thought	N
+oyu	H7593	šĕʾēl	ask	V
+oyu	H7595	šĕʾēlāʾ	affair	N
+ozg	H7680	śĕgāʾ	grow great	V
+ozg	H7690	śaggîʾ	great	A
+ozj	H7712	šĕdar	struggle	V
+ozj	H0849	ʾeštaddûr	revolt	N
+ozl	H8353	šēt	six	A
+ozl	H8361	šittîn	sixty	N
+paa	H7920	śĕkal	consider	V
+paa	H7924	śoklĕtānû	insight	N
+pad	H7932	šĕkēn	dwell	V
+pad	H4907	miškan	abode	N
+pag	H7954	šĕlēh	at ease	A
+pag	H7963	šĕlēwâ	ease	N
+pak	H7981	šĕlēṭ	have power	V
+pak	H7984	šilṭôn	ruler	N
+pak	H7985	šolṭān	dominion	N
+pak	H7990	šallîṭ	having mastery	A
+pao	H8000	šĕlēm	be complete	V
+pao	H8001	šĕlām	welfare	N
+pbk	H8214	šĕpēl	be low	V
+pbk	H8215	šĕpal	low	A
+pbm	H8232	šĕpar	be fair	V
+pbm	H8209	šappîr	fair	A
+pbm	H8238	šĕparpār	dawn	N
+pbr	H8330	šōreš	root	N
+pbr	H8332	šĕrōšî	uprooting	N
+pbw	H8355	šĕtâ	drink	V
+pbw	H4961	mišteh	feast	N
+pcj	H8532	tĕlāt	three	N
+pcj	H8523	tĕlîtay	third	A
+pcj	H8531	tĕlat	a third part	N
+pcj	H8523	taltî	third	A
+pcj	H8533	tĕlātîn	thirty	N
+pco	H8578	tinyān	second	A
+pco	H8579	tinyānût	the second time	D
+pco	H8648	tĕrên	two	N
+pcw	H8631	tĕqēp	grow strong	V
+pcw	H8624	taqqîp	strong	A
+pcw	H8632	tĕqāp	might	N
+pcw	H8632	tĕqōp	power	N
