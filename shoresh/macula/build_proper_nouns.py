@@ -155,19 +155,32 @@ def build():
                     seen.add((lang, surface))
                     rows.append((strong, tr, typ, lang, surface, "aligned", round(share, 3)))
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    with (OUT_DIR / "proper_nouns.tsv").open("w", encoding="utf-8") as fh:
-        fh.write("# Proper-noun lexicon (roadmap N1): biblical name Strong's -> localized renderings; "
-                 "shoresh macula.build_proper_nouns. OT+NT via TIPNR (CC-BY) ∪ STEPBible Np.\n")
-        fh.write("strong\ttranslit\ttype\tlang\tsurface\tsource\tweight\n")
-        for strong, tr, typ, lang, surface, src, w in rows:
-            fh.write(f"{strong}\t{tr}\t{typ}\t{lang}\t{surface}\t{src}\t{w}\n")
+    # One file per language (resources/proper_nouns/<lang>.tsv), not one merged table — mirrors
+    # aligned_lex/aligned_lex_hf's own per-language layout. With ~930 languages now feeding this
+    # (via aligned_lex_hf), a single merged file was a ~60MB blob that any one-language read had to
+    # linearly scan; per-language files keep git diffs scoped to the languages that actually changed
+    # and let consumers open just the language they need.
+    by_lang: dict[str, list[tuple]] = collections.defaultdict(list)
+    for strong, tr, typ, lang, surface, src, w in rows:
+        by_lang[lang].append((strong, tr, typ, surface, src, w))
 
-    langs = sorted({r[3] for r in rows})
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    for old in OUT_DIR.glob("*.tsv"):
+        old.unlink()
+    for lang, lrows in by_lang.items():
+        with (OUT_DIR / f"{lang}.tsv").open("w", encoding="utf-8") as fh:
+            fh.write(f"# Proper-noun lexicon (roadmap N1), lang={lang}: biblical name Strong's -> "
+                     f"localized renderings; shoresh macula.build_proper_nouns. "
+                     f"OT+NT via TIPNR (CC-BY) ∪ STEPBible Np.\n")
+            fh.write("strong\ttranslit\ttype\tsurface\tsource\tweight\n")
+            for strong, tr, typ, surface, src, w in sorted(lrows):
+                fh.write(f"{strong}\t{tr}\t{typ}\t{surface}\t{src}\t{w}\n")
+
+    langs = sorted(by_lang)
     covered = len({r[0] for r in rows})
     bytype = collections.Counter(tipnr_type.get(s, "name") for s in {r[0] for r in rows})
     print(f"[proper-nouns] {len(rows)} renderings · {covered} names "
-          f"({dict(bytype)}) · {len(langs)} langs -> {OUT_DIR/'proper_nouns.tsv'}", file=sys.stderr)
+          f"({dict(bytype)}) · {len(langs)} langs -> {OUT_DIR}/<lang>.tsv", file=sys.stderr)
     return rows
 
 

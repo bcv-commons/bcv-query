@@ -348,23 +348,24 @@ def _fold(s: str) -> str:
 @lru_cache(maxsize=8)
 def _proper_noun_index(lang: str = "eng") -> dict[str, list[tuple[str, str]]]:
     """{name_surface_lower: [(strong_code, type), …]} for one language, from the N1 proper-noun
-    lexicon (`resources/proper_nouns/proper_nouns.tsv`). Names are recognized across 19 languages +
-    attested morphological variants and carry a `type` (person/place/other/name). Distinct from the
-    gloss index: it is *filtered to proper nouns* and used at HIGH confidence, bypassing the keyness
-    floor (a recognized name is precise by identity, not by biblical-salience)."""
-    path = _PROPER_NOUNS_DIR / "proper_nouns.tsv"
+    lexicon (`resources/proper_nouns/<lang>.tsv`, one file per language — ~930 as of the
+    aligned_lex_hf ingest). Names are recognized across those languages + attested morphological
+    variants and carry a `type` (person/place/other/name). Distinct from the gloss index: it is
+    *filtered to proper nouns* and used at HIGH confidence, bypassing the keyness floor (a
+    recognized name is precise by identity, not by biblical-salience)."""
+    lang = canon(lang)
+    path = _PROPER_NOUNS_DIR / f"{lang}.tsv"
     if not path.exists():
         return {}
-    lang = canon(lang)
     idx: dict[str, dict[str, str]] = {}
     with path.open(encoding="utf-8") as fh:
         for line in fh:
             if line.startswith("#") or line.startswith("strong\t"):
                 continue
-            p = line.rstrip("\n").split("\t")  # strong translit type lang surface source weight
-            if len(p) < 5 or p[3] != lang:
+            p = line.rstrip("\n").split("\t")  # strong translit type surface source weight
+            if len(p) < 4:
                 continue
-            surface = _fold(p[4].strip()).lower()
+            surface = _fold(p[3].strip()).lower()
             if len(surface) < 2:
                 continue
             idx.setdefault(surface, {}).setdefault(p[0], p[2])
@@ -375,7 +376,7 @@ def _proper_noun_index(lang: str = "eng") -> dict[str, list[tuple[str, str]]]:
 def _proper_noun_names_eng() -> dict[str, str]:
     """{padded_strong: canonical English name} from the N1 lexicon — bridges a cross-lingually
     recognized name Strong's to the (English-keyed) entity graph. Prefers the curated English gloss."""
-    path = _PROPER_NOUNS_DIR / "proper_nouns.tsv"
+    path = _PROPER_NOUNS_DIR / "eng.tsv"
     out: dict[str, str] = {}
     if not path.exists():
         return out
@@ -385,10 +386,10 @@ def _proper_noun_names_eng() -> dict[str, str]:
         for line in fh:
             if line.startswith("#") or line.startswith("strong\t"):
                 continue
-            p = line.rstrip("\n").split("\t")   # strong translit type lang surface source weight
-            if len(p) < 6 or p[3] != "eng":
+            p = line.rstrip("\n").split("\t")   # strong translit type surface source weight
+            if len(p) < 5:
                 continue
-            code, surface, r = _normalize_code(p[0]), p[4].strip(), rank.get(p[5], 0)
+            code, surface, r = _normalize_code(p[0]), p[3].strip(), rank.get(p[4], 0)
             if surface and (code not in best or r > best[code]):
                 best[code] = r
                 out[code] = surface

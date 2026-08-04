@@ -135,4 +135,8 @@ resources/semantic_neighbors/llm_edges.tsv
 resources/prior_nt_lex/*.parquet
 # prior_pack: language-independent leverage bundle (regenerable); manifest+README committed
 resources/prior_pack/*.parquet
+# proper_nouns: N1 name lexicon, one file per language (~930, ~54MB total since aligned_lex_hf
+# started feeding it) — regenerable via shoresh/macula/build_proper_nouns.py, published to HF
+# (bcv-commons); manifest/README stay committed, same pattern as prior_pack above.
+resources/proper_nouns/*.tsv
 shoresh/versification/data/
