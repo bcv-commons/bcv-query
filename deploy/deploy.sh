@@ -76,3 +76,13 @@ case "$SVC" in
 esac
 
 echo "✓ deployed $SVC — running image: $(docker inspect "$SVC" --format '{{.Image}}' 2>/dev/null || echo '?')"
+
+# Every `docker build` here leaves cache layers behind (BuildKit never expires
+# them on its own), and this script runs a native build on the host every
+# deploy — left unchecked that's unbounded growth (seen in practice: 30GB+
+# after a few weeks). Build cache is pure intermediate layers, not referenced
+# by any running container/image, so pruning it is always safe. Deliberately
+# NOT `docker image prune`: that would remove shoresh-base:latest (kept on
+# purpose above to skip its 3-4 min rebuild) since it has 0 running containers.
+echo "→ prune build cache"
+docker builder prune -f >/dev/null || true
