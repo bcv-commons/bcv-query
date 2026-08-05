@@ -11,18 +11,20 @@
     "xling:shared-surface (>= 3 langs, aligned_lex_hf)",
     "bdb_root:shared-etymological-root (public domain, OpenScriptures/HebrewLexicon)",
     "parallelism:poetic-structural-pair (T'OMIM CC BY 4.0 + our own BHSA half_verse detection)",
-    "hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007, experimental)"
+    "hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007)",
+    "structural:coordination+apposition (Context-Fabric/BHSA syntactic structure)",
+    "corroborated:xling-agrees-with-wiktionary-roots"
   ],
   "confidence_tiers": {
     "high": 3300,
     "recall": 32321,
-    "prior": 22239
+    "prior": 27412
   },
   "lexemes": 3597,
-  "edges": 57860,
+  "edges": 63033,
   "topk": 10,
   "min_cos": 0.3,
   "min_occ": 3,
-  "content_sha256": "ce346a82a6a6a47f7ac3fd692979987b36b3281787685e6085a5213466a22791",
+  "content_sha256": "bee27c55423ff1ed9306623d6ce9eca2ab089bdb49c4aecb26b5c4e15fcc2c1b",
   "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick."
 }

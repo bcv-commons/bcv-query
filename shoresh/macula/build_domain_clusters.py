@@ -67,11 +67,13 @@ PRIOR_WEIGHT_DISCOUNT = 0.5   # prior-tier edges count at half weight vs. their 
 # domain agreement (up from the pre-BDB 45.1% at median 23) — better quality AND much larger coverage
 # together.
 # Re-swept again 2026-08 after parallelism + hwn signals added (graph grew to 5,715 nodes, 22,451
-# edges). New operating point: resolution=35.0 gives median cluster size 11 at 47.1% same-domain
-# agreement, 4,695 distinct Strong's covered (up from 4,628 pre-hwn) — hwn's own edges score well
-# (89.7%) but its edge volume is small next to bdb_root's, so the cluster-level move is modest: real,
-# not noise, but don't expect another BDB-sized jump from it.
-RESOLUTION = 35.0
+# edges). Operating point at that stage: resolution=35.0 gave median cluster size 11 at 47.1% same-
+# domain agreement, 4,695 distinct Strong's covered (up from 4,628 pre-hwn).
+# Re-swept again 2026-08 after structural (BHSA coordination+apposition) + corroborated (xling∩
+# wiktionary_roots) signals added (graph grew to 5,850 nodes, 26,550 edges). New operating point:
+# resolution=40.0 gives median cluster size 11 at 48.9% same-domain agreement, 4,829 distinct Strong's
+# covered — coverage AND quality up together again, same pattern as every prior signal addition.
+RESOLUTION = 40.0
 
 
 def load_graph(include_prior: bool = True, neighbors_path: Path = NEIGHBORS) -> Graph:
@@ -109,12 +111,17 @@ def cluster(g: Graph, resolution: float = RESOLUTION) -> dict[str, int]:
 
 
 def _load_domains() -> dict[str, set[str]]:
+    """strong -> {SDBH `core`-axis domain codes}. FIXED 2026-08: hbo.tsv carries FOUR domain_type
+    axes (core/lex/ctx/sdbg — see resources/semantic_domains/README.md) and this used to merge all
+    four indiscriminately, inflating agreement by ~4-5pp (two words matching only because they share
+    a `ctx` register tag like "Divine" isn't a synonymy signal). `core` is the one the README itself
+    calls "the concept axis — use this" for exactly this kind of comparison."""
     dom: dict[str, set[str]] = collections.defaultdict(set)
     if not DOMAINS.exists():
         return dom
     for line in DOMAINS.read_text(encoding="utf-8").splitlines()[1:]:
         p = line.split("\t")
-        if len(p) >= 3:
+        if len(p) >= 3 and p[1] == "core":
             dom[p[0]].add(p[2])
     return dom
 

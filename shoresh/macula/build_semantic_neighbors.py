@@ -43,6 +43,8 @@ LLM_EDGES = OUT_DIR / "llm_edges.tsv"        # method=llm layer (bcv-RAG/scripts
 ALIGNED_HF_DIR = ROOT / "resources" / "aligned_lex_hf"   # bcv-commons/lexeme-alignments, ~924 languages
 BDB_ROOTS = ROOT / "resources" / "bdb_roots" / "root_groups.tsv"   # public-domain BDB etymological roots
 PARALLELISM = ROOT / "resources" / "parallelism" / "parallelism_pairs.tsv"   # T'OMIM + our own detection
+BHSA_STRUCTURAL = ROOT / "resources" / "bhsa_structural" / "structural_pairs.tsv"   # coordination+apposition
+WIKTIONARY_ROOTS = ROOT / "resources" / "wiktionary_roots" / "root_pairs.tsv"   # weak alone; corroboration input
 
 MIN_OCC = 3        # a lexeme needs this many clause vectors for a stable centroid
 TOPK = 10          # neighbors kept per lexeme
@@ -178,7 +180,8 @@ def _gloss_tokens(g: str) -> set:
 
 def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = OUT_DIR,
           emb_label: str = "bge-m3 clause centroids", sense_split: bool = False, use_xling: bool = True,
-          use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = True):
+          use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = True,
+          use_structural: bool = True, use_corroborated: bool = True):
     lexemes, M, meta = lexeme_vectors(emb_path, sense_split=sense_split)
     print(f"[neighbors] {len(lexemes)} content lexemes with >= {MIN_OCC} clauses", file=sys.stderr)
     # Mean-center to kill embedding anisotropy: clause centroids all lean toward one "generic biblical
@@ -252,6 +255,27 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     print(f"[neighbors] hwn: {len(hwn_pairs)} Strong's pairs sharing a Hebrew WordNet synset"
           + ("" if use_hwn else " (disabled)"), file=sys.stderr)
 
+    # BHSA coordination + apposition (Context-Fabric syntactic structure, resources/bhsa_structural/) —
+    # validated 2026-08 at 61.7% combined SDBH agreement, a genuinely different lineage (syntax, not
+    # lexical/etymological) from every other signal here. See build_bhsa_structural_pairs.py.
+    structural_pairs = _load_structural_pairs() if use_structural else set()
+    print(f"[neighbors] structural: {len(structural_pairs)} Strong's pairs (BHSA coordination+apposition)"
+          + ("" if use_structural else " (disabled)"), file=sys.stderr)
+
+    # "Corroborated" tier — pairs where xling agrees with structural or Wiktionary roots. Neither xling
+    # nor wiktionary_root_pairs is trustworthy alone (52.8% / 35.0% SDBH agreement — xling is explicitly
+    # excluded elsewhere in this function for exactly this reason). Their AGREEMENT is a different story:
+    # measured 2026-08 at xling∩wiktionary=87.7%, xling∩structural=73.6% — comparable to or better than
+    # every other signal here. Computed regardless of use_xling (raw xling stays excluded as its own
+    # standalone signal; only the validated intersection is trusted) — see _load_corroborated_pairs().
+    corroborated_pairs: set[frozenset] = set()
+    if use_corroborated:
+        xling_for_corrob = _load_xling_pairs()
+        wiktionary_pairs = _load_wiktionary_root_pairs()
+        corroborated_pairs = _load_corroborated_pairs(xling_for_corrob, wiktionary_pairs)
+    print(f"[neighbors] corroborated: {len(corroborated_pairs)} Strong's pairs (xling ∩ wiktionary_roots)"
+          + ("" if use_corroborated else " (disabled)"), file=sys.stderr)
+
     # Coverage extension: xling/bdb_roots need no embedding, so they can name lexemes OUTSIDE the pack
     # (too few occurrences to get a stable centroid) — the same coverage gap un-restricting the paid LLM
     # run would close, at zero cost. Pull a representative (lexeme, gloss) for every Hebrew content
@@ -261,7 +285,10 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     bdb_strongs = {s for pair in bdb_root_pairs for s in pair}
     parallelism_strongs = {s for pair in parallelism_syn for s in pair}
     hwn_strongs = {s for pair in hwn_pairs for s in pair}
-    out_of_pack = ((xling_strongs | bdb_strongs | parallelism_strongs | hwn_strongs)
+    structural_strongs = {s for pair in structural_pairs for s in pair}
+    corroborated_strongs = {s for pair in corroborated_pairs for s in pair}
+    out_of_pack = ((xling_strongs | bdb_strongs | parallelism_strongs | hwn_strongs
+                    | structural_strongs | corroborated_strongs)
                    - set(strong2lex) - proper_strongs() - non_content_strongs())
     if out_of_pack and SPINE.exists():
         sp2 = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
@@ -276,9 +303,9 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
             meta[lexeme] = (hs, gloss)
             gloss_tok[lexeme] = _gloss_tokens(gloss)
             strong2lex[hs].append(lexeme)
-        print(f"[neighbors] coverage extension (xling + bdb_roots + parallelism + hwn): "
-              f"+{len(rep)}/{len(out_of_pack)} out-of-pack lexemes now reachable (no embedding)",
-              file=sys.stderr)
+        print(f"[neighbors] coverage extension (xling + bdb_roots + parallelism + hwn + structural + "
+              f"corroborated): +{len(rep)}/{len(out_of_pack)} out-of-pack lexemes now reachable "
+              f"(no embedding)", file=sys.stderr)
 
     # embedding kNN (cosine = dot of unit vectors) — tiered against the LLM prior
     rows, emb_pairs = [], set()
@@ -305,6 +332,10 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                 sources.append("parallelism"); score = min(1.0, score + 0.1)
             if pair in hwn_pairs:
                 sources.append("hwn"); score = min(1.0, score + 0.1)
+            if pair in structural_pairs:
+                sources.append("structural"); score = min(1.0, score + 0.1)
+            if pair in corroborated_pairs:
+                sources.append("corroborated"); score = min(1.0, score + 0.1)
             relation, conf = "similar", "recall"
             if pair in ant:                                      # LLM says OPPOSITE — emb false positive
                 relation = "antonym"
@@ -378,6 +409,32 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                     hwn_rows += 1
     print(f"[neighbors] hwn-only prior edges: {hwn_rows}", file=sys.stderr)
 
+    # structural-only PRIOR edges — BHSA coordination/apposition pairs the embedding didn't surface.
+    # Flat score, same tier as bdb_root/parallelism/hwn (see "not yet done" continuous-weighting note
+    # in domain-replacement-roadmap.md — all prior-tier sources share one flat score today regardless
+    # of their own validated quality, a known simplification, not an oversight here specifically).
+    structural_rows = 0
+    for pair in structural_pairs:
+        a, b = tuple(pair)
+        for lx in strong2lex.get(a, []):
+            for nb in strong2lex.get(b, []):
+                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                    rows.append((lx, nb, 0.5, "structural", "prior", "similar"))
+                    structural_rows += 1
+    print(f"[neighbors] structural-only prior edges: {structural_rows}", file=sys.stderr)
+
+    # corroborated-only PRIOR edges — xling∩{structural,wiktionary} pairs the embedding didn't surface.
+    # Already deduped against structural_pairs in _load_corroborated_pairs (no double-counting).
+    corroborated_rows = 0
+    for pair in corroborated_pairs:
+        a, b = tuple(pair)
+        for lx in strong2lex.get(a, []):
+            for nb in strong2lex.get(b, []):
+                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                    rows.append((lx, nb, 0.5, "corroborated", "prior", "similar"))
+                    corroborated_rows += 1
+    print(f"[neighbors] corroborated-only prior edges: {corroborated_rows}", file=sys.stderr)
+
     out_dir.mkdir(parents=True, exist_ok=True)
     import pyarrow as pa, pyarrow.parquet as pq
     c = list(zip(*rows)) if rows else ([], [], [], [], [], [])
@@ -397,7 +454,10 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                    f"xling:shared-surface (>= {XLING_MIN_LANGS} langs, aligned_lex_hf)",
                    "bdb_root:shared-etymological-root (public domain, OpenScriptures/HebrewLexicon)",
                    "parallelism:poetic-structural-pair (T'OMIM CC BY 4.0 + our own BHSA half_verse detection)"]
-                   + (["hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007, experimental)"] if use_hwn else []),
+                   + (["hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007)"] if use_hwn else [])
+                   + (["structural:coordination+apposition (Context-Fabric/BHSA syntactic structure)"]
+                      if use_structural else [])
+                   + (["corroborated:xling-agrees-with-wiktionary-roots"] if use_corroborated else []),
         "confidence_tiers": {"high": tier["high"], "recall": tier["recall"], "prior": tier["prior"]},
         "lexemes": len(lexemes), "edges": len(rows), "topk": TOPK, "min_cos": MIN_COS, "min_occ": MIN_OCC,
         "content_sha256": hashlib.sha256(dest.read_bytes()).hexdigest(),
@@ -529,6 +589,55 @@ def _load_parallelism_pairs() -> tuple[set[frozenset], set[frozenset]]:
     return syn, ant
 
 
+def _load_structural_pairs() -> set[frozenset]:
+    """{frozenset({H_a, H_b}), ...} — BHSA coordination + apposition pairs (Context-Fabric syntactic
+    structure, resources/bhsa_structural/structural_pairs.tsv, see build_bhsa_structural_pairs.py).
+    Validated 2026-08 at 61.7% combined SDBH-domain agreement (coordination alone 63.7%, apposition
+    48.3%) — a genuinely different lineage (syntax, not lexical/etymological derivation) from every
+    other signal in this pipeline. No corroboration-count threshold: single-content-word-side
+    restriction already did the precision work (see that script's docstring)."""
+    pairs: set[frozenset] = set()
+    if not BHSA_STRUCTURAL.exists():
+        return pairs
+    with BHSA_STRUCTURAL.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#") or line.startswith("strong_a\t"):
+                continue
+            p = line.rstrip("\n").split("\t")
+            if len(p) >= 2 and p[0].startswith("H") and p[1].startswith("H"):
+                pairs.add(frozenset((p[0], p[1])))
+    return pairs
+
+
+def _load_wiktionary_root_pairs() -> set[frozenset]:
+    """{frozenset({H_a, H_b}), ...} — Wiktionary Hebrew root-category pairs (resources/wiktionary_roots/
+    root_pairs.tsv, see build_wiktionary_roots.py). NOT used standalone (35.0% SDBH agreement alone —
+    the weakest signal measured) — only as a corroboration input, see _load_corroborated_pairs()."""
+    pairs: set[frozenset] = set()
+    if not WIKTIONARY_ROOTS.exists():
+        return pairs
+    with WIKTIONARY_ROOTS.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#") or line.startswith("strong_a\t"):
+                continue
+            p = line.rstrip("\n").split("\t")
+            if len(p) >= 2 and p[0].startswith("H") and p[1].startswith("H"):
+                pairs.add(frozenset((p[0], p[1])))
+    return pairs
+
+
+def _load_corroborated_pairs(xling_pairs, wiktionary_pairs) -> set[frozenset]:
+    """{frozenset({H_a, H_b}), ...} — pairs where xling AND Wiktionary roots independently agree.
+    Neither is trustworthy ALONE (52.8% / 35.0% SDBH agreement — xling is explicitly excluded from
+    clustering for exactly this reason, see --no-xling). Their AGREEMENT is: measured 2026-08 at 87.7%
+    SDBH agreement — better than every lexical/etymological signal in this pipeline except HWN (89.7%).
+    (xling ∩ structural was also measured at 73.6%, but that intersection is a strict subset of
+    structural_pairs — which already has its own standalone tier — so it contributes nothing NEW here
+    and is deliberately left out to avoid a redundant, do-nothing union term.)"""
+    xling_keys = set(xling_pairs) if not isinstance(xling_pairs, dict) else set(xling_pairs.keys())
+    return xling_keys & wiktionary_pairs
+
+
 def _load_hwn_pairs() -> set[frozenset]:
     """{frozenset({H_a, H_b}), ...} — Hebrew WordNet synset co-membership (Ordan & Wintner, U. Haifa
     2007), bare-consonant-matched to biblical Strong's (see build_hwn_benchmark.py, same matching
@@ -610,14 +719,16 @@ def _load_llm_edges(path):
 
 
 def _validate(rows, meta):
-    """Internal yardstick ONLY: do derived neighbors land in the same NC domain? (never published)."""
+    """Internal yardstick ONLY: do derived neighbors land in the same NC domain? (never published).
+    FIXED 2026-08: filter to domain_type=="core" (SDBH's concept axis) — see build_domain_clusters.py's
+    _load_domains() for the full explanation of why mixing in lex/ctx/sdbg inflated agreement."""
     if not DOMAINS.exists():
         print("[validate] no domains table", file=sys.stderr); return
     dom = collections.defaultdict(set)
     for line in DOMAINS.read_text(encoding="utf-8").splitlines()[1:]:
         p = line.split("\t")
-        if len(p) >= 3:
-            dom[p[0]].add(p[2])           # strong -> {domain codes}
+        if len(p) >= 3 and p[1] == "core":
+            dom[p[0]].add(p[2])           # strong -> {core-axis domain codes}
     def rate(pred):
         same = tot = 0
         for r in rows:
@@ -672,11 +783,20 @@ def main():
                          "Independent of UBS MARBLE; register-mismatch risk did not materialize as a "
                          "quality problem (validated 2026-08 at 89.7%% on its own prior-tier edges); "
                          "default is ON.")
+    ap.add_argument("--no-structural", action="store_true",
+                    help="skip the structural signal (BHSA coordination+apposition via Context-Fabric, "
+                         "candidate #6 re-purposed). Validated 2026-08 at 61.7%% SDBH agreement — a "
+                         "different lineage (syntax) from every other signal here; default is ON.")
+    ap.add_argument("--no-corroborated", action="store_true",
+                    help="skip the corroborated signal (xling ∩ wiktionary_roots). Neither is trusted "
+                         "alone (52.8%% / 35.0%% SDBH); their agreement is (87.7%%, validated 2026-08); "
+                         "default is ON.")
     a = ap.parse_args()
     label = a.emb_label or ("bge-m3 clause centroids" if a.emb == EMB else f"{a.emb.stem} clause centroids")
     build(a.validate, a.llm_edges, emb_path=a.emb, out_dir=a.out_dir, emb_label=label,
           sense_split=a.sense_split, use_xling=not a.no_xling, use_bdb=not a.no_bdb,
-          use_parallelism=not a.no_parallelism, use_hwn=not a.no_hwn)
+          use_parallelism=not a.no_parallelism, use_hwn=not a.no_hwn,
+          use_structural=not a.no_structural, use_corroborated=not a.no_corroborated)
 
 
 if __name__ == "__main__":

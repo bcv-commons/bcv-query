@@ -128,9 +128,22 @@ aligner/out/
 # MACULA: BHSA↔MACULA occurrence bridge (re-derivable via macula.build_bridge)
 shoresh/macula/bhsa-macula-bridge.db
 shoresh/macula/bhsa-macula-bridge.db-*
-# semantic_neighbors: CC0 derived pack — bulk parquet regenerable, manifest+README committed
+# semantic_neighbors: CC0 derived pack — bulk/volatile outputs regenerable + published to HF instead
+# of committed (rebuilt wholesale on every signal change, terrible git diffs at 30k+ lines); manifest
+# + README stay committed, same pattern as prior_pack/proper_nouns below. The upstream INPUT datasets
+# (bdb_roots/, parallelism/, wiktionary_roots/, bhsa_structural/, genre_context/) are NOT bulk/volatile
+# in this sense and stay tracked — see each one's own comment further down.
 resources/semantic_neighbors/*.parquet
 resources/semantic_neighbors/llm_edges.tsv
+resources/semantic_neighbors/by_lexeme.tsv
+resources/semantic_neighbors/by_strong.tsv
+resources/semantic_neighbors/domain_clusters.tsv
+resources/semantic_neighbors/domain_cluster_labels.tsv
+resources/semantic_neighbors/confidence_tiers.tsv
+resources/semantic_neighbors/llm_pair_verification.tsv
+# hwn_benchmark.tsv: NOT gitignored — small (20K/830 lines), stable (only rebuilt by the standalone
+# build_hwn_benchmark.py, not touched by the main signal-rebuild chain), a real ground-truth benchmark
+# artifact same as bdb_roots/parallelism, not a bulk pipeline output. Stays tracked.
 # prior_nt_lex: per-language NT-gap dictionary (derived from published aligned-lex + lxx_bridge); regenerable
 resources/prior_nt_lex/*.parquet
 # prior_pack: language-independent leverage bundle (regenerable); manifest+README committed
@@ -144,3 +157,4 @@ shoresh/versification/data/
 # shoresh/macula/build_bdb_roots.py); the derived resources/bdb_roots/root_groups.tsv stays committed.
 shoresh/macula/data/LexicalIndex.xml
 shoresh/macula/data/hebrew_synsets.xml
+shoresh/macula/data/kaikki_hebrew.jsonl
