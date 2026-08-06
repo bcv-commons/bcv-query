@@ -70,10 +70,16 @@ PRIOR_WEIGHT_DISCOUNT = 0.5   # prior-tier edges count at half weight vs. their 
 # edges). Operating point at that stage: resolution=35.0 gave median cluster size 11 at 47.1% same-
 # domain agreement, 4,695 distinct Strong's covered (up from 4,628 pre-hwn).
 # Re-swept again 2026-08 after structural (BHSA coordination+apposition) + corroborated (xling∩
-# wiktionary_roots) signals added (graph grew to 5,850 nodes, 26,550 edges). New operating point:
-# resolution=40.0 gives median cluster size 11 at 48.9% same-domain agreement, 4,829 distinct Strong's
-# covered — coverage AND quality up together again, same pattern as every prior signal addition.
-RESOLUTION = 40.0
+# wiktionary_roots) signals added (graph grew to 5,850 nodes, 26,550 edges). Operating point at that
+# stage: resolution=40.0, median cluster size 11, 4,829 distinct Strong's covered. (Note: the 48.9%
+# quality number recorded at the time predates the domain_type axis-blending fix below — see
+# _load_domains(); re-measured on the corrected core-only yardstick it was 44.5%, not a regression,
+# just a corrected measurement.)
+# Re-swept again 2026-08 after sefer_hashorashim (Radak, LLM-verified) signal added (graph grew to
+# 5,922 nodes, 27,108 edges). New operating point: resolution=50.0 gives median cluster size 10 at
+# 44.9% same-domain agreement (corrected core-only yardstick), 4,901 distinct Strong's covered — up
+# from 4,829/44.5% pre-sefer_hashorashim — coverage AND quality up together again.
+RESOLUTION = 50.0
 
 
 def load_graph(include_prior: bool = True, neighbors_path: Path = NEIGHBORS) -> Graph:

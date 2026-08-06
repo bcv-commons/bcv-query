@@ -181,7 +181,42 @@ def build():
     bytype = collections.Counter(tipnr_type.get(s, "name") for s in {r[0] for r in rows})
     print(f"[proper-nouns] {len(rows)} renderings · {covered} names "
           f"({dict(bytype)}) · {len(langs)} langs -> {OUT_DIR}/<lang>.tsv", file=sys.stderr)
+
+    _write_core(proper, tipnr_type, tipnr_orig, translit)
     return rows
+
+
+def _write_core(proper, tipnr_type, tipnr_orig, translit) -> None:
+    """resources/proper_nouns/core.tsv — export candidate #1 (bcv-commons-export-candidates.md):
+    which Strong's are names, their type, and their ORIGINAL Hebrew/Greek spelling. Language-independent
+    (no per-language renderings — that tier stays in the per-<lang>.tsv files above, which are NOT
+    bcv-query-owned per the ownership-handoff decision). This is the part that IS bcv-query-native and
+    export-worthy on its own: a real classification (person/place/other via TIPNR) + the actual
+    original-language spelling, not a judgment call the way the synonym-pairs work is."""
+    rows = []
+    for strong in sorted(proper):
+        typ = tipnr_type.get(strong, "name")
+        tr = translit.get(strong, "")
+        lang0 = "hbo" if strong.startswith("H") else "grc"
+        origs = tipnr_orig.get(strong, [])
+        if origs:
+            for orig in origs:
+                rows.append((strong, typ, tr, lang0, orig))
+        else:
+            rows.append((strong, typ, tr, lang0, ""))   # Np-only, no TIPNR original-spelling entry
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    with (OUT_DIR / "core.tsv").open("w", encoding="utf-8") as fh:
+        fh.write("# Proper-noun core (export candidate #1) — which Strong's are biblical names, their\n"
+                  "# type (person/place/other via STEPBible TIPNR, CC-BY, ∪ STEPBible Np morph), and their\n"
+                  "# ORIGINAL Hebrew/Greek spelling. Language-independent — no per-language renderings\n"
+                  "# (those stay in proper_nouns/<lang>.tsv, a separate, larger, ownership-handoff tier).\n"
+                  "# See build_proper_nouns.py.\n")
+        fh.write("strong\ttype\ttranslit\toriginal_lang\toriginal_surface\n")
+        for row in rows:
+            fh.write("\t".join(row) + "\n")
+    print(f"[proper-nouns] core: {len(rows)} rows ({len(proper)} distinct Strong's) -> {OUT_DIR}/core.tsv",
+          file=sys.stderr)
 
 
 if __name__ == "__main__":

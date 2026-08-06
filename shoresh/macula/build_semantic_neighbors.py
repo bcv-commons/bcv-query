@@ -45,6 +45,7 @@ BDB_ROOTS = ROOT / "resources" / "bdb_roots" / "root_groups.tsv"   # public-doma
 PARALLELISM = ROOT / "resources" / "parallelism" / "parallelism_pairs.tsv"   # T'OMIM + our own detection
 BHSA_STRUCTURAL = ROOT / "resources" / "bhsa_structural" / "structural_pairs.tsv"   # coordination+apposition
 WIKTIONARY_ROOTS = ROOT / "resources" / "wiktionary_roots" / "root_pairs.tsv"   # weak alone; corroboration input
+SEFER_HASHORASHIM = ROOT / "resources" / "sefer_hashorashim" / "llm_pair_verification.tsv"
 
 MIN_OCC = 3        # a lexeme needs this many clause vectors for a stable centroid
 TOPK = 10          # neighbors kept per lexeme
@@ -181,7 +182,7 @@ def _gloss_tokens(g: str) -> set:
 def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = OUT_DIR,
           emb_label: str = "bge-m3 clause centroids", sense_split: bool = False, use_xling: bool = True,
           use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = True,
-          use_structural: bool = True, use_corroborated: bool = True):
+          use_structural: bool = True, use_corroborated: bool = True, use_sefer_hashorashim: bool = True):
     lexemes, M, meta = lexeme_vectors(emb_path, sense_split=sense_split)
     print(f"[neighbors] {len(lexemes)} content lexemes with >= {MIN_OCC} clauses", file=sys.stderr)
     # Mean-center to kill embedding anisotropy: clause centroids all lean toward one "generic biblical
@@ -276,6 +277,14 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     print(f"[neighbors] corroborated: {len(corroborated_pairs)} Strong's pairs (xling ∩ wiktionary_roots)"
           + ("" if use_corroborated else " (disabled)"), file=sys.stderr)
 
+    # Sefer HaShorashim (Radak, c.1185-1235 CE, Public Domain, via Sefaria) — a medieval rabbinic Hebrew
+    # root dictionary, a third independent lineage alongside BDB (academic) and Wiktionary (modern
+    # crowd-sourced). "yes"-verdict pairs (LLM-verified from same-entry candidates) validated 2026-08 at
+    # 74.1% SDBH agreement on a 761-pair checkable sample — see build_sefer_hashorashim.py.
+    sefer_hashorashim_pairs = _load_sefer_hashorashim_pairs() if use_sefer_hashorashim else set()
+    print(f"[neighbors] sefer_hashorashim: {len(sefer_hashorashim_pairs)} LLM-verified Strong's pairs"
+          + ("" if use_sefer_hashorashim else " (disabled)"), file=sys.stderr)
+
     # Coverage extension: xling/bdb_roots need no embedding, so they can name lexemes OUTSIDE the pack
     # (too few occurrences to get a stable centroid) — the same coverage gap un-restricting the paid LLM
     # run would close, at zero cost. Pull a representative (lexeme, gloss) for every Hebrew content
@@ -287,8 +296,9 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     hwn_strongs = {s for pair in hwn_pairs for s in pair}
     structural_strongs = {s for pair in structural_pairs for s in pair}
     corroborated_strongs = {s for pair in corroborated_pairs for s in pair}
+    sefer_hashorashim_strongs = {s for pair in sefer_hashorashim_pairs for s in pair}
     out_of_pack = ((xling_strongs | bdb_strongs | parallelism_strongs | hwn_strongs
-                    | structural_strongs | corroborated_strongs)
+                    | structural_strongs | corroborated_strongs | sefer_hashorashim_strongs)
                    - set(strong2lex) - proper_strongs() - non_content_strongs())
     if out_of_pack and SPINE.exists():
         sp2 = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
@@ -304,8 +314,8 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
             gloss_tok[lexeme] = _gloss_tokens(gloss)
             strong2lex[hs].append(lexeme)
         print(f"[neighbors] coverage extension (xling + bdb_roots + parallelism + hwn + structural + "
-              f"corroborated): +{len(rep)}/{len(out_of_pack)} out-of-pack lexemes now reachable "
-              f"(no embedding)", file=sys.stderr)
+              f"corroborated + sefer_hashorashim): +{len(rep)}/{len(out_of_pack)} out-of-pack lexemes "
+              f"now reachable (no embedding)", file=sys.stderr)
 
     # embedding kNN (cosine = dot of unit vectors) — tiered against the LLM prior
     rows, emb_pairs = [], set()
@@ -336,6 +346,8 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                 sources.append("structural"); score = min(1.0, score + 0.1)
             if pair in corroborated_pairs:
                 sources.append("corroborated"); score = min(1.0, score + 0.1)
+            if pair in sefer_hashorashim_pairs:
+                sources.append("sefer_hashorashim"); score = min(1.0, score + 0.1)
             relation, conf = "similar", "recall"
             if pair in ant:                                      # LLM says OPPOSITE — emb false positive
                 relation = "antonym"
@@ -435,6 +447,18 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                     corroborated_rows += 1
     print(f"[neighbors] corroborated-only prior edges: {corroborated_rows}", file=sys.stderr)
 
+    # sefer_hashorashim-only PRIOR edges — LLM-verified pairs the embedding didn't surface. Flat score,
+    # same tier as the other prior-only blocks (see the continuous-weighting note further up).
+    sefer_hashorashim_rows = 0
+    for pair in sefer_hashorashim_pairs:
+        a, b = tuple(pair)
+        for lx in strong2lex.get(a, []):
+            for nb in strong2lex.get(b, []):
+                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                    rows.append((lx, nb, 0.5, "sefer_hashorashim", "prior", "similar"))
+                    sefer_hashorashim_rows += 1
+    print(f"[neighbors] sefer_hashorashim-only prior edges: {sefer_hashorashim_rows}", file=sys.stderr)
+
     out_dir.mkdir(parents=True, exist_ok=True)
     import pyarrow as pa, pyarrow.parquet as pq
     c = list(zip(*rows)) if rows else ([], [], [], [], [], [])
@@ -457,7 +481,9 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                    + (["hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007)"] if use_hwn else [])
                    + (["structural:coordination+apposition (Context-Fabric/BHSA syntactic structure)"]
                       if use_structural else [])
-                   + (["corroborated:xling-agrees-with-wiktionary-roots"] if use_corroborated else []),
+                   + (["corroborated:xling-agrees-with-wiktionary-roots"] if use_corroborated else [])
+                   + (["sefer_hashorashim:llm-verified (Radak, Public Domain, via Sefaria)"]
+                      if use_sefer_hashorashim else []),
         "confidence_tiers": {"high": tier["high"], "recall": tier["recall"], "prior": tier["prior"]},
         "lexemes": len(lexemes), "edges": len(rows), "topk": TOPK, "min_cos": MIN_COS, "min_occ": MIN_OCC,
         "content_sha256": hashlib.sha256(dest.read_bytes()).hexdigest(),
@@ -587,6 +613,27 @@ def _load_parallelism_pairs() -> tuple[set[frozenset], set[frozenset]]:
             elif relation == "likely_antonym":
                 ant.add(frozenset((a, b)))
     return syn, ant
+
+
+def _load_sefer_hashorashim_pairs() -> set[frozenset]:
+    """{frozenset({H_a, H_b}), ...} — "yes"-verdict pairs from Sefer HaShorashim (Radak, c.1185-1235 CE,
+    Public Domain, via Sefaria), a medieval Hebrew root dictionary from WITHIN the Jewish exegetical
+    tradition — a different lineage from BDB (19th-c. German-Protestant) and Wiktionary (modern
+    crowd-sourced). Candidates were same-entry co-membership (build_sefer_hashorashim.py, 21.6% SDBH
+    core-agreement pre-verification — too weak alone, same shape as xling/wiktionary_roots), then
+    individually LLM-verified (verify_pairs_llm.py) — "yes" verdicts score 74.1% on a 761-pair checkable
+    sample (2026-08), comparable to structural (61.7%) and better than bdb_root (50.6%)."""
+    pairs: set[frozenset] = set()
+    if not SEFER_HASHORASHIM.exists():
+        return pairs
+    with SEFER_HASHORASHIM.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#") or line.startswith("strong_a\t"):
+                continue
+            p = line.rstrip("\n").split("\t")
+            if len(p) >= 3 and p[2] == "yes" and p[0].startswith("H") and p[1].startswith("H"):
+                pairs.add(frozenset((p[0], p[1])))
+    return pairs
 
 
 def _load_structural_pairs() -> set[frozenset]:
@@ -791,12 +838,16 @@ def main():
                     help="skip the corroborated signal (xling ∩ wiktionary_roots). Neither is trusted "
                          "alone (52.8%% / 35.0%% SDBH); their agreement is (87.7%%, validated 2026-08); "
                          "default is ON.")
+    ap.add_argument("--no-sefer-hashorashim", action="store_true",
+                    help="skip the sefer_hashorashim signal (Radak, Public Domain, LLM-verified via "
+                         "verify_pairs_llm.py). Validated 2026-08 at 74.1%% SDBH agreement; default is ON.")
     a = ap.parse_args()
     label = a.emb_label or ("bge-m3 clause centroids" if a.emb == EMB else f"{a.emb.stem} clause centroids")
     build(a.validate, a.llm_edges, emb_path=a.emb, out_dir=a.out_dir, emb_label=label,
           sense_split=a.sense_split, use_xling=not a.no_xling, use_bdb=not a.no_bdb,
           use_parallelism=not a.no_parallelism, use_hwn=not a.no_hwn,
-          use_structural=not a.no_structural, use_corroborated=not a.no_corroborated)
+          use_structural=not a.no_structural, use_corroborated=not a.no_corroborated,
+          use_sefer_hashorashim=not a.no_sefer_hashorashim)
 
 
 if __name__ == "__main__":

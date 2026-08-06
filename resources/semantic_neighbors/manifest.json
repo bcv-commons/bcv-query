@@ -13,18 +13,19 @@
     "parallelism:poetic-structural-pair (T'OMIM CC BY 4.0 + our own BHSA half_verse detection)",
     "hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007)",
     "structural:coordination+apposition (Context-Fabric/BHSA syntactic structure)",
-    "corroborated:xling-agrees-with-wiktionary-roots"
+    "corroborated:xling-agrees-with-wiktionary-roots",
+    "sefer_hashorashim:llm-verified (Radak, Public Domain, via Sefaria)"
   ],
   "confidence_tiers": {
     "high": 3300,
     "recall": 32321,
-    "prior": 27412
+    "prior": 30146
   },
   "lexemes": 3597,
-  "edges": 63033,
+  "edges": 65767,
   "topk": 10,
   "min_cos": 0.3,
   "min_occ": 3,
-  "content_sha256": "bee27c55423ff1ed9306623d6ce9eca2ab089bdb49c4aecb26b5c4e15fcc2c1b",
+  "content_sha256": "54478c6d768e6455653eff6f5f5e7ea02effbc6d4b803424c8c3caaf625026ae",
   "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick."
 }

@@ -788,7 +788,14 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
         scon.close()
         if rows:
             senses = _verse_sense_map(book, chapter, vrs, gloss_lang) if spine_lang == "hbo" else {}
-            doms = _strong_domains() if spine_lang == "grc" else {}   # NT: Louw-Nida domain per word
+            doms = _strong_domains()          # per-word domain, both testaments (see axis pick below)
+            # Greek strongs only ever carry `sdbg` (Louw-Nida) rows in _strong_domains(); Hebrew
+            # strongs carry FOUR axes (core/lex/ctx/sdbg — hbo.tsv) mixed together, so picking a
+            # dominant domain WITHOUT filtering to one axis would blend concept/referent/register
+            # tags into one bogus "top domain" — the same bug fixed 2026-08 in the CC0 pipeline's own
+            # validation (see domain-replacement-roadmap.md). `core` is SDBH's own "concept axis —
+            # use this", the Hebrew analogue of Greek's `sdbg`.
+            domain_axis = "sdbg" if spine_lang == "grc" else "core"
             words = []
             for r in rows:
                 code = _strong_code(spine_lang, r["strong"])
@@ -805,10 +812,12 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
                 if senses.get(code):                       # binyan-correct sense (OT, hbo.db)
                     w["sense"] = senses[code]
                 dd = doms.get(_norm_strong(code)) if code else None
-                if dd:                                     # dominant Louw-Nida domain (Greek, per-strong)
-                    best = _dominant_domain(dd)            # top-domain gate + finer subdomain label
-                    if best:
-                        w["domain"] = _localize_domain(best[0], best[1], gloss_lang)
+                if dd:
+                    dd_axis = [d for d in dd if d[0] == domain_axis]
+                    if dd_axis:                            # dominant domain, one axis only
+                        best = _dominant_domain(dd_axis)   # top-domain gate + finer subdomain label
+                        if best:
+                            w["domain"] = _localize_domain(best[0], best[1], gloss_lang)
                 words.append(w)
             result["spine"] = {"language": spine_lang, "words": words}
     return result

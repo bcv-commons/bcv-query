@@ -57,6 +57,20 @@ To add a language: drop an `<iso639-3>.tsv` (or a `<iso639-3>-<Script>` BCP-47 n
 variant) + a `_DOMAIN_LANG_COL` entry in shoresh `data.py`. `_domain_labels(col)` loads only the
 requested language's file, memoized.
 
+> **Design principle (2026-08), for whenever this system next gets touched**: per-language English-
+> category-name translation (`eng/spa/fra/cmn-Hans/ind/deu` above) doesn't scale cleanly — Spanish/
+> French/German inherit the same Western scholarly tradition the category names were coined in, so
+> translation is close to transparent; Chinese/Indonesian are a bigger conceptual leap even at good
+> translation quality, since the category itself (not just its name) is a Western analytical construct.
+> The better-scaling alternative, discovered while investigating this: anchor a domain/cluster to an
+> **exemplar original-language word** (its highest-occurrence member) instead of an abstract English
+> label, then show that WORD's gloss in the target language — a concrete word translates far more
+> transparently across unrelated languages/cultures than an invented category does, and it rides on
+> gloss infrastructure (`aligned_lex_hf`, `strongs_gloss.tsv`) that already covers ~924 languages for
+> free, rather than needing a new hand/LLM-translated label file per language forever. Applies to this
+> file's `domain_labels/` AND to `resources/semantic_neighbors/domain_cluster_labels.tsv` (our own
+> LLM-named Louvain clusters) — neither has been reworked this way yet.
+
 ## Taxonomy caveat
 SDBG (Greek) and SDBH (Hebrew) are **different** domain systems — codes are **not
 cross-comparable**. For cross-language concept linking use the lexical bridge

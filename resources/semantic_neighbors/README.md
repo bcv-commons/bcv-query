@@ -71,3 +71,34 @@ Rebuild only when the embedding model or the spine changes (language-independent
 - shoresh `/concept`: a domain-free semantic field.
 - The NC `semantic_domains/` table stays for internal richness; this is the **publishable** layer —
   two layers, license-separated, same purpose.
+
+(Note: the sections above predate 2026-08's signal additions — BDB etymological roots, T'OMIM
+parallelism, Hebrew WordNet, BHSA structural pairs, and a cross-lingual/Wiktionary "corroborated" tier
+are now also active signals, not reflected in the schema/quality numbers above. See
+`shoresh/macula/build_semantic_neighbors.py` for the current signal list.)
+
+## Published subset — `published_pairs.tsv` (2026-08, gitignored, on HF)
+
+The confident subset of the pack, published standalone at
+[bcv-commons/semantic-neighbors](https://huggingface.co/datasets/bcv-commons/semantic-neighbors)
+(7,977 pairs, CC0). Built by `shoresh/macula/build_published_pairs.py`, which merges three independent
+publication-confidence gates:
+
+- **`cross_signal`** — pairs asserted by >= 2 methodologically independent signal families (not just
+  >= 2 raw source tags — see `build_confidence_tiers.py` for the family grouping). 70.2% SDBH
+  `core`-agreement on its own.
+- **`llm_verified`** — single-signal-family pairs, individually judged by a dedicated LLM pass
+  (`shoresh/macula/verify_pairs_llm.py`, ~$3 for ~33,500 pairs). Only "yes" verdicts published. 69.5%
+  on its own.
+- **`sefer_hashorashim_verified`** — candidates from Radak's *Sefer HaShorashim* (Public Domain,
+  medieval rabbinic Hebrew root dictionary, via Sefaria — `build_sefer_hashorashim.py`), also
+  LLM-verified the same way (~$1.83 for ~19,600 pairs). 62.9% on its own (this gate's *unique*
+  contribution, after removing overlap with the other two — the full "yes" tier alone was 74.1% on a
+  761-pair checkable sample before dedup).
+
+1,241 pairs pass **more than one** gate — that subset scores 78.4%, the highest-confidence layer in the
+dataset. These levers were chosen because raising the WHOLE pack's average wasn't working —
+cross-signal/cross-source agreement was the single biggest quality lever found in this whole project
+(see `internal-docs/domain-replacement-roadmap.md`, not in this repo's public history). The
+SDBH-agreement percentages are an internal proxy, not an independent correctness audit — see the HF
+dataset card for the full caveat before treating them as ground truth.

@@ -141,6 +141,7 @@ resources/semantic_neighbors/domain_clusters.tsv
 resources/semantic_neighbors/domain_cluster_labels.tsv
 resources/semantic_neighbors/confidence_tiers.tsv
 resources/semantic_neighbors/llm_pair_verification.tsv
+resources/semantic_neighbors/published_pairs.tsv
 # hwn_benchmark.tsv: NOT gitignored — small (20K/830 lines), stable (only rebuilt by the standalone
 # build_hwn_benchmark.py, not touched by the main signal-rebuild chain), a real ground-truth benchmark
 # artifact same as bdb_roots/parallelism, not a bulk pipeline output. Stays tracked.
@@ -158,3 +159,9 @@ shoresh/versification/data/
 shoresh/macula/data/LexicalIndex.xml
 shoresh/macula/data/hebrew_synsets.xml
 shoresh/macula/data/kaikki_hebrew.jsonl
+shoresh/macula/data/sefer_hashorashim_entries.jsonl
+# sefer_hashorashim: candidate pairs, pre-LLM-verification — intermediate, not a final dataset
+resources/sefer_hashorashim/candidate_pairs.tsv
+# hbo_lex_export.tsv: publish-ready export of senses/hbo_lex.tsv, regenerable via
+# build_hbo_lex_export.py, published to HF (bcv-commons/hebrew-word-senses)
+resources/senses/hbo_lex_export.tsv
