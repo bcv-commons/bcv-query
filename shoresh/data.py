@@ -768,14 +768,18 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
     lcon = _ro(LXX_DB)
     if lcon:
         rows = lcon.execute(
-            "SELECT idx, surface, plain, strong, morph, pos FROM lxx_words "
+            "SELECT idx, surface, plain, strong, wordid, morph, pos FROM lxx_words "
             "WHERE book=? AND chapter=? AND verse=? ORDER BY idx",
             (book, chapter, vrs)).fetchall()
         lcon.close()
         if rows:
+            # wordid is only surfaced for strong-less (orphan) words — it's the click-through key
+            # for GET /lxx-lexeme/{wordid}; tagged words already have `strong` for that role, and
+            # /lxx-lexeme only serves orphan groups, so a tagged word's wordid wouldn't resolve there.
             result["lxx"] = {"language": "grc", "words": [
                 {"idx": r["idx"], "surface": r["surface"], "plain": r["plain"],
                  "strong": _strong_code("grc", r["strong"]), "morph": r["morph"],
+                 **({"wordid": r["wordid"]} if r["strong"] is None and r["wordid"] is not None else {}),
                  **(gloss_of(_strong_code("grc", r["strong"])) or {})}
                 for r in rows]}
 
@@ -1111,82 +1115,79 @@ def morph_search(pattern: str, book: str | None = None,
 # -- Bridge 5: LXX Hebrew↔Greek bridge --
 
 def lxx_bridge(strong: str, limit: int = 50) -> dict:
-    """Given a Hebrew Strong's number, find how the LXX translates it.
+    """Hebrew<->Greek equivalents via the curated LXX alignment (resources/lxx_bridge.tsv, sourced
+    from MACULA Hebrew's own greekstrong alignment column — see build_lxx_bridge.py). Accepts a
+    Hebrew OR a Greek Strong's number and returns its LXX-attested renderings in the other language,
+    ranked by frequency.
 
-    For each OT verse containing the Hebrew word, finds the positionally
-    closest Greek content word in the LXX — the one most likely to be the
-    actual translation. Then ranks Greek Strong's numbers by frequency.
+    Previously this endpoint computed the H->G direction live, per request, via positional proximity
+    over spine.db/lxx.db (guessing the nearest Greek content word per Hebrew occurrence) — noisier,
+    and never supported the G->H direction the docs/MCP tool already described. bcv-RAG's own query
+    pipeline (lxx_expand.py) stopped relying on that live computation years ago in favor of this same
+    curated table, read locally; this brings the public endpoint in line with it. Trade-off: the old
+    per-pair `sample_refs` (example verses) and `hebrew_verses` count are dropped — nothing in-repo
+    consumed them, and re-deriving verse-level examples from the curated (aggregate-only) pairs would
+    need a separate verse-co-occurrence lookup, not done here.
     """
-    strong = strong.strip().upper()
-    if not strong.startswith("H") or not strong[1:].isdigit():
-        return {"error": "provide a Hebrew Strong's number (e.g. H2617)"}
-    hnum = int(strong[1:])
-    scon = _ro(SPINE_DB)
+    code = _norm_strong(strong)
+    if not code or code[0] not in ("H", "G"):
+        return {"error": "provide a Hebrew or Greek Strong's number (e.g. H2617 or G1656)"}
+    fwd, rev = _lxx_pairs()
+    if code.startswith("H"):
+        pairs = sorted(fwd.get(code, []), key=lambda p: -p[1])[:limit]
+        translations = [{"greek_strong": g, "count": c, **(gloss_of(g) or {})} for g, c in pairs]
+        return {"hebrew_strong": code, **(gloss_of(code) or {}), "greek_translations": translations}
+    pairs = sorted(rev.get(code, []), key=lambda p: -p[1])[:limit]
+    translations = [{"hebrew_strong": h, "count": c, **(gloss_of(h) or {})} for h, c in pairs]
+    return {"greek_strong": code, **(gloss_of(code) or {}), "hebrew_translations": translations}
+
+
+# -- Bridge 6: LXX-only Greek lexemes (no Strong's number) --
+
+@lru_cache(maxsize=1)
+def _lxx_orphan_citations() -> dict[str, dict]:
+    """wordid -> {citation_form, citation_morph, pos, citation_confidence} from
+    resources/lxx_orphan_lexemes/lexemes.tsv (one entry per wordid — the citation fields are
+    repeated across every variant row of the same group in the TSV; dedup'd here)."""
+    out: dict[str, dict] = {}
+    p = _resources_dir() / "lxx_orphan_lexemes" / "lexemes.tsv"
+    if p.exists():
+        with p.open(encoding="utf-8") as fh:
+            header: list[str] | None = None
+            for line in fh:
+                if line.startswith("#"):
+                    continue
+                if header is None:
+                    header = line.rstrip("\n").split("\t")
+                    continue
+                row = dict(zip(header, line.rstrip("\n").split("\t")))
+                out.setdefault(row["wordid"], {
+                    "citation_form": row["citation_form"], "citation_morph": row["citation_morph"],
+                    "pos": row["pos"], "citation_confidence": row["citation_confidence"],
+                })
+    return out
+
+
+def lxx_lexeme(wordid: str, limit: int = 200) -> dict:
+    """LXX-only lexeme lookup by `wordid` (no Strong's number exists for these — see
+    resources/lxx_orphan_lexemes/README.md). The click-through target for /verse's orphan Greek
+    words. Citation form comes from the precomputed table; occurrences are queried live from
+    lxx.db so the list is always complete and current (mirrors concordance()'s /word/{strong} shape)."""
+    wordid = wordid.strip()
+    meta = _lxx_orphan_citations().get(wordid)
+    if not meta:
+        return {"error": f"no LXX-only lexeme found for wordid {wordid!r}"}
+    occ: list[dict] = []
     lcon = _ro(LXX_DB)
-    if not scon or not lcon:
-        return {"error": "both spine.db and lxx.db required"}
-
-    nt_qmarks = ",".join("?" * len(NT_BOOKS))
-    hwords = scon.execute(
-        f"SELECT book, chapter, verse, idx FROM spine_words "
-        f"WHERE strong = ? AND book NOT IN ({nt_qmarks})",
-        (hnum, *sorted(NT_BOOKS))).fetchall()
-    scon.close()
-
-    from collections import Counter, defaultdict
-    greek_counts: Counter = Counter()
-    sample_verses: dict[int, list[str]] = {}
-
-    # Group Hebrew occurrences by verse in ONE pass. The previous version
-    # rescanned all of `hwords` per verse (two O(n) comprehensions inside the
-    # per-verse loop → O(verses × occurrences)), which made frequent lemmas
-    # multi-second on the wire (H0430 "God" ≈ 2.4s, H3068 "LORD" far worse).
-    # Insertion order == first-occurrence order, so iteration order (and thus
-    # the output) is unchanged. Now O(occurrences).
-    by_verse: dict[tuple, list[int]] = defaultdict(list)
-    for hw in hwords:
-        by_verse[(hw["book"], hw["chapter"], hw["verse"])].append(hw["idx"])
-
-    for vkey, idxs in by_verse.items():
-        grows = lcon.execute(
-            "SELECT idx, strong FROM lxx_words "
-            "WHERE book=? AND chapter=? AND verse=? "
-            "AND strong IS NOT NULL AND is_content=1 "
-            "ORDER BY idx",
-            vkey).fetchall()
-        if not grows:
-            continue
-        hcount = len(idxs)
-        hidxs = sorted(idxs)
-        gidxs = [(g["idx"], g["strong"]) for g in grows]
-        total_g = len(gidxs)
-        for hidx in hidxs:
-            frac = hidx / max(1, hcount + total_g)
-            target_gidx = int(frac * total_g)
-            target_gidx = min(target_gidx, total_g - 1)
-            best_g = gidxs[target_gidx][1]
-            greek_counts[best_g] += 1
-            ref = f"{vkey[0]} {vkey[1]}:{vkey[2]}"
-            if best_g not in sample_verses:
-                sample_verses[best_g] = []
-            if len(sample_verses[best_g]) < 3 and ref not in sample_verses[best_g]:
-                sample_verses[best_g].append(ref)
-    lcon.close()
-
-    translations = []
-    for gnum, count in greek_counts.most_common(limit):
-        gcode = f"G{gnum}"
-        translations.append({
-            "greek_strong": gcode, "count": count,
-            **(gloss_of(gcode) or {}),
-            "sample_refs": sample_verses.get(gnum, []),
-        })
-    return {
-        "hebrew_strong": strong,
-        **(gloss_of(strong) or {}),
-        "hebrew_verses": len(by_verse),
-        "greek_translations": translations,
-    }
+    if lcon:
+        for r in lcon.execute(
+                "SELECT book, chapter, verse, surface, morph FROM lxx_words "
+                "WHERE wordid=? AND strong IS NULL ORDER BY book, chapter, verse LIMIT ?",
+                (int(wordid), limit)).fetchall():
+            occ.append({"corpus": "LXX", "ref": f"{r['book']} {r['chapter']}:{r['verse']}",
+                        "surface": r["surface"], "morph": r["morph"]})
+        lcon.close()
+    return {"wordid": int(wordid), "language": "grc", **meta, "occurrences": occ}
 
 
 @lru_cache(maxsize=1)

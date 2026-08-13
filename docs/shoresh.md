@@ -34,7 +34,8 @@ All endpoints are plain `GET`s under the service root.
 | `GET /gloss/{word}` | Reverse gloss — a word → the Hebrew/Greek Strong's numbers behind it | $0 |
 | `GET /concept/{word}` | Concept pivot — word → Strong's + sample occurrences | $0 |
 | `GET /morph?pattern=&book=&chapter=` | Morphology search — imperatives, participles, nouns, … | $0 |
-| `GET /bridge/{strong}` | LXX bridge — how the Septuagint renders a Hebrew word in Greek (H→G) | $0 |
+| `GET /bridge/{strong}` | LXX bridge — how the Septuagint renders a Hebrew word in Greek, or vice versa (H↔G) | $0 |
+| `GET /lxx-lexeme/{wordid}` | LXX-only Greek lexeme (no Strong's number — never occurs in the NT) — citation form + variants | $0 |
 | `GET /structure/{book}/{ch}/{v}` | Syntax — BHSA/Nestle1904 hierarchy (proxied from the corpus engine) | $0 |
 | `GET /search?q=&lang=hbo` | **Hebrew** clause search (88,131 BHSA clauses) | $0 |
 | `GET /search?q=&lang=grc` | **Greek** clause search (8,011 Nestle1904 sentences) | $0 |

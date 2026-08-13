@@ -8,9 +8,18 @@ Source: eliranwong/LXX-Rahlfs-1935, the assembled MyBible export
     booknum <TAB> chapter <TAB> verse <TAB> <inline word tokens>
 
 Each word token is `SURFACE<S>wordid</S><m>lxx.POS.FEAT</m><S>strong</S><S>lexid</S>`
-— the Strong's number is the first `<S>` *after* the `<m>` tag (the leading
-`<S>` is an instance id, the trailing one a lexeme id; both are skipped). Some
-words carry no Strong's (rare words) — handled as NULL.
+— the Strong's number is the first `<S>` *after* the `<m>` tag, the lexid the
+second. The leading `<S>wordid</S>` (before `<m>`) was long treated as a
+throwaway per-occurrence instance id and skipped — VALIDATED 2026-08 that this
+is wrong: `wordid` is a reliable per-lemma key across the WHOLE corpus (a
+different numbering space than `lexid`, never equal to it, but same behavior),
+present even on the ~7% of words that carry no Strong's/lexid at all (where it's
+the only lemma-grouping signal available). Checked against every word that DOES
+carry a Strong's number: 0/4,050 distinct `wordid`s ever map to more than one
+Strong's — i.e. it never conflates two different lemmas. Now captured (see
+`wordid` column) — the win is entirely for the untagged remainder, which
+`build_orphan_lexemes.py` groups by it. Some words carry no Strong's (rare
+words) — handled as NULL.
 
 Output: `lxx.db` (SQLite, table `lxx_words`) — the LXX as a first-class
 original-language word store, schema parallel to the spine's `spine_words`
@@ -75,6 +84,7 @@ CONTENT_POS = {"N", "V", "A"}  # noun / verb / adjective — matches the spine
 _MORPH = re.compile(r"<m>lxx\.([^<]*)</m>")
 _WORD = re.compile(r"^([^<\s]+)")
 _STRONG = re.compile(r"<S>(\d+)</S>")
+_LEADING = re.compile(r"^[^<\s]+<S>(\d+)</S>")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS lxx_words (
@@ -86,6 +96,7 @@ CREATE TABLE IF NOT EXISTS lxx_words (
   plain      TEXT NOT NULL,
   strong     INTEGER,
   lexid      INTEGER,
+  wordid     INTEGER,
   morph      TEXT,
   pos        TEXT,
   is_content INTEGER NOT NULL,
@@ -94,25 +105,33 @@ CREATE TABLE IF NOT EXISTS lxx_words (
 );
 CREATE INDEX IF NOT EXISTS idx_lxx_strong ON lxx_words(strong);
 CREATE INDEX IF NOT EXISTS idx_lxx_lexid ON lxx_words(lexid);
+CREATE INDEX IF NOT EXISTS idx_lxx_wordid ON lxx_words(wordid);
 CREATE INDEX IF NOT EXISTS idx_lxx_book ON lxx_words(book, chapter, verse);
 """
 
 
 def parse_word(tok: str):
-    """One inline token -> (surface, strong|None, lexid|None, morph|None, pos).
+    """One inline token -> (surface, strong|None, lexid|None, wordid|None, morph|None, pos).
 
     Token: SURFACE<S>wordid</S><m>lxx.MORPH</m><S>strong</S><S>lexid</S>. The Strong's number
     is the FIRST <S> after <m>; the lexid (eliranwong analytical-lexicon lexeme id) is the SECOND
     — an opaque, homograph-precise lexeme key WITHIN the LXX (consistent per lexeme: ὁ is always
     73459). It is NOT a Strong's rollup and NOT MACULA's `grc:` key, so it only groups LXX-internal
     occurrences by lexeme; joining it out needs a crosswalk. Greek's homograph rate is ~1.6%, so it
-    rarely differs from Strong's — kept for internal precision where it does."""
+    rarely differs from Strong's — kept for internal precision where it does.
+
+    `wordid` (the leading <S>, always present, a different id space than `lexid` and never equal
+    to it) is ALSO a reliable per-lemma key — validated 2026-08, see module docstring — and unlike
+    `lexid` it survives on words with no Strong's number at all, which is the whole point of
+    capturing it: it's the only lemma-grouping signal for the ~7% untagged remainder."""
     wm = _WORD.match(tok)
     if not wm:
         return None
     surface = wm.group(1).strip("·.,;:")
     if not surface:
         return None
+    lm = _LEADING.match(tok)
+    wordid = int(lm.group(1)) if lm else None
     mm = _MORPH.search(tok)
     morph = mm.group(1) if mm else None
     pos = morph.split(".")[0] if morph else ""
@@ -122,14 +141,14 @@ def parse_word(tok: str):
         sm = _STRONG.search(tok, mpos)
         if sm:
             strong = int(sm.group(1))
-            lm = _STRONG.search(tok, sm.end())
-            if lm:
-                lexid = int(lm.group(1))
-    return surface, strong, lexid, morph, pos
+            lm2 = _STRONG.search(tok, sm.end())
+            if lm2:
+                lexid = int(lm2.group(1))
+    return surface, strong, lexid, wordid, morph, pos
 
 
 def iter_words(src: Path, wanted: set[str] | None):
-    """Yield (book, chapter, verse, idx, surface, strong, lexid, morph, pos) rows."""
+    """Yield (book, chapter, verse, idx, surface, strong, lexid, wordid, morph, pos) rows."""
     with src.open(encoding="utf-8") as fh:
         for line in fh:
             parts = line.rstrip("\n").split("\t")
@@ -150,9 +169,9 @@ def iter_words(src: Path, wanted: set[str] | None):
                 parsed = parse_word(tok)
                 if not parsed:
                     continue
-                surface, strong, lexid, morph, pos = parsed
+                surface, strong, lexid, wordid, morph, pos = parsed
                 idx += 1
-                yield (code, int(ch), int(v), idx, surface, strong, lexid, morph, pos)
+                yield (code, int(ch), int(v), idx, surface, strong, lexid, wordid, morph, pos)
 
 
 def fetch(src: Path | None) -> Path:
@@ -178,13 +197,13 @@ def build(wanted: set[str] | None, src: Path | None) -> None:
                " WHERE book IN (%s)" % ",".join("?" * len(wanted))),
                tuple(wanted) if wanted else ())
     n = 0
-    for (code, ch, v, idx, surface, strong, lexid, morph, pos) in iter_words(source, wanted):
+    for (code, ch, v, idx, surface, strong, lexid, wordid, morph, pos) in iter_words(source, wanted):
         db.execute(
             "INSERT OR REPLACE INTO lxx_words "
-            "(book,chapter,verse,idx,surface,plain,strong,lexid,morph,pos,is_content,canonical) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            "(book,chapter,verse,idx,surface,plain,strong,lexid,wordid,morph,pos,is_content,canonical) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (code, ch, v, idx, surface, to_modern_form(surface, "grc"),
-             strong, lexid, morph, pos, 1 if pos in CONTENT_POS else 0, _canon_of(code)),
+             strong, lexid, wordid, morph, pos, 1 if pos in CONTENT_POS else 0, _canon_of(code)),
         )
         n += 1
     db.commit()
@@ -203,9 +222,14 @@ def _report(db, n: int) -> None:
     books = db.execute("SELECT COUNT(DISTINCT book) FROM lxx_words").fetchone()[0]
     content = db.execute("SELECT COUNT(*) FROM lxx_words WHERE is_content=1").fetchone()[0]
     strong = db.execute("SELECT COUNT(*) FROM lxx_words WHERE strong IS NOT NULL").fetchone()[0]
+    orphan = db.execute(
+        "SELECT COUNT(*), COUNT(DISTINCT wordid) FROM lxx_words "
+        "WHERE strong IS NULL AND is_content=1").fetchone()
     print(f"\nlxx.db: {n:,} words · {books} books · "
           f"{content:,} content ({100*content//max(n,1)}%) · "
-          f"{strong:,} with Strong's ({100*strong//max(n,1)}%)", file=sys.stderr)
+          f"{strong:,} with Strong's ({100*strong//max(n,1)}%) · "
+          f"{orphan[0]:,} untagged content words grouping into {orphan[1]:,} lemmas via wordid",
+          file=sys.stderr)
     row = db.execute(
         "SELECT surface, strong, morph FROM lxx_words "
         "WHERE book='GEN' AND chapter=1 AND verse=1 ORDER BY idx").fetchall()

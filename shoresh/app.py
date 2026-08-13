@@ -109,6 +109,7 @@ def root() -> dict:
             "/concept/{word}",
             "/morph?pattern=&book=&chapter=",
             "/bridge/{strong}",
+            "/lxx-lexeme/{wordid}",
             "/structure/{book}/{chapter}/{verse}",
             "/structure/{book}/{chapter}/{verse}/word/{idx}",
             "/search?q=&lang=hbo&k=10&enrich=false&translate=gloss|llm",
@@ -552,10 +553,23 @@ def morph_search(pattern: str, book: str | None = None,
 
 @app.get("/bridge/{strong}")
 def lxx_bridge(strong: str, limit: int = 50) -> dict:
-    """Hebrew→Greek bridge via LXX: how does the Septuagint translate a Hebrew word?"""
+    """Hebrew<->Greek bridge via LXX: how does the Septuagint translate a Hebrew word, or which
+    Hebrew word(s) does a given Greek word translate? Accepts either an H#### or G#### Strong's."""
     result = data.lxx_bridge(strong, limit=min(limit, 200))
     if "error" in result:
         raise HTTPException(400, result["error"])
+    return result
+
+
+@app.get("/lxx-lexeme/{wordid}")
+def lxx_lexeme(wordid: str, limit: int = 200) -> dict:
+    """LXX-only Greek lexeme lookup — for words with no Strong's number (never occur in the NT, so
+    Strong's numbering has no code for them, e.g. Genesis 1:2's ἀκατασκεύαστος). `wordid` is the
+    field /verse returns on those words in place of `strong`. Citation form + all attested inflected
+    variants; see resources/lxx_orphan_lexemes/README.md."""
+    result = data.lxx_lexeme(wordid, limit=min(limit, 1000))
+    if "error" in result:
+        raise HTTPException(404, result["error"])
     return result
 
 

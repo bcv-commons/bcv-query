@@ -235,6 +235,7 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 | `/domain/{code}` | Every lexeme in a Louw-Nida / SDBH semantic domain |
 | `/tw/{strong}` | Translation-Words article(s) for a Strong's number |
 | `/bridge/{strong}` | Hebrew ↔ Greek (LXX) equivalents |
+| `/lxx-lexeme/{wordid}` | LXX-only Greek lexeme lookup (words with no Strong's number — `/verse` returns `wordid` on these in place of `strong`) |
 | `/morph` | Morphology search |
 | `/structure/{book}/{ch}/{v}[/syntax]` | Verse clause/phrase structure |
 | `/speakers`, `/speakers/at/{book}/{ch}/{v}`, `/speaker/{name}` | Speaker / red-letter index |

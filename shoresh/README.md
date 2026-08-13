@@ -19,7 +19,8 @@ All under the service root. Deterministic endpoints have no external dependency.
 | `GET /gloss/{word}` | Reverse gloss — English word → Hebrew/Greek Strong's numbers | $0 |
 | `GET /concept/{word}` | Concept pivot — English → Strong's + sample occurrences | $0 |
 | `GET /morph?pattern=&book=&chapter=` | Morphology search — imperatives, participles, verbs, nouns | $0 |
-| `GET /bridge/{strong}` | LXX bridge — how the Septuagint translates a Hebrew word | $0 |
+| `GET /bridge/{strong}` | LXX bridge — how the Septuagint translates a Hebrew word, or vice versa | $0 |
+| `GET /lxx-lexeme/{wordid}` | LXX-only Greek lexeme (no Strong's number) — citation form + variants | $0 |
 | `GET /structure/{book}/{ch}/{v}` | Syntax — BHSA/Nestle1904 hierarchy (proxied from bcv-RAG) | $0 |
 | `GET /search?q=&lang=hbo&k=10` | Hebrew clause search (88,131 BHSA clauses) | $0 |
 | `GET /search?q=&lang=grc&k=10` | Greek clause search (8,011 Nestle1904 sentences) | $0 |
