@@ -155,15 +155,41 @@ def main() -> int:
           f"min={min(sizes.values())} median={sorted(sizes.values())[len(sizes)//2]} max={max(sizes.values())}",
           file=sys.stderr)
 
+    # anchor confidence, per lexeme: does it have >=1 embedding-confirmed (high-tier) edge of its own,
+    # or is it only reachable via a discounted prior-tier edge (coverage extension)? Re-derived
+    # 2026-08-14 under the text-anchored intrinsic yardstick: same-cluster pairs where BOTH sides are
+    # "high" score 2.14x their frequency-matched baseline (as good as, arguably better than, pure
+    # high-only clustering); pairs touching an "extended" lexeme score 0.33x-0.53x on that SAME
+    # baseline-relative measure -- clearly weaker, not clearly above chance on it. A follow-up SDBH
+    # cross-check (interim only, not the yardstick -- see internal-docs/text-anchored-semantics-plan.md)
+    # confirms the same ordering (69.1% / 46.2% / 33.3%) but is less severe: 33.3% is still well above
+    # SDBH's own ~15% random baseline, so "extended" is weaker, not worthless. include_prior=True's
+    # graph-densification role holds up either way; its coverage-extension role is real but weak --
+    # domain_clusters.tsv previously gave no way to tell these two populations apart.
+    high_nodes = set(load_graph(neighbors_path=args.neighbors, include_prior=False).nodes())
+    n_high = sum(1 for lx in assign if lx in high_nodes)
+    print(f"[domain-clusters] anchor: {n_high} high-tier, {len(assign) - n_high} extended (prior-only)",
+          file=sys.stderr)
+
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
         fh.write("# Louvain communities over the semantic_neighbors graph (BEREL+sense-split, xling-free "
                   "clustering input). Canonical config: high+LLM-prior tiers, resolution=5.0 (median "
-                  "cluster size 23, ~45% same-domain agreement vs SDBH yardstick). NOT LLM-labeled yet — "
-                  "cluster_id is arbitrary, not a domain name. CC0 lineage. See build_domain_clusters.py.\n")
-        fh.write("lexeme\tstrong\tcluster_id\tcluster_size\n")
+                  "cluster size 23, ~45% same-domain agreement vs SDBH yardstick, SDBH-era measurement). "
+                  "NOT LLM-labeled yet — cluster_id is arbitrary, not a domain name. `anchor`: 'high' = "
+                  "this lexeme has its own embedding-confirmed edge (same-cluster pairs among these score "
+                  "2.14x a frequency-matched baseline under the text-anchored intrinsic yardstick, 69.1% "
+                  "SDBH agreement on an independent cross-check); 'extended' = only reachable via a "
+                  "prior-tier edge (0.33x-0.53x baseline on the intrinsic yardstick -- not distinguishable "
+                  "from random on THAT measure; a fresh SDBH cross-check agrees on the direction but is "
+                  "less severe, 33.3%-46.2%, still meaningfully above SDBH's own ~15% random-domain-share "
+                  "rate). Treat 'extended' placements as lower-confidence than 'high', not as worthless — "
+                  "see internal-docs/text-anchored-semantics-plan.md. CC0 lineage. See "
+                  "build_domain_clusters.py.\n")
+        fh.write("lexeme\tstrong\tcluster_id\tcluster_size\tanchor\n")
         for lx, cid in sorted(assign.items(), key=lambda kv: (kv[1], kv[0])):
-            fh.write(f"{lx}\t{_hs(lx)}\t{cid}\t{sizes[cid]}\n")
+            anchor = "high" if lx in high_nodes else "extended"
+            fh.write(f"{lx}\t{_hs(lx)}\t{cid}\t{sizes[cid]}\t{anchor}\n")
     print(f"[domain-clusters] -> {args.out}", file=sys.stderr)
 
     if args.validate:

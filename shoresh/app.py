@@ -116,6 +116,7 @@ def root() -> dict:
             "/words?language=Hebrew|Aramaic|Greek&pos=&stem=&tense=&suffix=&min_rank=&max_rank=&limit=&random=&order=&gloss_lang=",
             "/gloss-languages?language=Hebrew|Aramaic|Greek",
             "/domain/{code}?axis=sdbg|core|lex|ctx",
+            "/genre/{strong}",
             "/wordstudy/{strong}",
             "/speakers",
             "/speaker/{name}",
@@ -515,6 +516,15 @@ def get_field(strong: str, limit: int = 12) -> dict:
     Strong's conflates several lexemes it returns them split under `lexemes` (each with its own
     field); `field` stays a flat merged list."""
     return data.semantic_field(strong, limit=min(limit, 30))
+
+
+@app.get("/genre/{strong}")
+def get_genre_context(strong: str, limit: int = 12) -> dict:
+    """Words sharing a Strong's per-book occurrence PROFILE — register/setting (Priesthood, Warfare,
+    Sanctuary, ...), CC0 + data-derived from public-domain WLC occurrence counts. NOT a synonym list
+    (see /field for that) — two words can share a setting without meaning the same thing, and vice
+    versa. Hebrew/OT only."""
+    return data.genre_context(strong, limit=min(limit, 30))
 
 
 @app.get("/quotations/{book}/{chapter}/{verse}")

@@ -18,10 +18,12 @@ level train/test split, a train-derived "predictor" (shared TRAIN-split verses),
 TEST-split event (do the two lexemes co-occur in a held-out verse?), and the shared FrequencyMatcher
 for a frequency-matched (not frequency-weighted) random baseline.
 
-Preliminary result (2026-08-14): bdb_root 5.08% vs. a 4.15% frequency-matched baseline (1.22x) --
-positive, though a weaker lift than structural/parallelism showed on their OWN matched yardstick. Not
-yet wired into any --validate branch; this module exists to let that comparison be made deliberately,
-not to replace the syntactic-slot yardstick for signals it already validates well.
+Covers all four signals FAMILY grouped as "etymological"/"lexical-external" in
+build_confidence_tiers.py's FAMILY dict: bdb_root, hwn, wiktionary_roots, sefer_hashorashim -- loaded
+via the exact functions build_semantic_neighbors.py itself uses, so this measures what's actually fed
+into the pipeline. Not yet wired into any --validate branch; this module exists to let the
+distributional-vs-etymological comparison be made deliberately, not to replace the syntactic-slot
+yardstick for signals it already validates well.
 
   python -m macula.etymology_yardstick --report
 """
@@ -73,6 +75,22 @@ def load_bdb_root_pairs() -> list[tuple[str, str]]:
             for a, b in itertools.combinations(sorted(set(members)), 2)]
 
 
+def load_signal_pairs() -> dict[str, list[tuple[str, str]]]:
+    """{signal_name: [(strong_a, strong_b), ...]} for all four etymological/lexical-external signals,
+    via the EXACT loader functions build_semantic_neighbors.py itself uses -- so this measures what's
+    actually fed into the pipeline, not a re-derived approximation."""
+    from macula.build_semantic_neighbors import (
+        _load_hwn_pairs, _load_sefer_hashorashim_pairs, _load_wiktionary_root_pairs,
+    )
+
+    return {
+        "bdb_root": sorted(load_bdb_root_pairs()),
+        "hwn": sorted(tuple(sorted(p)) for p in _load_hwn_pairs()),
+        "wiktionary_roots": sorted(tuple(sorted(p)) for p in _load_wiktionary_root_pairs()),
+        "sefer_hashorashim": sorted(tuple(sorted(p)) for p in _load_sefer_hashorashim_pairs()),
+    }
+
+
 class EtymologyYardstick:
     """Same shape as intrinsic_yardstick.Yardstick (.score, .held_out, .random_baseline) so it can be
     passed to the same summarize()/validate_pairs() reporting functions."""
@@ -101,9 +119,9 @@ class EtymologyYardstick:
 
 
 def report(ys: EtymologyYardstick) -> None:
-    bdb_pairs = load_bdb_root_pairs()
-    summarize(ys, "bdb_root", bdb_pairs)
-    summarize(ys, "bdb_root -- frequency-matched random baseline", ys.random_baseline(bdb_pairs))
+    for name, pairs in load_signal_pairs().items():
+        summarize(ys, name, pairs)
+        summarize(ys, f"{name} -- frequency-matched random baseline", ys.random_baseline(pairs))
 
 
 def main() -> int:

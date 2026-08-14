@@ -8,10 +8,8 @@
     "lxx:shared-greek",
     "gloss:overlap",
     "llm:scholarly-prior",
-    "xling:shared-surface (>= 3 langs, aligned_lex_hf)",
     "bdb_root:shared-etymological-root (public domain, OpenScriptures/HebrewLexicon)",
     "parallelism:poetic-structural-pair (T'OMIM CC BY 4.0 + our own BHSA half_verse detection)",
-    "hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007)",
     "structural:coordination+apposition (Context-Fabric/BHSA syntactic structure)",
     "corroborated:xling-agrees-with-wiktionary-roots",
     "sefer_hashorashim:llm-verified (Radak, Public Domain, via Sefaria)"
@@ -19,13 +17,13 @@
   "confidence_tiers": {
     "high": 3300,
     "recall": 32321,
-    "prior": 30146
+    "prior": 29267
   },
   "lexemes": 3597,
-  "edges": 65767,
+  "edges": 64888,
   "topk": 10,
   "min_cos": 0.3,
   "min_occ": 3,
-  "content_sha256": "54478c6d768e6455653eff6f5f5e7ea02effbc6d4b803424c8c3caaf625026ae",
+  "content_sha256": "e3b803847ebb698af3727fa116ea41d56ca4ef5ce65b939e2397988b55ef4aa0",
   "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick."
 }

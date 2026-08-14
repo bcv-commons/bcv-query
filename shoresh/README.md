@@ -75,6 +75,32 @@ curl -X POST "$HOST/upload/clauses_hbo.sqlite?secret=$SECRET" --data-binary @dat
 | `clauses_hbo.npy` | 344MB | 88,131 BHSA clauses, 1024d BGE-M3 vectors |
 | `clauses_grc.npy` | 31MB | 8,011 Nestle1904 sentences, 1024d BGE-M3 vectors |
 
+## Corpus engine (BHSA / Nestle1904 via Context-Fabric)
+
+`shoresh/corpus_engine/` and several `macula/build_*.py` scripts (`extract_hbo_syntax.py`,
+`build_bhsa_structural_pairs.py`, `build_parallelism_pairs.py`, `spine/reconcile.py`,
+`bcv-RAG/scripts/build_lex_occurrences.py`) read the ETCBC/BHSA (Hebrew) and ETCBC/nestle1904 (Greek)
+corpora in Text-Fabric format, expected at `~/text-fabric-data`. This is a **CC BY-NC-SA download**,
+not part of the repo or baked into any Docker image (production mounts it as a host volume — see
+`internal-docs/hosting.md`) — a fresh clone or new dev machine needs to fetch it once:
+
+```bash
+python -c "from tf.app import use; use('ETCBC/bhsa', version='2021')"   # Hebrew — version pinned to
+                                                                          # match the hardcoded tf/2021
+                                                                          # path in the scripts above
+python -c "from tf.app import use; use('ETCBC/nestle1904')"             # Greek — no version pinned in
+                                                                          # code, latest is fine
+```
+
+This downloads into `~/text-fabric-data/github/ETCBC/<repo>/tf/<version>` — the exact path those
+scripts hardcode. `context-fabric`'s own `cfabric.downloader` has no BHSA/Nestle1904 registration as
+of 0.5.7 (`list_corpora()` returns `{}`); fetch via classic `text-fabric`'s `tf.app.use()` above —
+`shoresh/corpus_engine/cf_engine.py` reads whatever lands at that path regardless of which tool
+fetched it.
+
+Loading the full corpus (`CF.loadAll()`) takes ~1.6GB RAM — `internal-docs/hosting.md` warns not to
+re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
+
 ## Environment variables
 
 | Variable | Default | Purpose |
@@ -90,6 +116,7 @@ curl -X POST "$HOST/upload/clauses_hbo.sqlite?secret=$SECRET" --data-binary @dat
 ```bash
 pip install -r requirements.txt          # default (no torch)
 pip install -r requirements-berel.txt    # opt-in for BEREL/SPhilBERTa
+pip install -r requirements-macula.txt   # opt-in for macula/ build scripts (networkx, pyarrow)
 python -m lxx.parse --all && python -m spine.parse
 SHORESH_DATA=./data uvicorn app:app --port 8080
 ```

@@ -1,0 +1,8 @@
+# Additional deps for shoresh/macula/*.py — the offline semantic-neighbors / domain-clustering build
+# pipeline. Not part of the served app (numpy alone covers that, already in requirements.txt); these
+# are only needed to RUN the macula build scripts. Found missing 2026-08-14: build_domain_clusters.py
+# (networkx) and build_confidence_tiers.py / build_semantic_neighbors.py / build_prior_pack.py
+# (pyarrow) import these but neither was declared anywhere, so a fresh venv failed on first run.
+# Install with: pip install -r requirements.txt -r requirements-macula.txt
+networkx>=3.0        # build_domain_clusters.py — Louvain community detection
+pyarrow>=14.0         # neighbors.parquet / prior_pack read+write

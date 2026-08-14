@@ -14,8 +14,10 @@ WLC occurrence counts (zero external dependency, zero licensing risk).
 Validated 2026-08 against SDBH's own `ctx` axis (internal yardstick only, same as everywhere else):
 45.6% same-domain agreement (9,323 pairs) vs. a 13.81% random-chance baseline for that axis — a real
 ~3.3x lift, though clearly weaker than every `core`-axis signal in this pipeline (BDB 50.6%, structural
-61.7%+, HWN 89.7%). Expected: this is a cruder proxy (which books a word appears in) for a fundamentally
+61.7%+). Expected: this is a cruder proxy (which books a word appears in) for a fundamentally
 coarser category (setting, not concept) — not a quality regression, a different, harder target.
+(The HWN 89.7% figure once quoted here for comparison did not survive a 2026-08-14 re-check, see
+internal-docs/text-anchored-semantics-plan.md — dropped from this list rather than repeated.)
 
 NOT wired into build_semantic_neighbors.py — that pipeline's signals all target the `core` axis
 (same-domain/synonymy clustering); mixing a `ctx`-shaped signal in would repeat this project's own
@@ -51,7 +53,9 @@ def build() -> list[tuple[str, str, float]]:
     conn = sqlite3.connect(f"file:{HBO}?mode=ro", uri=True)
     strong_book: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
     books: set[str] = set()
-    for strong, book in conn.execute("SELECT strong, book FROM occurrence WHERE strong IS NOT NULL"):
+    for strong, book in conn.execute(
+        "SELECT strong, book FROM occurrence WHERE strong IS NOT NULL AND strong != ''"
+    ):
         strong_book[strong][book] += 1
         books.add(book)
     book_list = sorted(books)

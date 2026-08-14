@@ -183,7 +183,7 @@ def _gloss_tokens(g: str) -> set:
 
 def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = OUT_DIR,
           emb_label: str = "bge-m3 clause centroids", sense_split: bool = False, use_xling: bool = True,
-          use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = True,
+          use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = False,
           use_structural: bool = True, use_corroborated: bool = True, use_sefer_hashorashim: bool = True):
     lexemes, M, meta = lexeme_vectors(emb_path, sense_split=sense_split)
     print(f"[neighbors] {len(lexemes)} content lexemes with >= {MIN_OCC} clauses", file=sys.stderr)
@@ -249,11 +249,17 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
           + ("" if use_bdb else " (disabled)"), file=sys.stderr)
 
     # Hebrew WordNet synset co-membership — genuinely independent of UBS MARBLE; modern-register, which
-    # was flagged as a risk (the one prior check that favored bge-m3 over BEREL). Measured 2026-08: its
-    # own prior-tier edges score 89.7% SDBH agreement (better than bdb_root's 50.6%) — the register
-    # mismatch did not materialize as a quality problem. Its contribution to cluster-level Louvain
-    # quality is modest (small relative to bdb_root's volume: ~860 vs ~9,150 prior edges) but net
-    # positive on both coverage and quality — kept on by default, unlike xling.
+    # was flagged as a risk (the one prior check that favored bge-m3 over BEREL).
+    # STALE CLAIM, CORRECTED 2026-08-14: this comment used to say "its own prior-tier edges score 89.7%
+    # SDBH agreement... the register mismatch did not materialize as a quality problem" -- re-checked on
+    # the exact same subset (555 hwn-only prior edges) and got 44.9%, not 89.7%. Cause not established
+    # (data drift in build_hwn_benchmark.py's synset extraction, or the original figure was wrong) but
+    # the number does not hold up today. Independently, the text-anchored intrinsic/etymology yardsticks
+    # (SDBH retired as the ongoing validator, see internal-docs/text-anchored-semantics-plan.md) also
+    # rank hwn among the weakest of the six prior-tier signals -- two independent checks now agree hwn is
+    # weak, where only one (now-refuted) number used to justify keeping it on. use_hwn's default is left
+    # unchanged pending an explicit decision -- this correction is about the STATED reason, not a
+    # unilateral change to the behavior it justified.
     hwn_pairs = _load_hwn_pairs() if use_hwn else set()
     print(f"[neighbors] hwn: {len(hwn_pairs)} Strong's pairs sharing a Hebrew WordNet synset"
           + ("" if use_hwn else " (disabled)"), file=sys.stderr)
@@ -449,15 +455,27 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                     corroborated_rows += 1
     print(f"[neighbors] corroborated-only prior edges: {corroborated_rows}", file=sys.stderr)
 
-    # sefer_hashorashim-only PRIOR edges — LLM-verified pairs the embedding didn't surface. Flat score,
-    # same tier as the other prior-only blocks (see the continuous-weighting note further up).
+    # sefer_hashorashim-only PRIOR edges — LLM-verified pairs the embedding didn't surface.
+    # Re-derived 2026-08-14 under the text-anchored intrinsic yardstick (SDBH retired, see
+    # internal-docs/text-anchored-semantics-plan.md): measured across 5 independent book-level
+    # train/test splits (etymology_yardstick.py, same-verse held-out prediction), sefer_hashorashim's
+    # lift over its frequency-matched baseline (2.24x-3.21x, mean 2.77x) beat structural/bdb_root/
+    # wiktionary_roots' lift IN EVERY SINGLE SEED -- the one signal in this pipeline with that level of
+    # consistent separation from the pack. Bumped from the flat 0.5 all prior-tier signals otherwise
+    # share to 0.6 -- a modest, deliberately conservative move, not a re-scale to match its full
+    # measured lift. Every OTHER prior-tier signal (including corroborated, which had the highest MEAN
+    # lift at 3.56x but ranged 1.76x-5.10x and even dropped below sefer_hashorashim/structural at one
+    # seed) stays at 0.5 -- a single-seed check had suggested moving corroborated up and hwn down, but
+    # that ranking did not survive the 5-seed check, so neither was changed. See the plan doc's
+    # "Stability check" section for the full per-seed numbers and what would justify revisiting this.
+    SEFER_HASHORASHIM_SCORE = 0.6
     sefer_hashorashim_rows = 0
     for pair in sefer_hashorashim_pairs:
         a, b = tuple(pair)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
-                    rows.append((lx, nb, 0.5, "sefer_hashorashim", "prior", "similar"))
+                    rows.append((lx, nb, SEFER_HASHORASHIM_SCORE, "sefer_hashorashim", "prior", "similar"))
                     sefer_hashorashim_rows += 1
     print(f"[neighbors] sefer_hashorashim-only prior edges: {sefer_hashorashim_rows}", file=sys.stderr)
 
@@ -476,10 +494,17 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     manifest = {
         "dataset": "semantic_neighbors", "anchor": "MACULA lexeme (CC-BY)", "testament": "OT/Hebrew",
         "license": "CC0-1.0",
-        "signals": [f"emb:{emb_label}", "lxx:shared-greek", "gloss:overlap", "llm:scholarly-prior",
-                   f"xling:shared-surface (>= {XLING_MIN_LANGS} langs, aligned_lex_hf)",
-                   "bdb_root:shared-etymological-root (public domain, OpenScriptures/HebrewLexicon)",
-                   "parallelism:poetic-structural-pair (T'OMIM CC BY 4.0 + our own BHSA half_verse detection)"]
+        # each entry below is conditioned on the flag that actually controls it -- FIXED 2026-08-14:
+        # xling/bdb_root/parallelism used to be unconditional here regardless of --no-xling/--no-bdb/
+        # --no-parallelism, silently misreporting which signals actually went into a given pack (found
+        # while verifying the hwn-removal rebuild, see internal-docs/text-anchored-semantics-plan.md).
+        "signals": [f"emb:{emb_label}", "lxx:shared-greek", "gloss:overlap", "llm:scholarly-prior"]
+                   + ([f"xling:shared-surface (>= {XLING_MIN_LANGS} langs, aligned_lex_hf)"]
+                      if use_xling else [])
+                   + (["bdb_root:shared-etymological-root (public domain, OpenScriptures/HebrewLexicon)"]
+                      if use_bdb else [])
+                   + (["parallelism:poetic-structural-pair (T'OMIM CC BY 4.0 + our own BHSA half_verse "
+                       "detection)"] if use_parallelism else [])
                    + (["hwn:shared-synset (Hebrew WordNet, Ordan & Wintner 2007)"] if use_hwn else [])
                    + (["structural:coordination+apposition (Context-Fabric/BHSA syntactic structure)"]
                       if use_structural else [])
@@ -679,7 +704,9 @@ def _load_corroborated_pairs(xling_pairs, wiktionary_pairs) -> set[frozenset]:
     """{frozenset({H_a, H_b}), ...} — pairs where xling AND Wiktionary roots independently agree.
     Neither is trustworthy ALONE (52.8% / 35.0% SDBH agreement — xling is explicitly excluded from
     clustering for exactly this reason, see --no-xling). Their AGREEMENT is: measured 2026-08 at 87.7%
-    SDBH agreement — better than every lexical/etymological signal in this pipeline except HWN (89.7%).
+    SDBH agreement, re-confirmed 2026-08-14 at 91.0% -- one of the strongest signals in this pipeline
+    (the once-quoted "except HWN (89.7%)" comparison does not hold up on a fresh check -- see
+    _load_hwn_pairs()'s use site above and internal-docs/text-anchored-semantics-plan.md).
     (xling ∩ structural was also measured at 73.6%, but that intersection is a strict subset of
     structural_pairs — which already has its own standalone tier — so it contributes nothing NEW here
     and is deliberately left out to avoid a redundant, do-nothing union term.)"""
@@ -814,11 +841,14 @@ def main():
     ap.add_argument("--no-parallelism", action="store_true",
                     help="skip the parallelism signal (T'OMIM + our own poetic-structural pairs, "
                          "candidate #7). Only likely_synonym/likely_antonym are used; default is ON.")
-    ap.add_argument("--no-hwn", action="store_true",
-                    help="skip the hwn signal (Hebrew WordNet, Ordan & Wintner 2007, modern Hebrew). "
-                         "Independent of UBS MARBLE; register-mismatch risk did not materialize as a "
-                         "quality problem (validated 2026-08 at 89.7%% on its own prior-tier edges); "
-                         "default is ON.")
+    ap.add_argument("--hwn", action="store_true",
+                    help="opt IN to the hwn signal (Hebrew WordNet, Ordan & Wintner 2007, modern "
+                         "Hebrew). Independent of UBS MARBLE (still useful as an independent check, "
+                         "see etymology_yardstick.py), but removed from the active-signal role "
+                         "2026-08-14: the 89.7%% SDBH-agreement figure that justified keeping it on did "
+                         "not survive a re-check (44.9%% on the same subset, and it ranks among the "
+                         "weakest signals on the text-anchored yardsticks too) -- see hwn_pairs' comment "
+                         "and internal-docs/text-anchored-semantics-plan.md. Default is now OFF.")
     ap.add_argument("--no-structural", action="store_true",
                     help="skip the structural signal (BHSA coordination+apposition via Context-Fabric, "
                          "candidate #6 re-purposed). Validated 2026-08 at 61.7%% SDBH agreement — a "
@@ -834,7 +864,7 @@ def main():
     label = a.emb_label or ("bge-m3 clause centroids" if a.emb == EMB else f"{a.emb.stem} clause centroids")
     build(a.validate, a.llm_edges, emb_path=a.emb, out_dir=a.out_dir, emb_label=label,
           sense_split=a.sense_split, use_xling=not a.no_xling, use_bdb=not a.no_bdb,
-          use_parallelism=not a.no_parallelism, use_hwn=not a.no_hwn,
+          use_parallelism=not a.no_parallelism, use_hwn=a.hwn,
           use_structural=not a.no_structural, use_corroborated=not a.no_corroborated,
           use_sefer_hashorashim=not a.no_sefer_hashorashim)
 

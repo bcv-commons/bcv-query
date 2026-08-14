@@ -1256,6 +1256,48 @@ def semantic_field(strong: str, limit: int = 12) -> dict:
     return {"strong": code, "field": _semantic_field_map().get(code, [])[:limit]}
 
 
+@lru_cache(maxsize=1)
+def _genre_context_map() -> dict:
+    """resources/genre_context/context_pairs.tsv -> {padded Strong's: [(neighbor, cosine), ...]}.
+
+    A DIFFERENT axis from semantic_field: shared per-book occurrence distribution (register/setting —
+    e.g. Priesthood, Warfare, Sanctuary), NOT synonymy. Validated (2026-08) at a 14.4x held-out lift —
+    see internal-docs/text-anchored-semantics-plan.md — but deliberately NOT merged into
+    semantic_field/by_strong.tsv: two words concentrated in the same book(s) are not synonyms just
+    because they're both, say, Levitical vocabulary. Kept as its own standalone lookup for exactly
+    that reason (see build_genre_context_pairs.py's own docstring)."""
+    p = _resources_dir() / "genre_context" / "context_pairs.tsv"
+    out: dict = collections.defaultdict(list)
+    if p.exists():
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if ln.startswith("#") or ln.startswith("strong_a"):
+                continue
+            f = ln.split("\t")
+            if len(f) >= 3 and f[0] and f[1]:   # a handful of rows carry an empty strong (pre-fix
+                                                 # build_genre_context_pairs.py artifact) -- skip them
+                a, b, cos = f[0], f[1], float(f[2])
+                out[a].append((b, cos))
+                out[b].append((a, cos))
+    return dict(out)
+
+
+def genre_context(strong: str, limit: int = 12) -> dict:
+    """Words sharing this Strong's per-book occurrence PROFILE (register/setting), not its meaning.
+    CC0 + data-derived from public-domain WLC occurrence counts (build_genre_context_pairs.py).
+
+    This is NOT a synonym list — see /field for that. Two words can share a setting (e.g. both
+    concentrated in Leviticus) without being remotely synonymous; conversely two genuine synonyms in
+    different registers won't show up here. Sorted by cosine similarity of book-distribution."""
+    code = _norm_strong(strong)
+    neighbors = sorted(_genre_context_map().get(code, []), key=lambda e: -e[1])[:limit]
+    context = []
+    for nb, cos in neighbors:
+        g = gloss_of(nb) or {}
+        context.append({"strong": nb, "gloss": g.get("gloss"), "translit": g.get("translit"),
+                         "cosine": round(cos, 4)})
+    return {"strong": code, "context": context}
+
+
 # ---------- intertextual links: OT-in-NT quotations (X1) + synoptic parallels (X2) ----------
 
 @lru_cache(maxsize=1)
