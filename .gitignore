@@ -165,3 +165,4 @@ resources/sefer_hashorashim/candidate_pairs.tsv
 # hbo_lex_export.tsv: publish-ready export of senses/hbo_lex.tsv, regenerable via
 # build_hbo_lex_export.py, published to HF (bcv-commons/hebrew-word-senses)
 resources/senses/hbo_lex_export.tsv
+shoresh/macula/_fetch_dictalm_cuda.py
