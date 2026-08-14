@@ -44,6 +44,8 @@ MARGIN/MIN_MASS/INVCL_MIN below are picked, not swept -- same status as build_hi
 four constants. A sweep is plausible future work, not done here (see the plan doc).
 
   python -m macula.direction_yardstick --report
+  python -m macula.direction_yardstick            # writes the multi-seed aggregate used by
+                                                    # tier_hierarchy_dag.py (Phase C step 3)
 """
 from __future__ import annotations
 
@@ -65,10 +67,12 @@ MIN_MASS = 3      # each side needs >= this much TEST-split weighted context mas
 INVCL_MIN = 0.15  # invCL floor required for a CONFIRMED verdict
 
 
-def load_dag_edges() -> list[tuple[str, str, str]]:
-    """[(broader, narrower, source)] -- source in {apposition, distributional, both}."""
+def load_dag_edges(path: Path = DAG) -> list[tuple[str, str, str]]:
+    """[(broader, narrower, source)] -- source in {apposition, distributional, both}. `path` defaults
+    to hierarchy_dag.tsv but accepts any same-shaped file, e.g. dropped_edges.tsv, so this same
+    held-out check can be pointed at edges that never made it into the DAG."""
     rows = []
-    for line in DAG.read_text(encoding="utf-8").splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if line.startswith("#") or line.startswith("broader_strong"):
             continue
         b, n, sources = line.split("\t")
@@ -118,13 +122,13 @@ def verdict(profiles: dict, broader: str, narrower: str) -> tuple[str, float, fl
     return "UNDETERMINED", fwd, rev, icl
 
 
-def run(seed: int = SEED) -> dict[str, list[tuple]]:
+def run(seed: int = SEED, dag_path: Path = DAG) -> dict[str, list[tuple]]:
     _, test_books = book_split(seed=seed, train_frac=TRAIN_FRAC)
     profiles = build_profiles(test_books)
     print(f"[direction] test books={len(test_books)}  test-split profiled lexemes={len(profiles)}",
           file=sys.stderr)
 
-    edges = load_dag_edges()
+    edges = load_dag_edges(dag_path)
     matcher = FrequencyMatcher({lx: sum(p.values()) for lx, p in profiles.items()})
 
     results: dict[str, list[tuple]] = {"real": [], "reversed": [], "random": []}
@@ -174,27 +178,66 @@ def report(results: dict[str, list[tuple]]) -> None:
             summarize_group(source, rows)
 
 
+# This project's established multi-seed robustness-check set (used throughout Phase A/B; a single
+# TEST-book split is a go/no-go only -- see e.g. the 5-seed structural-pair-restriction check). Baking
+# a `tier` into hierarchy_dag.tsv from a single split's verdict would inherit that split's sparsity
+# noise permanently, so the persisted file is the multi-seed majority, not any one seed's run().
+SEEDS = (13, 17, 23, 29, 31)
+
+
+def run_multi_seed(seeds: tuple[int, ...] = SEEDS, dag_path: Path = DAG) -> dict[tuple[str, str], dict]:
+    """(broader,narrower) -> {source, verdict, n_confirmed, n_contradicted, n_undetermined, n_seeds}.
+    `verdict` is the plurality across seeds; a tie is resolved to UNDETERMINED (conservative -- don't
+    tier an edge as CONFIRMED or CONTRADICTED on a coin-flip split of the evidence)."""
+    per_edge: dict[tuple[str, str], dict] = {}
+    source_of: dict[tuple[str, str], str] = {}
+    for seed in seeds:
+        for b, n, source, v, _fwd, _rev, _icl in run(seed=seed, dag_path=dag_path)["real"]:
+            key = (b, n)
+            source_of[key] = source
+            tally = per_edge.setdefault(key, collections.Counter())
+            tally[v] += 1
+
+    out = {}
+    for key, tally in per_edge.items():
+        counts = {v: tally.get(v, 0) for v in ("CONFIRMED", "CONTRADICTED", "UNDETERMINED")}
+        top = max(counts.values())
+        winners = [v for v, c in counts.items() if c == top]
+        majority = winners[0] if len(winners) == 1 else "UNDETERMINED"
+        out[key] = {"source": source_of[key], "verdict": majority, "n_seeds": len(seeds), **counts}
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--report", action="store_true")
-    ap.add_argument("--seed", type=int, default=SEED)
+    ap.add_argument("--report", action="store_true", help="print single-seed control diagnostics")
+    ap.add_argument("--seed", type=int, default=SEED, help="seed used only for --report")
+    ap.add_argument("--candidates", type=Path, default=DAG,
+                    help="same-shaped (broader/narrower/sources) TSV to check, e.g. dropped_edges.tsv")
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
 
-    results = run(seed=args.seed)
     if args.report:
-        report(results)
+        report(run(seed=args.seed, dag_path=args.candidates))
+
+    aggregate = run_multi_seed(dag_path=args.candidates)
+    verdict_tally = collections.Counter(v["verdict"] for v in aggregate.values())
+    print(f"\n[direction] multi-seed ({len(SEEDS)} seeds) majority verdicts over {len(aggregate)} edges: "
+          f"CONFIRMED={verdict_tally['CONFIRMED']}  CONTRADICTED={verdict_tally['CONTRADICTED']}  "
+          f"UNDETERMINED={verdict_tally['UNDETERMINED']}", file=sys.stderr)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
         fh.write("# Direction verdicts for hierarchy_dag.tsv edges -- held-out weighted asymmetry\n"
-                  "# (WeedsPrec + invCL), computed on TEST-book slot profiles never used to infer\n"
-                  "# these edges. See direction_yardstick.py and\n"
-                  "# internal-docs/phase-c-instrument-calibration-plan.md.\n")
-        fh.write("broader_strong\tnarrower_strong\tsource\tverdict\tweeds_fwd\tweeds_rev\tinv_cl\n")
-        for b, n, source, v, fwd, rev, icl in results["real"]:
-            fh.write(f"{b}\t{n}\t{source}\t{v}\t{fwd:.4f}\t{rev:.4f}\t{icl:.4f}\n")
-    print(f"\n[direction] -> {args.out}", file=sys.stderr)
+                  "# (WeedsPrec + invCL), majority verdict across 5 TEST-book splits (seeds "
+                  f"{','.join(map(str, SEEDS))}), never used to infer these edges. See\n"
+                  "# direction_yardstick.py and internal-docs/phase-c-instrument-calibration-plan.md.\n")
+        fh.write("broader_strong\tnarrower_strong\tsource\tverdict\tn_confirmed\tn_contradicted\t"
+                  "n_undetermined\tn_seeds\n")
+        for (b, n), v in sorted(aggregate.items()):
+            fh.write(f"{b}\t{n}\t{v['source']}\t{v['verdict']}\t{v['CONFIRMED']}\t{v['CONTRADICTED']}\t"
+                      f"{v['UNDETERMINED']}\t{v['n_seeds']}\n")
+    print(f"[direction] -> {args.out}", file=sys.stderr)
     return 0
 
 

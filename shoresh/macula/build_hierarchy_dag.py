@@ -23,7 +23,13 @@ INDEPENDENTLY-computed TEST-book profiles, mirroring intrinsic_yardstick.py's ow
 is the harder bar; apposition-direction edges are checked for cycles only (BHSA grammar itself is the
 evidence there, not a statistical inference to re-validate).
 
+Rerunning this script regenerates the plain 3-column (broader/narrower/sources) file -- if
+direction_yardstick.py + tier_hierarchy_dag.py have already added the `tier` column and pruned
+CONTRADICTED edges (Phase C step 3), re-run that pair afterward too, in that order.
+
   python -m macula.build_hierarchy_dag
+  python -m macula.direction_yardstick   # then, to restore tiering:
+  python -m macula.tier_hierarchy_dag
 """
 from __future__ import annotations
 
@@ -42,6 +48,7 @@ APPOSITION = ROOT / "resources" / "bhsa_hierarchy" / "apposition_directed.tsv"
 CONFIDENCE_TIERS = ROOT / "resources" / "semantic_neighbors" / "confidence_tiers.tsv"
 HBO = ROOT / "resources" / "occurrences" / "hbo.db"
 OUT = ROOT / "resources" / "bhsa_hierarchy" / "hierarchy_dag.tsv"
+DROPPED_OUT = ROOT / "resources" / "bhsa_hierarchy" / "dropped_edges.tsv"
 
 HUB_PERCENTILE = 98          # apposition heads above this out-degree percentile are dropped
 MIN_PROFILE_SIZE = 3         # a lexeme needs >= this many (verb,slot) contexts to be considered
@@ -159,21 +166,24 @@ def generality_scores(nodes: set[str], profiles: dict[str, set]) -> dict[str, in
 
 
 def enforce_acyclic(all_edges: dict[tuple[str, str], list[str]],
-                     scores: dict[str, int]) -> dict[tuple[str, str], list[str]]:
-    """Keep only edges consistent with generality(broader) > generality(narrower). A strict global
-    ordering can't cycle by construction (ties, or missing scores on either side, are dropped rather
-    than guessed at)."""
-    kept = {}
-    dropped = 0
+                     scores: dict[str, int]) -> tuple[dict[tuple[str, str], list[str]],
+                                                        dict[tuple[str, str], list[str]]]:
+    """(kept, dropped). Keep only edges consistent with generality(broader) > generality(narrower). A
+    strict global ordering can't cycle by construction (ties, or missing scores on either side, are
+    dropped rather than guessed at). `dropped` -- the direction each edge was originally proposed with
+    (apposition/distributional), not re-derived -- is the candidate pool for optional LLM adjudication
+    later (see adjudicate_direction_llm.py); persisted by main() so that pool doesn't have to be
+    reconstructed by re-running this filter by hand."""
+    kept, dropped = {}, {}
     for (b, n), sources in all_edges.items():
         sb, sn = scores.get(b), scores.get(n)
         if sb is not None and sn is not None and sb > sn:
             kept[(b, n)] = sources
         else:
-            dropped += 1
-    print(f"[hierarchy-dag] acyclic filter: {dropped} edges dropped (reversed/tied/unscored), "
+            dropped[(b, n)] = sources
+    print(f"[hierarchy-dag] acyclic filter: {len(dropped)} edges dropped (reversed/tied/unscored), "
           f"{len(kept)} kept", file=sys.stderr)
-    return kept
+    return kept, dropped
 
 
 def find_cycles(edges: list[tuple[str, str]]) -> list[list[str]]:
@@ -233,7 +243,7 @@ def main() -> int:
 
     all_nodes = {n for pair in all_edges for n in pair}
     scores = generality_scores(all_nodes, full_profiles)
-    all_edges = enforce_acyclic(all_edges, scores)
+    all_edges, dropped_edges = enforce_acyclic(all_edges, scores)
 
     residual_cycles = find_cycles(list(all_edges.keys()))
     print(f"[hierarchy-dag] residual cycles after filtering: {len(residual_cycles)} "
@@ -249,6 +259,19 @@ def main() -> int:
         for (b, n), sources in sorted(all_edges.items()):
             fh.write(f"{b}\t{n}\t{'|'.join(sources)}\n")
     print(f"[hierarchy-dag] -> {args.out}", file=sys.stderr)
+
+    DROPPED_OUT.parent.mkdir(parents=True, exist_ok=True)
+    with DROPPED_OUT.open("w", encoding="utf-8") as fh:
+        fh.write("# Edges enforce_acyclic() dropped (reversed/tied/unscored under the generality-\n"
+                  "# ordering filter) -- direction shown is as originally proposed by apposition/\n"
+                  "# distributional, NOT re-derived. Candidate pool for optional LLM adjudication,\n"
+                  "# see adjudicate_direction_llm.py. Distinct from hierarchy_dag_flagged.tsv (edges\n"
+                  "# that DID survive assembly but direction_yardstick.py's held-out check\n"
+                  "# CONTRADICTED).\n")
+        fh.write("broader_strong\tnarrower_strong\tsources\n")
+        for (b, n), sources in sorted(dropped_edges.items()):
+            fh.write(f"{b}\t{n}\t{'|'.join(sources)}\n")
+    print(f"[hierarchy-dag] -> {DROPPED_OUT}", file=sys.stderr)
     return 0
 
 

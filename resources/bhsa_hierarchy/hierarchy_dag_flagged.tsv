@@ -1,0 +1,8 @@
+# Edges dropped from hierarchy_dag.tsv: direction_yardstick.py's 5-seed held-out
+# majority vote CONTRADICTED the claimed broader->narrower direction. Small pool,
+# kept (not deleted) as the candidate set for the deferred Haiku adjudication pass
+# noted in internal-docs/phase-c-instrument-calibration-plan.md -- distinct from
+# the larger pool build_hierarchy_dag.py's enforce_acyclic() drops before assembly.
+broader_strong	narrower_strong	sources	verdict
+H3196	H2534	apposition:1	CONTRADICTED
+H5797	H8597	apposition:1	CONTRADICTED
