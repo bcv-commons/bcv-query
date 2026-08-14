@@ -166,3 +166,7 @@ resources/sefer_hashorashim/candidate_pairs.tsv
 # build_hbo_lex_export.py, published to HF (bcv-commons/hebrew-word-senses)
 resources/senses/hbo_lex_export.tsv
 shoresh/macula/_fetch_dictalm_cuda.py
+# dictalm_calibration_*: DictaLM-3.0-1.7B local-model calibration output (internal-scripts/
+# calibrate_dictalm.py). Calibration concluded negative for both tasks tested (see
+# internal-docs/phase-c-instrument-calibration-plan.md) -- kept on disk for reference, not published.
+resources/semantic_neighbors/dictalm_calibration_*.tsv

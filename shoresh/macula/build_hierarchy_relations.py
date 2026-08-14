@@ -39,6 +39,11 @@ OUT_DIR = ROOT / "resources" / "bhsa_hierarchy"
 BHSA_PATH = Path.home() / "text-fabric-data" / "github" / "ETCBC" / "bhsa" / "tf" / "2021"
 
 CONTENT_SP = {"subs", "verb", "adjv"}
+NUMERAL_LS = {"card", "ordn", "mult"}   # BHSA `ls` (lexical subset) values for cardinal/ordinal/
+                                        # multiplicative numbers -- e.g. "a thousand" as an apposition
+                                        # side is grammatically real but not meaningful hierarchy
+                                        # content. Checked 2026-08-15: 3.3% of content words carry one
+                                        # of these tags, a small and targeted exclusion.
 
 
 def _load_api():
@@ -51,7 +56,7 @@ def _load_api():
 def _content_word(node, F, node2strong) -> str | None:
     sp = F.sp.v(node)
     s = node2strong.get(node)
-    if s and sp in CONTENT_SP:
+    if s and sp in CONTENT_SP and F.ls.v(node) not in NUMERAL_LS:
         return s if s.startswith("H") else f"H{int(s):04d}"
     return None
 
