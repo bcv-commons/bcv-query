@@ -37,8 +37,12 @@ OUT_DIR = ROOT / "resources" / "bhsa_structural"
 BHSA_PATH = Path.home() / "text-fabric-data" / "github" / "ETCBC" / "bhsa" / "tf" / "2021"
 
 CONTENT_SP = {"subs", "verb", "adjv"}
-MIN_COUNT = 2   # a pair needs >= this many independent occurrences to enter the "corroborated" cut
-                # (validated 2026-08: raises coordination 63.7%->73.9%, apposition 48.3%->57.7%)
+MIN_COUNT = 2   # NOT CURRENTLY APPLIED (found 2026-08-14): no code in this file or in
+                # build_semantic_neighbors.py's _load_structural_pairs() filters by count — that
+                # function's own docstring confirms "no corroboration-count threshold" is used, the
+                # single-content-word-side restriction below does the precision work alone. This
+                # constant's SDBH-era justification (coordination 63.7%->73.9%) describes a filter
+                # that was never wired in. Left here as a known discrepancy, not re-derived.
 
 
 def _load_api():

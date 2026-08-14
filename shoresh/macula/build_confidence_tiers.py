@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Cross-signal-agreement confidence tiers — the publication gate for semantic_neighbors.
 
-Every individual signal in this pipeline (embedding, BDB roots, parallelism, Hebrew WordNet,
-structural, corroborated, ...) tops out somewhere between 35% and 90% SDBH `core`-agreement on its
-own. Measured 2026-08: requiring INDEPENDENT signal FAMILIES to agree on the same pair does far better
-than any single signal — >=2 families: 73.4% (3,247 pairs); >=3: 82.9% (817 pairs) — a bigger jump than
-any individual signal addition this whole project. This is the actual publication-quality lever, not
-more signal-hunting (see domain-replacement-roadmap.md).
+Historically measured against SDBH `core`-domain agreement (see domain-replacement-roadmap.md for
+that record: individual signals topped out 35-90% agreement; requiring >=2 independent signal
+FAMILIES to agree did far better than any single signal, 73.4% at >=2 vs 82.9% at >=3). SDBH is
+retired as the validation yardstick as of 2026-08-14 (internal-docs/text-anchored-semantics-plan.md)
+— `--validate` now scores against the text-anchored intrinsic yardstick (held-out slot-filler
+prediction, see intrinsic_yardstick.py) instead. The FAMILY_GATE constant in build_published_pairs.py
+still carries its SDBH-era value pending re-derivation under the new yardstick.
 
 "Family", not raw source tag: emb/lxx/gloss are all byproducts of the SAME embedding kNN pass and
 would trivially co-occur — counting them as 3 independent votes would be circular. Grouped into
@@ -82,7 +83,8 @@ def build() -> list[tuple[str, str, int, str]]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", type=Path, default=OUT_DIR / "confidence_tiers.tsv")
-    ap.add_argument("--validate", action="store_true", help="score vs SDBH core domain (internal yardstick)")
+    ap.add_argument("--validate", action="store_true",
+                     help="score vs the text-anchored intrinsic yardstick (see intrinsic_yardstick.py)")
     args = ap.parse_args()
 
     rows = build()
@@ -103,23 +105,12 @@ def main() -> int:
     print(f"[confidence-tiers] -> {args.out}", file=sys.stderr)
 
     if args.validate:
-        dom = collections.defaultdict(set)
-        domains_path = ROOT / "resources" / "semantic_domains" / "hbo.tsv"
-        if domains_path.exists():
-            for line in domains_path.read_text(encoding="utf-8").splitlines()[1:]:
-                p = line.split("\t")
-                if len(p) >= 3 and p[1] == "core":
-                    dom[p[0]].add(p[2])
-            for n in (1, 2, 3):
-                same = tot = 0
-                for a, b, nf, _ in rows:
-                    if nf < n:
-                        continue
-                    ds, db_ = dom.get(a, set()), dom.get(b, set())
-                    if ds and db_:
-                        tot += 1
-                        same += bool(ds & db_)
-                print(f"[validate] >= {n} families: {same}/{tot} = {100*same/max(tot,1):.1f}%", file=sys.stderr)
+        from macula.intrinsic_yardstick import Yardstick, validate_pairs
+
+        ys = Yardstick()
+        for n in (1, 2, 3):
+            pairs = [(a, b) for a, b, nf, _ in rows if nf >= n]
+            validate_pairs(ys, f">= {n} families", pairs)
     return 0
 
 

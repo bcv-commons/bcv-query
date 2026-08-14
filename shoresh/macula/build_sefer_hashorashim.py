@@ -7,8 +7,10 @@ its library to carry an open license — Public Domain/CC0/CC-BY/CC-BY-SA).
 
 Prototyped 2026-08 against a naive BDB-prose extraction (see build_wiktionary_roots.py-era session
 notes / domain-replacement-roadmap.md) — Sefer HaShorashim's candidates came out cleaner (35.6% SDBH
-core-agreement pre-LLM vs. BDB-prose's 15.5%) and far cheaper to fully build (~10-15k candidate pairs
-vs. BDB-prose's ~200k), so this is the one that got built out fully.
+core-agreement pre-LLM vs. BDB-prose's 15.5%, SDBH-era measurement) and far cheaper to fully build
+(~10-15k candidate pairs vs. BDB-prose's ~200k), so this is the one that got built out fully. SDBH
+retired as the validation yardstick 2026-08-14 (internal-docs/text-anchored-semantics-plan.md);
+`--validate` now scores against the text-anchored intrinsic yardstick instead.
 
 Method: page through every dictionary entry via Sefaria's `next` ref chain (DictionaryNode text,
 ~1,500-3,000 entries — no bulk-export endpoint, so this is ~1 API call per entry). Within each entry,
@@ -231,21 +233,10 @@ def main() -> int:
     print(f"[sefer-hashorashim] -> {args.out}", file=sys.stderr)
 
     if args.validate:
-        dom = collections.defaultdict(set)
-        domains_path = ROOT / "resources" / "semantic_domains" / "hbo.tsv"
-        for line in domains_path.read_text(encoding="utf-8").splitlines()[1:]:
-            p = line.split("\t")
-            if len(p) >= 3 and p[1] == "core":
-                dom[p[0]].add(p[2])
-        same = tot = 0
-        for pair in pairs:
-            a, b = tuple(pair)
-            ds, db_ = dom.get(a, set()), dom.get(b, set())
-            if ds and db_:
-                tot += 1
-                same += bool(ds & db_)
-        print(f"[validate] {same}/{tot} = {100*same/max(tot,1):.1f}% (pre-LLM candidate quality)",
-              file=sys.stderr)
+        from macula.intrinsic_yardstick import Yardstick, validate_pairs
+
+        ys = Yardstick()
+        validate_pairs(ys, "pre-LLM candidate quality", [tuple(p) for p in pairs])
     return 0
 
 

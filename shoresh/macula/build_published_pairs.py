@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Merge the three publication-confidence levers into one final published dataset.
 
-Lever #1 (build_confidence_tiers.py): pairs where >=2 INDEPENDENT signal families agree —
-73.4% SDBH `core`-agreement at scale (3,225 pairs).
+Lever #1 (build_confidence_tiers.py): pairs where >=2 INDEPENDENT signal families agree.
 Lever #2 (verify_pairs_llm.py): the remaining single-signal-family pairs, individually judged by an
-LLM (biblical-Hebrew lexicographer prompt, strict) — "yes" verdicts score 69.6% (4,192 pairs).
+LLM (biblical-Hebrew lexicographer prompt, strict).
 Lever #3 (build_sefer_hashorashim.py + verify_pairs_llm.py): candidates from Radak's Sefer HaShorashim
-(Public Domain, medieval rabbinic root dictionary), LLM-verified the same way as lever #2 — "yes"
-verdicts score 74.1% (761-pair checkable sample, 2026-08).
+(Public Domain, medieval rabbinic root dictionary), LLM-verified the same way as lever #2.
+
+Historically each lever was scored against SDBH `core`-domain agreement (73.4% / 69.6% / 74.1% —
+see domain-replacement-roadmap.md for that record). SDBH is retired as the validation yardstick as of
+2026-08-14 (internal-docs/text-anchored-semantics-plan.md); `--validate` now scores against the
+text-anchored intrinsic yardstick instead. FAMILY_GATE below still carries its SDBH-era value pending
+re-derivation under the new yardstick.
 
 A pair earns publication three ways: cross-signal agreement (no LLM needed), explicit LLM confirmation
 on single-signal candidates, or LLM confirmation on Sefer HaShorashim candidates. Neither lever alone is
@@ -20,7 +24,6 @@ subset).
 from __future__ import annotations
 
 import argparse
-import collections
 import sys
 from pathlib import Path
 
@@ -31,7 +34,12 @@ LLM_VERIFICATION = ROOT / "resources" / "semantic_neighbors" / "llm_pair_verific
 SEFER_HASHORASHIM_VERIFICATION = ROOT / "resources" / "sefer_hashorashim" / "llm_pair_verification.tsv"
 OUT_DIR = ROOT / "resources" / "semantic_neighbors"
 
-FAMILY_GATE = 2   # >=2 independent signal families — see build_confidence_tiers.py
+FAMILY_GATE = 2   # >=2 independent signal families — see build_confidence_tiers.py.
+                  # Re-derived 2026-08-14 under the text-anchored intrinsic yardstick (SDBH retired,
+                  # see internal-docs/text-anchored-semantics-plan.md) and reaffirmed: >=1 family does
+                  # NOT clear a frequency-matched random baseline on held-out slot-filler co-occurrence
+                  # (4.9% vs 5.9%), >=2 clearly does (14.2% vs 9.4%), >=3 further still (20.0% vs 9.0%)
+                  # but at a steep pair-count cost (816 vs 3,225). 2 remains the right cutoff.
 
 
 def load_family_tiers() -> dict[frozenset, tuple[int, str]]:
@@ -136,27 +144,17 @@ def main() -> int:
     print(f"[published-pairs] -> {args.out}", file=sys.stderr)
 
     if args.validate:
-        dom = collections.defaultdict(set)
-        domains_path = ROOT / "resources" / "semantic_domains" / "hbo.tsv"
-        for line in domains_path.read_text(encoding="utf-8").splitlines()[1:]:
-            p = line.split("\t")
-            if len(p) >= 3 and p[1] == "core":
-                dom[p[0]].add(p[2])
+        from macula.intrinsic_yardstick import Yardstick, validate_pairs
+
+        ys = Yardstick()
         for label, pred in (("all published", lambda r: True),
                             ("cross_signal only", lambda r: r[2] == "cross_signal"),
                             ("llm_verified only", lambda r: r[2] == "llm_verified"),
                             ("sefer_hashorashim_verified only",
                              lambda r: r[2] == "sefer_hashorashim_verified"),
                             ("multi-gate", lambda r: "+" in r[2])):
-            same = tot = 0
-            for a, b, gate, n_fam, verdict in rows:
-                if not pred((a, b, gate, n_fam, verdict)):
-                    continue
-                ds, db_ = dom.get(a, set()), dom.get(b, set())
-                if ds and db_:
-                    tot += 1
-                    same += bool(ds & db_)
-            print(f"[validate] {label}: {same}/{tot} = {100*same/max(tot,1):.1f}%", file=sys.stderr)
+            pairs = [(a, b) for a, b, gate, n_fam, verdict in rows if pred((a, b, gate, n_fam, verdict))]
+            validate_pairs(ys, label, pairs)
     return 0
 
 

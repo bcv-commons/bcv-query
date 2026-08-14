@@ -15,9 +15,11 @@ Method: networkx's built-in Louvain implementation (`louvain_communities`) on th
 weighted by score. No new dependency — networkx already ships this.
 
 Validation (internal only, never published — same rule as build_semantic_neighbors.py's --validate):
-mirrors that script's yardstick methodology exactly, but applied to CLUSTER COHABITATION instead of
-graph EDGES — for every same-cluster lexeme pair, does it share >=1 real NC domain code? This measures
-whether the clustering step preserves the neighbor graph's already-validated quality, or degrades it.
+scored against the text-anchored intrinsic yardstick (held-out slot-filler prediction, see
+intrinsic_yardstick.py) applied to CLUSTER COHABITATION instead of graph EDGES — same-cluster lexeme
+pairs vs. a frequency-matched random baseline. SDBH retired as the yardstick 2026-08-14, see
+internal-docs/text-anchored-semantics-plan.md. RESOLUTION below still carries its SDBH-era value
+pending re-derivation under the new yardstick.
 
   python -m macula.build_domain_clusters --validate
 """
@@ -36,7 +38,6 @@ from networkx.algorithms.community import louvain_communities
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 NEIGHBORS = ROOT / "resources" / "semantic_neighbors" / "by_lexeme.tsv"
-DOMAINS = ROOT / "resources" / "semantic_domains" / "hbo.tsv"
 OUT = ROOT / "resources" / "semantic_neighbors" / "domain_clusters.tsv"
 
 SEED = 13   # fixed, for reproducible cluster ids across rebuilds
@@ -116,45 +117,19 @@ def cluster(g: Graph, resolution: float = RESOLUTION) -> dict[str, int]:
     return assign
 
 
-def _load_domains() -> dict[str, set[str]]:
-    """strong -> {SDBH `core`-axis domain codes}. FIXED 2026-08: hbo.tsv carries FOUR domain_type
-    axes (core/lex/ctx/sdbg — see resources/semantic_domains/README.md) and this used to merge all
-    four indiscriminately, inflating agreement by ~4-5pp (two words matching only because they share
-    a `ctx` register tag like "Divine" isn't a synonymy signal). `core` is the one the README itself
-    calls "the concept axis — use this" for exactly this kind of comparison."""
-    dom: dict[str, set[str]] = collections.defaultdict(set)
-    if not DOMAINS.exists():
-        return dom
-    for line in DOMAINS.read_text(encoding="utf-8").splitlines()[1:]:
-        p = line.split("\t")
-        if len(p) >= 3 and p[1] == "core":
-            dom[p[0]].add(p[2])
-    return dom
-
-
 def validate(assign: dict[str, int]) -> None:
-    """Internal yardstick ONLY (never published): do same-cluster lexemes share a real NC domain?"""
-    dom = _load_domains()
-    if not dom:
-        print("[validate] no domains table", file=sys.stderr)
-        return
+    """Internal yardstick ONLY (never published): do same-cluster lexemes hold up under the
+    text-anchored intrinsic yardstick (held-out slot-filler prediction)? SDBH retired 2026-08-14 --
+    see internal-docs/text-anchored-semantics-plan.md."""
+    from macula.intrinsic_yardstick import Yardstick, validate_pairs
+
     by_cluster: dict[int, list[str]] = collections.defaultdict(list)
     for lx, cid in assign.items():
         by_cluster[cid].append(lx)
-    same = tot = 0
-    for members in by_cluster.values():
-        if len(members) < 2:
-            continue
-        for a, b in combinations(members, 2):
-            ds, db_ = dom.get(_hs(a), set()), dom.get(_hs(b), set())
-            if ds and db_:
-                tot += 1
-                same += bool(ds & db_)
-    if tot:
-        print(f"[validate] same-cluster pairs sharing >=1 NC domain: {same}/{tot} = {100*same/tot:.1f}%  "
-              f"(yardstick; cf. the neighbor graph's own high-conf edge rate)", file=sys.stderr)
-    else:
-        print("[validate] no same-cluster pairs had domain coverage on both sides", file=sys.stderr)
+    pairs = [(_hs(a), _hs(b)) for members in by_cluster.values() if len(members) >= 2
+             for a, b in combinations(members, 2)]
+    ys = Yardstick()
+    validate_pairs(ys, "same-cluster pairs", pairs)
 
 
 def main() -> int:

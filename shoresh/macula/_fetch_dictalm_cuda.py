@@ -1,34 +1,45 @@
 #!/usr/bin/env python3
-"""Download + smoke-test DictaLM-3.0-1.7B-Instruct via plain transformers + CUDA (Linux/GPU box).
+"""Smoke-test DictaLM-3.0-1.7B-Instruct via plain transformers + CUDA (Linux/GPU box).
 
 Supersedes fetch_dictalm.sh/_fetch_dictalm.py for this machine — those target MLX (Apple Silicon
-only). Same HF_HUB_DISABLE_XET fix carried forward (a known Xet-transfer-backend stall bug).
+only). Loads from a local directory populated by dictalm_curl_download.sh (~/models/), NOT via
+transformers' own HF-hub download — that path (and huggingface_hub's snapshot_download, even with
+HF_HUB_DISABLE_XET=1) starts a fresh randomly-named .incomplete temp file on every process restart
+and can't resume across one, which on this machine's frequent involuntary reboots meant repeated
+multi-GB downloads that never finished. Plain `curl -L -C -` against a fixed local filename resumes
+correctly across restarts; this script just loads the result.
 
-  .venv/bin/python macula/_fetch_dictalm_cuda.py
+  .venv/bin/python macula/_fetch_dictalm_cuda.py [--model-dir ~/models/dictalm-3.0-1.7b-instruct]
 """
 from __future__ import annotations
 
-import os
-
-os.environ["HF_HUB_DISABLE_XET"] = "1"
-
+import argparse
 import sys
 import time
+from pathlib import Path
 
-MODEL = "dicta-il/DictaLM-3.0-1.7B-Instruct"
+DEFAULT_MODEL_DIR = Path("~/models/dictalm-3.0-1.7b-instruct").expanduser()
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--model-dir", type=Path, default=DEFAULT_MODEL_DIR)
+    args = ap.parse_args()
+
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     if not torch.cuda.is_available():
         sys.exit("CUDA not available")
 
-    print(f"[dictalm] downloading/loading {MODEL} ...", file=sys.stderr)
+    weights = args.model_dir / "model.safetensors"
+    if not weights.exists():
+        sys.exit(f"{weights} not found — run dictalm_curl_download.sh first (or pass --model-dir)")
+
+    print(f"[dictalm] loading {args.model_dir} ...", file=sys.stderr)
     t0 = time.time()
-    tok = AutoTokenizer.from_pretrained(MODEL)
-    model = AutoModelForCausalLM.from_pretrained(MODEL, torch_dtype=torch.bfloat16)
+    tok = AutoTokenizer.from_pretrained(args.model_dir)
+    model = AutoModelForCausalLM.from_pretrained(args.model_dir, torch_dtype=torch.bfloat16)
     model.to("cuda")
     model.eval()
     print(f"[dictalm] loaded in {time.time()-t0:.1f}s, "

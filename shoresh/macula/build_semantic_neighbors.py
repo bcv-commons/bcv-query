@@ -11,8 +11,11 @@ Signals (merged into a consensus):
   gloss — lexemes whose English glosses share content words                                    [corroborate]
 
 Output: resources/semantic_neighbors/neighbors.parquet (lexeme, neighbor_lexeme, score, sources) + a
-manifest.json. CC0 (public texts + open model + CC-BY tables). The NC domains are used ONLY as an
-internal yardstick (--validate), never as an input or an output.
+manifest.json. CC0 (public texts + open model + CC-BY tables). --validate scores against the
+text-anchored intrinsic yardstick (held-out BHSA slot-filler prediction, see intrinsic_yardstick.py) —
+SDBH retired as the validation yardstick 2026-08-14, see internal-docs/text-anchored-semantics-plan.md.
+Per-signal percentages quoted below in --no-* flag help are the historical SDBH-era record and are
+pending re-derivation under the new yardstick.
 
   python -m macula.build_semantic_neighbors --validate
 """
@@ -37,7 +40,6 @@ BRIDGE = HERE / "bhsa-macula-bridge.db"
 HBO = ROOT / "resources" / "occurrences" / "hbo.db"
 EMB = ROOT / "resources" / "occurrences" / "context_emb.npz"
 LXX = ROOT / "resources" / "lxx_bridge.tsv"
-DOMAINS = ROOT / "resources" / "semantic_domains" / "hbo.tsv"
 OUT_DIR = ROOT / "resources" / "semantic_neighbors"
 LLM_EDGES = OUT_DIR / "llm_edges.tsv"        # method=llm layer (bcv-RAG/scripts/build_llm_neighbors.py)
 ALIGNED_HF_DIR = ROOT / "resources" / "aligned_lex_hf"   # bcv-commons/lexeme-alignments, ~924 languages
@@ -766,38 +768,25 @@ def _load_llm_edges(path):
 
 
 def _validate(rows, meta):
-    """Internal yardstick ONLY: do derived neighbors land in the same NC domain? (never published).
-    FIXED 2026-08: filter to domain_type=="core" (SDBH's concept axis) — see build_domain_clusters.py's
-    _load_domains() for the full explanation of why mixing in lex/ctx/sdbg inflated agreement."""
-    if not DOMAINS.exists():
-        print("[validate] no domains table", file=sys.stderr); return
-    dom = collections.defaultdict(set)
-    for line in DOMAINS.read_text(encoding="utf-8").splitlines()[1:]:
-        p = line.split("\t")
-        if len(p) >= 3 and p[1] == "core":
-            dom[p[0]].add(p[2])           # strong -> {core-axis domain codes}
-    def rate(pred):
-        same = tot = 0
-        for r in rows:
-            lx, nb, relation = r[0], r[1], r[5]
-            if relation == "antonym" or not pred(r):
-                continue
-            ds, dn = dom.get(meta[lx][0], set()), dom.get(meta.get(nb, ("", ""))[0], set())
-            if ds and dn:
-                tot += 1; same += bool(ds & dn)
-        return same, tot
+    """Internal yardstick ONLY: does the text-anchored intrinsic yardstick (held-out slot-filler
+    prediction) back up derived neighbors? SDBH retired as the yardstick 2026-08-14 — see
+    internal-docs/text-anchored-semantics-plan.md and macula/intrinsic_yardstick.py."""
+    from macula.intrinsic_yardstick import Yardstick, validate_pairs
+
+    ys = Yardstick()
     for name, pred in (("all-similar", lambda r: True),
                        ("high-conf", lambda r: r[4] == "high"),
                        ("prior-only", lambda r: r[4] == "prior")):
-        s, t = rate(pred)
-        if t:
-            print(f"[validate] {name}: {s}/{t} share >=1 NC domain = {100*s/t:.1f}%  (yardstick)",
-                  file=sys.stderr)
+        pairs = [(meta[r[0]][0], meta.get(r[1], ("", ""))[0]) for r in rows
+                 if r[5] != "antonym" and pred(r) and r[0] in meta and r[1] in meta]
+        pairs = [(a, b) for a, b in pairs if a and b]
+        validate_pairs(ys, name, pairs)
 
 
 def main():
     ap = argparse.ArgumentParser(description="Build the CC0 semantic-neighbors pack.")
-    ap.add_argument("--validate", action="store_true", help="score vs NC domains (internal yardstick)")
+    ap.add_argument("--validate", action="store_true",
+                     help="score vs the text-anchored intrinsic yardstick (internal, see intrinsic_yardstick.py)")
     ap.add_argument("--llm-edges", type=Path, default=LLM_EDGES if LLM_EDGES.exists() else None,
                     help="method=llm syn/ant edges to tier against (default: semantic_neighbors/llm_edges.tsv)")
     ap.add_argument("--emb", type=Path, default=EMB,
