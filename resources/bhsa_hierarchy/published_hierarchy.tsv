@@ -1,0 +1,277 @@
+# Published Hebrew hierarchy -- pruned + tree-shaped view of hierarchy_dag.tsv
+# (internal, unpruned, kept separately). EDGE-ONLY: direct parent->child pairs,
+# not multi-hop paths -- chaining rows yourself is not asserted to be semantically
+# coherent, see publish_hierarchy_dag.py. `tier`/`berel_cos` as in the internal DAG.
+# Text-anchored, no SDBH/MARBLE as an input (structural comparison only).
+broader_strong	broader_gloss	narrower_strong	narrower_gloss	tier	berel_cos
+H0060	mourning	H4553	mourning	medium	0.5460
+H0068	stone	H1285	covenant	medium	0.2566
+H0068	stone	H1496	cutting	high	0.6276
+H0068	stone	H3871	tablet	high	0.6254
+H0068	stone	H7050	sling	medium	0.4898
+H0068	stone	H7718	onyx	medium	0.6582
+H0113	lord	H4899	anointed	high	0.4064
+H0113	lord	H6635	army	medium	0.4409
+H0120	man	H3205	beget	medium	0.1158
+H0120	man	H7705	concubine	medium	
+H0127	land	H0505	thousand	medium	0.1032
+H0127	land	H6251	young	medium	
+H0134	socket	H7165	clasp	medium	0.7206
+H0157	love	H5414	give	medium	0.1346
+H0157	love	H6593	flax	medium	
+H0157	love	H6785	wool	medium	
+H0157	love	H8250	drink	medium	
+H0226	sign	H4159	wonder	medium	0.7577
+H0251	brother	H1060	firstborn	high	0.5750
+H0269	sister	H0761	Aramean	medium	0.4537
+H0269	sister	H1377	queen	medium	0.4280
+H0352	ram	H4302	plantation	medium	0.2271
+H0352	ram	H4394	setting	medium	0.4903
+H0352	ram	H7161	horn	medium	0.3605
+H0367	terror	H2825	darkness	medium	0.5146
+H0376	man	H1100	Belial	medium	0.4390
+H0398	eat	H5311	storm	medium	
+H0413	to(wards)	H3467	save	medium	
+H0639	face	H2740	burning anger	high	0.7841
+H0713	purple	H0948	fine linen	medium	0.7668
+H0727	ark	H0712	box	medium	0.7031
+H0727	ark	H6532	curtain	medium	0.6352
+H0730	cedar	H0231	hyssop	medium	0.4980
+H0776	land	H4033	sojourning	medium	0.6049
+H0776	land	H4138	relatives	medium	0.4574
+H0784	fire	H1259	hail	medium	0.3427
+H0784	fire	H3940	torch	medium	0.4632
+H0899	treachery	H8162	mixed stuff	medium	
+H0905	alone	H7848	acacia	medium	0.5785
+H0929	animal	H7698	offspring	medium	0.5175
+H0929	animal	H7998	spoil	medium	0.2225
+H0929	animal	H8318	swarm	medium	0.6188
+H0957	plunder	H4933	plunder	medium	0.6959
+H1060	firstborn	H6363	firstborn	medium	0.6357
+H1060	firstborn	H7358	womb	medium	0.4657
+H1241	cattle	H3532	lamb	high	0.8420
+H1347	pride	H1998	sound	medium	
+H1389	Gibeath-(elohim)	H0972	chosen	medium	0.0489
+H1397	great man	H8365	open	medium	
+H1419	great	H3974	light	medium	0.2391
+H1419	great	H3996	entrance	medium	0.4626
+H1419	great	H5104	River	medium	0.2924
+H1419	great	H8121	sun	medium	0.1959
+H1530	heap	H4583	habitation	medium	0.3253
+H1530	heap	H8565	dragon	medium	0.3003
+H1612	vine	H1706	honey	medium	0.1725
+H1612	vine	H2132	Olives	medium	0.3859
+H1616	sojourner	H8453	sojourner	medium	0.7967
+H1697	word	H1293	blessing	high	0.2975
+H1697	word	H5030	prophet	high	0.6432
+H1697	word	H7045	curse	medium	0.2637
+H1818	blood	H4888	anointing	medium	0.3213
+H1870	way	H4546	highway	high	0.2591
+H1870	way	H4611	deed	high	0.3212
+H1870	way	H6529	fruit	medium	
+H1926	glory	H8559	Tamar	medium	
+H2022	mountain	H1389	Gibeath-(elohim)	high	0.6242
+H2022	mountain	H4791	height	medium	0.1878
+H2077	sacrifice	H8002	peace offering	high	0.9081
+H2091	gold	H4219	bowl	medium	0.7352
+H2091	gold	H5145	consecration	medium	0.2359
+H2091	gold	H5458	enclosure	medium	0.8239
+H2114	be a stranger	H6184	ruthless	medium	0.3278
+H2205	old	H4294	tribe	medium	0.3886
+H2220	arm	H2389	strong	medium	0.5979
+H2220	arm	H7665	break	medium	0.2601
+H2230	storm	H6986	destruction	medium	0.5639
+H2230	storm	H8178	shuddering	medium	0.2445
+H2233	seed	H0157	love	medium	0.2103
+H2398	sin	H7843	ruin	medium	0.5454
+H2416	alive	H4940	family	medium	
+H2416	alive	H5775	bird	high	0.4594
+H2428	strength	H0214	treasure	high	0.5102
+H2428	strength	H0571	truth	medium	
+H2428	strength	H4082	province	medium	0.3759
+H2428	strength	H8130	hate	medium	
+H2450	wise	H3045	know	medium	0.3571
+H2450	wise	H6256	time	medium	0.1633
+H2450	wise	H6953	preacher	medium	0.4990
+H2472	dream	H2377	vision	medium	0.5170
+H2472	dream	H2492	be healthy	high	0.7978
+H2491	slain	H2181	fornicate	medium	0.1822
+H2491	slain	H6913	grave	medium	0.1591
+H2491	slain	H7901	lie down	medium	0.0748
+H2534	rage	H1606	rebuke	medium	0.2846
+H2677	half	H1425	Gad	medium	0.7980
+H2677	half	H7206	Reubenite	medium	0.7539
+H2691	court	H6442	inner	medium	0.8831
+H2719	sword	H1698	pestilence	medium	0.6035
+H2748	magician	H0825	enchanter	medium	
+H2781	reproach	H4148	discipline	medium	0.1478
+H2781	reproach	H4923	devastation	medium	0.4450
+H2822	darkness	H0653	darkness	medium	0.7298
+H2860	son-in-law	H3947	take	medium	0.1938
+H2896	pleasant	H2100	flow	medium	0.1897
+H2896	pleasant	H2461	milk	medium	0.1470
+H2896	pleasant	H5158	torrent	medium	
+H2983	Jebusite	H6522	Perizzite	high	0.9337
+H3158	Jezreel	H3761	Carmelite	medium	0.7353
+H3196	wine	H6071	sweet	medium	0.3689
+H3196	wine	H7416	pomegranate	medium	0.1415
+H3228	[Ben]jaminite	H0334	lefthanded	medium	
+H3372	fear	H1215	unjust-gain	medium	0.1923
+H3374	fear	H4172	fear	medium	0.2502
+H3467	save	H0046	mighty	medium	0.4286
+H3499	remainder	H7604	remain	medium	0.2619
+H3519	glory	H1420	greatness	medium	0.4442
+H3519	glory	H1926	glory	medium	0.5350
+H3519	glory	H6996	small	medium	0.1252
+H3519	glory	H7036	dishonor	medium	0.2664
+H3532	lamb	H3849	log	medium	0.6918
+H3627	article	H7198	bow	medium	
+H3627	article	H8522	quiver	medium	
+H3627	article	H8641	contribution	medium	0.6092
+H3674	associate	H0671	governors	medium	
+H3701	silver	H2487	change	medium	0.5648
+H3774	Cherethite	H6432	Pelethite	medium	0.9510
+H3778	Chaldea	H4751	bitter	medium	
+H3801	tunic	H6446	long-sleeved	medium	0.7986
+H3820	heart	H8267	deception	medium	0.2766
+H3851	flame	H2230	storm	medium	0.5245
+H3882	Leviathan	H1282	Bariah	medium	
+H3882	Leviathan	H6129	crooked	medium	
+H3899	food	H2471	bun	medium	0.5213
+H3899	food	H4682	unleavened bread	medium	0.5121
+H3899	food	H6720	provision	medium	0.3634
+H3978	food	H0402	food	medium	0.5882
+H4043	shield	H6793	hook	medium	0.6330
+H4043	shield	H7982	shield	medium	0.2998
+H4057	mouth	H4420	saltiness	medium	0.3381
+H4057	mouth	H6160	Arabah	high	0.6244
+H4196	altar	H4639	deed	high	0.1979
+H4219	bowl	H3257	shovel	medium	0.7799
+H4219	bowl	H4518	bowl	medium	0.8521
+H4219	bowl	H7086	dish	medium	0.9329
+H4294	tribe	H4731	rod	medium	0.2509
+H4294	tribe	H5387	leader	high	0.5553
+H4294	tribe	H8597	beauty	medium	0.0699
+H4325	water	H0098	pool	medium	0.5053
+H4325	water	H5869	eye	medium	0.1206
+H4325	water	H7579	draw	medium	0.5053
+H4325	water	H8415	abyss	medium	0.3914
+H4397	messenger	H3887	mock	medium	0.0376
+H4421	battle	H1368	mighty man	medium	0.5971
+H4437	kingdom	H5461	ruler	medium	0.0870
+H4455	prey	H0957	plunder	medium	0.0571
+H4503	offering	H1061	firstfruit	medium	0.6235
+H4503	offering	H5262	drink offering	high	0.8415
+H4541	liquid	H5695	calf	medium	0.6309
+H4581	security	H4261	desire	medium	0.2415
+H4581	security	H4885	rejoicing	medium	0.1918
+H4687	commandment	H2708	statute	high	0.7160
+H4720	sanctuary	H4263	compassion	medium	
+H4720	sanctuary	H4581	security	medium	0.0850
+H4725	place	H4629	Maareh	medium	
+H4731	rod	H5278	pleasantness	medium	0.0944
+H4733	refuge	H4054	pasture	medium	0.6817
+H4735	livestock	H1581	camel	medium	0.6504
+H4885	rejoicing	H5947	jubilant	medium	0.4552
+H4888	anointing	H4842	ointment	medium	0.5043
+H4888	anointing	H7545	spice	medium	
+H4899	anointed	H5057	leader	medium	0.4364
+H4908	tabernacle	H5715	testimony	high	0.6306
+H4940	family	H3498	remain	medium	0.3281
+H4960	feast	H8106	Shemer	medium	
+H5045	Negeb	H8219	Shephelah	medium	0.7101
+H5061	plague	H5424	scab	medium	0.8573
+H5104	River	H2975	Nile	high	
+H5104	River	H7342	Broad	medium	0.2493
+H5159	inheritance	H1347	pride	medium	0.1123
+H5288	youth	H3627	article	medium	0.0853
+H5288	youth	H5375	lift	high	0.2681
+H5288	youth	H7270	spy	medium	0.3274
+H5288	youth	H8334	minister	medium	0.3123
+H5291	maiden	H1330	virgin	medium	0.5176
+H5315	soul	H1818	blood	medium	0.2395
+H5359	vengeance	H7966	recompense	medium	0.5534
+H5387	leader	H0269	sister	medium	0.0522
+H5387	leader	H7148	chosen	medium	
+H5560	fine flour	H7058	flour	medium	0.6410
+H5612	scroll	H1540	Heglam	medium	0.1945
+H5612	scroll	H2856	seal	medium	0.3667
+H5612	scroll	H4736	purchase	medium	0.5023
+H5631	eunuch	H0644	bake	medium	0.3395
+H5631	eunuch	H6370	concubine	medium	0.3426
+H5631	eunuch	H8248	water	medium	0.0940
+H5632	chief	H1907	counselor	medium	0.7682
+H5633	lord	H0796	Ashdod	medium	0.6034
+H5633	lord	H0832	Ashkelonite	medium	
+H5633	lord	H1663	Gittite	medium	0.6049
+H5633	lord	H5841	Gaza	medium	
+H5633	lord	H6139	Ekron	medium	
+H5674	pass	H7725	return	medium	0.5424
+H5713	witness	H4150	meeting	high	
+H5769	forever	H8077	devastation	medium	0.2391
+H5775	bird	H7431	creeping	medium	0.9180
+H5795	goat	H6842	male goat	medium	0.6592
+H5797	strength	H4268	refuge	medium	0.6872
+H5869	eye	H6951	assembly	medium	0.1155
+H5930	burnt offering	H1242	morning	medium	0.1572
+H5930	burnt offering	H6153	evening	medium	0.4327
+H5945	high	H7069	buy	medium	0.2546
+H6041	afflicted	H1800	poor	medium	0.8053
+H6124	striped	H5348	speckled	medium	0.8876
+H6154	Arabia	H8359	warp	medium	0.8663
+H6160	Arabah	H4417	Salt (Sea)	medium	0.5444
+H6389	Peleg	H2989	Jabal	medium	
+H6522	Perizzite	H1622	Girgashite	medium	0.9298
+H6529	fruit	H3712	branch	medium	0.1479
+H6529	fruit	H5687	leafy	medium	0.2939
+H6529	fruit	H6057	branch	medium	0.2382
+H6629	flock	H4830	pasturing	medium	0.4801
+H6635	army	H1964	temple	medium	0.4448
+H6635	army	H4634	rank	medium	0.1873
+H6662	righteous	H8549	unblemished	medium	0.1062
+H6666	righteousness	H6520	villager	medium	
+H6918	holy	H1254	create	medium	0.2747
+H6924	East	H1755	generation	medium	0.2211
+H6924	East	H5608	recount	medium	0.1308
+H6963	voice	H8469	supplication	medium	0.5342
+H6975	thorn	H8069	Shamir	medium	
+H7198	bow	H1369	might	medium	0.2849
+H7198	bow	H7225	first	medium	
+H7218	head	H1419	great	medium	0.2941
+H7218	head	H2374	seer	medium	0.2954
+H7218	head	H8269	ruler	medium	0.5005
+H7272	foot	H1916	footstool	medium	0.5350
+H7272	foot	H6471	beat	medium	0.1951
+H7307	spirit	H6346	governor	medium	
+H7323	run	H0327	steed	medium	
+H7323	run	H7409	steed	medium	
+H7393	chariot	H1270	iron	medium	0.3278
+H7453	neighbor	H5726	Adullamite	medium	0.1651
+H7523	murder	H5221	smite	medium	0.4060
+H7626	tribe	H2270	companion	medium	0.3743
+H7676	Sabbath	H4744	assembly	medium	0.6031
+H7704	Sirion	H8124	Shimshai	medium	
+H7785	leg	H2373	breast	medium	0.9299
+H7785	leg	H8573	wave offering	medium	0.8171
+H7794	cattle	H6499	bullock	medium	0.4798
+H7891	sing	H6496	overseer	medium	0.3328
+H7892	song	H4210	melody	medium	0.4214
+H8034	name	H0413	to(wards)	medium	
+H8034	name	H4886	anoint	medium	0.2467
+H8034	name	H5769	forever	high	0.4203
+H8048	Shammah	H6723	dryness	medium	
+H8048	Shammah	H8322	hissing	medium	
+H8064	heaven	H0676	finger	medium	0.0906
+H8064	heaven	H3427	dwell	medium	0.0511
+H8064	heaven	H4349	foundation	medium	0.6540
+H8064	heaven	H7549	expanse	medium	0.6797
+H8069	Shamir	H7898	thornbush	medium	
+H8141	year	H4643	tithe	medium	0.3365
+H8141	year	H8059	remission	medium	0.5550
+H8269	ruler	H2428	strength	medium	0.7729
+H8269	ruler	H3289	advise	medium	0.3364
+H8269	ruler	H5631	eunuch	high	0.8479
+H8269	ruler	H6485	reckon	medium	0.6066
+H8316	fire	H3980	fuel	medium	
+H8334	minister	H6486	punishment	medium	
+H8441	abomination	H8251	abomination	medium	0.5727

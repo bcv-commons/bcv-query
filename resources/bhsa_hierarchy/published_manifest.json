@@ -1,0 +1,15 @@
+{
+  "dataset": "bhsa_hierarchy/published_hierarchy",
+  "derived_from": "hierarchy_dag.tsv (internal, kept separately, not pruned)",
+  "method": "hub-edge removal (out-degree >= hub_cutoff dropped) + single-best-parent collapse (tier, then berel_cos, as tie-break)",
+  "hub_cutoff": 6,
+  "shape_target": "structural comparison to SDBH/Louw-Nida's published domain hierarchy (2 levels, ~93 top-level domains, strict tree, branching ~8.9) -- SDBH data not used as an input, retirement decision unchanged",
+  "scope_note": "edge-only (direct parent->child); multi-hop paths not asserted coherent",
+  "nodes": 403,
+  "edges": 271,
+  "components": 132,
+  "max_component_size": 21,
+  "max_depth": 4,
+  "components_depth_ge3": 6,
+  "content_sha256": "ecb75380083645ef2abd4a4b70c7c7aea55c38863945fe7f09ff64a5c0e6022d"
+}
