@@ -12,13 +12,17 @@ lexical/etymological derivation):
     same logic as T'OMIM's parallelism but from prose coordination, not poetic half-verses.
   apposition (phrase_atom rela=Appo): "the man, the prophet" restatement/specification pairs.
 
-Precision note (2026-08 finding): the naive extraction — pairing ALL content words under a coordinated
-subphrase against ALL content words under its `mother` — is noisy (mother can span more than the
-specific coordination partner when either side has multiple content words, producing spurious cross-
-products). Restricting to sides that resolve to EXACTLY ONE content word raises quality substantially
-(coordination: 49.5% -> 63.7% SDBH-domain agreement; apposition: 42.8% -> 48.3%) at a real but bounded
-recall cost. Precision was chosen deliberately — this project's current need is confidence, not
-coverage (see domain-replacement-roadmap.md).
+Precision note, SUPERSEDED 2026-08-15 (Phase B, text-anchored-semantics-plan.md): this script used to
+restrict to sides resolving to EXACTLY ONE content word, justified by an SDBH-domain-agreement jump
+(coordination 49.5% -> 63.7%, apposition 42.8% -> 48.3%) that made the naive all-cross-product
+extraction look much noisier than it turns out to be. Re-measured against the text-anchored intrinsic
+yardstick (held-out slot-filler prediction, SDBH retired as validator) across 5 book-level train/test
+splits: naive extraction's lift over a frequency-matched baseline is nearly IDENTICAL to the restricted
+version for apposition (1.76x vs 1.76x -- no cost at all) and only modestly lower for coordination
+(1.82x vs 1.99x, ~9% relative) -- while yielding 3.3x/4.7x more pairs (6,411/1,280 vs 1,939/275). The
+restriction is now REMOVED: naive extraction is the default, at 3.5x the total coverage the previous
+years-long default carried. The single-content-word-only path is kept as a legacy option (--restricted)
+for anyone who wants the higher-precision/lower-recall variant.
 
   python -m macula.build_bhsa_structural_pairs
 """
@@ -37,12 +41,6 @@ OUT_DIR = ROOT / "resources" / "bhsa_structural"
 BHSA_PATH = Path.home() / "text-fabric-data" / "github" / "ETCBC" / "bhsa" / "tf" / "2021"
 
 CONTENT_SP = {"subs", "verb", "adjv"}
-MIN_COUNT = 2   # NOT CURRENTLY APPLIED (found 2026-08-14): no code in this file or in
-                # build_semantic_neighbors.py's _load_structural_pairs() filters by count — that
-                # function's own docstring confirms "no corroboration-count threshold" is used, the
-                # single-content-word-side restriction below does the precision work alone. This
-                # constant's SDBH-era justification (coordination 63.7%->73.9%) describes a filter
-                # that was never wired in. Left here as a known discrepancy, not re-derived.
 
 
 def _load_api():
@@ -69,14 +67,27 @@ def _content_words(node, F, L, node2strong) -> list[str]:
     return out
 
 
-def extract() -> tuple[collections.Counter, collections.Counter]:
+def extract(restricted: bool = False) -> tuple[collections.Counter, collections.Counter]:
     """(coordination_pairs, apposition_pairs): Counter[frozenset({H_a, H_b})] -> occurrence count.
-    Only pairs where BOTH sides resolve to exactly one content word are kept (see module docstring)."""
+
+    restricted=False (default, since 2026-08-15): all-cross-product pairing between the two sides --
+    see module docstring for the text-anchored measurement justifying this. restricted=True: legacy
+    single-content-word-side-only variant (higher precision, ~3.5x less coverage)."""
     api = _load_api()
     F, E, L = api.F, api.E, api.L
 
     hbo = sqlite3.connect(f"file:{HBO}?mode=ro", uri=True)
     node2strong = dict(hbo.execute("SELECT node, strong FROM occurrence WHERE strong IS NOT NULL"))
+
+    def pair_up(a_words, b_words, counter):
+        if restricted:
+            if len(a_words) == 1 and len(b_words) == 1 and a_words[0] != b_words[0]:
+                counter[frozenset((a_words[0], b_words[0]))] += 1
+        else:
+            for a in a_words:
+                for b in b_words:
+                    if a != b:
+                        counter[frozenset((a, b))] += 1
 
     coord: collections.Counter = collections.Counter()
     for n in F.otype.s("subphrase"):
@@ -85,10 +96,7 @@ def extract() -> tuple[collections.Counter, collections.Counter]:
         m = E.mother.f(n)
         if not m:
             continue
-        a_words = _content_words(n, F, L, node2strong)
-        b_words = _content_words(m[0], F, L, node2strong)
-        if len(a_words) == 1 and len(b_words) == 1 and a_words[0] != b_words[0]:
-            coord[frozenset((a_words[0], b_words[0]))] += 1
+        pair_up(_content_words(n, F, L, node2strong), _content_words(m[0], F, L, node2strong), coord)
 
     appo: collections.Counter = collections.Counter()
     for n in F.otype.s("phrase_atom"):
@@ -103,9 +111,7 @@ def extract() -> tuple[collections.Counter, collections.Counter]:
             b_words = [hs] if hs else []
         else:
             b_words = _content_words(mo, F, L, node2strong)
-        a_words = _content_words(n, F, L, node2strong)
-        if len(a_words) == 1 and len(b_words) == 1 and a_words[0] != b_words[0]:
-            appo[frozenset((a_words[0], b_words[0]))] += 1
+        pair_up(_content_words(n, F, L, node2strong), b_words, appo)
 
     print(f"[bhsa-structural] coordination: {len(coord)} distinct pairs, {sum(coord.values())} occurrences",
           file=sys.stderr)
@@ -114,9 +120,9 @@ def extract() -> tuple[collections.Counter, collections.Counter]:
     return coord, appo
 
 
-def build() -> list[tuple[str, str, str, int]]:
+def build(restricted: bool = False) -> list[tuple[str, str, str, int]]:
     """[(strong_a, strong_b, relation, count)] — relation in {coordination, apposition}."""
-    coord, appo = extract()
+    coord, appo = extract(restricted=restricted)
     rows = []
     for pair, cnt in coord.items():
         a, b = sorted(pair)
@@ -130,16 +136,20 @@ def build() -> list[tuple[str, str, str, int]]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", type=Path, default=OUT_DIR / "structural_pairs.tsv")
+    ap.add_argument("--restricted", action="store_true",
+                     help="legacy single-content-word-side-only extraction (~3.5x less coverage, "
+                          "the pre-2026-08-15 default) instead of the current all-cross-product default")
     args = ap.parse_args()
 
-    rows = build()
+    rows = build(restricted=args.restricted)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
         fh.write("# Biblical Hebrew syntactic-structure word pairs, via Context-Fabric (ETCBC/BHSA).\n"
                   "# coordination (subphrase rela=par): \"X and Y\" constructions. apposition (phrase_atom\n"
                   "# rela=Appo): \"the man, the prophet\" restatement pairs. Independent of BDB/UBS MARBLE/\n"
-                  "# Hebrew WordNet — syntactic structure, not lexical/etymological derivation. Restricted to\n"
-                  "# single-content-word sides (precision > recall — see build_bhsa_structural_pairs.py).\n"
+                  "# Hebrew WordNet — syntactic structure, not lexical/etymological derivation.\n"
+                  f"# Extraction: {'RESTRICTED (legacy, --restricted)' if args.restricted else 'all-cross-product (default since 2026-08-15)'}"
+                  " — see build_bhsa_structural_pairs.py and internal-docs/text-anchored-semantics-plan.md.\n"
                   "# count: independent occurrences across the OT (corroboration strength).\n")
         fh.write("strong_a\tstrong_b\trelation\tcount\n")
         for a, b, relation, cnt in sorted(rows, key=lambda r: (r[2], -r[3], r[0])):

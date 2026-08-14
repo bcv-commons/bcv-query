@@ -17,13 +17,13 @@
   "confidence_tiers": {
     "high": 3300,
     "recall": 32321,
-    "prior": 29267
+    "prior": 39120
   },
   "lexemes": 3597,
-  "edges": 64888,
+  "edges": 74741,
   "topk": 10,
   "min_cos": 0.3,
   "min_occ": 3,
-  "content_sha256": "e3b803847ebb698af3727fa116ea41d56ca4ef5ce65b939e2397988b55ef4aa0",
+  "content_sha256": "c1e8da1c3b5e54d1b7e1f2e1ec7e5d7441ac752c5cebdf81d74ebe5cead8c5c2",
   "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick."
 }
