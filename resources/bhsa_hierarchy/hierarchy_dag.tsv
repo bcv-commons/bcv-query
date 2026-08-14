@@ -2,643 +2,644 @@
 # direction (BHSA grammar) + distributional inclusion (held-out verified, see
 # build_hierarchy_dag.py). Text-anchored, no SDBH/MARBLE.
 # `tier`: high = CONFIRMED by direction_yardstick.py's 5-seed held-out majority
-# vote (independent check); medium = UNDETERMINED there (usually held-out
-# sparsity, not counter-evidence) -- see tier_hierarchy_dag.py. Edges the vote
-# CONTRADICTED are excluded here, see hierarchy_dag_flagged.tsv.
-broader_strong	narrower_strong	sources	tier
-H0001	H1241	apposition:1	high
-H0001	H1323	apposition:1	medium
-H0001	H3548	apposition:1	high
-H0001	H3627	apposition:1	high
-H0001	H4138	apposition:1|distributional:1.00	medium
-H0001	H6343	apposition:1	medium
-H0001	H6629	apposition:1	high
-H0001	H6996	apposition:1	high
-H0001	H8269	apposition:1	high
-H0060	H4553	apposition:1	medium
-H0068	H1285	apposition:2	medium
-H0068	H1496	distributional:1.00	high
-H0068	H3871	apposition:2	high
-H0068	H7050	distributional:1.00	medium
-H0068	H7718	distributional:1.00	medium
-H0113	H4899	apposition:2	high
-H0113	H6635	apposition:5	medium
-H0120	H3205	apposition:1	medium
-H0120	H7705	apposition:2	medium
-H0127	H0505	apposition:1	medium
-H0127	H6251	apposition:1	medium
-H0127	H7698	apposition:1	medium
-H0134	H7165	distributional:1.00	medium
-H0157	H5414	apposition:1	medium
-H0157	H6593	apposition:1	medium
-H0157	H6785	apposition:1	medium
-H0157	H8250	apposition:1	medium
-H0226	H4159	distributional:0.82	medium
-H0251	H1060	distributional:0.81	high
-H0269	H0761	apposition:1	medium
-H0269	H1330	apposition:1	medium
-H0269	H1377	apposition:1	medium
-H0310	H5414	apposition:1	medium
-H0310	H5984	apposition:1	medium
-H0310	H6593	apposition:1	medium
-H0310	H6722	apposition:1	medium
-H0310	H6785	apposition:1	medium
-H0310	H8081	apposition:1	medium
-H0310	H8250	apposition:1	medium
-H0310	H8251	apposition:1	medium
-H0352	H4302	apposition:1	medium
-H0352	H4394	apposition:1|distributional:0.83	medium
-H0352	H7161	apposition:2	medium
-H0367	H2825	apposition:1	medium
-H0376	H1100	distributional:0.86	medium
-H0398	H2230	apposition:1	medium
-H0398	H5311	apposition:1	medium
-H0413	H3467	apposition:1	medium
-H0413	H7069	apposition:1	medium
-H0505	H6485	distributional:0.80	medium
-H0567	H1622	distributional:1.00	medium
-H0567	H1706	apposition:1	medium
-H0567	H2100	apposition:1	medium
-H0567	H2340	distributional:0.80	high
-H0567	H2461	apposition:1	medium
-H0567	H6522	distributional:1.00	high
-H0639	H1259	apposition:1	medium
-H0639	H2230	apposition:1	medium
-H0639	H2740	distributional:0.92	high
-H0639	H4899	apposition:1	medium
-H0639	H5311	apposition:1	medium
-H0713	H0948	distributional:1.00	medium
-H0727	H0712	distributional:1.00	medium
-H0727	H6532	distributional:0.80	medium
-H0730	H0231	distributional:1.00	medium
-H0776	H4033	distributional:0.83	medium
-H0776	H4138	distributional:0.86	medium
-H0784	H1259	apposition:1	medium
-H0784	H2230	apposition:1	medium
-H0784	H3940	distributional:0.80	medium
-H0784	H5311	apposition:1	medium
-H0802	H0269	apposition:1	high
-H0802	H0490	apposition:4	high
-H0802	H1173	apposition:1	medium
-H0802	H2181	apposition:2	medium
-H0802	H2850	apposition:1	high
-H0802	H3243	apposition:1	high
-H0802	H3618	distributional:0.82	medium
-H0802	H3761	apposition:3	medium
-H0802	H5031	distributional:1.00	medium
-H0802	H6370	apposition:4|distributional:0.93	high
-H0802	H7017	apposition:2	medium
-H0802	H7986	apposition:1	medium
-H0802	H7998	apposition:1	high
-H0802	H8283	apposition:1	medium
-H0899	H8162	apposition:1	medium
-H0905	H7848	apposition:1	medium
-H0929	H6251	apposition:1	medium
-H0929	H7698	apposition:1	medium
-H0929	H7998	apposition:1	medium
-H0929	H8318	distributional:0.80	medium
-H0953	H7665	apposition:1	medium
-H0957	H4933	distributional:1.00	medium
-H1004	H0001	apposition:1	high
-H1004	H0168	apposition:1	high
-H1004	H0214	distributional:0.93	high
-H1004	H0361	distributional:1.00	medium
-H1004	H1473	distributional:0.86	medium
-H1004	H1588	apposition:1	medium
-H1004	H1964	apposition:2|distributional:0.86	high
-H1004	H2270	apposition:1	medium
-H1004	H2315	distributional:0.80	medium
-H1004	H2691	apposition:1|distributional:0.86	high
-H1004	H3548	apposition:1	high
-H1004	H3608	distributional:0.83	medium
-H1004	H3627	apposition:1	high
-H1004	H3957	distributional:0.89	medium
-H1004	H4138	distributional:1.00	medium
-H1004	H4805	apposition:1|distributional:0.83	medium
-H1004	H5608	apposition:2	medium
-H1004	H5650	apposition:1	high
-H1004	H5944	distributional:1.00	medium
-H1004	H5947	apposition:1	medium
-H1004	H6442	distributional:1.00	medium
-H1004	H6918	apposition:1	high
-H1004	H6944	apposition:2	high
-H1004	H6996	apposition:1	high
-H1004	H7151	apposition:1	medium
-H1060	H6363	apposition:1	medium
-H1060	H7358	apposition:1	medium
-H1121	H0761	distributional:0.83	medium
-H1121	H0972	distributional:0.80	medium
-H1121	H1060	distributional:0.90	high
-H1121	H2677	distributional:0.90	high
-H1121	H2945	distributional:0.83	high
-H1121	H3205	distributional:0.86	medium
-H1121	H4940	distributional:0.93	high
-H1121	H5003	distributional:1.00	medium
-H1121	H5387	distributional:0.81	high
-H1121	H5608	distributional:0.94	medium
-H1121	H6956	distributional:1.00	high
-H1167	H0567	apposition:1	medium
-H1167	H1622	apposition:1	medium
-H1167	H2340	apposition:1	medium
-H1167	H2850	apposition:1	medium
-H1167	H2983	apposition:1	medium
-H1167	H3669	apposition:1	medium
-H1167	H6522	apposition:1	medium
-H1241	H3532	distributional:0.82	high
-H1259	H6986	apposition:1	medium
-H1259	H8178	apposition:1	medium
-H1323	H0269	apposition:3	high
-H1323	H0517	apposition:1	medium
-H1323	H0761	apposition:1	medium
-H1323	H1330	apposition:2	high
-H1323	H1389	apposition:1	high
-H1323	H1569	apposition:1	medium
-H1323	H1730	apposition:1	medium
-H1323	H2340	apposition:1	medium
-H1323	H2850	apposition:1	high
-H1323	H3669	apposition:1	medium
-H1323	H6370	distributional:0.87	high
-H1323	H6722	apposition:1	medium
-H1347	H1998	apposition:1	medium
-H1350	H0046	apposition:2	medium
-H1389	H0972	apposition:1	medium
-H1397	H8365	apposition:2	medium
-H1419	H2850	apposition:1	medium
-H1419	H3974	apposition:1	medium
-H1419	H3996	apposition:1	medium
-H1419	H5104	apposition:3	medium
-H1419	H8121	apposition:1	medium
-H1471	H0341	apposition:1	medium
-H1471	H2233	apposition:1	medium
-H1471	H3515	apposition:1	medium
-H1471	H4421	apposition:1	medium
-H1471	H4940	apposition:1	medium
-H1471	H5771	apposition:1	medium
-H1471	H7489	apposition:1	medium
-H1471	H7604	apposition:2	high
-H1471	H7843	apposition:1	medium
-H1530	H4583	apposition:1	medium
-H1530	H8565	apposition:1	medium
-H1612	H1706	apposition:1	medium
-H1612	H2132	apposition:1	medium
-H1616	H8453	apposition:1|distributional:0.83	medium
-H1697	H1100	apposition:1	medium
-H1697	H1293	apposition:2	high
-H1697	H5030	apposition:2	high
-H1697	H7045	apposition:2	medium
-H1818	H4888	distributional:0.86	medium
-H1870	H4546	distributional:0.82	high
-H1870	H4611	apposition:1	high
-H1870	H6529	apposition:1	medium
-H1926	H3712	apposition:1	medium
-H1926	H5687	apposition:1	medium
-H1926	H6057	apposition:1	medium
-H1926	H8559	apposition:1	medium
-H2022	H1389	apposition:1	high
-H2022	H4791	apposition:1	medium
-H2077	H8002	apposition:2|distributional:0.81	high
-H2091	H4219	distributional:0.83	medium
-H2091	H5145	apposition:1	medium
-H2091	H5458	apposition:1	medium
-H2091	H8641	apposition:1	medium
-H2114	H6184	apposition:1	medium
-H2197	H5311	apposition:1	medium
-H2205	H4294	apposition:1	medium
-H2220	H2389	apposition:1	medium
-H2220	H7665	apposition:1	medium
-H2230	H6986	apposition:1	medium
-H2230	H8178	apposition:1	medium
-H2233	H0157	apposition:1	medium
-H2398	H7843	apposition:1	medium
-H2416	H4940	apposition:1	medium
-H2416	H5775	apposition:1	high
-H2416	H6635	apposition:1	medium
-H2416	H7431	apposition:1|distributional:0.83	medium
-H2428	H0214	apposition:1	high
-H2428	H0571	apposition:1	medium
-H2428	H1215	apposition:1	medium
-H2428	H4082	apposition:1	medium
-H2428	H8130	apposition:1	medium
-H2450	H3045	apposition:1	medium
-H2450	H6256	apposition:1	medium
-H2450	H6953	distributional:1.00	medium
-H2472	H2377	apposition:1	medium
-H2472	H2492	distributional:1.00	high
-H2491	H2181	apposition:1	medium
-H2491	H6913	apposition:1	medium
-H2491	H7901	apposition:1	medium
-H2534	H1606	apposition:1	medium
-H2677	H1425	distributional:1.00	medium
-H2677	H7206	distributional:1.00	medium
-H2691	H6442	distributional:1.00	medium
-H2719	H1698	distributional:0.91	medium
-H2748	H0825	apposition:1	medium
-H2781	H4148	apposition:1	medium
-H2781	H4923	apposition:1	medium
-H2822	H0653	distributional:1.00	medium
-H2850	H1622	distributional:1.00	medium
-H2850	H1706	apposition:1	medium
-H2850	H2100	apposition:1	medium
-H2850	H2340	distributional:0.80	medium
-H2850	H2461	apposition:1	medium
-H2850	H6522	distributional:1.00	medium
-H2860	H3947	apposition:1	medium
-H2896	H1706	apposition:1	medium
-H2896	H2100	apposition:1	medium
-H2896	H2461	apposition:1	medium
-H2896	H5158	apposition:1	medium
-H2983	H1622	distributional:1.00	medium
-H2983	H6522	distributional:0.89	high
-H3027	H0251	apposition:1	medium
-H3027	H0676	distributional:0.86	medium
-H3027	H1489	apposition:1	medium
-H3027	H3318	apposition:1	medium
-H3027	H5030	apposition:3	medium
-H3027	H5104	apposition:1	medium
-H3027	H5608	apposition:1	medium
-H3027	H5650	apposition:2	medium
-H3027	H7676	apposition:1	medium
-H3117	H1755	apposition:1	medium
-H3117	H5769	apposition:1	high
-H3117	H6256	apposition:2	medium
-H3117	H6486	apposition:1	medium
-H3117	H7966	apposition:1	medium
-H3117	H8141	apposition:2	high
-H3158	H3761	distributional:1.00	medium
-H3196	H6071	apposition:1	medium
-H3196	H7416	apposition:1	medium
-H3206	H8267	apposition:1	medium
-H3220	H2348	distributional:1.00	medium
-H3220	H3996	apposition:1	medium
-H3220	H4417	apposition:2	medium
-H3220	H5488	distributional:0.92	high
-H3220	H8121	apposition:1	medium
-H3220	H8415	apposition:1	medium
-H3228	H0334	apposition:1	medium
-H3372	H1215	apposition:1	medium
-H3374	H4172	distributional:1.00	medium
-H3427	H3669	apposition:2	high
-H3427	H6522	apposition:1	high
-H3467	H0046	apposition:2	medium
-H3499	H7604	apposition:1	medium
-H3519	H1420	distributional:1.00	medium
-H3519	H1926	apposition:1	medium
-H3519	H6996	apposition:1	medium
-H3519	H7036	apposition:1	medium
-H3532	H3849	distributional:1.00	medium
-H3548	H0727	apposition:9	high
-H3548	H1285	apposition:5	medium
-H3548	H1323	apposition:1	medium
-H3548	H3603	apposition:1	high
-H3548	H4720	apposition:1	medium
-H3548	H5375	apposition:9	high
-H3548	H5592	apposition:1	medium
-H3548	H5715	apposition:1	medium
-H3548	H7218	apposition:1	medium
-H3548	H7626	apposition:1	high
-H3548	H7782	apposition:1	medium
-H3548	H8104	apposition:1	high
-H3548	H8334	apposition:3	high
-H3548	H8628	apposition:1	medium
-H3605	H0929	distributional:0.84	high
-H3605	H1419	distributional:0.81	high
-H3605	H2945	distributional:1.00	high
-H3605	H3627	distributional:0.86	high
-H3605	H4245	distributional:1.00	medium
-H3605	H4284	distributional:0.86	high
-H3605	H4467	distributional:0.91	high
-H3605	H4475	distributional:1.00	medium
-H3605	H4736	distributional:0.86	high
-H3605	H4916	distributional:1.00	high
-H3605	H5647	distributional:1.00	medium
-H3605	H6297	distributional:0.88	high
-H3605	H6951	distributional:0.91	high
-H3605	H6996	distributional:0.87	high
-H3605	H7379	distributional:0.83	high
-H3605	H7399	distributional:0.91	high
-H3605	H7488	distributional:0.80	medium
-H3605	H7611	distributional:0.92	high
-H3605	H8199	distributional:0.88	high
-H3605	H8403	distributional:0.83	medium
-H3627	H7198	apposition:1	medium
-H3627	H8522	apposition:1	medium
-H3627	H8641	apposition:1	medium
-H3669	H1622	distributional:1.00	medium
-H3669	H1706	apposition:1	medium
-H3669	H2100	apposition:1	medium
-H3669	H2340	distributional:0.90	high
-H3669	H2461	apposition:1	medium
-H3669	H6522	distributional:1.00	high
-H3674	H0671	apposition:2	medium
-H3701	H2487	distributional:1.00	medium
-H3701	H8641	apposition:1	medium
-H3774	H6432	distributional:1.00	medium
-H3778	H4751	apposition:1	medium
-H3801	H6446	apposition:1|distributional:0.80	medium
-H3820	H0761	apposition:1	medium
-H3820	H5030	apposition:1	medium
-H3820	H8267	apposition:1	medium
-H3851	H2230	apposition:1	medium
-H3851	H5311	apposition:1	medium
-H3878	H0727	apposition:2	medium
-H3878	H1285	apposition:2	medium
-H3878	H4908	apposition:2	medium
-H3878	H4931	apposition:2	medium
-H3878	H5375	apposition:2	high
-H3878	H5592	apposition:1	medium
-H3878	H7523	apposition:1	medium
-H3878	H7626	apposition:1	medium
-H3878	H7778	apposition:1	medium
-H3878	H8104	apposition:3	high
-H3878	H8334	apposition:2	high
-H3882	H1282	apposition:1	medium
-H3882	H6129	apposition:1	medium
-H3899	H2471	distributional:0.86	medium
-H3899	H4682	distributional:1.00	medium
-H3899	H6720	distributional:1.00	medium
-H3978	H0402	distributional:1.00	medium
-H4043	H6793	distributional:0.86	medium
-H4043	H7982	distributional:1.00	medium
-H4057	H2850	apposition:1	medium
-H4057	H4420	apposition:1	medium
-H4057	H6160	distributional:0.85	high
-H4196	H4639	apposition:1	high
-H4219	H3257	distributional:1.00	medium
-H4219	H4518	distributional:1.00	medium
-H4219	H7086	distributional:1.00	medium
-H4289	H3257	distributional:1.00	medium
-H4294	H4731	apposition:1	medium
-H4294	H5387	apposition:1	high
-H4294	H8597	apposition:1	medium
-H4325	H0098	distributional:0.80	medium
-H4325	H5869	apposition:1	medium
-H4325	H7579	distributional:1.00	medium
-H4325	H8415	apposition:1	medium
-H4397	H3887	apposition:1	medium
-H4405	H7843	apposition:1	medium
-H4421	H1368	apposition:1	medium
-H4428	H0001	apposition:4	medium
-H4428	H0113	apposition:5	high
-H4428	H0802	apposition:2	medium
-H4428	H1330	apposition:1	high
-H4428	H1368	apposition:1	high
-H4428	H2022	apposition:1	high
-H4428	H2428	apposition:1	high
-H4428	H3289	distributional:1.00	medium
-H4428	H3427	apposition:1	high
-H4428	H3778	apposition:1	high
-H4428	H4082	distributional:0.81	medium
-H4428	H4410	distributional:0.88	high
-H4428	H4436	distributional:0.80	medium
-H4428	H4475	distributional:1.00	medium
-H4428	H5387	distributional:0.86	high
-H4428	H5631	distributional:0.96	high
-H4428	H5650	apposition:1	high
-H4428	H6346	distributional:0.80	medium
-H4428	H6370	apposition:1	medium
-H4428	H6635	apposition:1	high
-H4428	H8104	apposition:3	high
-H4428	H8334	apposition:2	high
-H4437	H1907	apposition:1	medium
-H4437	H5461	apposition:1	medium
-H4455	H0957	apposition:1	medium
-H4503	H1061	distributional:1.00	medium
-H4503	H5262	distributional:0.83	high
-H4541	H5695	apposition:1	medium
-H4581	H4261	apposition:1	medium
-H4581	H4885	apposition:1	medium
-H4687	H2708	apposition:1	high
-H4720	H1347	apposition:1	medium
-H4720	H4261	apposition:1	medium
-H4720	H4263	apposition:1	medium
-H4720	H4581	apposition:1	medium
-H4725	H2975	apposition:1	medium
-H4725	H4629	apposition:1	medium
-H4725	H7342	apposition:1	medium
-H4731	H5278	apposition:1	medium
-H4733	H4054	apposition:3	medium
-H4735	H1581	apposition:1	medium
-H4818	H7036	apposition:1	medium
-H4885	H5947	apposition:1	medium
-H4888	H4842	apposition:1	medium
-H4888	H7545	apposition:1	medium
-H4899	H5057	apposition:1	medium
-H4908	H5715	apposition:1	high
-H4940	H3498	apposition:1	medium
-H4941	H2708	distributional:0.82	high
-H4960	H8106	apposition:1	medium
-H5030	H2492	distributional:1.00	high
-H5030	H8267	apposition:1	medium
-H5045	H8219	distributional:1.00	medium
-H5061	H5424	distributional:0.83	medium
-H5104	H2850	apposition:1	medium
-H5104	H2975	apposition:1	high
-H5104	H7342	apposition:1	medium
-H5158	H8415	apposition:1	medium
-H5159	H1347	apposition:1	medium
-H5288	H3627	apposition:4	medium
-H5288	H3878	apposition:2	medium
-H5288	H5375	apposition:4	high
-H5288	H7270	apposition:1	medium
-H5288	H8334	apposition:2	medium
-H5291	H1330	apposition:3	medium
-H5315	H1323	apposition:2	medium
-H5315	H1818	apposition:1	medium
-H5315	H6430	apposition:1	medium
-H5359	H7966	apposition:1	medium
-H5387	H0269	apposition:1	medium
-H5387	H7148	apposition:1	medium
-H5560	H7058	distributional:0.83	medium
-H5612	H1540	apposition:1	medium
-H5612	H2856	apposition:1	medium
-H5612	H4736	apposition:1	medium
-H5631	H0644	apposition:1	medium
-H5631	H6370	apposition:1	medium
-H5631	H8248	apposition:1	medium
-H5632	H1907	apposition:1	medium
-H5633	H0796	apposition:1	medium
-H5633	H0832	apposition:1	medium
-H5633	H1663	apposition:1	medium
-H5633	H5841	apposition:1	medium
-H5633	H6139	apposition:1	medium
-H5650	H0519	apposition:1	high
-H5650	H0606	apposition:1	medium
-H5650	H2205	apposition:1	high
-H5650	H3611	apposition:1	high
-H5650	H5030	apposition:17	high
-H5650	H5104	apposition:1	medium
-H5650	H5159	apposition:1	medium
-H5650	H5676	apposition:1	high
-H5650	H6780	apposition:1	medium
-H5650	H7495	apposition:1	medium
-H5650	H7626	apposition:1	medium
-H5650	H8198	distributional:0.85	high
-H5674	H3498	apposition:1	medium
-H5674	H7725	apposition:1	medium
-H5713	H4150	apposition:1	high
-H5713	H4294	apposition:1	medium
-H5713	H5387	apposition:1	high
-H5713	H7148	apposition:1	medium
-H5769	H8077	apposition:1	medium
-H5775	H7431	distributional:0.83	medium
-H5785	H8359	distributional:1.00	medium
-H5795	H6842	distributional:1.00	medium
-H5797	H4268	apposition:1	medium
-H5797	H4731	apposition:1	medium
-H5869	H5030	apposition:1	medium
-H5869	H6951	apposition:1	medium
-H5892	H1323	apposition:1	medium
-H5892	H2205	apposition:1	high
-H5892	H2715	apposition:1	high
-H5892	H4054	apposition:3	medium
-H5892	H4467	apposition:1	medium
-H5892	H4733	distributional:1.00	high
-H5892	H4908	apposition:1	high
-H5892	H5945	apposition:1	high
-H5892	H5947	apposition:1	medium
-H5892	H6913	apposition:1	high
-H5892	H6918	apposition:2	medium
-H5892	H7151	apposition:1	medium
-H5930	H1242	apposition:1	medium
-H5930	H6153	apposition:1	medium
-H5945	H7069	apposition:1	medium
-H5971	H0251	apposition:1	high
-H5971	H0376	apposition:3	high
-H5971	H0802	apposition:2	high
-H5971	H0972	apposition:1	medium
-H5971	H1004	apposition:2	medium
-H5971	H1121	apposition:6	medium
-H5971	H1323	apposition:1	high
-H5971	H1350	apposition:1	high
-H5971	H1471	apposition:2	high
-H5971	H1616	apposition:1	high
-H5971	H1995	apposition:1	high
-H5971	H2205	distributional:0.83	high
-H5971	H2945	apposition:1	high
-H5971	H3427	apposition:1	high
-H5971	H4001	apposition:2	medium
-H5971	H4264	apposition:1	high
-H5971	H6041	apposition:1	high
-H5971	H6951	distributional:0.80	high
-H5971	H6957	apposition:4	medium
-H5971	H7611	apposition:1|distributional:0.83	high
-H5971	H7626	apposition:1	high
-H6041	H1800	apposition:1	medium
-H6041	H6471	apposition:1	medium
-H6086	H1918	distributional:1.00	medium
-H6086	H3712	apposition:1	medium
-H6086	H5158	apposition:1	medium
-H6086	H5687	apposition:1|distributional:1.00	medium
-H6086	H6057	apposition:1	medium
-H6086	H6160	apposition:1	medium
-H6086	H7848	distributional:1.00	medium
-H6086	H8559	apposition:1	medium
-H6124	H5348	distributional:1.00	medium
-H6154	H8359	distributional:1.00	medium
-H6160	H4417	apposition:3	medium
-H6389	H2989	apposition:1	medium
-H6430	H0339	apposition:1	medium
-H6430	H0796	apposition:1	medium
-H6430	H0832	apposition:1	medium
-H6430	H1663	apposition:1|distributional:0.80	medium
-H6430	H5841	apposition:1	medium
-H6430	H6139	apposition:1	medium
-H6430	H6189	apposition:1	medium
-H6430	H7611	apposition:1	high
-H6440	H0113	apposition:1	high
-H6440	H0251	apposition:3	medium
-H6440	H0639	apposition:1	medium
-H6440	H1060	apposition:1	medium
-H6440	H1404	apposition:1	medium
-H6440	H2740	apposition:1	high
-H6440	H3548	apposition:3	medium
-H6499	H3532	distributional:0.91	medium
-H6522	H1622	distributional:1.00	medium
-H6529	H3712	apposition:1	medium
-H6529	H5687	apposition:1	medium
-H6529	H6057	apposition:1	medium
-H6529	H6160	apposition:1	medium
-H6529	H8559	apposition:1	medium
-H6629	H3532	distributional:0.82	medium
-H6629	H4830	apposition:1	medium
-H6635	H0046	apposition:1	medium
-H6635	H1368	apposition:2	medium
-H6635	H1964	apposition:1	medium
-H6635	H4634	apposition:1	medium
-H6635	H8334	apposition:1	medium
-H6662	H8549	apposition:1	medium
-H6664	H4302	apposition:1	medium
-H6666	H6520	apposition:1	medium
-H6697	H4268	apposition:1	medium
-H6918	H1254	apposition:1	medium
-H6924	H1755	apposition:1	medium
-H6924	H5608	apposition:1	medium
-H6924	H5769	apposition:1	medium
-H6944	H1350	apposition:1	medium
-H6944	H4791	apposition:1	medium
-H6944	H4842	apposition:1	medium
-H6944	H7545	apposition:1	medium
-H6944	H7676	apposition:1	high
-H6944	H7677	apposition:1	medium
-H6944	H8641	distributional:0.86	medium
-H6963	H8469	apposition:1	medium
-H6975	H8069	apposition:1	medium
-H7198	H1369	apposition:1	medium
-H7198	H7225	apposition:1	medium
-H7218	H1419	apposition:1	medium
-H7218	H2374	apposition:1	medium
-H7218	H5387	apposition:1	high
-H7218	H8269	apposition:4	medium
-H7272	H1800	apposition:1	medium
-H7272	H1916	distributional:0.80	medium
-H7272	H6471	apposition:1	medium
-H7307	H4899	apposition:1	medium
-H7307	H6346	apposition:1	medium
-H7323	H0327	apposition:1	medium
-H7323	H7409	apposition:1	medium
-H7393	H1270	apposition:1	medium
-H7453	H5726	apposition:2	medium
-H7523	H5221	apposition:1	medium
-H7626	H1425	distributional:1.00	medium
-H7626	H2270	apposition:1	medium
-H7626	H7206	distributional:1.00	medium
-H7676	H4744	apposition:1	medium
-H7704	H8124	apposition:2	medium
-H7785	H2373	distributional:1.00	medium
-H7785	H8573	distributional:1.00	medium
-H7794	H6499	apposition:1	medium
-H7891	H6496	apposition:1	medium
-H7892	H4210	apposition:1	medium
-H8034	H0413	apposition:1	medium
-H8034	H4886	apposition:1	medium
-H8034	H5769	apposition:1	high
-H8048	H6723	apposition:1	medium
-H8048	H8322	apposition:1	medium
-H8064	H0676	apposition:1	medium
-H8064	H3427	apposition:6	medium
-H8064	H4349	apposition:6	medium
-H8064	H4639	apposition:1	medium
-H8064	H7549	distributional:1.00	medium
-H8069	H7898	apposition:1	medium
-H8081	H4842	apposition:1	medium
-H8081	H4888	distributional:1.00	medium
-H8081	H4960	apposition:1	medium
-H8081	H5560	distributional:0.80	medium
-H8081	H5561	distributional:1.00	medium
-H8081	H7545	apposition:1	medium
-H8081	H8106	apposition:1	medium
-H8130	H1060	apposition:1	medium
-H8141	H4643	apposition:1	medium
-H8141	H8059	apposition:1|distributional:1.00	medium
-H8269	H2428	apposition:1	medium
-H8269	H3289	distributional:1.00	medium
-H8269	H5631	distributional:0.83	high
-H8269	H6485	apposition:1|distributional:1.00	medium
-H8316	H3980	apposition:1	medium
-H8334	H6486	apposition:1	medium
-H8441	H8251	apposition:1	medium
-H8451	H1293	apposition:1	medium
-H8451	H7045	apposition:1	medium
-H8478	H1060	apposition:1	medium
-H8504	H0948	distributional:1.00	medium
-H8641	H8573	distributional:0.83	medium
+# vote; medium = UNDETERMINED there (usually held-out sparsity). `berel_cos`:
+# cosine similarity of mean-centered BEREL Strong's centroids (relatedness, not
+# direction -- symmetric) -- see berel_relatedness_check.py; blank if either side
+# lacked a scorable centroid.
+broader_strong	narrower_strong	sources	tier	berel_cos
+H0001	H1241	apposition:1	high	0.3012
+H0001	H1323	apposition:1	medium	0.5573
+H0001	H3548	apposition:1	high	0.4048
+H0001	H3627	apposition:1	high	0.2895
+H0001	H4138	apposition:1|distributional:1.00	medium	0.5920
+H0001	H6343	apposition:1	medium	0.1180
+H0001	H6629	apposition:1	high	0.3296
+H0001	H6996	apposition:1	high	0.4774
+H0001	H8269	apposition:1	high	0.4292
+H0060	H4553	apposition:1	medium	0.5460
+H0068	H1285	apposition:2	medium	0.2566
+H0068	H1496	distributional:1.00	high	0.6276
+H0068	H3871	apposition:2	high	0.6254
+H0068	H7050	distributional:1.00	medium	0.4898
+H0068	H7718	distributional:1.00	medium	0.6582
+H0113	H4899	apposition:2	high	0.4064
+H0113	H6635	apposition:5	medium	0.4409
+H0120	H3205	apposition:1	medium	0.1158
+H0120	H7705	apposition:2	medium	
+H0127	H0505	apposition:1	medium	0.1032
+H0127	H6251	apposition:1	medium	
+H0127	H7698	apposition:1	medium	0.4618
+H0134	H7165	distributional:1.00	medium	0.7206
+H0157	H5414	apposition:1	medium	0.1346
+H0157	H6593	apposition:1	medium	-0.1967
+H0157	H6785	apposition:1	medium	-0.2321
+H0157	H8250	apposition:1	medium	-0.0496
+H0226	H4159	distributional:0.82	medium	0.7577
+H0251	H1060	distributional:0.81	high	0.5750
+H0269	H0761	apposition:1	medium	0.4537
+H0269	H1330	apposition:1	medium	0.4361
+H0269	H1377	apposition:1	medium	0.4280
+H0310	H5414	apposition:1	medium	
+H0310	H5984	apposition:1	medium	
+H0310	H6593	apposition:1	medium	
+H0310	H6722	apposition:1	medium	
+H0310	H6785	apposition:1	medium	
+H0310	H8081	apposition:1	medium	
+H0310	H8250	apposition:1	medium	
+H0310	H8251	apposition:1	medium	
+H0352	H4302	apposition:1	medium	0.2271
+H0352	H4394	apposition:1|distributional:0.83	medium	0.4903
+H0352	H7161	apposition:2	medium	0.3605
+H0367	H2825	apposition:1	medium	0.5146
+H0376	H1100	distributional:0.86	medium	0.4390
+H0398	H2230	apposition:1	medium	-0.3011
+H0398	H5311	apposition:1	medium	
+H0413	H3467	apposition:1	medium	
+H0413	H7069	apposition:1	medium	
+H0505	H6485	distributional:0.80	medium	0.5905
+H0567	H1622	distributional:1.00	medium	0.8368
+H0567	H1706	apposition:1	medium	0.3842
+H0567	H2100	apposition:1	medium	0.3777
+H0567	H2340	distributional:0.80	high	0.8804
+H0567	H2461	apposition:1	medium	0.3776
+H0567	H6522	distributional:1.00	high	0.8596
+H0639	H1259	apposition:1	medium	0.2854
+H0639	H2230	apposition:1	medium	0.1676
+H0639	H2740	distributional:0.92	high	0.7841
+H0639	H4899	apposition:1	medium	0.2746
+H0639	H5311	apposition:1	medium	
+H0713	H0948	distributional:1.00	medium	0.7668
+H0727	H0712	distributional:1.00	medium	0.7031
+H0727	H6532	distributional:0.80	medium	0.6352
+H0730	H0231	distributional:1.00	medium	0.4980
+H0776	H4033	distributional:0.83	medium	0.6049
+H0776	H4138	distributional:0.86	medium	0.4574
+H0784	H1259	apposition:1	medium	0.3427
+H0784	H2230	apposition:1	medium	0.1405
+H0784	H3940	distributional:0.80	medium	0.4632
+H0784	H5311	apposition:1	medium	
+H0802	H0269	apposition:1	high	0.7436
+H0802	H0490	apposition:4	high	0.3161
+H0802	H1173	apposition:1	medium	
+H0802	H2181	apposition:2	medium	0.2660
+H0802	H2850	apposition:1	high	0.4415
+H0802	H3243	apposition:1	high	0.3609
+H0802	H3618	distributional:0.82	medium	0.4732
+H0802	H3761	apposition:3	medium	0.3563
+H0802	H5031	distributional:1.00	medium	0.5265
+H0802	H6370	apposition:4|distributional:0.93	high	0.6999
+H0802	H7017	apposition:2	medium	0.4433
+H0802	H7986	apposition:1	medium	
+H0802	H7998	apposition:1	high	0.0645
+H0802	H8283	apposition:1	medium	
+H0899	H8162	apposition:1	medium	
+H0905	H7848	apposition:1	medium	0.5785
+H0929	H6251	apposition:1	medium	
+H0929	H7698	apposition:1	medium	0.5175
+H0929	H7998	apposition:1	medium	0.2225
+H0929	H8318	distributional:0.80	medium	0.6188
+H0953	H7665	apposition:1	medium	0.0365
+H0957	H4933	distributional:1.00	medium	0.6959
+H1004	H0001	apposition:1	high	0.4243
+H1004	H0168	apposition:1	high	0.4057
+H1004	H0214	distributional:0.93	high	0.6038
+H1004	H0361	distributional:1.00	medium	0.4261
+H1004	H1473	distributional:0.86	medium	0.4559
+H1004	H1588	apposition:1	medium	0.1485
+H1004	H1964	apposition:2|distributional:0.86	high	0.5679
+H1004	H2270	apposition:1	medium	0.1016
+H1004	H2315	distributional:0.80	medium	0.4663
+H1004	H2691	apposition:1|distributional:0.86	high	0.5870
+H1004	H3548	apposition:1	high	0.3989
+H1004	H3608	distributional:0.83	medium	0.5299
+H1004	H3627	apposition:1	high	0.4506
+H1004	H3957	distributional:0.89	medium	0.6129
+H1004	H4138	distributional:1.00	medium	0.2995
+H1004	H4805	apposition:1|distributional:0.83	medium	0.4426
+H1004	H5608	apposition:2	medium	0.2799
+H1004	H5650	apposition:1	high	0.3404
+H1004	H5944	distributional:1.00	medium	0.4755
+H1004	H5947	apposition:1	medium	-0.0163
+H1004	H6442	distributional:1.00	medium	0.5617
+H1004	H6918	apposition:1	high	0.0542
+H1004	H6944	apposition:2	high	0.4303
+H1004	H6996	apposition:1	high	0.3174
+H1004	H7151	apposition:1	medium	-0.0627
+H1060	H6363	apposition:1	medium	0.6357
+H1060	H7358	apposition:1	medium	0.4657
+H1121	H0761	distributional:0.83	medium	0.4573
+H1121	H0972	distributional:0.80	medium	-0.0245
+H1121	H1060	distributional:0.90	high	0.6746
+H1121	H2677	distributional:0.90	high	0.6358
+H1121	H2945	distributional:0.83	high	0.4958
+H1121	H3205	distributional:0.86	medium	0.4250
+H1121	H4940	distributional:0.93	high	0.6778
+H1121	H5003	distributional:1.00	medium	-0.3009
+H1121	H5387	distributional:0.81	high	0.4077
+H1121	H5608	distributional:0.94	medium	0.4070
+H1121	H6956	distributional:1.00	high	0.6765
+H1167	H0567	apposition:1	medium	0.1221
+H1167	H1622	apposition:1	medium	-0.0112
+H1167	H2340	apposition:1	medium	0.0682
+H1167	H2850	apposition:1	medium	0.1131
+H1167	H2983	apposition:1	medium	0.0401
+H1167	H3669	apposition:1	medium	0.1552
+H1167	H6522	apposition:1	medium	0.0018
+H1241	H3532	distributional:0.82	high	0.8420
+H1259	H6986	apposition:1	medium	0.2974
+H1259	H8178	apposition:1	medium	-0.0176
+H1323	H0269	apposition:3	high	0.7438
+H1323	H0517	apposition:1	medium	0.6632
+H1323	H0761	apposition:1	medium	0.5022
+H1323	H1330	apposition:2	high	0.5262
+H1323	H1389	apposition:1	high	0.1974
+H1323	H1569	apposition:1	medium	0.4414
+H1323	H1730	apposition:1	medium	0.0641
+H1323	H2340	apposition:1	medium	0.4528
+H1323	H2850	apposition:1	high	0.5489
+H1323	H3669	apposition:1	medium	0.4470
+H1323	H6370	distributional:0.87	high	0.5717
+H1323	H6722	apposition:1	medium	0.3375
+H1347	H1998	apposition:1	medium	
+H1350	H0046	apposition:2	medium	0.3724
+H1389	H0972	apposition:1	medium	0.0489
+H1397	H8365	apposition:2	medium	
+H1419	H2850	apposition:1	medium	0.2962
+H1419	H3974	apposition:1	medium	0.2391
+H1419	H3996	apposition:1	medium	0.4626
+H1419	H5104	apposition:3	medium	0.2924
+H1419	H8121	apposition:1	medium	0.1959
+H1471	H0341	apposition:1	medium	0.3380
+H1471	H2233	apposition:1	medium	0.1793
+H1471	H3515	apposition:1	medium	0.2428
+H1471	H4421	apposition:1	medium	0.2102
+H1471	H4940	apposition:1	medium	-0.0231
+H1471	H5771	apposition:1	medium	-0.0703
+H1471	H7489	apposition:1	medium	-0.1222
+H1471	H7604	apposition:2	high	0.0109
+H1471	H7843	apposition:1	medium	-0.0284
+H1530	H4583	apposition:1	medium	0.3253
+H1530	H8565	apposition:1	medium	0.3003
+H1612	H1706	apposition:1	medium	0.1725
+H1612	H2132	apposition:1	medium	0.3859
+H1616	H8453	apposition:1|distributional:0.83	medium	0.7967
+H1697	H1100	apposition:1	medium	0.2837
+H1697	H1293	apposition:2	high	0.2975
+H1697	H5030	apposition:2	high	0.6432
+H1697	H7045	apposition:2	medium	0.2637
+H1818	H4888	distributional:0.86	medium	0.3213
+H1870	H4546	distributional:0.82	high	0.2591
+H1870	H4611	apposition:1	high	0.3212
+H1870	H6529	apposition:1	medium	-0.0739
+H1926	H3712	apposition:1	medium	-0.0491
+H1926	H5687	apposition:1	medium	-0.0174
+H1926	H6057	apposition:1	medium	0.1305
+H1926	H8559	apposition:1	medium	
+H2022	H1389	apposition:1	high	0.6242
+H2022	H4791	apposition:1	medium	0.1878
+H2077	H8002	apposition:2|distributional:0.81	high	0.9081
+H2091	H4219	distributional:0.83	medium	0.7352
+H2091	H5145	apposition:1	medium	0.2359
+H2091	H5458	apposition:1	medium	0.8239
+H2091	H8641	apposition:1	medium	0.4346
+H2114	H6184	apposition:1	medium	0.3278
+H2197	H5311	apposition:1	medium	
+H2205	H4294	apposition:1	medium	0.3886
+H2220	H2389	apposition:1	medium	0.5979
+H2220	H7665	apposition:1	medium	0.2601
+H2230	H6986	apposition:1	medium	0.5639
+H2230	H8178	apposition:1	medium	0.2445
+H2233	H0157	apposition:1	medium	0.2103
+H2398	H7843	apposition:1	medium	0.5454
+H2416	H4940	apposition:1	medium	-0.1777
+H2416	H5775	apposition:1	high	0.4594
+H2416	H6635	apposition:1	medium	0.0898
+H2416	H7431	apposition:1|distributional:0.83	medium	0.4142
+H2428	H0214	apposition:1	high	0.5102
+H2428	H0571	apposition:1	medium	-0.0356
+H2428	H1215	apposition:1	medium	-0.0238
+H2428	H4082	apposition:1	medium	0.3759
+H2428	H8130	apposition:1	medium	-0.2575
+H2450	H3045	apposition:1	medium	0.3571
+H2450	H6256	apposition:1	medium	0.1633
+H2450	H6953	distributional:1.00	medium	0.4990
+H2472	H2377	apposition:1	medium	0.5170
+H2472	H2492	distributional:1.00	high	0.7978
+H2491	H2181	apposition:1	medium	0.1822
+H2491	H6913	apposition:1	medium	0.1591
+H2491	H7901	apposition:1	medium	0.0748
+H2534	H1606	apposition:1	medium	0.2846
+H2677	H1425	distributional:1.00	medium	0.7980
+H2677	H7206	distributional:1.00	medium	0.7539
+H2691	H6442	distributional:1.00	medium	0.8831
+H2719	H1698	distributional:0.91	medium	0.6035
+H2748	H0825	apposition:1	medium	
+H2781	H4148	apposition:1	medium	0.1478
+H2781	H4923	apposition:1	medium	0.4450
+H2822	H0653	distributional:1.00	medium	0.7298
+H2850	H1622	distributional:1.00	medium	0.8757
+H2850	H1706	apposition:1	medium	0.3958
+H2850	H2100	apposition:1	medium	0.3512
+H2850	H2340	distributional:0.80	medium	0.9393
+H2850	H2461	apposition:1	medium	0.3617
+H2850	H6522	distributional:1.00	medium	0.9140
+H2860	H3947	apposition:1	medium	0.1938
+H2896	H1706	apposition:1	medium	0.1227
+H2896	H2100	apposition:1	medium	0.1897
+H2896	H2461	apposition:1	medium	0.1470
+H2896	H5158	apposition:1	medium	-0.1212
+H2983	H1622	distributional:1.00	medium	0.9096
+H2983	H6522	distributional:0.89	high	0.9337
+H3027	H0251	apposition:1	medium	0.4178
+H3027	H0676	distributional:0.86	medium	0.2681
+H3027	H1489	apposition:1	medium	
+H3027	H3318	apposition:1	medium	0.1298
+H3027	H5030	apposition:3	medium	0.4664
+H3027	H5104	apposition:1	medium	0.2116
+H3027	H5608	apposition:1	medium	0.2633
+H3027	H5650	apposition:2	medium	0.5745
+H3027	H7676	apposition:1	medium	0.1360
+H3117	H1755	apposition:1	medium	0.2590
+H3117	H5769	apposition:1	high	0.3102
+H3117	H6256	apposition:2	medium	0.4975
+H3117	H6486	apposition:1	medium	0.2788
+H3117	H7966	apposition:1	medium	0.0418
+H3117	H8141	apposition:2	high	0.5688
+H3158	H3761	distributional:1.00	medium	0.7353
+H3196	H6071	apposition:1	medium	0.3689
+H3196	H7416	apposition:1	medium	0.1415
+H3206	H8267	apposition:1	medium	-0.1127
+H3220	H2348	distributional:1.00	medium	0.6441
+H3220	H3996	apposition:1	medium	0.4523
+H3220	H4417	apposition:2	medium	0.5651
+H3220	H5488	distributional:0.92	high	0.7388
+H3220	H8121	apposition:1	medium	0.2270
+H3220	H8415	apposition:1	medium	0.3834
+H3228	H0334	apposition:1	medium	
+H3372	H1215	apposition:1	medium	0.1923
+H3374	H4172	distributional:1.00	medium	0.2502
+H3427	H3669	apposition:2	high	0.2887
+H3427	H6522	apposition:1	high	0.0558
+H3467	H0046	apposition:2	medium	0.4286
+H3499	H7604	apposition:1	medium	0.2619
+H3519	H1420	distributional:1.00	medium	0.4442
+H3519	H1926	apposition:1	medium	0.5350
+H3519	H6996	apposition:1	medium	0.1252
+H3519	H7036	apposition:1	medium	0.2664
+H3532	H3849	distributional:1.00	medium	0.6918
+H3548	H0727	apposition:9	high	0.5781
+H3548	H1285	apposition:5	medium	0.3303
+H3548	H1323	apposition:1	medium	0.3421
+H3548	H3603	apposition:1	high	0.3631
+H3548	H4720	apposition:1	medium	0.4073
+H3548	H5375	apposition:9	high	0.1336
+H3548	H5592	apposition:1	medium	0.5433
+H3548	H5715	apposition:1	medium	0.3789
+H3548	H7218	apposition:1	medium	0.4375
+H3548	H7626	apposition:1	high	0.4315
+H3548	H7782	apposition:1	medium	0.1201
+H3548	H8104	apposition:1	high	0.0408
+H3548	H8334	apposition:3	high	0.3326
+H3548	H8628	apposition:1	medium	-0.0325
+H3605	H0929	distributional:0.84	high	0.5909
+H3605	H1419	distributional:0.81	high	0.5217
+H3605	H2945	distributional:1.00	high	0.6261
+H3605	H3627	distributional:0.86	high	0.6627
+H3605	H4245	distributional:1.00	medium	0.4822
+H3605	H4284	distributional:0.86	high	-0.0390
+H3605	H4467	distributional:0.91	high	0.6186
+H3605	H4475	distributional:1.00	medium	0.6292
+H3605	H4736	distributional:0.86	high	0.6143
+H3605	H4916	distributional:1.00	high	0.3315
+H3605	H5647	distributional:1.00	medium	0.1565
+H3605	H6297	distributional:0.88	high	0.4705
+H3605	H6951	distributional:0.91	high	0.7039
+H3605	H6996	distributional:0.87	high	0.4040
+H3605	H7379	distributional:0.83	high	0.1091
+H3605	H7399	distributional:0.91	high	0.6924
+H3605	H7488	distributional:0.80	medium	0.4397
+H3605	H7611	distributional:0.92	high	0.5629
+H3605	H8199	distributional:0.88	high	0.2098
+H3605	H8403	distributional:0.83	medium	0.5628
+H3627	H7198	apposition:1	medium	-0.2425
+H3627	H8522	apposition:1	medium	
+H3627	H8641	apposition:1	medium	0.6092
+H3669	H1622	distributional:1.00	medium	0.8053
+H3669	H1706	apposition:1	medium	0.3910
+H3669	H2100	apposition:1	medium	0.4212
+H3669	H2340	distributional:0.90	high	0.8783
+H3669	H2461	apposition:1	medium	0.3718
+H3669	H6522	distributional:1.00	high	0.8702
+H3674	H0671	apposition:2	medium	
+H3701	H2487	distributional:1.00	medium	0.5648
+H3701	H8641	apposition:1	medium	0.4891
+H3774	H6432	distributional:1.00	medium	0.9510
+H3778	H4751	apposition:1	medium	
+H3801	H6446	apposition:1|distributional:0.80	medium	0.7986
+H3820	H0761	apposition:1	medium	-0.0647
+H3820	H5030	apposition:1	medium	0.1197
+H3820	H8267	apposition:1	medium	0.2766
+H3851	H2230	apposition:1	medium	0.5245
+H3851	H5311	apposition:1	medium	
+H3878	H0727	apposition:2	medium	
+H3878	H1285	apposition:2	medium	
+H3878	H4908	apposition:2	medium	
+H3878	H4931	apposition:2	medium	
+H3878	H5375	apposition:2	high	
+H3878	H5592	apposition:1	medium	
+H3878	H7523	apposition:1	medium	
+H3878	H7626	apposition:1	medium	
+H3878	H7778	apposition:1	medium	
+H3878	H8104	apposition:3	high	
+H3878	H8334	apposition:2	high	
+H3882	H1282	apposition:1	medium	
+H3882	H6129	apposition:1	medium	
+H3899	H2471	distributional:0.86	medium	0.5213
+H3899	H4682	distributional:1.00	medium	0.5121
+H3899	H6720	distributional:1.00	medium	0.3634
+H3978	H0402	distributional:1.00	medium	0.5882
+H4043	H6793	distributional:0.86	medium	0.6330
+H4043	H7982	distributional:1.00	medium	0.2998
+H4057	H2850	apposition:1	medium	0.2867
+H4057	H4420	apposition:1	medium	0.3381
+H4057	H6160	distributional:0.85	high	0.6244
+H4196	H4639	apposition:1	high	0.1979
+H4219	H3257	distributional:1.00	medium	0.7799
+H4219	H4518	distributional:1.00	medium	0.8521
+H4219	H7086	distributional:1.00	medium	0.9329
+H4289	H3257	distributional:1.00	medium	0.7194
+H4294	H4731	apposition:1	medium	0.2509
+H4294	H5387	apposition:1	high	0.5553
+H4294	H8597	apposition:1	medium	0.0699
+H4325	H0098	distributional:0.80	medium	0.5053
+H4325	H5869	apposition:1	medium	0.1206
+H4325	H7579	distributional:1.00	medium	0.5053
+H4325	H8415	apposition:1	medium	0.3914
+H4397	H3887	apposition:1	medium	0.0376
+H4405	H7843	apposition:1	medium	0.2356
+H4421	H1368	apposition:1	medium	0.5971
+H4428	H0001	apposition:4	medium	0.5343
+H4428	H0113	apposition:5	high	0.5072
+H4428	H0802	apposition:2	medium	0.4048
+H4428	H1330	apposition:1	high	0.1365
+H4428	H1368	apposition:1	high	0.3704
+H4428	H2022	apposition:1	high	0.3092
+H4428	H2428	apposition:1	high	0.6105
+H4428	H3289	distributional:1.00	medium	0.4007
+H4428	H3427	apposition:1	high	0.2694
+H4428	H3778	apposition:1	high	
+H4428	H4082	distributional:0.81	medium	0.4969
+H4428	H4410	distributional:0.88	high	0.6553
+H4428	H4436	distributional:0.80	medium	0.5911
+H4428	H4475	distributional:1.00	medium	0.5597
+H4428	H5387	distributional:0.86	high	0.2628
+H4428	H5631	distributional:0.96	high	0.7477
+H4428	H5650	apposition:1	high	0.6531
+H4428	H6346	distributional:0.80	medium	0.6267
+H4428	H6370	apposition:1	medium	0.4033
+H4428	H6635	apposition:1	high	0.5102
+H4428	H8104	apposition:3	high	-0.0334
+H4428	H8334	apposition:2	high	0.1241
+H4437	H1907	apposition:1	medium	0.5357
+H4437	H5461	apposition:1	medium	0.0870
+H4455	H0957	apposition:1	medium	0.0571
+H4503	H1061	distributional:1.00	medium	0.6235
+H4503	H5262	distributional:0.83	high	0.8415
+H4541	H5695	apposition:1	medium	0.6309
+H4581	H4261	apposition:1	medium	0.2415
+H4581	H4885	apposition:1	medium	0.1918
+H4687	H2708	apposition:1	high	0.7160
+H4720	H1347	apposition:1	medium	0.0559
+H4720	H4261	apposition:1	medium	0.2068
+H4720	H4263	apposition:1	medium	
+H4720	H4581	apposition:1	medium	0.0850
+H4725	H2975	apposition:1	medium	
+H4725	H4629	apposition:1	medium	
+H4725	H7342	apposition:1	medium	0.0256
+H4731	H5278	apposition:1	medium	0.0944
+H4733	H4054	apposition:3	medium	0.6817
+H4735	H1581	apposition:1	medium	0.6504
+H4818	H7036	apposition:1	medium	0.0288
+H4885	H5947	apposition:1	medium	0.4552
+H4888	H4842	apposition:1	medium	0.5043
+H4888	H7545	apposition:1	medium	
+H4899	H5057	apposition:1	medium	0.4364
+H4908	H5715	apposition:1	high	0.6306
+H4940	H3498	apposition:1	medium	0.3281
+H4941	H2708	distributional:0.82	high	0.4741
+H4960	H8106	apposition:1	medium	
+H5030	H2492	distributional:1.00	high	-0.0218
+H5030	H8267	apposition:1	medium	0.2230
+H5045	H8219	distributional:1.00	medium	0.7101
+H5061	H5424	distributional:0.83	medium	0.8573
+H5104	H2850	apposition:1	medium	0.2586
+H5104	H2975	apposition:1	high	
+H5104	H7342	apposition:1	medium	0.2493
+H5158	H8415	apposition:1	medium	0.1345
+H5159	H1347	apposition:1	medium	0.1123
+H5288	H3627	apposition:4	medium	0.0853
+H5288	H3878	apposition:2	medium	
+H5288	H5375	apposition:4	high	0.2681
+H5288	H7270	apposition:1	medium	0.3274
+H5288	H8334	apposition:2	medium	0.3123
+H5291	H1330	apposition:3	medium	0.5176
+H5315	H1323	apposition:2	medium	0.0148
+H5315	H1818	apposition:1	medium	0.2395
+H5315	H6430	apposition:1	medium	-0.0347
+H5359	H7966	apposition:1	medium	0.5534
+H5387	H0269	apposition:1	medium	0.0522
+H5387	H7148	apposition:1	medium	
+H5560	H7058	distributional:0.83	medium	0.6410
+H5612	H1540	apposition:1	medium	0.1945
+H5612	H2856	apposition:1	medium	0.3667
+H5612	H4736	apposition:1	medium	0.5023
+H5631	H0644	apposition:1	medium	0.3395
+H5631	H6370	apposition:1	medium	0.3426
+H5631	H8248	apposition:1	medium	0.0940
+H5632	H1907	apposition:1	medium	0.7682
+H5633	H0796	apposition:1	medium	0.6034
+H5633	H0832	apposition:1	medium	
+H5633	H1663	apposition:1	medium	0.6049
+H5633	H5841	apposition:1	medium	
+H5633	H6139	apposition:1	medium	
+H5650	H0519	apposition:1	high	0.6585
+H5650	H0606	apposition:1	medium	-0.0200
+H5650	H2205	apposition:1	high	0.5687
+H5650	H3611	apposition:1	high	0.0433
+H5650	H5030	apposition:17	high	0.5469
+H5650	H5104	apposition:1	medium	0.1633
+H5650	H5159	apposition:1	medium	0.2729
+H5650	H5676	apposition:1	high	0.2535
+H5650	H6780	apposition:1	medium	0.0035
+H5650	H7495	apposition:1	medium	-0.1482
+H5650	H7626	apposition:1	medium	0.3953
+H5650	H8198	distributional:0.85	high	0.5291
+H5674	H3498	apposition:1	medium	0.1237
+H5674	H7725	apposition:1	medium	0.5424
+H5713	H4150	apposition:1	high	-0.2543
+H5713	H4294	apposition:1	medium	-0.2312
+H5713	H5387	apposition:1	high	-0.1837
+H5713	H7148	apposition:1	medium	
+H5769	H8077	apposition:1	medium	0.2391
+H5775	H7431	distributional:0.83	medium	0.9180
+H5785	H8359	distributional:1.00	medium	0.7362
+H5795	H6842	distributional:1.00	medium	0.6592
+H5797	H4268	apposition:1	medium	0.6872
+H5797	H4731	apposition:1	medium	0.0018
+H5869	H5030	apposition:1	medium	0.0890
+H5869	H6951	apposition:1	medium	0.1155
+H5892	H1323	apposition:1	medium	0.4777
+H5892	H2205	apposition:1	high	0.4428
+H5892	H2715	apposition:1	high	0.4437
+H5892	H4054	apposition:3	medium	0.5744
+H5892	H4467	apposition:1	medium	0.4474
+H5892	H4733	distributional:1.00	high	0.6385
+H5892	H4908	apposition:1	high	0.1951
+H5892	H5945	apposition:1	high	0.2014
+H5892	H5947	apposition:1	medium	0.1334
+H5892	H6913	apposition:1	high	0.3749
+H5892	H6918	apposition:2	medium	-0.0877
+H5892	H7151	apposition:1	medium	0.2252
+H5930	H1242	apposition:1	medium	0.1572
+H5930	H6153	apposition:1	medium	0.4327
+H5945	H7069	apposition:1	medium	0.2546
+H5971	H0251	apposition:1	high	0.4099
+H5971	H0376	apposition:3	high	0.2044
+H5971	H0802	apposition:2	high	0.3332
+H5971	H0972	apposition:1	medium	0.1044
+H5971	H1004	apposition:2	medium	0.1651
+H5971	H1121	apposition:6	medium	0.3059
+H5971	H1323	apposition:1	high	0.2743
+H5971	H1350	apposition:1	high	0.2287
+H5971	H1471	apposition:2	high	0.1936
+H5971	H1616	apposition:1	high	0.4658
+H5971	H1995	apposition:1	high	0.2055
+H5971	H2205	distributional:0.83	high	0.5368
+H5971	H2945	apposition:1	high	0.3819
+H5971	H3427	apposition:1	high	0.2254
+H5971	H4001	apposition:2	medium	0.0654
+H5971	H4264	apposition:1	high	0.3975
+H5971	H6041	apposition:1	high	0.0477
+H5971	H6951	distributional:0.80	high	0.6444
+H5971	H6957	apposition:4	medium	-0.0949
+H5971	H7611	apposition:1|distributional:0.83	high	0.3926
+H5971	H7626	apposition:1	high	0.3053
+H6041	H1800	apposition:1	medium	0.8053
+H6041	H6471	apposition:1	medium	-0.1458
+H6086	H1918	distributional:1.00	medium	0.3694
+H6086	H3712	apposition:1	medium	0.2107
+H6086	H5158	apposition:1	medium	0.2145
+H6086	H5687	apposition:1|distributional:1.00	medium	0.5780
+H6086	H6057	apposition:1	medium	0.0811
+H6086	H6160	apposition:1	medium	0.2070
+H6086	H7848	distributional:1.00	medium	0.6555
+H6086	H8559	apposition:1	medium	
+H6124	H5348	distributional:1.00	medium	0.8876
+H6154	H8359	distributional:1.00	medium	0.8663
+H6160	H4417	apposition:3	medium	0.5444
+H6389	H2989	apposition:1	medium	
+H6430	H0339	apposition:1	medium	0.0143
+H6430	H0796	apposition:1	medium	0.3387
+H6430	H0832	apposition:1	medium	
+H6430	H1663	apposition:1|distributional:0.80	medium	0.5086
+H6430	H5841	apposition:1	medium	
+H6430	H6139	apposition:1	medium	
+H6430	H6189	apposition:1	medium	0.1804
+H6430	H7611	apposition:1	high	0.1450
+H6440	H0113	apposition:1	high	0.4659
+H6440	H0251	apposition:3	medium	0.3627
+H6440	H0639	apposition:1	medium	0.3287
+H6440	H1060	apposition:1	medium	0.1943
+H6440	H1404	apposition:1	medium	0.0006
+H6440	H2740	apposition:1	high	0.3209
+H6440	H3548	apposition:3	medium	0.3657
+H6499	H3532	distributional:0.91	medium	0.9275
+H6522	H1622	distributional:1.00	medium	0.9298
+H6529	H3712	apposition:1	medium	0.1479
+H6529	H5687	apposition:1	medium	0.2939
+H6529	H6057	apposition:1	medium	0.2382
+H6529	H6160	apposition:1	medium	-0.0315
+H6529	H8559	apposition:1	medium	
+H6629	H3532	distributional:0.82	medium	0.4355
+H6629	H4830	apposition:1	medium	0.4801
+H6635	H0046	apposition:1	medium	0.4270
+H6635	H1368	apposition:2	medium	0.4039
+H6635	H1964	apposition:1	medium	0.4448
+H6635	H4634	apposition:1	medium	0.1873
+H6635	H8334	apposition:1	medium	0.1097
+H6662	H8549	apposition:1	medium	0.1062
+H6664	H4302	apposition:1	medium	0.1019
+H6666	H6520	apposition:1	medium	
+H6697	H4268	apposition:1	medium	0.6747
+H6918	H1254	apposition:1	medium	0.2747
+H6924	H1755	apposition:1	medium	0.2211
+H6924	H5608	apposition:1	medium	0.1308
+H6924	H5769	apposition:1	medium	0.2641
+H6944	H1350	apposition:1	medium	0.1635
+H6944	H4791	apposition:1	medium	-0.1619
+H6944	H4842	apposition:1	medium	0.3313
+H6944	H7545	apposition:1	medium	
+H6944	H7676	apposition:1	high	0.5102
+H6944	H7677	apposition:1	medium	0.3779
+H6944	H8641	distributional:0.86	medium	0.7179
+H6963	H8469	apposition:1	medium	0.5342
+H6975	H8069	apposition:1	medium	
+H7198	H1369	apposition:1	medium	0.2849
+H7198	H7225	apposition:1	medium	-0.2814
+H7218	H1419	apposition:1	medium	0.2941
+H7218	H2374	apposition:1	medium	0.2954
+H7218	H5387	apposition:1	high	0.4541
+H7218	H8269	apposition:4	medium	0.5005
+H7272	H1800	apposition:1	medium	-0.0041
+H7272	H1916	distributional:0.80	medium	0.5350
+H7272	H6471	apposition:1	medium	0.1951
+H7307	H4899	apposition:1	medium	0.2748
+H7307	H6346	apposition:1	medium	-0.0644
+H7323	H0327	apposition:1	medium	
+H7323	H7409	apposition:1	medium	-0.0475
+H7393	H1270	apposition:1	medium	0.3278
+H7453	H5726	apposition:2	medium	0.1651
+H7523	H5221	apposition:1	medium	0.4060
+H7626	H1425	distributional:1.00	medium	0.7420
+H7626	H2270	apposition:1	medium	0.3743
+H7626	H7206	distributional:1.00	medium	0.7404
+H7676	H4744	apposition:1	medium	0.6031
+H7704	H8124	apposition:2	medium	-0.1089
+H7785	H2373	distributional:1.00	medium	0.9299
+H7785	H8573	distributional:1.00	medium	0.8171
+H7794	H6499	apposition:1	medium	0.4798
+H7891	H6496	apposition:1	medium	0.3328
+H7892	H4210	apposition:1	medium	0.4214
+H8034	H0413	apposition:1	medium	
+H8034	H4886	apposition:1	medium	0.2467
+H8034	H5769	apposition:1	high	0.4203
+H8048	H6723	apposition:1	medium	
+H8048	H8322	apposition:1	medium	
+H8064	H0676	apposition:1	medium	0.0906
+H8064	H3427	apposition:6	medium	0.0511
+H8064	H4349	apposition:6	medium	0.6540
+H8064	H4639	apposition:1	medium	0.2819
+H8064	H7549	distributional:1.00	medium	0.6797
+H8069	H7898	apposition:1	medium	
+H8081	H4842	apposition:1	medium	0.5617
+H8081	H4888	distributional:1.00	medium	0.6688
+H8081	H4960	apposition:1	medium	0.1417
+H8081	H5560	distributional:0.80	medium	0.6378
+H8081	H5561	distributional:1.00	medium	0.6477
+H8081	H7545	apposition:1	medium	
+H8081	H8106	apposition:1	medium	
+H8130	H1060	apposition:1	medium	-0.1663
+H8141	H4643	apposition:1	medium	0.3365
+H8141	H8059	apposition:1|distributional:1.00	medium	0.5550
+H8269	H2428	apposition:1	medium	0.7729
+H8269	H3289	distributional:1.00	medium	0.3364
+H8269	H5631	distributional:0.83	high	0.8479
+H8269	H6485	apposition:1|distributional:1.00	medium	0.6066
+H8316	H3980	apposition:1	medium	
+H8334	H6486	apposition:1	medium	-0.0279
+H8441	H8251	apposition:1	medium	0.5727
+H8451	H1293	apposition:1	medium	0.2998
+H8451	H7045	apposition:1	medium	0.2361
+H8478	H1060	apposition:1	medium	
+H8504	H0948	distributional:1.00	medium	0.7539
+H8641	H8573	distributional:0.83	medium	0.7145

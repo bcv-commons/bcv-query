@@ -1,0 +1,23 @@
+# medium-tier hierarchy_dag.tsv edges whose BEREL relatedness (see
+# berel_relatedness_check.py) sits below the frequency-matched random baseline's
+# 25th percentile (-0.1081) -- candidates for being
+# noise apposition/distributional pairs rather than real semantic relations.
+# Flagged, not removed from hierarchy_dag.tsv.
+broader_strong	narrower_strong	sources	berel_cos
+H0157	H6593	apposition:1	-0.1967
+H0157	H6785	apposition:1	-0.2321
+H0398	H2230	apposition:1	-0.3011
+H1121	H5003	distributional:1.00	-0.3009
+H1471	H7489	apposition:1	-0.1222
+H2416	H4940	apposition:1	-0.1777
+H2428	H8130	apposition:1	-0.2575
+H2896	H5158	apposition:1	-0.1212
+H3206	H8267	apposition:1	-0.1127
+H3627	H7198	apposition:1	-0.2425
+H5650	H7495	apposition:1	-0.1482
+H5713	H4294	apposition:1	-0.2312
+H6041	H6471	apposition:1	-0.1458
+H6944	H4791	apposition:1	-0.1619
+H7198	H7225	apposition:1	-0.2814
+H7704	H8124	apposition:2	-0.1089
+H8130	H1060	apposition:1	-0.1663

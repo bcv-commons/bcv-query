@@ -30,6 +30,7 @@ CONTRADICTED edges (Phase C step 3), re-run that pair afterward too, in that ord
   python -m macula.build_hierarchy_dag
   python -m macula.direction_yardstick   # then, to restore tiering:
   python -m macula.tier_hierarchy_dag
+  python -m macula.berel_relatedness_check  # then, to restore the berel_cos column too
 """
 from __future__ import annotations
 
