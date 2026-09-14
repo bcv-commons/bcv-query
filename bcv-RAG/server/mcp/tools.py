@@ -22,7 +22,7 @@ from query.retrieve import retrieve
 from server.corpus_cards import resolve_corpus_hits
 from server.resolver import chunk_preview_from_card, resolve_chunk
 from server.trees import BUILDERS
-from lang import canon
+from lang import canon, to_web
 
 ToolHandler = Callable[[dict, sqlite3.Connection], dict]
 
@@ -573,6 +573,178 @@ def _cross_references(args: dict, db: sqlite3.Connection) -> dict:
         src_h = f"BBCCCVVV {bb}"
     return {"source_passage": {"bbcccvvv": bb, "human": src_h},
             "count": len(refs), "cross_references": refs}
+
+
+# ---------- Torah literary-unit structure (Kline's "Woven Torah", CC BY 4.0) ----------
+#
+# Cited third-party content, not something this project derives or validates — see
+# ingest/torah_weave.py's docstring. `_KLINE_ATTRIBUTION` is included on every response; CC BY
+# requires it, and it also keeps the tool's output honestly labeled as someone else's structural
+# claim rather than something bcv-query itself determined.
+_KLINE_ATTRIBUTION = {
+    "author": "Moshe Kline",
+    "citation": "Before Chapter and Verse: Reading the Woven Torah (self-published, 2022)",
+    "url": "https://chaver.com",
+    "license": "CC BY 4.0",
+}
+
+
+def _torah_verse_text(db: sqlite3.Connection, start: int, end: int, lang: str) -> str | None:
+    """Best-effort: this language's chunk body covering [start, end], or None if not indexed."""
+    lang_tag = f"lang:{to_web(canon(lang))}"
+    rows = db.execute(
+        "SELECT chunks.body FROM chunks "
+        "JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id "
+        "WHERE passage_refs.start_bbcccvvv <= ? AND passage_refs.end_bbcccvvv >= ? "
+        "AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:bible') "
+        "AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = ?) "
+        "ORDER BY passage_refs.start_bbcccvvv",
+        (end, start, lang_tag),
+    ).fetchall()
+    if not rows:
+        return None
+    # Some languages carry more than one kind:bible-tagged chunk per verse (e.g. an aligned pass
+    # plus a separate plain-text OT-completion pass, see ingest/bible_text.py) — dedupe identical
+    # bodies rather than concatenating repeats, order-preserving.
+    bodies = list(dict.fromkeys(r[0] for r in rows if r[0]))
+    return " ".join(bodies) if bodies else None
+
+
+def _torah_shared_lexemes(start_a: int, end_a: int, start_b: int, end_b: int) -> list[str] | None:
+    """Strong's numbers occurring in BOTH verse ranges (hbo.db) — best-effort, never raises."""
+    try:
+        import sqlite3 as _sqlite3
+        from resource_paths import resource_path
+        hbo = _sqlite3.connect(f"file:{resource_path('occurrences/hbo.db')}?mode=ro", uri=True)
+    except Exception:
+        return None
+
+    def _strongs(start: int, end: int) -> set[str]:
+        b1, c1, v1 = decode(start)
+        b2, c2, v2 = decode(end)
+        if b1 != b2:
+            return set()  # Kline's cells never cross books; a defensive no-op if that ever changes
+        rows = hbo.execute(
+            "SELECT DISTINCT strong FROM occurrence WHERE book = ? AND strong != '' "
+            "AND (chapter > ? OR (chapter = ? AND verse >= ?)) "
+            "AND (chapter < ? OR (chapter = ? AND verse <= ?))",
+            (b1, c1, c1, v1, c2, c2, v2),
+        ).fetchall()
+        return {r[0] for r in rows}
+
+    try:
+        shared = sorted(_strongs(start_a, end_a) & _strongs(start_b, end_b))
+    except Exception:
+        return None
+    finally:
+        hbo.close()
+    return shared or None
+
+
+@register_tool(
+    name="torah_unit_lookup",
+    description=(
+        "Look up which of Moshe Kline's 86 'Woven Torah' literary units (CC BY 4.0) a Torah verse "
+        "falls in, and its claimed structurally-paired cell(s) — a cited literary-structure "
+        "hypothesis, not a bcv-query claim. Optionally overlays the paired verses in another "
+        "language and any Strong's numbers repeated between them, both best-effort."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "reference": {"type": "string", "description": "A Torah verse, e.g. 'Genesis 1:14'"},
+            "lang": {"type": "string", "default": "en", "description": "Overlay the paired verses in this language, if indexed."},
+        },
+        "required": ["reference"],
+    },
+)
+def _torah_unit_lookup(args: dict, db: sqlite3.Connection) -> dict:
+    ref = args.get("reference", "").strip()
+    passages = parse_references(ref)
+    if not passages:
+        raise ValueError(f"could not parse Bible reference: {ref!r}")
+    bb = passages[0][0]
+    lang = args.get("lang", "en")
+
+    row = db.execute(
+        "SELECT c.unit_id, c.cell_label, c.row_number, c.column_letter, c.subdivision, "
+        "       c.start_bbcccvvv, c.end_bbcccvvv, u.title, u.format, u.unit_type "
+        "FROM torah_unit_cells c JOIN torah_units u ON u.unit_id = c.unit_id "
+        "WHERE c.start_bbcccvvv <= ? AND c.end_bbcccvvv >= ? LIMIT 1",
+        (bb, bb),
+    ).fetchone()
+    if row is None:
+        return {"reference": human(bb, bb), "in_torah_unit": False, "attribution": _KLINE_ATTRIBUTION}
+
+    (unit_id, cell_label, row_number, column_letter, subdivision,
+     c_start, c_end, title, fmt, unit_type) = row
+
+    partners = db.execute(
+        "SELECT cell_label, column_letter, start_bbcccvvv, end_bbcccvvv FROM torah_unit_cells "
+        "WHERE unit_id = ? AND row_number = ? "
+        "AND subdivision IS ? AND cell_label != ? ORDER BY column_letter",
+        (unit_id, row_number, subdivision, cell_label),
+    ).fetchall()
+
+    cell_out = {
+        "cell_label": cell_label, "verses": human(c_start, c_end),
+        "start_bbcccvvv": c_start, "end_bbcccvvv": c_end,
+    }
+    if lang != "en":
+        text = _torah_verse_text(db, c_start, c_end, lang)
+        if text:
+            cell_out["text"] = text
+
+    partner_out = []
+    for p_label, p_col, p_start, p_end in partners:
+        p = {"cell_label": p_label, "verses": human(p_start, p_end),
+             "start_bbcccvvv": p_start, "end_bbcccvvv": p_end}
+        if lang != "en":
+            text = _torah_verse_text(db, p_start, p_end, lang)
+            if text:
+                p["text"] = text
+        shared = _torah_shared_lexemes(c_start, c_end, p_start, p_end)
+        if shared:
+            p["shared_strongs"] = shared
+        partner_out.append(p)
+
+    return {
+        "reference": human(bb, bb),
+        "in_torah_unit": True,
+        "unit": {"unit_id": unit_id, "title": title, "format": fmt, "unit_type": unit_type},
+        "cell": cell_out,
+        "structural_partners": partner_out,
+        "attribution": _KLINE_ATTRIBUTION,
+    }
+
+
+@register_tool(
+    name="torah_units",
+    description=(
+        "Browse Moshe Kline's 86 'Woven Torah' literary units (CC BY 4.0) as a Torah outline — "
+        "title and verse range per unit, independent of the row/column pairing claim."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "book": {"type": "string", "description": "USFM code to filter to one book, e.g. 'GEN'"},
+        },
+    },
+)
+def _torah_units(args: dict, db: sqlite3.Connection) -> dict:
+    sql = ("SELECT serial_number, book, unit_number, title, start_bbcccvvv, end_bbcccvvv, format "
+           "FROM torah_units")
+    params: list = []
+    if args.get("book"):
+        sql += " WHERE book = ?"
+        params.append(args["book"].upper())
+    sql += " ORDER BY serial_number"
+    units = [
+        {"serial_number": s, "book": b, "unit_number": n, "title": t,
+         "verses": human(a, e), "format": f}
+        for s, b, n, t, a, e, f in db.execute(sql, params).fetchall()
+    ]
+    return {"count": len(units), "units": units, "attribution": _KLINE_ATTRIBUTION}
 
 
 @register_tool(

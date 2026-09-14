@@ -135,6 +135,17 @@ omit to default to English). The live `tools/list` is authoritative for full sch
 | `morphology_concordance` | `lex*, stem, sense, top_k, lang` | Verses by Hebrew lexeme + binyan + sense. |
 | `cross_language` | `strong*` | Hebrew↔Greek equivalents via the LXX bridge. |
 
+**Torah literary structure** — Moshe Kline's "Woven Torah" hypothesis (86 units, CC BY 4.0). **Cited
+third-party content, not a bcv-query claim** — see `ingest/torah_weave.py`'s docstring for why this is
+consumed as content rather than derived/validated against (the SDBH-retirement reasoning in
+`internal-docs/text-anchored-semantics-plan.md` applies to the latter, not the former). Every response
+carries the source citation.
+
+| Tool | Arguments | What it does |
+|---|---|---|
+| `torah_unit_lookup` | `reference*, lang` | A Torah verse's literary unit + claimed structurally-paired cell(s), optionally overlaid with the paired verses' text in `lang` and any Strong's numbers shared between them — both best-effort. |
+| `torah_units` | `book` | Browse the 86 units as a Torah outline (title + verse range per unit), independent of the pairing claim. |
+
 ## Notes
 
 - Tool results are best-effort JSON; enrichment that can't be produced is omitted rather

@@ -267,3 +267,40 @@ CREATE TABLE IF NOT EXISTS cross_references (
 );
 CREATE INDEX IF NOT EXISTS idx_xref_source ON cross_references(source_bbcccvvv);
 CREATE INDEX IF NOT EXISTS idx_xref_target_range ON cross_references(target_start_bbcccvvv, target_end_bbcccvvv);
+
+-- ── Torah literary-unit structure (Kline's "Woven Torah", CC BY 4.0) ──
+--
+-- A CITED third-party literary-structure hypothesis, not something this project derives or
+-- validates (see internal-docs/text-anchored-semantics-plan.md's SDBH-retirement reasoning for why
+-- that distinction matters: consuming a classification as content is fine, tuning our own build
+-- constants against it would not be — this is the former). 86 units partition the Torah; each unit
+-- is a 2-D table of verse-range cells. Cells sharing a row_number+subdivision but a different
+-- column_letter are Kline's claimed structural pairing — computed at query time (see
+-- server/mcp/tools.py:torah_unit_lookup), not precomputed, so units with >2 columns (e.g. a 2x3
+-- unit) aren't forced into a single-partner assumption.
+CREATE TABLE IF NOT EXISTS torah_units (
+  unit_id        TEXT PRIMARY KEY,        -- 'torahunit:<serial_number>'
+  serial_number  INTEGER NOT NULL,
+  book           TEXT NOT NULL,           -- USFM code
+  unit_number    INTEGER NOT NULL,        -- Kline's per-book numbering
+  title          TEXT NOT NULL,
+  start_bbcccvvv INTEGER NOT NULL,
+  end_bbcccvvv   INTEGER NOT NULL,
+  format         TEXT NOT NULL,           -- 'NxM' (regular) or irregular digit-string e.g. '12221'
+  irregular      INTEGER NOT NULL,        -- 0/1
+  unit_type      TEXT,                    -- 'F' (framework) | 'CL' (closure) | 'U' (unique) | NULL
+  source         TEXT NOT NULL DEFAULT 'kline-woven-torah-2022'
+);
+CREATE INDEX IF NOT EXISTS idx_torah_units_range ON torah_units(start_bbcccvvv, end_bbcccvvv);
+
+CREATE TABLE IF NOT EXISTS torah_unit_cells (
+  unit_id        TEXT NOT NULL REFERENCES torah_units(unit_id) ON DELETE CASCADE,
+  cell_label     TEXT NOT NULL,           -- '2Aa', as published
+  row_number     INTEGER NOT NULL,        -- parsed leading digits
+  column_letter  TEXT,                    -- parsed uppercase letter; NULL for single-column rows
+  subdivision    TEXT,                    -- parsed trailing lowercase letter; NULL if none
+  start_bbcccvvv INTEGER NOT NULL,
+  end_bbcccvvv   INTEGER NOT NULL,
+  PRIMARY KEY (unit_id, cell_label)
+);
+CREATE INDEX IF NOT EXISTS idx_torah_cells_range ON torah_unit_cells(start_bbcccvvv, end_bbcccvvv);
