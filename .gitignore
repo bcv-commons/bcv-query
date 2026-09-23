@@ -110,6 +110,10 @@ shoresh/macula/rp2018-spine.db-*
 # TR: third, independently-sourced Greek spine (re-derivable via macula.build_tr_spine)
 shoresh/macula/tr-textus-receptus-spine.db
 shoresh/macula/tr-textus-receptus-spine.db-*
+# lowfat: MACULA Hebrew lowfat-XML extraction (re-derivable via macula.parse_lowfat_hbo) + its
+# scratch git checkout (~400MB, fetched on demand, never committed)
+shoresh/macula/lowfat-hbo.db
+shoresh/macula/.lowfat-src/
 
 # interlinear: downloaded gbt/study-app source + built dbs (all re-derivable via interlinear.fetch +
 # .build_hebrew_greek / .build_gloss — see shoresh/interlinear/README.md)
