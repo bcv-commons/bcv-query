@@ -304,3 +304,37 @@ CREATE TABLE IF NOT EXISTS torah_unit_cells (
   PRIMARY KEY (unit_id, cell_label)
 );
 CREATE INDEX IF NOT EXISTS idx_torah_cells_range ON torah_unit_cells(start_bbcccvvv, end_bbcccvvv);
+
+-- ── Clause-level dependency graph (BHSA `mother`+`rela`) ──
+--
+-- Which clause grammatically depends on which, and how (Objc/Attr/Adju/Coor/Resu/...) -- discourse
+-- structure, not a lexical/word-pair signal. Source: shoresh/macula/build_hierarchy_relations.py,
+-- resources/bhsa_hierarchy/clause_mother.tsv (BHSA node ids pinned to text-fabric-data's ETCBC/bhsa
+-- 2021 release -- re-derive on a deliberate BHSA version bump, same discipline as every other
+-- BHSA-node-keyed resource). 20,791 of 88,131 OT clauses (24%) carry a mother.
+--
+-- mother_otype: a mother is not always a clause (13,917 clause / 5,305 phrase / 1,569 word, checked
+-- directly) -- a dependent clause can depend on one specific phrase/word inside another clause (a
+-- relative clause modifying a noun phrase), not only "the other clause" as a whole.
+--
+-- CAVEAT, surfaced in every consuming tool's own description, not just here: a long flat coordinated
+-- list (Coor chains -- a genealogy/name roster) chains exactly as deep as genuine narrative
+-- subordination. Depth alone does not mean discourse nesting.
+CREATE TABLE IF NOT EXISTS clause_dependencies (
+  dependent_node             INTEGER PRIMARY KEY,   -- BHSA clause node id
+  dependent_start_bbcccvvv   INTEGER NOT NULL,
+  dependent_end_bbcccvvv     INTEGER NOT NULL,
+  dependent_text             TEXT NOT NULL,
+  mother_node                INTEGER NOT NULL,      -- BHSA node id, of type mother_otype
+  mother_otype                TEXT NOT NULL,         -- 'clause' | 'phrase' | 'word'
+  mother_start_bbcccvvv      INTEGER NOT NULL,
+  mother_end_bbcccvvv        INTEGER NOT NULL,
+  mother_text                TEXT NOT NULL,
+  rela                        TEXT NOT NULL          -- Objc/Attr/Adju/Coor/Resu/RgRc/Subj/ReVo/
+                                                       -- Cmpl/PreC/Spec/PrAd
+);
+CREATE INDEX IF NOT EXISTS idx_clausedep_dep_range
+  ON clause_dependencies(dependent_start_bbcccvvv, dependent_end_bbcccvvv);
+CREATE INDEX IF NOT EXISTS idx_clausedep_mother_range
+  ON clause_dependencies(mother_start_bbcccvvv, mother_end_bbcccvvv);
+CREATE INDEX IF NOT EXISTS idx_clausedep_mother_node ON clause_dependencies(mother_node);

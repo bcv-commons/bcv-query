@@ -34,9 +34,27 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+sys.path.insert(0, str(HERE.parents[0]))
+from references import encode  # noqa: E402
+
 HBO = ROOT / "resources" / "occurrences" / "hbo.db"
 OUT_DIR = ROOT / "resources" / "bhsa_hierarchy"
 BHSA_PATH = Path.home() / "text-fabric-data" / "github" / "ETCBC" / "bhsa" / "tf" / "2021"
+
+# BHSA's own book-name convention (full English name, underscored multi-word) -> this project's USFM
+# codes, needed to compute BBCCCVVV for clause_mother.tsv's new addressable columns. Verified all 39
+# OT books round-trip cleanly (chiasm-pilot-plan.md's segmentation-fit work hit the same mapping need
+# in the other direction).
+_BHSA_TO_USFM = {
+    "Genesis": "GEN", "Exodus": "EXO", "Leviticus": "LEV", "Numbers": "NUM", "Deuteronomy": "DEU",
+    "Joshua": "JOS", "Judges": "JDG", "1_Samuel": "1SA", "2_Samuel": "2SA", "1_Kings": "1KI",
+    "2_Kings": "2KI", "Isaiah": "ISA", "Jeremiah": "JER", "Ezekiel": "EZK", "Hosea": "HOS",
+    "Joel": "JOL", "Amos": "AMO", "Obadiah": "OBA", "Jonah": "JON", "Micah": "MIC", "Nahum": "NAM",
+    "Habakkuk": "HAB", "Zephaniah": "ZEP", "Haggai": "HAG", "Zechariah": "ZEC", "Malachi": "MAL",
+    "Psalms": "PSA", "Job": "JOB", "Proverbs": "PRO", "Ruth": "RUT", "Song_of_songs": "SNG",
+    "Ecclesiastes": "ECC", "Lamentations": "LAM", "Esther": "EST", "Daniel": "DAN", "Ezra": "EZR",
+    "Nehemiah": "NEH", "1_Chronicles": "1CH", "2_Chronicles": "2CH",
+}
 
 CONTENT_SP = {"subs", "verb", "adjv"}
 NUMERAL_LS = {"card", "ordn", "mult"}   # BHSA `ls` (lexical subset) values for cardinal/ordinal/
@@ -112,18 +130,67 @@ def extract_construct(api, node2strong) -> collections.Counter:
     return out
 
 
-def extract_clause_mother(api) -> list[tuple[str, str, str]]:
-    """[(dependent_ref, mother_ref, rela)] -- clause-level dependency, verse-addressable."""
-    F, E, T = api.F, api.E, api.T
+def _node_text(node, F, L) -> str:
+    """Hebrew word text for a word/phrase/clause node -- L.d(word, otype='word') is empty for a
+    bare word node (same gotcha noted in extract_apposition/extract_construct above), so handle a
+    word node directly rather than via L.d."""
+    words = [node] if F.otype.v(node) == "word" else L.d(node, otype="word")
+    text = "".join((F.g_word_utf8.v(w) or "") + (F.trailer_utf8.v(w) or "") for w in words)
+    return " ".join(text.split())  # collapses any stray tab/newline in trailer text -- a TSV row
+                                    # (see chiasm_pilot's earlier embedded-newline bug) must not
+                                    # carry one, and this also normalizes visual whitespace/maqaf runs
+
+
+def _node_bbcccvvv(node, T) -> tuple[int, int]:
+    """(start, end) BBCCCVVV -- a single verse for every node type seen here (clause/phrase/word
+    are all verse-nested in BHSA, confirmed by T.sectionFromNode never returning a multi-verse
+    span), so start == end. USFM_TO_BHSA's inverse; unmapped book (shouldn't happen, OT-only
+    corpus) falls back to (0, 0), never raises."""
+    book, ch, vs = T.sectionFromNode(node)
+    usfm = _BHSA_TO_USFM.get(book)
+    if usfm is None:
+        return 0, 0
+    bb = encode(usfm, ch, vs)
+    return bb, bb
+
+
+def extract_clause_mother(api) -> list[tuple]:
+    """[(dependent_node, dependent_ref, dependent_start_bbcccvvv, dependent_end_bbcccvvv,
+    dependent_text, mother_node, mother_otype, mother_ref, mother_start_bbcccvvv,
+    mother_end_bbcccvvv, mother_text, rela)] -- clause-level dependency.
+
+    FIXED 2026-09-24 (internal-docs/clause-dependency-graph-plan.md): the original version keyed
+    rows on T.sectionFromNode()'s verse-level ref alone, which collapses 95.7% of rows to (self,
+    self) noise whenever a clause's mother sits in the same verse -- the common case. Now keyed on
+    the raw BHSA node ids (same anchor convention as hbo.db's word `node` and hbo_syntax.db's phrase
+    `node`), with the verse-level ref kept as a human-readable label only.
+
+    `mother_otype`: a clause's `mother` edge is NOT always another clause -- checked directly against
+    the live corpus: 13,917 clause->clause, 5,305 clause->phrase, 1,569 clause->word (0 with >1
+    mother; 0 cycles in the clause->clause subset, i.e. that subset is a genuine forest). A dependent
+    clause can depend on a specific phrase or word inside another clause (e.g. a relative clause
+    modifying one noun phrase), not only on "the other clause" as a whole -- recorded, not collapsed.
+
+    EXTENDED 2026-09-2X (for the clause_dependency_lookup MCP tool): `*_text` and `*_bbcccvvv`
+    columns, precomputed here (where cfabric access already lives) rather than at ingest/serve time
+    in bcv-RAG, which has neither BHSA access nor a use for it elsewhere -- same "compute once at
+    build time, serve cheaply from SQL" split as every other bcv-RAG-consumed resource.
+    """
+    F, E, L, T = api.F, api.E, api.L, api.T
     out = []
     for cl in F.otype.s("clause"):
         m = E.mother.f(cl)
         if not m:
             continue
+        mother = m[0]
         rela = F.rela.v(cl) or ""
         dep_ref = "%s %s:%s" % T.sectionFromNode(cl)
-        mom_ref = "%s %s:%s" % T.sectionFromNode(m[0])
-        out.append((dep_ref, mom_ref, rela))
+        mom_ref = "%s %s:%s" % T.sectionFromNode(mother)
+        dep_bb = _node_bbcccvvv(cl, T)
+        mom_bb = _node_bbcccvvv(mother, T)
+        out.append((cl, dep_ref, dep_bb[0], dep_bb[1], _node_text(cl, F, L),
+                     mother, F.otype.v(mother), mom_ref, mom_bb[0], mom_bb[1],
+                     _node_text(mother, F, L), rela))
     return out
 
 
@@ -159,14 +226,32 @@ def main() -> int:
             fh.write(f"{r}\t{c}\t{cnt}\n")
 
     clause_mother = extract_clause_mother(api)
-    print(f"[hierarchy] clause mother: {len(clause_mother)} dependent clauses", file=sys.stderr)
+    n_same_ref = sum(1 for row in clause_mother if row[1] == row[7])
+    print(f"[hierarchy] clause mother: {len(clause_mother)} dependent clauses "
+          f"({n_same_ref} same-verse-ref as their mother -- distinguishable now via node id, "
+          f"see header)", file=sys.stderr)
     with (args.out_dir / "clause_mother.tsv").open("w", encoding="utf-8") as fh:
-        fh.write("# BHSA clause-level dependency (candidate #6, never built before 2026-08-15): "
-                  "dependent_ref depends on mother_ref via `rela`. Discourse structure, not a "
-                  "word-pair signal -- see build_hierarchy_relations.py.\n")
-        fh.write("dependent_ref\tmother_ref\trela\n")
-        for dep, mom, rela in clause_mother:
-            fh.write(f"{dep}\t{mom}\t{rela}\n")
+        fh.write("# BHSA clause-level dependency (candidate #6). dependent_node depends on\n"
+                  "# mother_node via `rela`. Discourse structure, not a word-pair signal -- see\n"
+                  "# build_hierarchy_relations.py. mother_otype: a mother is not always a clause\n"
+                  "# (13,917 clause / 5,305 phrase / 1,569 word, checked directly) -- a dependent\n"
+                  "# clause can depend on one specific phrase/word inside another clause, not just\n"
+                  "# \"the other clause\" as a whole. FIXED 2026-09-24: rows now keyed on the raw BHSA\n"
+                  "# node id (same anchor convention as hbo.db/hbo_syntax.db's `node`), not the\n"
+                  "# verse-level ref alone -- the earlier version collapsed 95.7% of rows to\n"
+                  "# same-ref noise whenever a clause's mother sat in the same verse (the common\n"
+                  "# case), making same-verse relations unresolvable. *_ref columns are for human\n"
+                  "# reading only; join/distinguish on the *_node columns. *_bbcccvvv/*_text added\n"
+                  "# for the clause_dependency_lookup MCP tool (bcv-RAG). CAVEAT, read before use:\n"
+                  "# a long flat coordinated list (Coor chains, e.g. a genealogy/name roster) chains\n"
+                  "# just as deep as genuine narrative subordination -- depth alone does not mean\n"
+                  "# discourse nesting, checked directly (1 Chronicles 11:27's roster of names is\n"
+                  "# this file's single deepest chain, depth 19, all-Coor).\n")
+        fh.write("dependent_node\tdependent_ref\tdependent_start_bbcccvvv\tdependent_end_bbcccvvv\t"
+                  "dependent_text\tmother_node\tmother_otype\tmother_ref\tmother_start_bbcccvvv\t"
+                  "mother_end_bbcccvvv\tmother_text\trela\n")
+        for row in clause_mother:
+            fh.write("\t".join(str(v) for v in row) + "\n")
 
     print(f"[hierarchy] -> {args.out_dir}", file=sys.stderr)
     return 0

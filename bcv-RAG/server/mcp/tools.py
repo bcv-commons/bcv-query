@@ -747,6 +747,73 @@ def _torah_units(args: dict, db: sqlite3.Connection) -> dict:
     return {"count": len(units), "units": units, "attribution": _KLINE_ATTRIBUTION}
 
 
+# ---------- BHSA clause-level dependency graph ----------
+#
+# Discourse structure (which clause grammatically depends on which, and how), not a lexical/word-pair
+# signal -- see indexer/schema.sql's clause_dependencies comment for the full caveat list. Surfaced
+# in every response so a caller can't miss it, same posture as the Torah attribution above.
+_CLAUSE_DEP_CAVEAT = (
+    "BHSA clause-level dependency (Objc/Attr/Adju/Coor/Resu/...), not a bcv-query claim -- Context "
+    "Fabric reports grammatical annotation, it doesn't infer. One caveat worth knowing before reading "
+    "'depth' as meaningful: a long flat coordinated list (Coor chains, e.g. a genealogy/name roster) "
+    "chains exactly as deep as genuine narrative subordination -- checked directly, this dataset's "
+    "single deepest chain (20 clauses) is 1 Chronicles 11:27's roster of names, not an argument."
+)
+
+
+@register_tool(
+    name="clause_dependency_lookup",
+    description=(
+        "A verse's clause-level BHSA dependency structure: which of its clauses depend on which "
+        "other clause/phrase/word, and how (Objc/Attr/Adju/Coor/Resu/...) -- discourse structure, "
+        "'why does this clause relate to that one', not word-level syntax. Also reports which OTHER "
+        "clauses depend on this verse's clauses (the reverse direction), so a governing/'hub' clause "
+        "shows its full set of dependents. Hebrew Bible only."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "reference": {"type": "string", "description": "A Hebrew Bible verse, e.g. 'Zechariah 8:14'"},
+        },
+        "required": ["reference"],
+    },
+)
+def _clause_dependency_lookup(args: dict, db: sqlite3.Connection) -> dict:
+    ref = args.get("reference", "").strip()
+    passages = parse_references(ref)
+    if not passages:
+        raise ValueError(f"could not parse Bible reference: {ref!r}")
+    bb = passages[0][0]
+
+    as_dependent = db.execute(
+        "SELECT dependent_text, mother_text, mother_otype, mother_start_bbcccvvv, "
+        "mother_end_bbcccvvv, rela FROM clause_dependencies "
+        "WHERE dependent_start_bbcccvvv <= ? AND dependent_end_bbcccvvv >= ?",
+        (bb, bb),
+    ).fetchall()
+    as_mother = db.execute(
+        "SELECT mother_text, dependent_text, rela FROM clause_dependencies "
+        "WHERE mother_start_bbcccvvv <= ? AND mother_end_bbcccvvv >= ? AND mother_otype = 'clause'",
+        (bb, bb),
+    ).fetchall()
+
+    depends_on = [
+        {"clause": dep_txt, "depends_on": mom_txt, "mother_otype": mom_ot,
+         "mother_reference": human(mom_s, mom_e), "rela": rela}
+        for dep_txt, mom_txt, mom_ot, mom_s, mom_e, rela in as_dependent
+    ]
+    dependents = [
+        {"clause": mom_txt, "dependent_clause": dep_txt, "rela": rela}
+        for mom_txt, dep_txt, rela in as_mother
+    ]
+    return {
+        "reference": human(bb, bb),
+        "depends_on": depends_on,
+        "dependents_of_this_verses_clauses": dependents,
+        "note": _CLAUSE_DEP_CAVEAT,
+    }
+
+
 @register_tool(
     name="concordance",
     description=(
