@@ -16,7 +16,11 @@ confidence flag, these groups kept 0.91-0.93 of the SDBH labels' label-fit usefu
 split, with 93% of content tokens labelled (SDBH: 41%).
 
 Sources:
-  --source bhsa-free   shoresh/macula/data/bhsa_free/domain_clusters.tsv (default since 2026-10-03: no
+  --source bhsa-free-routed  shoresh/macula/data/bhsa_free/routed/domain_clusters.tsv (default since
+                       2026-10-03): the BHSA-free build with --route-homographs, so Strong's-level evidence
+                       (BDB roots, LLM pairs) attaches only to the matching MACULA homograph (fixes Ps 23:1
+                       רֹעִי "my shepherd" being labelled רֵעַ "neighbor"); scorecard-neutral on dev
+  --source bhsa-free   shoresh/macula/data/bhsa_free/domain_clusters.tsv (no
                        BHSA input, so no non-commercial data in the CC0 lineage; on the locked test split
                        it kept 0.95-0.96 of the SDBH labels' label-fit usefulness, vs 0.91-0.93 for production)
   --source production  resources/semantic_neighbors/domain_clusters.tsv (BHSA-derived signals)
@@ -26,9 +30,10 @@ Full BHSA-free rebuild (outputs under shoresh/macula/data/bhsa_free/, gitignored
   .venv/bin/python3 -m macula.build_bhsa_free_contexts
   .venv/bin/python3 -m macula.build_semantic_neighbors --emb macula/data/bhsa_free/context_emb_berel.npz \
       --macula-contexts macula/data/bhsa_free/occurrence.db --no-structural --parallelism-tomim-only \
-      --no-xling --emb-label "BEREL word-window centroids (MACULA, BHSA-free)" --out-dir macula/data/bhsa_free/neighbors
-  .venv/bin/python3 -m macula.build_domain_clusters --neighbors macula/data/bhsa_free/neighbors/by_lexeme.tsv \
-      --out macula/data/bhsa_free/domain_clusters.tsv
+      --no-xling --route-homographs --emb-label "BEREL word-window centroids (MACULA, BHSA-free)" \
+      --out-dir macula/data/bhsa_free/routed
+  .venv/bin/python3 -m macula.build_domain_clusters --neighbors macula/data/bhsa_free/routed/by_lexeme.tsv \
+      --out macula/data/bhsa_free/routed/domain_clusters.tsv
   .venv/bin/python3 -m macula.build_semantic_groups
 """
 from __future__ import annotations
@@ -47,10 +52,12 @@ OUT = ROOT / "resources" / "semantic_groups"
 
 def build(source: str) -> tuple[list[tuple], dict[str, tuple], str]:
     counts, lemmas = dp.token_counts(), dp.lemma_of()
-    if source == "bhsa-free":
+    if source in ("bhsa-free", "bhsa-free-routed"):
         occ, glosses = dp.lexeme_occurrences_nb()
-        path, provenance = dp.CLUSTERS_NB, ("BEREL word-window centroids over MACULA text, no BHSA input "
-                                            "(build_bhsa_free_contexts + build_semantic_neighbors --macula-contexts)")
+        path = dp.BHSA_FREE / "routed" / "domain_clusters.tsv" if source == "bhsa-free-routed" else dp.CLUSTERS_NB
+        provenance = ("BEREL word-window centroids over MACULA text, no BHSA input (build_bhsa_free_contexts + "
+                      "build_semantic_neighbors --macula-contexts"
+                      + (" --route-homographs)" if source == "bhsa-free-routed" else ")"))
     else:
         occ, glosses = dp.unit_occurrences()
         path, provenance = dp.CLUSTERS, "resources/semantic_neighbors/domain_clusters.tsv (production pack)"
@@ -96,7 +103,7 @@ def write(members: list[tuple], groups: dict[str, tuple], provenance: str, out: 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--source", choices=["production", "bhsa-free"], default="bhsa-free")
+    ap.add_argument("--source", choices=["production", "bhsa-free", "bhsa-free-routed"], default="bhsa-free-routed")
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
     members, groups, provenance = build(args.source)

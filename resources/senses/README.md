@@ -9,17 +9,18 @@ Two layers live here:
 
 | file | key | what |
 |---|---|---|
-| `hbo.tsv`, `grc.tsv` | **Strong's** | older per-Strong's sense inventory, from MACULA |
+| `hbo.tsv`, `grc.tsv` | **Strong's** | per-Strong's sense inventory from the **UBS open release** (rebuilt 2026-10) |
 | `hbo_lex.tsv` | **BHSA lex + stem** | newer Hebrew sense layer, derived from Hebrew **context** — binyan-aware, splits the homographs Strong's conflates |
 
-> ⚠️ **Licensing — NOT CC BY 4.0.** The Strong's-keyed `hbo.tsv`/`grc.tsv` are
-> derived from **UBS MARBLE** (SDBG/SDBH) sense data, which MACULA's LICENSE
-> carries **"used with permission,"** *outside* its CC BY 4.0 grant. Reference
-> data under UBS terms — not safe to redistribute/use commercially as CC-BY
-> without your own UBS permission. See `../semantic_domains/README.md`.
-> (`hbo_lex.tsv` clusters Hebrew context and labels from the curated per-stem
-> glosses + scrubbed MACULA glosses — same caution applies to the MACULA-derived
-> labels.)
+> **Licensing.** `hbo.tsv` / `grc.tsv` are built by `shoresh/macula/build_ubs_open.py` from the UBS
+> Dictionary of Biblical Hebrew and the UBS Dictionary of the Greek New Testament (© United Bible
+> Societies 2023, **CC BY-SA 4.0**, github.com/ubsicap/ubs-open-license @ `33dcc8c`): one row per
+> dictionary sense, `sense` = its order in the entry, `gloss` = its first English gloss, `count` = the
+> Scripture references UBS lists for it. Attribute UBS and keep anything built from them CC BY-SA.
+> (Until 2026-10 they came from the MARBLE sense layer bundled with MACULA, "used with permission" and
+> not redistributable.) `hbo_lex.tsv` is our own: Hebrew-context clusters labelled from curated per-stem
+> glosses and MACULA's CC BY glosses; it is keyed on, and built from, BHSA (see the BHSA licence note in
+> the repo README).
 
 ---
 

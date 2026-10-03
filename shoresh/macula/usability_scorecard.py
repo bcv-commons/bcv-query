@@ -37,7 +37,7 @@ from macula.domain_providers import OUT as PROVIDERS_DIR, SPINE_DB, load_provide
 HERE = Path(__file__).resolve().parent
 SHORESH = HERE.parent
 RESULTS = HERE / "data" / "usability" / "scorecard"
-PROVIDERS = ("P0", "P0none", "P1", "P2", "PR-P0", "PR-P2", "P1nb", "P2nb", "PR-P2nb", "A1", "A2", "P2nbmz")
+PROVIDERS = ("P0", "P0none", "P1", "P2", "PR-P0", "PR-P2", "P1nb", "P2nb", "PR-P2nb", "A1", "A2", "P2nbmz", "P2nbr")
 
 
 def ot_tokens() -> list[tuple[str, str]]:

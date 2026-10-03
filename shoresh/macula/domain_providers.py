@@ -45,6 +45,7 @@ import collections
 import hashlib
 import json
 import random
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -73,7 +74,9 @@ OCC_NB = BHSA_FREE / "occurrence.db"
 ABLATIONS = {"A1": (BHSA_FREE / "ablations" / "a1" / "domain_clusters.tsv", "sense"),
              "A2": (BHSA_FREE / "ablations" / "a2" / "domain_clusters.tsv", "lexeme"),
              # admission test: the BHSA-free pack plus the Metzudat Zion signal (compare with P2nb)
-             "P2nbmz": (BHSA_FREE / "with_mz" / "domain_clusters.tsv", "lexeme")}
+             "P2nbmz": (BHSA_FREE / "with_mz" / "domain_clusters.tsv", "lexeme"),
+             # BHSA-free + homograph routing of Strong's-level evidence (--route-homographs)
+             "P2nbr": (BHSA_FREE / "routed" / "domain_clusters.tsv", "lexeme")}
 CONTROL_SEED = 13
 
 Row = tuple[str, str, str, float, int]               # strong, axis, group_id, share, served
@@ -115,13 +118,39 @@ def lemma_of() -> dict[str, str]:
     return {s: c.most_common(1)[0][0] for s, c in ct.items()}
 
 
+FROZEN_GLOSSES = HERE / "data" / "usability" / "spine_glosses_frozen.tsv"
+
+
+def _frozen_glosses() -> dict[str, str]:
+    out = {}
+    for line in FROZEN_GLOSSES.read_text(encoding="utf-8").splitlines()[1:]:
+        p = line.split("\t")
+        if len(p) >= 2:
+            out[p[0]] = p[1]
+    return out
+
+
 def english_gloss(strong: str) -> str:
-    """Word-level fallback only: spine_glosses.tsv picks the wrong homograph for some words (H5483
-    horse -> "swallow", H0899 garment -> "treachery"), so cluster labels use unit_glosses() instead."""
+    """Word-level fallback for label reading aids. Reads a frozen copy of spine/spine_glosses.tsv (taken
+    before its 2026-10-03 homograph fix) so provider tables, and the locked item files built from them,
+    stay byte-identical across rebuilds; the served gloss table may change, the measurement set may not."""
+    if FROZEN_GLOSSES.exists():
+        m = re.match(r"^H0*(\d+)", strong)
+        return _frozen_glosses_cache().get(f"H{m.group(1)}" if m else strong, "")
     sys.path.insert(0, str(SHORESH))
     import data
     g = data.gloss_of(strong)
     return (g or {}).get("gloss") or ""
+
+
+_FG: dict | None = None
+
+
+def _frozen_glosses_cache() -> dict[str, str]:
+    global _FG
+    if _FG is None:
+        _FG = _frozen_glosses()
+    return _FG
 
 
 # ---------- P0: what /verse serves today ----------

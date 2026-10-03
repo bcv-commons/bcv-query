@@ -41,7 +41,7 @@ from macula.domain_providers import OUT as PROVIDERS_DIR, SPINE_DB, lemma_of, lo
 HERE = Path(__file__).resolve().parent
 ITEMS = HERE / "data" / "usability" / "items"
 SEEDS = (13, 17, 23, 29, 31)
-PROVIDERS = ("P0", "P1", "P2", "PR-P0", "PR-P2", "P1nb", "P2nb", "PR-P2nb", "A1", "A2", "P2nbmz")
+PROVIDERS = ("P0", "P1", "P2", "PR-P0", "PR-P2", "P1nb", "P2nb", "PR-P2nb", "A1", "A2", "P2nbmz", "P2nbr")
 N_GROUPS = 200
 N_TOKENS = 300
 MAX_MEMBERS = 4

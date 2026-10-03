@@ -13,6 +13,9 @@ Writes, same schema as before so shoresh and bcv-RAG need no change:
                              sdbg  Louw-Nida via the LXX bridge (Hebrew -> Greek renderings -> grc.tsv)
   semantic_domains/domain_labels/{eng,spa,fra,cmn-Hans}.tsv   Louw-Nida domain names
 (`ind` and `deu` label files are our own translations and are left as they are.)
+  senses/hbo.tsv, senses/grc.tsv   Strong's-keyed sense inventories: one row per dictionary sense
+                             (sense = its order in the entry, gloss = its first English gloss,
+                             count = Scripture references UBS lists for it)
 
 The open release has no SDBH core or contextual axis; those were retired (replaced by
 resources/semantic_groups/). count = the number of Scripture references UBS lists for a sense; share =
@@ -115,6 +118,38 @@ def write(path: Path, rows: list[tuple]) -> None:
           file=sys.stderr)
 
 
+def sense_rows(entries: list, prefix: str) -> list[tuple]:
+    """(strong, sense, gloss, count, share) in the old senses/<lang>.tsv schema."""
+    per: dict = collections.defaultdict(list)
+    for e in entries:
+        strongs = sorted({s for s in (_strong(c, prefix) for c in e.get("StrongCodes") or []) if s})
+        meanings = [lm for bf in e.get("BaseForms") or [] for lm in bf.get("LEXMeanings") or []]
+        for i, lm in enumerate(meanings, start=1):
+            loc = next((x for x in lm.get("LEXSenses") or [] if x.get("LanguageCode") == "en"), None)
+            gloss = ((loc or {}).get("Glosses") or [""])[0].strip()
+            n = len(lm.get("LEXReferences") or [])
+            if not gloss or n == 0:
+                continue
+            for s in strongs:
+                per[s].append((str(i), gloss.replace("\t", " "), n))
+    out = []
+    for s, senses in per.items():
+        total = sum(n for _i, _g, n in senses)
+        for rank, (i, g, n) in enumerate(sorted(senses, key=lambda x: -x[2])):
+            if rank == 0 or n >= MIN_COUNT:
+                out.append((s, i, g, n, round(n / total, 3)))
+    return sorted(out, key=lambda r: (r[0], -r[3]))
+
+
+def write_senses(path: Path, rows: list[tuple]) -> None:
+    with path.open("w", encoding="utf-8") as fh:
+        fh.write("strong\tsense\tgloss\tcount\tshare\n")
+        for r in rows:
+            fh.write("\t".join(str(x) for x in r) + "\n")
+    print(f"  wrote {path.relative_to(ROOT)}: {len({r[0] for r in rows})} words, {len(rows)} senses",
+          file=sys.stderr)
+
+
 def write_labels(lang: str, key: str) -> None:
     out = {}
     for d in load(key):
@@ -139,6 +174,9 @@ def main() -> int:
     write(OUT / "hbo.tsv", hbo + bridge)
     for lang, key in LABEL_FILES.items():
         write_labels(lang, key)
+    senses_dir = ROOT / "resources" / "senses"
+    write_senses(senses_dir / "grc.tsv", sense_rows(load("greek"), "G"))
+    write_senses(senses_dir / "hbo.tsv", sense_rows(load("hebrew"), "H"))
     return 0
 
 

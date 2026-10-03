@@ -225,7 +225,7 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
           emb_label: str = "bge-m3 clause centroids", sense_split: bool = False, use_xling: bool = True,
           use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = False,
           use_structural: bool = True, use_corroborated: bool = True, use_sefer_hashorashim: bool = True,
-          use_metzudat_zion: bool = False,
+          use_metzudat_zion: bool = False, route_homographs: bool = False,
           macula_contexts: Path | None = None, parallelism_tomim_only: bool = False):
     if macula_contexts:
         lexemes, M, meta = lexeme_vectors_macula(emb_path, macula_contexts)
@@ -378,6 +378,34 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
               f"corroborated + sefer_hashorashim): +{len(rep)}/{len(out_of_pack)} out-of-pack lexemes "
               f"now reachable (no embedding)", file=sys.stderr)
 
+    # Homograph routing for Strong's-level prior pairs: when a side's Strong's covers several MACULA
+    # lexemes in the pack, keep only the lexeme whose embedding is nearest the other side's (H7464
+    # "companions" ~ H7462 then attaches to the "associate" homograph, not to "shepherd").
+    vec = {lx: M[i] for i, lx in enumerate(lexemes)}
+
+    def _allowed(a, b):
+        if not route_homographs:
+            return None
+        la, lb = strong2lex.get(a, []), strong2lex.get(b, [])
+        if len(la) <= 1 and len(lb) <= 1:
+            return None
+
+        def closest(cands, others):
+            ref = [vec[o] for o in others if o in vec]
+            cv = [c for c in cands if c in vec]
+            if len(cands) <= 1 or not ref or not cv:
+                return cands
+            r = np.mean(ref, axis=0)
+            return [max(cv, key=lambda c: float(vec[c] @ r))]
+        la2 = closest(la, lb)
+        lb2 = closest(lb, la2)
+        return {(x, y) for x in la2 for y in lb2}
+
+    bdb_lex_pairs = None
+    if use_bdb and route_homographs:
+        bdb_lex_pairs = _bdb_lexeme_pairs(set(meta))
+        print(f"[neighbors] bdb_roots routed to homographs: {len(bdb_lex_pairs)} lexeme pairs", file=sys.stderr)
+
     # embedding kNN (cosine = dot of unit vectors) — tiered against the LLM prior
     rows, emb_pairs = [], set()
     for i, lx in enumerate(lexemes):
@@ -397,7 +425,7 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
             pair = frozenset((meta[lx][0], meta[nb][0]))         # strong-level
             if pair in xling_strong_pairs:
                 sources.append("xling"); score = min(1.0, score + 0.1)
-            if pair in bdb_root_pairs:
+            if (frozenset((lx, nb)) in bdb_lex_pairs) if bdb_lex_pairs is not None else (pair in bdb_root_pairs):
                 sources.append("bdb_root"); score = min(1.0, score + 0.1)
             if pair in parallelism_syn:
                 sources.append("parallelism"); score = min(1.0, score + 0.1)
@@ -425,8 +453,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
         a, b = tuple(pair) if len(pair) == 2 else (None, None)
         if not a:
             continue
+        allowed = _allowed(a, b)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
+                if allowed is not None and (lx, nb) not in allowed:
+                    continue
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     rows.append((lx, nb, 0.5, "llm", "prior", "similar"))
 
@@ -438,8 +469,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     xling_rows = 0
     for pair, n_langs in xling_strong_pairs.items():
         a, b = tuple(pair)
+        allowed = _allowed(a, b)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
+                if allowed is not None and (lx, nb) not in allowed:
+                    continue
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     score = min(0.45, 0.25 + 0.02 * n_langs)
                     rows.append((lx, nb, round(score, 3), "xling", "prior", "similar"))
@@ -451,13 +485,20 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     # is a single expert-curated fact, not a statistical count — validated at 50.6% SDBH agreement,
     # roughly on par with the LLM-only prior tier, so scored similarly.
     bdb_rows = 0
-    for pair in bdb_root_pairs:
-        a, b = tuple(pair)
-        for lx in strong2lex.get(a, []):
-            for nb in strong2lex.get(b, []):
-                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
-                    rows.append((lx, nb, 0.5, "bdb_root", "prior", "similar"))
-                    bdb_rows += 1
+    if bdb_lex_pairs is not None:
+        for pair in bdb_lex_pairs:
+            lx, nb = tuple(pair)
+            if pair not in emb_pairs:
+                rows.append((lx, nb, 0.5, "bdb_root", "prior", "similar"))
+                bdb_rows += 1
+    else:
+        for pair in bdb_root_pairs:
+            a, b = tuple(pair)
+            for lx in strong2lex.get(a, []):
+                for nb in strong2lex.get(b, []):
+                    if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                        rows.append((lx, nb, 0.5, "bdb_root", "prior", "similar"))
+                        bdb_rows += 1
     print(f"[neighbors] bdb_root-only prior edges: {bdb_rows}", file=sys.stderr)
 
     # parallelism-only PRIOR edges — structural pairs (T'OMIM expert-verified or our own detection) the
@@ -466,8 +507,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     parallelism_rows = 0
     for pair in parallelism_syn:
         a, b = tuple(pair)
+        allowed = _allowed(a, b)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
+                if allowed is not None and (lx, nb) not in allowed:
+                    continue
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     rows.append((lx, nb, 0.5, "parallelism", "prior", "similar"))
                     parallelism_rows += 1
@@ -477,8 +521,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     hwn_rows = 0
     for pair in hwn_pairs:
         a, b = tuple(pair)
+        allowed = _allowed(a, b)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
+                if allowed is not None and (lx, nb) not in allowed:
+                    continue
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     rows.append((lx, nb, 0.5, "hwn", "prior", "similar"))
                     hwn_rows += 1
@@ -491,8 +538,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     structural_rows = 0
     for pair in structural_pairs:
         a, b = tuple(pair)
+        allowed = _allowed(a, b)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
+                if allowed is not None and (lx, nb) not in allowed:
+                    continue
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     rows.append((lx, nb, 0.5, "structural", "prior", "similar"))
                     structural_rows += 1
@@ -503,8 +553,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     corroborated_rows = 0
     for pair in corroborated_pairs:
         a, b = tuple(pair)
+        allowed = _allowed(a, b)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
+                if allowed is not None and (lx, nb) not in allowed:
+                    continue
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     rows.append((lx, nb, 0.5, "corroborated", "prior", "similar"))
                     corroborated_rows += 1
@@ -527,8 +580,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     sefer_hashorashim_rows = 0
     for pair in sefer_hashorashim_pairs:
         a, b = tuple(pair)
+        allowed = _allowed(a, b)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
+                if allowed is not None and (lx, nb) not in allowed:
+                    continue
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     rows.append((lx, nb, SEFER_HASHORASHIM_SCORE, "sefer_hashorashim", "prior", "similar"))
                     sefer_hashorashim_rows += 1
@@ -536,8 +592,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     metzudat_zion_rows = 0
     for pair in metzudat_zion_pairs:
         a, b = tuple(pair)
+        allowed = _allowed(a, b)
         for lx in strong2lex.get(a, []):
             for nb in strong2lex.get(b, []):
+                if allowed is not None and (lx, nb) not in allowed:
+                    continue
                 if lx != nb and frozenset((lx, nb)) not in emb_pairs:
                     rows.append((lx, nb, 0.5, "metzudat_zion", "prior", "similar"))
                     metzudat_zion_rows += 1
@@ -656,6 +715,49 @@ def _write_by_lexeme(rows, meta, out_dir: Path = OUT_DIR):
         "# semantic field per MACULA lexeme (high+prior tiers, homograph-precise); CC0\n"
         "strong\tlexeme\tlexeme_gloss\tneighbor_strong\tneighbor_lexeme\tneighbor_gloss\trelation\tconfidence\tscore\n"
         + "\n".join("\t".join(map(str, r)) for r in lines) + "\n", encoding="utf-8")
+
+
+def _bdb_lexeme_pairs(in_pack: set[str]) -> set[frozenset]:
+    """BDB root families at MACULA-lexeme level, for Strong's numbers that cover several homographs.
+
+    BDB can list one Strong's under two roots (H7462 רָעָה: "associate with" under one root, "pasture"
+    under another), and MACULA splits such numbers into separate lexemes (hbo:7462a "associates with",
+    hbo:7462 "graze/shepherd"). Expanding a Strong's-level root pair onto every lexeme of the number
+    gives the shepherd lexeme the whole "friend" family. Here each BDB row (root, Strong's, gloss) goes
+    to the ONE lexeme of that Strong's whose MACULA token glosses best match the BDB gloss (all of
+    MACULA's lexemes are candidates, not just those in the pack); with no overlap, to the most frequent
+    lexeme. A membership routed to a lexeme outside the pack is dropped rather than moved onto another."""
+    from spine.build_glosses import _words
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    words: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
+    lexemes_of: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
+    for lexeme, strong, gloss, n in sp.execute(
+            "SELECT lexeme, strong, gloss, COUNT(*) FROM spine_words WHERE lexeme LIKE 'hbo:%' "
+            "AND strong IS NOT NULL GROUP BY lexeme, strong, gloss"):
+        hs = f"H{int(strong):04d}"
+        lexemes_of[hs][lexeme] += n
+        for w in _words((gloss or "").replace(".", " ")):
+            words[lexeme][w] += n
+    by_root: dict[str, set[str]] = collections.defaultdict(set)
+    for line in BDB_ROOTS.read_text(encoding="utf-8").splitlines():
+        p = line.split("\t")
+        if line.startswith(("#", "root_id\t")) or len(p) < 4 or not p[1].startswith("H"):
+            continue
+        cands = lexemes_of.get(p[1])
+        if not cands:
+            continue
+        if len(cands) == 1:
+            lx = next(iter(cands))
+        else:
+            bw = set(_words(p[3]))
+            lx = max(cands, key=lambda c: (sum(words[c][w] for w in bw), cands[c]))
+        if lx in in_pack:
+            by_root[p[0]].add(lx)
+    pairs: set[frozenset] = set()
+    for lexes in by_root.values():
+        for a, b in itertools.combinations(sorted(lexes), 2):
+            pairs.add(frozenset((a, b)))
+    return pairs
 
 
 def _load_bdb_root_pairs() -> set[frozenset]:
@@ -938,6 +1040,9 @@ def main():
                     help="skip the corroborated signal (xling ∩ wiktionary_roots). Neither is trusted "
                          "alone (52.8%% / 35.0%% SDBH); their agreement is (87.7%%, validated 2026-08); "
                          "default is ON.")
+    ap.add_argument("--route-homographs", action="store_true",
+                    help="attach Strong's-level evidence to the matching MACULA homograph only: BDB roots by "
+                         "gloss (_bdb_lexeme_pairs), other prior pairs by embedding proximity")
     ap.add_argument("--metzudat-zion", action="store_true",
                     help="add the LLM-verified Metzudat Zion gloss pairs (resources/metzudat_zion/)")
     ap.add_argument("--macula-contexts", type=Path, default=None,
@@ -955,7 +1060,7 @@ def main():
           use_parallelism=not a.no_parallelism, use_hwn=a.hwn,
           use_structural=not a.no_structural, use_corroborated=not a.no_corroborated,
           use_sefer_hashorashim=not a.no_sefer_hashorashim, macula_contexts=a.macula_contexts,
-          use_metzudat_zion=a.metzudat_zion,
+          use_metzudat_zion=a.metzudat_zion, route_homographs=a.route_homographs,
           parallelism_tomim_only=a.parallelism_tomim_only)
 
 

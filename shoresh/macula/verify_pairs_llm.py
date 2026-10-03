@@ -8,7 +8,7 @@ trust just because they only ever got one kind of evidence.
 
 Deliberately NOT run over the >=2-family tier (already trusted, would waste spend) or the zero-family
 noise floor (not worth judging). Batches N pairs per call for cost efficiency — same pattern as
-label_domain_clusters.py / build_llm_neighbors.py (both in bcv-RAG/scripts/, since that's historically
+build_llm_neighbors.py (in bcv-RAG/scripts/, since that's historically
 where ANTHROPIC_API_KEY lived; this script moved to shoresh/macula/ in 2026-08 once shoresh got its own
 .env — it's shoresh's own pipeline, not bcv-RAG's, and had only been living there for credential
 convenience).

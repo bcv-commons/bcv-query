@@ -148,7 +148,6 @@ resources/semantic_neighbors/llm_edges.tsv
 resources/semantic_neighbors/by_lexeme.tsv
 resources/semantic_neighbors/by_strong.tsv
 resources/semantic_neighbors/domain_clusters.tsv
-resources/semantic_neighbors/domain_cluster_labels.tsv
 resources/semantic_neighbors/confidence_tiers.tsv
 resources/semantic_neighbors/llm_pair_verification.tsv
 resources/semantic_neighbors/published_pairs.tsv
