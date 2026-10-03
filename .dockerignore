@@ -61,3 +61,6 @@ bcv-RAG/ingest/_staging/
 bcv-RAG/Dockerfile
 bcv-RAG/README.md
 bcv-RAG/.dockerignore
+
+# built inside the bcv-RAG image (build_aligned_lex_hf.py); never ship a local copy over it
+resources/aligned_lex_hf/

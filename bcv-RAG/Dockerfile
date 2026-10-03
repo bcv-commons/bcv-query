@@ -19,6 +19,22 @@ RUN pip install --no-cache-dir \
     -r /app/query/requirements.txt \
     -r /app/server/requirements.txt
 
+# aligned_lex_hf: bcv-commons/lexeme-alignments (HF, CC0-1.0), ~924 languages as of 2026-07 —
+# fetched at image build (too large to commit — ~2GB at the manual aligned_lex/'s per-language rate —
+# so this is the only place it can come from; matches shoresh/Dockerfile.base's fetch-at-build-time
+# pattern). Placed BEFORE the app code and resources/ COPYs so the slow download is a cached layer: a
+# code or resources/ change no longer re-runs it (it used to add tens of minutes to every deploy).
+# To pull newly published languages/alignments, bump ALIGNED_LEX_REFRESH (any new value busts this
+# layer's cache). huggingface_hub/pyarrow aren't needed at runtime past this step, but kept installed
+# rather than multi-stage-stripped — not worth the complexity for two packages.
+ARG ALIGNED_LEX_REFRESH=2026-10-03
+ENV BCV_RESOURCES_DIR=/app/resources
+COPY bcv-RAG/resource_paths.py /app/resource_paths.py
+COPY bcv-RAG/scripts/build_aligned_lex_hf.py /app/scripts/build_aligned_lex_hf.py
+RUN echo "aligned_lex_hf refresh: ${ALIGNED_LEX_REFRESH}" \
+ && pip install --no-cache-dir huggingface_hub pyarrow \
+ && python3 /app/scripts/build_aligned_lex_hf.py
+
 # The Context-Fabric corpus engine (BHSA + Nestle1904) was removed from bcv-RAG and
 # now lives in shoresh (migration). bcv-RAG's search path fetches syntactic data
 # from shoresh over SHORESH_URL (see server/corpus_cards.py) — no engine, no
@@ -33,16 +49,6 @@ COPY bcv-RAG/lang.py           /app/lang.py
 # Shared data resources (repo-root resources/, Strong's/BCVW-keyed) — consumed
 # via resource_paths.resource_path() (BCV_RESOURCES_DIR set below).
 COPY resources /app/resources
-
-# aligned_lex_hf: bcv-commons/lexeme-alignments (HF, CC0-1.0), ~924 languages as of 2026-07 —
-# fetched fresh at every image build (too large to commit — ~2GB at the manual aligned_lex/'s
-# per-language rate — so this is the only place it can come from; matches shoresh/Dockerfile.base's
-# fetch-at-build-time pattern for anything too large/live to check in). huggingface_hub/pyarrow
-# aren't needed at runtime past this step, but kept installed rather than multi-stage-stripped —
-# not worth the complexity for two packages.
-COPY bcv-RAG/scripts/build_aligned_lex_hf.py /app/scripts/build_aligned_lex_hf.py
-RUN pip install --no-cache-dir huggingface_hub pyarrow \
- && python3 /app/scripts/build_aligned_lex_hf.py
 
 ENV HOME=/root
 ENV PYTHONUNBUFFERED=1
