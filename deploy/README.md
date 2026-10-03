@@ -26,4 +26,8 @@ deploy/deploy.sh bcv-rag --no-pull # build the current tree without pulling (loc
 4. `deploy/deploy.sh <svc>`.
 
 Requirements on the host: docker + compose (v2 plugin or v1) and git.
-Rollback: `git -C <repo> checkout <tag-or-sha> && deploy/deploy.sh <svc> --no-pull`.
+Rollback: every deploy first tags the running image `<image>:previous`, then waits for the new
+container's healthcheck; if it isn't healthy within `HEALTH_TIMEOUT` seconds (default 180) the
+script restores `:previous` by itself and exits 1. To roll back by hand later:
+`deploy/deploy.sh <svc> --rollback` (one step back). For older versions:
+`git -C <repo> checkout <tag-or-sha> && deploy/deploy.sh <svc> --no-pull`.
