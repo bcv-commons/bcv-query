@@ -42,12 +42,12 @@ FAMILY_GATE = 2   # >=2 independent signal families — see build_confidence_tie
                   # but at a steep pair-count cost (816 vs 3,225). 2 remains the right cutoff.
 
 
-def load_family_tiers() -> dict[frozenset, tuple[int, str]]:
+def load_family_tiers(tiers: Path = TIERS) -> dict[frozenset, tuple[int, str]]:
     """{frozenset({a,b}): (n_families, families_csv)}"""
     out = {}
-    if not TIERS.exists():
+    if not tiers.exists():
         return out
-    with TIERS.open(encoding="utf-8") as fh:
+    with tiers.open(encoding="utf-8") as fh:
         for line in fh:
             if line.startswith("#") or line.startswith("strong_a\t"):
                 continue
@@ -85,15 +85,24 @@ def load_sefer_hashorashim_verdicts() -> dict[frozenset, str]:
     return out
 
 
-def build() -> list[tuple[str, str, str, int, str]]:
+def build(tiers: Path = TIERS, llm_needs_tier_support: bool = False,
+          exclude_families: frozenset = frozenset()) -> list[tuple[str, str, str, int, str]]:
     """[(strong_a, strong_b, gate, n_families, llm_verdict)] — gate is a "+"-joined subset of
-    {cross_signal, llm_verified, sefer_hashorashim_verified}."""
-    families = load_family_tiers()
+    {cross_signal, llm_verified, sefer_hashorashim_verified}. llm_needs_tier_support: keep an
+    llm_verified pair only if the tiers (the pack being published) link it by at least one signal; used for
+    the BHSA-free release, whose LLM-verification candidates were originally drawn from BHSA-influenced
+    tiers."""
+    families = load_family_tiers(tiers)
+    if exclude_families:     # e.g. "corroborated" (Wiktionary, CC BY-SA) for a strictly CC0 release
+        families = {p: (len([f for f in fs.split("|") if f and f not in exclude_families]),
+                        "|".join(f for f in fs.split("|") if f and f not in exclude_families))
+                    for p, (n, fs) in families.items()}
+        families = {p: v for p, v in families.items() if v[0] > 0}
     verdicts = load_llm_verdicts()
     sefer_verdicts = load_sefer_hashorashim_verdicts()
 
     cross_signal_pairs = {p for p, (n, _) in families.items() if n >= FAMILY_GATE}
-    llm_yes_pairs = {p for p, v in verdicts.items() if v == "yes"}
+    llm_yes_pairs = {p for p, v in verdicts.items() if v == "yes" and (not llm_needs_tier_support or p in families)}
     sefer_yes_pairs = {p for p, v in sefer_verdicts.items() if v == "yes"}
     published = cross_signal_pairs | llm_yes_pairs | sefer_yes_pairs
 
@@ -115,11 +124,15 @@ def build() -> list[tuple[str, str, str, int, str]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--tiers", type=Path, default=TIERS)
+    ap.add_argument("--llm-needs-tier-support", action="store_true")
+    ap.add_argument("--exclude-families", default="", help="comma-separated signal families to ignore")
     ap.add_argument("--out", type=Path, default=OUT_DIR / "published_pairs.tsv")
     ap.add_argument("--validate", action="store_true")
     args = ap.parse_args()
 
-    rows = build()
+    rows = build(args.tiers, args.llm_needs_tier_support,
+                 frozenset(f for f in args.exclude_families.split(",") if f))
     multi = sum(1 for r in rows if "+" in r[2])
     print(f"[published-pairs] {len(rows)} total pairs (cross_signal only: "
           f"{sum(1 for r in rows if r[2] == 'cross_signal')}, llm_verified only: "
@@ -129,15 +142,12 @@ def main() -> int:
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
-        fh.write("# Final published Hebrew semantic-neighbor pairs — the union of three independent\n"
-                  "# publication-confidence gates (2026-08): cross_signal (>=2 independent signal\n"
-                  "# families agree, 73.4% SDBH core-agreement), llm_verified (explicit LLM pairwise\n"
-                  "# judgment on single-signal candidates, 69.6% agreement), and\n"
-                  "# sefer_hashorashim_verified (LLM-verified candidates from Radak's Sefer HaShorashim,\n"
-                  "# Public Domain medieval rabbinic root dictionary, 74.1% agreement). `gate` shows which\n"
-                  "# check(s) this pair passed — pairs passing multiple gates are the highest-confidence\n"
-                  "# subset. CC0 lineage (see domain-replacement-roadmap.md for full methodology).\n"
-                  "# See build_published_pairs.py.\n")
+        fh.write("# Published Hebrew semantic-neighbor pairs: the union of three publication gates.\n"
+                  "# cross_signal = >=2 independent signal families agree; llm_verified = explicit LLM pairwise\n"
+                  "# judgment on single-signal candidates; sefer_hashorashim_verified = LLM-verified candidates\n"
+                  "# from Radak's Sefer HaShorashim (Public Domain). `gate` shows which check(s) a pair passed;\n"
+                  "# pairs passing several gates are the highest-confidence subset. CC0. See\n"
+                  f"# build_published_pairs.py. Tiers: {args.tiers.parent.name}/{args.tiers.name}.\n")
         fh.write("strong_a\tstrong_b\tgate\tn_families\tllm_verdict\n")
         for a, b, gate, n_fam, verdict in sorted(rows, key=lambda r: (r[0], r[1])):
             fh.write(f"{a}\t{b}\t{gate}\t{n_fam}\t{verdict}\n")

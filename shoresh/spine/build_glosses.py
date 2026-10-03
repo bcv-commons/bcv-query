@@ -62,8 +62,15 @@ def _words(text: str) -> list[str]:
     return [_stem(w) for w in re.findall(r"[A-Za-z]{2,}", text) if w.lower() not in _STOP]
 
 
+# Reviewed exceptions where MACULA's token glosses are too thin or blank to choose the right TBESH entry
+# (H905's common "alone" sense has 121 tokens with empty glosses, so the rarer "pole" would win).
+OVERRIDES = {"H905": "alone", "H2764": "devoted thing", "H6049": "practice soothsaying"}
+
+
 def macula_usage() -> dict[str, "collections.Counter"]:
-    """H#### (unpadded) -> Counter of stemmed content words in MACULA's per-token English glosses."""
+    """H#### (unpadded) -> Counter of frozenset(stemmed content words) per MACULA token gloss, weighted by
+    token count. Scoring is per token (a token matches once, however many of its words match), so a
+    two-word gloss like "the holy place" is not counted twice."""
     import collections
     import sqlite3
     out: dict = collections.defaultdict(collections.Counter)
@@ -73,8 +80,9 @@ def macula_usage() -> dict[str, "collections.Counter"]:
     for strong, gloss, n in db.execute(
             "SELECT strong, gloss, COUNT(*) FROM spine_words WHERE lexeme LIKE 'hbo:%' AND strong IS NOT NULL "
             "AND gloss IS NOT NULL GROUP BY strong, gloss"):
-        for w in _words(gloss.replace(".", " ")):
-            out[f"H{int(strong)}"][w] += n
+        ws = frozenset(_words(gloss.replace(".", " ")))
+        if ws:
+            out[f"H{int(strong)}"][ws] += n
     return out
 
 
@@ -82,35 +90,51 @@ def _namelike(c) -> bool:
     return c[3].startswith("N:") or c[0][:1].isupper()
 
 
-def pick(cands: list[tuple[str, str, str, str]], usage) -> tuple[str, str]:
-    """cands: [(gloss, definition, translit, grammar)] in TBESH order -> (gloss, translit).
-    Each entry is scored by how many of the word's glossed tokens its own gloss matches (x2) plus, for
-    common-word entries, its short definition; name-like entries (grammar "N:" or a capitalized gloss)
-    are scored on their gloss only, so a name's etymology ("Lebo: means to go in") can't outscore the
-    common verb. Ties go to common-word entries. The first entry is replaced only when another matches
-    clearly better: score above the first's and support of at least 20% (and 5) of the glossed tokens.
-    Weak evidence keeps the first entry (חֶסֶד: 2 tokens "shame" vs ~300 "loyalty", which no entry matches)."""
+def _specific(raw: str) -> str:
+    """The rendering after the colon in a TBESH gloss ("to boast: praise" -> "praise"), or ""."""
+    if ":" not in raw:
+        return ""
+    spec = raw.split(":", 1)[1].split("/", 1)[0]
+    return re.sub(r"^\([^)]*\)\s*", "", spec).strip().strip("-").strip()
+
+
+def pick(cands: list[tuple], usage) -> tuple[str, str]:
+    """cands: [(gloss, definition, translit, grammar, raw_gloss)] in TBESH order -> (gloss, translit).
+
+    Each MACULA token counts once: 2 if its words meet the entry's gloss words (headword plus the
+    rendering after the colon), else 1 if they meet the start of the entry's definition (common-word
+    entries only; a name's etymology, "Lebo: means to go in", must not outscore the verb). Ties go to
+    common-word entries. The first entry is replaced only when another scores higher with support from at
+    least 20% (and 5) of the word's glossed tokens. When the chosen entry's headword itself has under 20%
+    support but its specific rendering has at least 20% ("to boast: praise" for halal, glossed "praise"
+    64 times), the rendering is used as the gloss."""
     first = cands[0]
     if not usage:
         return first[0], first[2]
     total = sum(usage.values())
 
-    def words(c):
-        g = set(_words(c[0]))
+    def wsets(c):
+        g = set(_words(c[0])) | set(_words(_specific(c[4])))
         d = set() if _namelike(c) else set(_words(" ".join(c[1].split()[:12]))) - g
         return g, d
 
     def score(c):
-        g, d = words(c)
-        return 2 * sum(usage[w] for w in g) + sum(usage[w] for w in d)
+        g, d = wsets(c)
+        return sum(n * (2 if ws & g else 1 if ws & d else 0) for ws, n in usage.items())
+
+    def support(words):
+        return sum(n for ws, n in usage.items() if ws & words)
 
     order = {id(c): i for i, c in enumerate(cands)}
     best = max(cands, key=lambda c: (score(c), not _namelike(c), -order[id(c)]))
-    g, d = words(best)
-    support = sum(usage[w] for w in g | d)
-    if best is not first and score(best) > score(first) and support >= max(5, 0.2 * total):
-        return best[0], best[2]
-    return first[0], first[2]
+    g, d = wsets(best)
+    better = score(best) > score(first) or (score(best) == score(first) and _namelike(first)
+                                             and not _namelike(best))
+    chosen = best if (best is not first and better and support(g | d) >= max(5, 0.2 * total)) else first
+    spec = _specific(chosen[4])
+    if spec and support(set(_words(chosen[0]))) < 0.2 * total <= support(set(_words(spec))):
+        return spec, chosen[2]
+    return chosen[0], chosen[2]
 
 
 def main() -> None:
@@ -140,9 +164,11 @@ def main() -> None:
             gloss = clean_gloss(c[6])
             if gloss:
                 cands.setdefault(strong, []).append((gloss, c[7] if len(c) > 7 else "", c[4] if len(c) > 4 else "",
-                                                     c[5] if len(c) > 5 else ""))
+                                                     c[5] if len(c) > 5 else "", c[6]))
         for strong, cs in cands.items():
-            if prefix == "H":
+            if prefix == "H" and strong in OVERRIDES:
+                gloss, xlit = OVERRIDES[strong], cs[0][2]
+            elif prefix == "H":
                 gloss, xlit = pick(cs, usage.get(strong))
                 changed += gloss != cs[0][0]
             else:

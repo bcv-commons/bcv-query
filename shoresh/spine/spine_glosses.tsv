@@ -203,7 +203,7 @@ H201	Omar	o.mar
 H202	strength	on
 H203	On	on
 H204	On	on
-H205	evil	a.ven
+H205	wickedness	a.ven
 H206	Aven	a.ven
 H207	Ono	o.no
 H208	Onam	o.nam
@@ -637,7 +637,7 @@ H635	Esther	es.ter
 H636	wood	a
 H637	also	aph
 H638	also	aph
-H639	face	aph
+H639	anger	aph
 H640	gird	a.phad
 H641	Ephod	e.phod
 H642	ephod	e.phud.dah
@@ -828,7 +828,7 @@ H826	enchanter	ash.shaph
 H827	quiver	ash.pah
 H828	Ashpenaz	ash.pe.naz
 H829	raisin bun	esh.par
-H830	refuse	ash.pot
+H830	Dung (Gate)	ash.pot
 H831	Ashkelon	ash.qe.lon
 H832	Ashkelonite	esh.qe.lo.ni
 H833	bless	a.shar
@@ -1212,7 +1212,7 @@ H1210	vintage	ba.tsir
 H1211	onion	be.tsel
 H1212	Bezalel	be.tsal.el
 H1213	Bazluth	bats.lut
-H1214	cut off	ba.tsa
+H1214	to gain	ba.tsa
 H1215	unjust-gain	be.tsa
 H1216	swell	ba.tseq
 H1217	dough	ba.tseq
@@ -1293,7 +1293,7 @@ H1291	knee	be.rekh
 H1292	Barachel	ba.rakh.el
 H1293	blessing	be.ra.khah
 H1294	Beracah	be.ra.khah
-H1295	Pool	be.re.khah
+H1295	pool	be.re.khah
 H1296	Berechiah	be.rekh.yah
 H1297	nevertheless	be.ram
 H1298	Bera	be.ra
@@ -1514,7 +1514,7 @@ H1512	belly	ga.chon
 H1513	coal	ge.chel
 H1514	Gaham	ga.cham
 H1515	Gahar	ga.char
-H1516	Valley	gay
+H1516	valley	gay
 H1517	sinew	gid
 H1518	burst	gi.ach
 H1519	strive	gi.ach
@@ -1538,7 +1538,7 @@ H1536	wheel	gil.gal
 H1537	Gilgal	gil.gal
 H1538	head	gul.go.let
 H1539	skin	ge.led
-H1540	reveal	ga.lah
+H1540	uncover	ga.lah
 H1541	reveal	ge.lah
 H1542	Giloh	gi.loh
 H1543	bowl	gul.lah
@@ -1586,7 +1586,7 @@ H1584	cease	ga.mar
 H1585	complete	ge.mar
 H1586	Gomer	go.mer
 H1587	Gemariah	ge.mar.yah
-H1588	Garden (of Uzza)	gan
+H1588	garden	gan
 H1589	steal	ga.nav
 H1590	thief	gan.nav
 H1591	theft	ge.ne.vah
@@ -1707,7 +1707,7 @@ H1705	Daberath	da.ve.rat
 H1706	honey	de.vash
 H1707	hump	dab.be.shet
 H1708	Dabbesheth	dab.be.shet
-H1709	Fish (Gate)	dag
+H1709	fish	dag
 H1710	fish	da.gah
 H1711	multiply	da.gah
 H1712	Dagon	da.gon
@@ -1824,7 +1824,7 @@ H1822	destroyed	dum.mah
 H1823	likeness	de.mut
 H1824	quiet	de.mi
 H1825	likeness	dim.yon
-H1826	silence	da.mam
+H1826	silent	da.mam
 H1827	silence	de.ma.mah
 H1828	dung	do.men
 H1829	Dimnah	dim.nah
@@ -1982,7 +1982,7 @@ H1980	go	ha.lakh
 H1981	go	ha.lakh
 H1982	traveller	he.lekh
 H1983	toll	ha.lakh
-H1984	boast	ha.lal
+H1984	praise	ha.lal
 H1985	Hillel	hil.lel
 H1986	smite	ha.lam
 H1987	Helem	he.lem
@@ -2026,7 +2026,7 @@ H2024	Hara	ha.ra
 H2025	altar	har.el
 H2026	kill	ha.rag
 H2027	slaughter	he.reg
-H2028	Slaughter	ha.re.gah
+H2028	slaughter	ha.re.gah
 H2029	conceive	ha.rah
 H2030	pregnant	ha.rah
 H2031	fantasies	har.hor
@@ -2386,7 +2386,7 @@ H2384	vision	chiz.za.von
 H2385	lightning	cha.ziz
 H2386	swine	cha.zir
 H2387	Hezir	che.zir
-H2388	strengthen	cha.zaq
+H2388	hold	cha.zaq
 H2389	strong	cha.zaq
 H2390	stronger	cha.zeq
 H2391	strength	che.zeq
@@ -3275,7 +3275,7 @@ H3273	Jeiel	ye.i.el
 H3274	Jeush	ye.ish
 H3275	Jacan	ya.kan
 H3276	gain	ya.al
-H3277	goat	ya.el
+H3277	Wildgoats'	ya.el
 H3278	Jael	ya.el
 H3279	Jaalah	ya.a.la
 H3280	doe	ya.a.lah
@@ -3421,7 +3421,7 @@ H3419	herb	ya.raq
 H3420	mildew	ye.ra.qon
 H3421	Jorkeam	yor.qe.am
 H3422	greenish	ye.raq.raq
-H3423	possess	ya.rash
+H3423	take	ya.rash
 H3424	possession	ye.re.shah
 H3425	possession	ye.rush.shah
 H3426	there	yesh
@@ -3450,7 +3450,7 @@ H3448	Jesse	yi.shay
 H3449	Isshiah	yish.shiy.yah
 H3450	Jesimiel	ye.shi.ma.el
 H3451	desolation	ye.shi.mah
-H3452	wilderness	ye.shi.mon
+H3452	Jeshimon	ye.shi.mon
 H3453	aged	ya.shish
 H3454	Jeshishai	ye.shi.sah
 H3455	put	ya.sam
@@ -3833,7 +3833,7 @@ H3831	garment	le.vush
 H3832	ruin	la.vat
 H3833	lion	le.vi
 H3834	cake	la.vi.vah
-H3835	make bricks	la.van
+H3835	whiten	la.ven
 H3836	white	la.van
 H3837	Laban	la.van
 H3838	Lebanah	le.va.na
@@ -4024,7 +4024,7 @@ H4022	excellence	me.ged
 H4023	Megiddo	me.gid.don
 H4024	Migdol	mig.dol
 H4025	Magdiel	mag.di.el
-H4026	Tower	mig.dal
+H4026	tower	mig.dal
 H4027	Migdal-el	mig.dal-el
 H4028	Migdal-gad	mig.dal-gad
 H4029	tower of Eder	mig.dal-e.der
@@ -4215,7 +4215,7 @@ H4213	little	miz.ar
 H4214	pitchfork	miz.reh
 H4215	scattering wind	me.za.reh
 H4216	Mazzaroth	maz.za.rah
-H4217	East (Gate)	miz.rach
+H4217	east	miz.rach
 H4218	sowing	miz.ra
 H4219	bowl	miz.raq
 H4220	fatling	me.ach
@@ -4415,7 +4415,7 @@ H4413	Mallothi	mal.lo.ti
 H4414	dissipate	ma.lach
 H4415	eat salt	me.lach
 H4416	salt	me.lach
-H4417	Salt (Sea)	me.lach
+H4417	salt	me.lach
 H4418	rag	ma.lach
 H4419	mariner	mal.lach
 H4420	saltiness	me.le.chah
@@ -4434,7 +4434,7 @@ H4432	Molech	mo.lekh
 H4433	queen	mal.kah
 H4434	snare	mal.ko.det
 H4435	Milcah	mil.kah
-H4436	Queen (of Sheba)	mal.kah
+H4436	queen	mal.kah
 H4437	kingdom	mal.khu
 H4438	royalty	mal.khut
 H4439	Malchiel	mal.ki.el
@@ -4637,7 +4637,7 @@ H4635	row	ma.a.re.khet
 H4636	naked	ma.a.rom
 H4637	terror	ma.a.ra.tsah
 H4638	Maarath	ma.a.rat
-H4639	deed	ma.a.seh
+H4639	work	ma.a.seh
 H4640	Maasai	ma.a.say
 H4641	Maaseiah	ma.a.se.yah
 H4642	oppression	ma.a.shaq.qah
@@ -4660,7 +4660,7 @@ H4658	carcass	map.pe.let
 H4659	work	miph.al
 H4660	shattering	map.pats
 H4661	war-club	map.pets
-H4662	appointment	miph.qad
+H4662	Muster (Gate)	miph.qad
 H4663	Muster (Gate)	miph.qad
 H4664	landing	miph.rats
 H4665	neck	miph.re.qet
@@ -5102,7 +5102,7 @@ H5100	groaning	ne.ha.mah
 H5101	bray	na.haq
 H5102	flow	na.har
 H5103	River	ne.har
-H5104	River	na.har
+H5104	river	na.har
 H5105	light	ne.ha.rah
 H5106	forbid	nu
 H5107	bear fruit	nuv
@@ -5160,7 +5160,7 @@ H5158	torrent	na.chal
 H5159	inheritance	na.cha.lah
 H5160	Nahaliel	na.cha.li.el
 H5161	Nehelam	ne.che.la.mi
-H5162	sorry	na.cham
+H5162	comfort	na.cham
 H5163	Naham	na.cham
 H5164	repentance	no.cham
 H5165	comfort	ne.cha.mah
@@ -5313,7 +5313,7 @@ H5311	storm	ne.phets
 H5312	go out	ne.phaq
 H5313	cost	niph.qa
 H5314	be refreshed	na.phash
-H5315	soul	ne.phesh
+H5315	life	ne.phesh
 H5316	Naphath	ne.phet
 H5317	honey	no.phet
 H5318	Nephtoah	neph.to.ach
@@ -5925,7 +5925,7 @@ H5923	yoke	ol
 H5924	above	el.la
 H5925	Ulla	ul.la
 H5926	stammerer	il.leg
-H5927	ascend	a.lah
+H5927	offer up	a.lah
 H5928	burnt offering	a.lah
 H5929	leaf	a.leh
 H5930	burnt offering	o.lah
@@ -5943,7 +5943,7 @@ H5941	Eli	e.li
 H5942	upper	il.li
 H5943	Most High	il.lay
 H5944	upper room	a.liy.yah
-H5945	Most High	el.yon
+H5945	high	el.yon
 H5946	Most High	el.yon
 H5947	jubilant	al.liz
 H5948	furnace	a.lil
@@ -6008,7 +6008,7 @@ H6006	lift	a.mas
 H6007	Amasiah	a.mas.yah
 H6008	Amad	am.ad
 H6009	be deep	a.maq
-H6010	Valley (of Achor)	e.meq
+H6010	valley	e.meq
 H6011	depth	o.meq
 H6012	unfathomable	a.meq
 H6013	deep	a.moq
@@ -6047,7 +6047,7 @@ H6045	task	in.yan
 H6046	Anem	a.nem
 H6047	Anamim	a.na.mim
 H6048	Anammelech	a.nam.me.lekh
-H6049	divine	a.nan
+H6049	practice soothsaying	a.nan
 H6050	cloud	a.nan
 H6051	cloud	a.nan
 H6052	Anan	a.nan
@@ -6211,7 +6211,7 @@ H6209	strip	a.rar
 H6210	bed	e.re.s
 H6211	moth	ash
 H6212	vegetation	e.sev
-H6213	make	a.sah
+H6213	do	a.sah
 H6214	Asahel	a.sa.h.el
 H6215	Esau	e.sav
 H6216	oppressor	a.shoq
@@ -6436,7 +6436,7 @@ H6434	Corner	pen
 H6435	lest	pen
 H6436	cake	pan.nag
 H6437	turn	pa.nah
-H6438	Corner (Gate)	pin.nah
+H6438	corner	pin.nah
 H6439	Penuel	pe.nu.el
 H6440	face	pa.neh
 H6441	within	pe.ni.mah
@@ -6483,7 +6483,7 @@ H6481	wound	pa.tsa
 H6482	wound	pe.tsa
 H6483	Happizzez	pits.tsets
 H6484	press	pa.tsar
-H6485	reckon	pa.qad
+H6485	visit	pa.qad
 H6486	punishment	pe.qud.dah
 H6487	deposit	piq.qa.don
 H6488	oversight	pe.qi.dut
@@ -6522,7 +6522,7 @@ H6520	villager	pe.ra.zon
 H6521	villager	pe.ra.zi
 H6522	Perizzite	pe.riz.zi
 H6523	iron	par.zel
-H6524	break out	pa.rach
+H6524	sprout	pa.rach
 H6525	flower	pe.rach
 H6526	brood	pir.chach
 H6527	divide	pa.rat
@@ -6695,7 +6695,7 @@ H6693	press	tsuq
 H6694	pour	tsuq
 H6695	distress	tsoq
 H6696	confine	tsur
-H6697	Rocks (of Goats)	tsur
+H6697	rock	tsur
 H6698	Zur	tsur
 H6699	design	tsu.rah
 H6700	Zuriel	tsu.ri.el
@@ -6885,7 +6885,7 @@ H6883	leprosy	tsa.ra.at
 H6884	refine	tsa.raph
 H6885	goldsmith	tso.re.phi
 H6886	Zarephath	tsa.re.phat
-H6887	confine	tsa.rar
+H6887	distress	tsa.rar
 H6888	Zererah	tse.re.rah
 H6889	Zereth	tse.ret
 H6890	Zereth-shahar	tse.ret hash.sha.char
@@ -6942,7 +6942,7 @@ H6940	darkness	qad.rut
 H6941	mournfully	qe.do.ran.nit
 H6942	consecrate	qa.dash
 H6943	Kedesh	qe.desh
-H6944	Most Holy Place	qo.desh
+H6944	holiness	qo.desh
 H6945	male cult prostitute	qa.desh
 H6946	Kadesh	qa.desh
 H6947	Kadesh-barnea	qa.desh bar.ne.a
@@ -7065,7 +7065,7 @@ H7063	thorn	qim.ma.shon
 H7064	nest	qen
 H7065	be jealous	qa.na
 H7066	buy	qe.na
-H7067	Jealous	qan.na
+H7067	jealous	qan.na
 H7068	jealousy	qin.ah
 H7069	buy	qa.nah
 H7070	branch	qa.neh
@@ -7120,7 +7120,7 @@ H7118	end	qe.tsat
 H7119	cool	qar
 H7120	cold	qor
 H7121	call	qa.ra
-H7122	encounter	qa.ra
+H7122	meet	qa.ra
 H7123	read	qe.ra
 H7124	partridge	qo.re
 H7125	befall	qir.ah
@@ -7449,7 +7449,7 @@ H7447	drop	ra.sis
 H7448	bridle	re.sen
 H7449	Resen	re.sen
 H7450	moisten	ra.sas
-H7451	bad	ra
+H7451	evil	ra
 H7452	shouting	re.a
 H7453	neighbor	re.a
 H7454	thought	re.a
@@ -7583,7 +7583,7 @@ H7581	roaring	she.a.gah
 H7582	crash	sha.ah
 H7583	gaze	sha.ah
 H7584	desolation	sha.a.vah
-H7585	hell	she.ol
+H7585	Sheol	she.ol
 H7586	Saul	sha.ul
 H7587	Shaulite	sha.u.li
 H7588	roar	sha.on
@@ -7843,7 +7843,7 @@ H7841	Shehariah	she.char.yah
 H7842	Shaharaim	sha.cha.ra.yim
 H7843	ruin	sha.chat
 H7844	corrupt	she.chat
-H7845	Pit	sha.chat
+H7845	pit	sha.chat
 H7846	rebellion	set
 H7847	turn aside	sa.tah
 H7848	acacia	shit.tah
@@ -8191,7 +8191,7 @@ H8189	Shaaraim	sha.a.ra.yim
 H8190	Shaashgaz	sha.ash.gaz
 H8191	delight	sha.shu.a
 H8192	be bare	sha.phah
-H8193	lips	sa.phah
+H8193	lip	sa.phah
 H8194	cheese	sha.phah
 H8195	Shepho	she.pho
 H8196	judgment	she.phot
@@ -8476,10 +8476,10 @@ H8474	contend	ta.cha.rah
 H8475	Tahrea	tach.re.a
 H8476	leather	ta.chash
 H8477	Tahash	ta.chash
-H8478	underneath	ta.chat
+H8478	under	ta.chat
 H8479	under	ta.chat
 H8480	Tahath	ta.chat
-H8481	Lower (Beth Horon)	tach.ton
+H8481	lower	tach.ton
 H8482	lower	tach.ti
 H8483	Kadesh	tach.tim chod.shi
 H8484	middle	ti.khon

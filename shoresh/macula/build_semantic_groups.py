@@ -50,6 +50,14 @@ ROOT = HERE.parents[1]
 OUT = ROOT / "resources" / "semantic_groups"
 
 
+def live_gloss(strong: str) -> str:
+    """The served gloss table (spine/spine_glosses.tsv) — not the scorecard's frozen copy."""
+    import sys as _sys
+    _sys.path.insert(0, str(HERE.parent))
+    import data
+    return ((data.gloss_of(strong) or {}).get("gloss")) or ""
+
+
 def build(source: str) -> tuple[list[tuple], dict[str, tuple], str]:
     counts, lemmas = dp.token_counts(), dp.lemma_of()
     if source in ("bhsa-free", "bhsa-free-routed"):
@@ -77,7 +85,7 @@ def build(source: str) -> tuple[list[tuple], dict[str, tuple], str]:
                              (f"hbo:{int(ls[1:]):04d}%",)).fetchone()
             if row:
                 ex[g] = (ls, row[0])
-    groups = {g: (ls, ll, dp.clean_gloss(sense_gloss.get((ls, g)) or dp.english_gloss(ls)))
+    groups = {g: (ls, ll, dp.clean_gloss(sense_gloss.get((ls, g)) or live_gloss(ls)))
               for g, (ls, ll) in ex.items()}
     return members, groups, provenance
 

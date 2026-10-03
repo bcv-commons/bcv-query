@@ -49,13 +49,13 @@ def _hs(lx: str) -> str:
     return f"H{int(m.group(1)):04d}" if m else ""
 
 
-def build() -> list[tuple[str, str, int, str]]:
+def build(neighbors: Path = NEIGHBORS) -> list[tuple[str, str, int, str]]:
     """[(strong_a, strong_b, n_families, families_csv)] — one row per distinct Strong's pair, keyed by
     how many INDEPENDENT signal families ever asserted it (across all confidence tiers, not just
     high/prior — a pair earns cross-signal credit even if individual mentions were only "recall")."""
     import pyarrow.parquet as pq
 
-    t = pq.read_table(NEIGHBORS).to_pydict()
+    t = pq.read_table(neighbors).to_pydict()
     pair_families: dict[frozenset, set[str]] = collections.defaultdict(set)
     pair_antonym: set[frozenset] = set()
     for lx, nb, src, rel in zip(t["lexeme"], t["neighbor_lexeme"], t["sources"], t["relation"]):
@@ -82,12 +82,14 @@ def build() -> list[tuple[str, str, int, str]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--neighbors", type=Path, default=NEIGHBORS,
+                    help="neighbors.parquet to tier (e.g. the BHSA-free pack in macula/data/bhsa_free/routed/)")
     ap.add_argument("--out", type=Path, default=OUT_DIR / "confidence_tiers.tsv")
     ap.add_argument("--validate", action="store_true",
                      help="score vs the text-anchored intrinsic yardstick (see intrinsic_yardstick.py)")
     args = ap.parse_args()
 
-    rows = build()
+    rows = build(args.neighbors)
     tally = collections.Counter(r[2] for r in rows)
     print(f"[confidence-tiers] {len(rows)} distinct pairs; "
           f"{sum(1 for r in rows if r[2] >= 2)} with >=2 families, "
@@ -96,8 +98,8 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
         fh.write("# Cross-signal-agreement confidence tiers — the publication gate. n_families = how many\n"
-                  "# INDEPENDENT signal families (see build_confidence_tiers.py) assert this pair. Validated\n"
-                  "# 2026-08 vs SDBH core: >=1 family 35.7%, >=2 73.4%, >=3 82.9% same-domain agreement.\n"
+                  f"# INDEPENDENT signal families (see build_confidence_tiers.py) assert this pair. Source pack:\n"
+                  f"# {args.neighbors.parent.name}/{args.neighbors.name}.\n"
                   "# Publication recommendation: n_families >= 2 as the headline dataset.\n")
         fh.write("strong_a\tstrong_b\tn_families\tfamilies\n")
         for a, b, n, fams in sorted(rows, key=lambda r: (-r[2], r[0], r[1])):
