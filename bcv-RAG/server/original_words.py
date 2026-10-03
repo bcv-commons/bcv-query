@@ -64,7 +64,9 @@ def _compact_words(words: list[dict]) -> list[dict]:
          "lemma": w.get("lemma", ""),
          "gloss": w.get("gloss", ""), "translit": w.get("translit", ""),
          "sense": w.get("sense", ""),          # shoresh /verse's binyan-correct sense (hbo.db-derived, OT)
-         "domain": w.get("domain", "")}        # dominant Louw-Nida domain (Greek, NT)
+         # Greek: dominant Louw-Nida domain. Hebrew: CC0 semantic group label + gloss ("אָב · father").
+         "domain": w.get("domain", ""),
+         "group_confidence": (w.get("group") or {}).get("confidence", "")}
         for w in words if w.get("strong")
     ]
 
@@ -77,7 +79,8 @@ def verse_interlinear(book: str, ch: int, v: int, gloss_lang: str = "English") -
         return None
     try:
         with httpx.Client(base_url=SHORESH_URL, timeout=3.0) as client:
-            resp = client.get(f"/verse/{book}/{ch}/{v}", params={"gloss_lang": gloss_lang})
+            resp = client.get(f"/verse/{book}/{ch}/{v}",
+                              params={"gloss_lang": gloss_lang, "domain_gloss": "true"})
             if resp.status_code != 200:
                 return None
             data = resp.json() or {}

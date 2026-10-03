@@ -1,5 +1,6 @@
-# source=UBS MARBLE SDBG (Louw-Nida) domain-name mapping; license=CC-BY-SA (UBS open-license); reference-only
+# source=UBS Dictionary of Biblical Hebrew / UBS Dictionary of the Greek New Testament, © United Bible Societies 2023, CC BY-SA 4.0 (github.com/ubsicap/ubs-open-license @ 33dcc8c67151); Louw-Nida domain names
 code	label
+001	Objetos y rasgos geográficos
 001001	Universo, Creación
 001002	Regiones sobre la Tierra
 001003	Regiones bajo la superficie de la Tierra
@@ -16,25 +17,31 @@ code	label
 001014	Centros Poblados
 001015	Pastos y tierras cultivadas
 001016	Vías de comunicación: Carreteras, calles, caminos, etc.
+002	Sustancias naturales
 002001	Elementos
+002002	Aire
 002003	Fuego
 002004	Agua
 002005	Tierra, Barro, Arena, Roca
 002006	Piedras y sustancias preciosas y semipreciosas
 002007	Metales
+003	Plantas
 003001	Plantas [Significado general]
 003002	Árboles
 003003	Plantas que no son árboles
 003004	Partes frutales de las plantas
 003005	Partes no frutales de las plantas
 003006	Madera y derivados de la madera
+004	Animales
 004001	Animales
 004002	Aves
 004003	Insectos
 004004	Reptiles y otros seres que se arrastran
 004005	Peces y otras criaturas marinas
+005	Alimentos y condimentos
 005001	Alimentos
 005002	Condimentos
+006	Artefactos
 006001	Artefactos [Significado general]
 006002	Instrumentos usados en agricultura y labranza
 006003	Instrumentos utilizados en la pesca
@@ -58,6 +65,7 @@ code	label
 006021	Perfumes e Incienso
 006022	Instrumentos para medir
 006023	Misceláneos
+007	Construcciones
 007001	Construcciones [Significado general]
 007002	Edificios
 007003	Partes y áreas de edificios
@@ -66,29 +74,36 @@ code	label
 007006	Muros y vallas
 007007	Construcciones varias
 007008	Materiales de construcción
+008	Carrocería, partes de la carrocería y productos para la carrocería
 008001	Cuerpo
 008002	Partes del cuerpo
 008003	Productos fisiológicos corporales
+009	Personas
 009001	Seres humanos
 009002	Hombres
 009003	Mujeres
 009004	Niños
 009005	Personas por las que se siente afecto
+010	Términos de parentesco
 010001	Grupos y miembros de grupos de personas considerados como parientes por consanguinidad, pero sin referencia especial a las generaciones sucesivas
 010002	Relaciones de parentesco que implican generaciones sucesivas
 010003	Relaciones de parentesco de la misma generación
 010004	Relaciones de parentesco basadas en el matrimonio
+011	Grupos, clases de personas y miembros de dichos grupos y clases
 011001	General
 011002	Socio-Religioso
 011003	Socio-Político
 011004	Étno-Cultural
 011005	Filosófico
+012	Seres y poderes sobrenaturales
 012001	Seres sobrenaturales
 012002	Poderes sobrenaturales
+013	Ser, Llegar a ser, Existir, Ocurrir
 013001	Subdominio Estado
 013002	Cambio de Estado
 013003	Existir
 013004	Ocurrir
+014	Eventos y Estados Físicos
 014001	Clima
 014002	Viento
 014003	Lluvia
@@ -99,6 +114,7 @@ code	label
 014008	Ardor
 014009	Sonido
 014010	Movimiento de la Tierra
+015	Movimiento lineal
 015001	Mover, ir/venir
 015002	Viaje, Trayecto
 015003	Pasar, Cruzar, Atravesar, Rodear
@@ -135,6 +151,7 @@ code	label
 015034	Nadar
 015035	Rodar
 016	Movimiento No Lineal
+017	Posturas y eventos relacionados con las posturas
 017001	Pararse
 017002	Sentarse
 017003	Arrodillarse
@@ -143,24 +160,29 @@ code	label
 017006	Reclinarse [para comer]
 017007	Acostarse
 017008	Inclinarse, enderezarse
+018	Adherido, acoplamiento (¿?)
 018001	Agarrar, sostener
 018002	Sujetar, Pegarse
+019	Impacto Físico
 019001	Golpear, Pegar
 019002	Perforar, Cortar
 019003	Dividir, desgarrar
 019004	Romper, atravesar
 019005	Presionar
 019006	Cavar
+020	Violencia, Daño, Destrucción, Matanza
 020001	Violencia
 020002	Dañar, Herir
 020003	Destruir
 020004	Matar
+021	Peligro, riesgo, seguro, salvar
 021001	Peligro
 021002	Exponerse a un peligro
 021003	Estar a Salvo, Liberarse del Peligro
 021004	Convertirse en Seguro, Libre de Peligro
 021005	Hacer Estar a Salvo, Libre de Peligro
 021006	Salvar en un sentido religioso
+022	Problemas, Dificultades, Alivio, Circunstancias Favorables
 022001	Problemas, Dificultades, Angustia
 022002	Experimentar Problemas, Dificultades
 022003	Ocasionar problemas, dificultades
@@ -168,6 +190,7 @@ code	label
 022005	Alivio del problema
 022006	Fácil, Ligero
 022007	Circunstancias o estado favorables
+023	Procesos y Estados Fisiológicos
 023001	Comer, beber
 023002	Procesos que implican la boca, aparte de comer y beber
 023003	Nacimiento, Procreación
@@ -181,6 +204,7 @@ code	label
 023011	Crecer, Crecimiento
 023012	Madurar, Producir Fruto, Tener Semilla
 023013	Pudrirse, Decaer
+024	Sucesos y estados sensoriales
 024001	Ver
 024002	Oír
 024003	Olfato
@@ -188,6 +212,7 @@ code	label
 024005	Tocar, Sentir
 024006	Dolor, Sufrimiento
 024007	Percepción Sensorial General
+025	Actitudes y Emociones
 025001	Deseo, querer, desear
 025002	Desear fuertemente
 025003	Amor, Afecto, Compasión
@@ -213,6 +238,7 @@ code	label
 025023	Pena, Arrepentimiento
 025024	Desánimo
 026	Facultades psicológicas
+027	Aprender
 027001	Aprender
 027002	Aprender la ubicación de algo
 027003	Aprender algo en contra alguien
@@ -220,15 +246,18 @@ code	label
 027005	Estar Dispuesto a Aprender
 027006	Estar preparado para aprender, prestar atención
 027007	Reconocer
+028	Saber
 028001	Saber
 028002	Conocido [contenido del conocimiento]
 028003	Bien Conocido, Mostrado Claramente, Revelado
 028004	Poder de ser conocido
 028005	No poder conocer, secreto
+029	Memoria y Recuerdo
 029001	Almacenamiento de información
 029002	Recuerdo de la memoria
 029003	No Recordar, Olvidar
 029004	Recordar y Responder con la Acción Apropiada
+030	Pensar
 030001	Pensar, Pensamiento
 030002	Pensar, con el propósito implícito de responder adecuadamente
 030003	Pensar sobre contingencias futuras
@@ -236,6 +265,7 @@ code	label
 030005	Decidir, Concluir
 030006	Elegir, Seleccionar, Preferir
 030007	Distinguir, Evaluar, Juzgar
+031	Sostener un punto de vista, Creer, Confiar
 031001	Tener una opinión, Sostener un punto de vista
 031002	Sostener una opinión equivocada, estar equivocado
 031003	Estar de acuerdo, consentir
@@ -246,11 +276,13 @@ code	label
 031008	Cambiar de opinión con respecto a la verdad
 031009	Confiar, Apoyarse
 031010	Ser un creyente, fe cristiana
+032	Comprender
 032001	Entender
 032002	Llegar a comprender
 032003	Facilidad o dificultad de comprensión
 032004	Capacidad de comprensión
 032005	Falta de capacidad para entender
+033	Comunicación
 033001	Lenguaje
 033002	Palabra, pasaje
 033003	Tipos de discurso
@@ -307,6 +339,7 @@ code	label
 033054	Jurar, Poner bajo juramento, Hacer un voto
 033055	Bendición, Maldición
 033056	Comunicación no verbal
+034	Asociación
 034001	Asociar
 034002	Unir, Empezar a Asociar
 034003	Pertenecer a, Estar incluido en la membresía de, Estar excluido de
@@ -317,6 +350,7 @@ code	label
 034008	Ser hospitalario
 034009	Besar, Abrazar
 034010	Matrimonio, Divorcio
+035	Ayudar, Cuidar de
 035001	Ayudar
 035002	Servir
 035003	Proveer para, apoyar
@@ -325,10 +359,12 @@ code	label
 035006	Criar, educar
 035007	Adoptar
 035008	Desertar, Desamparar
+036	Guiar, Disciplinar, Seguir
 036001	Guiar, Dirigir
 036002	Disciplinar, Entrenar
 036003	Obedecer, Desobedecer
 036004	Seguir, Ser Discípulo
+037	Controlar, Gobernar
 037001	Controlar, Restringir
 037002	Obligar, Forzar
 037003	Ejercer la autoridad
@@ -339,8 +375,10 @@ code	label
 037008	Encarcelar
 037009	Guardar, Vigilar
 037010	Liberar, Poner en libertad
+038	Castigar, Recompensar
 038001	Castigar
 038002	Recompensa, Recompensar
+039	Hostilidad, Contienda
 039001	Oposición, Hostilidad
 039002	División
 039003	Resistencia
@@ -353,13 +391,16 @@ code	label
 039010	Ataque
 039011	Emboscada
 039012	Conquistar
+040	Reconciliación, Perdón
 040001	Reconciliación
 040002	Perdón
+041	Comportamiento y estados relacionados
 041001	Comportamiento, conducta
 041002	Costumbre, Tradición
 041003	Patrones particulares de comportamiento
 041004	Imitar el comportamiento
 041005	Cambiar el comportamiento
+042	Realizar, hacer
 042001	Función
 042002	Hacer, realizar
 042003	Hacer, Crear
@@ -369,6 +410,7 @@ code	label
 044	Ganadería, Pesca
 045	Edificación, Construcción
 046	Actividades domésticas
+047	Actividades con Líquidos o Masas
 047001	Movimiento de líquidos o masas
 047002	Uso de líquidos
 047003	Aplicación y Eliminación de Líquidos o Masas
@@ -377,6 +419,7 @@ code	label
 050	Certámenes y juegos
 051	Fiestas, Festivales
 052	Funerales y Entierros
+053	Actividades Religiosas
 053001	Práctica Religiosa
 053002	Ofrenda, Sacrificio
 053003	Purificar, Limpiar
@@ -390,11 +433,13 @@ code	label
 053011	Exorcismo
 053012	Sacrilegio
 054	Actividades Marítimas
+055	Actividades Militares
 055001	Armar
 055002	Combatir
 055003	Ejército
 055004	Soldados, Oficiales
 055005	Prisioneros de Guerra
+056	Tribunales y Procedimientos Legales
 056001	Corte de Justicia
 056002	Demanda, Caso
 056003	Acusación
@@ -425,6 +470,7 @@ code	label
 057019	Ser una carga financiera
 057020	Llevar registros
 057021	Robar, Asaltar
+058	Naturaleza, Clase, Ejemplo
 058001	Naturaleza, Carácter
 058002	Apariencia como manifestación externa de forma
 058003	Principios o rasgos básicos que definen la naturaleza de algo
@@ -436,6 +482,7 @@ code	label
 058009	Patrón, Modelo, Ejemplo y Representación correspondiente
 058010	Arquetipo, Tipo correspondiente [Antitipo]
 058011	Nuevo, Viejo [primariamente no-temporal]
+059	Cantidad
 059001	Muchos, Pocos [Contables]
 059002	Mucho, Poco [Masas, Colectivos, Extensiones]
 059003	Todo, Cualquiera, Cada, Todos [Totalidad]
@@ -444,6 +491,7 @@ code	label
 059006	Abundancia, Exceso, Ahorro
 059007	Aumentar, Disminuir
 059008	Sumar, Restar
+060	Número
 060001	Número, Incontable
 060002	Uno, dos, tres, etc. [Números Cardinales]
 060003	Primero, Segundo, Tercero, Etc. [Números Ordinales]
@@ -452,8 +500,10 @@ code	label
 060006	Doble, cuatro veces más, etc. [Múltiplos]
 060007	Par, Grupo [Numerales colectivos]
 061	Secuencia
+062	Ordenar, Organizar
 062001	Juntar, Arreglo [de objetos físicos]
 062002	Organización [de eventos y estados]
+063	Entero, Unir, Parte, Dividir
 063001	Entero
 063002	Unir
 063003	Mezclar
@@ -462,6 +512,7 @@ code	label
 063006	Dividir
 063007	Separar
 064	Comparación
+065	Valor
 065001	Valioso, carente de valor
 065002	Digno, Indigno
 065003	Bueno, malo
@@ -469,6 +520,7 @@ code	label
 065005	Ventajoso, Desventajoso
 065006	Importante, No Importante
 066	Apropiado, Impropio
+067	Tiempo
 067001	Punto de tiempo sin referencia a otros puntos de tiempo: tiempo, ocasión, siempre, a menudo
 067002	Punto de tiempo con referencia a otros puntos de tiempo: antes, hace tiempo, ahora, al mismo tiempo, cuando, sobre, después
 067003	Punto de tiempo con referencia a duración del tiempo: Principio, Fin
@@ -479,6 +531,7 @@ code	label
 067008	Unidades de Tiempo Indefinidas: Edad, Vida, Intervalo, Período
 067009	Unidades de Tiempo Definidas: Año, Mes, Semana, Día, Hora
 067010	Unidades de Tiempo con Referencia a Otras Unidades o Puntos de Tiempo: Ayer, Hoy, Próximo Día
+068	Aspecto
 068001	Empezar, comenzar
 068002	Continuar
 068003	Completar, terminar, tener éxito
@@ -486,17 +539,20 @@ code	label
 068005	Tratar, Intentar
 068006	Realizar intensamente o extensamente
 068007	Rapidez, Repentino
+069	Afirmación, Negación
 069001	Afirmación
 069002	Negación
 069003	Negación combinada con clíticos
 069004	Marcadores para una respuesta afirmativa a las preguntas
 069005	Marcadores para una respuesta negativa a las preguntas
 070	Real, irreal
+071	Modo
 071001	Posible, Imposible
 071002	Probable, Improbable
 071003	Cierto, Incierto
 071004	Debería, Tener que
 071005	Necesario, Innecesario
+072	Verdadero, Falso
 072001	Verdadero, falso
 072002	Exacto, Inexacto
 073	Genuino, Falso
@@ -504,11 +560,13 @@ code	label
 075	Adecuado, Calificado
 076	Poder, Fuerza
 077	Listo, Preparado
+078	Grado
 078001	Mucho, Poco [Grado positivo-negativo]
 078002	Más que, menos que [Grado comparativo]
 078003	Más o menos, aproximadamente, casi, apenas [grado aproximado].
 078004	Completamente, Suficiente [Grado Completivo]
 078005	Hasta, Tanto como, En la medida que [Marca extendida de grado]
+079	Características de los Objetos
 079001	Físico [Material], Espiritual
 079002	Natural [Humano], Espiritual
 079003	Sólido, Líquido
@@ -538,16 +596,20 @@ code	label
 079027	Enrollado
 079028	Grande, pequeño
 079029	Perfecto
+080	Espacio
 080001	Espacio, Lugar
 080002	Límites, fronteras espaciales
+081	Dimensiones espaciales
 081001	Medida, Medir
 081002	Alto, Bajo, Profundo
 081003	Largo, corto, lejano
 081004	Estrecho, ancho
 081005	Medidas específicas de volumen
 081006	Medidas específicas de longitud
+082	Orientaciones espaciales
 082001	Norte, Sur, Este, Oeste
 082002	Izquierda, Derecha, Adelante, Opuesto
+083	Posiciones Espaciales
 083001	Aquí, Ahí
 083002	Dónde, en algún lugar, en todas partes
 083003	En medio, Entre, En, Dentro
@@ -558,14 +620,17 @@ code	label
 083008	En, Sobre, En la superficie de
 083009	Encima, Debajo
 083010	Más allá, al otro lado de
+084	Extensiones espaciales
 084001	Extensión de una Fuente
 084002	Extensión hacia una meta
 084003	Extensión a lo largo de un camino
+085	Que existe en el espacio
 085001	Estar en un lugar
 085002	Poner, colocar
 085003	Permanecer, Quedarse
 085004	Dejar en un lugar
 085005	Habitar, Residir
+086	Peso
 086001	Pesado, Ligero
 086002	Libra, Talento [Unidades específicas de peso]
 087	Estatus
@@ -574,6 +639,7 @@ code	label
 087003	De alto rango o estatus [incluye a las personas de alto estatus]
 087004	De bajo rango o estatus [incluye a las personas de bajo estatus]
 087005	Esclavo, libre
+088	Cualidades morales y éticas y conductas relacionadas
 088001	Bondad
 088002	Justo, Recto
 088003	Santo, Puro
@@ -612,6 +678,9 @@ code	label
 088036	Mala conducta sexual
 088037	Embriaguez
 088038	Pecado, maldad, culpa
+089	Relaciones
+089001	Relación
+089002	Dependencia
 089003	Origen
 089004	Especificación
 089005	Relaciones que implican correspondencias [Isomorfismos]
@@ -635,6 +704,8 @@ code	label
 089023	Contraste
 089024	Relación alternativa
 089025	Sustancia
+089026	Mediación
+090	Caso
 090001	Agente, personal o no personal, causal o inmediato, directo o indirecto
 090002	Instrumento
 090003	Origen de un evento o actividad
@@ -649,11 +720,13 @@ code	label
 090012	Agente en un papel causativo marcado por verbos
 090013	El que experimenta
 090014	Provocar la experiencia
+091	Marcadores del discurso
 091001	Marcadores de transición
 091002	Marcadores de énfasis
 091003	Marcadores de atención
 091004	Marcador de dirección directa
 091005	Marcadores de cláusulas identificativas y explicativas [epexegéticas].
+092	Referenciales del discurso
 092001	Hablante
 092002	El hablante y los asociados al hablante [exclusivo e inclusivo]
 092003	Receptor, receptores
@@ -662,5 +735,6 @@ code	label
 092006	Referencia relativa
 092007	Referencia demostrativa o deíctica
 092008	Adjunto enfático
+093	Nombres de personas y lugares
 093001	Personas
 093002	Lugares

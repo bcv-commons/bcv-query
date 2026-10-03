@@ -188,14 +188,34 @@ The card `drill`/`syntax` paths point at shoresh. To localize per-word data, app
       "morph": "...", "translit": "...",
       "gloss": "cinta",                     // localized per-word gloss (Hebrew + Greek)
       "sense": "...",                       // Hebrew only: binyan-correct localized sense
-      "domain": "Love, Affection, Compassion" // Greek NT only: Louw-Nida semantic domain
+      "domain": "Love, Affection, Compassion" // Greek: Louw-Nida semantic domain
     } ] } }
 ```
 
+Hebrew words carry a **semantic group** instead of a Louw-Nida domain (CC0, built from our own
+semantic-neighbour data; it replaced SDBH's non-redistributable `core` axis in 2026-10). The group is
+named by a Hebrew exemplar word, and `domain` holds that Hebrew label. Add `domain_gloss=true` to append
+the exemplar's gloss in `gloss_lang`:
+
+```jsonc
+// GET {SHORESH_BASE}/verse/GEN/22/2?domain_gloss=true
+{ "surface": "בִּנְךָ", "strong": "H1121", "gloss": "son",
+  "domain": "בֵּן · son",                  // "בֵּן" without domain_gloss
+  "group": { "id": "c33", "label": "בֵּן", "label_strong": "H1121", "gloss": "son",
+             "size": 1, "confidence": "high", "share": 0.967 } }
+```
+
+`confidence` is `high` when the word's membership is confirmed by its usage in the text and `extended`
+when it rests on lexical evidence only (shared roots, scholarly synonym lists, LXX renderings). Clients
+that want the most precise labels can show `high` only. The full membership of a group is
+`/domain/{id}?axis=group`.
+
 **`GET {SHORESH_BASE}/wordstudy/{STRONG}?gloss_lang=Indonesian`** — a composite word study:
 localized headline `gloss`, `keyness` (how distinctively biblical), `stems` (per-binyan
-senses for Hebrew verbs), `lex_senses`, `senses`, `sense_distribution`, `domains`, `siblings`,
-and `tw[]` (Translation-Words articles, each with `title` + `definition`).
+senses for Hebrew verbs), `lex_senses`, `senses`, `sense_distribution`, `domains`, `group` (Hebrew
+semantic group, as in `/verse`), `siblings`, and `tw[]` (Translation-Words articles, each with `title` +
+`definition`). Hebrew `domains[]` rows with `axis: "group"` carry the group id, Hebrew label, gloss and
+confidence.
 
 **`GET {SHORESH_BASE}/structure/{USFM}/{chapter}/{verse}/syntax`** — the clause→phrase syntax
 tree (the passage card's `syntax` link).
@@ -232,7 +252,7 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 | `/senses/{strong}` | Sense distribution for a Strong's number |
 | `/lexeme/{lex}` | Lexeme profile (stems × senses × counts × sample refs) |
 | `/concept/{word}` | Words sharing a concept |
-| `/domain/{code}` | Every lexeme in a Louw-Nida / SDBH semantic domain |
+| `/domain/{code}` | Every lexeme in a semantic domain: `axis=sdbg` (Louw-Nida, default), `axis=group` (Hebrew semantic group, ids like `c27`); `axis=core` and `axis=ctx` are aliases of `group` |
 | `/tw/{strong}` | Translation-Words article(s) for a Strong's number |
 | `/bridge/{strong}` | Hebrew ↔ Greek (LXX) equivalents |
 | `/lxx-lexeme/{wordid}` | LXX-only Greek lexeme lookup (words with no Strong's number — `/verse` returns `wordid` on these in place of `strong`) |

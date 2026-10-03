@@ -170,6 +170,11 @@ shoresh/macula/data/LexicalIndex.xml
 shoresh/macula/data/hebrew_synsets.xml
 shoresh/macula/data/kaikki_hebrew.jsonl
 shoresh/macula/data/sefer_hashorashim_entries.jsonl
+# usability scorecard outputs; the P0 snapshot holds SDBH labels and must stay local
+shoresh/macula/data/usability/
+shoresh/macula/data/bhsa_free/
+shoresh/macula/data/ubs_open/
+shoresh/macula/data/metzudat_zion_chapters.jsonl
 # sefer_hashorashim: candidate pairs, pre-LLM-verification — intermediate, not a final dataset
 resources/sefer_hashorashim/candidate_pairs.tsv
 # hbo_lex_export.tsv: publish-ready export of senses/hbo_lex.tsv, regenerable via

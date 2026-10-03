@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""Re-source resources/semantic_domains/ from UBS's open release (CC BY-SA 4.0), replacing the
+"used with permission" MARBLE data that came through MACULA and could not be redistributed.
+
+Source (pinned): github.com/ubsicap/ubs-open-license @ COMMIT
+  dictionaries/hebrew/JSON/UBSHebrewDic-v0.9.3-en.JSON      UBS Dictionary of Biblical Hebrew (from SDBH)
+  dictionaries/greek/JSON/UBSGreekNTDic-v1.1-en.JSON         UBS Dictionary of the Greek NT (Louw-Nida)
+  dictionaries/greek/JSON/UBSGreekNTDicLexicalDomains-v1.*   localized Louw-Nida domain names
+
+Writes, same schema as before so shoresh and bcv-RAG need no change:
+  semantic_domains/grc.tsv   sdbg  Louw-Nida domain per Greek Strong's (subdomain where given)
+  semantic_domains/hbo.tsv   lex   SDBH lexical domain per Hebrew Strong's
+                             sdbg  Louw-Nida via the LXX bridge (Hebrew -> Greek renderings -> grc.tsv)
+  semantic_domains/domain_labels/{eng,spa,fra,cmn-Hans}.tsv   Louw-Nida domain names
+(`ind` and `deu` label files are our own translations and are left as they are.)
+
+The open release has no SDBH core or contextual axis; those were retired (replaced by
+resources/semantic_groups/). count = the number of Scripture references UBS lists for a sense; share =
+count over the word's total for that axis; a word's primary domain is always kept, others when count >= 2
+(as before).
+
+  cd shoresh && .venv/bin/python3 -m macula.build_ubs_open
+"""
+from __future__ import annotations
+
+import collections
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+OUT = ROOT / "resources" / "semantic_domains"
+CACHE = HERE / "data" / "ubs_open"
+COMMIT = "33dcc8c671511151551804e073f1d461bc5d5b1a"
+RAW = f"https://raw.githubusercontent.com/ubsicap/ubs-open-license/{COMMIT}/dictionaries"
+FILES = {
+    "hebrew": "hebrew/JSON/UBSHebrewDic-v0.9.3-en.JSON",
+    "greek": "greek/JSON/UBSGreekNTDic-v1.1-en.JSON",
+    "greek_dom_en": "greek/JSON/UBSGreekNTDicLexicalDomains-v1.1-en.JSON",
+    "greek_dom_es": "greek/JSON/UBSGreekNTDicLexicalDomains-v1.0-es.JSON",
+    "greek_dom_fr": "greek/JSON/UBSGreekNTDicLexicalDomains-v1.1-fr.JSON",
+    "greek_dom_zh": "greek/JSON/UBSGreekNTDicLexicalDomains-v1.0-zh-hans.JSON",
+}
+LABEL_FILES = {"eng": "greek_dom_en", "spa": "greek_dom_es", "fra": "greek_dom_fr", "cmn-Hans": "greek_dom_zh"}
+MIN_COUNT = 2
+ATTRIBUTION = ("UBS Dictionary of Biblical Hebrew / UBS Dictionary of the Greek New Testament, "
+               "© United Bible Societies 2023, CC BY-SA 4.0 (github.com/ubsicap/ubs-open-license @ "
+               f"{COMMIT[:12]})")
+
+
+def fetch(key: str) -> Path:
+    """Cached download; curl resumes partial files (raw.githubusercontent.com is slow from here)."""
+    dest = CACHE / Path(FILES[key]).name
+    CACHE.mkdir(parents=True, exist_ok=True)
+    for _ in range(8):
+        try:
+            json.loads(dest.read_text(encoding="utf-8-sig"))
+            return dest
+        except (FileNotFoundError, json.JSONDecodeError):
+            subprocess.run(["curl", "-sSL", "-C", "-", "--max-time", "280", "-o", str(dest),
+                            f"{RAW}/{FILES[key]}"], check=False)
+    sys.exit(f"could not download {FILES[key]}")
+
+
+def load(key: str):
+    return json.loads(fetch(key).read_text(encoding="utf-8-sig"))
+
+
+def _strong(code: str, prefix: str) -> str | None:
+    m = re.match(r"^[HAG]?(\d+)", code.strip())
+    return f"{prefix}{int(m.group(1)):04d}" if m else None
+
+
+def senses(entries: list, prefix: str, sub_first: bool):
+    """Yield (strong, domain_code, label, n_refs) per sense and domain."""
+    for e in entries:
+        strongs = {s for s in (_strong(c, prefix) for c in e.get("StrongCodes") or []) if s}
+        for bf in e.get("BaseForms") or []:
+            for lm in bf.get("LEXMeanings") or []:
+                doms = (lm.get("LEXSubDomains") or []) if sub_first else []
+                doms = doms or lm.get("LEXDomains") or []
+                n = len(lm.get("LEXReferences") or []) or 1
+                for d in doms:
+                    code = (d.get("DomainCode") or "").strip()
+                    if code:
+                        for s in strongs:
+                            yield s, code, (d.get("Domain") or "").strip(), n
+
+
+def aggregate(rows, axis: str) -> list[tuple]:
+    agg: dict = collections.defaultdict(collections.Counter)
+    label: dict = {}
+    for s, code, lab, n in rows:
+        agg[s][code] += n
+        label.setdefault(code, lab)
+    out = []
+    for s, counter in agg.items():
+        total = sum(counter.values())
+        for i, (code, n) in enumerate(counter.most_common()):
+            if i == 0 or n >= MIN_COUNT:
+                out.append((s, axis, code, label[code], n, round(n / total, 3)))
+    return out
+
+
+def write(path: Path, rows: list[tuple]) -> None:
+    rows.sort(key=lambda r: (r[0], r[1], -r[4]))
+    with path.open("w", encoding="utf-8") as fh:
+        fh.write("strong\tdomain_type\tdomain\tlabel\tcount\tshare\n")
+        for s, dtype, code, lab, n, share in rows:
+            fh.write(f"{s}\t{dtype}\t{code}\t{lab}\t{n}\t{share}\n")
+    print(f"  wrote {path.relative_to(ROOT)}: {len({r[0] for r in rows})} words, {len(rows)} rows",
+          file=sys.stderr)
+
+
+def write_labels(lang: str, key: str) -> None:
+    out = {}
+    for d in load(key):
+        loc = (d.get("SemanticDomainLocalizations") or [{}])[0]
+        if d.get("Code") and loc.get("Label"):
+            out[d["Code"]] = loc["Label"].strip()
+    path = OUT / "domain_labels" / f"{lang}.tsv"
+    with path.open("w", encoding="utf-8") as fh:
+        fh.write(f"# source={ATTRIBUTION}; Louw-Nida domain names\ncode\tlabel\n")
+        for code in sorted(out):
+            fh.write(f"{code}\t{out[code]}\n")
+    print(f"  wrote {path.relative_to(ROOT)}: {len(out)} labels", file=sys.stderr)
+
+
+def main() -> int:
+    sys.path.insert(0, str(ROOT / "bcv-RAG"))
+    from scripts.build_semantic_domains import _bridge_rows
+
+    write(OUT / "grc.tsv", aggregate(senses(load("greek"), "G", sub_first=True), "sdbg"))
+    hbo = aggregate(senses(load("hebrew"), "H", sub_first=False), "lex")
+    bridge = _bridge_rows(str(OUT / "grc.tsv"), str(ROOT / "resources" / "lxx_bridge.tsv"))
+    write(OUT / "hbo.tsv", hbo + bridge)
+    for lang, key in LABEL_FILES.items():
+        write_labels(lang, key)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

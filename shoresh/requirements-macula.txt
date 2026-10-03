@@ -6,3 +6,4 @@
 # Install with: pip install -r requirements.txt -r requirements-macula.txt
 networkx>=3.0        # build_domain_clusters.py — Louvain community detection
 pyarrow>=14.0         # neighbors.parquet / prior_pack read+write
+anthropic>=1.11       # usability_judge.py — Claude judge for the usability scorecard

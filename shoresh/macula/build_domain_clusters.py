@@ -174,8 +174,8 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
         fh.write("# Louvain communities over the semantic_neighbors graph (BEREL+sense-split, xling-free "
-                  "clustering input). Canonical config: high+LLM-prior tiers, resolution=5.0 (median "
-                  "cluster size 23, ~45% same-domain agreement vs SDBH yardstick, SDBH-era measurement). "
+                  f"clustering input). This build: {'high-only' if args.no_prior else 'high+LLM-prior'} tiers, "
+                  f"resolution={args.resolution}, {len(sizes)} clusters. "
                   "NOT LLM-labeled yet — cluster_id is arbitrary, not a domain name. `anchor`: 'high' = "
                   "this lexeme has its own embedding-confirmed edge (same-cluster pairs among these score "
                   "2.14x a frequency-matched baseline under the text-anchored intrinsic yardstick, 69.1% "

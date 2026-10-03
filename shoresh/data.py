@@ -248,13 +248,105 @@ def _domain_index() -> dict:
                 parts = line.rstrip("\n").split("\t")
                 if len(parts) >= 6:
                     s, dtype, code, label, count, share = parts[:6]
+                    if dtype in _RETIRED_AXES:      # SDBH core/ctx: not redistributable; replaced by
+                        continue                    # the CC0 semantic groups (see _semantic_groups)
                     idx[(dtype, code)].append((s, label, int(count), float(share)))
     return idx
 
 
-def domain_lexemes(code: str, axis: str = "sdbg", limit: int = 200) -> dict:
+_RETIRED_AXES = frozenset({"core", "ctx"})
+
+
+# ---------- Hebrew semantic groups (CC0; replace SDBH core/ctx) ----------
+
+@lru_cache(maxsize=1)
+def _semantic_groups() -> tuple[dict, dict]:
+    """(members, groups) from resources/semantic_groups/ (built by macula/build_semantic_groups.py).
+    members: strong -> [(group_id, share, served, confidence)]; groups: group_id -> row dict."""
+    base = _resources_dir() / "semantic_groups"
+    members: dict = collections.defaultdict(list)
+    groups: dict = {}
+    for name, sink in (("hbo_members.tsv", "m"), ("hbo_groups.tsv", "g")):
+        path = base / name
+        if not path.exists():
+            continue
+        with path.open(encoding="utf-8") as fh:
+            header = None
+            for line in fh:
+                if line.startswith("#"):
+                    continue
+                parts = line.rstrip("\n").split("\t")
+                if header is None:
+                    header = parts
+                    continue
+                rec = dict(zip(header, parts))
+                if sink == "m":
+                    members[rec["strong"]].append((rec["group_id"], float(rec["share"]),
+                                                   rec["served"] == "1", rec["confidence"]))
+                else:
+                    groups[rec["group_id"]] = rec
+    return members, groups
+
+
+@lru_cache(maxsize=4096)
+def _label_gloss(label_strong: str, gloss_en: str, gloss_lang: str) -> str:
+    """The exemplar's gloss in the reader's language (word_glosses via the Strong's lexemes), else English."""
+    if gloss_lang and gloss_lang != "English":
+        for lex in _strong_to_lex().get(label_strong, []):
+            loc = resolve_word_gloss("hbo", gloss_lang, lex, None)
+            if loc:
+                return re.split(r"[;,]", loc)[0].strip()
+    return gloss_en
+
+
+def _group_record(gid: str, gloss_lang: str) -> dict | None:
+    g = _semantic_groups()[1].get(gid)
+    if not g:
+        return None
+    return {"id": gid, "label": g["label_lemma"], "label_strong": g["label_strong"],
+            "gloss": _label_gloss(g["label_strong"], g["gloss_en"], gloss_lang),
+            "size": int(g["n_served"])}
+
+
+def semantic_group(strong: str, gloss_lang: str = "English") -> dict | None:
+    """The group served for a Hebrew Strong's (its dominant group, >= 60% of occurrences), with the
+    membership's confidence (`high` = embedding-confirmed, `extended` = prior-only), or None."""
+    for gid, share, served, conf in _semantic_groups()[0].get(_norm_strong(strong), []):
+        if served:
+            rec = _group_record(gid, gloss_lang)
+            if rec:
+                return {**rec, "confidence": conf, "share": round(share, 3)}
+    return None
+
+
+def group_label(group: dict, with_gloss: bool) -> str:
+    """The string clients see in `domain`: the Hebrew exemplar lemma, optionally "lemma · gloss"."""
+    return f"{group['label']} · {group['gloss']}" if with_gloss and group.get("gloss") else group["label"]
+
+
+def group_lexemes(gid: str, gloss_lang: str = "English", limit: int = 200) -> dict:
+    """Every word in a Hebrew semantic group, glossed, `high` confidence first."""
+    rec = _group_record(gid.strip(), gloss_lang)
+    if not rec:
+        return {"domain": gid, "axis": "group", "label": None, "count": 0, "lexemes": []}
+    rows = [(s, sh, conf) for s, mem in _semantic_groups()[0].items()
+            for g, sh, served, conf in mem if g == rec["id"] and served]
+    rows.sort(key=lambda r: (r[2] != "high", -r[1], r[0]))
+    lexemes = [{"strong": s, "lang": "hbo", **(gloss_of(s) or {}), "share": round(sh, 3), "confidence": conf}
+               for s, sh, conf in rows[:limit]]
+    return {"domain": rec["id"], "axis": "group", "label": rec["label"], "gloss": rec["gloss"],
+            "count": len(rows), "lexemes": lexemes}
+
+
+def domain_lexemes(code: str, axis: str = "sdbg", limit: int = 200, gloss_lang: str = "English") -> dict:
     """Every lexeme in a semantic domain, glossed — "every word in Love/Affection".
-    axis: sdbg (Louw-Nida, Greek + LXX-bridged Hebrew) | core | lex | ctx (native SDBH)."""
+    axis: sdbg (Louw-Nida, Greek + LXX-bridged Hebrew) | lex (native SDBH) | group (CC0 Hebrew
+    semantic groups). core / ctx are aliases of group: SDBH's core/ctx axes were retired."""
+    if axis == "group" or axis in _RETIRED_AXES:
+        out = group_lexemes(code, gloss_lang, limit)
+        if axis in _RETIRED_AXES:
+            out["aliased_from"] = axis
+        return out
     members = _domain_index().get((axis, code.strip()), [])
     lexemes = []
     for s, _label, count, share in sorted(members, key=lambda m: (-m[2], -m[3]))[:limit]:
@@ -590,11 +682,21 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
     equivalent — from the shared resources. `gloss_lang` localizes the lex_senses labels."""
     code = _norm_strong(strong)
     domains = [{"axis": a, "domain": d, "label": lab, "share": round(sh, 3)}
-               for a, d, lab, sh in sorted(_strong_domains().get(code, []), key=lambda x: -x[3])]
+               for a, d, lab, sh in _strong_domains().get(code, [])]
+    for gid, share, _served, conf in _semantic_groups()[0].get(code, []):
+        rec = _group_record(gid, gloss_lang)
+        if rec:
+            domains.append({"axis": "group", "domain": gid, "label": rec["label"], "gloss": rec["gloss"],
+                            "share": round(share, 3), "confidence": conf})
+    domains.sort(key=lambda d: -d["share"])
+    group = semantic_group(code, gloss_lang) if code.startswith("H") else None
     siblings = []
     prim = next((d for d in domains if d["axis"] == "sdbg"), None)
     if prim:
         siblings = [lx for lx in domain_lexemes(prim["domain"], axis="sdbg", limit=8)["lexemes"]
+                    if lx["strong"] != code][:6]
+    elif group:
+        siblings = [lx for lx in group_lexemes(group["id"], gloss_lang, limit=8)["lexemes"]
                     if lx["strong"] != code][:6]
     fwd, rev = _lxx_pairs()
     cross = ([{"strong": g, "count": c, **(gloss_of(g) or {})} for g, c in fwd.get(code, [])][:3]
@@ -619,7 +721,8 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         "strong": code, **head,
         "keyness": keyness_of(code),                   # how distinctively biblical
         "tw": tw,                                       # nudge 1: study the concept (localized text)
-        "domains": domains, "siblings": siblings,      # nudge 3: related words
+        "domains": domains, "group": group,             # Hebrew semantic group (CC0), or None
+        "siblings": siblings,                           # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
         "stems": _stem_senses(code, gloss_lang),       # lex-anchored: per-binyan glosses + homographs
         "lex_senses": _lex_senses(code, gloss_lang),   # Hebrew-context-derived senses (per lex, per stem)
@@ -757,9 +860,10 @@ def _strong_code(word_lang: str, strong: int | None) -> str | None:
     return f"{'H' if word_lang == 'hbo' else 'G'}{strong}"
 
 
-def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dict:
+def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain_gloss: bool = False) -> dict:
     """Greek (LXX) + Hebrew/Greek (spine) words for one verse. `gloss_lang` localizes the per-word
-    binyan-correct sense."""
+    binyan-correct sense. Hebrew words carry `group` (CC0 semantic group) and `domain` = its Hebrew
+    exemplar label, with the localized gloss appended ("אָב · father") when `domain_gloss`."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
@@ -792,14 +896,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
         scon.close()
         if rows:
             senses = _verse_sense_map(book, chapter, vrs, gloss_lang) if spine_lang == "hbo" else {}
-            doms = _strong_domains()          # per-word domain, both testaments (see axis pick below)
-            # Greek strongs only ever carry `sdbg` (Louw-Nida) rows in _strong_domains(); Hebrew
-            # strongs carry FOUR axes (core/lex/ctx/sdbg — hbo.tsv) mixed together, so picking a
-            # dominant domain WITHOUT filtering to one axis would blend concept/referent/register
-            # tags into one bogus "top domain" — the same bug fixed 2026-08 in the CC0 pipeline's own
-            # validation (see domain-replacement-roadmap.md). `core` is SDBH's own "concept axis —
-            # use this", the Hebrew analogue of Greek's `sdbg`.
-            domain_axis = "sdbg" if spine_lang == "grc" else "core"
+            doms = _strong_domains()          # Greek per-word domain (Louw-Nida `sdbg`)
             words = []
             for r in rows:
                 code = _strong_code(spine_lang, r["strong"])
@@ -815,10 +912,16 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dic
                         w["gloss"] = re.split(r"[;,]", loc)[0].strip()
                 if senses.get(code):                       # binyan-correct sense (OT, hbo.db)
                     w["sense"] = senses[code]
-                dd = doms.get(_norm_strong(code)) if code else None
-                if dd:
-                    dd_axis = [d for d in dd if d[0] == domain_axis]
-                    if dd_axis:                            # dominant domain, one axis only
+                if spine_lang == "hbo":
+                    # CC0 semantic group (replaced SDBH `core` 2026-10); `domain` stays a plain string
+                    group = semantic_group(code, gloss_lang) if code else None
+                    if group:
+                        w["group"] = group
+                        w["domain"] = group_label(group, domain_gloss)
+                else:
+                    dd = doms.get(_norm_strong(code)) if code else None
+                    dd_axis = [x for x in dd if x[0] == "sdbg"] if dd else []
+                    if dd_axis:                            # dominant Louw-Nida domain
                         best = _dominant_domain(dd_axis)   # top-domain gate + finer subdomain label
                         if best:
                             w["domain"] = _localize_domain(best[0], best[1], gloss_lang)

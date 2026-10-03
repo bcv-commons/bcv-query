@@ -103,7 +103,18 @@ PROMPT = (
 )
 
 
+BACKEND = "api"   # "api" (ANTHROPIC_API_KEY, MODEL) or "claude-cli" (Claude Code headless, the subscription)
+
+
 def call_llm(batch: list[dict], tries: int = 5):
+    if BACKEND == "claude-cli":
+        from macula.usability_judge import call_claude_cli
+        text, itok, otok = call_claude_cli(PROMPT + json.dumps(batch, ensure_ascii=False))
+        return parse(text, {p["pair_id"] for p in batch}), itok, otok
+    return _call_api(batch, tries)
+
+
+def _call_api(batch: list[dict], tries: int = 5):
     key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not key:
         sys.exit("ERROR: set ANTHROPIC_API_KEY (shoresh/.env)")
@@ -184,7 +195,16 @@ def main() -> int:
                     help="strong_a/strong_b-shaped TSV to verify (default: confidence_tiers.tsv, "
                          "filtered to n_families==1)")
     ap.add_argument("--out", type=Path, default=OUT, help="output path (default: llm_pair_verification.tsv)")
+    ap.add_argument("--backend", choices=["api", "claude-cli"], default="api",
+                    help="claude-cli runs through Claude Code headless mode (the user's subscription)")
+    ap.add_argument("--hebrew", action="store_true",
+                    help="show each word's pointed Hebrew lemma next to its Strong's number and gloss")
     args = ap.parse_args()
+    global BACKEND, MODEL
+    BACKEND = args.backend
+    if BACKEND == "claude-cli":
+        from macula.usability_judge import MODELS
+        MODEL = MODELS["claude-cli"] + " (claude-cli)"
 
     candidates = load_candidates(args.candidates)
     done = _already_done(args.out)
@@ -192,11 +212,18 @@ def main() -> int:
     if args.limit:
         candidates = candidates[:args.limit]
     glosses = load_glosses()
+    lemmas = {}
+    if args.hebrew:
+        from macula.domain_providers import lemma_of
+        lemmas = lemma_of()
+
+    def show(s: str) -> str:
+        return " ".join(x for x in (s, lemmas.get(s, ""), glosses.get(s, "")) if x)
 
     entries = []
     for i, (a, b) in enumerate(candidates):
         pid = f"{a}-{b}"
-        entries.append({"pair_id": pid, "a": f"{a} {glosses.get(a, '')}", "b": f"{b} {glosses.get(b, '')}"})
+        entries.append({"pair_id": pid, "a": show(a), "b": show(b)})
 
     if args.dry_run:
         print(f"[verify-pairs] {len(entries)} pairs pending (of which this dry-run shows "

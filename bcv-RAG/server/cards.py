@@ -75,7 +75,8 @@ def _concept_line(card: dict | None) -> str | None:
 
     domains = card.get("domains") or []
     if domains and domains[0].get("label"):
-        parts.append("domain: " + domains[0]["label"])
+        d0 = domains[0]                     # Hebrew group rows carry a Hebrew label + separate gloss
+        parts.append("domain: " + d0["label"] + (f" · {d0['gloss']}" if d0.get("gloss") else ""))
 
     return "CONCEPT — " + " | ".join(p for p in parts if p)
 
@@ -503,7 +504,7 @@ class PassageStrategy(CardStrategy):
                 continue
             words.append({"translit": w.get("translit") or w.get("surface"), "gloss": gloss,
                           "key": key, "sensed": bool(sense), "role": roles.get(_norm_gloss(gloss)),
-                          "domain": w.get("domain") or None})   # Louw-Nida domain (NT/Greek)
+                          "domain": w.get("domain") or None})   # Louw-Nida (Greek) / semantic group (Hebrew)
         if not words:
             return None
         words.sort(key=lambda x: -x["key"])
@@ -535,7 +536,7 @@ class PassageStrategy(CardStrategy):
             return None
         loc = f"{data['code']}/{data['ch']}/{data['v']}"        # USFM code + numeric ch/v (NOT the localized ref)
         domains = [f"{w['translit']}: {re.split(r'[,:]', w['domain'])[0].strip()}"
-                   for w in data["words"][:6] if w.get("domain")]   # NT semantic domains (Louw-Nida)
+                   for w in data["words"][:6] if w.get("domain")]   # Louw-Nida (NT) / Hebrew semantic groups (OT)
         return {"kind": self.kind, "headline": self._line(data), "anchor": data["ref"],
                 "drill": f"/verse/{loc}", "syntax": f"/structure/{loc}/syntax",
                 "lxx": data.get("lxx"), "frame": data.get("frame"),

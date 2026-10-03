@@ -45,19 +45,20 @@ class PooledEncoder:
         self.torch = torch
         # spike.py's original (53-verse eval) never needed a device — CPU was fine at that scale.
         # At ~78k clauses that's the difference between minutes and hours, so place on MPS if available.
-        self.device = "mps" if torch.backends.mps.is_available() else "cpu"
+        self.device = ("cuda" if torch.cuda.is_available()
+                       else "mps" if torch.backends.mps.is_available() else "cpu")
         self.tok = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModel.from_pretrained(model_id).to(self.device)
         self.model.eval()
         print(f"PooledEncoder: {model_id} on {self.device}", file=sys.stderr)
 
-    def encode(self, texts: list[str], batch_size: int = 32, **_kw) -> np.ndarray:
+    def encode(self, texts: list[str], batch_size: int = 32, max_length: int = 128, **_kw) -> np.ndarray:
         torch = self.torch
         out = []
         with torch.no_grad():
             for i in range(0, len(texts), batch_size):
                 batch = texts[i:i + batch_size]
-                enc = self.tok(batch, padding=True, truncation=True, max_length=128,
+                enc = self.tok(batch, padding=True, truncation=True, max_length=max_length,
                                return_tensors="pt").to(self.device)
                 hidden = self.model(**enc).last_hidden_state
                 mask = enc["attention_mask"].unsqueeze(-1).float()

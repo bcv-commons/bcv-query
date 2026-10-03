@@ -1,4 +1,8 @@
-"""Build the lexeme-level Strong's → semantic-domain tables (S2 / Phase 1).
+"""SUPERSEDED (2026-10) for building resources/semantic_domains/: that is now shoresh/macula/build_ubs_open.py,
+from UBS's open CC BY-SA release. This script read the non-redistributable MARBLE layer via MACULA; it is kept
+because build_ubs_open reuses _bridge_rows (the LXX-bridged sdbg axis). Do not use it to rebuild the tables.
+
+Build the lexeme-level Strong's → semantic-domain tables (S2 / Phase 1).
 
 Aggregates MACULA's per-occurrence domain data into a clean lexeme table so
 concept retrieval can broaden a Strong's to its semantic domain(s).
