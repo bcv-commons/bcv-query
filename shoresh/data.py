@@ -24,7 +24,7 @@ import sqlite3
 from functools import lru_cache
 from pathlib import Path
 
-from spine.common import FILENUM
+from spine.common import FILENUM, to_modern_form
 from references import encode, decode, norm_strong as _norm_strong
 
 HERE = Path(__file__).resolve().parent
@@ -399,6 +399,45 @@ def setting_lexemes(sid: str, gloss_lang: str = "English", limit: int = 200) -> 
                 "count": counts.get(s, (0, 0))[0], "share": round(counts.get(s, (0, 0))[1], 3),
                 "characteristic": s in top} for s in order[:limit]]
     return {"domain": rec["id"], "axis": "setting", "label": rec["label"], "count": len(order), "lexemes": lexemes}
+
+
+@lru_cache(maxsize=1)
+def _mz_explanations() -> dict:
+    """(book, chapter, verse) -> [(word consonants, strong, heading, short, text, sense_strong)] from
+    resources/metzudat_zion/explanations.tsv: Metzudat Zion's word explanations (Public Domain Hebrew text;
+    macula/build_metzudat_zion.py --explanations)."""
+    path = _resources_dir() / "metzudat_zion" / "explanations.tsv"
+    out: dict = collections.defaultdict(list)
+    if path.exists():
+        for r in _tsv_rows(path):
+            out[(r["book"], int(r["chapter"]), int(r["verse"]))].append(
+                (r["word"], r["strong"], r["heading"], r["short"], r["text"], r["sense_strong"]))
+    return out
+
+
+def _attach_explanations(book: str, chapter: int, vrs: int, words: list[dict]) -> None:
+    """Hebrew explaining Hebrew: Metzudat Zion's explanation of a word, matched by the word's consonants,
+    else by Strong's number, each explanation used once."""
+    pending = list(_mz_explanations().get((book, chapter, vrs), []))
+    if not pending:
+        return
+
+    def take(pred):
+        for i, e in enumerate(pending):
+            if pred(e):
+                return pending.pop(i)
+        return None
+
+    for w in words:
+        cons = to_modern_form(w.get("surface") or "", "hbo")
+        e = take(lambda e: e[0] == cons) or (take(lambda e: e[1] == _norm_strong(w["strong"])) if w.get("strong") else None)
+        if not e:
+            continue
+        _word, _strong, heading, short, text, sense = e
+        exp = {"source": "Metzudat Zion", "heading": heading, "short": short, "text": text}
+        if sense:
+            exp["explained_by"] = {"strong": sense, **(gloss_of(sense) or {})}
+        w["explanation"] = exp
 
 
 @lru_cache(maxsize=1)
@@ -971,7 +1010,8 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
     """Greek (LXX) + Hebrew/Greek (spine) words for one verse. `gloss_lang` localizes the per-word
     binyan-correct sense. Hebrew words carry `group` (CC0 semantic group) and `domain` = its Hebrew
     exemplar label, with the localized gloss appended ("אָב · father") when `domain_gloss`, and
-    `setting` (the topical setting the word is used in here; CC BY), glossed the same way."""
+    `setting` (the topical setting the word is used in here; CC BY), glossed the same way, and in the
+    Prophets and Writings `explanation`: Metzudat Zion's Hebrew explanation of the word (Public Domain)."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
@@ -1046,6 +1086,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
                 words.append(w)
             if spine_lang == "hbo":
                 _match_leftover_settings(words, pending, gloss_lang, domain_gloss)
+                _attach_explanations(book, chapter, vrs, words)
             result["spine"] = {"language": spine_lang, "words": words}
     return result
 

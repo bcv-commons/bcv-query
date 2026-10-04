@@ -227,6 +227,21 @@ when the word is too common or too rare to tell and the passage's main setting i
 
 Every word used in a setting: `/domain/{id}?axis=setting`.
 
+In the Prophets and Writings, Hebrew words can also carry an **explanation**: Metzudat Zion's (18th c.)
+explanation of that word in that verse, in Hebrew. It often names the sense directly with ענין ("in the
+sense of") and sometimes corrects a misleading English gloss (Isa 36:2 בְּחֵיל "rampart": ענין צבאות עם,
+an army). `short` is the explanation without its cross-references, `text` the full comment;
+`explained_by` gives the biblical word it explains with, when that is unambiguous. Hebrew text Public
+Domain (via Sefaria).
+
+```jsonc
+// GET {SHORESH_BASE}/verse/PSA/23/2
+{ "surface": "בִּנְאוֹת", "strong": "H4999", "gloss": "habitation",
+  "explanation": { "source": "Metzudat Zion", "heading": "בנאות", "short": "ענין מדור",
+                   "text": "ענין מדור כמו נאות השלום (ירמיה כ״ה)",
+                   "explained_by": { "strong": "H4070", "gloss": "dwelling", "translit": "me.dor" } } }
+```
+
 **`GET {SHORESH_BASE}/wordstudy/{STRONG}?gloss_lang=Indonesian`** — a composite word study:
 localized headline `gloss`, `keyness` (how distinctively biblical), `stems` (per-binyan
 senses for Hebrew verbs), `lex_senses`, `senses`, `sense_distribution`, `domains`, `group` (Hebrew

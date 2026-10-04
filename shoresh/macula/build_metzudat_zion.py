@@ -193,9 +193,14 @@ def extract() -> collections.Counter:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--no-fetch", action="store_true")
+    ap.add_argument("--explanations", action="store_true",
+                    help="write resources/metzudat_zion/explanations.tsv (per-word explanations) and stop")
     args = ap.parse_args()
     if not args.no_fetch:
         fetch()
+    if args.explanations:
+        write_explanations(explanations())
+        return 0
     pairs = extract()
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", encoding="utf-8") as fh:
@@ -209,6 +214,133 @@ def main() -> int:
             fh.write(f"{a}\t{b}\t{cnt}\n")
     print(f"[metzudat-zion] -> {OUT}", file=sys.stderr)
     return 0
+
+
+
+# ---------- per-word explanations (Hebrew explaining Hebrew, served in /verse) ----------
+
+EXPLANATIONS = ROOT / "resources" / "metzudat_zion" / "explanations.tsv"
+_OPENER_WORDS = {"הוא", "היא", "הם", "הן", "ענינו", "עניינו", "ענין", "כן", "גם", "זה", "זו", "ר״ל", "רצה", "לומר"}
+_CITE_START = re.compile(r"\s(?:וכן|כמו|ודומה)\s|\(")
+
+
+def _verse_word_units(sp, book: str, ch: int, vs: int) -> list[dict]:
+    """MACULA splits prefixes into tokens; rebuild whole words (tokens sharing a key prefix)."""
+    units: "collections.OrderedDict[str, dict]" = collections.OrderedDict()
+    for key, surface, lemma, strong, lexeme in sp.execute(
+            "SELECT key, surface, lemma, strong, lexeme FROM spine_words WHERE book=? AND chapter=? AND verse=? "
+            "AND lexeme LIKE 'hbo:%' ORDER BY idx", (book, ch, vs)):
+        u = units.setdefault(key[:-1], {"key": key[:-1], "surface": "", "parts": []})
+        u["surface"] += to_modern_form(surface or "", "hbo")
+        u["parts"].append((to_modern_form(lemma, "hbo") if lemma else "",
+                           f"H{int(strong):04d}" if strong is not None else "", lexeme))
+    return list(units.values())
+
+
+def _content_strong(unit: dict, drop: set[str]) -> str:
+    """The word's content part: the part with the longest lemma (prefixes and suffixes are one or two
+    letters), so a name keeps its own number rather than its conjunction's."""
+    parts = [p for p in unit["parts"] if p[1]]
+    return max(parts, key=lambda p: len(p[0]))[1] if parts else ""
+
+
+def _anchor(head: str, units: list[dict]) -> dict | None:
+    """Whole-word match on consonants, then the word with up to two prefix letters removed, then a lemma."""
+    h = to_modern_form(head, "hbo")
+    if not h:
+        return None
+    for u in units:
+        if u["surface"] == h:
+            return u
+    b = h
+    for _ in range(2):
+        if len(b) > 2 and b[0] in PREFIXES:
+            b = b[1:]
+            for u in units:
+                if u["surface"].endswith(b) or any(b == p[0] for p in u["parts"]):
+                    return u
+    for u in units:
+        if any(h == p[0] for p in u["parts"]):
+            return u
+    return None
+
+
+def _resolve_sense_word(word: str, idx: dict[str, set[str]]) -> set[str]:
+    """A gloss word to a biblical lemma: as written, with a prefix letter removed, or a later-Hebrew sense noun
+    (חוזק, כריתה, השחתה, מהירות) reduced to its root: drop ות/ית/ה endings and a ה/מ/ת noun prefix."""
+    hits = _resolve_gloss(word, idx)
+    if hits:
+        return hits
+    b = to_modern_form(word, "hbo")
+    cands = []
+    for end in ("ות", "ית", "ה", "ת", ""):
+        stem = b[: len(b) - len(end)] if end and b.endswith(end) else (b if not end else None)
+        if not stem:
+            continue
+        for pre in ("", "ה", "מ", "ת"):
+            core = stem[len(pre):] if pre and stem.startswith(pre) else (stem if not pre else None)
+            if core and 2 < len(core) <= 4:
+                cands.append(core.replace("ו", "") if len(core) == 4 and "ו" in core[1:3] else core)
+    for c in cands:
+        h = idx.get(c)
+        if h and len(h) == 1:
+            return h
+    return set()
+
+
+def explanations() -> list[tuple]:
+    drop = excluded()
+    idx = _bare_index(drop)
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    rows, st = [], collections.Counter()
+    for line in CACHE.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        for vi, comments in enumerate(row["verses"], start=1):
+            comments = comments if isinstance(comments, list) else [comments]
+            units = None
+            for c in comments:
+                m = re.match(r"\s*<b>([^<]+)</b>\s*\.?\s*(.*)", c or "", re.S)
+                if not m:
+                    continue
+                st["comments"] += 1
+                if units is None:
+                    units = _verse_word_units(sp, row["book"], row["chapter"], vi)
+                heading = re.sub(r"[.:]\s*$", "", m.group(1).strip())
+                u = _anchor(heading.split()[0] if heading.split() else "", units)
+                if not u:
+                    st["not_anchored"] += 1
+                    continue
+                st["anchored"] += 1
+                text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()
+                short = _CITE_START.split(" " + text, maxsplit=1)[0].strip().rstrip(",;:")
+                words = [w for w in re.findall(r"[א-ת״׳'\"]+", short) if w not in _OPENER_WORDS]
+                sense = ""
+                if words and not words[0].startswith(SKIP_OPENERS):
+                    hits = _resolve_sense_word(words[0], idx)
+                    own = _content_strong(u, drop)
+                    if len(hits) == 1 and next(iter(hits)) != own:
+                        sense = next(iter(hits))
+                        st["sense_word_resolved"] += 1
+                rows.append((row["book"], row["chapter"], vi, u["key"], u["surface"], _content_strong(u, drop),
+                             heading, short, text, sense))
+    print(f"[metzudat-zion] explanations: {dict(st)}", file=sys.stderr)
+    return rows
+
+
+def write_explanations(rows: list[tuple]) -> None:
+    EXPLANATIONS.parent.mkdir(parents=True, exist_ok=True)
+    with EXPLANATIONS.open("w", encoding="utf-8") as fh:
+        fh.write("# Metzudat Zion (David and Hillel Altschuler, 18th c.): its word explanations on the Prophets and "
+                 "Writings,\n# anchored to the explained word. Hebrew text Public Domain (\"On Your Way\" edition, via "
+                 "Sefaria); anchoring CC0.\n# word_key = MACULA word (lexeme-spine key without the part digit); word = its "
+                 "consonants; "
+                 "strong = the word's content part;\n# short = the explanation before any citation (וכן / כמו / "
+                 "reference); sense_strong = the Hebrew word that\n# explains it, resolved to a biblical lemma "
+                 "where unambiguous. Built by shoresh/macula/build_metzudat_zion.py --explanations.\n")
+        fh.write("book\tchapter\tverse\tword_key\tword\tstrong\theading\tshort\ttext\tsense_strong\n")
+        for r in rows:
+            fh.write("\t".join(str(x).replace("\t", " ") for x in r) + "\n")
+    print(f"[metzudat-zion] -> {EXPLANATIONS} ({len(rows)} rows)", file=sys.stderr)
 
 
 if __name__ == "__main__":
