@@ -198,7 +198,7 @@ def _targets(text: str, book: str, ch: int, vs: int) -> list[tuple]:
         v = gematria(m.group(1))
         if v:
             out.append((book, ch, v))
-    for m in re.finditer(r"\((?:לעיל|לקמן|כנ\"ל|למעלה)?\s*([א-ת\"']{1,4})[\s,]+([א-ת\"']{1,4})\)", t):
+    for m in re.finditer(r"\((?:לעיל|לקמן|כנ\"ל|למעלה|ע\"ל|עי' לעיל|עיין לעיל)?\s*([א-ת\"']{1,4})[\s,]+([א-ת\"']{1,4})\)", t):
         c, v = gematria(m.group(1)), gematria(m.group(2))
         if c and v:
             out.append((book, c, v))
@@ -227,16 +227,32 @@ def resolve_cross_reference(heading: str, text: str, book: str, ch: int, vs: int
     """(text, 'BOOK c:v') of the comment the pointer leads to, on a word of this heading; else None."""
     mine = {re.sub(r"[וי]", "", to_modern_form(w, "hbo")) for w in re.split(r"[,\s]+", heading) if w}
     mine = {w for w in mine if len(w) >= 2}
-    for b, c, v in _targets(text, book, ch, vs):
+    targets = _targets(text, book, ch, vs)
+    for b, c, v in targets:
         verses = [v] if v else [k[2] for k in idx if k[0] == b and k[1] == c]
         for vv in sorted(set(verses)):
             for words, t in idx.get((b, c, vv), []):
                 if words & mine:
                     return t, f"{b} {c}:{vv}"
+    if not targets:                    # bare "above" / "below": the nearest comment on the same word in this book
+        t2 = text.replace("״", '"')
+        back = re.search(r"למעלה|לעיל|ע\"ל|כנ\"ל", t2)
+        fwd = re.search(r"לקמן|להלן", t2)
+        if back or fwd:
+            keys = sorted(k for k in idx if k[0] == book)
+            here = (book, ch, vs)
+            order = ([k for k in reversed(keys) if k < here] if back else []) + ([k for k in keys if k > here] if fwd else [])
+            for k in order:
+                for words, t in idx.get(k, []):
+                    if words & mine:
+                        return t, f"{k[0]} {k[1]}:{k[2]}"
     return None
 
 
 # ---------- distinctions for word studies ----------
+
+_DIFF = re.compile(r"הבדל|ההבדל|הבדלם|נרדף|הנרדפים|בינו ובין")
+_DIFF_FROM = re.compile(r"(?:הבדלו מן|והבדלו מן|נבדל מן|ההבדל בינו ובין|בינו ובין|נרדף עם)\s+(?:פעל\s+|שם\s+)?([א-ת][א-ת\u0591-\u05C7]*)")
 
 DISTINCTIONS = ROOT / "resources" / "malbim" / "distinctions.tsv"
 
@@ -248,6 +264,7 @@ def distinctions() -> list[tuple]:
     drop = excluded()
     sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
     xidx = comment_index()
+    gidx = _bare_index(drop)
     rows, st = [], collections.Counter()
     for line in CACHE.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
@@ -259,9 +276,23 @@ def distinctions() -> list[tuple]:
                 if not m:
                     continue
                 items = _items(m.group(1))
+                body = re.sub(r"<[^>]+>", "", m.group(2))
+                partner_word = ""
                 if not items:
-                    continue
-                st["two_item_headings"] += 1
+                    words = re.sub(r"[.:]\s*$", "", m.group(1).strip()).split()
+                    if len(words) == 2 and _DIFF.search(body):
+                        items = words                     # "ישמח יגל" + "הבדל בין שמחה ובין גיל"
+                        st["two_word_heading_confirmed_by_text"] += 1
+                    elif len(words) == 1:
+                        pm = _DIFF_FROM.search(body)       # "יגל: הבדלו מן שמחה"
+                        if not pm:
+                            continue
+                        items, partner_word = words, pm.group(1)
+                        st["differs_from_in_text"] += 1
+                    else:
+                        continue
+                else:
+                    st["two_item_headings"] += 1
                 if any(len(x.split()) > 2 for x in items):
                     st["long_phrase_item"] += 1            # anchors to an unhelpful first word
                     continue
@@ -271,8 +302,15 @@ def distinctions() -> list[tuple]:
                 if not all(anchored):
                     st["not_anchored"] += 1
                     continue
-                sa, sb = (_content_strong(u, drop) for u in anchored)
-                if not sa or not sb or sa == sb:
+                if partner_word:                          # partner named only in the text: link it only if unique
+                    sa = _content_strong(anchored[0], drop)
+                    hits = _resolve_gloss(partner_word, gidx)
+                    sb = next(iter(hits)) if len(hits) == 1 else ""
+                    items = [items[0], partner_word]
+                    st["partner_linked" if sb else "partner_unlinked"] += 1
+                else:
+                    sa, sb = (_content_strong(u, drop) for u in anchored)
+                if not sa or sa == sb or (not sb and not partner_word):
                     st["same_or_missing_word"] += 1
                     continue
                 text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()

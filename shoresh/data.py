@@ -510,6 +510,8 @@ def _malbim_distinctions() -> dict:
             ref = f"{r['book']} {r['chapter']}:{r['verse']}"
             for me, word, other, other_word in ((r["strong_a"], r["word_a"], r["strong_b"], r["word_b"]),
                                                 (r["strong_b"], r["word_b"], r["strong_a"], r["word_a"])):
+                if not me:                # partner named in the text but not linkable to one biblical word
+                    continue
                 out[me].append({"ref": ref, "word": word, "other": {"strong": other, "word": other_word},
                                 "heading": r["heading"], "text": r["text"], "license": r["license"],
                                 **({"via": r["via"]} if r.get("via") else {})})
@@ -527,7 +529,7 @@ def malbim_distinctions(strong: str, limit: int = 12) -> dict | None:
         if (r["other"]["strong"], r["text"]) in seen:
             continue
         seen.add((r["other"]["strong"], r["text"]))
-        items.append({**r, "other": {**r["other"], **(gloss_of(r["other"]["strong"]) or {})}})
+        items.append({**r, "other": {**r["other"], **((gloss_of(r["other"]["strong"]) or {}) if r["other"]["strong"] else {})}})
     return {"source": "Malbim, Beur HaMilot (19th c.)", "count": len(items), "items": items[:limit]}
 
 
