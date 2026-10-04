@@ -247,7 +247,11 @@ localized headline `gloss`, `keyness` (how distinctively biblical), `stems` (per
 senses for Hebrew verbs), `lex_senses`, `senses`, `sense_distribution`, `domains`, `group` (Hebrew
 semantic group, as in `/verse`), `siblings`, and `tw[]` (Translation-Words articles, each with `title` +
 `definition`). Hebrew `domains[]` rows with `axis: "group"` carry the group id, Hebrew label, gloss and
-confidence; `settings[]` lists the settings the word is used in, with counts and shares.
+confidence; `settings[]` lists the settings the word is used in, with counts and shares. Hebrew words
+also carry `relations` (UBS synonyms/antonyms per dictionary sense, CC BY-SA 4.0) and `distinctions`:
+Malbim's (19th c.) explanations of how the word differs from a near-synonym it stands beside in a verse
+(צְדָקָה / מִשְׁפָּט: "justice between people, righteousness between a person and God"), in Hebrew, each with
+the verse, the partner word and Sefaria's licence label for the edition.
 
 **`GET {SHORESH_BASE}/structure/{USFM}/{chapter}/{verse}/syntax`** — the clause→phrase syntax
 tree (the passage card's `syntax` link).

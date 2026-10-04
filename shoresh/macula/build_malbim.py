@@ -133,9 +133,14 @@ def extract() -> collections.Counter:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--no-fetch", action="store_true")
+    ap.add_argument("--distinctions", action="store_true",
+                    help="write resources/malbim/distinctions.tsv (for word studies) and stop")
     args = ap.parse_args()
     if not args.no_fetch:
         fetch()
+    if args.distinctions:
+        write_distinctions(distinctions())
+        return 0
     pairs = extract()
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", encoding="utf-8") as fh:
@@ -149,6 +154,69 @@ def main() -> int:
             fh.write(f"{a}\t{b}\t{cnt}\n")
     print(f"[malbim] -> {OUT}", file=sys.stderr)
     return 0
+
+
+
+# ---------- distinctions for word studies ----------
+
+DISTINCTIONS = ROOT / "resources" / "malbim" / "distinctions.tsv"
+
+
+def distinctions() -> list[tuple]:
+    """Every two-item heading anchored word by word (whole words, as build_metzudat_zion --explanations):
+    the two words Malbim distinguishes and his explanation of the difference."""
+    from macula.build_metzudat_zion import _anchor, _content_strong, _verse_word_units
+    drop = excluded()
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    rows, st = [], collections.Counter()
+    for line in CACHE.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        for vi, comments in enumerate(row["verses"], start=1):
+            comments = comments if isinstance(comments, list) else [comments]
+            units = None
+            for c in comments:
+                m = re.match(r"\s*<b>([^<]+)</b>\s*\.?\s*(.*)", c or "", re.S)
+                if not m:
+                    continue
+                items = _items(m.group(1))
+                if not items:
+                    continue
+                st["two_item_headings"] += 1
+                if any(len(x.split()) > 2 for x in items):
+                    st["long_phrase_item"] += 1            # anchors to an unhelpful first word
+                    continue
+                if units is None:
+                    units = _verse_word_units(sp, row["book"], row["chapter"], vi)
+                anchored = [_anchor(x.split()[0], units) for x in items]
+                if not all(anchored):
+                    st["not_anchored"] += 1
+                    continue
+                sa, sb = (_content_strong(u, drop) for u in anchored)
+                if not sa or not sb or sa == sb:
+                    st["same_or_missing_word"] += 1
+                    continue
+                text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()
+                if len(re.findall(r"[א-ת]{2,}", re.sub(r"\([^)]*\)", "", text))) < 4:
+                    st["only_a_cross_reference"] += 1      # "(עיין לעיל ג' יב)": nothing to show
+                    continue
+                rows.append((row["book"], row["chapter"], vi, sa, items[0], sb, items[1],
+                             re.sub(r"[.:]\s*$", "", m.group(1).strip()), text, row.get("license") or ""))
+                st["distinctions"] += 1
+    print(f"[malbim] distinctions: {dict(st)}", file=sys.stderr)
+    return rows
+
+
+def write_distinctions(rows: list[tuple]) -> None:
+    DISTINCTIONS.parent.mkdir(parents=True, exist_ok=True)
+    with DISTINCTIONS.open("w", encoding="utf-8") as fh:
+        fh.write("# Malbim, Beur HaMilot (19th c.): pairs of words he distinguishes in a verse, with his explanation of "
+                 "the difference.\n# Hebrew text via Sefaria; `license` is Sefaria's label for the edition (Public "
+                 "Domain; 'unknown' for the\n# newer Psalms import from the same source, mobile.tora.ws). Anchoring "
+                 "CC0. Built by shoresh/macula/build_malbim.py --distinctions.\n")
+        fh.write("book\tchapter\tverse\tstrong_a\tword_a\tstrong_b\tword_b\theading\ttext\tlicense\n")
+        for r in rows:
+            fh.write("\t".join(str(x).replace("\t", " ") for x in r) + "\n")
+    print(f"[malbim] -> {DISTINCTIONS} ({len(rows)} rows)", file=sys.stderr)
 
 
 if __name__ == "__main__":

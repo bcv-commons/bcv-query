@@ -441,6 +441,37 @@ def _attach_explanations(book: str, chapter: int, vrs: int, words: list[dict]) -
 
 
 @lru_cache(maxsize=1)
+def _malbim_distinctions() -> dict:
+    """strong -> [distinction] from resources/malbim/distinctions.tsv (Malbim, Beur HaMilot: two words he
+    distinguishes in a verse and how they differ; macula/build_malbim.py --distinctions)."""
+    path = _resources_dir() / "malbim" / "distinctions.tsv"
+    out: dict = collections.defaultdict(list)
+    if path.exists():
+        for r in _tsv_rows(path):
+            ref = f"{r['book']} {r['chapter']}:{r['verse']}"
+            for me, word, other, other_word in ((r["strong_a"], r["word_a"], r["strong_b"], r["word_b"]),
+                                                (r["strong_b"], r["word_b"], r["strong_a"], r["word_a"])):
+                out[me].append({"ref": ref, "word": word, "other": {"strong": other, "word": other_word},
+                                "heading": r["heading"], "text": r["text"], "license": r["license"]})
+    return out
+
+
+def malbim_distinctions(strong: str, limit: int = 12) -> dict | None:
+    """How Malbim distinguishes this word from its near-synonyms, most-discussed partners first."""
+    rows = _malbim_distinctions().get(_norm_strong(strong))
+    if not rows:
+        return None
+    partners = collections.Counter(r["other"]["strong"] for r in rows)
+    seen, items = set(), []
+    for r in sorted(rows, key=lambda r: (-partners[r["other"]["strong"]], r["ref"])):
+        if (r["other"]["strong"], r["text"]) in seen:
+            continue
+        seen.add((r["other"]["strong"], r["text"]))
+        items.append({**r, "other": {**r["other"], **(gloss_of(r["other"]["strong"]) or {})}})
+    return {"source": "Malbim, Beur HaMilot (19th c.)", "count": len(items), "items": items[:limit]}
+
+
+@lru_cache(maxsize=1)
 def _lexical_relations() -> dict:
     """strong -> [(sense, relation, other_lemma, [other strongs])] from resources/lexical_relations/hbo.tsv
     (UBS Dictionary of Biblical Hebrew synonym/antonym links, CC BY-SA 4.0; macula/build_ubs_open.py)."""
@@ -868,6 +899,8 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
                      for sid, n, sh in _settings()[2].get(code, []) if setting_record(sid)],
         # synonyms / antonyms per dictionary sense (UBS, CC BY-SA 4.0; `sense` matches `senses`), or None
         "relations": lexical_relations(code, gloss_lang) if code.startswith("H") else None,
+        # Malbim's distinctions between this word and its near-synonyms (Hebrew), or None
+        "distinctions": malbim_distinctions(code) if code.startswith("H") else None,
         "siblings": siblings,                           # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
         "stems": _stem_senses(code, gloss_lang),       # lex-anchored: per-binyan glosses + homographs
