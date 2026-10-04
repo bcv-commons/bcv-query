@@ -288,6 +288,21 @@ def _semantic_groups() -> tuple[dict, dict]:
     return members, groups
 
 
+# English past forms in group-label glosses ("said", "took") against base forms in the lexeme glosses
+_IRREGULAR = {"said": "say", "took": "take", "taken": "take", "came": "come", "went": "go", "gone": "go",
+              "gave": "give", "given": "give", "saw": "see", "seen": "see", "made": "make", "spoke": "speak",
+              "spoken": "speak", "knew": "know", "known": "know", "bound": "bind", "found": "find", "ate": "eat",
+              "eaten": "eat", "drank": "drink", "fell": "fall", "fallen": "fall", "fled": "flee", "fought": "fight",
+              "bore": "bear", "born": "bear", "brought": "bring", "built": "build", "sent": "send", "left": "leave",
+              "kept": "keep", "slept": "sleep", "sat": "sit", "stood": "stand", "struck": "strike", "sold": "sell",
+              "told": "tell", "thought": "think", "wept": "weep", "wrote": "write", "written": "write",
+              "rose": "rise", "risen": "rise", "ran": "run", "slew": "slay", "slain": "slay", "led": "lead",
+              "held": "hold", "heard": "hear", "dwelt": "dwell", "hid": "hide", "hidden": "hide", "lay": "lie",
+              "laid": "lay", "cast": "cast", "set": "set", "put": "put", "smote": "smite", "smitten": "smite",
+              "begot": "beget", "begotten": "beget", "drew": "draw", "drawn": "draw", "chose": "choose",
+              "chosen": "choose", "forgot": "forget", "forgotten": "forget", "swore": "swear", "sworn": "swear"}
+
+
 @lru_cache(maxsize=1)
 def _hbo_lex_counts() -> dict[str, int]:
     """BHSA lex -> occurrences (resources/word_freq/hbo.tsv): ties between homographs go to the common one."""
@@ -306,16 +321,17 @@ def _label_gloss(label_strong: str, gloss_en: str, gloss_lang: str) -> str:
     """The exemplar's gloss in the reader's language (word_glosses via the Strong's lexemes), else English."""
     if gloss_lang and gloss_lang != "English":
         lexes = _strong_to_lex().get(label_strong, [])
-        if len(lexes) > 1 and gloss_en:            # homographs share a Strong's: take the one meant here
-            want = set(re.findall(r"[a-z]+", gloss_en.lower()))
+        if lexes and gloss_en:
+            # the lexeme meant here: its English gloss must share a word beginning with the label's English
+            # (buried/bury, stones/stone); homographs and crosswalk gaps otherwise give a wrong-sense
+            # translation (H7462 "shepherd" -> R<H=[ "associate with")
+            stems = lambda t: {_IRREGULAR.get(w, w)[:3] for w in re.findall(r"[a-z]+", t.lower()) if len(w) > 2}
+            want = stems(gloss_en)
             def overlap(lex):
-                en = resolve_word_gloss("hbo", "English", lex, None) or ""
-                return len(want & set(re.findall(r"[a-z]+", en.lower())))
+                return len(want & stems(resolve_word_gloss("hbo", "English", lex, None) or ""))
             counts = _hbo_lex_counts()
             lexes = sorted(lexes, key=lambda lx: (overlap(lx), counts.get(lx, 0)), reverse=True)
-            if overlap(lexes[0]) == 0:
-                # no homograph's English matches: the crosswalk may list the wrong lexeme (H7462 "shepherd"
-                # carries R<H/ "evil"), so keep the English rather than show a wrong-sense translation
+            if want and overlap(lexes[0]) == 0:
                 return gloss_en
         for lex in lexes:
             loc = resolve_word_gloss("hbo", gloss_lang, lex, None)
