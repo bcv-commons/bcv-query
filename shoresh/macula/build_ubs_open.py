@@ -166,10 +166,25 @@ def relation_rows(entries: list, prefix: str) -> list[tuple]:
             if lem:
                 exact[lem].update(strongs)
                 bare[_POINTS.sub("", lem)].add(frozenset(strongs))
+    # who links to whom (lemma level), to prefer the homograph that links back
+    links: dict = collections.defaultdict(set)
+    for e in entries:
+        for bf in e.get("BaseForms") or []:
+            for lm in bf.get("LEXMeanings") or []:
+                for field in ("LEXSynonyms", "LEXAntonyms"):
+                    for other in lm.get(field) or []:
+                        links[e.get("Lemma") or ""].add(_POINTS.sub("", str(other).strip()))
+    strongs_of_lemma: dict = collections.defaultdict(set)
+    for e in entries:
+        for s in (_strong(c, prefix) for c in e.get("StrongCodes") or []):
+            if s:
+                strongs_of_lemma[s].add(e.get("Lemma") or "")
+    freq = _strong_freq(prefix)
     out = []
     for e in entries:
         strongs = sorted({s for s in (_strong(c, prefix) for c in e.get("StrongCodes") or []) if s})
         meanings = [lm for bf in e.get("BaseForms") or [] for lm in bf.get("LEXMeanings") or []]
+        me = _POINTS.sub("", e.get("Lemma") or "")
         for i, lm in enumerate(meanings, start=1):
             for rel, field in (("synonym", "LEXSynonyms"), ("antonym", "LEXAntonyms")):
                 for other in lm.get(field) or []:
@@ -180,9 +195,20 @@ def relation_rows(entries: list, prefix: str) -> list[tuple]:
                     if not hit:
                         cands = bare.get(_POINTS.sub("", other), set())
                         hit = set(next(iter(cands))) if len(cands) == 1 else set()
+                    # several homographs: the one whose entry links back first, then the more frequent word
+                    back = lambda s: any(me in links.get(lem, set()) for lem in strongs_of_lemma.get(s, ()))
+                    ordered = sorted(hit, key=lambda s: (not back(s), -freq.get(s, 0), s))
                     for s in strongs:
-                        out.append((s, str(i), e.get("Lemma") or "", rel, other, ",".join(sorted(hit))))
+                        out.append((s, str(i), e.get("Lemma") or "", rel, other, ",".join(ordered)))
     return out
+
+
+def _strong_freq(prefix: str) -> dict:
+    import sqlite3
+    db = sqlite3.connect(f"file:{HERE / 'lexeme-spine.db'}?mode=ro", uri=True)
+    lang = "hbo" if prefix == "H" else "grc"
+    return {f"{prefix}{int(s):04d}": n for s, n in db.execute(
+        f"SELECT strong, COUNT(*) FROM spine_words WHERE lexeme LIKE '{lang}:%' AND strong IS NOT NULL GROUP BY strong")}
 
 
 def write_relations(path: Path, rows: list[tuple]) -> None:

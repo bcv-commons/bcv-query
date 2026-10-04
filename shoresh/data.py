@@ -288,11 +288,36 @@ def _semantic_groups() -> tuple[dict, dict]:
     return members, groups
 
 
+@lru_cache(maxsize=1)
+def _hbo_lex_counts() -> dict[str, int]:
+    """BHSA lex -> occurrences (resources/word_freq/hbo.tsv): ties between homographs go to the common one."""
+    path = _resources_dir() / "word_freq" / "hbo.tsv"
+    out = {}
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines()[1:]:
+            p = line.split("\t")
+            if len(p) >= 2 and p[1].isdigit():
+                out[p[0]] = int(p[1])
+    return out
+
+
 @lru_cache(maxsize=4096)
 def _label_gloss(label_strong: str, gloss_en: str, gloss_lang: str) -> str:
     """The exemplar's gloss in the reader's language (word_glosses via the Strong's lexemes), else English."""
     if gloss_lang and gloss_lang != "English":
-        for lex in _strong_to_lex().get(label_strong, []):
+        lexes = _strong_to_lex().get(label_strong, [])
+        if len(lexes) > 1 and gloss_en:            # homographs share a Strong's: take the one meant here
+            want = set(re.findall(r"[a-z]+", gloss_en.lower()))
+            def overlap(lex):
+                en = resolve_word_gloss("hbo", "English", lex, None) or ""
+                return len(want & set(re.findall(r"[a-z]+", en.lower())))
+            counts = _hbo_lex_counts()
+            lexes = sorted(lexes, key=lambda lx: (overlap(lx), counts.get(lx, 0)), reverse=True)
+            if overlap(lexes[0]) == 0:
+                # no homograph's English matches: the crosswalk may list the wrong lexeme (H7462 "shepherd"
+                # carries R<H/ "evil"), so keep the English rather than show a wrong-sense translation
+                return gloss_en
+        for lex in lexes:
             loc = resolve_word_gloss("hbo", gloss_lang, lex, None)
             if loc:
                 return re.split(r"[;,]", loc)[0].strip()

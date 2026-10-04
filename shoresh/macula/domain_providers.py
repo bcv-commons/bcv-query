@@ -92,7 +92,9 @@ ABLATIONS = {"A1": (BHSA_FREE / "ablations" / "a1" / "domain_clusters.tsv", "sen
              # + Malbim, Metzudat Zion and Mahberet Menahem
              "MZMM0": (BHSA_FREE / "seeded" / "mzmm_h0" / "domain_clusters.tsv", "lexeme"),
              # baseline without the corroborated family (Wiktionary-backed, CC BY-SA) for a clean CC0 lineage
-             "BNC0": (BHSA_FREE / "seeded" / "base_nc_h0" / "domain_clusters.tsv", "lexeme")}
+             "BNC0": (BHSA_FREE / "seeded" / "base_nc_h0" / "domain_clusters.tsv", "lexeme"),
+             # served configuration + MACULA verb-frame slot-sharing pairs (build_verb_frames.py)
+             "VF0": (BHSA_FREE / "seeded" / "vf_nc_h0" / "domain_clusters.tsv", "lexeme")}
 RENDERING_SENSES = HERE / "data" / "rendering_senses" / "occurrences.tsv"
 CONTROL_SEED = 13
 

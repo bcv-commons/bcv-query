@@ -47,6 +47,7 @@ MIN_OCC = 20            # lexemes with fewer aligned occurrences keep one sense
 MIN_SENSE_SHARE = 0.05  # a sense needs at least this share of the word's occurrences ...
 MIN_SENSE_OCC = 4       # ... and at least this many
 RESOLUTION = 1.0
+MIN_OCC_EVAL = 20       # words need this many reference-labelled tokens to be scored (Menahem: set to 4)
 
 _ARABIC_MARKS = re.compile(r"[ً-ٰٟـ]")
 
@@ -76,12 +77,45 @@ def norm(lang: str, s: str) -> str:
     return s
 
 
+# Pronouns and possessives: Hebrew suffixes ("his hand", "your soul") are translated with them in every
+# language, so without this suffixed forms clustered as a "sense" of their own (יָד: "his"; נֶפֶשׁ: "you").
+PRONOUNS = {
+    "eng": "he him his she her hers it its they them their theirs you your yours thou thee thy thine ye i me my "
+           "mine we us our ours himself herself itself themselves yourself yourselves myself ourselves",
+    "fra": "il le lui son sa ses elle la leur leurs ils eux elles les vous votre vos tu te toi ton ta tes je me moi "
+           "mon ma mes nous notre nos se soi",
+    "spa": "él lo le su sus ella la ellos ellas los las les vosotros vuestro vuestra vuestros vuestras tú te ti tu "
+           "tus yo me mí mi mis nosotros nuestro nuestra nuestros nuestras se sí usted ustedes",
+    "por": "ele o lhe seu sua seus suas ela a eles elas os as lhes vós vosso vossa vossos vossas tu te ti teu tua "
+           "teus tuas eu me mim meu minha meus minhas nós nosso nossa nossos nossas se si",
+    "rus": "он его ему него нему им ним она её ее ей ней они их им ими них нам вы вас вам ваш ваша ваше ваши ты тебя "
+           "тебе твой твоя твое твоё твои я меня мне мой моя мое моё мои мы нас нам наш наша наше наши свой своя "
+           "свое своё свои себя себе",
+}
+
+
+# Articles, prepositions, conjunctions, demonstratives: aligned along with the noun ("THE land", "AND his
+# hand"), they made spurious senses (אֶרֶץ "the", יָד "and"). Verbs such as be/have stay (היה needs them).
+FUNCTION_WORDS = {
+    "eng": "the a an and of to in for with from by on at as but or nor not that this these those which who whom "
+           "what when where there then than so if unto upon into out up down over under before after all every",
+    "fra": "le la les l un une des de du d et à au aux en dans pour par sur avec sans que qui ne pas ou mais ce cet "
+           "cette ces tout tous toute toutes",
+    "spa": "el la los las un una unos unas de del y e a al en por para con sin que no o u pero este esta estos estas "
+           "ese esa todo toda todos todas",
+    "por": "o a os as um uma de do da dos das e em no na nos nas por para com sem que não ou mas este esta estes "
+           "estas esse essa todo toda todos todas",
+    "rus": "и в во на с со к ко по из у о об за от до не что а но или же все всё весь вся",
+}
+
+
 def stopwords(lang: str) -> set[str]:
     p = STOP / f"{lang}.tsv"
+    out = set(PRONOUNS.get(lang, "").split()) | set(FUNCTION_WORDS.get(lang, "").split())
     if not p.exists():
-        return set()
-    return {l.split("\t")[0].lower() for l in p.read_text(encoding="utf-8").splitlines()
-            if l and not l.startswith("#") and not l.startswith("surface\t")}
+        return out
+    return out | {l.split("\t")[0].lower() for l in p.read_text(encoding="utf-8").splitlines()
+                  if l and not l.startswith("#") and not l.startswith("surface\t")}
 
 
 def load_features() -> tuple[dict[str, set], dict[str, collections.Counter]]:
@@ -226,6 +260,26 @@ def ubs_gold() -> dict[str, str]:
     return gold
 
 
+def menahem_gold() -> dict[str, str]:
+    """token key -> Mahberet Menahem division ("entry#division") for the occurrences Menahem cites
+    (resources/mahberet_menahem/senses.tsv); the word's content part stands for the word."""
+    path = ROOT / "resources" / "mahberet_menahem" / "senses.tsv"
+    if not path.exists():
+        return {}
+    db = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    parts = collections.defaultdict(list)
+    for key, lemma in db.execute("SELECT key, lemma FROM spine_words WHERE lexeme LIKE 'hbo:%'"):
+        parts[key[:-1]].append((len(lemma or ""), key))
+    gold = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith(("#", "book\t")):
+            continue
+        r = line.split("\t")
+        if parts.get(r[3]):
+            gold[max(parts[r[3]])[1]] = f"{r[7]}#{r[8]}"
+    return gold
+
+
 def gloss_partition() -> dict[str, str]:
     lf = sqlite3.connect(f"file:{LOWFAT}?mode=ro", uri=True)
     return {k: (g or "").lower() for k, g in lf.execute("SELECT key, gloss FROM lowfat_words WHERE is_inserted=0")}
@@ -283,7 +337,7 @@ def evaluate(result: dict[str, dict[str, int]], gold: dict[str, str]) -> dict:
         keys = [k for k in toks[lexeme] if k in a and k in gold]
         senses = collections.Counter(gold[k] for k in keys)
         # polysemous by UBS: at least two senses, the second with >= 10% of the tokens
-        if len(keys) < MIN_OCC or len(senses) < 2 or senses.most_common(2)[1][1] < 0.1 * len(keys):
+        if len(keys) < MIN_OCC_EVAL or len(senses) < 2 or senses.most_common(2)[1][1] < 0.1 * len(keys):
             continue
         n_lex += 1
         for name, pred in (("rendering", a), ("one-sense", {k: 1 for k in keys}),
@@ -312,7 +366,8 @@ def main() -> int:
     multi = sum(1 for r in result.values() if len(set(r.values())) > 1)
     print(f"lexemes {len(result)}; split into >1 sense: {multi}", file=sys.stderr)
     if a.eval:
-        print(json.dumps(evaluate(result, ubs_gold()), indent=1))
+        print(json.dumps({"vs UBS index": evaluate(result, ubs_gold()),
+                          "vs Mahberet Menahem": evaluate(result, menahem_gold())}, indent=1))
     return 0
 
 

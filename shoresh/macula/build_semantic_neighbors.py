@@ -51,6 +51,7 @@ SEFER_HASHORASHIM = ROOT / "resources" / "sefer_hashorashim" / "llm_pair_verific
 METZUDAT_ZION = ROOT / "resources" / "metzudat_zion" / "llm_verification.tsv"
 MALBIM = ROOT / "resources" / "malbim" / "llm_verification.tsv"
 MAHBERET_MENAHEM = ROOT / "resources" / "mahberet_menahem" / "llm_verification.tsv"
+VERB_FRAMES = ROOT / "resources" / "verb_frames" / "candidate_pairs.tsv"
 
 MIN_OCC = 3        # a lexeme needs this many clause vectors for a stable centroid
 TOPK = 10          # neighbors kept per lexeme
@@ -241,6 +242,7 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
           use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = False,
           use_structural: bool = True, use_corroborated: bool = True, use_sefer_hashorashim: bool = True,
           use_metzudat_zion: bool = False, use_malbim: bool = False, use_menahem: bool = False,
+          use_verb_frames: bool = False,
           route_homographs: bool = False,
           macula_contexts: Path | None = None, parallelism_tomim_only: bool = False,
           rendering_senses: Path | None = None):
@@ -360,12 +362,17 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
     # Malbim, Beur HaMilot: near-synonyms Malbim distinguishes (build_malbim.py), LLM-verified. Same handling.
     commentary = {"metzudat_zion": _load_verified_pairs(METZUDAT_ZION) if use_metzudat_zion else set(),
                   "malbim": _load_verified_pairs(MALBIM) if use_malbim else set(),
-                  "mahberet_menahem": _load_verified_pairs(MAHBERET_MENAHEM) if use_menahem else set()}
+                  "mahberet_menahem": _load_verified_pairs(MAHBERET_MENAHEM) if use_menahem else set(),
+                  # verb-frame slot sharing (build_verb_frames.py): not LLM-verified, a distributional signal
+                  "verb_frames": ({frozenset(l.split("\t")[:2]) for l in VERB_FRAMES.read_text(encoding="utf-8").splitlines()
+                                   if l.startswith("H")} if use_verb_frames else set())}
     for name, on in (("metzudat_zion", use_metzudat_zion), ("malbim", use_malbim),
-                     ("mahberet_menahem", use_menahem)):
-        print(f"[neighbors] {name}: {len(commentary[name])} LLM-verified Strong's pairs"
+                     ("mahberet_menahem", use_menahem), ("verb_frames", use_verb_frames)):
+        print(f"[neighbors] {name}: {len(commentary[name])} "
+              f"{'candidate' if name == 'verb_frames' else 'LLM-verified'} Strong's pairs"
               + ("" if on else " (disabled)"), file=sys.stderr)
-    metzudat_zion_pairs = commentary["metzudat_zion"] | commentary["malbim"] | commentary["mahberet_menahem"]
+    metzudat_zion_pairs = (commentary["metzudat_zion"] | commentary["malbim"] | commentary["mahberet_menahem"]
+                           | commentary["verb_frames"])
 
     # Coverage extension: xling/bdb_roots need no embedding, so they can name lexemes OUTSIDE the pack
     # (too few occurrences to get a stable centroid) — the same coverage gap un-restricting the paid LLM
@@ -1099,6 +1106,8 @@ def main():
                     help="add the LLM-verified Metzudat Zion gloss pairs (resources/metzudat_zion/)")
     ap.add_argument("--malbim", action="store_true",
                     help="add the LLM-verified Malbim Beur HaMilot pairs (resources/malbim/)")
+    ap.add_argument("--verb-frames", action="store_true",
+                    help="add MACULA verb-frame slot-sharing pairs (resources/verb_frames/)")
     ap.add_argument("--mahberet-menahem", action="store_true",
                     help="add the LLM-verified Mahberet Menahem pairs (resources/mahberet_menahem/)")
     ap.add_argument("--macula-contexts", type=Path, default=None,
@@ -1120,6 +1129,7 @@ def main():
           use_structural=not a.no_structural, use_corroborated=not a.no_corroborated,
           use_sefer_hashorashim=not a.no_sefer_hashorashim, macula_contexts=a.macula_contexts,
           use_metzudat_zion=a.metzudat_zion, use_malbim=a.malbim, use_menahem=a.mahberet_menahem,
+          use_verb_frames=a.verb_frames,
           route_homographs=a.route_homographs,
           parallelism_tomim_only=a.parallelism_tomim_only, rendering_senses=a.rendering_senses)
 
