@@ -160,9 +160,14 @@ def extract() -> collections.Counter:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--no-fetch", action="store_true")
+    ap.add_argument("--senses", action="store_true",
+                    help="write resources/mahberet_menahem/senses.tsv (sense inventory) and stop")
     args = ap.parse_args()
     if not args.no_fetch:
         fetch()
+    if args.senses:
+        write_senses(senses())
+        return 0
     pairs = extract()
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", encoding="utf-8") as fh:
@@ -177,6 +182,72 @@ def main() -> int:
                 fh.write(f"{a}\t{b}\t{cnt}\n")
     print(f"[menahem] -> {OUT}", file=sys.stderr)
     return 0
+
+
+
+# ---------- sense inventory (Hebrew) for word studies and /verse ----------
+
+SENSES = ROOT / "resources" / "mahberet_menahem" / "senses.tsv"
+
+
+def _sense_phrase(text: str) -> str:
+    """The division's own sense words: 'ענין X Y' up to punctuation, or כמשמעו ('as it sounds'); else ''."""
+    m = re.search(r"(ענין\s+[^.,:;()]+)", text)
+    if m:
+        return re.sub(r"\s+(הם|הוא|היא|הן)\s*$", "", m.group(1).strip())
+    return "כמשמעו" if "כמשמעו" in text else ""
+
+
+def senses() -> list[tuple]:
+    """One row per cited occurrence: the root entry (headword), its division, the division's sense phrase and
+    text, and the anchored word (whole words, as build_metzudat_zion --explanations)."""
+    from macula.build_metzudat_zion import _anchor, _content_strong, _verse_word_units
+    drop = excluded()
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    rows, st = [], collections.Counter()
+    for line in CACHE.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        letter = row["ref"].rsplit(" ", 1)[-1]
+        for ei, entry in enumerate(row["entries"]):
+            if not isinstance(entry, list) or len(entry) < 2:
+                continue
+            root = re.sub(r"<[^>]+>|[‎‏]", "", entry[0]).strip()
+            body = " ".join(x for x in entry[1:] if isinstance(x, str))
+            parts = re.split(_ORDINALS + r"\s*,", body)
+            divisions = parts[1:] if len(parts) > 1 else parts
+            st["entries"] += 1
+            for di, div in enumerate(divisions, start=1):
+                plain = re.sub(r"\s+", " ", re.sub(r"<[^>]+>|[‎‏]", "", div)).strip().rstrip(".:").strip()
+                sense = _sense_phrase(plain)
+                last = None
+                for word, _between, ref in _CITE.findall(div):
+                    book, ch, vs = parse_ref(ref, last)
+                    if not book or not ch or not vs:
+                        st["unparsed_citation"] += 1
+                        continue
+                    last = book
+                    u = _anchor(word, _verse_word_units(sp, book, ch, vs))
+                    if not u:
+                        st["not_anchored"] += 1
+                        continue
+                    rows.append((book, ch, vs, u["key"], u["surface"], _content_strong(u, drop), root,
+                                 f"{letter}:{ei}", di, len(divisions), sense, plain))
+                    st["cited_occurrences"] += 1
+    print(f"[menahem] senses: {dict(st)}", file=sys.stderr)
+    return rows
+
+
+def write_senses(rows: list[tuple]) -> None:
+    SENSES.parent.mkdir(parents=True, exist_ok=True)
+    with SENSES.open("w", encoding="utf-8") as fh:
+        fh.write("# Mahberet Menahem (Menahem ben Saruq, 10th c.): its sense divisions per root, one row per cited "
+                 "occurrence,\n# anchored to the word. Hebrew text Public Domain (London 1854, via Sefaria); "
+                 "anchoring CC0.\n# entry = letter:index of the root entry; division of n_divisions; sense = the "
+                 "division's ענין phrase (or כמשמעו).\n# Built by shoresh/macula/build_mahberet_menahem.py --senses.\n")
+        fh.write("book\tchapter\tverse\tword_key\tword\tstrong\troot\tentry\tdivision\tn_divisions\tsense\ttext\n")
+        for r in rows:
+            fh.write("\t".join(str(x).replace("\t", " ") for x in r) + "\n")
+    print(f"[menahem] -> {SENSES} ({len(rows)} rows)", file=sys.stderr)
 
 
 if __name__ == "__main__":

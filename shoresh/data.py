@@ -441,6 +441,58 @@ def _attach_explanations(book: str, chapter: int, vrs: int, words: list[dict]) -
 
 
 @lru_cache(maxsize=1)
+def _menahem() -> tuple[dict, dict, dict]:
+    """From resources/mahberet_menahem/senses.tsv (Mahberet Menahem's sense divisions, Public Domain;
+    macula/build_mahberet_menahem.py --senses): (by verse, by strong, divisions per entry)."""
+    path = _resources_dir() / "mahberet_menahem" / "senses.tsv"
+    by_verse, by_strong, entries = collections.defaultdict(list), collections.defaultdict(set), {}
+    if path.exists():
+        for r in _tsv_rows(path):
+            d = {"root": r["root"], "entry": r["entry"], "division": int(r["division"]),
+                 "of": int(r["n_divisions"]), "sense": r["sense"],
+                 "example": r["text"].split(")")[0] + ")" if ")" in r["text"] else r["text"][:80]}
+            by_verse[(r["book"], int(r["chapter"]), int(r["verse"]))].append((r["word"], r["strong"], d))
+            by_strong[r["strong"]].add(r["entry"])
+            div = entries.setdefault(r["entry"], {"root": r["root"], "divisions": {}})["divisions"].setdefault(
+                d["division"], {"division": d["division"], "sense": d["sense"], "example": d["example"],
+                                "text": r["text"], "refs": [], "strongs": set()})
+            div["refs"].append(f"{r['book']} {r['chapter']}:{r['verse']}")
+            div["strongs"].add(r["strong"])
+    return by_verse, by_strong, entries
+
+
+def menahem_senses(strong: str) -> dict | None:
+    """Menahem's root entries that cite this word, with every division (sense) of each; `cites_this_word`
+    marks the divisions where this word is cited."""
+    code = _norm_strong(strong)
+    _bv, by_strong, entries = _menahem()
+    if code not in by_strong:
+        return None
+    out = []
+    for e in sorted(by_strong[code]):
+        ent = entries[e]
+        out.append({"root": ent["root"], "divisions": [
+            {"division": d["division"], "sense": d["sense"], "example": d["example"],
+             "refs": d["refs"][:6], "cited": len(d["refs"]), "cites_this_word": code in d["strongs"]}
+            for _n, d in sorted(ent["divisions"].items())]})
+    return {"source": "Mahberet Menahem (Menahem ben Saruq, 10th c.)", "entries": out}
+
+
+def _attach_menahem(book: str, chapter: int, vrs: int, words: list[dict]) -> None:
+    """Where Menahem cites this very occurrence: the root and which of its senses (division) it belongs to."""
+    pending = list(_menahem()[0].get((book, chapter, vrs), []))
+    for w in words:
+        if not pending:
+            return
+        cons = to_modern_form(w.get("surface") or "", "hbo")
+        hit = next((i for i, (word, _s, _d) in enumerate(pending) if word == cons), None)
+        if hit is None and w.get("strong"):
+            hit = next((i for i, (_w, s, _d) in enumerate(pending) if s == _norm_strong(w["strong"])), None)
+        if hit is not None:
+            w["menahem"] = pending.pop(hit)[2]
+
+
+@lru_cache(maxsize=1)
 def _malbim_distinctions() -> dict:
     """strong -> [distinction] from resources/malbim/distinctions.tsv (Malbim, Beur HaMilot: two words he
     distinguishes in a verse and how they differ; macula/build_malbim.py --distinctions)."""
@@ -901,6 +953,8 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         "relations": lexical_relations(code, gloss_lang) if code.startswith("H") else None,
         # Malbim's distinctions between this word and its near-synonyms (Hebrew), or None
         "distinctions": malbim_distinctions(code) if code.startswith("H") else None,
+        # Mahberet Menahem's sense divisions of the roots this word is cited under (Hebrew), or None
+        "menahem": menahem_senses(code) if code.startswith("H") else None,
         "siblings": siblings,                           # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
         "stems": _stem_senses(code, gloss_lang),       # lex-anchored: per-binyan glosses + homographs
@@ -1044,7 +1098,8 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
     binyan-correct sense. Hebrew words carry `group` (CC0 semantic group) and `domain` = its Hebrew
     exemplar label, with the localized gloss appended ("אָב · father") when `domain_gloss`, and
     `setting` (the topical setting the word is used in here; CC BY), glossed the same way, and in the
-    Prophets and Writings `explanation`: Metzudat Zion's Hebrew explanation of the word (Public Domain)."""
+    Prophets and Writings `explanation`: Metzudat Zion's Hebrew explanation of the word (Public Domain),
+    and `menahem` where Mahberet Menahem cites this occurrence: its root and which division (sense)."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
@@ -1120,6 +1175,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
             if spine_lang == "hbo":
                 _match_leftover_settings(words, pending, gloss_lang, domain_gloss)
                 _attach_explanations(book, chapter, vrs, words)
+                _attach_menahem(book, chapter, vrs, words)
             result["spine"] = {"language": spine_lang, "words": words}
     return result
 
