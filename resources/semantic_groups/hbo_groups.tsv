@@ -1,615 +1,618 @@
-# Hebrew semantic groups (CC0). Source: BEREL word-window centroids over MACULA text, no BHSA input (build_bhsa_free_contexts + build_semantic_neighbors --macula-contexts --route-homographs). Built by shoresh/macula/build_semantic_groups.py.
+# Hebrew semantic groups (CC0). Source: BEREL word-window centroids over MACULA text, no BHSA input (build_bhsa_free_contexts + build_semantic_neighbors --macula-contexts --route-homographs --no-corroborated: no Wiktionary input). Built by shoresh/macula/build_semantic_groups.py.
 group_id	label_strong	label_lemma	gloss_en	n_served	n_high
-c0	H3772	כָּרַת	cut off	18	8
-c1	H1058	בָּכָה	wept	19	10
-c2	H6912	קָבַר	buried	4	4
-c3	H4191	מוּת	die	14	8
-c4	H3671	כָּנָף	wings	13	5
-c5	H7070	קָנֶה	reed	6	2
-c6	H0106	אֶגְרֹף	fist	3	0
-c7	H5982	עַמּוּד	pillars	6	3
-c8	H6430	פְּלִשְׁתִּי	Philistines	9	7
-c9	H0120	אָדָם	humankind	5	4
+c0	H7105	קָצִיר	harvest	4	2
+c1	H3772	כָּרַת	cut off	18	8
+c2	H6041	עָנִי	poor	12	8
+c3	H3001	יָבֵשׁ	dried up	13	7
+c4	H6912	קָבַר	buried	4	4
+c5	H0646	אֵפוֹד	ephod	6	4
+c6	H6998	קָטַף	pluck off	7	0
+c7	H7070	קָנֶה	reed	6	2
+c8	H0120	אָדָם	humankind	5	4
+c9	H7838	שָׁחֹר	black	7	2
 c10	H7718	שֹׁהַם	onyx	9	7
-c11	H6212	עֶשֶׂב	vegetation	6	4
-c12	H0430	אֱלֹהִים	God	11	7
-c13	H0251	אָח	brother	10	5
-c14	H3407	יְרִיעָה	curtains	10	7
-c15	H7004	קְטֹרֶת	incense	7	6
-c16	H8398	תֵּבֵל	world	10	3
-c17	H1961	הָיָה	become	10	6
-c18	H2530	חָמַד	desirable	15	9
-c19	H0214	אוֹצָר	storehouses	11	7
-c20	H0216	אוֹר	light	23	11
-c21	H3847	לָבַשׁ	clothed	17	8
-c22	H3627	כְּלִי	articles	13	2
-c23	H8085	שָׁמַע	heard	15	8
-c24	H6924	קֶדֶם	east	12	0
-c25	H0334	אִטֵּר	impeded	2	0
-c26	H7852	שָׂטַם	hostile towards	4	0
-c27	H0341	אֹיֵב	enemies	11	8
-c28	H0560	אֲמַר	saying	5	2
-c29	H0809	אֲשִׁישָׁה	raisin-cake	3	0
-c30	H1934	הָוָא	became	2	2
-c31	H3513	כָּבַד	honored	12	7
-c32	H1104	בָּלַע	swallowed up	8	3
-c33	H0398	אָכַל	eat	15	5
-c34	H3899	לֶחֶם	food	11	6
-c35	H0405	אֶכֶף	pressure	2	0
-c36	H6643	צְבִי	beauty	17	7
-c37	H6086	עֵץ	wood(s)	18	7
-c38	H5262	נֶסֶךְ	their drink	5	2
-c39	H0479	אִלֵּךְ	these	2	0
-c40	H5787	עִוֵּר	blind	11	6
-c41	H6041	עָנִי	poor	13	8
-c42	H0520	אַמָּה	cubits	10	3
-c43	H4940	מִשְׁפָּחָה	clans	5	3
-c44	H0571	אֶמֶת	faithfulness	10	3
-c45	H2617	חֶסֶד	loyalty	6	3
-c46	H3001	יָבֵשׁ	dried up	14	9
-c47	H5794	עַז	strong	6	2
-c48	H0584	אָנַח	groaning	6	0
-c49	H1880	דֶּשֶׁן	fatness	10	3
-c50	H0631	אָסַר	bound	12	2
-c51	H0622	אָסַף	gathered	15	3
-c52	H5712	עֵדָה	congregation	9	4
-c53	H1219	בָּצַר	gather grapes	10	4
-c54	H0633	אֱסָר	prohibition	2	0
-c55	H0639	אַף	anger	18	11
-c56	H0646	אֵפוֹד	ephod	4	3
-c57	H5175	נָחָשׁ	snake	17	10
-c58	H8242	שַׂק	sackcloth	10	5
-c59	H0666	אֲפֵר	bandage	2	0
-c60	H0697	אַרְבֶּה	locusts	11	8
-c61	H7264	רָגַז	trembled	13	5
-c62	H0741	אֲרִיאֵל	hearth	3	0
-c63	H7341	רֹחַב	breadth	10	4
-c64	H4013	מִבְצָר	fortification	4	4
-c65	H1004	בַּיִת	house	8	3
-c66	H0776	אֶרֶץ	land	9	4
-c67	H7043	קָלַל	curse	9	3
-c68	H0784	אֵשׁ	fire	14	9
-c69	H0794	אֲשֵׁדָה	slopes	2	0
-c70	H2398	חָטָא	sinned	15	9
-c71	H5771	עָוֺן	iniquity	6	6
-c72	H7563	רָשָׁע	wicked people	5	3
-c73	H8104	שָׁמַר	keep	8	3
-c74	H1548	גָּלַח	shave	10	0
-c75	H0833	אָשַׁר	called blessed	3	0
-c76	H0849	אֶשְׁתַּדּוּר	revolt	2	0
-c77	H7126	קָרַב	present	7	4
-c78	H8130	שָׂנֵא	those	15	7
-c79	H0888	בְּאֵשׁ	displeasing	2	0
-c80	H0905	בַּד	besides	4	2
-c81	H8336	שֵׁשׁ	fine linen	15	8
-c82	H3701	כֶּסֶף	silver	12	8
-c83	H0205	אָוֶן	wickedness	8	6
-c84	H0927	בְּהַל	haste	2	0
-c85	H3372	יָרֵא	afraid	13	6
-c86	H5596	סָפַח	attach	5	1
-c87	H4003	מְבוּקָה	emptiness	2	0
-c88	H0954	בּוּשׁ	ashamed	12	7
-c89	H0959	בָּזָה	despised	12	3
-c90	H7998	שָׁלָל	plunder	11	6
-c91	H5254	נָסָה	put to the test	11	2
-c92	H5797	עֹז	strength	9	7
-c93	H0982	בָּטַח	trust	10	7
-c94	H2451	חׇכְמָה	wisdom	16	10
-c95	H0738	אֲרִי	lion	10	7
-c96	H4548	מַסְמֵר	nails	4	0
-c97	H1612	גֶּפֶן	vine	11	6
-c98	H1060	בְּכוֹר	firstborn	11	3
-c99	H1946	הוּךְ	go	4	2
-c100	H6154	עֵרֶב	woof	4	4
-c101	H1123	בֵּן	sons	2	0
-c102	H1129	בָּנָה	built	16	5
-c103	H1145	בֶּן־יְמִינִי	jaminite	2	0
-c104	H6629	צֹאן	flock	9	3
-c105	H8313	שָׂרַף	burned	18	9
-c106	H2557	חָמֵץ	leaven	4	3
-c107	H3537	כַּד	jar	7	2
-c108	H5158	נַחַל	wadi	8	5
-c109	H4672	מָצָא	found	16	9
-c110	H1305	בָּרַר	chosen	12	3
-c111	H8184	שְׂעֹרָה	barley(s)	12	5
-c112	H4306	מָטַר	rain	16	9
-c113	H5127	נוּס	fled	5	2
-c114	H1817	דֶּלֶת	doors	12	6
-c115	H0953	בּוֹר	pit	9	6
-c116	H1310	בָּשַׁל	boil	10	4
-c117	H1818	דָּם	blood	10	6
-c118	H0374	אֵיפָה	ephah	9	6
-c119	H1335	בֶּתֶר	pieces	2	0
-c120	H1347	גָּאוֹן	pride	10	5
-c121	H1364	גָּבֹהַּ	high	6	4
-c122	H5337	נָצַל	deliver	10	4
-c123	H7965	שָׁלוֹם	peace	10	5
-c124	H5971	עַם	people	19	4
-c125	H7845	שַׁחַת	pit	9	0
-c126	H2428	חַיִל	army	12	5
-c127	H2022	הַר	mountain	11	4
-c128	H1400	גְּבַר	men	3	0
-c129	H1416	גְּדוּד	marauding bands	9	4
-c130	H7227	רַב	many	9	3
-c131	H2346	חוֹמָה	wall	5	4
-c132	H1456	גֵּהָה	healing	2	0
-c133	H1482	גּוּר	cubs	2	0
-c134	H7703	שָׁדַד	devastated	15	7
-c135	H8328	שֶׁרֶשׁ	root	16	5
-c136	H1438	גָּדַע	cut down	9	2
-c137	H8056	שָׂמַח	joyful	16	10
-c138	H0212	אוֹפָן	wheels	16	4
-c139	H1541	גְּלָה	revealed	2	0
-c140	H2543	חֲמוֹר	donkey	11	6
-c141	H4043	מָגֵן	shield	16	7
-c142	H1596	גְּנַז	treasures	2	0
-c143	H3196	יַיִן	wine	13	7
-c144	H2114	זוּר	strangers	7	3
-c145	H7378	רִיב	conduct a case	11	5
-c146	H1637	גֹּרֶן	threshing floor	19	5
-c147	H1643	גֶּרֶשׂ	groats	2	0
-c148	H4602	מַעֲכָתִי	Maacathite	2	2
-c149	H6051	עָנָן	cloud	6	3
-c150	H5774	עוּף	flying	19	4
-c151	H1697	דָּבָר	word	11	5
-c152	H4056	מַדְבַּח	altar	3	0
-c153	H4057	מִדְבָּר	wilderness	6	4
-c154	H1706	דְּבַשׁ	honey	9	4
-c155	H0929	בְּהֵמָה	livestock	15	8
-c156	H7699	שַׁד	breasts	3	2
-c157	H1739	דָּוֶה	faint	6	1
-c158	H2891	טָהֵר	pure	8	6
-c159	H2470	חָלָה	sick	7	4
-c160	H5769	עוֹלָם	perpetuity	13	3
-c161	H7993	שָׁלַךְ	threw	13	2
-c162	H8267	שֶׁקֶר	falsehood	14	9
-c163	H8199	שָׁפַט	judge	9	4
-c164	H4083	מְדִינָה	province	5	0
-c165	H5549	סָלַל	cast up	5	2
-c166	H1792	דָּכָא	crushed	6	2
-c167	H1836	דֵּן	this	4	2
-c168	H3533	כָּבַשׁ	subdued	7	0
-c169	H5197	נָטַף	prophesy	7	3
-c170	H4912	מָשָׁל	proverb	8	4
-c171	H4758	מַרְאֶה	appearance	10	5
-c172	H1828	דֹּמֶן	dung	2	0
-c173	H8034	שֵׁם	name	12	0
-c174	H6966	קוּם	set up	14	0
-c175	H3318	יָצָא	went out	20	6
-c176	H3367	יְקָר	honor	5	3
-c177	H7451	רַע	evil	7	3
-c178	H3684	כְּסִיל	fool	14	8
-c179	H1984	הָלַל	praise	11	5
-c180	H7069	קָנָה	bought	18	10
-c181	H7782	שׁוֹפָר	trumpet	8	3
-c182	H1870	דֶּרֶךְ	way	12	6
-c183	H0935	בּוֹא	came	13	4
-c184	H5265	נָסַע	set out	4	2
-c185	H7503	רָפָה	drop	11	3
-c186	H2015	הָפַךְ	turned	10	1
-c187	H6555	פָּרַץ	spread out	13	5
-c188	H5930	עֹלָה	burnt offering	7	6
-c189	H2065	זֶבֶד	endowment	2	0
-c190	H6337	פָּז	than pure gold	3	2
-c191	H6438	פִּנָּה	corner	6	0
-c192	H2151	זָלַל	glutton	4	2
-c193	H2165	זְמָן	appointed time	2	0
-c194	H6256	עֵת	time	9	2
-c195	H2170	זְמָר	(the)	2	0
-c196	H7892	שִׁיר	song	9	7
-c197	H2173	זִמְרָה	best products	2	0
-c198	H2180	זָנָב	tail	2	0
-c199	H2181	זָנָה	acted as a prostitute	11	5
-c200	H5800	עָזַב	forsaken	8	2
-c201	H3154	יֶזַע	sweat	2	0
-c202	H6996	קָטָן	small	11	3
-c203	H8057	שִׂמְחָה	joy	9	6
-c204	H6083	עָפָר	dust	10	5
-c205	H2205	זָקֵן	elders	13	5
-c206	H2210	זָקַף	raising up	2	0
-c207	H5462	סָגַר	shut	14	3
-c208	H6327	פּוּץ	scattered	10	3
-c209	H2233	זֶרַע	offspring	12	6
-c210	H5315	נֶפֶשׁ	life	13	7
-c211	H5034	נָבֵל	withered	6	3
-c212	H8210	שָׁפַךְ	pour out	13	2
-c213	H2245	חָבַב	loving	2	0
-c214	H2255	חֲבַל	destroyed	3	0
-c215	H6148	עָרַב	make a wager	8	4
-c216	H2256	חֶבֶל	ropes	12	4
-c217	H2269	חֲבַר	companions	2	0
-c218	H7676	שַׁבָּת	sabbath	9	3
-c219	H2300	חָדַד	sharpened	4	0
-c220	H2302	חָדָה	rejoiced	2	0
-c221	H3117	יוֹם	day	8	7
-c222	H2326	חוֹב	debt	2	0
-c223	H2329	חוּג	circle	3	0
-c224	H2331	חָוָה	declare	2	0
-c225	H5892	עִיר	city	2	2
-c226	H2342	חוּל	in labor	8	4
-c227	H2603	חָנַן	show	17	9
-c228	H2351	חוּץ	outside	9	8
-c229	H7704	שָׂדֶה	field	12	6
-c230	H4631	מְעָרָה	cave	10	4
-c231	H3836	לָבָן	white	11	3
-c232	H7200	רָאָה	see	11	6
-c233	H6763	צֵלָע	side	8	5
-c234	H5030	נָבִיא	prophet	14	9
-c235	H2370	חֲזָא	seeing	3	0
-c236	H2336	חוֹחַ	thornbush	5	2
-c237	H2409	חֲטָּיָא	sin offering	3	0
-c238	H2416	חַי	life	6	3
-c239	H2423	חֵיוָא	animals	3	0
-c240	H6099	עָצוּם	mighty	10	3
-c241	H2429	חַיִל	power	9	0
-c242	H6310	פֶּה	mouth	10	5
-c243	H2598	חֲנֻכָּה	dedication	6	2
-c244	H3730	כַּפְתֹּר	bulb	5	4
-c245	H2448	חַכְלִלוּת	dullness	2	0
-c246	H6419	פָּלַל	pray	6	2
-c247	H4682	מַצָּה	unleavened bread(s)	10	5
-c248	H2490	חָלַל	began	7	1
-c249	H2506	חֵלֶק	portion	5	1
-c250	H2508	חֲלָק	portion	2	0
-c251	H2527	חֹם	heat	6	2
-c252	H2029	הָרָה	conceived	3	2
-c253	H2559	חָמַק	turned away	2	0
-c254	H2569	חֹמֶשׁ	part	2	0
-c255	H4997	נֹאד	skin-bottle	2	0
-c256	H8432	תָּוֶךְ	midst	9	5
-c257	H7198	קֶשֶׁת	bow	8	3
-c258	H2611	חָנֵף	godless	6	0
-c259	H8549	תָּמִים	unblemished	6	4
-c260	H2629	חָסַם	muzzle	2	0
-c261	H1722	דְּהַב	(the)	5	5
-c262	H4591	מָעַט	who made little	9	5
-c263	H4325	מַיִם	water	16	7
-c264	H0157	אָהַב	love	13	5
-c265	H2670	חׇפְשִׁי	free person	5	0
-c266	H0068	אֶבֶן	stones	8	6
-c267	H2677	חֵצִי	half	8	4
-c268	H2684	חֹצֶן	bosom	2	0
-c269	H4941	מִשְׁפָּט	justice	12	9
-c270	H8074	שָׁמֵם	appalled	20	10
-c271	H2742	חֲרוּץ	than gold	5	0
-c272	H3789	כָּתַב	written	3	1
-c273	H2761	חֲרַךְ	singed	2	0
-c274	H2790	חָרַשׁ	keep silent	14	4
-c275	H4639	מַעֲשֶׂה	work	14	10
-c276	H2803	חָשַׁב	planned	19	10
-c277	H0707	אָרַג	weaver	7	3
-c278	H2818	חֲשַׁח	needing	2	0
-c279	H4513	מָנַע	withheld	12	4
-c280	H1242	בֹּקֶר	morning	7	2
-c281	H2834	חָשַׂף	bared	3	0
-c282	H2841	חַשְׁרָה	sieve	2	0
-c283	H2853	חָתַל	at all (be wrapped)	3	0
-c284	H2885	טַבַּעַת	rings	12	2
-c285	H2869	טָב	good	2	0
-c286	H2876	טַבָּח	bodyguards	8	3
-c287	H8081	שֶׁמֶן	oil	8	5
-c288	H4292	מַטְאֲטֵא	broom	2	0
-c289	H2896	טוֹב	good	9	4
-c290	H6743	צָלַח	succeed	6	2
-c291	H6662	צַדִּיק	righteous	12	9
-c292	H5273	נָעִים	pleasant	10	4
-c293	H2901	טָוָה	spun	2	0
-c294	H6823	צָפָה	overlaid	13	5
-c295	H6635	צָבָא	hosts	10	6
-c296	H2960	טֹרַח	burden	2	0
-c297	H8255	שֶׁקֶל	shekels	14	7
-c298	H5038	נְבֵלָה	corpse	5	4
-c299	H2994	יְבֵמֶת	wife	3	0
-c300	H1898	הָגָה	remove	2	0
-c301	H3021	יָגַע	labor	12	4
-c302	H3064	יְהוּדִי	Jews	4	0
-c303	H3062	יְהוּדָאִי	Jewish	2	0
-c304	H3123	יוֹנָה	dove	2	2
-c305	H7017	קֵינִי	Kenites	8	8
-c306	H3187	יָחַשׂ	their genealogical	2	0
-c307	H4428	מֶלֶךְ	king	5	4
-c308	H1121	בֵּן	son	15	10
-c309	H3886	לוּעַ	rash	3	0
-c310	H3225	יָמִין	hand	13	5
-c311	H5399	נֶשֶׁף	twilight	5	3
-c312	H3245	יָסַד	founded	9	1
-c313	H6315	פּוּחַ	breathes out	9	1
-c314	H6965	קוּם	arose	15	8
-c315	H3330	יַצִּיב	certain	2	0
-c316	H2236	זָרַק	sprinkle	3	3
-c317	H3335	יָצַר	potter	7	4
-c318	H3820	לֵב	heart	7	2
-c319	H3345	יְקַד	(the)	2	0
-c320	H4725	מָקוֹם	place	7	2
-c321	H3368	יָקָר	precious	4	1
-c322	H3423	יָרַשׁ	take possession of	11	9
-c323	H0168	אֹהֶל	tent	7	6
-c324	H4350	מְכוֹנָה	stands	12	3
-c325	H3467	יָשַׁע	save	8	7
-c326	H8142	שֵׁנָה	sleep	8	5
-c327	H3498	יָתַר	left	15	9
-c328	H3519	כָּבוֹד	glory	9	6
-c329	H4345	מַכְבֵּר	grating	4	0
-c330	H3548	כֹּהֵן	priest	6	4
-c331	H4348	מִכְוָה	burn	3	0
-c332	H8064	שָׁמַיִם	heavens	9	5
-c333	H5795	עֵז	goats	12	6
-c334	H3559	כּוּן	prepared	9	5
-c335	H5341	נָצַר	keep	4	0
-c336	H3605	כֹּל	all	7	1
-c337	H7100	קֶצַח	black cumin	3	2
-c338	H3925	לָמַד	teach	21	8
-c339	H6566	פָּרַשׂ	spread out	17	2
-c340	H4522	מַס	labor	13	4
-c341	H7950	שֶׁלֶג	snow	3	2
-c342	H6963	קוֹל	voice	16	10
-c343	H8145	שֵׁנִי	Vashni	13	2
-c344	H3720	כָּפָן	famine	2	0
-c345	H0352	אַיִל	ram	8	6
-c346	H1288	בָּרַךְ	blessed	11	6
-c347	H3774	כְּרֵתִי	Kerethites	2	2
-c348	H7080	קָסַם	diviners	15	9
-c349	H3045	יָדַע	know	5	5
-c350	H5612	סֵפֶר	scroll	12	7
-c351	H0899	בֶּגֶד	garments	14	9
-c352	H3680	כָּסָה	covered	5	1
-c353	H2266	חָבַר	joined	12	4
-c354	H3909	לָט	secrecy	5	0
-c355	H3885	לוּן	spend the night	7	0
-c356	H2778	חָרַף	taunted	6	3
-c357	H4421	מִלְחָמָה	battle	11	6
-c358	H4272	מָחַץ	smash	6	0
-c359	H7291	רָדַף	pursued	13	2
-c360	H3947	לָקַח	took	8	5
-c361	H3950	לָקַט	gather	11	2
-c362	H4948	מִשְׁקָל	weight	10	0
-c363	H2388	חָזַק	strong	13	4
-c364	H5391	נָשַׁךְ	bite	9	3
-c365	H1897	הָגָה	utter	10	5
-c366	H1082	בָּלַג	that I may be cheerful	2	0
-c367	H7810	שַׁחַד	bribe	9	3
-c368	H4038	מַגָּל	(of) a sickle	2	0
-c369	H4060	מִדָּה	measurement	8	3
-c370	H2086	זֵד	arrogant people	9	1
-c371	H4076	מָדַי	Medes	2	0
-c372	H4116	מָהַר	hurried	13	3
-c373	H1285	בְּרִית	covenant	13	8
-c374	H5437	סָבַב	turned	10	3
-c375	H1669	דָּאַב	become faint	3	0
-c376	H5060	נָגַע	touch	9	2
-c377	H3427	יָשַׁב	inhabitants	16	7
-c378	H4900	מָשַׁךְ	drew	5	0
-c379	H4203	מָזוֹן	food	2	0
-c380	H4220	מֵחַ	fatlings	2	0
-c381	H2614	חָנַק	hanged himself	2	0
-c382	H3665	כָּנַע	subdued	15	2
-c383	H4376	מָכַר	sold	6	4
-c384	H7646	שָׂבַע	satisfied	9	3
-c385	H4416	מְלַח	salt	2	0
-c386	H4430	מֶלֶךְ	O	7	2
-c387	H0561	אֵמֶר	words	8	3
-c388	H0559	אָמַר	said	12	6
-c389	H8504	תְּכֵלֶת	violet stuff	11	6
-c390	H4751	מַר	bitter	12	2
-c391	H4427	מָלַךְ	reigned	9	6
-c392	H4943	מֶשֶׁק	acquisition	2	0
-c393	H4487	מָנָה	count	9	4
-c394	H5148	נָחָה	lead	8	2
-c395	H5239	נָלָה	as	2	0
-c396	H5352	נָקָה	go unpunished	16	11
-c397	H4549	מָסַס	melt	9	2
-c398	H0591	אֳנִיָּה	ships	6	3
-c399	H5564	סָמַךְ	lean	7	2
-c400	H6485	פָּקַד	their enrolled	7	2
-c401	H6213	עָשָׂה	do	10	6
-c402	H5923	עֹל	yoke	7	4
-c403	H5954	עֲלַל	went in	2	0
-c404	H4611	מַעֲלָל	deeds	6	3
-c405	H6031	עָנָה	afflicted	8	1
-c406	H3708	כַּעַס	provocation	17	2
-c407	H7121	קָרָא	called	11	3
-c408	H5753	עָוָה	done wrong	18	2
-c409	H6172	עֶרְוָה	nakedness	13	1
-c410	H6174	עָרוֹם	naked	7	3
-c411	H6231	עָשַׁק	oppressed	11	6
-c412	H8641	תְּרוּמָה	contribution	6	4
-c413	H5307	נָפַל	fall	9	2
-c414	H7604	שָׁאַר	left	10	7
-c415	H5310	נָפַץ	smash	4	0
-c416	H8269	שַׂר	officials	16	9
-c417	H6587	פֶּשַׂע	step	3	0
-c418	H8179	שַׁעַר	gate	18	6
-c419	H1101	בָּלַל	mixed	13	4
-c420	H6440	פָּנִים	face	12	3
-c421	H3658	כִּנּוֹר	harp	11	7
-c422	H6944	קֹדֶשׁ	holiness	10	7
-c423	H6979	קוּר	dug	5	0
-c424	H4765	מַרְבַד	coverings	2	0
-c425	H1869	דָּרַךְ	tread	8	4
-c426	H4784	מָרָה	rebelled against	9	5
-c427	H7350	רָחוֹק	distance	4	3
-c428	H4803	מָרַט	polished	7	0
-c429	H5483	סוּס	horses	11	7
-c430	H5503	סָחַר	traders	13	3
-c431	H7462	רָעָה	shepherd	13	7
-c432	H7495	רָפָא	healed	6	0
-c433	H4836	מַרְצֵעַ	awl	2	0
-c434	H7543	רָקַח	perfumer	9	2
-c435	H5375	נָשָׂא	lifted up	8	2
-c436	H5377	נָשָׁא	him deceive	3	0
-c437	H4390	מָלֵא	filled	11	5
-c438	H7665	שָׁבַר	broken	11	5
-c439	H7901	שָׁכַב	lay down	14	7
-c440	H1544	גִּלּוּל	idols	11	9
-c441	H7751	שׁוּט	rove about	9	1
-c442	H7161	קֶרֶן	horns	6	5
-c443	H5029	נְבִיא	prophet	3	0
-c444	H2930	טָמֵא	unclean	11	9
-c445	H5081	נָדִיב	noble people	6	4
-c446	H5782	עוּר	awake	16	4
-c447	H6565	פָּרַר	break	7	2
-c448	H2472	חֲלוֹם	dream	3	3
-c449	H7311	רוּם	exalted	12	2
-c450	H6524	פָּרַח	bud	15	7
-c451	H5190	נָטַל	am laying	4	0
-c452	H5117	נוּחַ	rest	12	5
-c453	H5215	נִיר	unplowed ground	2	0
-c454	H0226	אוֹת	sign	16	6
-c455	H7167	קָרַע	tore	10	2
-c456	H3027	יָד	hand	26	8
-c457	H5348	נָקֹד	speckled	7	4
-c458	H5585	סָעִיף	clefts	9	0
-c459	H5363	נֹקֶף	beating	1	0
-c460	H7911	שָׁכַח	forgotten	5	2
-c461	H0914	בָּדַל	separated	10	0
-c462	H5409	נֵתַח	pieces	2	2
-c463	H5415	נְתַן	give	2	0
-c464	H5431	סָאַן	which marches	2	0
-c465	H8248	שָׁקָה	water	10	3
-c466	H7639	שְׂבָכָה	network	5	0
-c467	H7641	שִׁבֹּל	ears of grain	8	2
-c468	H2691	חָצֵר	courtyard	11	2
-c469	H1366	גְּבוּל	border	16	8
-c470	H5491	סוֹף	end	2	0
-c471	H5501	סְחִי	offscouring	2	0
-c472	H5518	סִיר	pot	12	6
-c473	H5629	סֶרַח	overhanging	1	0
-c474	H6828	צָפוֹן	north	23	7
-c475	H5648	עֲבַד	made	4	0
-c476	H5674	עָבַר	pass over	9	6
-c477	H5688	עֲבֹת	ropes	12	4
-c478	H5689	עֲגַב	lusted	5	0
-c479	H1241	בָּקָר	herd	14	6
-c480	H5703	עַד	ever	3	0
-c481	H6026	עָנַג	take delight	14	1
-c482	H2555	חָמָס	violence	11	5
-c483	H3243	יָנַק	suck	8	0
-c484	H5781	עוּק	am about to make totter	3	0
-c485	H3272	יְעַט	counselors	2	0
-c486	H5914	עֶכֶס	anklets	2	0
-c487	H5927	עָלָה	went up	13	4
-c488	H5943	עִלַּי	(the) Most	3	0
-c489	H0802	אִשָּׁה	wife	12	8
-c490	H5968	עָלַף	become faint	2	0
-c491	H5999	עָמָל	toil	3	3
-c492	H8415	תְּהוֹם	deep	8	3
-c493	H2403	חַטָּאָה	sin	10	5
-c494	H6076	עֹפֶל	hill	3	0
-c495	H6102	עָצֵל	sluggard	4	1
-c496	H6128	עֲקַלְקַל	twisting	3	0
-c497	H6135	עָקָר	barren	7	0
-c498	H6136	עִקַּר	stump	2	0
-c499	H6149	עָרֵב	pleasing	2	0
-c500	H3915	לַיִל	night	16	7
-c501	H6245	עָשַׁת	become smooth	3	0
-c502	H6250	עֶשְׁתֹּנָה	plans	2	0
-c503	H6255	עַשְׁתְּרֹת קַרְנַיִם	Ashteroth	2	0
-c504	H6471	פַּעַם	times	9	0
-c505	H6275	עָתַק	moved on	7	0
-c506	H6280	עָתַר	multiplied	2	0
-c507	H5850	עֲטָרָה	crown	8	5
-c508	H3373	יָרֵא	fearing	23	6
-c509	H6348	פָּחַז	undisciplined	3	0
-c510	H3782	כָּשַׁל	stumble	8	0
-c511	H6378	פַּךְ	flask	2	0
-c512	H4256	מַחֲלֹקֶת	divisions	7	0
-c513	H6392	פְּלֻגָּה	divisions	3	0
-c514	H6399	פְּלַח	paying reverence	2	0
-c515	H7819	שָׁחַט	cut the throat of	10	4
-c516	H6427	פַּלָּצוּת	shuddering	4	1
-c517	H6478	פָּצַל	stripped	2	0
-c518	H6497	פֶּקַע	gourds	2	0
-c519	H7235	רָבָה	increase	10	5
-c520	H6521	פְּרָזִי	hamlet-dwellers	3	0
-c521	H6528	פֶּרֶט	fallen grapes	2	0
-c522	H6541	פַּרְסָה	hoof	5	4
-c523	H5493	סוּר	turned aside	7	3
-c524	H6591	פְּשַׁר	interpretation	3	0
-c525	H6638	צָבָה	make swell	2	0
-c526	H6634	צְבָא	pleased	2	0
-c527	H6658	צָדָה	lying in wait for	2	0
-c528	H6675	צוֹאָה	excrement	3	0
-c529	H6706	צְחִיחַ	bareness	6	0
-c530	H7832	שָׂחַק	laughs	5	0
-c531	H6715	צָחֹר	tawny	2	0
-c532	H0567	אֱמֹרִי	Amorites	9	7
-c533	H6746	צְלֹחִית	jar	2	0
-c534	H6794	צִנּוּר	tunnel	2	0
-c535	H5162	נָחַם	comfort	11	0
-c536	H7105	קָצִיר	harvest	4	2
-c537	H6898	קֻבָּה	tent	2	0
-c538	H3618	כַּלָּה	daughter-in-law	6	4
-c539	H6153	עֶרֶב	evening	10	4
-c540	H8615	תִּקְוָה	hope	12	2
-c541	H8441	תּוֹעֵבַה	abominations	9	9
-c542	H4196	מִזְבֵּחַ	altar	11	5
-c543	H6991	קָטַל	kills	2	0
-c544	H3932	לָעַג	mock	11	3
-c545	H7068	קִנְאָה	jealousy	4	2
-c546	H7090	קִפּוֹד	hedgehog	3	0
-c547	H7102	קְצִיעָה	cassia(s)	2	0
-c548	H7109	קְצַף	anger	2	0
-c549	H7127	קְרֵב	approached	2	0
-c550	H7134	קַרְדֹּם	axes	2	0
-c551	H6293	פָּגַע	touches	13	4
-c552	H7144	קׇרְחָה	baldness	6	5
-c553	H3924	לֻלָאָה	loops	5	2
-c554	H7169	קָרַץ	nipped off	2	0
-c555	H7180	קִשֻּׁא	cucumbers	2	0
-c556	H7214	רְאֵם	wild ox	3	0
-c557	H7218	רֹאשׁ	head	11	3
-c558	H1419	גָּדוֹל	great	13	7
-c559	H7970	שְׁלוֹשִׁים	officers	7	4
-c560	H7266	רְגַז	rage	2	0
-c561	H8252	שָׁקַט	at peace	18	4
-c562	H7284	רְגַשׁ	came as a crowd	3	0
-c563	H7314	רוּם	height	2	0
-c564	H7332	רָזוֹן	leanness	4	0
-c565	H7373	רָטֹב	fresh plant	2	0
-c566	H7388	רִיר	spittle	2	0
-c567	H7405	רָכַס	bind	3	0
-c568	H7416	רִמּוֹן	pomegranates	7	2
-c569	H7453	רֵעַ	neighbor	12	2
-c570	H7457	רָעֵב	hungry	8	5
-c571	H7476	רַעְיוֹן	thoughts	2	0
-c572	H3563	כּוֹס	cup	5	2
-c573	H7582	שָׁאָה	make desolate	3	0
-c574	H3518	כָּבָה	extinguished	11	2
-c575	H7574	רֶתֶם	broom plant	2	0
-c576	H7576	רָתַק	snapped	4	0
-c577	H1540	גָּלָה	uncover	9	7
-c578	H7696	שָׁגַע	behaving like a madman	3	0
-c579	H7631	שְׂבִיב	flames	2	0
-c580	H7685	שָׂגָה	grow	5	0
-c581	H7725	שׁוּב	return	8	2
-c582	H7753	שׂוּךְ	am about to fence up	2	0
-c583	H2199	זָעַק	cried out	15	8
-c584	H7795	שׂוֹרָה	row	2	0
-c585	H7811	שָׂחָה	swimmer	2	0
-c586	H6341	פַּח	snare	5	5
-c587	H7829	שַׁחֶפֶת	consumption	2	0
-c588	H7838	שָׁחֹר	black	7	2
-c589	H7854	שָׂטָן	adversary	8	0
-c590	H7875	שִׂיד	lime	2	0
-c591	H5414	נָתַן	give	12	4
-c592	H7905	שֻׂכָּה	harpoons	2	0
-c593	H7921	שָׁכֹל	bereaved	4	0
-c594	H7963	שְׁלֵוָה	prosperity	2	0
-c595	H4910	מָשַׁל	rule	10	3
-c596	H7988	שִׁלְיָה	afterbirth	2	0
-c597	H8001	שְׁלָם	peace	2	0
-c598	H2142	זָכַר	remember	6	3
-c599	H8102	שֶׁמֶץ	whisper	2	0
-c600	H8127	שֵׁן	teeth	5	0
-c601	H0970	בָּחַר	men	6	0
-c602	H0693	אָרַב	ambusher	6	2
-c603	H8307	שְׁרִירוּת	stubbornness	4	0
-c604	H8288	שְׂרוֹךְ	thong	2	0
-c605	H8320	שָׂרֻק	sorrel	2	0
-c606	H8354	שָׁתָה	drink	12	5
-c607	H8362	שָׁתַל	planted	2	0
-c608	H8373	תָּאַב	long	2	0
-c609	H8382	תָּאַם	bearing twins	2	0
-c610	H7270	רָגַל	spies	13	4
-c611	H8482	תַּחְתִּי	lowest	2	0
-c612	H7788	שׁוּר	your	2	0
+c11	H6430	פְּלִשְׁתִּי	Philistines	9	7
+c12	H0068	אֶבֶן	stones	8	6
+c13	H3245	יָסַד	founded	9	1
+c14	H3519	כָּבוֹד	glory	9	6
+c15	H0157	אָהַב	love	17	7
+c16	H0251	אָח	brother	10	5
+c17	H7453	רֵעַ	neighbor	12	2
+c18	H1961	הָיָה	become	11	0
+c19	H8398	תֵּבֵל	world	10	3
+c20	H2530	חָמַד	desirable	10	7
+c21	H3689	כֶּסֶל	loins	5	0
+c22	H2555	חָמָס	violence	11	5
+c23	H7451	רַע	evil	7	3
+c24	H0214	אוֹצָר	storehouses	11	7
+c25	H1242	בֹּקֶר	morning	7	2
+c26	H0216	אוֹר	light	20	11
+c27	H0226	אוֹת	sign	16	6
+c28	H2142	זָכַר	remember	6	3
+c29	H0935	בּוֹא	came	13	4
+c30	H6440	פָּנִים	face	7	2
+c31	H6924	קֶדֶם	east	8	0
+c32	H3920	לָכַד	captured	5	3
+c33	H2388	חָזַק	strong	13	4
+c34	H0334	אִטֵּר	impeded	2	0
+c35	H0341	אֹיֵב	enemies	11	8
+c36	H0560	אֲמַר	saying	5	2
+c37	H0352	אַיִל	ram	8	6
+c38	H0374	אֵיפָה	ephah	11	8
+c39	H0809	אֲשִׁישָׁה	raisin-cake	3	0
+c40	H1934	הָוָא	became	2	2
+c41	H4682	מַצָּה	unleavened bread(s)	10	5
+c42	H0398	אָכַל	eat	15	5
+c43	H0405	אֶכֶף	pressure	2	0
+c44	H0430	אֱלֹהִים	God	11	7
+c45	H6086	עֵץ	wood(s)	18	7
+c46	H0479	אִלֵּךְ	these	2	0
+c47	H7641	שִׁבֹּל	ears of grain	8	2
+c48	H4060	מִדָּה	measurement	8	3
+c49	H6213	עָשָׂה	do	10	6
+c50	H0571	אֶמֶת	faithfulness	10	3
+c51	H0561	אֵמֶר	words	8	3
+c52	H0639	אַף	anger	18	11
+c53	H5999	עָמָל	toil	3	3
+c54	H5923	עֹל	yoke	7	4
+c55	H1540	גָּלָה	uncover	9	7
+c56	H0631	אָסַר	bound	12	2
+c57	H0622	אָסַף	gathered	15	5
+c58	H5712	עֵדָה	congregation	9	4
+c59	H0633	אֱסָר	prohibition	2	0
+c60	H3915	לַיִל	night	16	7
+c61	H6083	עָפָר	dust	13	6
+c62	H0666	אֲפֵר	bandage	2	0
+c63	H6643	צְבִי	beauty	17	7
+c64	H0697	אַרְבֶּה	locusts	11	8
+c65	H0693	אָרַב	ambusher	6	2
+c66	H0707	אָרַג	weaver	6	2
+c67	H7341	רֹחַב	breadth	10	4
+c68	H3427	יָשַׁב	inhabitants	16	7
+c69	H0738	אֲרִי	lion	9	7
+c70	H0741	אֲרִיאֵל	hearth	3	0
+c71	H4013	מִבְצָר	fortification	4	4
+c72	H0776	אֶרֶץ	land	9	4
+c73	H7043	קָלַל	curse	9	3
+c74	H0784	אֵשׁ	fire	14	9
+c75	H0794	אֲשֵׁדָה	slopes	2	0
+c76	H5117	נוּחַ	rest	12	5
+c77	H5930	עֹלָה	burnt offering	7	6
+c78	H0802	אִשָּׁה	wife	13	9
+c79	H1219	בָּצַר	gather grapes	10	4
+c80	H7563	רָשָׁע	wicked people	15	9
+c81	H4784	מָרָה	rebelled against	14	8
+c82	H2403	חַטָּאָה	sin	10	5
+c83	H5771	עָוֺן	iniquity	6	6
+c84	H8104	שָׁמַר	keep	8	3
+c85	H3730	כַּפְתֹּר	bulb	5	4
+c86	H7198	קֶשֶׁת	bow	8	3
+c87	H0833	אָשַׁר	called blessed	3	0
+c88	H0849	אֶשְׁתַּדּוּר	revolt	2	0
+c89	H7126	קָרַב	present	7	4
+c90	H2181	זָנָה	acted as a prostitute	11	5
+c91	H0888	בְּאֵשׁ	displeasing	2	0
+c92	H0953	בּוֹר	pit	9	6
+c93	H0205	אָוֶן	wickedness	8	6
+c94	H0905	בַּד	besides	4	2
+c95	H0914	בָּדַל	separated	10	0
+c96	H0927	בְּהַל	haste	2	0
+c97	H0929	בְּהֵמָה	livestock	15	8
+c98	H2930	טָמֵא	unclean	16	10
+c99	H7429	רָמַס	trample	5	3
+c100	H8336	שֵׁשׁ	fine linen	12	6
+c101	H5254	נָסָה	put to the test	11	2
+c102	H1897	הָגָה	utter	10	5
+c103	H8432	תָּוֶךְ	midst	9	5
+c104	H1004	בַּיִת	house	8	3
+c105	H1058	בָּכָה	wept	21	12
+c106	H1060	בְּכוֹר	firstborn	11	3
+c107	H1082	בָּלַג	that I may be cheerful	2	0
+c108	H1101	בָּלַל	mixed	15	4
+c109	H2233	זֶרַע	offspring	12	6
+c110	H1123	בֵּן	sons	2	0
+c111	H1129	בָּנָה	built	16	5
+c112	H1145	בֶּן־יְמִינִי	jaminite	2	0
+c113	H3372	יָרֵא	afraid	13	6
+c114	H8313	שָׂרַף	burned	16	7
+c115	H7845	שַׁחַת	pit	9	0
+c116	H7703	שָׁדַד	devastated	8	2
+c117	H2557	חָמֵץ	leaven	4	3
+c118	H6555	פָּרַץ	spread out	12	2
+c119	H5158	נַחַל	wadi	7	5
+c120	H6419	פָּלַל	pray	8	4
+c121	H4672	מָצָא	found	14	9
+c122	H1305	בָּרַר	chosen	12	3
+c123	H8184	שְׂעֹרָה	barley(s)	12	5
+c124	H3335	יָצַר	potter	7	4
+c125	H1880	דֶּשֶׁן	fatness	10	3
+c126	H5348	נָקֹד	speckled	6	4
+c127	H1817	דֶּלֶת	doors	12	6
+c128	H1288	בָּרַךְ	blessed	11	6
+c129	H0954	בּוּשׁ	ashamed	12	7
+c130	H1818	דָּם	blood	10	6
+c131	H1335	בֶּתֶר	pieces	2	0
+c132	H1347	גָּאוֹן	pride	10	5
+c133	H7311	רוּם	exalted	12	2
+c134	H1350	גָּאַל	redeem	6	3
+c135	H2611	חָנֵף	godless	6	0
+c136	H1364	גָּבֹהַּ	high	6	4
+c137	H1366	גְּבוּל	border	15	7
+c138	H5794	עַז	strong	6	2
+c139	H1400	גְּבַר	men	3	0
+c140	H4428	מֶלֶךְ	king	5	4
+c141	H4910	מָשַׁל	rule	10	3
+c142	H2022	הַר	mountain	11	4
+c143	H1419	גָּדוֹל	great	7	5
+c144	H2677	חֵצִי	half	8	4
+c145	H4940	מִשְׁפָּחָה	clans	5	3
+c146	H3988	מָאַס	rejected	14	6
+c147	H2346	חוֹמָה	wall	5	4
+c148	H6212	עֶשֶׂב	vegetation	7	4
+c149	H1456	גֵּהָה	healing	2	0
+c150	H5971	עַם	people	5	4
+c151	H1482	גּוּר	cubs	2	0
+c152	H1548	גָּלַח	shave	9	0
+c153	H2742	חֲרוּץ	than gold	10	0
+c154	H2723	חׇרְבָּה	ruins	14	7
+c155	H5375	נָשָׂא	lifted up	8	2
+c156	H1541	גְּלָה	revealed	2	0
+c157	H0212	אוֹפָן	wheels	16	4
+c158	H7965	שָׁלוֹם	peace	10	5
+c159	H4639	מַעֲשֶׂה	work	14	10
+c160	H1612	גֶּפֶן	vine	11	6
+c161	H7704	שָׂדֶה	field	12	6
+c162	H8255	שֶׁקֶל	shekels	12	7
+c163	H4803	מָרַט	polished	7	0
+c164	H1643	גֶּרֶשׂ	groats	2	0
+c165	H0106	אֶגְרֹף	fist	3	0
+c166	H7971	שָׁלַח	sent	13	4
+c167	H4256	מַחֲלֹקֶת	divisions	7	0
+c168	H4602	מַעֲכָתִי	Maacathite	2	2
+c169	H4306	מָטַר	rain	17	9
+c170	H5774	עוּף	flying	19	4
+c171	H1697	דָּבָר	word	12	5
+c172	H4056	מַדְבַּח	altar	3	0
+c173	H7291	רָדַף	pursued	13	2
+c174	H6587	פֶּשַׂע	step	3	0
+c175	H3559	כּוּן	prepared	9	5
+c176	H2470	חָלָה	sick	7	4
+c177	H7462	רָעָה	shepherd	13	7
+c178	H7235	רָבָה	increase	12	5
+c179	H7699	שַׁד	breasts	3	2
+c180	H1739	דָּוֶה	faint	6	1
+c181	H2891	טָהֵר	pure	8	6
+c182	H5769	עוֹלָם	perpetuity	13	3
+c183	H1121	בֵּן	son	14	9
+c184	H1637	גֹּרֶן	threshing floor	23	5
+c185	H1760	דָּחָה	pushed down	3	0
+c186	H8199	שָׁפַט	judge	19	9
+c187	H4083	מְדִינָה	province	5	0
+c188	H1104	בָּלַע	swallowed up	9	2
+c189	H1836	דֵּן	this	4	2
+c190	H3665	כָּנַע	subdued	15	2
+c191	H5197	נָטַף	prophesy	7	3
+c192	H4912	מָשָׁל	proverb	8	4
+c193	H4758	מַרְאֶה	appearance	10	5
+c194	H1828	דֹּמֶן	dung	2	0
+c195	H2451	חׇכְמָה	wisdom	16	10
+c196	H1869	דָּרַךְ	tread	8	4
+c197	H5549	סָלַל	cast up	5	2
+c198	H3367	יְקָר	honor	5	3
+c199	H3805	כֹתֶרֶת	capital	12	6
+c200	H3684	כְּסִיל	fool	14	8
+c201	H7069	קָנָה	bought	18	10
+c202	H2114	זוּר	strangers	7	3
+c203	H1870	דֶּרֶךְ	way	12	6
+c204	H1946	הוּךְ	go	4	2
+c205	H5800	עָזַב	forsaken	16	5
+c206	H5753	עָוָה	done wrong	18	2
+c207	H2015	הָפַךְ	turned	10	1
+c208	H4191	מוּת	die	12	7
+c209	H2029	הָרָה	conceived	3	2
+c210	H2040	הָרַס	torn down	13	3
+c211	H8085	שָׁמַע	heard	11	6
+c212	H2065	זֶבֶד	endowment	2	0
+c213	H5081	נָדִיב	noble people	5	4
+c214	H4196	מִזְבֵּחַ	altar	12	6
+c215	H6337	פָּז	than pure gold	3	2
+c216	H4203	מָזוֹן	food	2	0
+c217	H2151	זָלַל	glutton	4	2
+c218	H2803	חָשַׁב	planned	17	9
+c219	H2790	חָרַשׁ	keep silent	14	4
+c220	H2165	זְמָן	appointed time	2	0
+c221	H2170	זְמָר	(the)	2	0
+c222	H7892	שִׁיר	song	9	7
+c223	H2173	זִמְרָה	best products	2	0
+c224	H2180	זָנָב	tail	2	0
+c225	H2282	חַג	festival	7	3
+c226	H6471	פַּעַם	times	14	0
+c227	H6996	קָטָן	small	11	3
+c228	H2199	זָעַק	cried out	16	9
+c229	H2543	חֲמוֹר	donkey	14	6
+c230	H2205	זָקֵן	elders	13	5
+c231	H2210	זָקַף	raising up	2	0
+c232	H6327	פּוּץ	scattered	10	3
+c233	H7307	רוּחַ	spirit	9	5
+c234	H4219	מִזְרָק	bowls	14	10
+c235	H2245	חָבַב	loving	2	0
+c236	H6828	צָפוֹן	north	23	7
+c237	H2255	חֲבַל	destroyed	3	0
+c238	H2266	חָבַר	joined	12	4
+c239	H0591	אֳנִיָּה	ships	6	3
+c240	H6148	עָרַב	make a wager	9	4
+c241	H2269	חֲבַר	companions	2	0
+c242	H2300	חָדַד	sharpened	4	0
+c243	H2302	חָדָה	rejoiced	2	0
+c244	H7676	שַׁבָּת	sabbath	9	3
+c245	H3117	יוֹם	day	8	7
+c246	H2326	חוֹב	debt	2	0
+c247	H2329	חוּג	circle	3	0
+c248	H2331	חָוָה	declare	2	0
+c249	H2342	חוּל	in labor	8	4
+c250	H2603	חָנַן	show	15	7
+c251	H3836	לָבָן	white	10	2
+c252	H2885	טַבַּעַת	rings	12	2
+c253	H2370	חֲזָא	seeing	3	0
+c254	H5030	נָבִיא	prophet	14	9
+c255	H6763	צֵלָע	side	8	5
+c256	H2336	חוֹחַ	thornbush	5	2
+c257	H2409	חֲטָּיָא	sin offering	3	0
+c258	H6677	צַוָּאר	neck	9	2
+c259	H2416	חַי	life	6	3
+c260	H2423	חֵיוָא	animals	3	0
+c261	H2448	חַכְלִלוּת	dullness	2	0
+c262	H3198	יָכַח	rebuke	10	5
+c263	H2472	חֲלוֹם	dream	3	3
+c264	H2490	חָלַל	began	5	0
+c265	H8142	שֵׁנָה	sleep	8	5
+c266	H5337	נָצַל	deliver	14	8
+c267	H2527	חֹם	heat	6	2
+c268	H3627	כְּלִי	articles	11	2
+c269	H2559	חָמַק	turned away	2	0
+c270	H2569	חֹמֶשׁ	part	2	0
+c271	H4997	נֹאד	skin-bottle	2	0
+c272	H2719	חֶרֶב	sword	9	6
+c273	H2617	חֶסֶד	loyalty	6	3
+c274	H2598	חֲנֻכָּה	dedication	6	2
+c275	H2629	חָסַם	muzzle	2	0
+c276	H1722	דְּהַב	(the)	5	5
+c277	H4591	מָעַט	who made little	9	5
+c278	H4325	מַיִם	water	16	7
+c279	H7270	רָגַל	spies	13	4
+c280	H2670	חׇפְשִׁי	free person	5	0
+c281	H2684	חֹצֶן	bosom	2	0
+c282	H3658	כִּנּוֹר	harp	11	7
+c283	H8074	שָׁמֵם	appalled	10	5
+c284	H2761	חֲרַךְ	singed	2	0
+c285	H2818	חֲשַׁח	needing	2	0
+c286	H2834	חָשַׂף	bared	3	0
+c287	H2841	חַשְׁרָה	sieve	2	0
+c288	H3373	יָרֵא	fearing	21	6
+c289	H2853	חָתַל	at all (be wrapped)	3	0
+c290	H2869	טָב	good	2	0
+c291	H8081	שֶׁמֶן	oil	7	5
+c292	H6944	קֹדֶשׁ	holiness	10	7
+c293	H4292	מַטְאֲטֵא	broom	2	0
+c294	H2896	טוֹב	good	9	4
+c295	H5273	נָעִים	pleasant	10	4
+c296	H6743	צָלַח	succeed	6	2
+c297	H7810	שַׁחַד	bribe	9	3
+c298	H2901	טָוָה	spun	2	0
+c299	H8267	שֶׁקֶר	falsehood	14	9
+c300	H6051	עָנָן	cloud	12	5
+c301	H6823	צָפָה	overlaid	13	5
+c302	H8441	תּוֹעֵבַה	abominations	9	9
+c303	H0520	אַמָּה	cubits	10	3
+c304	H2960	טֹרַח	burden	2	0
+c305	H5038	נְבֵלָה	corpse	8	4
+c306	H2994	יְבֵמֶת	wife	3	0
+c307	H1898	הָגָה	remove	2	0
+c308	H3021	יָגַע	labor	12	4
+c309	H5307	נָפַל	fall	8	2
+c310	H1984	הָלַל	praise	11	5
+c311	H5414	נָתַן	give	7	2
+c312	H3064	יְהוּדִי	Jews	4	0
+c313	H3062	יְהוּדָאִי	Jewish	2	0
+c314	H3123	יוֹנָה	dove	2	2
+c315	H3243	יָנַק	suck	8	0
+c316	H3154	יֶזַע	sweat	2	0
+c317	H7017	קֵינִי	Kenites	8	8
+c318	H3187	יָחַשׂ	their genealogical	2	0
+c319	H3196	יַיִן	wine	13	7
+c320	H5262	נֶסֶךְ	their drink	5	2
+c321	H2428	חַיִל	army	12	5
+c322	H3225	יָמִין	hand	13	5
+c323	H5399	נֶשֶׁף	twilight	5	3
+c324	H3925	לָמַד	teach	16	5
+c325	H3272	יְעַט	counselors	2	0
+c326	H6315	פּוּחַ	breathes out	9	1
+c327	H6965	קוּם	arose	13	7
+c328	H3330	יַצִּיב	certain	2	0
+c329	H7901	שָׁכַב	lay down	14	9
+c330	H3820	לֵב	heart	7	2
+c331	H3345	יְקַד	(the)	2	0
+c332	H4725	מָקוֹם	place	7	2
+c333	H3368	יָקָר	precious	4	1
+c334	H0168	אֹהֶל	tent	10	8
+c335	H3423	יָרַשׁ	take possession of	11	9
+c336	H3467	יָשַׁע	save	8	7
+c337	H6662	צַדִּיק	righteous	12	9
+c338	H8549	תָּמִים	unblemished	6	4
+c339	H3498	יָתַר	left	15	9
+c340	H3708	כַּעַס	provocation	17	2
+c341	H0394	אַכְזָרִי	cruel	3	2
+c342	H3513	כָּבַד	honored	9	5
+c343	H4345	מַכְבֵּר	grating	4	0
+c344	H3671	כָּנָף	wings	13	5
+c345	H3537	כַּד	jar	7	2
+c346	H3548	כֹּהֵן	priest	6	4
+c347	H5341	נָצַר	keep	4	0
+c348	H4348	מִכְוָה	burn	3	0
+c349	H5795	עֵז	goats	12	6
+c350	H4350	מְכוֹנָה	stands	11	2
+c351	H3605	כֹּל	all	7	1
+c352	H4513	מָנַע	withheld	12	4
+c353	H5518	סִיר	pot	12	6
+c354	H7100	קֶצַח	black cumin	3	2
+c355	H0567	אֱמֹרִי	Amorites	9	7
+c356	H3680	כָּסָה	covered	5	1
+c357	H0982	בָּטַח	trust	17	9
+c358	H7950	שֶׁלֶג	snow	3	2
+c359	H6963	קוֹל	voice	16	10
+c360	H3724	כֹּפֶר	ransom	3	1
+c361	H8145	שֵׁנִי	Vashni	13	2
+c362	H3720	כָּפָן	famine	2	0
+c363	H3774	כְּרֵתִי	Kerethites	2	2
+c364	H3782	כָּשַׁל	stumble	8	0
+c365	H7080	קָסַם	diviners	15	9
+c366	H3045	יָדַע	know	5	5
+c367	H3789	כָּתַב	written	3	1
+c368	H5612	סֵפֶר	scroll	12	7
+c369	H0899	בֶּגֶד	garments	13	11
+c370	H3847	לָבַשׁ	clothed	14	6
+c371	H3742	כְּרוּב	cherubim	18	12
+c372	H3885	לוּן	spend the night	7	0
+c373	H3886	לוּעַ	rash	3	0
+c374	H6635	צָבָא	hosts	12	6
+c375	H3899	לֶחֶם	food	14	6
+c376	H5065	נָגַשׂ	taskmasters	7	4
+c377	H3924	לֻלָאָה	loops	5	2
+c378	H3887	לוּץ	mocker	9	2
+c379	H6310	פֶּה	mouth	10	5
+c380	H4003	מְבוּקָה	emptiness	2	0
+c381	H4038	מַגָּל	(of) a sickle	2	0
+c382	H2086	זֵד	arrogant people	9	1
+c383	H4076	מָדַי	Medes	2	0
+c384	H4272	מָחַץ	smash	10	0
+c385	H4116	מָהַר	hurried	11	3
+c386	H1285	בְּרִית	covenant	13	8
+c387	H5437	סָבַב	turned	10	3
+c388	H5781	עוּק	am about to make totter	3	0
+c389	H5060	נָגַע	touch	9	2
+c390	H4220	מֵחַ	fatlings	2	0
+c391	H2508	חֲלָק	portion	2	0
+c392	H2614	חָנַק	hanged himself	2	0
+c393	H5797	עֹז	strength	9	7
+c394	H4376	מָכַר	sold	6	4
+c395	H2256	חֶבֶל	ropes	12	4
+c396	H4427	מָלַךְ	reigned	9	6
+c397	H4416	מְלַח	salt	2	0
+c398	H4430	מֶלֶךְ	O	7	2
+c399	H0559	אָמַר	said	12	6
+c400	H8504	תְּכֵלֶת	violet stuff	11	6
+c401	H4751	מַר	bitter	12	2
+c402	H4483	מְנָא	appointed	3	2
+c403	H2506	חֵלֶק	portion	5	1
+c404	H5782	עוּר	awake	15	7
+c405	H5352	נָקָה	go unpunished	7	4
+c406	H5462	סָגַר	shut	14	3
+c407	H5892	עִיר	city	11	4
+c408	H5503	סָחַר	traders	13	3
+c409	H3909	לָט	secrecy	5	0
+c410	H5648	עֲבַד	made	4	0
+c411	H1241	בָּקָר	herd	14	6
+c412	H6174	עָרוֹם	naked	7	3
+c413	H5954	עֲלַל	went in	2	0
+c414	H5927	עָלָה	went up	13	4
+c415	H4611	מַעֲלָל	deeds	6	3
+c416	H8415	תְּהוֹם	deep	8	3
+c417	H6031	עָנָה	afflicted	9	2
+c418	H4631	מְעָרָה	cave	10	4
+c419	H7553	רִקְמָה	multicolored material	5	3
+c420	H1589	גָּנַב	stolen	14	8
+c421	H8641	תְּרוּמָה	contribution	6	4
+c422	H8269	שַׂר	officials	14	9
+c423	H8179	שַׁעַר	gate	13	6
+c424	H1416	גְּדוּד	marauding bands	8	3
+c425	H4941	מִשְׁפָּט	justice	12	9
+c426	H0312	אַחֵר	other	9	3
+c427	H8034	שֵׁם	name	8	0
+c428	H7998	שָׁלָל	plunder	9	6
+c429	H6629	צֹאן	flock	9	3
+c430	H6438	פִּנָּה	corner	6	0
+c431	H7102	קְצִיעָה	cassia(s)	2	0
+c432	H6293	פָּגַע	touches	13	4
+c433	H7180	קִשֻּׁא	cucumbers	2	0
+c434	H7227	רַב	many	9	3
+c435	H8252	שָׁקַט	at peace	14	4
+c436	H5619	סָקַל	stoned	4	2
+c437	H7350	רָחוֹק	distance	4	3
+c438	H4549	מָסַס	melt	9	2
+c439	H5483	סוּס	horses	11	7
+c440	H7495	רָפָא	healed	5	0
+c441	H7665	שָׁבַר	broken	8	4
+c442	H4836	מַרְצֵעַ	awl	2	0
+c443	H1314	בֶּשֶׂם	spices	7	6
+c444	H7543	רָקַח	perfumer	9	2
+c445	H5391	נָשַׁךְ	bite	9	3
+c446	H5377	נָשָׁא	him deceive	3	0
+c447	H4390	מָלֵא	filled	11	5
+c448	H7832	שָׂחַק	laughs	5	0
+c449	H1544	גִּלּוּל	idols	11	9
+c450	H4943	מֶשֶׁק	acquisition	2	0
+c451	H7751	שׁוּט	rove about	9	1
+c452	H8354	שָׁתָה	drink	16	5
+c453	H7161	קֶרֶן	horns	7	5
+c454	H7782	שׁוֹפָר	trumpet	6	2
+c455	H8355	שְׁתָה	drinking	2	0
+c456	H5415	נְתַן	give	2	0
+c457	H0584	אָנַח	groaning	6	0
+c458	H5029	נְבִיא	prophet	3	0
+c459	H6172	עֶרְוָה	nakedness	9	1
+c460	H5127	נוּס	fled	13	3
+c461	H3701	כֶּסֶף	silver	12	8
+c462	H6566	פָּרַשׂ	spread out	17	2
+c463	H5190	נָטַל	am laying	4	0
+c464	H6485	פָּקַד	their enrolled	7	2
+c465	H5215	נִיר	unplowed ground	2	0
+c466	H7819	שָׁחַט	cut the throat of	12	5
+c467	H5239	נָלָה	as	2	0
+c468	H3027	יָד	hand	26	8
+c469	H3318	יָצָא	went out	8	3
+c470	H6524	פָּרַח	bud	15	7
+c471	H5363	נֹקֶף	beating	1	0
+c472	H7167	קָרַע	tore	11	4
+c473	H7911	שָׁכַח	forgotten	5	2
+c474	H5315	נֶפֶשׁ	life	9	2
+c475	H5409	נֵתַח	pieces	2	2
+c476	H2236	זָרַק	sprinkle	3	3
+c477	H5431	סָאַן	which marches	2	0
+c478	H7639	שְׂבָכָה	network	5	0
+c479	H4522	מַס	labor	13	4
+c480	H5491	סוֹף	end	2	0
+c481	H4900	מָשַׁךְ	drew	5	0
+c482	H5501	סְחִי	offscouring	2	0
+c483	H4548	מַסְמֵר	nails	4	0
+c484	H5585	סָעִיף	clefts	9	0
+c485	H7646	שָׂבַע	satisfied	9	3
+c486	H5629	סֶרַח	overhanging	1	0
+c487	H5674	עָבַר	pass over	9	6
+c488	H5688	עֲבֹת	ropes	12	4
+c489	H5689	עֲגַב	lusted	5	0
+c490	H5703	עַד	ever	3	0
+c491	H6256	עֵת	time	9	2
+c492	H5787	עִוֵּר	blind	11	6
+c493	H5968	עָלַף	become faint	2	0
+c494	H5850	עֲטָרָה	crown	8	5
+c495	H5914	עֶכֶס	anklets	2	0
+c496	H8056	שָׂמַח	joyful	17	11
+c497	H5943	עִלַּי	(the) Most	3	0
+c498	H5982	עַמּוּד	pillars	7	4
+c499	H6026	עָנַג	take delight	14	1
+c500	H6076	עֹפֶל	hill	3	0
+c501	H6102	עָצֵל	sluggard	4	1
+c502	H6128	עֲקַלְקַל	twisting	3	0
+c503	H1565	גַּלְמוּד	barren	4	0
+c504	H6136	עִקַּר	stump	2	0
+c505	H6154	עֵרֶב	woof	4	4
+c506	H6149	עָרֵב	pleasing	2	0
+c507	H8210	שָׁפַךְ	pour out	13	2
+c508	H6099	עָצוּם	mighty	10	3
+c509	H6245	עָשַׁת	become smooth	3	0
+c510	H6250	עֶשְׁתֹּנָה	plans	2	0
+c511	H6255	עַשְׁתְּרֹת קַרְנַיִם	Ashteroth	2	0
+c512	H5265	נָסַע	set out	11	2
+c513	H6280	עָתַר	multiplied	2	0
+c514	H6297	פֶּגֶר	corpses	14	0
+c515	H6565	פָּרַר	break	7	2
+c516	H6348	פָּחַז	undisciplined	3	0
+c517	H6378	פַּךְ	flask	2	0
+c518	H6392	פְּלֻגָּה	divisions	3	0
+c519	H6399	פְּלַח	paying reverence	2	0
+c520	H4948	מִשְׁקָל	weight	10	0
+c521	H6427	פַּלָּצוּת	shuddering	4	1
+c522	H2351	חוּץ	outside	9	8
+c523	H6478	פָּצַל	stripped	2	0
+c524	H6497	פֶּקַע	gourds	2	0
+c525	H6521	פְּרָזִי	hamlet-dwellers	3	0
+c526	H6528	פֶּרֶט	fallen grapes	2	0
+c527	H6541	פַּרְסָה	hoof	5	4
+c528	H5493	סוּר	turned aside	7	3
+c529	H6591	פְּשַׁר	interpretation	2	0
+c530	H6638	צָבָה	make swell	2	0
+c531	H6634	צְבָא	pleased	2	0
+c532	H6651	צָבַר	heaped up	4	0
+c533	H6658	צָדָה	lying in wait for	2	0
+c534	H6675	צוֹאָה	excrement	3	0
+c535	H1706	דְּבַשׁ	honey	9	4
+c536	H4057	מִדְבָּר	wilderness	6	4
+c537	H6715	צָחֹר	tawny	2	0
+c538	H1310	בָּשַׁל	boil	10	4
+c539	H6746	צְלֹחִית	jar	2	0
+c540	H7457	רָעֵב	hungry	13	5
+c541	H7685	שָׂגָה	grow	5	0
+c542	H4043	מָגֵן	shield	16	7
+c543	H6794	צִנּוּר	tunnel	2	0
+c544	H8130	שָׂנֵא	those	14	5
+c545	H6898	קֻבָּה	tent	2	0
+c546	H3947	לָקַח	took	11	6
+c547	H7218	רֹאשׁ	head	11	3
+c548	H6153	עֶרֶב	evening	6	2
+c549	H6991	קָטַל	kills	2	0
+c550	H5162	נָחַם	comfort	11	0
+c551	H3932	לָעַג	mock	11	3
+c552	H6603	פִּתּוּחַ	engravings	3	2
+c553	H7068	קִנְאָה	jealousy	4	2
+c554	H7090	קִפּוֹד	hedgehog	3	0
+c555	H7109	קְצַף	anger	2	0
+c556	H6979	קוּר	dug	5	0
+c557	H7121	קָרָא	called	11	3
+c558	H7127	קְרֵב	approached	2	0
+c559	H7134	קַרְדֹּם	axes	2	0
+c560	H7144	קׇרְחָה	baldness	6	5
+c561	H7169	קָרַץ	nipped off	2	0
+c562	H7214	רְאֵם	wild ox	3	0
+c563	H7229	רַב	great	6	2
+c564	H4765	מַרְבַד	coverings	2	0
+c565	H7970	שְׁלוֹשִׁים	officers	7	4
+c566	H7266	רְגַז	rage	2	0
+c567	H7284	רְגַשׁ	came as a crowd	3	0
+c568	H7314	רוּם	height	2	0
+c569	H7332	רָזוֹן	leanness	4	0
+c570	H7373	רָטֹב	fresh plant	2	0
+c571	H7388	רִיר	spittle	2	0
+c572	H7405	רָכַס	bind	3	0
+c573	H7416	רִמּוֹן	pomegranates	7	2
+c574	H8057	שִׂמְחָה	joy	8	5
+c575	H7476	רַעְיוֹן	thoughts	2	0
+c576	H3563	כּוֹס	cup	5	2
+c577	H3518	כָּבָה	extinguished	11	2
+c578	H8064	שָׁמַיִם	heavens	9	5
+c579	H3533	כָּבַשׁ	subdued	7	0
+c580	H7576	רָתַק	snapped	4	0
+c581	H7574	רֶתֶם	broom plant	2	0
+c582	H7582	שָׁאָה	make desolate	3	0
+c583	H7593	שְׁאֵל	asked	2	0
+c584	H7631	שְׂבִיב	flames	2	0
+c585	H7725	שׁוּב	return	8	2
+c586	H7753	שׂוּךְ	am about to fence up	2	0
+c587	H7788	שׁוּר	your	2	0
+c588	H7200	רָאָה	see	13	6
+c589	H7795	שׂוֹרָה	row	2	0
+c590	H7811	שָׂחָה	swimmer	2	0
+c591	H6341	פַּח	snare	5	5
+c592	H7829	שַׁחֶפֶת	consumption	2	0
+c593	H7854	שָׂטָן	adversary	8	0
+c594	H7875	שִׂיד	lime	2	0
+c595	H7896	שִׁית	set	12	4
+c596	H7905	שֻׂכָּה	harpoons	2	0
+c597	H7921	שָׁכֹל	bereaved	4	0
+c598	H6966	קוּם	set up	14	0
+c599	H7963	שְׁלֵוָה	prosperity	2	0
+c600	H7988	שִׁלְיָה	afterbirth	2	0
+c601	H7993	שָׁלַךְ	threw	13	2
+c602	H8001	שְׁלָם	peace	2	0
+c603	H8102	שֶׁמֶץ	whisper	2	0
+c604	H8127	שֵׁן	teeth	5	0
+c605	H0970	בָּחַר	men	6	0
+c606	H8307	שְׁרִירוּת	stubbornness	4	0
+c607	H8288	שְׂרוֹךְ	thong	2	0
+c608	H8320	שָׂרֻק	sorrel	2	0
+c609	H8328	שֶׁרֶשׁ	root	15	5
+c610	H8362	שָׁתַל	planted	2	0
+c611	H8373	תָּאַב	long	2	0
+c612	H8382	תָּאַם	bearing twins	2	0
+c613	H5034	נָבֵל	withered	6	3
+c614	H8482	תַּחְתִּי	lowest	2	0
+c615	H2429	חַיִל	power	9	0

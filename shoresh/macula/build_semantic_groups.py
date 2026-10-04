@@ -16,8 +16,13 @@ confidence flag, these groups kept 0.91-0.93 of the SDBH labels' label-fit usefu
 split, with 93% of content tokens labelled (SDBH: 41%).
 
 Sources:
-  --source bhsa-free-routed  shoresh/macula/data/bhsa_free/routed/domain_clusters.tsv (default since
-                       2026-10-03): the BHSA-free build with --route-homographs, so Strong's-level evidence
+  --source bhsa-free-served  shoresh/macula/data/bhsa_free/served/domain_clusters.tsv (default since
+                       2026-10-04): bhsa-free-routed plus --no-corroborated (the corroborated family rests on
+                       Wiktionary roots, CC BY-SA, so it stays out of the CC0 lineage) and a fixed hash seed
+                       (reproducible builds). Label fit 86.7% vs 87.6% with those edges (dev, seed-matched,
+                       within hash-seed noise)
+  --source bhsa-free-routed  shoresh/macula/data/bhsa_free/routed/domain_clusters.tsv (2026-10-03):
+                       the BHSA-free build with --route-homographs, so Strong's-level evidence
                        (BDB roots, LLM pairs) attaches only to the matching MACULA homograph (fixes Ps 23:1
                        רֹעִי "my shepherd" being labelled רֵעַ "neighbor"); scorecard-neutral on dev
   --source bhsa-free   shoresh/macula/data/bhsa_free/domain_clusters.tsv (no
@@ -30,10 +35,11 @@ Full BHSA-free rebuild (outputs under shoresh/macula/data/bhsa_free/, gitignored
   .venv/bin/python3 -m macula.build_bhsa_free_contexts
   .venv/bin/python3 -m macula.build_semantic_neighbors --emb macula/data/bhsa_free/context_emb_berel.npz \
       --macula-contexts macula/data/bhsa_free/occurrence.db --no-structural --parallelism-tomim-only \
-      --no-xling --route-homographs --emb-label "BEREL word-window centroids (MACULA, BHSA-free)" \
-      --out-dir macula/data/bhsa_free/routed
-  .venv/bin/python3 -m macula.build_domain_clusters --neighbors macula/data/bhsa_free/routed/by_lexeme.tsv \
-      --out macula/data/bhsa_free/routed/domain_clusters.tsv
+      --no-xling --no-corroborated --route-homographs --emb-label "BEREL word-window centroids (MACULA, BHSA-free)" \
+      --out-dir macula/data/bhsa_free/served
+  .venv/bin/python3 -m macula.build_domain_clusters --neighbors macula/data/bhsa_free/served/by_lexeme.tsv \
+      --out macula/data/bhsa_free/served/domain_clusters.tsv
+  (both builders fix PYTHONHASHSEED=0 themselves; two runs are byte-identical)
   .venv/bin/python3 -m macula.build_semantic_groups
 """
 from __future__ import annotations
@@ -60,12 +66,14 @@ def live_gloss(strong: str) -> str:
 
 def build(source: str) -> tuple[list[tuple], dict[str, tuple], str]:
     counts, lemmas = dp.token_counts(), dp.lemma_of()
-    if source in ("bhsa-free", "bhsa-free-routed"):
+    if source in ("bhsa-free", "bhsa-free-routed", "bhsa-free-served"):
         occ, glosses = dp.lexeme_occurrences_nb()
-        path = dp.BHSA_FREE / "routed" / "domain_clusters.tsv" if source == "bhsa-free-routed" else dp.CLUSTERS_NB
+        path = {"bhsa-free-served": dp.BHSA_FREE / "served" / "domain_clusters.tsv",
+                "bhsa-free-routed": dp.BHSA_FREE / "routed" / "domain_clusters.tsv"}.get(source, dp.CLUSTERS_NB)
         provenance = ("BEREL word-window centroids over MACULA text, no BHSA input (build_bhsa_free_contexts + "
                       "build_semantic_neighbors --macula-contexts"
-                      + (" --route-homographs)" if source == "bhsa-free-routed" else ")"))
+                      + {"bhsa-free-served": " --route-homographs --no-corroborated: no Wiktionary input)",
+                         "bhsa-free-routed": " --route-homographs)"}.get(source, ")"))
     else:
         occ, glosses = dp.unit_occurrences()
         path, provenance = dp.CLUSTERS, "resources/semantic_neighbors/domain_clusters.tsv (production pack)"
@@ -111,7 +119,8 @@ def write(members: list[tuple], groups: dict[str, tuple], provenance: str, out: 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--source", choices=["production", "bhsa-free", "bhsa-free-routed"], default="bhsa-free-routed")
+    ap.add_argument("--source", choices=["production", "bhsa-free", "bhsa-free-routed", "bhsa-free-served"],
+                    default="bhsa-free-served")
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
     members, groups, provenance = build(args.source)
