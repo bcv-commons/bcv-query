@@ -338,10 +338,112 @@ def group_lexemes(gid: str, gloss_lang: str = "English", limit: int = 200) -> di
             "count": len(rows), "lexemes": lexemes}
 
 
+# ---------- Hebrew settings (CC BY; stand-in for SDBH ctx) ----------
+
+def _tsv_rows(path: Path):
+    header = None
+    with path.open(encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#"):
+                continue
+            parts = line.rstrip("\n").split("\t")
+            if header is None:
+                header = parts
+                continue
+            yield dict(zip(header, parts))
+
+
+@lru_cache(maxsize=1)
+def _settings() -> tuple[dict, dict, dict]:
+    """(settings, verse_map, strong_map) from resources/settings/ (macula/build_setting_axis.py).
+    settings: id -> {label_strongs, label_lemmas, top_strongs}; verse_map: (book, ch, vs) ->
+    [(strong, setting, via)] in text order; strong_map: strong -> [(setting, count, share)]."""
+    base = _resources_dir() / "settings"
+    settings, verses, strongs = {}, {}, collections.defaultdict(list)
+    if not (base / "hbo_settings.tsv").exists():
+        return settings, verses, strongs
+    for r in _tsv_rows(base / "hbo_settings.tsv"):
+        settings[r["setting"]] = {"label_strongs": r["label_strongs"].split(","),
+                                  "label_lemmas": r["label_lemmas"].split(","),
+                                  "top_strongs": r["top_strongs"].split(",")}
+    for r in _tsv_rows(base / "hbo_verse_settings.tsv"):
+        verses[(r["book"], int(r["chapter"]), int(r["verse"]))] = [
+            tuple(w.split(":")) for w in r["words"].split("|") if w]
+    for r in _tsv_rows(base / "hbo_strong_settings.tsv"):
+        strongs[r["strong"]].append((r["setting"], int(r["count"]), float(r["share"])))
+    return settings, verses, strongs
+
+
+def setting_record(sid: str, gloss_lang: str = "English", with_gloss: bool = False) -> dict | None:
+    """A setting's id and label: its two most characteristic Hebrew words ("מִזְבֵּחַ, עֹלָה"), with
+    glosses in the reader's language when `with_gloss` ("מִזְבֵּחַ · altar, עֹלָה · burnt offering")."""
+    st = _settings()[0].get(sid)
+    if not st:
+        return None
+    parts = []
+    for strong, lemma in zip(st["label_strongs"], st["label_lemmas"]):
+        g = _label_gloss(strong, (gloss_of(strong) or {}).get("gloss") or "", gloss_lang) if with_gloss else ""
+        parts.append(f"{lemma} · {g}" if g else lemma)
+    return {"id": sid, "label": ", ".join(parts)}
+
+
+def setting_lexemes(sid: str, gloss_lang: str = "English", limit: int = 200) -> dict:
+    """Words used in a setting: its characteristic words first, then every word by occurrences in it."""
+    rec = setting_record(sid.strip(), gloss_lang, with_gloss=True)
+    if not rec:
+        return {"domain": sid, "axis": "setting", "label": None, "count": 0, "lexemes": []}
+    top = _settings()[0][rec["id"]]["top_strongs"]
+    counts = {s: (n, sh) for s, rows in _settings()[2].items() for st, n, sh in rows if st == rec["id"]}
+    order = top + sorted((s for s in counts if s not in top), key=lambda s: -counts[s][0])
+    lexemes = [{"strong": s, "lang": "hbo", **(gloss_of(s) or {}),
+                "count": counts.get(s, (0, 0))[0], "share": round(counts.get(s, (0, 0))[1], 3),
+                "characteristic": s in top} for s in order[:limit]]
+    return {"domain": rec["id"], "axis": "setting", "label": rec["label"], "count": len(order), "lexemes": lexemes}
+
+
+@lru_cache(maxsize=1)
+def _lexical_relations() -> dict:
+    """strong -> [(sense, relation, other_lemma, [other strongs])] from resources/lexical_relations/hbo.tsv
+    (UBS Dictionary of Biblical Hebrew synonym/antonym links, CC BY-SA 4.0; macula/build_ubs_open.py)."""
+    path = _resources_dir() / "lexical_relations" / "hbo.tsv"
+    out: dict = collections.defaultdict(list)
+    if path.exists():
+        for r in _tsv_rows(path):
+            out[r["strong"]].append((r["sense"], r["relation"], r["other_lemma"],
+                                     [x for x in r["other_strongs"].split(",") if x]))
+    return out
+
+
+def lexical_relations(strong: str, gloss_lang: str = "English") -> dict | None:
+    """Synonyms and antonyms of a Hebrew word per dictionary sense (UBS, CC BY-SA 4.0), glossed."""
+    rows = _lexical_relations().get(_norm_strong(strong))
+    if not rows:
+        return None
+    out: dict = {"synonyms": [], "antonyms": [], "license": "CC BY-SA 4.0",
+                 "source": "UBS Dictionary of Biblical Hebrew (United Bible Societies)"}
+    seen = set()
+    for sense, rel, lemma, others in rows:
+        if (rel, sense, lemma) in seen:
+            continue
+        seen.add((rel, sense, lemma))
+        item = {"sense": sense, "lemma": lemma, "strongs": others}   # a lemma can match homographs
+        if others:
+            g = gloss_of(others[0]) or {}
+            item["gloss"] = _label_gloss(others[0], g.get("gloss") or "", gloss_lang) if g else ""
+        out["synonyms" if rel == "synonym" else "antonyms"].append(item)
+    return out
+
+
 def domain_lexemes(code: str, axis: str = "sdbg", limit: int = 200, gloss_lang: str = "English") -> dict:
     """Every lexeme in a semantic domain, glossed — "every word in Love/Affection".
     axis: sdbg (Louw-Nida, Greek + LXX-bridged Hebrew) | lex (native SDBH) | group (CC0 Hebrew
-    semantic groups). core / ctx are aliases of group: SDBH's core/ctx axes were retired."""
+    semantic groups) | setting (CC BY Hebrew settings, ids like s01). SDBH's core/ctx axes were retired:
+    core is an alias of group, ctx of setting."""
+    if axis in ("setting", "ctx"):
+        out = setting_lexemes(code, gloss_lang, limit)
+        if axis == "ctx":
+            out["aliased_from"] = "ctx"
+        return out
     if axis == "group" or axis in _RETIRED_AXES:
         out = group_lexemes(code, gloss_lang, limit)
         if axis in _RETIRED_AXES:
@@ -722,6 +824,11 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         "keyness": keyness_of(code),                   # how distinctively biblical
         "tw": tw,                                       # nudge 1: study the concept (localized text)
         "domains": domains, "group": group,             # Hebrew semantic group (CC0), or None
+        # Hebrew settings the word is used in (CC BY; stand-in for SDBH ctx), most frequent first
+        "settings": [{**setting_record(sid, gloss_lang, with_gloss=True), "count": n, "share": sh}
+                     for sid, n, sh in _settings()[2].get(code, []) if setting_record(sid)],
+        # synonyms / antonyms per dictionary sense (UBS, CC BY-SA 4.0; `sense` matches `senses`), or None
+        "relations": lexical_relations(code, gloss_lang) if code.startswith("H") else None,
         "siblings": siblings,                           # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
         "stems": _stem_senses(code, gloss_lang),       # lex-anchored: per-binyan glosses + homographs
@@ -863,7 +970,8 @@ def _strong_code(word_lang: str, strong: int | None) -> str | None:
 def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain_gloss: bool = False) -> dict:
     """Greek (LXX) + Hebrew/Greek (spine) words for one verse. `gloss_lang` localizes the per-word
     binyan-correct sense. Hebrew words carry `group` (CC0 semantic group) and `domain` = its Hebrew
-    exemplar label, with the localized gloss appended ("אָב · father") when `domain_gloss`."""
+    exemplar label, with the localized gloss appended ("אָב · father") when `domain_gloss`, and
+    `setting` (the topical setting the word is used in here; CC BY), glossed the same way."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
@@ -896,6 +1004,11 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
         scon.close()
         if rows:
             senses = _verse_sense_map(book, chapter, vrs, gloss_lang) if spine_lang == "hbo" else {}
+            # settings come keyed by Strong's in text order (MACULA tokens); match them in order
+            pending = collections.defaultdict(collections.deque)
+            verse_settings = _settings()[1].get((book, chapter, vrs), []) if spine_lang == "hbo" else []
+            for n, (st_code, sid, via) in enumerate(verse_settings):
+                pending[st_code].append((sid, via, n))
             doms = _strong_domains()          # Greek per-word domain (Louw-Nida `sdbg`)
             words = []
             for r in rows:
@@ -918,6 +1031,11 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
                     if group:
                         w["group"] = group
                         w["domain"] = group_label(group, domain_gloss)
+                    if code and pending.get(_norm_strong(code)):
+                        sid, via, _n = pending[_norm_strong(code)].popleft()
+                        rec = setting_record(sid, gloss_lang, with_gloss=domain_gloss)
+                        if rec:
+                            w["setting"] = {**rec, "via": "word" if via == "w" else "passage"}
                 else:
                     dd = doms.get(_norm_strong(code)) if code else None
                     dd_axis = [x for x in dd if x[0] == "sdbg"] if dd else []
@@ -926,8 +1044,25 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
                         if best:
                             w["domain"] = _localize_domain(best[0], best[1], gloss_lang)
                 words.append(w)
+            if spine_lang == "hbo":
+                _match_leftover_settings(words, pending, gloss_lang, domain_gloss)
             result["spine"] = {"language": spine_lang, "words": words}
     return result
+
+
+def _match_leftover_settings(words: list[dict], pending: dict, gloss_lang: str, domain_gloss: bool) -> None:
+    """Second pass: the two spines sometimes number a word differently (רֹעִי is H7473 in MACULA, H7462 in
+    the STEP spine). When the leftover settings and the leftover content words are equally many, pair them
+    in text order."""
+    left = sorted((n, sid, via) for q in pending.values() for sid, via, n in q)
+    content = _settings()[2]
+    open_words = [w for w in words if "setting" not in w and w.get("strong") and _norm_strong(w["strong"]) in content]
+    if not left or len(left) != len(open_words):
+        return
+    for w, (_n, sid, via) in zip(open_words, left):
+        rec = setting_record(sid, gloss_lang, with_gloss=domain_gloss)
+        if rec:
+            w["setting"] = {**rec, "via": "word" if via == "w" else "passage"}
 
 
 @lru_cache(maxsize=1)

@@ -133,6 +133,8 @@ def validate(assign: dict[str, int]) -> None:
 
 
 def main() -> int:
+    from macula.build_semantic_neighbors import deterministic_hash_seed
+    deterministic_hash_seed()              # Louvain's result depends on edge order, i.e. on set hashing
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--validate", action="store_true")
     ap.add_argument("--neighbors", type=Path, default=NEIGHBORS,

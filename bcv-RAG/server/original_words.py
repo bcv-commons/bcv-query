@@ -66,7 +66,9 @@ def _compact_words(words: list[dict]) -> list[dict]:
          "sense": w.get("sense", ""),          # shoresh /verse's binyan-correct sense (hbo.db-derived, OT)
          # Greek: dominant Louw-Nida domain. Hebrew: CC0 semantic group label + gloss ("אָב · father").
          "domain": w.get("domain", ""),
-         "group_confidence": (w.get("group") or {}).get("confidence", "")}
+         "group_confidence": (w.get("group") or {}).get("confidence", ""),
+         # Hebrew: the topical setting the word is used in here ("מִזְבֵּחַ · altar, עֹלָה · burnt offering")
+         "setting": (w.get("setting") or {}).get("label", "")}
         for w in words if w.get("strong")
     ]
 

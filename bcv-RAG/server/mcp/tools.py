@@ -1029,13 +1029,15 @@ def _lexeme_profile(args: dict, db: sqlite3.Connection) -> dict:
         "Every lexeme in a semantic domain or group, glossed — 'all the words for Love/Affection'. "
         "axis=sdbg (default): Louw-Nida domain, Greek + the Hebrew the LXX renders into it (codes like "
         "'025003'). axis=group: a Hebrew semantic group (CC0, ids like 'c27', named by a Hebrew exemplar "
-        "word; find a word's group via word_study or verse_interlinear). $0. Localized via `lang`."
+        "word; find a word's group via word_study or verse_interlinear). axis=setting: a Hebrew setting "
+        "(ids 's01'-'s40'; the topical setting words are used in, e.g. altar/burnt offering, battle, "
+        "household; found per word in verse_interlinear and word_study). $0. Localized via `lang`."
     ),
     input_schema={
         "type": "object",
         "properties": {
-            "code": {"type": "string", "description": "Domain code ('025003') or group id ('c27')."},
-            "axis": {"type": "string", "enum": ["sdbg", "group"], "default": "sdbg"},
+            "code": {"type": "string", "description": "Domain code ('025003'), group id ('c27') or setting id ('s01')."},
+            "axis": {"type": "string", "enum": ["sdbg", "group", "setting"], "default": "sdbg"},
             "lang": {"type": "string", "default": "en"},
         },
         "required": ["code"],

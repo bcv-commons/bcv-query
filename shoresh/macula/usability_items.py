@@ -41,7 +41,7 @@ from macula.domain_providers import OUT as PROVIDERS_DIR, SPINE_DB, lemma_of, lo
 HERE = Path(__file__).resolve().parent
 ITEMS = HERE / "data" / "usability" / "items"
 SEEDS = (13, 17, 23, 29, 31)
-PROVIDERS = ("P0", "P1", "P2", "PR-P0", "PR-P2", "P1nb", "P2nb", "PR-P2nb", "A1", "A2", "P2nbmz", "P2nbr")
+PROVIDERS = ("P0", "P1", "P2", "PR-P0", "PR-P2", "P1nb", "P2nb", "PR-P2nb", "A1", "A2", "P2nbmz", "P2nbr", "P2nbrm", "P2nbrmz", "B0", "B1", "MZM0", "RS0", "RSN0", "MZMM0", "BNC0")
 N_GROUPS = 200
 N_TOKENS = 300
 MAX_MEMBERS = 4
@@ -285,8 +285,12 @@ def main() -> int:
            "pool_bucket": bucket_of(pool), "tokens": tokens, "verses": verses,
            "shared": served_by["P0"] & served_by["P1"] & served_by["P2"]}
 
+    # merge into the existing manifest: a run for a few providers must not drop the others' entries
+    # (the test lock compares every locked file against it)
+    old = (json.loads((ITEMS / "manifest.json").read_text(encoding="utf-8")).get("files", {})
+           if (ITEMS / "manifest.json").exists() else {})
     manifest: dict = {"providers_manifest": hashlib.sha256((PROVIDERS_DIR / "manifest.json").read_bytes()).hexdigest(),
-                      "files": {}}
+                      "files": dict(old)}
     manifest["files"]["gold.jsonl"] = write_jsonl(ITEMS / "gold.jsonl", gold_items(lemmas))
     for p in args.providers:
         for seed in SEEDS:

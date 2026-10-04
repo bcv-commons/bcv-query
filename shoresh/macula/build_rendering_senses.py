@@ -1,0 +1,320 @@
+"""Sense split by translation: occurrences of a Hebrew word that translators render alike share a sense.
+
+For רוּחַ, translators in ten languages write "spirit / espíritu / esprit / дух..." in some verses and
+"wind / viento / vent / ветер..." in others. The renderings of one sense co-occur on the same Hebrew
+token across languages; renderings of different senses do not. So per lexeme:
+1. features = (language, normalised rendering) on each aligned occurrence (resources/strongs/attestations,
+   10 languages, Clear-Bible alignments; function words dropped via resources/stopwords);
+2. a feature graph, edges weighted by cross-language co-occurrence on the same token (cosine-normalised);
+3. Louvain communities = candidate senses; each occurrence goes to the community its features vote for;
+   communities with too few occurrences are dissolved into the next-best;
+4. label = the community's most frequent English rendering.
+Hebrew-internal context plays no part; the BEREL context split (build_bhsa_free_senses.py) could not
+separate spirit/wind.
+
+Evaluated (`--eval`) against the UBS Dictionary of Biblical Hebrew per-token sense index (CC BY-SA,
+index/WLC of ubsicap/ubs-open-license) as an independent check, beside two baselines: one sense per word,
+and MACULA's per-token English gloss.
+
+  python -m macula.build_rendering_senses --eval
+  python -m macula.build_rendering_senses --out macula/data/rendering_senses
+"""
+from __future__ import annotations
+
+import argparse
+import collections
+import itertools
+import json
+import math
+import re
+import sqlite3
+import sys
+import unicodedata
+from pathlib import Path
+
+import pyarrow.compute as pc
+import pyarrow.parquet as pq
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+SPINE = HERE / "lexeme-spine.db"
+LOWFAT = HERE / "lowfat-hbo.db"
+ATTEST = ROOT / "resources" / "strongs" / "attestations"
+STOP = ROOT / "resources" / "stopwords"
+UBS_INDEX = HERE / "data" / "ubs_open" / "index_wlc"
+LANGS = ("eng", "spa", "fra", "por", "rus", "arb", "hin", "ben", "asm", "hau")
+MIN_OCC = 20            # lexemes with fewer aligned occurrences keep one sense
+MIN_SENSE_SHARE = 0.05  # a sense needs at least this share of the word's occurrences ...
+MIN_SENSE_OCC = 4       # ... and at least this many
+RESOLUTION = 1.0
+
+_ARABIC_MARKS = re.compile(r"[ً-ٰٟـ]")
+
+
+def norm(lang: str, s: str) -> str:
+    s = unicodedata.normalize("NFC", s.lower()).strip(".,;:!?\"'«»()[]“”‘’-—")
+    if lang == "arb":
+        s = _ARABIC_MARKS.sub("", s)
+        for pre in ("و", "ف"):
+            if s.startswith(pre) and len(s) > 3:
+                s = s[1:]
+        if s.startswith("ال") and len(s) > 4:
+            s = s[2:]
+        return s[:5]
+    if lang in ("eng", "spa", "fra", "por", "hau", "rus"):
+        s = "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+        # grammatical number is not a sense: plural tokens get plural renderings in every language
+        if lang in ("eng", "fra") and len(s) > 3 and s.endswith(("s", "x")):
+            s = s[:-1]
+        elif lang in ("spa", "por") and len(s) > 4 and s.endswith(("es", "os", "as")):
+            s = s[:-1]
+        elif lang in ("spa", "por") and len(s) > 3 and s.endswith("s"):
+            s = s[:-1]
+        if lang == "rus":
+            return s[:4]
+        return s[:5] if len(s) > 5 else s
+    return s
+
+
+def stopwords(lang: str) -> set[str]:
+    p = STOP / f"{lang}.tsv"
+    if not p.exists():
+        return set()
+    return {l.split("\t")[0].lower() for l in p.read_text(encoding="utf-8").splitlines()
+            if l and not l.startswith("#") and not l.startswith("surface\t")}
+
+
+def load_features() -> tuple[dict[str, set], dict[str, collections.Counter]]:
+    """token key (lexeme-spine key) -> {(lang, form)}, and form -> Counter(raw English surfaces) for labels."""
+    feats: dict[str, set] = collections.defaultdict(set)
+    eng_raw: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
+    for lang in LANGS:
+        p = ATTEST / f"{lang}.parquet"
+        if not p.exists():
+            continue
+        t = pq.read_table(p, columns=["strong", "surface", "source_id"])
+        t = t.filter(pc.starts_with(t["source_id"], "o"))
+        stop = stopwords(lang)
+        for sid, surf in zip(t["source_id"].to_pylist(), t["surface"].to_pylist()):
+            if not surf:
+                continue
+            low = surf.lower().strip(".,;:!?\"'")
+            if low in stop or len(low) < 3:
+                continue
+            f = norm(lang, surf)
+            if len(f) < 3:
+                continue
+            feats[sid[1:]].add((lang, f))
+            if lang == "eng":
+                eng_raw[f][low] += 1
+    return feats, eng_raw
+
+
+def lexeme_tokens() -> dict[str, list[str]]:
+    db = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    out = collections.defaultdict(list)
+    for key, lexeme in db.execute("SELECT key, lexeme FROM spine_words WHERE lexeme LIKE 'hbo:%'"):
+        out[lexeme].append(key)
+    return out
+
+
+def split_lexeme(keys: list[str], feats: dict[str, set], seed: int = 13) -> dict[str, int]:
+    """token key -> sense number (1 = largest). Tokens without features are left out."""
+    import networkx as nx
+    occ = [(k, feats[k]) for k in keys if feats.get(k)]
+    if len(occ) < MIN_OCC:
+        return {k: 1 for k, _ in occ}
+    fcount = collections.Counter(f for _, fs in occ for f in fs)
+    keep = {f for f, n in fcount.items() if n >= 2}
+    pair = collections.Counter()
+    for _, fs in occ:
+        fs = sorted(f for f in fs if f in keep)
+        for a, b in itertools.combinations(fs, 2):
+            if a[0] != b[0]:
+                pair[(a, b)] += 1
+    G = nx.Graph()
+    G.add_nodes_from(keep)
+    for (a, b), n in pair.items():
+        if n >= 2:
+            G.add_edge(a, b, weight=n / math.sqrt(fcount[a] * fcount[b]))
+    comms = nx.community.louvain_communities(G, weight="weight", resolution=RESOLUTION, seed=seed)
+    comm_of = {f: i for i, c in enumerate(comms) for f in c}
+
+    def votes(fs, allowed):
+        v = collections.Counter()
+        for f in fs:
+            if f in comm_of and comm_of[f] in allowed:
+                v[comm_of[f]] += 1
+        return v
+
+    allowed = set(range(len(comms)))
+    while True:
+        assign = {}
+        for k, fs in occ:
+            v = votes(fs, allowed)
+            if v:
+                assign[k] = v.most_common(1)[0][0]
+        size = collections.Counter(assign.values())
+        small = [c for c in allowed if size[c] < max(MIN_SENSE_OCC, MIN_SENSE_SHARE * len(occ))]
+        if not small or len(allowed) == 1:
+            break
+        allowed.discard(min(small, key=lambda c: size[c]))
+    if not assign:
+        return {k: 1 for k, _ in occ}
+    order = {c: i + 1 for i, (c, _) in enumerate(collections.Counter(assign.values()).most_common())}
+    return {k: order[c] for k, c in assign.items()}
+
+
+def build(out: Path | None = None, only: set[str] | None = None,
+          merge_same_label: bool = False) -> dict[str, dict[str, int]]:
+    feats, eng_raw = load_features()
+    toks = lexeme_tokens()
+    result, labels = {}, {}
+    for lexeme, keys in toks.items():
+        if only and lexeme not in only:
+            continue
+        a = split_lexeme(keys, feats)
+        eng = collections.defaultdict(collections.Counter)
+        for k, s in a.items():
+            for lang, f in feats.get(k, ()):
+                if lang == "eng":
+                    eng[s][f] += 1
+        lab = {s: _label(eng[s], eng_raw) for s in set(a.values())}
+        # optional: senses with the same English label as one (two "soul" communities). Off by default:
+        # it lowered agreement with the UBS sense index (ARI 0.202 -> 0.183 at resolution 1.0).
+        first = {}
+        merged = {s: (first.setdefault(lab[s] or f"#{s}", s) if merge_same_label else s) for s in sorted(lab)}
+        a = {k: merged[s] for k, s in a.items()}
+        order = {s: i + 1 for i, (s, _) in enumerate(collections.Counter(a.values()).most_common())}
+        result[lexeme] = {k: order[s] for k, s in a.items()}
+        labels[lexeme] = {order[s]: lab[s] for s in order}
+    if out:
+        out.mkdir(parents=True, exist_ok=True)
+        with (out / "occurrences.tsv").open("w", encoding="utf-8") as fh:
+            fh.write("key\tlexeme\tsense\n")
+            for lexeme, a in result.items():
+                for k, s in a.items():
+                    fh.write(f"{k}\t{lexeme}\t{s}\n")
+        with (out / "senses.tsv").open("w", encoding="utf-8") as fh:
+            fh.write("lexeme\tsense\tlabel\tcount\tshare\n")
+            for lexeme, a in result.items():
+                cnt = collections.Counter(a.values())
+                tot = sum(cnt.values())
+                for s, n in sorted(cnt.items()):
+                    fh.write(f"{lexeme}\t{s}\t{labels[lexeme].get(s, '')}\t{n}\t{n / tot:.3f}\n")
+    return result
+
+
+def _label(c: collections.Counter, eng_raw: dict) -> str:
+    if not c:
+        return ""
+    f = c.most_common(1)[0][0]
+    return eng_raw[f].most_common(1)[0][0] if eng_raw.get(f) else f
+
+
+# ---------- evaluation ----------
+
+def ubs_gold() -> dict[str, str]:
+    """token key -> UBS sense id ("lemma:000002"), first lexical link."""
+    gold = {}
+    for p in sorted(UBS_INDEX.glob("*.json")):
+        for rec in json.loads(p.read_text(encoding="utf-8")):
+            links = [l for l in rec.get("LexicalLinks", []) if l.startswith("SDBH:")]
+            if links:
+                parts = links[0].split(":")
+                gold[rec["ID"][1:]] = f"{parts[1]}:{parts[2]}"
+    return gold
+
+
+def gloss_partition() -> dict[str, str]:
+    lf = sqlite3.connect(f"file:{LOWFAT}?mode=ro", uri=True)
+    return {k: (g or "").lower() for k, g in lf.execute("SELECT key, gloss FROM lowfat_words WHERE is_inserted=0")}
+
+
+def pair_scores(pred: dict[str, object], gold: dict[str, str], keys: list[str]) -> tuple[float, float, float] | None:
+    ks = [k for k in keys if k in pred and k in gold]
+    if len(ks) < 2:
+        return None
+    tp = fp = fn = 0
+    pc_ = collections.Counter((pred[k], gold[k]) for k in ks)
+    pp = collections.Counter(pred[k] for k in ks)
+    gg = collections.Counter(gold[k] for k in ks)
+    c2 = lambda n: n * (n - 1) // 2
+    tp = sum(c2(n) for n in pc_.values())
+    same_pred = sum(c2(n) for n in pp.values())
+    same_gold = sum(c2(n) for n in gg.values())
+    prec = tp / same_pred if same_pred else 1.0
+    rec = tp / same_gold if same_gold else 1.0
+    f1 = 2 * prec * rec / (prec + rec) if prec + rec else 0.0
+    return prec, rec, f1
+
+
+def ari(pred: dict, gold: dict, keys: list[str]) -> float | None:
+    ks = [k for k in keys if k in pred and k in gold]
+    n = len(ks)
+    if n < 2:
+        return None
+    c2 = lambda x: x * (x - 1) / 2
+    idx = sum(c2(v) for v in collections.Counter((pred[k], gold[k]) for k in ks).values())
+    a = sum(c2(v) for v in collections.Counter(pred[k] for k in ks).values())
+    b = sum(c2(v) for v in collections.Counter(gold[k] for k in ks).values())
+    exp = a * b / c2(n)
+    mx = (a + b) / 2
+    return 0.0 if mx == exp else (idx - exp) / (mx - exp)
+
+
+def bhsa_partition() -> dict[str, str]:
+    """Internal comparison only: the BHSA-based sense column of the full spine (never published)."""
+    db = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    cols = {r[1] for r in db.execute("PRAGMA table_info(spine_words)")}
+    if "sense" not in cols:
+        return {}
+    return {k: f"{st}:{se}" for k, st, se in db.execute(
+        "SELECT key, stem, sense FROM spine_words WHERE lexeme LIKE 'hbo:%' AND sense IS NOT NULL")}
+
+
+def evaluate(result: dict[str, dict[str, int]], gold: dict[str, str]) -> dict:
+    gloss = gloss_partition()
+    bhsa = bhsa_partition()
+    toks = lexeme_tokens()
+    rows = collections.defaultdict(list)
+    n_lex = 0
+    for lexeme, a in result.items():
+        keys = [k for k in toks[lexeme] if k in a and k in gold]
+        senses = collections.Counter(gold[k] for k in keys)
+        # polysemous by UBS: at least two senses, the second with >= 10% of the tokens
+        if len(keys) < MIN_OCC or len(senses) < 2 or senses.most_common(2)[1][1] < 0.1 * len(keys):
+            continue
+        n_lex += 1
+        for name, pred in (("rendering", a), ("one-sense", {k: 1 for k in keys}),
+                           ("macula-gloss", {k: gloss.get(k, "") for k in keys}),
+                           ("bhsa-context (internal)", {k: bhsa.get(k, "") for k in keys})):
+            s = pair_scores(pred, gold, keys)
+            if s:
+                rows[name].append((s + (ari(pred, gold, keys) or 0.0,), len(keys)))
+    out = {"polysemous_lexemes": n_lex}
+    for name, rs in rows.items():
+        macro = [sum(r[0][i] for r in rs) / len(rs) for i in range(4)]
+        out[name] = {"pair_precision": round(macro[0], 3), "pair_recall": round(macro[1], 3),
+                     "pair_f1": round(macro[2], 3), "ari": round(macro[3], 3)}
+    return out
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--eval", action="store_true")
+    ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--resolution", type=float, default=RESOLUTION)
+    ap.add_argument("--merge-same-label", action="store_true")
+    a = ap.parse_args()
+    globals()["RESOLUTION"] = a.resolution
+    result = build(a.out, merge_same_label=a.merge_same_label)
+    multi = sum(1 for r in result.values() if len(set(r.values())) > 1)
+    print(f"lexemes {len(result)}; split into >1 sense: {multi}", file=sys.stderr)
+    if a.eval:
+        print(json.dumps(evaluate(result, ubs_gold()), indent=1))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

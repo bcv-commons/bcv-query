@@ -2,8 +2,13 @@
 """Build the language-independent prior pack — internal-docs/prior-pack.md.
 
 One row per ORIGINAL lexeme, bundling the shoresh-owned signals the aligner's gloss/neural runs consume
-as priors: keyness (function-word filter), LXX cross-testament bridge, sense inventory, and the
-semantic-neighbors pack. Keyed on the MACULA lexeme → one build serves every target language.
+as priors: keyness (function-word filter), LXX cross-testament bridge, and the semantic-neighbors pack.
+Keyed on the MACULA lexeme → one build serves every target language.
+
+BHSA-free since 2026-10-03 (BHSA is CC BY-NC-SA; this pack is CC BY): `neighbors` come from the BHSA-free
+pack (build_semantic_neighbors.py --macula-contexts --no-structural --parallelism-tomim-only --no-xling
+--route-homographs), and the former `senses` column is gone (it was our BHSA-based sense clustering). For
+senses use bcv-commons/senses-attested-ubs (CC BY-SA, keyed on UBS Dictionary of Biblical Hebrew senses).
 
   python -m macula.build_prior_pack        # -> resources/prior_pack/prior_pack.parquet + manifest.json
 """
@@ -28,7 +33,7 @@ MACULA = HERE / "macula-spine.db"
 KEYNESS = ROOT / "resources" / "strongs_keyness.tsv"
 LXX = ROOT / "resources" / "lxx_bridge.tsv"
 GLOSS = ROOT / "resources" / "strongs_gloss.tsv"
-NEIGHBORS = ROOT / "resources" / "semantic_neighbors" / "neighbors.parquet"
+NEIGHBORS = HERE / "data" / "bhsa_free" / "routed" / "neighbors.parquet"   # BHSA-free pack, not resources/'s
 OUT_DIR = ROOT / "resources" / "prior_pack"
 
 # MACULA `class` -> normalized cross-language POS (wishlist #1 set). `name` is applied on top for
@@ -97,7 +102,9 @@ def _xling_confidence(aligned_dir: Path) -> dict:
     return lex_hi
 
 
-def build(aligned_dir: Path | None = None):
+def build(aligned_dir: Path | None = None, neighbors: Path = NEIGHBORS):
+    if not neighbors.exists():
+        raise SystemExit(f"missing {neighbors} -- build the BHSA-free pack first (see docstring)")
     xling = _xling_confidence(aligned_dir) if aligned_dir and Path(aligned_dir).exists() else None
     sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
 
@@ -109,12 +116,6 @@ def build(aligned_dir: Path | None = None):
         t = "NT" if lexeme.startswith("grc:") else "OT"
         hstrong = (f"{'G' if t=='NT' else 'H'}{int(strong):04d}") if strong is not None else None
         info[lexeme] = {"strong": hstrong, "lemma": lemma or "", "is_content": bool(isc), "testament": t}
-
-    # 2. sense inventory per lexeme: [(stem, sense, share)] over sensed occurrences
-    sense_ct = collections.defaultdict(collections.Counter)
-    for lexeme, stem, sense in sp.execute(
-            "SELECT lexeme, stem, sense FROM spine_words WHERE sense IS NOT NULL AND sense != ''"):
-        sense_ct[lexeme][(stem or "", sense)] += 1
 
     # 3. keyness: strong -> weight
     keyness = {}
@@ -140,10 +141,9 @@ def build(aligned_dir: Path | None = None):
 
     # 5. neighbors: lexeme -> [{lexeme, score, relation, confidence}]
     nb = collections.defaultdict(list)
-    if NEIGHBORS.exists():
-        for r in pq.read_table(NEIGHBORS).to_pylist():
-            nb[r["lexeme"]].append({"lexeme": r["neighbor_lexeme"], "score": float(r["score"]),
-                                    "relation": r["relation"], "confidence": r["confidence"]})
+    for r in pq.read_table(neighbors).to_pylist():
+        nb[r["lexeme"]].append({"lexeme": r["neighbor_lexeme"], "score": float(r["score"]),
+                                "relation": r["relation"], "confidence": r["confidence"]})
 
     # 5b. grammar: dominant POS (name-aware), transliteration, content/function class
     gram = _grammar(info)
@@ -153,10 +153,6 @@ def build(aligned_dir: Path | None = None):
     for lexeme, d in info.items():
         s = d["strong"]
         g = gram.get(lexeme, {})
-        senses = []
-        tot = sum(sense_ct[lexeme].values())
-        for (stem, sense), c in sense_ct[lexeme].most_common():
-            senses.append({"stem": stem, "sense": sense, "share": round(c / tot, 4)})
         rows.append({
             "lexeme": lexeme, "strong": s, "testament": d["testament"],
             "is_content": d["is_content"], "lemma": d["lemma"],
@@ -165,13 +161,10 @@ def build(aligned_dir: Path | None = None):
             "keyness": keyness.get(s),
             "lxx_greek": order(h2g.get(s, [])) if d["testament"] == "OT" else [],
             "lxx_hebrew": order(g2h.get(s, [])) if d["testament"] == "NT" else [],
-            "senses": senses,
             "neighbors": sorted(nb.get(lexeme, []), key=lambda x: -x["score"]),
             "xling_confidence": (xling.get(lexeme, 0) if xling is not None else None),
         })
 
-    sense_struct = pa.list_(pa.struct([("stem", pa.string()), ("sense", pa.string()),
-                                       ("share", pa.float32())]))
     nb_struct = pa.list_(pa.struct([("lexeme", pa.string()), ("score", pa.float32()),
                                     ("relation", pa.string()), ("confidence", pa.string())]))
     table = pa.table({
@@ -186,7 +179,6 @@ def build(aligned_dir: Path | None = None):
         "keyness": pa.array([r["keyness"] for r in rows], pa.float32()),
         "lxx_greek": pa.array([r["lxx_greek"] for r in rows], pa.list_(pa.string())),
         "lxx_hebrew": pa.array([r["lxx_hebrew"] for r in rows], pa.list_(pa.string())),
-        "senses": pa.array([r["senses"] for r in rows], sense_struct),
         "neighbors": pa.array([r["neighbors"] for r in rows], nb_struct),
         "xling_confidence": pa.array([r["xling_confidence"] for r in rows], pa.int32()),
     })
@@ -201,20 +193,20 @@ def build(aligned_dir: Path | None = None):
         "rows": len(rows),
         "with_keyness": sum(1 for r in rows if r["keyness"] is not None),
         "with_lxx": sum(1 for r in rows if r["lxx_greek"] or r["lxx_hebrew"]),
-        "with_senses": sum(1 for r in rows if r["senses"]),
         "with_neighbors": sum(1 for r in rows if r["neighbors"]),
         "with_xling": sum(1 for r in rows if r["xling_confidence"]),
         "components": {
             "keyness_sha256": _sha(KEYNESS), "lxx_bridge_sha256": _sha(LXX),
-            "neighbors_sha256": _sha(NEIGHBORS), "spine_sha256": _sha(SPINE),
+            "neighbors_sha256": _sha(neighbors), "spine_sha256": _sha(SPINE),
         },
         "content_sha256": _sha(dest),
-        "note": "language-independent; CC-BY (MACULA lexeme + lxx_bridge); label-free (no MARBLE).",
+        "note": "language-independent; CC-BY (MACULA lexeme + lxx_bridge); label-free (no MARBLE); "
+                "BHSA-free since 2026-10-03 (BHSA-free neighbors; senses column removed).",
     }
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"prior_pack: {len(rows)} lexemes -> {dest}")
     print(f"  keyness {manifest['with_keyness']} · lxx {manifest['with_lxx']} · "
-          f"senses {manifest['with_senses']} · neighbors {manifest['with_neighbors']} · "
+          f"neighbors {manifest['with_neighbors']} · "
           f"xling {manifest['with_xling']}")
     return manifest
 
@@ -223,4 +215,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--aligned-lex-dir", type=Path, default=None,
                     help="local mirror of published aligned-lex (iso=*/data.parquet) → adds xling_confidence")
-    build(ap.parse_args().aligned_lex_dir)
+    ap.add_argument("--neighbors", type=Path, default=NEIGHBORS)
+    a = ap.parse_args()
+    build(a.aligned_lex_dir, a.neighbors)

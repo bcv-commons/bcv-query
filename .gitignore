@@ -104,6 +104,7 @@ shoresh/macula/macula-spine.db
 shoresh/macula/macula-spine.db-*
 # MACULA: lexeme-anchored spine export (re-derivable via macula.build_spine_words; data-contract §1)
 shoresh/macula/lexeme-spine.db
+shoresh/macula/lexeme-spine-macula.db
 # RP2018: second, independently-sourced Greek spine (re-derivable via macula.build_rp_spine)
 shoresh/macula/rp2018-spine.db
 shoresh/macula/rp2018-spine.db-*
@@ -172,8 +173,16 @@ shoresh/macula/data/sefer_hashorashim_entries.jsonl
 # usability scorecard outputs; the P0 snapshot holds SDBH labels and must stay local
 shoresh/macula/data/usability/
 shoresh/macula/data/bhsa_free/
+shoresh/macula/data/hf_cards/
+shoresh/macula/data/oshb_wlc/
+shoresh/macula/data/settings/
+shoresh/macula/data/rendering_senses/
+shoresh/macula/data/spanish_gloss_fix.jsonl
+shoresh/macula/data/menahem_*.log
 shoresh/macula/data/ubs_open/
 shoresh/macula/data/metzudat_zion_chapters.jsonl
+shoresh/macula/data/malbim_beur_hamilot_chapters.jsonl
+shoresh/macula/data/mahberet_menahem_letters.jsonl
 # sefer_hashorashim: candidate pairs, pre-LLM-verification — intermediate, not a final dataset
 resources/sefer_hashorashim/candidate_pairs.tsv
 # hbo_lex_export.tsv: publish-ready export of senses/hbo_lex.tsv, regenerable via

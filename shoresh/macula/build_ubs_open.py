@@ -150,6 +150,54 @@ def write_senses(path: Path, rows: list[tuple]) -> None:
           file=sys.stderr)
 
 
+_POINTS = re.compile(r"[\u0591-\u05C7]")
+
+
+def relation_rows(entries: list, prefix: str) -> list[tuple]:
+    """(strong, sense, lemma, relation, other_lemma, other_strongs) for every LEXSynonyms / LEXAntonyms
+    link; `sense` numbers meanings as sense_rows does. The other word is given as a lemma: resolved to
+    Strong's by the dictionary's own headwords, exact first, then consonants only if unambiguous."""
+    exact: dict = collections.defaultdict(set)
+    bare: dict = collections.defaultdict(set)
+    for e in entries:
+        strongs = {s for s in (_strong(c, prefix) for c in e.get("StrongCodes") or []) if s}
+        for lem in [e.get("Lemma") or ""] + list(e.get("AlternateLemmas") or []):
+            lem = lem if isinstance(lem, str) else (lem.get("Lemma") or "")
+            if lem:
+                exact[lem].update(strongs)
+                bare[_POINTS.sub("", lem)].add(frozenset(strongs))
+    out = []
+    for e in entries:
+        strongs = sorted({s for s in (_strong(c, prefix) for c in e.get("StrongCodes") or []) if s})
+        meanings = [lm for bf in e.get("BaseForms") or [] for lm in bf.get("LEXMeanings") or []]
+        for i, lm in enumerate(meanings, start=1):
+            for rel, field in (("synonym", "LEXSynonyms"), ("antonym", "LEXAntonyms")):
+                for other in lm.get(field) or []:
+                    other = (other if isinstance(other, str) else str(other)).strip()
+                    if not other:
+                        continue
+                    hit = exact.get(other)
+                    if not hit:
+                        cands = bare.get(_POINTS.sub("", other), set())
+                        hit = set(next(iter(cands))) if len(cands) == 1 else set()
+                    for s in strongs:
+                        out.append((s, str(i), e.get("Lemma") or "", rel, other, ",".join(sorted(hit))))
+    return out
+
+
+def write_relations(path: Path, rows: list[tuple]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as fh:
+        fh.write(f"# source={ATTRIBUTION}; synonym and antonym links between dictionary senses. `sense` numbers\n"
+                 "# the word's meanings as resources/senses/ does; other_strongs is empty where the linked lemma\n"
+                 "# could not be resolved (phrases, ambiguous spellings). Built by shoresh/macula/build_ubs_open.py.\n")
+        fh.write("strong\tsense\tlemma\trelation\tother_lemma\tother_strongs\n")
+        for r in sorted(set(rows)):
+            fh.write("\t".join(r) + "\n")
+    n_res = sum(1 for r in set(rows) if r[5])
+    print(f"  wrote {path.relative_to(ROOT)}: {len(set(rows))} links, {n_res} resolved to Strong's", file=sys.stderr)
+
+
 def write_labels(lang: str, key: str) -> None:
     out = {}
     for d in load(key):
@@ -177,6 +225,7 @@ def main() -> int:
     senses_dir = ROOT / "resources" / "senses"
     write_senses(senses_dir / "grc.tsv", sense_rows(load("greek"), "G"))
     write_senses(senses_dir / "hbo.tsv", sense_rows(load("hebrew"), "H"))
+    write_relations(ROOT / "resources" / "lexical_relations" / "hbo.tsv", relation_rows(load("hebrew"), "H"))
     return 0
 
 

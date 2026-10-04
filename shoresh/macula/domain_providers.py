@@ -76,7 +76,24 @@ ABLATIONS = {"A1": (BHSA_FREE / "ablations" / "a1" / "domain_clusters.tsv", "sen
              # admission test: the BHSA-free pack plus the Metzudat Zion signal (compare with P2nb)
              "P2nbmz": (BHSA_FREE / "with_mz" / "domain_clusters.tsv", "lexeme"),
              # BHSA-free + homograph routing of Strong's-level evidence (--route-homographs)
-             "P2nbr": (BHSA_FREE / "routed" / "domain_clusters.tsv", "lexeme")}
+             "P2nbr": (BHSA_FREE / "routed" / "domain_clusters.tsv", "lexeme"),
+             # admission tests on top of P2nbr: + Malbim Beur HaMilot; + Malbim and Metzudat Zion
+             "P2nbrm": (BHSA_FREE / "routed_malbim" / "domain_clusters.tsv", "lexeme"),
+             "P2nbrmz": (BHSA_FREE / "routed_mz_malbim" / "domain_clusters.tsv", "lexeme"),
+             # seed-controlled builds (fixed PYTHONHASHSEED; build_semantic_neighbors.deterministic_hash_seed):
+             # baseline at hash seeds 0 and 1 (clustering noise), + Malbim and Metzudat Zion, + sense units
+             # split by translation (build_rendering_senses.py)
+             "B0": (BHSA_FREE / "seeded" / "base_h0" / "domain_clusters.tsv", "lexeme"),
+             "B1": (BHSA_FREE / "seeded" / "base_h1" / "domain_clusters.tsv", "lexeme"),
+             "MZM0": (BHSA_FREE / "seeded" / "mzm_h0" / "domain_clusters.tsv", "lexeme"),
+             "RS0": (BHSA_FREE / "seeded" / "rs_h0" / "domain_clusters.tsv", "rsense"),
+             # sense units for nouns and adjectives only (verb "senses" were mostly tense/inflection)
+             "RSN0": (BHSA_FREE / "seeded" / "rsn_h0" / "domain_clusters.tsv", "rsense_nouns"),
+             # + Malbim, Metzudat Zion and Mahberet Menahem
+             "MZMM0": (BHSA_FREE / "seeded" / "mzmm_h0" / "domain_clusters.tsv", "lexeme"),
+             # baseline without the corroborated family (Wiktionary-backed, CC BY-SA) for a clean CC0 lineage
+             "BNC0": (BHSA_FREE / "seeded" / "base_nc_h0" / "domain_clusters.tsv", "lexeme")}
+RENDERING_SENSES = HERE / "data" / "rendering_senses" / "occurrences.tsv"
 CONTROL_SEED = 13
 
 Row = tuple[str, str, str, float, int]               # strong, axis, group_id, share, served
@@ -219,6 +236,26 @@ def lexeme_occurrences_nb() -> tuple[collections.Counter, dict[str, collections.
         g = clean_gloss((gloss or "").replace("[", "").replace("]", ""))
         if g and g.lower() not in _GLOSS_PREFIXES:          # MACULA sometimes glosses a verb token "he"
             glosses[lexeme][g] += 1
+    return counts, glosses
+
+
+def rsense_occurrences_nb(senses: Path | None = None) -> tuple[collections.Counter, dict[str, collections.Counter]]:
+    """Counts and glosses per lexeme#sense unit, senses from build_rendering_senses.py (as
+    build_semantic_neighbors --rendering-senses forms its units)."""
+    sense_of = {}
+    with (senses or RENDERING_SENSES).open(encoding="utf-8") as fh:
+        next(fh)
+        for line in fh:
+            k, _lx, sn = line.rstrip("\n").split("\t")
+            sense_of[k] = sn
+    counts: collections.Counter = collections.Counter()
+    glosses: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
+    for key, lexeme, gloss in _ro(OCC_NB).execute("SELECT key, lexeme, gloss FROM occurrence"):
+        unit = f"{lexeme}#{sense_of.get(key, '_nosense')}"
+        counts[unit] += 1
+        g = clean_gloss((gloss or "").replace("[", "").replace("]", ""))
+        if g and g.lower() not in _GLOSS_PREFIXES:
+            glosses[unit][g] += 1
     return counts, glosses
 
 
@@ -400,7 +437,10 @@ def build_all(out_dir: Path = OUT) -> dict:
     for name, (path, unit_kind) in ABLATIONS.items():
         if not path.exists():
             continue
-        occ_u, gloss_u = (occ, unit_gloss) if unit_kind == "sense" else lexeme_occurrences_nb()
+        occ_u, gloss_u = ((occ, unit_gloss) if unit_kind == "sense" else
+                          rsense_occurrences_nb() if unit_kind == "rsense" else
+                          rsense_occurrences_nb(RENDERING_SENSES.with_name("occurrences_nouns.tsv"))
+                          if unit_kind == "rsense_nouns" else lexeme_occurrences_nb())
         rows, sense_gloss = build_clusters(False, occ_u, gloss_u, path)
         ex = exemplar_labels(rows, counts, lemmas)
         groups = {g: (render_label(ll, sense_gloss.get((ls, g)) or english_gloss(ls)), ls, ll)

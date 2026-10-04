@@ -131,7 +131,7 @@ omit to default to English). The live `tools/list` is authoritative for full sch
 | `verse_interlinear` | `reference*, lang` | Per-word gloss/sense/domain (Greek: Louw-Nida; Hebrew: "Hebrew label · gloss") + LXX parallel for a verse. |
 | `verse_syntax` | `reference*` | Clause→phrase syntax tree (who-did-what). |
 | `lexeme_profile` | `lex*, lang` | A lexeme's stems × senses × counts × sample refs (finer than Strong's). |
-| `semantic_domain` | `code*, axis, lang` | Every lexeme in a Louw-Nida domain (`axis=sdbg`) or a Hebrew semantic group (`axis=group`, ids like `c27`), glossed. |
+| `semantic_domain` | `code*, axis, lang` | Every lexeme in a Louw-Nida domain (`axis=sdbg`), a Hebrew semantic group (`axis=group`, ids like `c27`) or a Hebrew setting (`axis=setting`, ids `s01`-`s40`), glossed. |
 | `morphology_concordance` | `lex*, stem, sense, top_k, lang` | Verses by Hebrew lexeme + binyan + sense. |
 | `cross_language` | `strong*` | Hebrew↔Greek equivalents via the LXX bridge. |
 

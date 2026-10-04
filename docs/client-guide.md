@@ -210,12 +210,29 @@ when it rests on lexical evidence only (shared roots, scholarly synonym lists, L
 that want the most precise labels can show `high` only. The full membership of a group is
 `/domain/{id}?axis=group`.
 
+Hebrew content words also carry a **setting**: the topical setting the word is used in *in this verse*
+(a ritual, legal, military, household, wisdom or other setting), the stand-in for SDBH's contextual
+domains. Settings are found in the Hebrew text itself (topics over the Leningrad Codex's own paragraphs)
+and named by their two most characteristic Hebrew words. The same word can sit in different settings in
+different verses. `via` is `word` when the word itself places the verse in that setting and `passage`
+when the word is too common or too rare to tell and the passage's main setting is shown. CC BY 4.0
+(derived from MACULA Hebrew and the Open Scriptures Hebrew Bible paragraph marks).
+
+```jsonc
+// GET {SHORESH_BASE}/verse/LEV/1/9?domain_gloss=true
+{ "surface": "הַמִּזְבֵּחָה", "strong": "H4196", "gloss": "altar",
+  "setting": { "id": "s01", "label": "מִזְבֵּחַ · altar, עֹלָה · burnt offering", "via": "word" } }
+// without domain_gloss: "label": "מִזְבֵּחַ, עֹלָה"
+```
+
+Every word used in a setting: `/domain/{id}?axis=setting`.
+
 **`GET {SHORESH_BASE}/wordstudy/{STRONG}?gloss_lang=Indonesian`** — a composite word study:
 localized headline `gloss`, `keyness` (how distinctively biblical), `stems` (per-binyan
 senses for Hebrew verbs), `lex_senses`, `senses`, `sense_distribution`, `domains`, `group` (Hebrew
 semantic group, as in `/verse`), `siblings`, and `tw[]` (Translation-Words articles, each with `title` +
 `definition`). Hebrew `domains[]` rows with `axis: "group"` carry the group id, Hebrew label, gloss and
-confidence.
+confidence; `settings[]` lists the settings the word is used in, with counts and shares.
 
 **`GET {SHORESH_BASE}/structure/{USFM}/{chapter}/{verse}/syntax`** — the clause→phrase syntax
 tree (the passage card's `syntax` link).
@@ -252,7 +269,7 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 | `/senses/{strong}` | Sense distribution for a Strong's number |
 | `/lexeme/{lex}` | Lexeme profile (stems × senses × counts × sample refs) |
 | `/concept/{word}` | Words sharing a concept |
-| `/domain/{code}` | Every lexeme in a semantic domain: `axis=sdbg` (Louw-Nida, default), `axis=group` (Hebrew semantic group, ids like `c27`); `axis=core` and `axis=ctx` are aliases of `group` |
+| `/domain/{code}` | Every lexeme in a semantic domain: `axis=sdbg` (Louw-Nida, default), `axis=group` (Hebrew semantic group, ids like `c27`), `axis=setting` (Hebrew setting, ids `s01`-`s40`); `axis=core` is an alias of `group`, `axis=ctx` of `setting` |
 | `/tw/{strong}` | Translation-Words article(s) for a Strong's number |
 | `/bridge/{strong}` | Hebrew ↔ Greek (LXX) equivalents |
 | `/lxx-lexeme/{wordid}` | LXX-only Greek lexeme lookup (words with no Strong's number — `/verse` returns `wordid` on these in place of `strong`) |

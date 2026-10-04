@@ -1,8 +1,39 @@
+---
+license: cc-by-4.0
+pretty_name: "Prior pack: language-independent lexeme priors for alignment"
+language:
+  - hbo
+  - grc
+tags:
+  - biblical-hebrew
+  - koine-greek
+  - word-alignment
+configs:
+  - config_name: default
+    data_files: "prior_pack.parquet"
+---
+
 # `prior_pack/` — language-independent leverage for the aligner (CC-BY)
 
 One row per **original lexeme**, bundling shoresh signals the aligner's gloss/neural runs consume as
 priors. Built once (language-independent) via `shoresh/macula/build_prior_pack.py`. Spec:
 `internal-docs/prior-pack.md`. **CC-BY-4.0** (MACULA lexeme + lxx_bridge; label-free, no MARBLE).
+
+## Changed 2026-10-03: BHSA-free
+
+The ETCBC BHSA database is licensed CC BY-NC-SA, which does not fit this CC BY pack. Two columns changed:
+
+- **`senses` is removed.** It was our own sense clustering, built on BHSA clauses. For a sense inventory
+  use [`bcv-commons/senses-attested-ubs`](https://huggingface.co/datasets/bcv-commons/senses-attested-ubs)
+  (CC BY-SA 4.0, keyed on UBS Dictionary of Biblical Hebrew senses).
+- **`neighbors` comes from the BHSA-free semantic-neighbors pack**, the same build behind
+  [`bcv-commons/semantic-neighbors`](https://huggingface.co/datasets/bcv-commons/semantic-neighbors). It is
+  keyed on MACULA lexemes like the rest of this pack, which fixes an old key mismatch: Hebrew lexemes with
+  neighbors went from 3,012 to 4,783.
+
+Also: 34 Hebrew proper nouns (e.g. H11 Abaddon, H435 Eliezer) now have `pos = name` instead of `noun`.
+
+## Columns
 
 | column | meaning |
 |---|---|
@@ -12,11 +43,10 @@ priors. Built once (language-independent) via `shoresh/macula/build_prior_pack.p
 | `word_class` | `content` \| `function`, derived from `pos` |
 | `keyness` | biblical-salience (function-word filter); null for non-content |
 | `lxx_greek` / `lxx_hebrew` | cross-testament bridge (OT→Greek / NT→Hebrew), freq-ordered |
-| `senses` | `[{stem, sense, share}]` — sense inventory / prior distribution (OT) |
-| `neighbors` | `[{lexeme, score, relation, confidence}]` — semantic field (OT) |
+| `neighbors` | `[{lexeme, score, relation, confidence}]` — semantic field (OT); `confidence` is `high`, `prior` or `recall` |
 | `xling_confidence` | # of published `aligned-lex` languages that align this lexeme with a hi_conf dominant (0–7); high=stable anchor, low=fragile |
 
-Consumed: gloss (keyness+lxx+senses extend/clean the mined dict); neural (neighbors tie-break + senses).
-Publish to `bcv-commons/strongs` as a `priors` config. `neighbors`/`senses` are OT-only for now.
+Consumed: gloss (keyness+lxx extend/clean the mined dict); neural (neighbors tie-break).
+`neighbors` is OT-only for now.
 
 `xling_confidence` is derived from the aligner's published `aligned-lex` (the loop-back); rebuild with `--aligned-lex-dir <mirror>` when partitions change.

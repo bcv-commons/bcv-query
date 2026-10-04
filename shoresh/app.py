@@ -143,7 +143,9 @@ def get_verse(book: str, chapter: int, verse: int, gloss_lang: str = "English",
     """Greek (LXX) + Hebrew/Greek (spine) words of a verse, side by side.
     `gloss_lang` localizes the per-word binyan-correct sense (e.g. German, Spanish).
     Hebrew words carry `group` (CC0 semantic group: id, Hebrew label, gloss, confidence) and `domain`,
-    the group's Hebrew label; `domain_gloss=true` appends the localized gloss ("אָב · father")."""
+    the group's Hebrew label; `domain_gloss=true` appends the localized gloss ("אָב · father").
+    Hebrew content words also carry `setting` {id, label, via}: the topical setting the word is used in
+    in this verse (e.g. "מִזְבֵּחַ, עֹלָה" = altar / burnt offering), glossed the same way."""
     result = data.verse(book, chapter, verse, gloss_lang, domain_gloss)
     if result["lxx"] is None and result["spine"] is None:
         raise HTTPException(404, f"no original-language words for {book} {chapter}:{verse}")
@@ -208,8 +210,10 @@ def get_tw(strong: str) -> dict:
 def get_domain(code: str, axis: str = "sdbg", gloss_lang: str = "English") -> dict:
     """Every lexeme in a semantic domain, glossed — "every word in Love/Affection".
     axis=sdbg (Louw-Nida; Greek + LXX-bridged Hebrew) | lex (native SDBH) | group (CC0 Hebrew
-    semantic groups, ids like c27). axis=core / ctx are aliases of group (SDBH's core/ctx retired).
-    e.g. /domain/025003 → ἀγάπη, ἀγαπάω, … + the Hebrew the LXX renders into it; /domain/c27?axis=group."""
+    semantic groups, ids like c27) | setting (CC BY Hebrew settings, ids s01-s40). SDBH's core/ctx
+    were retired: axis=core is an alias of group, axis=ctx of setting.
+    e.g. /domain/025003 → ἀγάπη, ἀγαπάω, … + the Hebrew the LXX renders into it; /domain/c27?axis=group;
+    /domain/s01?axis=setting."""
     result = data.domain_lexemes(code, axis=axis, gloss_lang=gloss_lang)
     if not result["lexemes"]:
         raise HTTPException(404, f"no lexemes in domain '{code}' (axis={axis})")

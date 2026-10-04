@@ -114,8 +114,13 @@ def parse_chapter(path: Path) -> list[dict]:
     seq_counter: dict[tuple, int] = {}
 
     def walk(el: ET.Element, clause_verb: str | None, construct_group: str | None,
-             phrase_role: str | None, group_counter: list[int]):
-        for child in el:
+             phrase_role: str | None, group_counter: list[int], cflags: frozenset = frozenset()):
+        # construct_role: in an NPofNP group the first child is the nomen regens (construct state),
+        # the rest the nomen rectum. A word's flags collect over all enclosing NPofNP groups, so a middle
+        # link of a chain (בְּנֵי in "word of the sons of Israel") is both.
+        is_npofnp = el.get("rule") == "NPofNP"
+        for ci, child in enumerate(el):
+            child_flags = cflags | ({"regens"} if ci == 0 else {"rectum"}) if is_npofnp else cflags
             if child.tag == "p":
                 continue  # raw verse text, not the word tree
             elif child.tag == "wg":
@@ -126,7 +131,7 @@ def parse_chapter(path: Path) -> list[dict]:
                     group_counter[0] += 1
                     cg = f"{path.stem}-cg{group_counter[0]}"
                 pr = child.get("role") or phrase_role
-                walk(child, cv, cg, pr, group_counter)
+                walk(child, cv, cg, pr, group_counter, child_flags)
             elif child.tag == "w":
                 xml_id = child.get(_XML_ID, "")
                 parsed = _REF.match(child.get("ref", ""))
@@ -152,6 +157,7 @@ def parse_chapter(path: Path) -> list[dict]:
                     "head_key": (None if vkey == k else vkey),
                     "phrase_role": own_role or phrase_role,
                     "construct_group": construct_group,
+                    "construct_role": "+".join(sorted(child_flags, reverse=True)) or None,
                 }
                 for f in _W_FIELDS:
                     row[f] = child.get(f, "") or ""
@@ -164,7 +170,7 @@ def parse_chapter(path: Path) -> list[dict]:
                 # every <w> inside a <c>, undercounting real words by ~1,700 across the OT (concentrated
                 # in genealogy-heavy books) before this default branch was added.
                 pr = child.get("role") or phrase_role
-                walk(child, clause_verb, construct_group, pr, group_counter)
+                walk(child, clause_verb, construct_group, pr, group_counter, child_flags)
 
     walk(root, None, None, None, [0])
     return rows
@@ -185,6 +191,7 @@ def build(src: Path, out_path: Path) -> dict:
                                             -- that verb (clause root) -- see docstring HEAD DEFINITION
             phrase_role TEXT,               -- v/s/o/o2/p/pp/adv -- own role, else nearest ancestor's
             construct_group TEXT,          -- shared id for all words in one NPofNP chain, else NULL
+            construct_role TEXT,           -- regens / rectum / regens+rectum (middle link), else NULL
             PRIMARY KEY (book, chapter, verse, seq)
         );
         CREATE INDEX ix_lowfat_key ON lowfat_words(key);
@@ -199,7 +206,7 @@ def build(src: Path, out_path: Path) -> dict:
             "INSERT INTO lowfat_words VALUES "
             "(:key,:xml_id,:book,:chapter,:verse,:word,:seq,:is_inserted,:surface,:strong,"
             " :class,:morph,:pos,:type,:lemma,:gloss,:state,:gender,:number,:person,"
-            " :head_key,:phrase_role,:construct_group)",
+            " :head_key,:phrase_role,:construct_group,:construct_role)",
             rows,
         )
         n_words += len(rows)

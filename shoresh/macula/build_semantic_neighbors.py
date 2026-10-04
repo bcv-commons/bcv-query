@@ -49,6 +49,8 @@ BHSA_STRUCTURAL = ROOT / "resources" / "bhsa_structural" / "structural_pairs.tsv
 WIKTIONARY_ROOTS = ROOT / "resources" / "wiktionary_roots" / "root_pairs.tsv"   # weak alone; corroboration input
 SEFER_HASHORASHIM = ROOT / "resources" / "sefer_hashorashim" / "llm_pair_verification.tsv"
 METZUDAT_ZION = ROOT / "resources" / "metzudat_zion" / "llm_verification.tsv"
+MALBIM = ROOT / "resources" / "malbim" / "llm_verification.tsv"
+MAHBERET_MENAHEM = ROOT / "resources" / "mahberet_menahem" / "llm_verification.tsv"
 
 MIN_OCC = 3        # a lexeme needs this many clause vectors for a stable centroid
 TOPK = 10          # neighbors kept per lexeme
@@ -178,11 +180,21 @@ def lexeme_vectors(emb_path: Path = EMB, sense_split: bool = False):
     return lexemes, np.vstack(mat).astype(np.float32), meta
 
 
-def lexeme_vectors_macula(emb_path: Path, occ_db: Path):
+def lexeme_vectors_macula(emb_path: Path, occ_db: Path, rendering_senses: Path | None = None):
     """BHSA-free variant of lexeme_vectors: occurrences and their word-centred windows come from
     macula.build_bhsa_free_contexts (MACULA lexeme-spine, CC BY), not from hbo.db's BHSA clauses. No
-    sense split (hbo.db's senses were clustered on BHSA clauses). Same MIN_OCC, proper-noun and
-    non-content filters, same return shape."""
+    sense split from hbo.db (its senses were clustered on BHSA clauses). Same MIN_OCC, proper-noun and
+    non-content filters, same return shape.
+    rendering_senses: an occurrences.tsv from build_rendering_senses.py (key, lexeme, sense); units become
+    lexeme#sense (sense split by translation, BHSA-free), as lexeme_vectors(sense_split=True) does with
+    hbo.db's senses. Occurrences without an assignment go to lexeme#_nosense."""
+    sense_of: dict = {}
+    if rendering_senses:
+        with rendering_senses.open(encoding="utf-8") as fh:
+            next(fh)
+            for line in fh:
+                k, _lx, sn = line.rstrip("\n").split("\t")
+                sense_of[k] = sn
     proper = proper_strongs()
     non_content = non_content_strongs()
     z = np.load(emb_path, allow_pickle=True)
@@ -192,10 +204,13 @@ def lexeme_vectors_macula(emb_path: Path, occ_db: Path):
     acc: dict = collections.defaultdict(lambda: [np.zeros(dim, np.float32), 0])
     strong_of, gloss_ct = {}, collections.defaultdict(collections.Counter)
     occ = sqlite3.connect(f"file:{occ_db}?mode=ro", uri=True)
-    for lexeme, strong, gloss, context in occ.execute("SELECT lexeme, strong, gloss, context FROM occurrence"):
+    for key_, lexeme, strong, gloss, context in occ.execute(
+            "SELECT key, lexeme, strong, gloss, context FROM occurrence"):
         v = ctx_vec.get(context)
         if v is None or not lexeme:
             continue
+        if rendering_senses:
+            lexeme = f"{lexeme}#{sense_of.get(key_, '_nosense')}"
         acc[lexeme][0] += v
         acc[lexeme][1] += 1
         strong_of[lexeme] = strong
@@ -225,10 +240,12 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
           emb_label: str = "bge-m3 clause centroids", sense_split: bool = False, use_xling: bool = True,
           use_bdb: bool = True, use_parallelism: bool = True, use_hwn: bool = False,
           use_structural: bool = True, use_corroborated: bool = True, use_sefer_hashorashim: bool = True,
-          use_metzudat_zion: bool = False, route_homographs: bool = False,
-          macula_contexts: Path | None = None, parallelism_tomim_only: bool = False):
+          use_metzudat_zion: bool = False, use_malbim: bool = False, use_menahem: bool = False,
+          route_homographs: bool = False,
+          macula_contexts: Path | None = None, parallelism_tomim_only: bool = False,
+          rendering_senses: Path | None = None):
     if macula_contexts:
-        lexemes, M, meta = lexeme_vectors_macula(emb_path, macula_contexts)
+        lexemes, M, meta = lexeme_vectors_macula(emb_path, macula_contexts, rendering_senses)
     else:
         lexemes, M, meta = lexeme_vectors(emb_path, sense_split=sense_split)
     print(f"[neighbors] {len(lexemes)} content lexemes with >= {MIN_OCC} clauses", file=sys.stderr)
@@ -340,9 +357,15 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
           + ("" if use_sefer_hashorashim else " (disabled)"), file=sys.stderr)
     # Metzudat Zion word glosses (Hebrew explaining Hebrew; build_metzudat_zion.py), LLM-verified.
     # Off by default until admitted through the usability scorecard.
-    metzudat_zion_pairs = _load_verified_pairs(METZUDAT_ZION) if use_metzudat_zion else set()
-    print(f"[neighbors] metzudat_zion: {len(metzudat_zion_pairs)} LLM-verified Strong's pairs"
-          + ("" if use_metzudat_zion else " (disabled)"), file=sys.stderr)
+    # Malbim, Beur HaMilot: near-synonyms Malbim distinguishes (build_malbim.py), LLM-verified. Same handling.
+    commentary = {"metzudat_zion": _load_verified_pairs(METZUDAT_ZION) if use_metzudat_zion else set(),
+                  "malbim": _load_verified_pairs(MALBIM) if use_malbim else set(),
+                  "mahberet_menahem": _load_verified_pairs(MAHBERET_MENAHEM) if use_menahem else set()}
+    for name, on in (("metzudat_zion", use_metzudat_zion), ("malbim", use_malbim),
+                     ("mahberet_menahem", use_menahem)):
+        print(f"[neighbors] {name}: {len(commentary[name])} LLM-verified Strong's pairs"
+              + ("" if on else " (disabled)"), file=sys.stderr)
+    metzudat_zion_pairs = commentary["metzudat_zion"] | commentary["malbim"] | commentary["mahberet_menahem"]
 
     # Coverage extension: xling/bdb_roots need no embedding, so they can name lexemes OUTSIDE the pack
     # (too few occurrences to get a stable centroid) — the same coverage gap un-restricting the paid LLM
@@ -437,8 +460,9 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                 sources.append("corroborated"); score = min(1.0, score + 0.1)
             if pair in sefer_hashorashim_pairs:
                 sources.append("sefer_hashorashim"); score = min(1.0, score + 0.1)
-            if pair in metzudat_zion_pairs:
-                sources.append("metzudat_zion"); score = min(1.0, score + 0.1)
+            for name, cpairs in commentary.items():
+                if pair in cpairs:
+                    sources.append(name); score = min(1.0, score + 0.1)
             relation, conf = "similar", "recall"
             if pair in ant:                                      # LLM says OPPOSITE — emb false positive
                 relation = "antonym"
@@ -589,18 +613,19 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                     rows.append((lx, nb, SEFER_HASHORASHIM_SCORE, "sefer_hashorashim", "prior", "similar"))
                     sefer_hashorashim_rows += 1
     print(f"[neighbors] sefer_hashorashim-only prior edges: {sefer_hashorashim_rows}", file=sys.stderr)
-    metzudat_zion_rows = 0
-    for pair in metzudat_zion_pairs:
-        a, b = tuple(pair)
-        allowed = _allowed(a, b)
-        for lx in strong2lex.get(a, []):
-            for nb in strong2lex.get(b, []):
-                if allowed is not None and (lx, nb) not in allowed:
-                    continue
-                if lx != nb and frozenset((lx, nb)) not in emb_pairs:
-                    rows.append((lx, nb, 0.5, "metzudat_zion", "prior", "similar"))
-                    metzudat_zion_rows += 1
-    print(f"[neighbors] metzudat_zion-only prior edges: {metzudat_zion_rows}", file=sys.stderr)
+    for name, cpairs in commentary.items():
+        n_rows = 0
+        for pair in cpairs:
+            a, b = tuple(pair)
+            allowed = _allowed(a, b)
+            for lx in strong2lex.get(a, []):
+                for nb in strong2lex.get(b, []):
+                    if allowed is not None and (lx, nb) not in allowed:
+                        continue
+                    if lx != nb and frozenset((lx, nb)) not in emb_pairs:
+                        rows.append((lx, nb, 0.5, name, "prior", "similar"))
+                        n_rows += 1
+        print(f"[neighbors] {name}-only prior edges: {n_rows}", file=sys.stderr)
 
     out_dir.mkdir(parents=True, exist_ok=True)
     import pyarrow as pa, pyarrow.parquet as pq
@@ -636,7 +661,11 @@ def build(validate: bool, llm_edges=None, emb_path: Path = EMB, out_dir: Path = 
                    + (["sefer_hashorashim:llm-verified (Radak, Public Domain, via Sefaria)"]
                       if use_sefer_hashorashim else [])
                    + (["metzudat_zion:llm-verified word glosses (Altschuler, Public Domain, via Sefaria)"]
-                      if use_metzudat_zion else []),
+                      if use_metzudat_zion else [])
+                   + (["malbim:llm-verified near-synonyms Malbim distinguishes (Beur HaMilot, Public Domain, via Sefaria)"]
+                      if use_malbim else [])
+                   + (["mahberet_menahem:llm-verified sense words (Menahem ben Saruq, Public Domain, via Sefaria)"]
+                      if use_menahem else []),
         "confidence_tiers": {"high": tier["high"], "recall": tier["recall"], "prior": tier["prior"]},
         "lexemes": len(lexemes), "edges": len(rows), "topk": TOPK, "min_cos": MIN_COS, "min_occ": MIN_OCC,
         "content_sha256": hashlib.sha256(dest.read_bytes()).hexdigest(),
@@ -726,7 +755,12 @@ def _bdb_lexeme_pairs(in_pack: set[str]) -> set[frozenset]:
     gives the shepherd lexeme the whole "friend" family. Here each BDB row (root, Strong's, gloss) goes
     to the ONE lexeme of that Strong's whose MACULA token glosses best match the BDB gloss (all of
     MACULA's lexemes are candidates, not just those in the pack); with no overlap, to the most frequent
-    lexeme. A membership routed to a lexeme outside the pack is dropped rather than moved onto another."""
+    lexeme. A membership routed to a lexeme outside the pack is dropped rather than moved onto another.
+    With sense units (lexeme#sense) a routed lexeme stands for all of its sense units: a root family spans
+    a word's senses."""
+    units_of: dict[str, list[str]] = collections.defaultdict(list)
+    for u in in_pack:
+        units_of[u.split("#", 1)[0]].append(u)
     from spine.build_glosses import _words
     sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
     words: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
@@ -751,8 +785,7 @@ def _bdb_lexeme_pairs(in_pack: set[str]) -> set[frozenset]:
         else:
             bw = set(_words(p[3]))
             lx = max(cands, key=lambda c: (sum(words[c][w] for w in bw), cands[c]))
-        if lx in in_pack:
-            by_root[p[0]].add(lx)
+        by_root[p[0]].update(units_of.get(lx, []))
     pairs: set[frozenset] = set()
     for lexes in by_root.values():
         for a, b in itertools.combinations(sorted(lexes), 2):
@@ -812,6 +845,24 @@ def _load_parallelism_pairs(tomim_only: bool = False) -> tuple[set[frozenset], s
                 ant.add(frozenset((a, b)))
     return syn, ant
 
+
+
+def deterministic_hash_seed() -> None:
+    """Re-run this process with a fixed PYTHONHASHSEED (default 0; override with SHORESH_HASH_SEED).
+    Set iteration order follows string hashing, which Python randomises per process; it decides edge
+    direction, which source a duplicate prior edge is credited to, and the edge order Louvain sees. Without
+    this, two builds of the same inputs gave 613 vs 607 clusters (2026-10-03)."""
+    import os
+    want = os.environ.get("SHORESH_HASH_SEED", "0")
+    if os.environ.get("PYTHONHASHSEED") != want:
+        os.environ["PYTHONHASHSEED"] = want
+        os.execv(sys.executable, [sys.executable, "-m", __spec_name()] + sys.argv[1:])
+
+
+def __spec_name() -> str:
+    import __main__
+    spec = getattr(__main__, "__spec__", None)
+    return spec.name if spec else "macula.build_semantic_neighbors"
 
 def _load_verified_pairs(path: Path) -> set[frozenset]:
     """{frozenset({H_a, H_b}), ...}: "yes" verdicts from a verify_pairs_llm.py output file."""
@@ -994,6 +1045,7 @@ def _validate(rows, meta):
 
 
 def main():
+    deterministic_hash_seed()
     ap = argparse.ArgumentParser(description="Build the CC0 semantic-neighbors pack.")
     ap.add_argument("--validate", action="store_true",
                      help="score vs the text-anchored intrinsic yardstick (internal, see intrinsic_yardstick.py)")
@@ -1045,9 +1097,16 @@ def main():
                          "gloss (_bdb_lexeme_pairs), other prior pairs by embedding proximity")
     ap.add_argument("--metzudat-zion", action="store_true",
                     help="add the LLM-verified Metzudat Zion gloss pairs (resources/metzudat_zion/)")
+    ap.add_argument("--malbim", action="store_true",
+                    help="add the LLM-verified Malbim Beur HaMilot pairs (resources/malbim/)")
+    ap.add_argument("--mahberet-menahem", action="store_true",
+                    help="add the LLM-verified Mahberet Menahem pairs (resources/mahberet_menahem/)")
     ap.add_argument("--macula-contexts", type=Path, default=None,
                     help="BHSA-free mode: occurrence.db from macula.build_bhsa_free_contexts (pair with "
                          "--emb pointing at its context_emb_berel.npz)")
+    ap.add_argument("--rendering-senses", type=Path, default=None,
+                    help="with --macula-contexts: split units by translation-based senses "
+                         "(occurrences.tsv from build_rendering_senses.py)")
     ap.add_argument("--parallelism-tomim-only", action="store_true",
                     help="use only T'OMIM-confirmed parallelism pairs (drops our BHSA half_verse detection)")
     ap.add_argument("--no-sefer-hashorashim", action="store_true",
@@ -1060,8 +1119,9 @@ def main():
           use_parallelism=not a.no_parallelism, use_hwn=a.hwn,
           use_structural=not a.no_structural, use_corroborated=not a.no_corroborated,
           use_sefer_hashorashim=not a.no_sefer_hashorashim, macula_contexts=a.macula_contexts,
-          use_metzudat_zion=a.metzudat_zion, route_homographs=a.route_homographs,
-          parallelism_tomim_only=a.parallelism_tomim_only)
+          use_metzudat_zion=a.metzudat_zion, use_malbim=a.malbim, use_menahem=a.mahberet_menahem,
+          route_homographs=a.route_homographs,
+          parallelism_tomim_only=a.parallelism_tomim_only, rendering_senses=a.rendering_senses)
 
 
 if __name__ == "__main__":

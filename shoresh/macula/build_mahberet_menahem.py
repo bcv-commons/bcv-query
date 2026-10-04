@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""Mahberet Menahem: words Menahem ben Saruq explains with another Hebrew word. Hebrew explaining Hebrew.
+
+Mahberet Menahem (10th c., the first Hebrew-language dictionary of the Bible) splits each root into
+numbered divisions by meaning ("מתחלק לשני מחלקות: האחד, ... השני, ..."). A division cites verses, the
+cited word in bold, and often names its sense with ענין: `השני, תחת שערה <b>באשה</b> (איוב לא, מ) ...
+ענין קוצים הם` ("the second: ... in the sense of thorns"). Hebrew text Public Domain (London 1854 edition),
+via Sefaria.
+
+Extraction, the same narrow pattern as build_metzudat_zion.py:
+  - each cited bold word is resolved through its own verse in lexeme-spine.db (surface or lemma,
+    consonants only, trying up to two prefix letters removed); "שם" in a citation repeats the last book;
+  - the sense word is the word after ענין in that division; it is resolved by consonants against Biblical
+    Hebrew lemmas and kept only if it names exactly one content Strong's number;
+  - a pair = (a cited word's Strong's, the sense word's Strong's), different, names and function words
+    dropped. Divisions that only cite the same root's derivatives give no pair here: BDB and Radak
+    already cover root families.
+
+  cd shoresh && .venv/bin/python3 -m macula.build_mahberet_menahem            # fetch (resumable) + extract
+  cd shoresh && .venv/bin/python3 -m macula.build_mahberet_menahem --no-fetch
+"""
+from __future__ import annotations
+
+import argparse
+import collections
+import json
+import re
+import sqlite3
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from spine.common import to_modern_form  # noqa: E402
+
+from macula.build_metzudat_zion import PREFIXES, _bare_index, _get, _resolve_gloss, excluded  # noqa: E402
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+SPINE = HERE / "lexeme-spine.db"
+CACHE = HERE / "data" / "mahberet_menahem_letters.jsonl"
+OUT = ROOT / "resources" / "mahberet_menahem" / "candidate_pairs.tsv"
+LETTERS = ["Alef", "Bet", "Gimel", "Daled", "Heh", "Vav", "Zayin", "Chet", "Tet", "Yod", "Kaf", "Lamed",
+           "Mem", "Nun", "Samekh", "Ayin", "Peh", "Tzadi", "Kof", "Resh", "Shin", "Tav"]
+# Hebrew book names and abbreviations as Menahem's citations write them -> spine book codes
+HEB_BOOKS = {
+    "בראשית": "GEN", "שמות": "EXO", "ויקרא": "LEV", "במדבר": "NUM", "דברים": "DEU", "יהושע": "JOS",
+    "שופטים": "JDG", "רות": "RUT", "ש\"א": "1SA", "שמואל א": "1SA", "ש\"ב": "2SA", "שמואל ב": "2SA",
+    "מ\"א": "1KI", "מלכים א": "1KI", "מ\"ב": "2KI", "מלכים ב": "2KI", "ישעיהו": "ISA", "ישעיה": "ISA",
+    "ירמיהו": "JER", "ירמיה": "JER", "יחזקאל": "EZK", "הושע": "HOS", "יואל": "JOL", "עמוס": "AMO",
+    "עובדיה": "OBA", "יונה": "JON", "מיכה": "MIC", "נחום": "NAM", "חבקוק": "HAB", "צפניה": "ZEP",
+    "חגי": "HAG", "זכריה": "ZEC", "מלאכי": "MAL", "תהלים": "PSA", "תהלות": "PSA", "משלי": "PRO",
+    "איוב": "JOB", "שיר השירים": "SNG", "שה\"ש": "SNG", "איכה": "LAM", "קהלת": "ECC", "אסתר": "EST",
+    "דניאל": "DAN", "עזרא": "EZR", "נחמיה": "NEH", "דה\"א": "1CH", "דברי הימים א": "1CH",
+    "דה\"ב": "2CH", "דברי הימים ב": "2CH",
+}
+_GEM = {c: v for c, v in zip("אבגדהוזחטיכלמנסעפצקרשת", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60,
+                                                       70, 80, 90, 100, 200, 300, 400])}
+_ORDINALS = r"(?:האחד|האחת|השני|השנית|השלישי|השלישית|הרביעי|הרביעית|החמישי|החמישית|הששי|הששית|השביעי|השמיני|התשיעי|העשירי)"
+_CITE = re.compile(r"<b>([^<]+)</b>([^<]*?)<small>\(([^)]+)\)</small>")
+
+
+def gematria(s: str) -> int | None:
+    s = re.sub(r"[\"'״׳\s]", "", s)
+    if not s or any(c not in _GEM for c in s):
+        return None
+    return sum(_GEM[c] for c in s)
+
+
+def fetch() -> None:
+    CACHE.parent.mkdir(parents=True, exist_ok=True)
+    done = set()
+    if CACHE.exists():
+        done = {json.loads(l)["ref"] for l in CACHE.read_text(encoding="utf-8").splitlines() if l}
+    with CACHE.open("a", encoding="utf-8") as fh:
+        for letter in LETTERS:
+            ref = f"Machberet Menachem, Letter {letter}"
+            if ref in done:
+                continue
+            d = _get(ref)
+            v = (d or {}).get("versions") or []
+            if not v or not v[0].get("text"):
+                print(f"[menahem] nothing for {ref}", file=sys.stderr)
+                continue
+            fh.write(json.dumps({"ref": ref, "license": v[0].get("license"), "version": v[0].get("versionTitle"),
+                                 "entries": v[0]["text"]}, ensure_ascii=False) + "\n")
+            fh.flush()
+            time.sleep(0.3)
+            print(f"[menahem] {letter}: {len(v[0]['text'])} entries", file=sys.stderr)
+
+
+def parse_ref(text: str, last_book: str | None) -> tuple[str | None, int | None, int | None]:
+    text = text.strip()
+    m = re.match(r"^(.*?)\s*([א-ת\"'״׳]+)\s*,\s*([א-ת\"'״׳]+)\s*$", text)
+    if not m:
+        return last_book, None, None
+    book_txt = m.group(1).strip()
+    book = last_book if book_txt in ("שם", "") else HEB_BOOKS.get(book_txt)
+    return book, gematria(m.group(2)), gematria(m.group(3))
+
+
+def verse_words(conn, book, ch, vs):
+    return [(to_modern_form(s, "hbo"), to_modern_form(l, "hbo") if l else None, f"H{int(st):04d}")
+            for s, l, st in conn.execute(
+                "SELECT surface, lemma, strong FROM spine_words WHERE book=? AND chapter=? AND verse=? "
+                "AND strong IS NOT NULL AND lexeme LIKE 'hbo:%'", (book, ch, vs))]
+
+
+def resolve_cited(word: str, vwords, drop: set[str]) -> set[str]:
+    b = to_modern_form(word, "hbo")
+    for k in range(3):                       # as written, then up to two prefix letters removed
+        if k and (len(b) <= 2 or b[0] not in PREFIXES):
+            break
+        if k:
+            b = b[1:]
+        hits = {s for sb, lb, s in vwords if b and (b == sb or b == lb) and s not in drop}
+        if hits:
+            return hits
+    return set()
+
+
+def extract() -> collections.Counter:
+    drop = excluded()
+    idx = _bare_index(drop)
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    pairs: collections.Counter = collections.Counter()
+    stats = collections.Counter()
+    for line in CACHE.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        for entry in row["entries"]:
+            if not isinstance(entry, list) or len(entry) < 2:
+                continue
+            body = " ".join(x for x in entry[1:] if isinstance(x, str))
+            stats["entries"] += 1
+            divisions = re.split(_ORDINALS + r"\s*,", body)
+            for div in divisions:
+                m = re.search(r"ענין\s+([א-ת][א-ת֑-ׇ]*)", re.sub(r"<[^>]+>", " ", div))
+                if not m:
+                    continue
+                stats["divisions_with_inyan"] += 1
+                sense = _resolve_gloss(m.group(1), idx)
+                if len(sense) != 1:
+                    continue
+                stats["sense_resolved"] += 1
+                last_book = None
+                cited = set()
+                for word, _between, ref in _CITE.findall(div):
+                    book, ch, vs = parse_ref(ref, last_book)
+                    if not book or not ch or not vs:
+                        continue
+                    last_book = book
+                    cited |= resolve_cited(word, verse_words(sp, book, ch, vs), drop)
+                for c in cited - sense:
+                    pairs[frozenset({c} | sense)] += 1
+                    stats["pairs"] += 1
+    print(f"[menahem] {dict(stats)} -> {len(pairs)} distinct pairs", file=sys.stderr)
+    return pairs
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--no-fetch", action="store_true")
+    args = ap.parse_args()
+    if not args.no_fetch:
+        fetch()
+    pairs = extract()
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    with OUT.open("w", encoding="utf-8") as fh:
+        fh.write("# CANDIDATE Hebrew Strong's pairs from Mahberet Menahem (Menahem ben Saruq, 10th c.; Hebrew text "
+                 "Public Domain,\n# London 1854, via Sefaria): a cited word and the Hebrew word naming its sense "
+                 "(ענין). Derived data CC0.\n# `count` = number of divisions giving the pair. See "
+                 "shoresh/macula/build_mahberet_menahem.py.\n")
+        fh.write("strong_a\tstrong_b\tcount\n")
+        for pair, cnt in sorted(pairs.items(), key=lambda kv: (-kv[1], sorted(kv[0]))):
+            if len(pair) == 2:
+                a, b = sorted(pair)
+                fh.write(f"{a}\t{b}\t{cnt}\n")
+    print(f"[menahem] -> {OUT}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

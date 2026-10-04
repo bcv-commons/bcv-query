@@ -29,7 +29,7 @@ LOWFAT_DEFAULT = HERE / "lowfat-hbo.db"
 
 def _add_columns(db: sqlite3.Connection) -> None:
     existing = {r[1] for r in db.execute("PRAGMA table_info(spine_words)")}
-    for col in ("head_idx", "phrase_role", "construct_group"):
+    for col in ("head_idx", "phrase_role", "construct_group", "construct_role"):
         if col not in existing:
             coltype = "INTEGER" if col == "head_idx" else "TEXT"
             db.execute(f"ALTER TABLE spine_words ADD COLUMN {col} {coltype}")
@@ -59,8 +59,8 @@ def enrich(spine_path: Path, lowfat_path: Path) -> dict:
         key_to_idx[key] = (book, chapter, verse, idx)
 
     n_role = n_head = n_cg = n_head_unresolved = 0
-    for key, head_key, phrase_role, construct_group in lf.execute(
-        "SELECT key, head_key, phrase_role, construct_group FROM lowfat_words WHERE is_inserted=0"
+    for key, head_key, phrase_role, construct_group, construct_role in lf.execute(
+        "SELECT key, head_key, phrase_role, construct_group, construct_role FROM lowfat_words WHERE is_inserted=0"
     ):
         if key not in key_to_idx:
             continue  # shouldn't happen (word-count parity verified 0 mismatched books), but never fail on it
@@ -72,8 +72,8 @@ def enrich(spine_path: Path, lowfat_path: Path) -> dict:
             else:
                 n_head_unresolved += 1
         db.execute(
-            "UPDATE spine_words SET head_idx=?, phrase_role=?, construct_group=? WHERE key=?",
-            (head_idx, phrase_role, construct_group, key),
+            "UPDATE spine_words SET head_idx=?, phrase_role=?, construct_group=?, construct_role=? WHERE key=?",
+            (head_idx, phrase_role, construct_group, construct_role, key),
         )
         n_head += head_idx is not None
         n_role += phrase_role is not None
