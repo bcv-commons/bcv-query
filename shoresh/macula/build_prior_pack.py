@@ -8,7 +8,7 @@ Keyed on the MACULA lexeme → one build serves every target language.
 BHSA-free since 2026-10-03 (BHSA is CC BY-NC-SA; this pack is CC BY): `neighbors` come from the BHSA-free
 pack (build_semantic_neighbors.py --macula-contexts --no-structural --parallelism-tomim-only --no-xling
 --route-homographs), and the former `senses` column is gone (it was our BHSA-based sense clustering). For
-senses use bcv-commons/senses-attested-ubs (CC BY-SA, keyed on UBS Dictionary of Biblical Hebrew senses).
+senses use bcv-commons/senses-attested (CC BY-SA, keyed on UBS Dictionary of Biblical Hebrew senses).
 
   python -m macula.build_prior_pack        # -> resources/prior_pack/prior_pack.parquet + manifest.json
 """

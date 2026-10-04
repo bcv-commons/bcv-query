@@ -133,6 +133,8 @@ def extract() -> collections.Counter:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--no-fetch", action="store_true")
+    ap.add_argument("--explanations", action="store_true",
+                    help="write resources/malbim/explanations.tsv (per-word comments for /verse) and stop")
     ap.add_argument("--distinctions", action="store_true",
                     help="write resources/malbim/distinctions.tsv (for word studies) and stop")
     args = ap.parse_args()
@@ -140,6 +142,9 @@ def main() -> int:
         fetch()
     if args.distinctions:
         write_distinctions(distinctions())
+        return 0
+    if args.explanations:
+        write_explanations(explanations())
         return 0
     pairs = extract()
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -157,6 +162,80 @@ def main() -> int:
 
 
 
+# ---------- cross-references ("see there") ----------
+
+_REF_WORDS = {"עי", "עיין", "ועי", "הבדלם", "בפי", "פי", "כנל", "לקמן", "לעיל", "למעלה", "עוד", "פסוק", "עש", "ועש",
+              "עמש", "כמש", "שם", "בארתי", "כבר", "בפירוש", "הבדלו", "בביאור", "ביאור", "שבארתי", "מש"}
+
+
+def is_cross_reference(text: str) -> bool:
+    """Only reference words and verse numbers left: a pointer, not an explanation. Short real glosses
+    (רוח: רצון; יסכר: כמו יסגר) are explanations and stay."""
+    t = re.sub(r"\([^)]*\)", " ", text)
+    words = [re.sub(r"[\"'״׳]", "", w) for w in re.findall(r"[א-ת][א-ת\"'״׳]*", t)]
+    real = [w for w in words if len(w) >= 2 and w not in _REF_WORDS and not _is_number(w)]
+    return not real
+
+
+def _is_number(w: str) -> bool:
+    from macula.build_mahberet_menahem import gematria
+    g = gematria(w)
+    return g is not None and g <= 176 and len(w) <= 3
+
+
+def _targets(text: str, book: str, ch: int, vs: int) -> list[tuple]:
+    """(book, chapter, verse|None) the pointer names: '(שופטים ה׳:ג׳)', 'ישעיה ב' ב'', '(ב' י"ג)' (same book),
+    'פסוק א'' (same chapter), '(ישעיהו ט"ו)' (chapter only)."""
+    from macula.build_mahberet_menahem import HEB_BOOKS, gematria
+    t = text.replace("״", '"').replace("׳", "'")
+    out = []
+    for name, code in sorted(HEB_BOOKS.items(), key=lambda kv: -len(kv[0])):
+        for m in re.finditer(re.escape(name) + r"\s+([א-ת\"']+)(?:[:\s,]+([א-ת\"']+))?", t):
+            c, v = gematria(m.group(1)), gematria(m.group(2)) if m.group(2) else None
+            if c:
+                out.append((code, c, v))
+    for m in re.finditer(r"פסוק\s+([א-ת\"']+)", t):
+        v = gematria(m.group(1))
+        if v:
+            out.append((book, ch, v))
+    for m in re.finditer(r"\((?:לעיל|לקמן|כנ\"ל|למעלה)?\s*([א-ת\"']{1,4})[\s,]+([א-ת\"']{1,4})\)", t):
+        c, v = gematria(m.group(1)), gematria(m.group(2))
+        if c and v:
+            out.append((book, c, v))
+    return out
+
+
+def comment_index() -> dict:
+    """(book, chapter, verse) -> [(heading words without vowel letters, text)] over all non-pointer comments."""
+    idx: dict = collections.defaultdict(list)
+    for line in CACHE.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        for vi, comments in enumerate(row["verses"], start=1):
+            for c in (comments if isinstance(comments, list) else [comments]):
+                m = re.match(r"\s*<b>([^<]+)</b>\s*\.?\s*(.*)", c or "", re.S)
+                if not m:
+                    continue
+                text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()
+                if is_cross_reference(text):
+                    continue
+                words = {re.sub(r"[וי]", "", to_modern_form(w, "hbo")) for w in re.split(r"[,\s]+", m.group(1)) if w}
+                idx[(row["book"], row["chapter"], vi)].append(({w for w in words if len(w) >= 2}, text))
+    return idx
+
+
+def resolve_cross_reference(heading: str, text: str, book: str, ch: int, vs: int, idx: dict):
+    """(text, 'BOOK c:v') of the comment the pointer leads to, on a word of this heading; else None."""
+    mine = {re.sub(r"[וי]", "", to_modern_form(w, "hbo")) for w in re.split(r"[,\s]+", heading) if w}
+    mine = {w for w in mine if len(w) >= 2}
+    for b, c, v in _targets(text, book, ch, vs):
+        verses = [v] if v else [k[2] for k in idx if k[0] == b and k[1] == c]
+        for vv in sorted(set(verses)):
+            for words, t in idx.get((b, c, vv), []):
+                if words & mine:
+                    return t, f"{b} {c}:{vv}"
+    return None
+
+
 # ---------- distinctions for word studies ----------
 
 DISTINCTIONS = ROOT / "resources" / "malbim" / "distinctions.tsv"
@@ -168,6 +247,7 @@ def distinctions() -> list[tuple]:
     from macula.build_metzudat_zion import _anchor, _content_strong, _verse_word_units
     drop = excluded()
     sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    xidx = comment_index()
     rows, st = [], collections.Counter()
     for line in CACHE.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
@@ -196,11 +276,16 @@ def distinctions() -> list[tuple]:
                     st["same_or_missing_word"] += 1
                     continue
                 text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()
-                if len(re.findall(r"[א-ת]{2,}", re.sub(r"\([^)]*\)", "", text))) < 4:
-                    st["only_a_cross_reference"] += 1      # "(עיין לעיל ג' יב)": nothing to show
-                    continue
+                via = ""
+                if is_cross_reference(text):
+                    got = resolve_cross_reference(m.group(1), text, row["book"], row["chapter"], vi, xidx)
+                    if not got:
+                        st["unresolved_cross_reference"] += 1
+                        continue
+                    text, via = got
+                    st["cross_reference_resolved"] += 1
                 rows.append((row["book"], row["chapter"], vi, sa, items[0], sb, items[1],
-                             re.sub(r"[.:]\s*$", "", m.group(1).strip()), text, row.get("license") or ""))
+                             re.sub(r"[.:]\s*$", "", m.group(1).strip()), text, row.get("license") or "", via))
                 st["distinctions"] += 1
     print(f"[malbim] distinctions: {dict(st)}", file=sys.stderr)
     return rows
@@ -213,10 +298,80 @@ def write_distinctions(rows: list[tuple]) -> None:
                  "the difference.\n# Hebrew text via Sefaria; `license` is Sefaria's label for the edition (Public "
                  "Domain; 'unknown' for the\n# newer Psalms import from the same source, mobile.tora.ws). Anchoring "
                  "CC0. Built by shoresh/macula/build_malbim.py --distinctions.\n")
-        fh.write("book\tchapter\tverse\tstrong_a\tword_a\tstrong_b\tword_b\theading\ttext\tlicense\n")
+        fh.write("book\tchapter\tverse\tstrong_a\tword_a\tstrong_b\tword_b\theading\ttext\tlicense\tvia\n")
         for r in rows:
             fh.write("\t".join(str(x).replace("\t", " ") for x in r) + "\n")
     print(f"[malbim] -> {DISTINCTIONS} ({len(rows)} rows)", file=sys.stderr)
+
+
+
+# ---------- per-word explanations (served in /verse beside Metzudat Zion) ----------
+
+EXPLANATIONS = ROOT / "resources" / "malbim" / "explanations.tsv"
+
+
+def explanations() -> list[tuple]:
+    """Every Beur HaMilot comment anchored to the word(s) its heading quotes: one-word and phrase headings
+    to their first word, two- and three-item headings to each item's word. Cross-reference-only comments
+    are left out."""
+    from macula.build_metzudat_zion import _anchor, _content_strong, _verse_word_units
+    drop = excluded()
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    xidx = comment_index()
+    rows, st = [], collections.Counter()
+    for line in CACHE.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        for vi, comments in enumerate(row["verses"], start=1):
+            comments = comments if isinstance(comments, list) else [comments]
+            units = None
+            for c in comments:
+                m = re.match(r"\s*<b>([^<]+)</b>\s*\.?\s*(.*)", c or "", re.S)
+                if not m:
+                    continue
+                st["comments"] += 1
+                heading = re.sub(r"[.:]\s*$", "", m.group(1).strip())
+                text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()
+                via = ""
+                if is_cross_reference(text):
+                    got = resolve_cross_reference(heading, text, row["book"], row["chapter"], vi, xidx)
+                    if not got:
+                        st["unresolved_cross_reference"] += 1
+                        continue
+                    text, via = got
+                    st["cross_reference_resolved"] += 1
+                items = [x.strip() for x in heading.split(",") if x.strip()]
+                if len(items) == 1:
+                    items = _items(heading) or [heading]
+                if units is None:
+                    units = _verse_word_units(sp, row["book"], row["chapter"], vi)
+                short = re.split(r"(?<=[.:])\s|\s\(", text, maxsplit=1)[0]
+                if len(short.split()) < 3:                 # e.g. a lone pointer word: use the text's opening
+                    short = re.sub(r"\([^)]*\)", "", text).strip()
+                short = short if len(short) <= 200 else short[:200].rsplit(" ", 1)[0] + "…"
+                done = set()
+                for item in items:
+                    u = _anchor(item.split()[0], units) if item.split() else None
+                    if not u or u["key"] in done:
+                        continue
+                    done.add(u["key"])
+                    rows.append((row["book"], row["chapter"], vi, u["key"], u["surface"], _content_strong(u, drop),
+                                 heading, short, text, row.get("license") or "", via))
+                st["anchored" if done else "not_anchored"] += 1
+    print(f"[malbim] explanations: {dict(st)}", file=sys.stderr)
+    return rows
+
+
+def write_explanations(rows: list[tuple]) -> None:
+    EXPLANATIONS.parent.mkdir(parents=True, exist_ok=True)
+    with EXPLANATIONS.open("w", encoding="utf-8") as fh:
+        fh.write("# Malbim, Beur HaMilot (19th c.): his word comments on the Prophets and Writings, anchored to the "
+                 "word(s) each heading quotes.\n# Hebrew text via Sefaria; `license` is Sefaria's label for the "
+                 "edition. Anchoring CC0. short = the first sentence.\n# Built by shoresh/macula/build_malbim.py "
+                 "--explanations.\n")
+        fh.write("book\tchapter\tverse\tword_key\tword\tstrong\theading\tshort\ttext\tlicense\tvia\n")
+        for r in rows:
+            fh.write("\t".join(str(x).replace("\t", " ") for x in r) + "\n")
+    print(f"[malbim] -> {EXPLANATIONS} ({len(rows)} rows)", file=sys.stderr)
 
 
 if __name__ == "__main__":

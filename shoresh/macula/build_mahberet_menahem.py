@@ -53,6 +53,8 @@ HEB_BOOKS = {
     "איוב": "JOB", "שיר השירים": "SNG", "שה\"ש": "SNG", "איכה": "LAM", "קהלת": "ECC", "אסתר": "EST",
     "דניאל": "DAN", "עזרא": "EZR", "נחמיה": "NEH", "דה\"א": "1CH", "דברי הימים א": "1CH",
     "דה\"ב": "2CH", "דברי הימים ב": "2CH",
+    # abbreviations and misprints as they occur in the 1854 edition's citations
+    "שיר": "SNG", "עמום": "AMO", "ההלים": "PSA", "יחקאל": "EZK", "חבקוקו": "HAB",
 }
 _GEM = {c: v for c, v in zip("אבגדהוזחטיכלמנסעפצקרשת", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60,
                                                        70, 80, 90, 100, 200, 300, 400])}
@@ -89,10 +91,16 @@ def fetch() -> None:
             print(f"[menahem] {letter}: {len(v[0]['text'])} entries", file=sys.stderr)
 
 
-def parse_ref(text: str, last_book: str | None) -> tuple[str | None, int | None, int | None]:
-    text = text.strip()
-    m = re.match(r"^(.*?)\s*([א-ת\"'״׳]+)\s*,\s*([א-ת\"'״׳]+)\s*$", text)
+def parse_ref(text: str, last_book: str | None, last_chapter: int | None = None
+              ) -> tuple[str | None, int | None, int | None]:
+    """'שמות כה, יד' -> (EXO, 25, 14). 'שם' repeats the last book; 'שם, ו' = same book and chapter, verse 6.
+    Typographic gershayim and invisible direction marks are normalised first."""
+    text = re.sub(r"[\u200e\u200f]", "", text).replace("״", '"').replace("׳", "'").strip().rstrip(",")
+    m = re.match(r"^(.*?)\s*([א-ת\"']+)\s*,\s*([א-ת\"']+)\s*$", text)
     if not m:
+        m2 = re.match(r"^שם\s*,\s*([א-ת\"']+)$", text)
+        if m2 and last_book and last_chapter:
+            return last_book, last_chapter, gematria(m2.group(1))
         return last_book, None, None
     book_txt = m.group(1).strip()
     book = last_book if book_txt in ("שם", "") else HEB_BOOKS.get(book_txt)
@@ -198,10 +206,51 @@ def _sense_phrase(text: str) -> str:
     return "כמשמעו" if "כמשמעו" in text else ""
 
 
+def _anchor_citation(sp, word: str, book: str, ch: int, vs: int):
+    """(word unit, how): the cited verse; then each word of a multi-word citation; then verses +-1/+-2 (the 1854
+    edition's numbering is sometimes off); then a word occurring exactly once in the chapter (wrong verse
+    number). Every step still requires the word itself to match."""
+    from macula.build_metzudat_zion import _anchor, _verse_word_units
+
+    def exact(w, us):
+        """Wider searches use only exact whole-word or lemma matches of 3+ letters (a sampled 20% error rate
+        with the looser rules: הוות -> ממות, מעל -> על)."""
+        h = to_modern_form(w, "hbo")
+        if len(h) < 3:
+            return None
+        hit = [u for u in us if u["surface"] == h or any(h == p[0] for p in u["parts"])]
+        return hit[0] if len(hit) == 1 else None
+
+    words = word.split()
+    units = _verse_word_units(sp, book, ch, vs)
+    u = _anchor(words[0], units)
+    if u:
+        return u, "verse"
+    for w in words[1:]:
+        u = exact(w, units)
+        if u:
+            return u, "verse_other_word"
+    for d in (-1, 1, -2, 2):
+        u = _anchor(words[0], _verse_word_units(sp, book, ch, vs + d)) if vs + d > 0 else None
+        if u:
+            return u, "neighbour_verse"
+    hits = []
+    n_vs = sp.execute("SELECT MAX(verse) FROM spine_words WHERE book=? AND chapter=?", (book, ch)).fetchone()[0] or 0
+    for v in range(1, n_vs + 1):
+        u = exact(words[0], _verse_word_units(sp, book, ch, v))
+        if u:
+            hits.append(u)
+            if len(hits) > 1:
+                break
+    if len(hits) == 1:
+        return hits[0], "unique_in_chapter"
+    return None, ""
+
+
 def senses() -> list[tuple]:
     """One row per cited occurrence: the root entry (headword), its division, the division's sense phrase and
     text, and the anchored word (whole words, as build_metzudat_zion --explanations)."""
-    from macula.build_metzudat_zion import _anchor, _content_strong, _verse_word_units
+    from macula.build_metzudat_zion import _content_strong
     drop = excluded()
     sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
     rows, st = [], collections.Counter()
@@ -219,17 +268,18 @@ def senses() -> list[tuple]:
             for di, div in enumerate(divisions, start=1):
                 plain = re.sub(r"\s+", " ", re.sub(r"<[^>]+>|[‎‏]", "", div)).strip().rstrip(".:").strip()
                 sense = _sense_phrase(plain)
-                last = None
+                last, last_ch = None, None
                 for word, _between, ref in _CITE.findall(div):
-                    book, ch, vs = parse_ref(ref, last)
+                    book, ch, vs = parse_ref(ref, last, last_ch)
                     if not book or not ch or not vs:
                         st["unparsed_citation"] += 1
                         continue
-                    last = book
-                    u = _anchor(word, _verse_word_units(sp, book, ch, vs))
+                    last, last_ch = book, ch
+                    u, how = _anchor_citation(sp, word, book, ch, vs)
                     if not u:
                         st["not_anchored"] += 1
                         continue
+                    st[f"anchored_{how}"] += 1
                     rows.append((book, ch, vs, u["key"], u["surface"], _content_strong(u, drop), root,
                                  f"{letter}:{ei}", di, len(divisions), sense, plain))
                     st["cited_occurrences"] += 1

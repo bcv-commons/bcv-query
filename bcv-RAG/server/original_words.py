@@ -69,8 +69,8 @@ def _compact_words(words: list[dict]) -> list[dict]:
          "group_confidence": (w.get("group") or {}).get("confidence", ""),
          # Hebrew: the topical setting the word is used in here ("מִזְבֵּחַ · altar, עֹלָה · burnt offering")
          "setting": (w.get("setting") or {}).get("label", ""),
-         # Hebrew: Metzudat Zion's explanation of the word, in Hebrew (Prophets and Writings)
-         "explanation": (w.get("explanation") or {}).get("short", "")}
+         # Hebrew: the commentators' short explanations of the word, in Hebrew (Prophets and Writings)
+         "explanation": " | ".join(f"{e['source'].split(',')[0]}: {e['short']}" for e in w.get("explanations") or [])}
         for w in words if w.get("strong")
     ]
 

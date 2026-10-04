@@ -24,7 +24,7 @@ priors. Built once (language-independent) via `shoresh/macula/build_prior_pack.p
 The ETCBC BHSA database is licensed CC BY-NC-SA, which does not fit this CC BY pack. Two columns changed:
 
 - **`senses` is removed.** It was our own sense clustering, built on BHSA clauses. For a sense inventory
-  use [`bcv-commons/senses-attested-ubs`](https://huggingface.co/datasets/bcv-commons/senses-attested-ubs)
+  use [`bcv-commons/senses-attested`](https://huggingface.co/datasets/bcv-commons/senses-attested)
   (CC BY-SA 4.0, keyed on UBS Dictionary of Biblical Hebrew senses).
 - **`neighbors` comes from the BHSA-free semantic-neighbors pack**, the same build behind
   [`bcv-commons/semantic-neighbors`](https://huggingface.co/datasets/bcv-commons/semantic-neighbors). It is

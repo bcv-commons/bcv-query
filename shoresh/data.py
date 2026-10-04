@@ -401,43 +401,50 @@ def setting_lexemes(sid: str, gloss_lang: str = "English", limit: int = 200) -> 
     return {"domain": rec["id"], "axis": "setting", "label": rec["label"], "count": len(order), "lexemes": lexemes}
 
 
+EXPLANATION_SOURCES = (("Metzudat Zion", "metzudat_zion"), ("Malbim, Beur HaMilot", "malbim"))
+
+
 @lru_cache(maxsize=1)
-def _mz_explanations() -> dict:
-    """(book, chapter, verse) -> [(word consonants, strong, heading, short, text, sense_strong)] from
-    resources/metzudat_zion/explanations.tsv: Metzudat Zion's word explanations (Public Domain Hebrew text;
-    macula/build_metzudat_zion.py --explanations)."""
-    path = _resources_dir() / "metzudat_zion" / "explanations.tsv"
+def _explanations() -> dict:
+    """(book, chapter, verse) -> [(source, word consonants, strong, heading, short, text, sense_strong,
+    license)] from resources/{metzudat_zion,malbim}/explanations.tsv: word explanations in Hebrew (Metzudat
+    Zion, 18th c.; Malbim's Beur HaMilot, 19th c.), anchored to the explained word
+    (macula/build_metzudat_zion.py / build_malbim.py --explanations)."""
     out: dict = collections.defaultdict(list)
-    if path.exists():
+    for source, folder in EXPLANATION_SOURCES:
+        path = _resources_dir() / folder / "explanations.tsv"
+        if not path.exists():
+            continue
         for r in _tsv_rows(path):
             out[(r["book"], int(r["chapter"]), int(r["verse"]))].append(
-                (r["word"], r["strong"], r["heading"], r["short"], r["text"], r["sense_strong"]))
+                (source, r["word"], r["strong"], r["heading"], r["short"], r["text"], r.get("sense_strong", ""),
+                 r.get("license") or "Public Domain", r.get("via", "")))
     return out
 
 
 def _attach_explanations(book: str, chapter: int, vrs: int, words: list[dict]) -> None:
-    """Hebrew explaining Hebrew: Metzudat Zion's explanation of a word, matched by the word's consonants,
-    else by Strong's number, each explanation used once."""
-    pending = list(_mz_explanations().get((book, chapter, vrs), []))
-    if not pending:
-        return
-
-    def take(pred):
-        for i, e in enumerate(pending):
-            if pred(e):
-                return pending.pop(i)
-        return None
-
-    for w in words:
-        cons = to_modern_form(w.get("surface") or "", "hbo")
-        e = take(lambda e: e[0] == cons) or (take(lambda e: e[1] == _norm_strong(w["strong"])) if w.get("strong") else None)
-        if not e:
-            continue
-        _word, _strong, heading, short, text, sense = e
-        exp = {"source": "Metzudat Zion", "heading": heading, "short": short, "text": text}
-        if sense:
-            exp["explained_by"] = {"strong": sense, **(gloss_of(sense) or {})}
-        w["explanation"] = exp
+    """Hebrew explaining Hebrew: each commentary's explanation of a word, matched by the word's consonants,
+    else by Strong's number; each explanation used once."""
+    pending = list(_explanations().get((book, chapter, vrs), []))
+    for source, _folder in EXPLANATION_SOURCES:
+        mine = [e for e in pending if e[0] == source]
+        for w in words:
+            if not mine:
+                break
+            cons = to_modern_form(w.get("surface") or "", "hbo")
+            hit = next((e for e in mine if e[1] == cons), None)
+            if hit is None and w.get("strong"):
+                hit = next((e for e in mine if e[2] == _norm_strong(w["strong"])), None)
+            if hit is None:
+                continue
+            mine.remove(hit)
+            _src, _word, _strong, heading, short, text, sense, lic, via = hit
+            exp = {"source": source, "heading": heading, "short": short, "text": text, "license": lic}
+            if via:                       # the comment only pointed elsewhere; this is the comment it points to
+                exp["via"] = via
+            if sense:
+                exp["explained_by"] = {"strong": sense, **(gloss_of(sense) or {})}
+            w.setdefault("explanations", []).append(exp)
 
 
 @lru_cache(maxsize=1)
@@ -504,7 +511,8 @@ def _malbim_distinctions() -> dict:
             for me, word, other, other_word in ((r["strong_a"], r["word_a"], r["strong_b"], r["word_b"]),
                                                 (r["strong_b"], r["word_b"], r["strong_a"], r["word_a"])):
                 out[me].append({"ref": ref, "word": word, "other": {"strong": other, "word": other_word},
-                                "heading": r["heading"], "text": r["text"], "license": r["license"]})
+                                "heading": r["heading"], "text": r["text"], "license": r["license"],
+                                **({"via": r["via"]} if r.get("via") else {})})
     return out
 
 
@@ -1098,7 +1106,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
     binyan-correct sense. Hebrew words carry `group` (CC0 semantic group) and `domain` = its Hebrew
     exemplar label, with the localized gloss appended ("אָב · father") when `domain_gloss`, and
     `setting` (the topical setting the word is used in here; CC BY), glossed the same way, and in the
-    Prophets and Writings `explanation`: Metzudat Zion's Hebrew explanation of the word (Public Domain),
+    Prophets and Writings `explanations`: Hebrew explanations of the word (Metzudat Zion, Malbim),
     and `menahem` where Mahberet Menahem cites this occurrence: its root and which division (sense)."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"

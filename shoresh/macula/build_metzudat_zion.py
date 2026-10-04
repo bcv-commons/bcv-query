@@ -244,14 +244,42 @@ def _content_strong(unit: dict, drop: set[str]) -> str:
     return max(parts, key=lambda p: len(p[0]))[1] if parts else ""
 
 
+def _no_vowel_letters(w: str) -> str:
+    return re.sub(r"[וי]", "", w)
+
+
 def _anchor(head: str, units: list[dict]) -> dict | None:
-    """Whole-word match on consonants, then the word with up to two prefix letters removed, then a lemma."""
+    """Whole-word match on consonants, then the word with up to two prefix letters removed, then a lemma,
+    then the same ignoring the vowel letters ו/י (commentators quote in full spelling: סופרים for ספרים),
+    accepted only when exactly one word of the verse matches."""
     h = to_modern_form(head, "hbo")
     if not h:
         return None
     for u in units:
         if u["surface"] == h:
             return u
+    hit = _anchor_strict(h, units)
+    if hit:
+        return hit
+    hv = _no_vowel_letters(h)
+    if len(hv) >= 2:
+        same = [u for u in units if _no_vowel_letters(u["surface"]) == hv]
+        if len(same) == 1:
+            return same[0]
+        b = h
+        for _ in range(2):
+            if len(b) > 2 and b[0] in PREFIXES:
+                b = b[1:]
+                bv = _no_vowel_letters(b)
+                same = [u for u in units if len(bv) >= 2 and (_no_vowel_letters(u["surface"]).endswith(bv)
+                                                            or any(bv == _no_vowel_letters(p[0]) for p in u["parts"]))]
+                if len(same) == 1:
+                    return same[0]
+    return None
+
+
+def _anchor_strict(h: str, units: list[dict]) -> dict | None:
+    """Prefix-stripped and lemma matches on exact consonants (the original rules)."""
     b = h
     for _ in range(2):
         if len(b) > 2 and b[0] in PREFIXES:
