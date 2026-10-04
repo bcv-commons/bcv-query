@@ -117,6 +117,64 @@ def cluster(g: Graph, resolution: float = RESOLUTION) -> dict[str, int]:
     return assign
 
 
+def consensus_cluster(g: Graph, resolution: float = RESOLUTION, runs: int = 20, threshold: float = 0.5,
+                      max_rounds: int = 5, dropout: float = 0.0, jitter: float = 0.0) -> dict[str, int]:
+    """Consensus clustering (Lancichinetti & Fortunato 2012): Louvain `runs` times with different seeds and
+    shuffled edge order; keep word pairs grouped together in >= `threshold` of the runs, weighted by that
+    share; cluster the agreement graph the same way, until every run returns the same partition. Plain
+    Louvain on this graph changes ~24% of groups with nothing but the hash seed (2026-10-04)."""
+    import random
+
+    def runs_on(graph: Graph, res: float, perturb: bool) -> list[dict[str, int]]:
+        out = []
+        edges = list(graph.edges(data="weight"))
+        nodes = list(graph.nodes())
+        for r in range(runs):
+            rng = random.Random(1000 + r)
+            rng.shuffle(edges)
+            rng.shuffle(nodes)
+            h = Graph()
+            h.add_nodes_from(nodes)
+            if perturb:            # robustness to input noise: drop some edges, jitter the weights
+                h.add_weighted_edges_from((a, b, w * rng.uniform(1 - jitter, 1 + jitter))
+                                          for a, b, w in edges if rng.random() >= dropout)
+            else:
+                h.add_weighted_edges_from(edges)
+            comms = louvain_communities(h, weight="weight", resolution=res, seed=1000 + r)
+            out.append({lx: cid for cid, members in enumerate(comms) for lx in members})
+        return out
+
+    def agreement(parts: list[dict[str, int]]) -> Graph:
+        together: collections.Counter = collections.Counter()
+        for part in parts:
+            by: dict[int, list[str]] = collections.defaultdict(list)
+            for lx, cid in part.items():
+                by[cid].append(lx)
+            for members in by.values():
+                for a, b in combinations(sorted(members), 2):
+                    together[(a, b)] += 1
+        c = Graph()
+        c.add_nodes_from(g.nodes())
+        for (a, b), n in together.items():
+            if n / len(parts) >= threshold:
+                c.add_edge(a, b, weight=n / len(parts))
+        return c
+
+    parts = runs_on(g, resolution, perturb=dropout > 0 or jitter > 0)
+    for rnd in range(max_rounds):
+        c = agreement(parts)
+        parts = runs_on(c, 1.0, perturb=False)
+        canon = {frozenset(frozenset(lx for lx, cid in p.items() if cid == k) for k in set(p.values()))
+                 for p in parts}
+        print(f"[domain-clusters] consensus round {rnd + 1}: {len(canon)} distinct partition(s) over {runs} runs",
+              file=sys.stderr)
+        if len(canon) == 1:
+            break
+    final = sorted((sorted(m) for m in {frozenset(lx for lx, cid in parts[0].items() if cid == k)
+                                        for k in set(parts[0].values())}), key=lambda m: m[0])
+    return {lx: cid for cid, members in enumerate(final) for lx in members}
+
+
 def validate(assign: dict[str, int]) -> None:
     """Internal yardstick ONLY (never published): do same-cluster lexemes hold up under the
     text-anchored intrinsic yardstick (held-out slot-filler prediction)? SDBH retired 2026-08-14 --
@@ -145,13 +203,20 @@ def main() -> int:
     ap.add_argument("--no-prior", action="store_true",
                      help="high-tier edges only (real quality ~60%%, but median cluster size ~3 — not "
                           "domain-shaped). Default includes LLM-only prior-tier edges too (median ~23).")
+    ap.add_argument("--consensus", type=int, default=0, metavar="RUNS",
+                    help="consensus clustering over RUNS Louvain runs (0 = a single Louvain run)")
+    ap.add_argument("--dropout", type=float, default=0.0, help="consensus: share of edges dropped per run")
+    ap.add_argument("--jitter", type=float, default=0.0, help="consensus: relative weight jitter per run")
+    ap.add_argument("--threshold", type=float, default=0.5, help="consensus: co-membership share to keep a pair")
     args = ap.parse_args()
 
     g = load_graph(neighbors_path=args.neighbors, include_prior=not args.no_prior)
     print(f"[domain-clusters] graph: {g.number_of_nodes()} lexemes, {g.number_of_edges()} edges "
           f"({'high-only' if args.no_prior else 'high+LLM-prior'}, resolution={args.resolution})",
           file=sys.stderr)
-    assign = cluster(g, resolution=args.resolution)
+    assign = (consensus_cluster(g, resolution=args.resolution, runs=args.consensus, threshold=args.threshold,
+                                dropout=args.dropout, jitter=args.jitter) if args.consensus
+              else cluster(g, resolution=args.resolution))
     sizes = collections.Counter(assign.values())
     print(f"[domain-clusters] {len(sizes)} clusters; size distribution: "
           f"min={min(sizes.values())} median={sorted(sizes.values())[len(sizes)//2]} max={max(sizes.values())}",
