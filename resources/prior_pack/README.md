@@ -1,5 +1,5 @@
 ---
-license: cc-by-4.0
+license: cc-by-sa-4.0
 pretty_name: "Prior pack: language-independent lexeme priors for alignment"
 language:
   - hbo
@@ -13,15 +13,23 @@ configs:
     data_files: "prior_pack.parquet"
 ---
 
-# `prior_pack/` — language-independent leverage for the aligner (CC-BY)
+# `prior_pack/` — language-independent leverage for the aligner (CC BY-SA)
 
 One row per **original lexeme**, bundling shoresh signals the aligner's gloss/neural runs consume as
 priors. Built once (language-independent) via `shoresh/macula/build_prior_pack.py`. Spec:
-`internal-docs/prior-pack.md`. **CC-BY-4.0** (MACULA lexeme + lxx_bridge; label-free, no MARBLE).
+`internal-docs/prior-pack.md`. **CC BY-SA 4.0** (MACULA lexeme + lxx_bridge, CC BY 4.0; `keyness` uses modern-Hebrew word frequencies from
+[wordfreq](https://github.com/rspeer/wordfreq), whose data is CC BY-SA 4.0; label-free, no MARBLE).
+
+## Changed 2026-10-04: licence CC BY-SA 4.0
+
+Previously labelled CC BY 4.0. The `keyness` column (biblical frequency minus general-language frequency) uses
+modern-Hebrew frequencies from `wordfreq`, whose data is CC BY-SA 4.0, so the pack carries share-alike. No data
+changed. Attribution: wordfreq (Robyn Speer), data derived from sources including Wikipedia, OpenSubtitles and
+Google Books Ngrams; see its README.
 
 ## Changed 2026-10-03: BHSA-free
 
-The ETCBC BHSA database is licensed CC BY-NC-SA, which does not fit this CC BY pack. Two columns changed:
+The ETCBC BHSA database is licensed CC BY-NC-SA, which does not fit this openly licensed pack. Two columns changed:
 
 - **`senses` is removed.** It was our own sense clustering, built on BHSA clauses. For a sense inventory
   use [`bcv-commons/senses-attested`](https://huggingface.co/datasets/bcv-commons/senses-attested)

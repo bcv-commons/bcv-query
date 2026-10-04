@@ -1,7 +1,7 @@
 {
   "dataset": "prior_pack",
   "anchor": "MACULA lexeme (CC-BY)",
-  "license": "CC-BY-4.0",
+  "license": "CC-BY-SA-4.0",
   "rows": 14720,
   "with_keyness": 14045,
   "with_lxx": 3759,
@@ -14,5 +14,5 @@
     "spine_sha256": "4bfd0cdd0a4eed93c5f14fe073f7c96f25ccd07073dc4888c6f9c4fc4c882125"
   },
   "content_sha256": "f41f6d4c1ad5a12ce55d0ff7b8230e487f29abb2e35dc18499ca501fdd535e0a",
-  "note": "language-independent; CC-BY (MACULA lexeme + lxx_bridge); label-free (no MARBLE); BHSA-free since 2026-10-03 (BHSA-free neighbors; senses column removed)."
+  "note": "language-independent; MACULA lexeme + lxx_bridge (CC BY); keyness uses wordfreq frequencies (CC BY-SA 4.0), so the pack is CC BY-SA 4.0 (relabelled 2026-10-04, data unchanged); label-free (no MARBLE); BHSA-free since 2026-10-03 (BHSA-free neighbors; senses column removed)."
 }

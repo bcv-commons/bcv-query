@@ -189,7 +189,7 @@ def build(aligned_dir: Path | None = None, neighbors: Path = NEIGHBORS):
     def _sha(p):
         return hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None
     manifest = {
-        "dataset": "prior_pack", "anchor": "MACULA lexeme (CC-BY)", "license": "CC-BY-4.0",
+        "dataset": "prior_pack", "anchor": "MACULA lexeme (CC-BY)", "license": "CC-BY-SA-4.0",
         "rows": len(rows),
         "with_keyness": sum(1 for r in rows if r["keyness"] is not None),
         "with_lxx": sum(1 for r in rows if r["lxx_greek"] or r["lxx_hebrew"]),
@@ -200,7 +200,8 @@ def build(aligned_dir: Path | None = None, neighbors: Path = NEIGHBORS):
             "neighbors_sha256": _sha(neighbors), "spine_sha256": _sha(SPINE),
         },
         "content_sha256": _sha(dest),
-        "note": "language-independent; CC-BY (MACULA lexeme + lxx_bridge); label-free (no MARBLE); "
+        "note": "language-independent; MACULA lexeme + lxx_bridge (CC BY); keyness uses wordfreq frequencies "
+                "(CC BY-SA 4.0), so the pack is CC BY-SA 4.0; label-free (no MARBLE); "
                 "BHSA-free since 2026-10-03 (BHSA-free neighbors; senses column removed).",
     }
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
