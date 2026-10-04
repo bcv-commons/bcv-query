@@ -253,7 +253,8 @@ confidence; `settings[]` lists the settings the word is used in, with counts and
 also carry `relations` (UBS synonyms/antonyms per dictionary sense, CC BY-SA 4.0) and `distinctions`:
 Malbim's (19th c.) explanations of how the word differs from a near-synonym it stands beside in a verse
 (צְדָקָה / מִשְׁפָּט: "justice between people, righteousness between a person and God"), in Hebrew, each with
-the verse, the partner word and Sefaria's licence label for the edition. `menahem` gives Mahberet
+the verse, the partner word and Sefaria's licence label for the edition (Beur HaMilot on the Prophets and
+Writings, and Malbim's Torah commentary for Torah words). `menahem` gives Mahberet
 Menahem's (10th c., the first Hebrew dictionary of the Bible) sense divisions for the roots the word is
 cited under: each division's sense (its ענין phrase, when it has one), an example citation and the cited
 verses; `cites_this_word` marks the divisions that cite this word. In `/verse`, a word Menahem cites

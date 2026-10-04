@@ -133,6 +133,8 @@ def extract() -> collections.Counter:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--no-fetch", action="store_true")
+    ap.add_argument("--torah", action="store_true",
+                    help="fetch Malbim on the Torah and write resources/malbim/distinctions_torah.tsv")
     ap.add_argument("--explanations", action="store_true",
                     help="write resources/malbim/explanations.tsv (per-word comments for /verse) and stop")
     ap.add_argument("--distinctions", action="store_true",
@@ -145,6 +147,13 @@ def main() -> int:
         return 0
     if args.explanations:
         write_explanations(explanations())
+        return 0
+    if args.torah:
+        fetch_torah()
+        rows = torah_distinctions()
+        global DISTINCTIONS
+        DISTINCTIONS = TORAH_DISTINCTIONS
+        write_distinctions(rows)
         return 0
     pairs = extract()
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -325,6 +334,36 @@ def distinctions() -> list[tuple]:
                 rows.append((row["book"], row["chapter"], vi, sa, items[0], sb, items[1],
                              re.sub(r"[.:]\s*$", "", m.group(1).strip()), text, row.get("license") or "", via))
                 st["distinctions"] += 1
+    # "the difference between X and Y" stated in a comment's text, about words other than its heading's
+    have = {(r[0], r[1], r[2], *sorted((r[3], r[5]))) for r in rows}
+    for line in CACHE.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        for vi, comments in enumerate(row["verses"], start=1):
+            units = None
+            for c in (comments if isinstance(comments, list) else [comments]):
+                m0 = re.match(r"\s*<b>([^<]+)</b>\s*\.?\s*(.*)", c or "", re.S)
+                if not m0:
+                    continue
+                body = re.sub(r"<[^>]+>", "", m0.group(2))
+                for m in _BETWEEN.finditer(body):
+                    if units is None:
+                        units = _verse_word_units(sp, row["book"], row["chapter"], vi)
+                    strongs = []
+                    for w in (m.group(1), m.group(2)):
+                        u = _anchor(w, units)
+                        hits = {_content_strong(u, drop)} if u else _resolve_gloss(w, gidx)
+                        strongs.append(next(iter(hits)) if len(hits) == 1 else "")
+                    if not all(strongs) or strongs[0] == strongs[1]:
+                        st["text_pair_unresolved"] += 1
+                        continue
+                    key = (row["book"], row["chapter"], vi, *sorted(strongs))
+                    if key in have:
+                        continue
+                    have.add(key)
+                    text = re.sub(r"\s+", " ", body).strip().rstrip(":").strip()
+                    rows.append((row["book"], row["chapter"], vi, strongs[0], m.group(1), strongs[1], m.group(2),
+                                 f"{m.group(1)} / {m.group(2)}", text, row.get("license") or "", ""))
+                    st["text_pair_distinctions"] += 1
     print(f"[malbim] distinctions: {dict(st)}", file=sys.stderr)
     return rows
 
@@ -410,6 +449,78 @@ def write_explanations(rows: list[tuple]) -> None:
         for r in rows:
             fh.write("\t".join(str(x).replace("\t", " ") for x in r) + "\n")
     print(f"[malbim] -> {EXPLANATIONS} ({len(rows)} rows)", file=sys.stderr)
+
+
+
+# ---------- Malbim on the Torah: explicit distinctions in the verse commentary ----------
+
+TORAH_CACHE = HERE / "data" / "malbim_torah_chapters.jsonl"
+TORAH_DISTINCTIONS = ROOT / "resources" / "malbim" / "distinctions_torah.tsv"
+_BETWEEN = re.compile(r"(?:ה)?הבדל\s+(?:יש\s+)?בין\s+([א-ת][א-ת֑-ׇ\"']*)\s+(?:ובין\s+|ל|ו)([א-ת][א-ת֑-ׇ\"']*)")
+
+
+def fetch_torah() -> None:
+    """Malbim on the Torah (HaTorah VeHaMitzvah; Vilna 1891, Public Domain, via Sefaria), per chapter."""
+    TORAH_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    done = {json.loads(l)["ref"] for l in TORAH_CACHE.read_text(encoding="utf-8").splitlines()} if TORAH_CACHE.exists() else set()
+    counts = chapter_counts()
+    with TORAH_CACHE.open("a", encoding="utf-8") as fh:
+        for book in sorted(TORAH):
+            for ch in range(1, counts.get(book, 0) + 1):
+                ref = f"Malbim on {book} {ch}"
+                if ref in done:
+                    continue
+                d = _get(ref)
+                v = (d or {}).get("versions") or []
+                if v and v[0].get("text"):
+                    fh.write(json.dumps({"ref": ref, "book": BOOK_MAP[book], "chapter": ch,
+                                         "license": v[0].get("license"), "version": v[0].get("versionTitle"),
+                                         "verses": v[0]["text"]}, ensure_ascii=False) + "\n")
+                    fh.flush()
+                time.sleep(0.15)
+            print(f"[malbim-torah] {book} done", file=sys.stderr)
+
+
+def torah_distinctions() -> list[tuple]:
+    from macula.build_metzudat_zion import _anchor, _content_strong, _verse_word_units
+    drop = excluded()
+    gidx = _bare_index(drop)
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    rows, st, seen = [], collections.Counter(), set()
+    for line in TORAH_CACHE.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        for vi, comments in enumerate(row["verses"], start=1):
+            text = " ".join(re.sub(r"<[^>]+>", "", c or "") for c in (comments if isinstance(comments, list) else [comments]))
+            units = None
+            for m in _BETWEEN.finditer(text):
+                st["difference_phrases"] += 1
+                if units is None:
+                    units = _verse_word_units(sp, row["book"], row["chapter"], vi)
+                strongs = []
+                for w in (m.group(1), m.group(2)):
+                    u = _anchor(w, units)
+                    if u:
+                        strongs.append(_content_strong(u, drop))
+                    else:
+                        hits = _resolve_gloss(w, gidx)
+                        strongs.append(next(iter(hits)) if len(hits) == 1 else "")
+                if not all(strongs) or strongs[0] == strongs[1]:
+                    st["same_root_or_unresolved"] += 1
+                    continue
+                start = max(text.rfind(".", 0, m.start()), text.rfind(":", 0, m.start())) + 1
+                end_dot = min([i for i in (text.find(".", m.end()), text.find(":", m.end())) if i != -1] or [len(text)])
+                sentence = text[start:end_dot].strip()
+                if len(sentence) > 400:
+                    sentence = sentence[:400].rsplit(" ", 1)[0] + "…"
+                key = (row["book"], row["chapter"], vi, *sorted(strongs))
+                if key in seen:
+                    continue
+                seen.add(key)
+                rows.append((row["book"], row["chapter"], vi, strongs[0], m.group(1), strongs[1], m.group(2),
+                             f"{m.group(1)} / {m.group(2)}", sentence, row.get("license") or "", ""))
+                st["distinctions"] += 1
+    print(f"[malbim-torah] {dict(st)}", file=sys.stderr)
+    return rows
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ Replaces the 2026-08 release (BHSA lexeme ids, senses clustered on BHSA clauses,
 from build_rendering_senses.py: occurrences of a MACULA lexeme that translators in ten languages render
 alike share a sense (Clear-Bible/Alignments, CC BY 4.0). Keyed on MACULA lexemes (CC BY 4.0).
 
-  python -m macula.build_rendering_senses --out macula/data/rendering_senses     # if not built yet
+  python -m macula.build_rendering_senses --gbt --out macula/data/rendering_senses   # if not built yet
   python -m macula.export_hebrew_word_senses       # -> macula/data/hf_cards/hebrew-word-senses/
 """
 from __future__ import annotations

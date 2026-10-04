@@ -316,6 +316,23 @@ def _hbo_lex_counts() -> dict[str, int]:
     return out
 
 
+@lru_cache(maxsize=1)
+def _aligned_glosses() -> dict:
+    """(H####, iso) -> gloss from resources/aligned_glosses/hbo.tsv: the lexeme-aligner's most frequent
+    rendering per language (CC0; macula/build_aligned_glosses.py). Fills labels the BibleOL route leaves English."""
+    path = _resources_dir() / "aligned_glosses" / "hbo.tsv"
+    out = {}
+    if path.exists():
+        for r in _tsv_rows(path):
+            out[(r["strong"], r["iso"])] = r["gloss"]
+    return out
+
+
+def _aligned_label_gloss(strong: str, gloss_lang: str) -> str | None:
+    iso = _tw_lang_by_name().get(gloss_lang)
+    return _aligned_glosses().get((_norm_strong(strong), iso)) if iso else None
+
+
 @lru_cache(maxsize=4096)
 def _label_gloss(label_strong: str, gloss_en: str, gloss_lang: str) -> str:
     """The exemplar's gloss in the reader's language (word_glosses via the Strong's lexemes), else English."""
@@ -332,12 +349,12 @@ def _label_gloss(label_strong: str, gloss_en: str, gloss_lang: str) -> str:
             counts = _hbo_lex_counts()
             lexes = sorted(lexes, key=lambda lx: (overlap(lx), counts.get(lx, 0)), reverse=True)
             if want and overlap(lexes[0]) == 0:
-                return gloss_en
+                return _aligned_label_gloss(label_strong, gloss_lang) or gloss_en
         for lex in lexes:
             loc = resolve_word_gloss("hbo", gloss_lang, lex, None)
             if loc:
                 return re.split(r"[;,]", loc)[0].strip()
-    return gloss_en
+    return (_aligned_label_gloss(label_strong, gloss_lang) or gloss_en) if gloss_lang and gloss_lang != "English" else gloss_en
 
 
 def _group_record(gid: str, gloss_lang: str) -> dict | None:
@@ -544,9 +561,11 @@ def _attach_menahem(book: str, chapter: int, vrs: int, words: list[dict]) -> Non
 def _malbim_distinctions() -> dict:
     """strong -> [distinction] from resources/malbim/distinctions.tsv (Malbim, Beur HaMilot: two words he
     distinguishes in a verse and how they differ; macula/build_malbim.py --distinctions)."""
-    path = _resources_dir() / "malbim" / "distinctions.tsv"
     out: dict = collections.defaultdict(list)
-    if path.exists():
+    for name in ("distinctions.tsv", "distinctions_torah.tsv"):   # Beur HaMilot; the Torah commentary
+        path = _resources_dir() / "malbim" / name
+        if not path.exists():
+            continue
         for r in _tsv_rows(path):
             ref = f"{r['book']} {r['chapter']}:{r['verse']}"
             for me, word, other, other_word in ((r["strong_a"], r["word_a"], r["strong_b"], r["word_b"]),

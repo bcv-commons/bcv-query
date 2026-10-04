@@ -64,6 +64,23 @@ def live_gloss(strong: str) -> str:
     return ((data.gloss_of(strong) or {}).get("gloss")) or ""
 
 
+_FUNCTION = set("o the a an of to in on at by for with from your my his her their our its you he she it they we i "
+                "me him them us this that these those and or but not no be is are was were will shall which who whom "
+                "what when where there then all most at".split())
+
+
+def reading_gloss(sense: str | None, strong: str) -> str:
+    """The exemplar's English reading aid: its most common gloss inside the group, without parenthesised bits
+    ("(the)", "(s)", "(of) a sickle"); the dictionary gloss when nothing content-like is left (MACULA glosses a
+    vocative מֶלֶךְ "O", a suffixed form "your")."""
+    import re
+    g = re.sub(r"\s*\([^)]*\)", "", dp.clean_gloss(sense or "")).strip(" ,;")
+    words = re.findall(r"[a-z]+", g.lower())
+    if not words or all(w in _FUNCTION for w in words):
+        return live_gloss(strong)
+    return g
+
+
 def build(source: str) -> tuple[list[tuple], dict[str, tuple], str]:
     counts, lemmas = dp.token_counts(), dp.lemma_of()
     if source in ("bhsa-free", "bhsa-free-routed", "bhsa-free-served"):
@@ -93,7 +110,7 @@ def build(source: str) -> tuple[list[tuple], dict[str, tuple], str]:
                              (f"hbo:{int(ls[1:]):04d}%",)).fetchone()
             if row:
                 ex[g] = (ls, row[0])
-    groups = {g: (ls, ll, dp.clean_gloss(sense_gloss.get((ls, g)) or live_gloss(ls)))
+    groups = {g: (ls, ll, reading_gloss(sense_gloss.get((ls, g)), ls))
               for g, (ls, ll) in ex.items()}
     return members, groups, provenance
 

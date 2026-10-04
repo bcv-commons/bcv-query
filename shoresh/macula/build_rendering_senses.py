@@ -47,6 +47,7 @@ MIN_OCC = 20            # lexemes with fewer aligned occurrences keep one sense
 MIN_SENSE_SHARE = 0.05  # a sense needs at least this share of the word's occurrences ...
 MIN_SENSE_OCC = 4       # ... and at least this many
 RESOLUTION = 1.0
+USE_GBT = False          # --gbt: add Global Bible Tools per-word glosses (14 more languages)
 MIN_OCC_EVAL = 20       # words need this many reference-labelled tokens to be scored (Menahem: set to 4)
 
 _ARABIC_MARKS = re.compile(r"[ً-ٰٟـ]")
@@ -118,6 +119,55 @@ def stopwords(lang: str) -> set[str]:
                   if l and not l.startswith("#") and not l.startswith("surface\t")}
 
 
+GBT_DIR = Path(__import__("os").environ.get(
+    "GBT_OCCURRENCE_DIR", str(Path.home() / "dev/bcv-commons/lexeme-aligner/pipeline/work/occurrence_align")))
+GBT_MIN_ROWS = 100_000          # skip partial gloss projects (French has 1,300 rows)
+
+
+def _content_part_keys() -> dict[str, str]:
+    """MACULA word key (token key without its part digit) -> the key of its content part (longest lemma)."""
+    db = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    best: dict = {}
+    for key, lemma in db.execute("SELECT key, lemma FROM spine_words WHERE lexeme LIKE 'hbo:%'"):
+        w, n = key[:-1], len(lemma or "")
+        if w not in best or n > best[w][0]:
+            best[w] = (n, key)
+    return {w: k for w, (_n, k) in best.items()}
+
+
+def gbt_features() -> dict[str, set]:
+    """Per-word glosses from Global Bible Tools (CC0; via the lexeme-aligner's occurrence_align export), one
+    feature set per language tagged gbt-<iso>: content words of the gloss phrase, normalised like the
+    translations. GBT ids are BCCCVVVWW over whole words; the gloss goes to the word's content part."""
+    import json
+    part = _content_part_keys()
+    feats: dict[str, set] = collections.defaultdict(set)
+    if not GBT_DIR.exists():
+        return feats
+    for path in sorted(GBT_DIR.glob("gbt_*.jsonl")):
+        lang = path.stem.split("_", 1)[1]
+        if lang == "eng" or sum(1 for _ in path.open(encoding="utf-8")) < GBT_MIN_ROWS:
+            continue                    # English already comes from BSB/YLT; skip partial projects
+        stop = stopwords(lang)
+        for line in path.open(encoding="utf-8"):
+            r = json.loads(line)
+            if r.get("kind") != "1:1" or not r.get("target_gloss"):
+                continue
+            sid = str(r["source_ids"][0])
+            if len(sid) < 9 or int(sid[:-8]) > 39:
+                continue
+            key = part.get(f"{int(sid[:-8]):02d}{sid[-8:-5]}{sid[-5:-2]}{int(sid[-2:]):03d}")
+            if not key:
+                continue
+            for w in re.findall(r"[^\W\d_]+", r["target_gloss"][0].lower()):
+                if len(w) < 3 or w in stop:
+                    continue
+                f = norm(lang, w) if lang in LANGS else w[:5]
+                if len(f) >= 3:
+                    feats[key].add((f"gbt-{lang}", f))
+    return feats
+
+
 def load_features() -> tuple[dict[str, set], dict[str, collections.Counter]]:
     """token key (lexeme-spine key) -> {(lang, form)}, and form -> Counter(raw English surfaces) for labels."""
     feats: dict[str, set] = collections.defaultdict(set)
@@ -141,6 +191,9 @@ def load_features() -> tuple[dict[str, set], dict[str, collections.Counter]]:
             feats[sid[1:]].add((lang, f))
             if lang == "eng":
                 eng_raw[f][low] += 1
+    if USE_GBT:
+        for k, fs in gbt_features().items():
+            feats[k] |= fs
     return feats, eng_raw
 
 
@@ -360,8 +413,10 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--resolution", type=float, default=RESOLUTION)
     ap.add_argument("--merge-same-label", action="store_true")
+    ap.add_argument("--gbt", action="store_true", help="add Global Bible Tools per-word glosses (14 languages)")
     a = ap.parse_args()
     globals()["RESOLUTION"] = a.resolution
+    globals()["USE_GBT"] = a.gbt
     result = build(a.out, merge_same_label=a.merge_same_label)
     multi = sum(1 for r in result.values() if len(set(r.values())) > 1)
     print(f"lexemes {len(result)}; split into >1 sense: {multi}", file=sys.stderr)

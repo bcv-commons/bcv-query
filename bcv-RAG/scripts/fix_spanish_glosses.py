@@ -25,7 +25,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "shoresh"))
 WG = ROOT / "resources" / "word_glosses" / "hbo"
 SEED = ROOT / "resources" / "lexicons" / "heb_en.csv"
-LOG = ROOT / "shoresh" / "macula" / "data" / "spanish_gloss_fix.jsonl"
+LOG = ROOT / "shoresh" / "macula" / "data" / ("spanish_gloss_fix_vocab.jsonl" if "--vocab" in sys.argv
+                                                     else "spanish_gloss_fix.jsonl")
 MARK = re.compile(r"[çãõêôâ]|ção|ões|lh|nh|\bnão\b|\buma?\b|\bda\b|\bdo\b|\bem\b|\bou\b")
 BATCH = 40
 PROMPT = (
@@ -33,8 +34,8 @@ PROMPT = (
     "Portuguese by mistake. For each item you get the Hebrew lemma, the column (`default` = the word's "
     "gloss; otherwise a verb stem such as qal, nif, piel), the English gloss, and the current cell. Return "
     "the correct Spanish gloss in the same style and length as the current cell (keep commas, semicolons, "
-    "parentheses and question marks). If the current cell is already correct Spanish, or a proper name, "
-    "return it unchanged.\nReply with JSON only: a list of {\"id\": <id>, \"es\": <Spanish gloss>}.\n\n"
+    "parentheses and question marks). Proper names: use the usual Spanish Bible (Reina-Valera) spelling. "
+    "If the current cell is already correct Spanish, return it unchanged.\nReply with JSON only: a list of {\"id\": <id>, \"es\": <Spanish gloss>}.\n\n"
     "Items:\n")
 
 
@@ -50,6 +51,30 @@ def lemmas() -> dict[str, str]:
         r = csv.DictReader(fh)
         for row in r:
             out[row["lex"]] = row["Lexeme"]
+    return out
+
+
+def vocab_candidates(head, es_rows):
+    """Second pass (2026-10-04): cells whose words occur in Portuguese Bibles but never in Spanish ones
+    (Clear attestations RV09/JFA11 + the aligner's per-language renderings) -- catches Portuguese without
+    tell-tale spelling ("vazio", "embotamento", "trevas")."""
+    import pyarrow.parquet as pq
+    def vocab(iso):
+        v = {x.lower() for x in pq.read_table(ROOT / "resources/strongs/attestations" / f"{iso}.parquet",
+                                              columns=["surface"]).column("surface").to_pylist() if x}
+        for line in (ROOT / "resources/aligned_lex_hf" / f"{iso}.tsv").read_text(encoding="utf-8").splitlines():
+            if not line.startswith(("#", "surface\t")):
+                v |= set(line.split("\t")[0].lower().split())
+        return v
+    es, pt = vocab("spa"), vocab("por")
+    out = []
+    for i, row in enumerate(es_rows):
+        for j, col in enumerate(head[1:], start=1):
+            v = row[j] if j < len(row) else ""
+            toks = [w for w in re.findall(r"[^\W\d_]+", v.lower()) if len(w) >= 4]
+            bad = [w for w in toks if w not in es and w in pt]
+            if v and bad and len(bad) >= max(1, len(toks) // 2):
+                out.append({"id": f"{i}:{j}", "lex": row[0], "col": col, "es": v, "en": ""})
     return out
 
 
@@ -79,13 +104,21 @@ def candidates():
 
 def main() -> int:
     run = "--run" in sys.argv
+    backend = "openai" if "--openai" in sys.argv else "claude-cli"
     head, es, cand = candidates()
+    if "--vocab" in sys.argv:
+        en_head, en_rows = read("English")
+        en_map = {r[0]: dict(zip(en_head, r)) for r in en_rows}
+        cand = vocab_candidates(head, es)
+        for c in cand:
+            c["en"] = (en_map.get(c["lex"]) or {}).get(c["col"], "") or (en_map.get(c["lex"]) or {}).get("default", "")
     print(f"{len(cand)} candidate cells", file=sys.stderr)
     if not run:
         for c in cand[:15]:
             print(c)
         return 0
-    from macula.usability_judge import call_claude_cli
+    from macula.usability_judge import call_claude_cli, call_judge, _load_env
+    _load_env()
     lem = lemmas()
     done = {}
     if LOG.exists():
@@ -95,7 +128,8 @@ def main() -> int:
     def call(batch):
         items = [{"id": c["id"], "hebrew": lem.get(c["lex"], c["lex"]), "column": c["col"],
                   "english": c["en"], "current": c["es"]} for c in batch]
-        text, _i, _o = call_claude_cli(PROMPT + json.dumps(items, ensure_ascii=False, indent=1))
+        prompt = PROMPT + json.dumps(items, ensure_ascii=False, indent=1)
+        text, _i, _o = call_judge("openai", prompt) if backend == "openai" else call_claude_cli(prompt)
         m = re.search(r"\[.*\]", text, re.S)
         try:
             return {r["id"]: r["es"].strip() for r in json.loads(m.group(0)) if r.get("es")} if m else {}
