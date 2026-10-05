@@ -1160,42 +1160,69 @@ def aquifer_search(
             for i, (cid, _rank) in enumerate(rows)]
 
 
+_topic_ids_cache: set[str] | None = None
+
+
+def _topic_ids(db: sqlite3.Connection) -> set[str]:
+    global _topic_ids_cache
+    if _topic_ids_cache is None:
+        _topic_ids_cache = {r[0] for r in db.execute("SELECT id FROM topics")}
+    return _topic_ids_cache
+
+
 def topic_search(
     db: sqlite3.Connection,
     *,
     topic_query: str | None,
+    lang: str | None = None,
     limit: int = 30,
 ) -> list[Hit]:
-    """Nave's-style topic lookup: topic name → BBCCCVVV passages → BSB chunks."""
+    """Nave's-style topic lookup: topic name → BBCCCVVV passages → Bible chunks in the query language.
+
+    The topic: its exact name; else, in any language, through Strong's (query.topic_map: "fe" → G4102 →
+    FAITH); else, for English only, a name starting with the words (4+ letters). The prefix fallback is
+    English-only because Nave's names are: Spanish "amor" matched AMORITES."""
     if not topic_query:
         return []
 
-    # Resolve topic by exact-name (case-insensitive) match first; fall back to LIKE.
     rows = db.execute(
         "SELECT id FROM topics WHERE LOWER(name) = LOWER(?) LIMIT 5",
         (topic_query,),
     ).fetchall()
-    if not rows:
-        rows = db.execute(
-            "SELECT id FROM topics WHERE LOWER(name) LIKE LOWER(?) LIMIT 5",
-            (topic_query + "%",),
-        ).fetchall()
     topic_ids = [r[0] for r in rows]
     if not topic_ids:
+        from query.topic_map import map_topic
+        mapped = map_topic(topic_query, lang or "eng", _topic_ids(db))
+        topic_ids = [mapped] if mapped else []
+    if not topic_ids and canon(lang or "eng") == "eng" and len(topic_query.strip()) >= 4:
+        topic_ids = [r[0] for r in db.execute(
+            "SELECT id FROM topics WHERE LOWER(name) LIKE LOWER(?) LIMIT 5",
+            (topic_query + "%",),
+        ).fetchall()]
+    if not topic_ids:
         return []
+    # the query language's Bible only, filtered BEFORE the limit: with Bibles in several languages a top-30
+    # across all of them left 1-3 verses after the language gate
+    lang_sql, lang_params = "", []
+    if lang:
+        lang_sql = "AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = ?) "
+        lang_params = [f"lang:{to_web(canon(lang))}"]
 
     placeholders = ",".join("?" * len(topic_ids))
     # Get up to `limit` BBCCCVVV pairs from topic_passages, then join to BSB chunks.
     rows = db.execute(
         "SELECT DISTINCT chunks.id "
         "FROM topic_passages tp "
-        "JOIN passage_refs pr ON pr.start_bbcccvvv <= tp.end_bbcccvvv "
-        "                     AND pr.end_bbcccvvv >= tp.start_bbcccvvv "
+        # Bible chunks are single verses (start = end), so overlap = the verse lies in the topic passage: a
+        # range the (start, end) index seeks directly. The general overlap test (start <= tp.end AND
+        # end >= tp.start) scanned every reference starting before tp.end: 52 s for "grace" in production.
+        "JOIN passage_refs pr ON pr.start_bbcccvvv BETWEEN tp.start_bbcccvvv AND tp.end_bbcccvvv "
         "JOIN chunks ON chunks.doc_id = pr.doc_id AND chunks.chunk_index = 0 "
         f"WHERE tp.topic_id IN ({placeholders}) "
         "AND EXISTS (SELECT 1 FROM tags WHERE doc_id = chunks.doc_id AND tag = 'kind:bible') "
+        + lang_sql +
         "ORDER BY tp.start_bbcccvvv LIMIT ?",
-        [*topic_ids, limit],
+        [*topic_ids, *lang_params, limit],
     ).fetchall()
     n = len(rows)
     return [
@@ -1208,6 +1235,7 @@ def xref_search(
     db: sqlite3.Connection,
     *,
     source_bbcccvvv: int | None,
+    lang: str | None = None,
     limit: int = 30,
 ) -> list[Hit]:
     """Cross-reference followup: source verse → TSK/BSB-parallel target verses → BSB chunks."""
@@ -1217,22 +1245,27 @@ def xref_search(
     # parallels with no rank field), then TSK refs by rank ascending. Putting
     # bsb-parallel at the bottom (the previous (rank IS NULL) sort) buried
     # the most pedagogically valuable parallels behind TSK long-tail.
+    # the query language's Bible only, before the limit (as topic_search)
+    lang_tag = f"lang:{to_web(canon(lang))}" if lang else None
+    # Bible chunks are single verses, so "overlaps the target range" = "its verse lies in it" (see
+    # topic_search). CROSS JOIN fixes the join order (SQLite keeps it): from this verse's few cross-references
+    # to their verses. Left to itself the planner started from all ~590k kind:bible docs and took 7-24 s.
     rows = db.execute(
         """
         SELECT DISTINCT chunks.id, xr.rank, xr.source_attribution
         FROM cross_references xr
-        JOIN passage_refs pr ON pr.start_bbcccvvv <= xr.target_end_bbcccvvv
-                             AND pr.end_bbcccvvv   >= xr.target_start_bbcccvvv
-        JOIN chunks ON chunks.doc_id = pr.doc_id AND chunks.chunk_index = 0
-        JOIN tags k ON k.doc_id = chunks.doc_id AND k.tag = 'kind:bible'
+        CROSS JOIN passage_refs pr ON pr.start_bbcccvvv BETWEEN xr.target_start_bbcccvvv AND xr.target_end_bbcccvvv
+        CROSS JOIN chunks ON chunks.doc_id = pr.doc_id AND chunks.chunk_index = 0
         WHERE xr.source_bbcccvvv = ?
+          AND EXISTS (SELECT 1 FROM tags k WHERE k.doc_id = chunks.doc_id AND k.tag = 'kind:bible')
+          AND (? IS NULL OR EXISTS (SELECT 1 FROM tags l WHERE l.doc_id = chunks.doc_id AND l.tag = ?))
         ORDER BY
           CASE xr.source_attribution WHEN 'bsb-parallel' THEN 0 ELSE 1 END,
           (xr.rank IS NULL),
           xr.rank ASC
         LIMIT ?
         """,
-        (source_bbcccvvv, limit),
+        (source_bbcccvvv, lang_tag, lang_tag, limit),
     ).fetchall()
     n = len(rows)
     return [
@@ -1552,8 +1585,8 @@ def _gather_hits(
                                     passages=analysis.passages),
         lambda c: entity_search(c, entity_query=analysis.entity_query, lang=lang),
         lambda c: bible_search(c, fts_query=analysis.fts_query, passages=analysis.passages, lang=lang),
-        lambda c: topic_search(c, topic_query=analysis.topic_query),
-        lambda c: xref_search(c, source_bbcccvvv=analysis.xref_source),
+        lambda c: topic_search(c, topic_query=analysis.topic_query, lang=lang),
+        lambda c: xref_search(c, source_bbcccvvv=analysis.xref_source, lang=lang),
         lambda c: cfabric_search(analysis.passages),
         lambda c: aquifer_search(c, fts_query=analysis.fts_query, lang=lang),
         lambda c: speaker_search(c, speaker=analysis.speaker, fts_query=analysis.fts_query),

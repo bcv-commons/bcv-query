@@ -44,9 +44,8 @@ deploy/
 # re-derivable, published to Hugging Face, and NOT read at runtime (verified:
 # no resource_path("strongs") anywhere). ~443 MB — never ship it in the image.
 resources/strongs/
-# topic_strongs.tsv: topic-anchoring foundation, not yet wired into runtime
-# (dormant). Re-include here once the gloss-bridge actually reads it. ~11 MB.
-resources/topic_strongs.tsv
+# topic_strongs.tsv (~11 MB) is now read at runtime by bcv-RAG/query/topic_map.py (topic words in any
+# language -> Strong's -> Nave's topic), so it ships in the images.
 
 # bcv-RAG bits not needed in the image
 # NOTE: "bcv-RAG/scripts/*" (not "bcv-RAG/scripts/") so the negation below can

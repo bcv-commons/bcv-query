@@ -119,7 +119,14 @@
     "ein",
     "eine",
     "dinge",
-    "sache"
+    "sache",
+    "den",
+    "dem",
+    "des",
+    "einen",
+    "einem",
+    "einer",
+    "eines"
   ],
   "relation_map": {
     "vater": "father-of-rev",
