@@ -45,11 +45,18 @@ _primary: dict[str, tuple[str, float]] | None = None   # strong -> (domain, shar
 _members: dict[str, list[tuple[str, float, int]]] | None = None  # domain -> [(strong, share, count)]
 
 
+# Keyness cap in the ranking. Greek keyness is measured against pagan Koine (LAGT): a word rare in the Bible
+# and absent there scores ~4-5 (splagchnizomai 4.94, the hapax anileos "merciless" 3.86) against agapao's
+# 1.36, so uncapped, "love" expanded to "pity" and chesed to "merciless". Capped, keyness still breaks ties
+# between on-concept words, and frequency decides.
+KEYNESS_CAP = 2.5
+
+
 def _rank(m: tuple[str, float, int]) -> float:
     """Co-member ranking: central AND distinctive. log(freq) lifts common,
     concept-central lexemes (agapaō) over rare keyness-only compounds (philotheos);
-    keyness keeps it on-concept."""
-    return math.log1p(m[2]) + strong_keyness(m[0])
+    keyness, capped at KEYNESS_CAP, keeps it on-concept."""
+    return math.log1p(m[2]) + min(strong_keyness(m[0]), KEYNESS_CAP)
 
 
 def _load() -> None:

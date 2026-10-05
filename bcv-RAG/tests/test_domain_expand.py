@@ -8,7 +8,11 @@ larger / original-language-tagged corpus; here we lock in the expansion logic.)
 
 Run:  PYTHONPATH=. python tests/test_domain_expand.py
 """
-from query.domain_expand import expand_domains
+import os
+
+os.environ.setdefault("DOMAIN_EXPAND", "1")       # the feature is opt-in; the test exercises it
+
+from query.domain_expand import expand_domains  # noqa: E402
 
 # query Strong's → a co-domain lexeme that MUST appear in its expansion.
 # Each pair crosses languages (the shared SDBG axis spanning Greek + LXX-bridged Hebrew).
@@ -16,7 +20,7 @@ EXPECT = {
     "G0026": "H0157",   # agapē (love)      → ahav (Hebrew "love")
     "G1515": "H7965",   # eirēnē (peace)    → shalom
     "G0040": "H6944",   # hagios (holy)     → qodesh (holiness)
-    "H2617": "G1656",   # chesed            → eleos (mercy)
+    "H2617": ("G1656", "G1653"),   # chesed → eleos / eleeō (mercy, have mercy: one word family)
     "H0157": "G0025",   # ahav (love)       → agapaō (Greek "love")
 }
 
@@ -25,8 +29,9 @@ def main() -> None:
     fails = []
     for src, want in EXPECT.items():
         got = expand_domains([f"strongs:{src}"])
-        ok = f"strongs:{want}" in got
-        print(f"  {src} -> {got}  {'OK' if ok else 'MISSING ' + want}")
+        wants = want if isinstance(want, tuple) else (want,)
+        ok = any(f"strongs:{w}" in got for w in wants)
+        print(f"  {src} -> {got}  {'OK' if ok else 'MISSING ' + '/'.join(wants)}")
         if not ok:
             fails.append((src, want, got))
 

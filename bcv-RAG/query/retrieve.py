@@ -656,18 +656,33 @@ def domain_search(db: sqlite3.Connection, tags: list[str], *, limit: int = 50,
     member_tags = [f"strongs:{m}" for m in sorted(members)][:max_members]
     if not member_tags:
         return []
-    ph = ",".join("?" * len(member_tags))
-    sql = (
-        "SELECT chunks.id, COUNT(DISTINCT tags.tag) AS ov "
-        "FROM tags JOIN chunks ON chunks.doc_id = tags.doc_id AND chunks.chunk_index = 0 "
-        f"WHERE tags.tag IN ({ph}) "
-        "AND NOT EXISTS (SELECT 1 FROM tags ax WHERE ax.doc_id = chunks.doc_id AND ax.tag = 'resource:aquifer') "
-        "GROUP BY chunks.id ORDER BY ov DESC LIMIT ?"
-    )
-    rows = db.execute(sql, member_tags + [limit]).fetchall()
-    n = len(rows)
-    return [Hit(chunk_id=r[0], score=1.0 - i / max(1, n), retrievers=["semdomain"])
-            for i, r in enumerate(rows)]
+    key = (tuple(member_tags), limit)
+    ids = _semdomain_cache.get(key)
+    if ids is None:
+        ph = ",".join("?" * len(member_tags))
+        sql = (
+            "SELECT chunks.id, COUNT(DISTINCT tags.tag) AS ov "
+            "FROM tags JOIN chunks ON chunks.doc_id = tags.doc_id AND chunks.chunk_index = 0 "
+            f"WHERE tags.tag IN ({ph}) "
+            "AND NOT EXISTS (SELECT 1 FROM tags ax WHERE ax.doc_id = chunks.doc_id AND ax.tag = 'resource:aquifer') "
+            "GROUP BY chunks.id ORDER BY ov DESC LIMIT ?"
+        )
+        ids = [r[0] for r in db.execute(sql, member_tags + [limit]).fetchall()]
+        with _semdomain_lock:
+            if len(_semdomain_cache) >= _SEMDOMAIN_CACHE_MAX:
+                _semdomain_cache.pop(next(iter(_semdomain_cache)))        # oldest first
+            _semdomain_cache[key] = ids
+    n = len(ids)
+    return [Hit(chunk_id=c, score=1.0 - i / max(1, n), retrievers=["semdomain"])
+            for i, c in enumerate(ids)]
+
+
+# domain_search depends only on the domains' member set, not on the rest of the query, so its result is
+# cached per member set: a concept seen once (love, holiness, covenant...) costs nothing after that. The
+# index is read-only while the process runs; a redeploy (new index) starts a new cache.
+_SEMDOMAIN_CACHE_MAX = 2048
+_semdomain_cache: dict[tuple, list[str]] = {}
+_semdomain_lock = Lock()
 
 
 # ---------- v3 retrievers (stage-3) ----------
