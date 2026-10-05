@@ -132,6 +132,9 @@ def root() -> dict:
             "/interlinear/word/{word_id}?lang=eng",
             "/interlinear/languages",
             "/interlinear/similar/{strong}",
+            "/verse/{book}/{chapter}/{verse}/malbim",
+            "/files",
+            "/files/{name}",
         ],
         "docs": "../docs/original-language-anchoring.md",
     }
@@ -161,6 +164,46 @@ def get_verse_malbim(book: str, chapter: int, verse: int) -> dict:
     if result is None:
         raise HTTPException(404, f"no Malbim commentary for {book} {chapter}:{verse}")
     return result
+
+
+PUBLIC_DIR = os.environ.get("SHORESH_PUBLIC_DIR", "/data/public")
+
+
+def _public_manifest() -> dict:
+    """manifest.json of the published files (written by publish_files.py), re-read on each call so a
+    shipped update is live without a restart."""
+    import json
+    path = os.path.join(PUBLIC_DIR, "manifest.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, ValueError):
+        return {"files": []}
+
+
+@app.get("/files")
+def list_files(request: Request) -> dict:
+    """Data files published for direct download (the original-language spines): name, bytes, sha256,
+    license, source, description, url. Download one with GET /files/{name}; check its sha256 here."""
+    m = _public_manifest()
+    # behind Caddy the app sees http on the Docker network: build the URL as the client saw it
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc
+    base = f"{proto}://{host}"
+    return {"updated": m.get("updated"),
+            "files": [{**f, "url": f"{base}/files/{f['name']}"} for f in m.get("files", [])]}
+
+
+@app.get("/files/{name}")
+def get_file(name: str):
+    """One published file (only names listed by /files; supports HTTP Range requests)."""
+    from fastapi.responses import FileResponse
+    entry = next((f for f in _public_manifest().get("files", []) if f.get("name") == name), None)
+    path = os.path.join(PUBLIC_DIR, name)
+    if entry is None or os.path.basename(name) != name or not os.path.isfile(path):
+        raise HTTPException(404, f"no published file {name!r}; see /files")
+    return FileResponse(path, filename=name, media_type="application/octet-stream",
+                        headers={"X-Content-SHA256": entry.get("sha256", "")})
 
 
 @app.get("/word/{strong}")

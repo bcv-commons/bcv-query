@@ -184,6 +184,9 @@ shoresh/macula/data/metzudat_zion_chapters.jsonl
 shoresh/macula/data/malbim_beur_hamilot_chapters.jsonl
 shoresh/macula/data/malbim_torah_chapters.jsonl
 shoresh/macula/data/compact_renderings_*.pkl
+shoresh/macula/data/rend_renderings*.pkl
+shoresh/macula/data/rend_sim*/
+shoresh/macula/data/public/
 shoresh/macula/data/mahberet_menahem_letters.jsonl
 shoresh/macula/data/malbim_commentary_chapters.jsonl
 shoresh/macula/data/malbim_commentary_fetch.log
