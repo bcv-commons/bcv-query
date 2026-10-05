@@ -24,7 +24,7 @@ import math
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -127,7 +127,7 @@ def root() -> dict:
             "/participants/{book}/{chapter}/{verse}",
             "/quotations/{book}/{chapter}/{verse}",
             "/parallels/{book}/{chapter}/{verse}",
-            "/versify/{scheme}/{book}/{chapter}/{verse}",
+            "/versify/{scheme}/{book}/{chapter}/{verse}  (deprecated, removal 2026-11-05: use cdn.bibel.wiki/_vrs/map)",
             "/interlinear/chapter/{book}/{chapter}",
             "/interlinear/word/{word_id}?lang=eng",
             "/interlinear/languages",
@@ -605,11 +605,26 @@ def get_parallels(book: str, chapter: int, verse: int) -> dict:
 
 
 @app.get("/versify/{scheme}/{book}/{chapter}/{verse}")
-def get_versify(scheme: str, book: str, chapter: int, verse: int) -> dict:
-    """Versification (V1): normalize a verse ref to the KJV standard, given its tradition `scheme`
-    (`hebrew` = Masoretic, `lxx` = Septuagint, `kjv` = identity). Returns `standard_ref` (→ KJV) and
-    `from_standard_ref` (KJV → this scheme). From STEPBible TVTMS."""
-    return data.versify(scheme, book, chapter, verse)
+def get_versify(scheme: str, book: str, chapter: int, verse: int, response: Response) -> dict:
+    """DEPRECATED, removal on 2026-11-05. Normalize a verse ref to the KJV standard, given its tradition
+    `scheme` (`hebrew` = Masoretic, `lxx` = Septuagint, `kjv` = identity). Returns `standard_ref` (→ KJV) and
+    `from_standard_ref` (KJV → this scheme), as before, plus `deprecated`, `sunset` and `see`.
+
+    Verse numbering per edition and the maps between schemes belong to the bcv-commons/bibles project, which
+    publishes them as pinned files: https://cdn.bibel.wiki/_vrs/map/<scheme>-to-eng.json (`org` = our
+    `hebrew`). From STEPBible TVTMS."""
+    result = data.versify(scheme, book, chapter, verse)
+    url = f"https://cdn.bibel.wiki/_vrs/map/{VERSIFY_CDN_SCHEME.get(scheme, scheme)}-to-eng.json"
+    response.headers["Deprecation"] = "true"
+    response.headers["Sunset"] = VERSIFY_SUNSET_HTTP
+    response.headers["Link"] = f'<{url}>; rel="successor-version"'
+    return {**result, "deprecated": True, "sunset": VERSIFY_SUNSET, "see": url,
+            "note": "Verse maps are published by bcv-commons/bibles; this endpoint will be removed."}
+
+
+VERSIFY_SUNSET = "2026-11-05"
+VERSIFY_SUNSET_HTTP = "Thu, 05 Nov 2026 00:00:00 GMT"
+VERSIFY_CDN_SCHEME = {"hebrew": "org"}          # bibles' name for the Hebrew (Masoretic) scheme
 
 
 @app.get("/morph")
