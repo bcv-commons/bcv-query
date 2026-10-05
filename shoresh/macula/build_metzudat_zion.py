@@ -237,11 +237,16 @@ def _verse_word_units(sp, book: str, ch: int, vs: int) -> list[dict]:
     return list(units.values())
 
 
+_PRONOUNS = {"הוא", "היא", "אני", "אנכי", "אתה", "את", "אתם", "אתן", "הם", "המה", "הן", "הנה", "אנחנו", "נחנו"}
+
+
 def _content_strong(unit: dict, drop: set[str]) -> str:
-    """The word's content part: the part with the longest lemma (prefixes and suffixes are one or two
-    letters), so a name keeps its own number rather than its conjunction's."""
+    """The word's content part: the part with the longest lemma (prefixes are one or two letters), so a name
+    keeps its own number rather than its conjunction's. Pronoun suffixes (MACULA gives them the lemma הוּא,
+    longer than עַם or אָב) count only when the word is nothing else."""
     parts = [p for p in unit["parts"] if p[1]]
-    return max(parts, key=lambda p: len(p[0]))[1] if parts else ""
+    core = [p for p in parts if p[0] not in _PRONOUNS] or parts
+    return max(core, key=lambda p: len(p[0]))[1] if core else ""
 
 
 def _no_vowel_letters(w: str) -> str:
@@ -334,9 +339,13 @@ def explanations() -> list[tuple]:
                 if units is None:
                     units = _verse_word_units(sp, row["book"], row["chapter"], vi)
                 heading = re.sub(r"[.:]\s*$", "", m.group(1).strip())
-                u = _anchor(heading.split()[0] if heading.split() else "", units)
+                head = heading.split()[0] if heading.split() else ""
+                u = _anchor(head, units)
                 if not u:
-                    st["not_anchored"] += 1
+                    from macula.anchor_llm import fallback
+                    u = fallback("metzudat_zion", row["book"], row["chapter"], vi, head, units, m.group(2))
+                    st["anchored_llm" if u else "not_anchored"] += 1
+                if not u:
                     continue
                 st["anchored"] += 1
                 text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()

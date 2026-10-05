@@ -1,0 +1,571 @@
+# LLM fallback anchors for commentary headings the deterministic anchoring missed (shoresh/macula/anchor_llm.py).
+# word_key '-' = the model found no such word in the verse, or its choice failed the consonant check. CC0.
+source	ref	head	word_key	word	judge
+malbim	AMO 4:2	צנות	30004002012	בְּצִנּ֔וֹת	claude-sonnet-5-5
+malbim	AMO 4:2	סירות	30004002014	בְּסִיר֥וֹת	claude-sonnet-5-5
+malbim	AMO 5:11	כפר	-		claude-sonnet-5-5
+malbim	HAB 1:8	זאבי	35001008005	מִזְּאֵ֣בֵי	claude-sonnet-5-5
+malbim	HAB 3:18	בה	35003018002	בַּיהוָ֣ה	claude-sonnet-5-5
+malbim	ISA 1:4	ה	-		claude-sonnet-5-5
+malbim	ISA 1:19	חרב	-		claude-sonnet-5-5
+malbim	ISA 2:4	אתים	23002004009	לְאִתִּ֗ים	claude-sonnet-5-5
+malbim	ISA 5:2	ויזעקהו	23005002001	וַֽיְעַזְּקֵ֣הוּ	claude-sonnet-5-5
+malbim	ISA 8:22	חשך	23008022006	וַחֲשֵׁכָה֙	claude-sonnet-5-5
+malbim	ISA 10:11	אליליה	23010011005	וְלֶאֱלִילֶ֑יהָ	claude-sonnet-5-5
+malbim	ISA 10:11	עצביה	23010011009	וְלַעֲצַבֶּֽיהָ	claude-sonnet-5-5
+malbim	ISA 10:33	ונקף	-		claude-sonnet-5-5
+malbim	ISA 10:33	בברזל	-		claude-sonnet-5-5
+malbim	ISA 13:18	תחום	23013018011	תָח֥וּס	claude-sonnet-5-5
+malbim	ISA 15:3	הבמות	-		claude-sonnet-5-5
+malbim	ISA 17:7	יראה	23017007011	תִּרְאֶֽינָה	claude-sonnet-5-5
+malbim	ISA 17:12	ישאיון	23017012013	יִשָּׁאֽוּן	claude-sonnet-5-5
+malbim	ISA 19:16	עצת	-		claude-sonnet-5-5
+malbim	ISA 21:8	משמר	23021008011	מִ֨שְׁמַרְתִּ֔י	claude-sonnet-5-5
+malbim	ISA 21:12	אתא	23021012003	אָתָ֥ה	claude-sonnet-5-5
+malbim	ISA 23:1	וצידון	-		claude-sonnet-5-5
+malbim	ISA 24:9	בארתי	-		claude-sonnet-5-5
+malbim	ISA 24:16	וכו	-		claude-sonnet-5-5
+malbim	ISA 27:1	גדולה	23027001007	וְהַגְּדוֹלָ֣ה	claude-sonnet-5-5
+malbim	ISA 27:2	חמר	23027002004	חֶ֖מֶד	claude-sonnet-5-5
+malbim	ISA 28:9	הכהן	-		claude-sonnet-5-5
+malbim	ISA 28:17	וכפר	-		claude-sonnet-5-5
+malbim	ISA 28:20	זר	-		claude-sonnet-5-5
+malbim	ISA 28:20	מעשה	-		claude-sonnet-5-5
+malbim	ISA 29:5	ברעם	-		claude-sonnet-5-5
+malbim	ISA 30:10	ראים	23030010003	לָֽרֹאִים֙	claude-sonnet-5-5
+malbim	ISA 30:10	חזים	23030010006	וְלַ֣חֹזִ֔ים	claude-sonnet-5-5
+malbim	ISA 31:7	ונחל	-		claude-sonnet-5-5
+malbim	ISA 36:12	חריהם	-		claude-sonnet-5-5
+malbim	ISA 36:14	המפתה	-		claude-sonnet-5-5
+malbim	ISA 38:16	ה	-		claude-sonnet-5-5
+malbim	ISA 40:6	ורוח	-		claude-sonnet-5-5
+malbim	ISA 40:7	פעלתו	-		claude-sonnet-5-5
+malbim	ISA 41:11	מצותך	-		claude-sonnet-5-5
+malbim	ISA 41:11	מלחמתך	-		claude-sonnet-5-5
+malbim	ISA 41:15	סערה	-		claude-sonnet-5-5
+malbim	ISA 41:15	ה	-		claude-sonnet-5-5
+malbim	ISA 41:20	ידיעה	23041020003	וְיֵדְע֗וּ	claude-sonnet-5-5
+malbim	ISA 41:20	והשכלה	23041020005	וְיַשְׂכִּ֨ילוּ֙	claude-sonnet-5-5
+malbim	ISA 43:16	נתיב	23043016009	נְתִיבָֽה	claude-sonnet-5-5
+malbim	ISA 44:13	בודד	-		claude-sonnet-5-5
+malbim	ISA 44:21	כעב	-		claude-sonnet-5-5
+malbim	ISA 49:7	ה	-		claude-sonnet-5-5
+malbim	ISA 49:15	פרי	-		claude-sonnet-5-5
+malbim	ISA 51:12	ותפחד	-		claude-sonnet-5-5
+malbim	ISA 51:12	כונן	-		claude-sonnet-5-5
+malbim	ISA 51:19	ינחמך	23051019012	אֲנַחֲמֵֽךְ	claude-sonnet-5-5
+malbim	ISA 51:23	נפשך	23051023006	לְנַפְשֵׁ֖ךְ	claude-sonnet-5-5
+malbim	ISA 52:12	ה	-		claude-sonnet-5-5
+malbim	ISA 53:3	מכאב	23053003005	מַכְאֹב֖וֹת	claude-sonnet-5-5
+malbim	ISA 53:5	פשעינו	23053005003	מִפְּשָׁעֵ֔נוּ	claude-sonnet-5-5
+malbim	ISA 53:5	עונותינו	23053005005	מֵעֲוֺנֹתֵ֑ינוּ	claude-sonnet-5-5
+malbim	ISA 55:5	ה	-		claude-sonnet-5-5
+malbim	ISA 57:11	ישא	-		claude-sonnet-5-5
+malbim	ISA 57:11	ינחל	-		claude-sonnet-5-5
+malbim	ISA 60:9	ה	-		claude-sonnet-5-5
+malbim	ISA 61:7	תתימרו	-		claude-sonnet-5-5
+malbim	ISA 61:10	אגיל	23061010004	תָּגֵ֤ל	claude-sonnet-5-5
+malbim	ISA 61:10	בה	23061010003	בַּֽיהוָ֗ה	claude-sonnet-5-5
+malbim	ISA 65:4	קברים	23065004002	בַּקְּבָרִ֔ים	claude-sonnet-5-5
+malbim	JER 2:33	דם	-		claude-sonnet-5-5
+malbim	JER 2:33	מצאתים	-		claude-sonnet-5-5
+malbim	JER 3:6	בגודה	-		claude-sonnet-5-5
+malbim	JER 5:26	כלוב	-		claude-sonnet-5-5
+malbim	JER 8:18	מבליג	24008018001	מַבְלִ֥יגִיתִ֖י	claude-sonnet-5-5
+malbim	JER 8:20	השברתי	-		claude-sonnet-5-5
+malbim	JER 8:20	שמה	-		claude-sonnet-5-5
+malbim	JER 10:11	ארעא	24010011011	מֵֽאַרְעָ֛א	claude-sonnet-5-5
+malbim	JER 10:19	יצאוני	-		claude-sonnet-5-5
+malbim	JER 10:24	גוים	-		claude-sonnet-5-5
+malbim	JER 14:5	עשב	-		claude-sonnet-5-5
+malbim	JER 18:15	נתיב	24018015011	נְתִיב֔וֹת	claude-sonnet-5-5
+malbim	JER 23:13	שערורה	-		claude-sonnet-5-5
+malbim	JER 23:19	עד	-		claude-sonnet-5-5
+malbim	JER 31:34	עונם	24031034025	לַֽעֲוֺנָ֔ם	claude-sonnet-5-5
+malbim	JOL 2:4	ערוך	-		claude-sonnet-5-5
+malbim	JOL 2:7	במסלתו	-		claude-sonnet-5-5
+malbim	JOL 2:12	ונחם	-		claude-sonnet-5-5
+malbim	JOL 2:17	ויחמול	-		claude-sonnet-5-5
+malbim	JOL 4:4	גומל	29004004015	גֹּמְלִ֤ים	claude-sonnet-5-5
+malbim	JOL 4:9	גבורים	29004009007	הַגִּבּוֹרִ֔ים	claude-sonnet-5-5
+malbim	MAL 3:18	עובד	39003018007	עֹבֵ֣ד	claude-sonnet-5-5
+malbim	MIC 1:8	ומכותיה	-		claude-sonnet-5-5
+malbim	MIC 1:8	ונגע	-		claude-sonnet-5-5
+malbim	MIC 2:4	שם	-		claude-sonnet-5-5
+malbim	MIC 3:6	מתנבאים	-		claude-sonnet-5-5
+malbim	MIC 3:9	ישרה	33003009014	הַיְשָׁרָ֖ה	claude-sonnet-5-5
+malbim	MIC 4:1	מדרכיו	-		claude-sonnet-5-5
+malbim	MIC 4:1	בארחותיו	-		claude-sonnet-5-5
+malbim	MIC 7:10	ריבי	-		claude-sonnet-5-5
+malbim	MIC 7:10	משפטי	-		claude-sonnet-5-5
+malbim	NAM 3:6	רואי	34003006006	כְּרֹֽאִי	claude-sonnet-5-5
+malbim	OBA 1:5	נדמית	31001005009	נִדְמֵ֔יתָה	claude-sonnet-5-5
+malbim	PRO 1:4	פתאים	20001004002	לִפְתָאיִ֣ם	claude-sonnet-5-5
+malbim	PRO 1:12	יורדי	20001012005	כְּי֣וֹרְדֵי	claude-sonnet-5-5
+malbim	PRO 1:20	תקרא	-		claude-sonnet-5-5
+malbim	PRO 1:20	תאמר	-		claude-sonnet-5-5
+malbim	PRO 1:24	ותוכחתי	-		claude-sonnet-5-5
+malbim	PRO 2:7	ישרים	20002007003	לַ֭יְשָׁרִים	claude-sonnet-5-5
+malbim	PRO 2:13	דרכי	20002013005	בְּדַרְכֵי	claude-sonnet-5-5
+malbim	PRO 2:15	מעגלותיהם	20002015005	בְּמַעְגְּלוֹתָֽם	claude-sonnet-5-5
+malbim	PRO 2:16	נכריה	20002016004	מִ֝נָּכְרִיָּ֗ה	claude-sonnet-5-5
+malbim	PRO 3:11	תוכחה	20003011008	בְּתוֹכַחְתּֽוֹ	claude-sonnet-5-5
+malbim	PRO 3:18	תומך	20003018006	וְֽתֹמְכֶ֥יהָ	claude-sonnet-5-5
+malbim	PRO 3:34	כבוד	-		claude-sonnet-5-5
+malbim	PRO 3:34	קלון	-		claude-sonnet-5-5
+malbim	PRO 4:5	ותשמרך	-		claude-sonnet-5-5
+malbim	PRO 4:5	ותצרך	-		claude-sonnet-5-5
+malbim	PRO 7:5	נכריה	20007005004	מִ֝נָּכְרִיָּ֗ה	claude-sonnet-5-5
+malbim	PRO 7:18	אהבים	20007018007	בָּאֳהָבִֽים	claude-sonnet-5-5
+malbim	PRO 8:6	נפתל	-		claude-sonnet-5-5
+malbim	PRO 8:6	ועקש	-		claude-sonnet-5-5
+malbim	PRO 10:15	והרישה	20010015007	רֵישָֽׁם	claude-sonnet-5-5
+malbim	PRO 11:14	מחשבה	-		claude-sonnet-5-5
+malbim	PRO 11:14	עצה	-		claude-sonnet-5-5
+malbim	PRO 12:17	ובוטה	-		claude-sonnet-5-5
+malbim	PRO 12:17	שפת	-		claude-sonnet-5-5
+malbim	PRO 12:17	ולשון	-		claude-sonnet-5-5
+malbim	PRO 14:6	כסיל	-		claude-sonnet-5-5
+malbim	PRO 14:7	לץ	-		claude-sonnet-5-5
+malbim	PRO 14:24	איוולת	20014024004	אִוֶּ֖לֶת	claude-sonnet-5-5
+malbim	PRO 14:29		-		claude-sonnet-5-5
+malbim	PRO 15:10	תוכחה	20015010006	תוֹכַ֣חַת	claude-sonnet-5-5
+malbim	PRO 16:24	אכף	-		claude-sonnet-5-5
+malbim	PRO 19:1	אץ	-		claude-sonnet-5-5
+malbim	PRO 19:14	ומה	20019014005	וּ֝מֵיְהוָ֗ה	claude-sonnet-5-5
+malbim	PRO 20:18	תחבולות	20020018004	וּ֝בְתַחְבֻּל֗וֹת	claude-sonnet-5-5
+malbim	PRO 22:7	עברתו	-		claude-sonnet-5-5
+malbim	PRO 24:7	ופיו	-		claude-sonnet-5-5
+malbim	PRO 26:10	ושוכר	20026010004	וְשֹׂכֵ֥ר	claude-sonnet-5-5
+malbim	PRO 29:9	יבקשו	-		claude-sonnet-5-5
+malbim	PRO 29:9	ישבחנה	-		claude-sonnet-5-5
+malbim	PRO 30:2	ודעת	-		claude-sonnet-5-5
+malbim	PSA 3:2	סלה	-		claude-sonnet-5-5
+malbim	PSA 7:15	ויחפרהו	-		claude-sonnet-5-5
+malbim	PSA 10:1	בגאות	-		claude-sonnet-5-5
+malbim	PSA 10:1	ידלק	-		claude-sonnet-5-5
+malbim	PSA 10:1	יתפשו	-		claude-sonnet-5-5
+malbim	PSA 10:10	חלכאים	19010010008	כָּאִֽים	claude-sonnet-5-5
+malbim	PSA 12:6	בעליל	-		claude-sonnet-5-5
+malbim	PSA 12:6	צרוף	-		claude-sonnet-5-5
+malbim	PSA 12:6	מזוקק	-		claude-sonnet-5-5
+malbim	PSA 18:26	תתפתל	-		claude-sonnet-5-5
+malbim	PSA 18:32	ה	-		claude-sonnet-5-5
+malbim	PSA 24:7	גבור	-		claude-sonnet-5-5
+malbim	PSA 24:7	מלחמה	-		claude-sonnet-5-5
+malbim	PSA 28:8	עמך	-		claude-sonnet-5-5
+malbim	PSA 28:8	נחלתך	-		claude-sonnet-5-5
+malbim	PSA 32:11	ישרים	19032011007	יִשְׁרֵי	claude-sonnet-5-5
+malbim	PSA 38:5	חטאתי	-		claude-sonnet-5-5
+malbim	PSA 42:9	ושירה	19042009007	שִׁיר֣וֹ	claude-sonnet-5-5
+malbim	PSA 48:15	עלמות	-		claude-sonnet-5-5
+malbim	PSA 55:2	תחנתי	19055002006	מִתְּחִנָּתִֽי	claude-sonnet-5-5
+malbim	PSA 55:3	האזינה	-		claude-sonnet-5-5
+malbim	PSA 55:16	ישיא	-		claude-sonnet-5-5
+malbim	PSA 57:11	מעל	-		claude-sonnet-5-5
+malbim	PSA 59:4	ה	-		claude-sonnet-5-5
+malbim	PSA 61:2	האזינה	-		claude-sonnet-5-5
+malbim	PSA 63:7	אשמרות	19063007005	בְּ֝אַשְׁמֻר֗וֹת	claude-sonnet-5-5
+malbim	PSA 66:18	הקשיב	-		claude-sonnet-5-5
+malbim	PSA 68:24	קדקד	-		claude-sonnet-5-5
+malbim	PSA 69:6	אולתי	19069006004	לְאִוַּלְתִּ֑י	claude-sonnet-5-5
+malbim	PSA 71:23	בשו	-		claude-sonnet-5-5
+malbim	PSA 71:23	חפרו	-		claude-sonnet-5-5
+malbim	PSA 72:7	גז	-		claude-sonnet-5-5
+malbim	PSA 72:7	רביבים	-		claude-sonnet-5-5
+malbim	PSA 72:7	זרזיף	-		claude-sonnet-5-5
+malbim	PSA 73:10	מי	-		claude-sonnet-5-5
+malbim	PSA 76:6	נרדם	-		claude-sonnet-5-5
+malbim	PSA 77:12	פעלך	19077012008	פִּלְאֶֽךָ	claude-sonnet-5-5
+malbim	PSA 85:2	שבות	19085002006	שְׁבִ֣ית	claude-sonnet-5-5
+malbim	PSA 86:11	אמתך	19086011005	בַּאֲמִתֶּ֑ךָ	claude-sonnet-5-5
+malbim	PSA 88:3	רנתי	19088003006	לְרִנָּתִֽי	claude-sonnet-5-5
+malbim	PSA 89:6	יערך	-		claude-sonnet-5-5
+malbim	PSA 89:6	ידמה	-		claude-sonnet-5-5
+malbim	PSA 89:6	בני	-		claude-sonnet-5-5
+malbim	PSA 89:19	ה	-		claude-sonnet-5-5
+malbim	PSA 89:45	מגרת	19089045005	מִגַּֽרְתָּה	claude-sonnet-5-5
+malbim	PSA 91:2	לה	19091002002	לַֽ֭יהוָה	claude-sonnet-5-5
+malbim	PSA 91:13	וידע	-		claude-sonnet-5-5
+malbim	PSA 96:3	עמים	19096003005	הָֽ֝עַמִּ֗ים	claude-sonnet-5-5
+malbim	PSA 101:5	אכרית	-		claude-sonnet-5-5
+malbim	PSA 103:1	ה	-		claude-sonnet-5-5
+malbim	PSA 105:1	וכו	-		claude-sonnet-5-5
+malbim	PSA 106:10	אחד	-		claude-sonnet-5-5
+malbim	PSA 106:21	חמתו	-		claude-sonnet-5-5
+malbim	PSA 106:30	ויכעיסו	-		claude-sonnet-5-5
+malbim	PSA 107:17	עונותיהם	19107017004	וּֽ֝מֵעֲוֺֽנֹתֵיהֶ֗ם	claude-sonnet-5-5
+malbim	PSA 107:29	מחוז	-		claude-sonnet-5-5
+malbim	PSA 107:29	גבול	-		claude-sonnet-5-5
+malbim	PSA 107:34	ומוצאי	-		claude-sonnet-5-5
+malbim	PSA 109:17	ומד	-		claude-sonnet-5-5
+malbim	PSA 111:2	הוד	-		claude-sonnet-5-5
+malbim	PSA 111:2	והדר	-		claude-sonnet-5-5
+malbim	PSA 111:2	צדקתו	-		claude-sonnet-5-5
+malbim	PSA 112:1	יראת	19112001005	יָרֵ֣א	claude-sonnet-5-5
+malbim	PSA 119:1	מצות	-		claude-sonnet-5-5
+malbim	PSA 119:1	עדות	-		claude-sonnet-5-5
+malbim	PSA 119:1	פקודים	-		claude-sonnet-5-5
+malbim	PSA 119:1	חוקים	-		claude-sonnet-5-5
+malbim	PSA 119:1	משפטים	-		claude-sonnet-5-5
+malbim	PSA 126:6	נושא	19126006004	נֹשֵׂ֪א	claude-sonnet-5-5
+malbim	PSA 135:4	מוצא	-		claude-sonnet-5-5
+malbim	PSA 139:11	לא	-		claude-sonnet-5-5
+malbim	PSA 139:20	יומרוך	19139020002	יֹ֭אמְרֻךָ	claude-sonnet-5-5
+malbim	PSA 139:20	ובתקוממיך	-		claude-sonnet-5-5
+malbim	PSA 139:22	אויבים	19139022004	לְ֝אוֹיְבִ֗ים	claude-sonnet-5-5
+malbim	PSA 141:5	ותלתי	19141005012	וּ֝תְפִלָּתִ֗י	claude-sonnet-5-5
+malbim	PSA 145:4	אשיחה	-		claude-sonnet-5-5
+malbim	PSA 145:4	הדר	-		claude-sonnet-5-5
+malbim	PSA 147:4	וכו	-		claude-sonnet-5-5
+malbim	ZEP 1:2	אסוף	36001002001	אָסֹ֨ף	claude-sonnet-5-5
+malbim	ZEP 3:2	בה	36003002007	בַּֽיהוָה֙	claude-sonnet-5-5
+menahem	SNG 6:11	אבי	22006011006	בְּאִבֵּ֣י	claude-sonnet-5-5
+menahem	ISA 19:10	ואגמים	23019010007	אַגְמֵי	claude-sonnet-5-5
+menahem	EST 9:19	אגרת	-		claude-sonnet-5-5
+menahem	2SA 19:17	לו	-		claude-sonnet-5-5
+menahem	DAN 3:22	אזא	27003022010	אֵזֵ֣ה	claude-sonnet-5-5
+menahem	DAN 3:19	אזא	27003019016	לְמֵזֵ֣א	claude-sonnet-5-5
+menahem	JOB 16:17	אחוך	-		claude-sonnet-5-5
+menahem	GEN 9:23	אחרונית	01009023011	אֲחֹ֣רַנִּ֔ית	claude-sonnet-5-5
+menahem	EST 8:10	אחשתרנים	17008010015	הָֽאֲחַשְׁתְּרָנִ֔ים	claude-sonnet-5-5
+menahem	PSA 85:5	איל	-		claude-sonnet-5-5
+menahem	GEN 8:8	אכן	-		claude-sonnet-5-5
+menahem	JOB 14:4	אלל	-		claude-sonnet-5-5
+menahem	1KI 10:3	והאולם	-		claude-sonnet-5-5
+menahem	LAM 1:9	אנושה	-		claude-sonnet-5-5
+menahem	1KI 8:23	אף	-		claude-sonnet-5-5
+menahem	EXO 25:8	אפודתו	-		claude-sonnet-5-5
+menahem	ISA 33:12	אפס	-		claude-sonnet-5-5
+menahem	PSA 10:9	יאיב	-		claude-sonnet-5-5
+menahem	DAN 6:25	לארעיה	27006025019	לְאַרְעִ֣ית	claude-sonnet-5-5
+menahem	GEN 45:10	אשכלתיה	-		claude-sonnet-5-5
+menahem	ISA 21:12	אתא	23021012003	אָתָ֥ה	claude-sonnet-5-5
+menahem	NUM 21:1	האחרים	04021001011	הָאֲתָרִ֑ים	claude-sonnet-5-5
+menahem	JOB 36:21	בהיר	-		claude-sonnet-5-5
+menahem	ZEC 13:9	ובחנתיך	38013009009	וּבְחַנְתִּ֖ים	claude-sonnet-5-5
+menahem	EZK 46:12	יבכר	-		claude-sonnet-5-5
+menahem	EXO 18:15	נבלתבל	-		claude-sonnet-5-5
+menahem	JOB 36:20	יבלע	-		claude-sonnet-5-5
+menahem	DAN 7:16	אבעה	27007016007	אֶבְעֵֽא	claude-sonnet-5-5
+menahem	1SA 22:5	יבעתני	-		claude-sonnet-5-5
+menahem	PSA 21:8	לבקרים	-		claude-sonnet-5-5
+menahem	JER 51:11	הבו	-		claude-sonnet-5-5
+menahem	PSA 94:4	ברקיו	-		claude-sonnet-5-5
+menahem	ISA 40:19	מבשרת	-		claude-sonnet-5-5
+menahem	AMO 6:1	גובי	-		claude-sonnet-5-5
+menahem	DAN 7:15	בגו	27007015005	בְּג֣וֹא	claude-sonnet-5-5
+menahem	ISA 9:4	גיא	-		claude-sonnet-5-5
+menahem	ISA 5:1	גליון	-		claude-sonnet-5-5
+menahem	PRO 19:1	יתגלע	-		claude-sonnet-5-5
+menahem	ISA 25:9	גמולי	-		claude-sonnet-5-5
+menahem	JER 5:13	בגפן	-		claude-sonnet-5-5
+menahem	JOB 11:17	יגורו	-		claude-sonnet-5-5
+menahem	ISA 26:9	גיר	-		claude-sonnet-5-5
+menahem	ISA 30:6	דבש	23030006019	דַּבֶּ֤שֶׁת	claude-sonnet-5-5
+menahem	SNG 6:4	כנגדלות	22006004008	כַּנִּדְגָּלֽוֹת	claude-sonnet-5-5
+menahem	JOB 20:8	וירד	-		claude-sonnet-5-5
+menahem	ISA 11:5	ידו	-		claude-sonnet-5-5
+menahem	JER 5:17	דוה	-		claude-sonnet-5-5
+menahem	JOB 41:11	כידורי	18041011004	כִּיד֥וֹדֵי	claude-sonnet-5-5
+menahem	PRO 26:27	ודי	-		claude-sonnet-5-5
+menahem	JOB 40:12	והרך	18040012005	וַהֲדֹ֖ךְ	claude-sonnet-5-5
+menahem	ISA 9:6	דללו	-		claude-sonnet-5-5
+menahem	JER 51:6	תדמה	24051006008	תִּדַּ֖מּוּ	claude-sonnet-5-5
+menahem	JER 45:2	תרמי	-		claude-sonnet-5-5
+menahem	PRO 20:20	ירעך	20020020004	יִֽדְעַ֥ךְ	claude-sonnet-5-5
+menahem	DAN 4:32	דיירי	27004032003	דָּיְרֵ֤י	claude-sonnet-5-5
+menahem	NEH 3:15	דרכים	-		claude-sonnet-5-5
+menahem	PSA 25:10	כהדוש	-		claude-sonnet-5-5
+menahem	JER 50:11	דשא	24050011013	דָשָׁ֔ה	claude-sonnet-5-5
+menahem	JER 25:30	הירד	24025030021	הֵידָד֙	claude-sonnet-5-5
+menahem	JER 48:33	הירד	24048033012	הֵידָ֔ד	claude-sonnet-5-5
+menahem	JER 51:14	הירד	24051014012	הֵידָֽד	claude-sonnet-5-5
+menahem	ISA 16:10	הירד	23016010016	הֵידָ֥ד	claude-sonnet-5-5
+menahem	PSA 56:2	הוות	-		claude-sonnet-5-5
+menahem	AMO 3:9	מהומ	30003009015	מְהוּמֹ֤ת	claude-sonnet-5-5
+menahem	ISA 20:6	כברואשרלהיות	-		claude-sonnet-5-5
+menahem	DEU 7:13	מוסיף	-		claude-sonnet-5-5
+menahem	2SA 14:6	מוצב	-		claude-sonnet-5-5
+menahem	1SA 28:3	העתקמספרמעשהאפודפרקיג	-		claude-sonnet-5-5
+menahem	2KI 4:39	הנזיר	12004039020	הַנָּזִ֖יד	claude-sonnet-5-5
+menahem	JOB 36:22	זהב	-		claude-sonnet-5-5
+menahem	JER 2:18	המזמרות	-		claude-sonnet-5-5
+menahem	EZK 47:12	אזניך	-		claude-sonnet-5-5
+menahem	GEN 27:2	זינך	-		claude-sonnet-5-5
+menahem	HOS 4:11	זנוץ	28004011001	זְנ֛וּת	claude-sonnet-5-5
+menahem	JOS 10:17	הזונה	-		claude-sonnet-5-5
+menahem	GEN 9:6	זעפים	-		claude-sonnet-5-5
+menahem	ISA 25:10	זעיר	-		claude-sonnet-5-5
+menahem	PSA 89:40	זרזיף	-		claude-sonnet-5-5
+menahem	EZK 37:16	חברו	26037016014	חֲבֵרָ֑יו	claude-sonnet-5-5
+menahem	ISA 46:12	בחבריך	-		claude-sonnet-5-5
+menahem	GEN 43:30	החררה	01043030011	הַחַ֖דְרָה	claude-sonnet-5-5
+menahem	ISA 29:22	יחודו	-		claude-sonnet-5-5
+menahem	GEN 16:1	במחזה	-		claude-sonnet-5-5
+menahem	NUM 5:21	ויתחטאו	-		claude-sonnet-5-5
+menahem	1SA 20:3	חיות	-		claude-sonnet-5-5
+menahem	PSA 10:10	חלכאים	19010010008	כָּאִֽים	claude-sonnet-5-5
+menahem	GEN 30:38	ויחמן	01030038015	וַיֵּחַ֖מְנָה	claude-sonnet-5-5
+menahem	ISA 27:2	חמר	23027002004	חֶ֖מֶד	claude-sonnet-5-5
+menahem	EZK 25:11	החמר	-		claude-sonnet-5-5
+menahem	EXO 8:10	חמריםחמרים	-		claude-sonnet-5-5
+menahem	PRO 4:19	חן	-		claude-sonnet-5-5
+menahem	JOB 19:21	חנוני	18019021001	חָנֻּ֬נִי	claude-sonnet-5-5
+menahem	PRO 22:6	חנן	20022006001	חֲנֹ֣ךְ	claude-sonnet-5-5
+menahem	1SA 24:11	ותחם	09024011015	וַתָּ֣חָס	claude-sonnet-5-5
+menahem	JON 4:10	חסתה	32004010004	חַ֨סְתָּ֙	claude-sonnet-5-5
+menahem	GEN 16:5	החוצה	-		claude-sonnet-5-5
+menahem	ISA 16:6	חציר	-		claude-sonnet-5-5
+menahem	PSA 148:3	חקר	-		claude-sonnet-5-5
+menahem	ISA 36:12	חראיהם	-		claude-sonnet-5-5
+menahem	2KI 10:27	למחראות	12010027011	לְמֽוֹצָא֖וֹת	claude-sonnet-5-5
+menahem	1SA 11:15	לחרדת	-		claude-sonnet-5-5
+menahem	JDG 4:18	החרסה	-		claude-sonnet-5-5
+menahem	DAN 8:7	חרצה	-		claude-sonnet-5-5
+menahem	EXO 22:15	חשן	-		claude-sonnet-5-5
+menahem	HAB 2:17	יחיחן	35002017007	יְחִיתַ֑ן	claude-sonnet-5-5
+menahem	DAN 4:22	טררין	27004022002	טָֽרְדִ֣ין	claude-sonnet-5-5
+menahem	EXO 20:12	כבר	02020012001	כַּבֵּ֥ד	claude-sonnet-5-5
+menahem	GEN 45:10	כבדו	-		claude-sonnet-5-5
+menahem	LEV 13:28	וכבס	-		claude-sonnet-5-5
+menahem	2SA 3:39	ותכל	-		claude-sonnet-5-5
+menahem	EXO 5:3	כן	-		claude-sonnet-5-5
+menahem	PSA 33:7	כנם	19033007001	כֹּנֵ֣ס	claude-sonnet-5-5
+menahem	PRO 8:8	כנפיו	-		claude-sonnet-5-5
+menahem	ISA 32:12	כסוחים	-		claude-sonnet-5-5
+menahem	JOB 5:14	כסלו	-		claude-sonnet-5-5
+menahem	2SA 3:35	להכרות	10003035004	לְהַבְר֧וֹת	claude-sonnet-5-5
+menahem	EXO 30:25	הכיור	-		claude-sonnet-5-5
+menahem	JOL 4:10	כתתו	29004010001	כֹּ֤תּוּ	claude-sonnet-5-5
+menahem	ISA 38:9	מכחב	23038009001	מִכְתָּ֖ב	claude-sonnet-5-5
+menahem	ISA 10:1	ומכתבי	23010001005	וּֽמְכַתְּבִ֥ים	claude-sonnet-5-5
+menahem	LEV 11:21	לא	-		claude-sonnet-5-5
+menahem	PSA 54:8	לבאים	-		claude-sonnet-5-5
+menahem	1SA 9:20	להקת	-		claude-sonnet-5-5
+menahem	ISA 3:6	ולחיי	-		claude-sonnet-5-5
+menahem	JOB 10:3	לעו	-		claude-sonnet-5-5
+menahem	GEN 45:19	וימאן	-		claude-sonnet-5-5
+menahem	ISA 58:12	ימחאו	-		claude-sonnet-5-5
+menahem	NUM 22:8	ימחץ	-		claude-sonnet-5-5
+menahem	DAN 4:21	מטר	27004021009	מְטָ֖ת	claude-sonnet-5-5
+menahem	EXO 5:12	מלאת	-		claude-sonnet-5-5
+menahem	GEN 34:8	המלךתמלך	-		claude-sonnet-5-5
+menahem	1SA 16:14	ומה	-		claude-sonnet-5-5
+menahem	DAN 5:7	והמניכה	27005007026	וְהַֽמְנִיכָ֤א	claude-sonnet-5-5
+menahem	JOS 6:5	וימס	-		claude-sonnet-5-5
+menahem	EXO 15:17	והממעיט	-		claude-sonnet-5-5
+menahem	LEV 8:15	תמעלמעל	-		claude-sonnet-5-5
+menahem	EXO 6:9	מופת	-		claude-sonnet-5-5
+menahem	JOB 38:19	תמרגא	-		claude-sonnet-5-5
+menahem	RUT 1:20	מרה	08001020011	הֵמַ֥ר	claude-sonnet-5-5
+menahem	2KI 14:26	מרח	12014026007	מֹרֶ֣ה	claude-sonnet-5-5
+menahem	ISA 5:19	המתים	-		claude-sonnet-5-5
+menahem	PSA 60:5	מתי	-		claude-sonnet-5-5
+menahem	EZK 3:3	ומתוקים	26003003020	לְמָתֽוֹק	claude-sonnet-5-5
+menahem	PSA 141:5	יניא	-		claude-sonnet-5-5
+menahem	DAN 11:5	הננב	27011005003	הַנֶּ֖גֶב	claude-sonnet-5-5
+menahem	ISA 21:1	בננב	23021001005	בַּנֶּ֨גֶב֙	claude-sonnet-5-5
+menahem	PSA 12:3	ינוח	-		claude-sonnet-5-5
+menahem	GEN 36:24	נכאת	-		claude-sonnet-5-5
+menahem	EZK 47:18	להונותם	-		claude-sonnet-5-5
+menahem	EXO 14:15	נסי	-		claude-sonnet-5-5
+menahem	JOS 9:5	נקרים	06009005013	נִקֻּדִֽים	claude-sonnet-5-5
+menahem	JDG 16:3	המסכת	-		claude-sonnet-5-5
+menahem	PSA 140:5	סכותה	-		claude-sonnet-5-5
+menahem	ECC 10:3	כשהסכל	21010003004	כְּשֶׁסָּכָ֥ל	claude-sonnet-5-5
+menahem	ISA 44:25	יסכל	23044025010	יְשַׂכֵּֽל	claude-sonnet-5-5
+menahem	GEN 25:12	סלם	-		claude-sonnet-5-5
+menahem	DAN 3:5	סומפניא	27003005011	סוּמְפֹּ֣נְיָ֔ה	claude-sonnet-5-5
+menahem	GEN 49:11	סותה	01049011014	סוּתֽוֹ	claude-sonnet-5-5
+menahem	ISA 25:2	שער	-		claude-sonnet-5-5
+menahem	LEV 13:6	מספחה	03013006016	מִסְפַּ֣חַת	claude-sonnet-5-5
+menahem	JER 46:28	וספק	-		claude-sonnet-5-5
+menahem	1KI 21:4	סקל	-		claude-sonnet-5-5
+menahem	GEN 48:21	העביר	-		claude-sonnet-5-5
+menahem	DAN 6:9	תעדה	27006009015	תֶעְדֵּֽא	claude-sonnet-5-5
+menahem	JER 18:8	עט	-		claude-sonnet-5-5
+menahem	JOB 24:21	עטיניו	-		claude-sonnet-5-5
+menahem	DEU 28:48	עול	05028048014	עֹ֤ל	claude-sonnet-5-5
+menahem	PSA 9:1	עלמות	19009001002	עַלְמ֥וּת	claude-sonnet-5-5
+menahem	PRO 7:18	נחעלסה	20007018006	נִ֝תְעַלְּסָ֗ה	claude-sonnet-5-5
+menahem	EZK 20:16	והעמדת	-		claude-sonnet-5-5
+menahem	PSA 76:3	ומעונתם	19076003004	וּמְע֖וֹנָת֣וֹ	claude-sonnet-5-5
+menahem	HOS 2:17	וענהה	28002017011	וְעָ֤נְתָה	claude-sonnet-5-5
+menahem	NUM 3:22	הענק	-		claude-sonnet-5-5
+menahem	MAL 3:21	ועשיתם	39003021001	וְעַסּוֹתֶ֣ם	claude-sonnet-5-5
+menahem	DAN 7:8	אתעקרו	27007008016	אֶתְעֲקַ֖רָה	claude-sonnet-5-5
+menahem	1SA 25:16	ערך	-		claude-sonnet-5-5
+menahem	SNG 5:13	כערודת	22005013002	כַּעֲרוּגַ֣ת	claude-sonnet-5-5
+menahem	EXO 9:23	ערך	-		claude-sonnet-5-5
+menahem	LEV 19:20	נפדחה	03019020014	נִפְדָּ֔תָה	claude-sonnet-5-5
+menahem	EXO 21:8	והפרה	02021008009	וְהֶפְדָּ֑הּ	claude-sonnet-5-5
+menahem	LEV 1:12	פרדו	03001012007	פִּדְר֑וֹ	claude-sonnet-5-5
+menahem	1SA 25:20	ויפל	-		claude-sonnet-5-5
+menahem	NAM 3:4	פלדת	-		claude-sonnet-5-5
+menahem	GEN 31:35	מפניכם	01031035012	מִפָּנֶ֔יךָ	claude-sonnet-5-5
+menahem	EZK 25:7	יפעתך	-		claude-sonnet-5-5
+menahem	PRO 6:12	פעם	-		claude-sonnet-5-5
+menahem	EXO 25:34	פעמון	-		claude-sonnet-5-5
+menahem	1SA 3:21	פים	-		claude-sonnet-5-5
+menahem	DEU 5:28	פה	-		claude-sonnet-5-5
+menahem	PSA 60:4	פצמת	19060004003	פְּצַמְתָּ֑הּ	claude-sonnet-5-5
+menahem	ISA 25:6	פקו	-		claude-sonnet-5-5
+menahem	DAN 2:33	דפרזל	27002033003	פַרְזֶ֑ל	claude-sonnet-5-5
+menahem	DAN 2:34	דפרזלא	27002034015	פַרְזְלָ֖א	claude-sonnet-5-5
+menahem	GEN 36:23	ויפשיטו	-		claude-sonnet-5-5
+menahem	1SA 29:3	מוצב	-		claude-sonnet-5-5
+menahem	DAN 6:25	לצד	-		claude-sonnet-5-5
+menahem	NEH 3:15	צל	-		claude-sonnet-5-5
+menahem	EXO 16:10	צללו	-		claude-sonnet-5-5
+menahem	2SA 15:1	צמוקים	-		claude-sonnet-5-5
+menahem	GEN 35:14	בצעיף	-		claude-sonnet-5-5
+menahem	JER 3:12	ציה	-		claude-sonnet-5-5
+menahem	1KI 6:24	יצקיםביצקתו	-		claude-sonnet-5-5
+menahem	ISA 51:3	המציק	-		claude-sonnet-5-5
+menahem	EXO 13:6	קהל	-		claude-sonnet-5-5
+menahem	EXO 8:10	קחו	-		claude-sonnet-5-5
+menahem	EZK 13:22	אקטף	-		claude-sonnet-5-5
+menahem	DAN 7:16	יהקים	-		claude-sonnet-5-5
+menahem	PRO 6:17	וקנמון	-		claude-sonnet-5-5
+menahem	ISA 3:2	הקצורקצרה	-		claude-sonnet-5-5
+menahem	PRO 3:15	יקרת	20003015001	יְקָ֣רָה	claude-sonnet-5-5
+menahem	EZK 27:31	קרחא	26027031003	קָרְחָ֔ה	claude-sonnet-5-5
+menahem	ISA 15:2	קרסו	-		claude-sonnet-5-5
+menahem	PSA 33:2	מרבבת	-		claude-sonnet-5-5
+menahem	JER 20:6	רבצם	-		claude-sonnet-5-5
+menahem	JER 8:9	ורגע	-		claude-sonnet-5-5
+menahem	EXO 14:9	וידרפו	02014009001	וַיִּרְדְּפ֨וּ	claude-sonnet-5-5
+menahem	JER 28:10	רחים	-		claude-sonnet-5-5
+menahem	EXO 12:2	רחם	-		claude-sonnet-5-5
+menahem	GEN 41:55	ותרע	01041055001	וַתִּרְעַב֙	claude-sonnet-5-5
+menahem	2SA 13:19	הריפות	-		claude-sonnet-5-5
+menahem	ISA 29:5	ורקה	-		claude-sonnet-5-5
+menahem	EXO 22:15	ריקם	-		claude-sonnet-5-5
+menahem	PSA 68:8	וירם	-		claude-sonnet-5-5
+menahem	ISA 23:5	רויה	-		claude-sonnet-5-5
+menahem	2KI 3:17	נושא	-		claude-sonnet-5-5
+menahem	PRO 16:11	שאול	-		claude-sonnet-5-5
+menahem	2KI 14:4	משיבו	-		claude-sonnet-5-5
+menahem	LEV 26:32	השבט	-		claude-sonnet-5-5
+menahem	GEN 49:6	שבט	-		claude-sonnet-5-5
+menahem	EXO 25:13	משבצת	-		claude-sonnet-5-5
+menahem	DEU 2:36	שגבו	05002036016	שָׂגְבָ֖ה	claude-sonnet-5-5
+menahem	HOS 10:1	ישדר	-		claude-sonnet-5-5
+menahem	JOB 39:10	ישדר	18039010006	יְשַׂדֵּ֖ד	claude-sonnet-5-5
+menahem	DAN 5:21	שוי	-		claude-sonnet-5-5
+menahem	PRO 4:15	לשחר	-		claude-sonnet-5-5
+menahem	2SA 24:20	שוט	-		claude-sonnet-5-5
+menahem	PRO 6:25	ישט	-		claude-sonnet-5-5
+menahem	MIC 4:4	ממסוכה	-		claude-sonnet-5-5
+menahem	EXO 15:13	שכבת	-		claude-sonnet-5-5
+menahem	EZR 4:12	אשכללו	15004012021	שַׁכְלִ֔ילוּ	claude-sonnet-5-5
+menahem	JOB 19:5	ונשל	-		claude-sonnet-5-5
+menahem	JOB 7:1	ונשל	-		claude-sonnet-5-5
+menahem	ECC 6:2	ישלטנה	21006002016	יַשְׁלִיטֶ֤נּוּ	claude-sonnet-5-5
+menahem	ISA 60:20	ושלמה	23060020014	וְשָׁלְמ֖וּ	claude-sonnet-5-5
+menahem	ISA 32:3	תעשנה	23032003002	תִשְׁעֶ֖ינָה	claude-sonnet-5-5
+menahem	DAN 1:17	המשפט	-		claude-sonnet-5-5
+menahem	ISA 28:17	למשקלה	23028017005	לְמִשְׁקָ֑לֶת	claude-sonnet-5-5
+menahem	GEN 24:49	ישנם	01024049003	יֶשְׁכֶ֨ם	claude-sonnet-5-5
+menahem	PSA 90:8	שחה	19090008002	שַׁתָּ֣ה	claude-sonnet-5-5
+menahem	EZK 9:4	תיו	-		claude-sonnet-5-5
+menahem	1SA 21:14	ויתו	-		claude-sonnet-5-5
+menahem	EXO 35:4	תחת	-		claude-sonnet-5-5
+menahem	PSA 68:11	תלמיה	-		claude-sonnet-5-5
+menahem	LAM 4:3	תנין	25004003003	תַּנִּים֙	claude-sonnet-5-5
+menahem	DAN 5:27	תקלתא	27005027002	תְּקִ֥ילְתָּה	claude-sonnet-5-5
+metzudat_zion	1CH 5:10	ההגדאים	13005010006	הַֽהַגְרִאִ֔ים	claude-sonnet-5-5
+metzudat_zion	1CH 20:4	הרפא	13020004016	הָרְפָאִ֖ים	claude-sonnet-5-5
+metzudat_zion	1CH 27:6	השלישים	13027006004	הַשְּׁלֹשִׁ֖ים	claude-sonnet-5-5
+metzudat_zion	1KI 6:1	זיו	-		claude-sonnet-5-5
+metzudat_zion	1KI 12:4	עולנו	11012004004	עֻלֵּ֑נוּ	claude-sonnet-5-5
+metzudat_zion	1KI 13:31	עצמותיו	11013031019	עַצְמֹתָ֔יו	claude-sonnet-5-5
+metzudat_zion	1SA 5:6	בעפולים	-		claude-sonnet-5-5
+metzudat_zion	1SA 5:8	יסוב	09005008016	יִסֹּ֔ב	claude-sonnet-5-5
+metzudat_zion	1SA 20:6	נשאול	09020006006	נִשְׁאֹל֩	claude-sonnet-5-5
+metzudat_zion	1SA 21:14	ויתו	-		claude-sonnet-5-5
+metzudat_zion	2CH 20:21	החלו	14020021012	הֶֽחָל֔וּץ	claude-sonnet-5-5
+metzudat_zion	2CH 23:1	לעזריה	14023001009	לַעֲזַרְיָ֣הוּ	claude-sonnet-5-5
+metzudat_zion	2CH 25:17	לך	-		claude-sonnet-5-5
+metzudat_zion	2CH 35:23	ויורו	-		claude-sonnet-5-5
+metzudat_zion	2KI 9:25	שלשה	12009025005	שָֽׁלִשׁ֔וֹ	claude-sonnet-5-5
+metzudat_zion	2KI 12:9	ויאותו	12012009001	וַיֵּאֹ֖תוּ	claude-sonnet-5-5
+metzudat_zion	2KI 18:27	חוריהם	-		claude-sonnet-5-5
+metzudat_zion	2KI 18:27	שיניהם	-		claude-sonnet-5-5
+metzudat_zion	2SA 11:20	יורו	-		claude-sonnet-5-5
+metzudat_zion	2SA 11:24	ויורו	-		claude-sonnet-5-5
+metzudat_zion	2SA 16:13	לעומתו	10016013009	לְעֻמָּת֗וֹ	claude-sonnet-5-5
+metzudat_zion	2SA 18:30	סוב	10018030003	סֹ֖ב	claude-sonnet-5-5
+metzudat_zion	AMO 5:9	שוד	30005009002	שֹׁ֖ד	claude-sonnet-5-5
+metzudat_zion	AMO 5:27	מהלא	30005027003	מֵהָ֣לְאָה	claude-sonnet-5-5
+metzudat_zion	AMO 6:1	השאנני	30006001002	הַשַּׁאֲנַנִּ֣ים	claude-sonnet-5-5
+metzudat_zion	DAN 5:2	שגלת	27005002021	שֵׁגְלָתֵ֖הּ	claude-sonnet-5-5
+metzudat_zion	DAN 6:5	עילה	27006005006	עִלָּ֛ה	claude-sonnet-5-5
+metzudat_zion	DAN 7:14	וליה	27007014001	וְלֵ֨הּ	claude-sonnet-5-5
+metzudat_zion	DAN 9:24	שבועים	27009024001	שָׁבֻעִ֨ים	claude-sonnet-5-5
+metzudat_zion	DAN 12:5	היאור	27012005011	הַיְאֹ֔ר	claude-sonnet-5-5
+metzudat_zion	EZK 3:8	לעומת	26003008006	לְעֻמַּ֣ת	claude-sonnet-5-5
+metzudat_zion	EZK 13:20	לפורחות	26013020015	לְפֹ֣רְח֔וֹת	claude-sonnet-5-5
+metzudat_zion	EZK 16:55	לקדמותן	26016055005	לְקַדְמָתָ֔ן	claude-sonnet-5-5
+metzudat_zion	EZK 17:21	מברהיו	26017021004	מִבְרָחָ֤יו	claude-sonnet-5-5
+metzudat_zion	EZK 22:2	התשפוט	26022002004	הֲתִשְׁפֹּ֥ט	claude-sonnet-5-5
+metzudat_zion	EZK 22:30	גודר	26022030004	גֹּֽדֵר	claude-sonnet-5-5
+metzudat_zion	EZK 24:3	שפות	26024003012	שְׁפֹ֤ת	claude-sonnet-5-5
+metzudat_zion	EZK 25:7	לבג	26025007009	לְבַז֙	claude-sonnet-5-5
+metzudat_zion	EZK 27:27	מערכך	26027027003	מַעֲרָבֵ֕ךְ	claude-sonnet-5-5
+metzudat_zion	EZK 27:31	קרחא	26027031003	קָרְחָ֔ה	claude-sonnet-5-5
+metzudat_zion	EZK 29:3	יאוריו	26029003016	יְאֹרָ֑יו	claude-sonnet-5-5
+metzudat_zion	EZK 31:12	ויטשוהו	26031012005	וַֽיִּטְּשֻׁ֑הוּ	claude-sonnet-5-5
+metzudat_zion	EZK 45:11	החומר	26045011008	הַחֹ֖מֶר	claude-sonnet-5-5
+metzudat_zion	EZK 46:6	תמימים	26046006006	תְּמִימִ֑ם	claude-sonnet-5-5
+metzudat_zion	EZK 47:8	ונרפאו	26047008018	וְנִרְפּ֥וּ	claude-sonnet-5-5
+metzudat_zion	EZK 48:22	ומאחוזת	26048022001	וּמֵאֲחֻזַּ֤ת	claude-sonnet-5-5
+metzudat_zion	EZR 4:8	אגרא	15004008007	אִגְּרָ֥ה	claude-sonnet-5-5
+metzudat_zion	HAB 2:18	יוצרו	35002018006	יֹֽצְר֔וֹ	claude-sonnet-5-5
+metzudat_zion	HAB 3:4	עזו	35003004009	עֻזֹּֽה	claude-sonnet-5-5
+metzudat_zion	HOS 5:13	מזורו	28005013007	מְזֹר֔וֹ	claude-sonnet-5-5
+metzudat_zion	HOS 14:8	ישובו	28014008001	יָשֻׁ֨בוּ֙	claude-sonnet-5-5
+metzudat_zion	ISA 8:9	וחותו	23008009003	וָחֹ֔תּוּ	claude-sonnet-5-5
+metzudat_zion	ISA 9:15	ומאושריו	23009015006	וּמְאֻשָּׁרָ֖יו	claude-sonnet-5-5
+metzudat_zion	ISA 10:27	ועולו	23010027008	וְעֻלּ֖וֹ	claude-sonnet-5-5
+metzudat_zion	ISA 13:16	תשגלנה	23013016008	תִּשָּׁכַֽבְנָה	claude-sonnet-5-5
+metzudat_zion	ISA 14:25	עולו	23014025009	עֻלּ֔וֹ	claude-sonnet-5-5
+metzudat_zion	ISA 19:20	לוהצים	23019020013	לֹֽחֲצִ֔ים	claude-sonnet-5-5
+metzudat_zion	ISA 21:12	אתא	23021012003	אָתָ֥ה	claude-sonnet-5-5
+metzudat_zion	ISA 22:7	שות	23022007007	שֹׁ֖ת	claude-sonnet-5-5
+metzudat_zion	ISA 27:2	חמר	23027002004	חֶ֖מֶד	claude-sonnet-5-5
+metzudat_zion	ISA 28:1		-		claude-sonnet-5-5
+metzudat_zion	ISA 36:12	חראיהם	-		claude-sonnet-5-5
+metzudat_zion	ISA 36:12	שיניהם	23036012027	רַגְלֵיהֶ֖ם	claude-sonnet-5-5
+metzudat_zion	ISA 39:2	נכתה	23039002008	נְכֹת֡וֹ	claude-sonnet-5-5
+metzudat_zion	ISA 44:25	יסכל	23044025010	יְשַׂכֵּֽל	claude-sonnet-5-5
+metzudat_zion	ISA 46:4	אסבול	23046004008	אֶסְבֹּ֑ל	claude-sonnet-5-5
+metzudat_zion	ISA 51:4	ארגיעה	23051004014	אַרְגִּֽיעַ	claude-sonnet-5-5
+metzudat_zion	ISA 59:8	דורך	23059008012	דֹּרֵ֣ךְ	claude-sonnet-5-5
+metzudat_zion	JDG 2:3	צדים	07002003009	לְצִדִּ֔ים	claude-sonnet-5-5
+metzudat_zion	JDG 3:7	אשרות	07003007016	הָאֲשֵׁרֽוֹת	claude-sonnet-5-5
+metzudat_zion	JER 3:2	שגלת	24003002009	שֻׁכַּ֔בְתְּ	claude-sonnet-5-5
+metzudat_zion	JER 52:34	וארוחתו	24052034001	וַאֲרֻחָת֗וֹ	claude-sonnet-5-5
+metzudat_zion	JOB 1:21	יצתי	18001021004	יָצָ֜אתִי	claude-sonnet-5-5
+metzudat_zion	JOB 10:11	תשוככני	18010011006	תְּסֹכְכֵֽנִי	claude-sonnet-5-5
+metzudat_zion	JOB 19:21	חנוני	18019021001	חָנֻּ֬נִי	claude-sonnet-5-5
+metzudat_zion	JOB 21:13	יבלו	-		claude-sonnet-5-5
+metzudat_zion	JOB 33:27	ישור	18033027001	יָשֹׁ֤ר	claude-sonnet-5-5
+metzudat_zion	JOS 15:19	גלות	06015019011	גֻּלֹּ֣ת	claude-sonnet-5-5
+metzudat_zion	JOS 20:7	ויקדישו	06020007001	וַיַּקְדִּ֜שׁוּ	claude-sonnet-5-5
+metzudat_zion	NEH 6:8	בודם	16006008014	בוֹדָֽאם	claude-sonnet-5-5
+metzudat_zion	PSA 24:1	לה	19024001003	לַֽ֭יהוָה	claude-sonnet-5-5
+metzudat_zion	PSA 42:2	תערוג	19042002002	תַּעֲרֹ֥ג	claude-sonnet-5-5
+metzudat_zion	PSA 42:9	שירה	19042009007	שִׁיר֣וֹ	claude-sonnet-5-5
+metzudat_zion	PSA 50:21	אוכיהך	19050021008	אוֹכִיחֲךָ֖	claude-sonnet-5-5
+metzudat_zion	PSA 116:16	פתהת	19116016010	פִּ֝תַּ֗חְתָּ	claude-sonnet-5-5
+metzudat_zion	PSA 131:2	כגמול	19131002006	כְּ֭גָמֻל	claude-sonnet-5-5
+metzudat_zion	PSA 139:20	יומרוך	19139020002	יֹ֭אמְרֻךָ	claude-sonnet-5-5
+metzudat_zion	SNG 4:10	דודיך	22004010003	דֹדַ֖יִךְ	claude-sonnet-5-5
+metzudat_zion	ZEC 5:9	ותשנה	38005009014	וַתִּשֶּׂ֨אנָה֙	claude-sonnet-5-5
+metzudat_zion	ZEC 6:8	אותי	38006008002	אֹתִ֔י	claude-sonnet-5-5
+metzudat_zion	ZEC 11:15	אוילי	38011015009	אֱוִלִֽי	claude-sonnet-5-5
+metzudat_zion	ZEC 14:2	תשגלנה	38014002014	תִּשָּׁכַ֑בְנָה	claude-sonnet-5-5
+metzudat_zion	ZEP 1:2	אסוף	36001002001	אָסֹ֨ף	claude-sonnet-5-5
+metzudat_zion	ZEP 3:18	משא	36003018006	מַשְׂאֵ֥ת	claude-sonnet-5-5

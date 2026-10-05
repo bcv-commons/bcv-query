@@ -152,6 +152,17 @@ def get_verse(book: str, chapter: int, verse: int, gloss_lang: str = "English",
     return result
 
 
+@app.get("/commentary/{book}/{chapter}/{verse}")
+def get_commentary(book: str, chapter: int, verse: int) -> dict:
+    """Malbim's verse commentary in Hebrew (19th c.; on the Torah HaTorah VeHaMitzvah, on the Prophets and
+    Writings Beur HaInyan): his comments on this verse in order, each {heading, text, license, edition}.
+    `heading` is the words he quotes, or a section title such as השאלות (his questions on the passage)."""
+    result = data.commentary(book, chapter, verse)
+    if result is None:
+        raise HTTPException(404, f"no commentary for {book} {chapter}:{verse}")
+    return result
+
+
 @app.get("/word/{strong}")
 def get_word(strong: str, limit: int = 200) -> dict:
     """Concordance: every occurrence of a Strong's number (G#### Greek / H#### Hebrew)."""

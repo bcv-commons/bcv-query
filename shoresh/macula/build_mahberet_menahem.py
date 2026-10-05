@@ -244,7 +244,9 @@ def _anchor_citation(sp, word: str, book: str, ch: int, vs: int):
                 break
     if len(hits) == 1:
         return hits[0], "unique_in_chapter"
-    return None, ""
+    from macula.anchor_llm import fallback
+    u = fallback("menahem", book, ch, vs, word, units)
+    return (u, "llm") if u else (None, "")
 
 
 def senses() -> list[tuple]:

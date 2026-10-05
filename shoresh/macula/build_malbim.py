@@ -71,6 +71,29 @@ def fetch() -> None:
             print(f"[malbim] {book} done", file=sys.stderr)
 
 
+def _merged(verses: list) -> list[list]:
+    """Per verse, its comments with split headings joined: some editions (Jeremiah) give a two-item heading
+    as two entries, `<b>גוי</b>, ` (heading and a comma, nothing else) then `<b>ועמי.</b> text`; joined to
+    `<b>גוי, ועמי.</b> text`, the two-item heading Malbim wrote."""
+    out = []
+    for cs in verses:
+        res, carry = [], ""
+        for c in (cs if isinstance(cs, list) else [cs]):
+            m = re.match(r"\s*<b>([^<]+)</b>(['׳]?\s*,\s*)$", c) if isinstance(c, str) else None
+            if m:
+                carry += m.group(1).strip().rstrip(",") + m.group(2).strip().rstrip(",") + ", "
+                continue
+            if carry and isinstance(c, str):
+                m2 = re.match(r"(\s*)<b>([^<]+)</b>(.*)", c, re.S)
+                c = f"{m2.group(1)}<b>{carry}{m2.group(2)}</b>{m2.group(3)}" if m2 else c
+                carry = ""
+            res.append(c)
+        if carry:
+            res.append(f"<b>{carry.rstrip(', ')}</b>")
+        out.append(res)
+    return out
+
+
 def _items(head: str) -> list[str]:
     """'גוי, עם' / 'פצע וחבורה' -> the two items; anything else -> []."""
     head = re.sub(r"[.:]\s*$", "", head.strip())
@@ -102,7 +125,7 @@ def extract() -> collections.Counter:
     stats = collections.Counter()
     for line in CACHE.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
-        for vi, comments in enumerate(row["verses"], start=1):
+        for vi, comments in enumerate(_merged(row["verses"]), start=1):
             comments = comments if isinstance(comments, list) else [comments]
             if not any(comments):
                 continue
@@ -139,7 +162,16 @@ def main() -> int:
                     help="write resources/malbim/explanations.tsv (per-word comments for /verse) and stop")
     ap.add_argument("--distinctions", action="store_true",
                     help="write resources/malbim/distinctions.tsv (for word studies) and stop")
+    ap.add_argument("--commentary", action="store_true",
+                    help="fetch Malbim's verse commentary and write resources/malbim/commentary.tsv.gz")
     args = ap.parse_args()
+    if args.commentary:
+        if not args.no_fetch:
+            fetch_torah()
+            fetch_leviticus()
+            fetch_commentary()
+        write_commentary(commentary())
+        return 0
     if not args.no_fetch:
         fetch()
     if args.distinctions:
@@ -219,7 +251,7 @@ def comment_index() -> dict:
     idx: dict = collections.defaultdict(list)
     for line in CACHE.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
-        for vi, comments in enumerate(row["verses"], start=1):
+        for vi, comments in enumerate(_merged(row["verses"]), start=1):
             for c in (comments if isinstance(comments, list) else [comments]):
                 m = re.match(r"\s*<b>([^<]+)</b>\s*\.?\s*(.*)", c or "", re.S)
                 if not m:
@@ -277,7 +309,7 @@ def distinctions() -> list[tuple]:
     rows, st = [], collections.Counter()
     for line in CACHE.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
-        for vi, comments in enumerate(row["verses"], start=1):
+        for vi, comments in enumerate(_merged(row["verses"]), start=1):
             comments = comments if isinstance(comments, list) else [comments]
             units = None
             for c in comments:
@@ -338,7 +370,7 @@ def distinctions() -> list[tuple]:
     have = {(r[0], r[1], r[2], *sorted((r[3], r[5]))) for r in rows}
     for line in CACHE.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
-        for vi, comments in enumerate(row["verses"], start=1):
+        for vi, comments in enumerate(_merged(row["verses"]), start=1):
             units = None
             for c in (comments if isinstance(comments, list) else [comments]):
                 m0 = re.match(r"\s*<b>([^<]+)</b>\s*\.?\s*(.*)", c or "", re.S)
@@ -398,7 +430,7 @@ def explanations() -> list[tuple]:
     rows, st = [], collections.Counter()
     for line in CACHE.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
-        for vi, comments in enumerate(row["verses"], start=1):
+        for vi, comments in enumerate(_merged(row["verses"]), start=1):
             comments = comments if isinstance(comments, list) else [comments]
             units = None
             for c in comments:
@@ -428,6 +460,10 @@ def explanations() -> list[tuple]:
                 done = set()
                 for item in items:
                     u = _anchor(item.split()[0], units) if item.split() else None
+                    if not u and item.split():
+                        from macula.anchor_llm import fallback
+                        u = fallback("malbim", row["book"], row["chapter"], vi, item.split()[0], units, text)
+                        st["anchored_llm"] += bool(u)
                     if not u or u["key"] in done:
                         continue
                     done.add(u["key"])
@@ -481,6 +517,176 @@ def fetch_torah() -> None:
             print(f"[malbim-torah] {book} done", file=sys.stderr)
 
 
+COMMENTARY_CACHE = HERE / "data" / "malbim_commentary_chapters.jsonl"
+
+
+def fetch_commentary() -> None:
+    """Malbim's verse commentary on the Prophets and Writings (Beur HaInyan; Sefaria "Malbim on <book>"),
+    per chapter. The Torah commentary is fetched by fetch_torah()."""
+    COMMENTARY_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    done = ({json.loads(l)["ref"] for l in COMMENTARY_CACHE.read_text(encoding="utf-8").splitlines()}
+            if COMMENTARY_CACHE.exists() else set())
+    with COMMENTARY_CACHE.open("a", encoding="utf-8") as fh:
+        for book, n_ch in chapter_counts().items():
+            if book in TORAH:
+                continue
+            for ch in range(1, n_ch + 1):
+                ref = f"Malbim on {book} {ch}"
+                if ref in done:
+                    continue
+                d = _get(ref)
+                v = (d or {}).get("versions") or []
+                if v and v[0].get("text"):
+                    fh.write(json.dumps({"ref": ref, "book": BOOK_MAP[book], "chapter": ch,
+                                         "license": v[0].get("license"), "version": v[0].get("versionTitle"),
+                                         "verses": v[0]["text"]}, ensure_ascii=False) + "\n")
+                    fh.flush()
+                time.sleep(0.15)
+            print(f"[malbim-commentary] {book} done", file=sys.stderr)
+
+
+LEVITICUS_CACHE = HERE / "data" / "malbim_leviticus_chapters.jsonl"
+
+
+def _quoted_verse(sp, quote: str, cv: tuple) -> tuple:
+    """The verse, from cv up to three verses on, whose words include all the quote's first two words."""
+    from macula.build_metzudat_zion import _anchor, _verse_word_units
+    words = [w for w in re.findall(r"[א-ת]+", quote) if len(w) >= 2][:2]
+    if not words:
+        return cv
+    for d in range(0, 4):
+        units = _verse_word_units(sp, "LEV", cv[0], cv[1] + d)
+        if units and all(_anchor(w, units) for w in words):
+            return (cv[0], cv[1] + d)
+    return cv
+
+
+def fetch_leviticus() -> None:
+    """Malbim on Leviticus follows the Sifra (portion / siman / paragraph), not verses. Sefaria links each
+    verse to its paragraphs; with those links the paragraphs are regrouped per chapter and verse, in the same
+    shape as the other caches (a paragraph's opening quote, up to its first colon, becomes the heading)."""
+    import urllib.parse
+    import urllib.request
+
+    def get(url):
+        for attempt in range(5):
+            try:
+                req = urllib.request.Request(url, headers={"user-agent": "bcv-query/1.0"})
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    return json.load(resp)
+            except Exception:                                  # noqa: BLE001 - retried, then given up
+                time.sleep(min(2 ** attempt, 20))
+        return None
+
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    verses = sp.execute("SELECT DISTINCT chapter, verse FROM spine_words WHERE book='LEV' AND lexeme LIKE 'hbo:%' "
+                        "ORDER BY chapter, verse").fetchall()
+    link = re.compile(r"^Malbim on Leviticus, ([A-Za-z ]+) (\d+):(\d+)(?:-(\d+))?$")
+    links_path = HERE / "data" / "malbim_leviticus_links.json"
+    links = json.loads(links_path.read_text(encoding="utf-8")) if links_path.exists() else {}
+    for c, v in verses:
+        if f"{c}:{v}" not in links:
+            got = get(f"https://www.sefaria.org/api/links/{urllib.parse.quote(f'Leviticus {c}:{v}')}?with_text=0")
+            if got is None:
+                continue
+            links[f"{c}:{v}"] = [{"ref": x.get("ref"), "category": x.get("category")} for x in got
+                                 if "Malbim on Leviticus" in (x.get("ref") or "")]
+            time.sleep(0.1)
+    links_path.write_text(json.dumps(links, ensure_ascii=False), encoding="utf-8")
+    where: dict = {}                                           # (portion, siman, paragraph) -> (chapter, verse)
+    for c, v in verses:
+        for x in links.get(f"{c}:{v}", []):
+            m = link.match(x["ref"] or "")
+            # "Commentary" = the paragraph comments on this verse; "Quoting Commentary" only cites it
+            if m and x["category"] == "Commentary":
+                lo, hi = int(m.group(3)), int(m.group(4) or m.group(3))
+                for para in range(lo, hi + 1):
+                    where.setdefault((m.group(1), int(m.group(2)), para), (c, v))
+    per: dict = collections.defaultdict(lambda: collections.defaultdict(list))
+    lic, ver = "", ""
+    for portion in sorted({k[0] for k in where}):
+        d = get(f"https://www.sefaria.org/api/v3/texts/{urllib.parse.quote(f'Malbim on Leviticus, {portion}')}"
+                "?version=hebrew") or {}
+        vs = d.get("versions") or []
+        if not vs:
+            continue
+        lic, ver = vs[0].get("license") or lic, vs[0].get("versionTitle") or ver
+        for si, paras in enumerate(vs[0].get("text") or [], start=1):
+            cv = None
+            for pi, para in enumerate(paras if isinstance(paras, list) else [paras], start=1):
+                linked = where.get((portion, si, pi))
+                cv = linked or cv                              # unlinked paragraphs follow the siman's last link
+                if not cv or not isinstance(para, str) or not para.strip():
+                    continue
+                m = re.match(r"\s*([^:<]{2,80}):\s*(.*)", para, re.S)
+                if m:                  # the quote decides when it is only in a later verse (Sefaria links some
+                    cv = _quoted_verse(sp, m.group(1), cv)     # simanim one verse early: Kedoshim 46 to 19:18)
+                per[cv[0]][cv[1]].append(f"<b>{m.group(1).strip()}</b> {m.group(2)}" if m else para)
+    with LEVITICUS_CACHE.open("w", encoding="utf-8") as fh:
+        for c in sorted(per):
+            n = max(v for cc, v in verses if cc == c)
+            fh.write(json.dumps({"ref": f"Malbim on Leviticus (by verse) {c}", "book": "LEV", "chapter": c,
+                                 "license": lic, "version": ver,
+                                 "verses": [per[c].get(v, []) for v in range(1, n + 1)]}, ensure_ascii=False) + "\n")
+    print(f"[malbim-leviticus] {len(where)} linked paragraphs, {sum(len(x) for x in per.values())} verses",
+          file=sys.stderr)
+
+
+COMMENTARY = ROOT / "resources" / "malbim" / "commentary.tsv.gz"
+
+
+def _plain(html: str) -> str:
+    """Comment HTML to plain text; line breaks kept (the questions section is a list)."""
+    t = re.sub(r"<br\s*/?>", "\n", html or "")
+    t = re.sub(r"<[^>]+>", "", t)
+    t = re.sub(r"[ \t\u00a0]+", " ", t)
+    return "\n".join(x.strip() for x in t.split("\n") if x.strip())
+
+
+def commentary() -> list[tuple]:
+    """Every verse comment of Malbim's commentary: the Torah (fetch_torah) and the Prophets and Writings
+    (fetch_commentary), one row per comment: book, chapter, verse, n, heading (the bold quote or section
+    title, e.g. השאלות = his questions on the passage), text, license, edition."""
+    rows, st = [], collections.Counter()
+    for cache in (TORAH_CACHE, LEVITICUS_CACHE, COMMENTARY_CACHE):
+        if not cache.exists():
+            continue
+        for line in cache.read_text(encoding="utf-8").splitlines():
+            r = json.loads(line)
+            for vi, comments in enumerate(r["verses"], start=1):
+                n = 0
+                for c in (comments if isinstance(comments, list) else [comments]):
+                    if not isinstance(c, str) or not c.strip():
+                        continue
+                    m = re.match(r"\s*<b>(.*?)</b>\s*(.*)", c, re.S)
+                    heading = _plain(m.group(1)).rstrip(",.:; ") if m else ""
+                    text = _plain(m.group(2) if m else c).lstrip(",.:; ")
+                    if not text and not heading:
+                        continue
+                    n += 1
+                    rows.append((r["book"], r["chapter"], vi, n, heading, text, r.get("license") or "",
+                                 r.get("version") or ""))
+                    st["comments"] += 1
+                st["verses_with_comments"] += bool(n)
+    print(f"[malbim] commentary: {dict(st)}", file=sys.stderr)
+    return rows
+
+
+def write_commentary(rows: list[tuple]) -> None:
+    import gzip
+    COMMENTARY.parent.mkdir(parents=True, exist_ok=True)
+    head = ("# Malbim (Meir Leibush Wisser, 19th c.): his verse commentary on the Hebrew Bible (on the Torah: "
+            "HaTorah VeHaMitzvah; on the\n# Prophets and Writings: Beur HaInyan), one row per comment. Hebrew text "
+            "via Sefaria; license and edition per row\n# as Sefaria gives them. heading = the words the comment "
+            "quotes, or a section title (השאלות: his questions).\n# Built by shoresh/macula/build_malbim.py "
+            "--commentary.\n")
+    body = head + "book\tchapter\tverse\tn\theading\ttext\tlicense\tedition\n" + "".join(
+        "\t".join(str(x).replace("\t", " ").replace("\n", "\\n") for x in r) + "\n" for r in rows)
+    with COMMENTARY.open("wb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", mtime=0, filename="") as fh:
+        fh.write(body.encode("utf-8"))      # mtime=0: the same rows give the same bytes
+    print(f"[malbim] -> {COMMENTARY} ({len(rows)} comments)", file=sys.stderr)
+
+
 def torah_distinctions() -> list[tuple]:
     from macula.build_metzudat_zion import _anchor, _content_strong, _verse_word_units
     drop = excluded()
@@ -489,7 +695,7 @@ def torah_distinctions() -> list[tuple]:
     rows, st, seen = [], collections.Counter(), set()
     for line in TORAH_CACHE.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
-        for vi, comments in enumerate(row["verses"], start=1):
+        for vi, comments in enumerate(_merged(row["verses"]), start=1):
             text = " ".join(re.sub(r"<[^>]+>", "", c or "") for c in (comments if isinstance(comments, list) else [comments]))
             units = None
             for m in _BETWEEN.finditer(text):

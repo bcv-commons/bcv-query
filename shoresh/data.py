@@ -1169,7 +1169,8 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
     exemplar label, with the localized gloss appended ("אָב · father") when `domain_gloss`, and
     `setting` (the topical setting the word is used in here; CC BY), glossed the same way, and in the
     Prophets and Writings `explanations`: Hebrew explanations of the word (Metzudat Zion, Malbim),
-    and `menahem` where Mahberet Menahem cites this occurrence: its root and which division (sense)."""
+    and `menahem` where Mahberet Menahem cites this occurrence: its root and which division (sense).
+    `commentary` {source, comments, path}: Malbim comments on this verse, served in full by /commentary."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
@@ -1247,7 +1248,51 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
                 _attach_explanations(book, chapter, vrs, words)
                 _attach_menahem(book, chapter, vrs, words)
             result["spine"] = {"language": spine_lang, "words": words}
+    n = len(_malbim_commentary().get((book, chapter, vrs), ()))
+    if n:                                  # the full comments are long: served by /commentary
+        result["commentary"] = {"source": MALBIM_COMMENTARY, "comments": n,
+                                "path": f"/commentary/{book}/{chapter}/{vrs}"}
     return result
+
+
+MALBIM_COMMENTARY = "Malbim (19th c.)"
+
+
+@lru_cache(maxsize=1)
+def _malbim_commentary() -> dict:
+    """(book, chapter, verse) -> [comment] from resources/malbim/commentary.tsv.gz (Malbim's verse commentary:
+    HaTorah VeHaMitzvah on the Torah, Beur HaInyan on the Prophets and Writings; macula/build_malbim.py
+    --commentary)."""
+    import gzip
+    path = _resources_dir() / "malbim" / "commentary.tsv.gz"
+    out: dict = collections.defaultdict(list)
+    if not path.exists():
+        return out
+    header = None
+    with gzip.open(path, "rt", encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#"):
+                continue
+            parts = line.rstrip("\n").split("\t")
+            if header is None:
+                header = parts
+                continue
+            r = dict(zip(header, parts))
+            out[(r["book"], int(r["chapter"]), int(r["verse"]))].append(
+                {"heading": r["heading"], "text": r["text"].replace("\\n", "\n"),
+                 "license": r["license"] or "Public Domain", "edition": r["edition"]})
+    return out
+
+
+def commentary(book: str, chapter: int, vrs: int) -> dict | None:
+    """Malbim's comments on one verse, in his order: each {heading (the words he quotes, or a section title
+    such as השאלות, his questions on the passage), text, license, edition}. Hebrew."""
+    book = book.upper()
+    items = _malbim_commentary().get((book, chapter, vrs))
+    if not items:
+        return None
+    return {"book": book, "chapter": chapter, "verse": vrs, "source": MALBIM_COMMENTARY,
+            "language": "he", "comments": items}
 
 
 def _match_leftover_settings(words: list[dict], pending: dict, gloss_lang: str, domain_gloss: bool) -> None:

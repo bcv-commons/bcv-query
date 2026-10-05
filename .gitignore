@@ -185,6 +185,10 @@ shoresh/macula/data/malbim_beur_hamilot_chapters.jsonl
 shoresh/macula/data/malbim_torah_chapters.jsonl
 shoresh/macula/data/compact_renderings_*.pkl
 shoresh/macula/data/mahberet_menahem_letters.jsonl
+shoresh/macula/data/malbim_commentary_chapters.jsonl
+shoresh/macula/data/malbim_commentary_fetch.log
+shoresh/macula/data/malbim_leviticus_*
+shoresh/macula/data/anchor_misses/
 # sefer_hashorashim: candidate pairs, pre-LLM-verification — intermediate, not a final dataset
 resources/sefer_hashorashim/candidate_pairs.tsv
 # hbo_lex_export.tsv: publish-ready export of senses/hbo_lex.tsv, regenerable via
