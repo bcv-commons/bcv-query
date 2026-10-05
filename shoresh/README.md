@@ -12,7 +12,7 @@ All under the service root. Deterministic endpoints have no external dependency.
 | Endpoint | What | Cost |
 |----------|------|------|
 | `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine with morphology + gloss | $0 |
-| `GET /commentary/{book}/{ch}/{v}` | Malbim's verse commentary in Hebrew (19th c.; whole Hebrew Bible), comment by comment | $0 |
+| `GET /verse/{book}/{ch}/{v}/malbim` | Malbim's verse commentary in Hebrew (19th c.; whole Hebrew Bible), comment by comment | $0 |
 | `GET /word/{strong}` | Concordance — every occurrence of a Strong's number | $0 |
 | `GET /words` | Vocab-trainer feed — glosses in 11 languages, per-binyan for Hebrew verbs | $0 |
 | `GET /wordstudy/{strong}` | Word-study card — multilingual sense breakdown for a Strong's number | $0 |

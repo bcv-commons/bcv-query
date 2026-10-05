@@ -1170,7 +1170,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
     `setting` (the topical setting the word is used in here; CC BY), glossed the same way, and in the
     Prophets and Writings `explanations`: Hebrew explanations of the word (Metzudat Zion, Malbim),
     and `menahem` where Mahberet Menahem cites this occurrence: its root and which division (sense).
-    `commentary` {source, comments, path}: Malbim comments on this verse, served in full by /commentary."""
+    `commentary` {source, comments, path}: Malbim comments on this verse, served in full by /verse/{book}/{chapter}/{verse}/malbim."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
@@ -1249,9 +1249,9 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
                 _attach_menahem(book, chapter, vrs, words)
             result["spine"] = {"language": spine_lang, "words": words}
     n = len(_malbim_commentary().get((book, chapter, vrs), ()))
-    if n:                                  # the full comments are long: served by /commentary
+    if n:                                  # the full comments are long: /verse/.../malbim
         result["commentary"] = {"source": MALBIM_COMMENTARY, "comments": n,
-                                "path": f"/commentary/{book}/{chapter}/{vrs}"}
+                                "path": f"/verse/{book}/{chapter}/{vrs}/malbim"}
     return result
 
 

@@ -939,7 +939,10 @@ def _glang(lang: str | None) -> str:
         "Returns the localized gloss, keyness (how distinctively biblical), per-binyan stem "
         "senses (Hebrew verbs), sense distribution, semantic domains (Louw-Nida; for Hebrew also the "
         "CC0 semantic `group`, named by a Hebrew exemplar word, with a high/extended confidence), related "
-        "lexemes, and Translation-Words article(s). $0, no model. Localized via `lang`."
+        "lexemes, and Translation-Words article(s). Hebrew also: `settings` (topical settings the word is "
+        "used in), `relations` (UBS synonyms/antonyms), `menahem` (Mahberet Menahem's root and sense "
+        "divisions, 10th c.), `distinctions` (Malbim's explanations of how this word differs from its "
+        "near-synonyms, in Hebrew, with verse references). $0, no model. Localized via `lang`."
     ),
     input_schema={
         "type": "object",
@@ -964,7 +967,9 @@ def _word_study(args: dict, db: sqlite3.Connection) -> dict:
         "Per-word interlinear for a verse: each original word with surface, lemma, Strong's, "
         "morphology, localized gloss, binyan-correct sense (Hebrew), and domain: Louw-Nida (Greek) or "
         "the Hebrew semantic group as 'Hebrew label · gloss' (Hebrew), plus the LXX parallel for OT "
-        "verses. $0. Localized via `lang`."
+        "verses. Hebrew words also carry `setting`, `explanation` (Metzudat Zion / Malbim, in Hebrew) and "
+        "`menahem` (root, sense division n/m, sense phrase); `malbim_comments` = how many comments "
+        "verse_commentary has for this verse. $0. Localized via `lang`."
     ),
     input_schema={
         "type": "object",
@@ -979,6 +984,28 @@ def _verse_interlinear(args: dict, db: sqlite3.Connection) -> dict:
     from server.original_words import verse_interlinear
     code, ch, v = _ref_to_bcv(args.get("reference", ""))
     return verse_interlinear(code, ch, v, _glang(args.get("lang"))) or {"reference": args.get("reference"), "unavailable": True}
+
+
+@register_tool(
+    name="verse_commentary",
+    description=(
+        "Malbim's commentary on one verse of the Hebrew Bible (19th c., in Hebrew; on the Torah HaTorah "
+        "VeHaMitzvah, on the Prophets and Writings Beur HaInyan): his comments in order, each with "
+        "`heading` (the words of the verse he quotes, or a section title such as השאלות, his questions on "
+        "the passage), `text`, `license` and `edition`. Not available for Ecclesiastes and Lamentations; "
+        "in narrative books he often comments once per passage, on its first verse. $0."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {"reference": {"type": "string", "description": "A single OT verse, e.g. 'Isaiah 1:1'."}},
+        "required": ["reference"],
+    },
+)
+def _verse_commentary(args: dict, db: sqlite3.Connection) -> dict:
+    from server.original_words import verse_malbim
+    code, ch, v = _ref_to_bcv(args.get("reference", ""))
+    return verse_malbim(code, ch, v) or {"reference": args.get("reference"), "comments": [],
+                                         "note": "no Malbim comment on this verse"}
 
 
 @register_tool(

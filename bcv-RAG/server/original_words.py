@@ -70,9 +70,19 @@ def _compact_words(words: list[dict]) -> list[dict]:
          # Hebrew: the topical setting the word is used in here ("מִזְבֵּחַ · altar, עֹלָה · burnt offering")
          "setting": (w.get("setting") or {}).get("label", ""),
          # Hebrew: the commentators' short explanations of the word, in Hebrew (Prophets and Writings)
-         "explanation": " | ".join(f"{e['source'].split(',')[0]}: {e['short']}" for e in w.get("explanations") or [])}
+         "explanation": " | ".join(f"{e['source'].split(',')[0]}: {e['short']}" for e in w.get("explanations") or []),
+         # Hebrew: where Mahberet Menahem (10th c.) cites this occurrence: its root, and which of the root's
+         # senses (division n of m) this use belongs to, with the sense phrase ("ענין ...")
+         "menahem": _menahem(w.get("menahem"))}
         for w in words if w.get("strong")
     ]
+
+
+def _menahem(m: dict | None) -> str:
+    if not m:
+        return ""
+    sense = f": {m['sense']}" if m.get("sense") else ""
+    return f"{m['root']} ({m['division']}/{m['of']}){sense}"
 
 
 def verse_interlinear(book: str, ch: int, v: int, gloss_lang: str = "English") -> dict | None:
@@ -94,8 +104,16 @@ def verse_interlinear(book: str, ch: int, v: int, gloss_lang: str = "English") -
     words = _compact_words((data.get("spine") or {}).get("words") or [])
     if not words:
         return None
-    return {"lang": (data.get("spine") or {}).get("language", ""), "words": words,
-            "lxx": _compact_words((data.get("lxx") or {}).get("words") or [])}
+    out = {"lang": (data.get("spine") or {}).get("language", ""), "words": words,
+           "lxx": _compact_words((data.get("lxx") or {}).get("words") or [])}
+    if data.get("commentary"):             # Malbim comments on this verse: fetch them with verse_commentary
+        out["malbim_comments"] = data["commentary"].get("comments", 0)
+    return out
+
+
+def verse_malbim(book: str, ch: int, v: int) -> dict | None:
+    """Malbim's comments on one verse (Hebrew) via shoresh /verse/{book}/{ch}/{v}/malbim, or None."""
+    return shoresh_get(f"/verse/{book}/{ch}/{v}/malbim", timeout=5.0)
 
 
 def verse_syntax(book: str, ch: int, v: int) -> dict | None:
