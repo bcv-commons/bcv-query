@@ -6,8 +6,8 @@ KJV-numbered normalizes to KJV via its scheme's diffs. This builds those diff ta
 **TVTMS** (CC-BY) "Expanded Version", whose columns are `SourceType | SourceRef | StandardRef(=KJV) |
 Action | …`. We extract, per scheme, the rows where `SourceRef != StandardRef` (identity elsewhere):
 
-  • **hebrew** (Masoretic / WLC — our BHSA spine)  — TVTMS SourceType contains "Hebrew"
-  • **lxx**    (Septuagint / Rahlfs — our lxx.db)  — TVTMS SourceType contains "Greek"
+  • **hebrew** (Masoretic / WLC — our BHSA spine)  — TVTMS SourceType has the part "Hebrew"
+  • **lxx**    (Septuagint / Rahlfs — our lxx.db)  — TVTMS SourceType has the part "Greek"
 
 Output: `resources/versification/schemes/<scheme>.tsv` (`source_ref  standard_ref  action`) +
 `schemes.tsv` registry. Refs are `BOOK ch:v` (USFM codes); a Psalm superscription maps to the KJV
@@ -31,8 +31,23 @@ TVTMS_URL = ("https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/
              "TVTMS%20-%20Translators%20Versification%20Traditions%20with%20Methodology%20for%20"
              "Standardisation%20for%20Eng%2BHeb%2BLat%2BGrk%2BOthers%20-%20STEPBible.org%20CC%20BY.txt")
 
-# TVTMS SourceType keyword -> our scheme name (a scheme = every SourceType containing the keyword).
+# TVTMS SourceType keyword -> our scheme name. A SourceType names one or more traditions joined by "+"
+# ("Latin+Greek", "Eng-KJV+Hebrew"); a scheme takes the rows whose SourceType has the keyword as one of
+# those parts. Matched as a whole part, not a substring: "Greek2", "GreekUndivided", "GreekIntegrated",
+# "Greek3", "Greek2-NETS" are other Greek traditions, and substring matching let their rows overwrite the
+# standard ones (lxx Ps 9:21 mapped to both 9:20 and 10:1; 116 LXX verses had two targets).
 SCHEMES = {"hebrew": "Hebrew", "lxx": "Greek"}
+# Exact-part matching is used for "hebrew" only. The lxx scheme keeps the old substring match ("Greek" also
+# takes Greek2, GreekUndivided...) until it gets per-book reconciliation: for Rahlfs neither tradition is
+# right throughout. Exact "Greek" fixes Ps 9:21 and Hos 6:6 but loses LXX Jeremiah's reordering (only in
+# Greek2) and Malachi (Rahlfs 3:22-24 follows Greek2), while Greek2 wrongly shifts Haggai and Zechariah 3.
+# The right tradition per book is the one whose source shape matches data/vrs/lxx.vrs (see
+# internal-docs/vrs-reconciliation/). Until then: unchanged behaviour (a source verse can have two targets).
+EXACT = {"hebrew"}
+
+
+def _has_tradition(stype: str, kw: str) -> bool:
+    return kw in (part.strip() for part in stype.split("+"))
 _REF = re.compile(r"^([1-4A-Za-z]{2,4})\.(\d+):(\d+|Title)$")   # Gen.6:1 / Psa.3:Title
 
 # The generic single-verse extraction is reliable only for the protestant OT books whose versification
@@ -48,6 +63,10 @@ _OT_BOOKS = {"GEN", "EXO", "LEV", "NUM", "DEU", "JOS", "JDG", "RUT", "1SA", "2SA
              "1CH", "2CH", "EZR", "NEH", "JOB", "PSA", "PRO", "ECC", "SNG", "ISA", "JER",
              "LAM", "EZK", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB", "ZEP",
              "HAG", "ZEC", "MAL"}   # EST + DAN excluded (embedded Greek additions — dedicated handling)
+# ... but only from the Greek scheme: the Hebrew text of Esther and Daniel has no additions, and Daniel's
+# Hebrew/Aramaic renumbering (Dan 3:31 -> KJV 4:1, 6:1 -> 5:31) is ordinary. Excluding them from the
+# Hebrew scheme too (2026-07-14) dropped 66 valid Daniel rows.
+_BOOKS = {"hebrew": _OT_BOOKS | {"EST", "DAN"}, "lxx": _OT_BOOKS}
 
 
 def fetch(src: Path | None) -> Path:
@@ -73,9 +92,26 @@ def _norm(ref: str):
     return f"{book} {ch}:{v}"
 
 
+def _kjv_shape() -> dict:
+    """book -> {chapter: verses} of the KJV standard (data/vrs/eng.vrs)."""
+    out: dict = {}
+    for ln in (Path(__file__).resolve().parent / "data" / "vrs" / "eng.vrs").read_text(encoding="utf-8").splitlines():
+        p = ln.split()
+        if p and not ln.startswith("#") and len(p) > 1 and ":" in p[1]:
+            out[p[0]] = {int(t.split(":")[0]): int(t.split(":")[1]) for t in p[1:]}
+    return out
+
+
+def _in_kjv(shape: dict, ref: str) -> bool:
+    b, cv = ref.split(" ", 1)
+    c, v = cv.split(":")
+    return v == "title" or (b in shape and int(c) in shape[b] and 1 <= int(v) <= shape[b][int(c)])
+
+
 def build(src: Path | None = None):
     source = fetch(src)
     lines = source.read_text(encoding="utf-8-sig").splitlines()
+    kjv = _kjv_shape()
 
     rows = {name: [] for name in SCHEMES}
     seen = {name: set() for name in SCHEMES}
@@ -87,7 +123,8 @@ def build(src: Path | None = None):
         if "." not in sref or ":" not in sref:
             continue
         # protestant OT only — deuterocanon (ESG/DAG/2ES/ODA) needs dedicated per-book handling
-        if sref.split(".", 1)[0].upper() not in _OT_BOOKS:
+        book = sref.split(".", 1)[0].upper()
+        if book not in _OT_BOOKS | {"EST", "DAN"}:
             continue
         # v1: clean single-verse remaps only — skip ranges/subverses (';' '-' '!')
         if any(ch in sref or ch in stdref for ch in (";", "-", "!")):
@@ -95,8 +132,13 @@ def build(src: Path | None = None):
         s, d = _norm(sref), _norm(stdref)
         if not s or not d or s == d:
             continue
+        if not _in_kjv(kjv, d):           # the standard side must be a KJV verse (TVTMS 1Ki.5:18 -> 1Ki.5:32)
+            continue
         for name, kw in SCHEMES.items():
-            if kw in stype and (s, d) not in seen[name]:
+            if book not in _BOOKS[name]:
+                continue
+            match = _has_tradition(stype, kw) if name in EXACT else kw in stype
+            if match and (s, d) not in seen[name]:
                 seen[name].add((s, d))
                 rows[name].append((s, d, action))
 

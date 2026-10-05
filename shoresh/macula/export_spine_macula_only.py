@@ -41,6 +41,9 @@ def export(spine: Path, lowfat: Path, out: Path) -> dict:
         ("variant", "macula-only: no BHSA-derived columns (" + ", ".join(BHSA_COLUMNS) + ")"),
         ("license", "CC BY 4.0 (MACULA Hebrew/Greek, Clear Bible)"),
     ])
+    from macula.spine_versification import declaration    # the spine's own verse numbering
+    db.executemany("INSERT OR REPLACE INTO spine_meta(key, value) VALUES (?, ?)",
+                   list(declaration(db, "nestle1904").items()))
     db.commit()
     db.execute("VACUUM")
     db.close()

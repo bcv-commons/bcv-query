@@ -337,6 +337,9 @@ def main() -> None:
             ("source_sha256", src_sha),
             ("words", str(n)),
         ])
+        from macula.spine_versification import declaration    # the spine's own verse numbering
+        db.executemany("INSERT OR REPLACE INTO spine_meta(key, value) VALUES (?, ?)",
+                       list(declaration(db, "tr").items()))
         db.commit()
 
     out_sha = hashlib.sha256(args.out.read_bytes()).hexdigest()
