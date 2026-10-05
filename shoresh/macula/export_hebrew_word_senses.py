@@ -39,17 +39,28 @@ def distinctive_labels(sense_of: dict, counts: collections.Counter) -> dict:
         for lang, f in feats.get(key, ()):
             if lang == "eng":
                 eng[(lx, sense)][f] += 1
+    raw = lambda f: eng_raw[f].most_common(1)[0][0] if eng_raw.get(f) else f
     out = {}
     for lx in multi:
-        senses = [s_ for (l, s_) in n if l == lx]
+        senses = sorted((s_ for (l, s_) in n if l == lx), key=lambda s_: -n[(lx, s_)])   # largest first
+        used = set()
         for s_ in senses:
             share = {f: c / n[(lx, s_)] for f, c in eng[(lx, s_)].items()}
             def score(f):
                 other = max((eng[(lx, o)][f] / n[(lx, o)] for o in senses if o != s_ and n[(lx, o)]), default=0)
                 return share[f] - other
-            if share:
-                best = max(share, key=score)
-                out[(lx, s_)] = eng_raw[best].most_common(1)[0][0] if eng_raw.get(best) else best
+            # the main sense: its most frequent rendering; smaller senses: the most distinctive rendering not
+            # already a label of a larger sense of this word
+            order = (sorted(share, key=lambda f: -share[f]) if s_ == senses[0]
+                     else sorted(share, key=score, reverse=True))
+            for f in order:
+                if raw(f) not in used:
+                    out[(lx, s_)] = raw(f)
+                    used.add(raw(f))
+                    break
+            else:
+                if order:                      # every English rendering already names a larger sense
+                    out[(lx, s_)] = f"{raw(order[0])} ({senses.index(s_) + 1})"
     return out
 
 
@@ -63,6 +74,8 @@ def main() -> int:
     sense_of = {}
     for line in (SRC / "occurrences.tsv").read_text(encoding="utf-8").splitlines()[1:]:
         key, lexeme, sense = line.split("\t")
+        # names keep their splits: translations often spell same-named people or places differently
+        # (Abimelech of Gerar / son of Gideon), and merging them lowered agreement with UBS 0.317 -> 0.289
         sense_of[key] = (lexeme, sense)
     db = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
     occ = collections.defaultdict(list)

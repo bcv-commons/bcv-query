@@ -47,6 +47,7 @@ MIN_OCC = 20            # lexemes with fewer aligned occurrences keep one sense
 MIN_SENSE_SHARE = 0.05  # a sense needs at least this share of the word's occurrences ...
 MIN_SENSE_OCC = 4       # ... and at least this many
 RESOLUTION = 1.0
+COMPACT_FEATURES = None  # --compact FILE: renderings from the aligner's positional alignments
 USE_GBT = False          # --gbt: add Global Bible Tools per-word glosses (14 more languages)
 MIN_OCC_EVAL = 20       # words need this many reference-labelled tokens to be scored (Menahem: set to 4)
 
@@ -194,6 +195,11 @@ def load_features() -> tuple[dict[str, set], dict[str, collections.Counter]]:
     if USE_GBT:
         for k, fs in gbt_features().items():
             feats[k] |= fs
+    if COMPACT_FEATURES:                 # per-occurrence renderings from the aligner (build_compact_renderings)
+        import pickle
+        with open(COMPACT_FEATURES, "rb") as fh:
+            for k, fs in pickle.load(fh)["features"].items():
+                feats[k] |= fs
     return feats, eng_raw
 
 
@@ -414,9 +420,11 @@ def main() -> int:
     ap.add_argument("--resolution", type=float, default=RESOLUTION)
     ap.add_argument("--merge-same-label", action="store_true")
     ap.add_argument("--gbt", action="store_true", help="add Global Bible Tools per-word glosses (14 languages)")
+    ap.add_argument("--compact", default=None, help="pickle from build_compact_renderings.py (many languages)")
     a = ap.parse_args()
     globals()["RESOLUTION"] = a.resolution
     globals()["USE_GBT"] = a.gbt
+    globals()["COMPACT_FEATURES"] = a.compact
     result = build(a.out, merge_same_label=a.merge_same_label)
     multi = sum(1 for r in result.values() if len(set(r.values())) > 1)
     print(f"lexemes {len(result)}; split into >1 sense: {multi}", file=sys.stderr)

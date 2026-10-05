@@ -183,6 +183,7 @@ shoresh/macula/data/ubs_open/
 shoresh/macula/data/metzudat_zion_chapters.jsonl
 shoresh/macula/data/malbim_beur_hamilot_chapters.jsonl
 shoresh/macula/data/malbim_torah_chapters.jsonl
+shoresh/macula/data/compact_renderings_*.pkl
 shoresh/macula/data/mahberet_menahem_letters.jsonl
 # sefer_hashorashim: candidate pairs, pre-LLM-verification — intermediate, not a final dataset
 resources/sefer_hashorashim/candidate_pairs.tsv
