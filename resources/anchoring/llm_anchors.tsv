@@ -176,7 +176,7 @@ malbim	PSA 72:7	רביבים	-		claude-sonnet-5-5
 malbim	PSA 72:7	זרזיף	-		claude-sonnet-5-5
 malbim	PSA 73:10	מי	-		claude-sonnet-5-5
 malbim	PSA 76:6	נרדם	-		claude-sonnet-5-5
-malbim	PSA 77:12	פעלך	19077012008	פִּלְאֶֽךָ	claude-sonnet-5-5
+malbim	PSA 77:12	פעלך	-		hand-corrected: the heading belongs to verse 13
 malbim	PSA 85:2	שבות	19085002006	שְׁבִ֣ית	claude-sonnet-5-5
 malbim	PSA 86:11	אמתך	19086011005	בַּאֲמִתֶּ֑ךָ	claude-sonnet-5-5
 malbim	PSA 88:3	רנתי	19088003006	לְרִנָּתִֽי	claude-sonnet-5-5
@@ -569,3 +569,12 @@ metzudat_zion	ZEC 11:15	אוילי	38011015009	אֱוִלִֽי	claude-sonnet-5-
 metzudat_zion	ZEC 14:2	תשגלנה	38014002014	תִּשָּׁכַ֑בְנָה	claude-sonnet-5-5
 metzudat_zion	ZEP 1:2	אסוף	36001002001	אָסֹ֨ף	claude-sonnet-5-5
 metzudat_zion	ZEP 3:18	משא	36003018006	מַשְׂאֵ֥ת	claude-sonnet-5-5
+malbim	JER 3:8	ותזני	24003008022	וַתִּ֥זֶן	claude-sonnet-5-5
+malbim	JER 20:11	וה	-		claude-sonnet-5-5
+malbim	JER 22:17	עושק	24022017014	הָעֹ֥שֶׁק	claude-sonnet-5-5
+malbim	JER 23:19	לא	-		claude-sonnet-5-5
+malbim	JER 24:6	ובניתי	24024006009	וּבְנִיתִים֙	claude-sonnet-5-5
+malbim	JER 32:9	וכו	-		claude-sonnet-5-5
+malbim	JER 44:21	אותם	24044021016	אֹתָם֙	claude-sonnet-5-5
+malbim	JER 50:29	ה	-		claude-sonnet-5-5
+malbim	PRO 7:25	נתיבותיה	20007025008	בִּנְתִיבוֹתֶֽיהָ	claude-sonnet-5-5

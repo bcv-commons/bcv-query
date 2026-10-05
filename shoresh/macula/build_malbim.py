@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import functools
 import json
 import re
 import sqlite3
@@ -79,9 +80,10 @@ def _merged(verses: list) -> list[list]:
     for cs in verses:
         res, carry = [], ""
         for c in (cs if isinstance(cs, list) else [cs]):
-            m = re.match(r"\s*<b>([^<]+)</b>(['׳]?\s*,\s*)$", c) if isinstance(c, str) else None
-            if m:
-                carry += m.group(1).strip().rstrip(",") + m.group(2).strip().rstrip(",") + ", "
+            m = re.match(r"\s*<b>([^<]+)</b>\s*(['׳]?)\s*([,\[\]\s]*)$", c) if isinstance(c, str) else None
+            if m:              # heading only (`<b>וישלח ה</b>' ` + `<b>את ידו.</b> ...`: one heading)
+                head = m.group(1).strip().rstrip(",") + m.group(2)
+                carry += head + (", " if "," in m.group(1) + m.group(3) else " ")
                 continue
             if carry and isinstance(c, str):
                 m2 = re.match(r"(\s*)<b>([^<]+)</b>(.*)", c, re.S)
@@ -89,7 +91,7 @@ def _merged(verses: list) -> list[list]:
                 carry = ""
             res.append(c)
         if carry:
-            res.append(f"<b>{carry.rstrip(', ')}</b>")
+            res.append(f"<b>{carry.rstrip(', ')}</b>")      # a heading with no comment after it
         out.append(res)
     return out
 
@@ -206,16 +208,26 @@ def main() -> int:
 # ---------- cross-references ("see there") ----------
 
 _REF_WORDS = {"עי", "עיין", "ועי", "הבדלם", "בפי", "פי", "כנל", "לקמן", "לעיל", "למעלה", "עוד", "פסוק", "עש", "ועש",
-              "עמש", "כמש", "שם", "בארתי", "כבר", "בפירוש", "הבדלו", "בביאור", "ביאור", "שבארתי", "מש"}
+              "עמש", "כמש", "שם", "בארתי", "כבר", "בפירוש", "הבדלו", "בביאור", "ביאור", "שבארתי", "מש", "בפנים", "ועיין", "עיי"}
 
 
 def is_cross_reference(text: str) -> bool:
     """Only reference words and verse numbers left: a pointer, not an explanation. Short real glosses
     (רוח: רצון; יסכר: כמו יסגר) are explanations and stay."""
+    if re.match(r"\s*כמו\s+[א-ת]{2,}", text):      # "כמו אל", "כמו חלד": a gloss, however short
+        return False
     t = re.sub(r"\([^)]*\)", " ", text)
     words = [re.sub(r"[\"'״׳]", "", w) for w in re.findall(r"[א-ת][א-ת\"'״׳]*", t)]
-    real = [w for w in words if len(w) >= 2 and w not in _REF_WORDS and not _is_number(w)]
+    real = [w for w in words if len(w) >= 2 and w not in _REF_WORDS and not _is_number(w) and w not in _book_names()]
     return not real
+
+
+@functools.lru_cache(maxsize=1)
+def _book_names() -> set[str]:
+    """Hebrew book names and their short forms as written in references (ישעיה, ישע, יחזקאל...)."""
+    from macula.build_mahberet_menahem import HEB_BOOKS
+    names = {re.sub(r"[\"'״׳]", "", n) for n in HEB_BOOKS}
+    return names | {n.split()[0] for n in names}
 
 
 def _is_number(w: str) -> bool:
@@ -231,7 +243,7 @@ def _targets(text: str, book: str, ch: int, vs: int) -> list[tuple]:
     t = text.replace("״", '"').replace("׳", "'")
     out = []
     for name, code in sorted(HEB_BOOKS.items(), key=lambda kv: -len(kv[0])):
-        for m in re.finditer(re.escape(name) + r"\s+([א-ת\"']+)(?:[:\s,]+([א-ת\"']+))?", t):
+        for m in re.finditer(re.escape(name) + r"(?![א-ת])\s*\(?\s*([א-ת\"']+)(?:[:\s,]+([א-ת\"']+))?", t):
             c, v = gematria(m.group(1)), gematria(m.group(2)) if m.group(2) else None
             if c:
                 out.append((code, c, v))
@@ -243,6 +255,34 @@ def _targets(text: str, book: str, ch: int, vs: int) -> list[tuple]:
         c, v = gematria(m.group(1)), gematria(m.group(2))
         if c and v:
             out.append((book, c, v))
+    # "סי' קי"ט" / "ס"ס ל"ב" (psalm number; end of chapter): a chapter of this book
+    for m in re.finditer(r"(?:סי'|סימן|ס\"ס)\s*([א-ת\"']{1,5})", t):
+        c = gematria(m.group(1))
+        if c:
+            out.append((book, c, None))
+    # a lone number after above/below: "ע\"ל (ל\"ד)", "כנ\"ל (י\"א)": a verse of this chapter or a chapter
+    for m in re.finditer(r"(?:לעיל|לקמן|כנ\"ל|למעלה|ע\"ל|לק'|למע')\s*\(?\s*([א-ת\"']{1,4})\s*(?:\)|:|$)", t):
+        n = gematria(m.group(1))
+        if n:
+            out += [(book, ch, n), (book, n, None)]
+    # the same pair written without parentheses: "עיין לעיל ה' י\"ב", "עיין למעלה ח' טז"
+    for m in re.finditer(r"(?:לעיל|למעלה|לקמן|ע\"ל)\s+([א-ת\"']{1,4})[\s,]+([א-ת\"']{1,4})(?![א-ת])", t):
+        c, v = gematria(m.group(1)), gematria(m.group(2))
+        if c and v:
+            out.append((book, c, v))
+    return out
+
+
+def _stems(heading: str) -> set[str]:
+    """The heading's words as rough stems, so differently inflected quotes of one word meet (ארחות / ארחתיך,
+    דרכי / דרכיך): vowel letters ו/י dropped, one prefix letter dropped from longer words, first three letters."""
+    out = set()
+    for w in re.split(r"[,\s]+", heading):
+        w = re.sub(r"[וי]", "", to_modern_form(w, "hbo"))
+        if len(w) > 3 and w[0] in "והבלמכש":
+            w = w[1:]
+        if len(w) >= 2:
+            out.add(w[:3])
     return out
 
 
@@ -259,21 +299,38 @@ def comment_index() -> dict:
                 text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()
                 if is_cross_reference(text):
                     continue
-                words = {re.sub(r"[וי]", "", to_modern_form(w, "hbo")) for w in re.split(r"[,\s]+", m.group(1)) if w}
-                idx[(row["book"], row["chapter"], vi)].append(({w for w in words if len(w) >= 2}, text))
+                words = _stems(m.group(1))
+                idx[(row["book"], row["chapter"], vi)].append((words, text))
+    # his verse commentary (Beur HaInyan; on the Torah, HaTorah VeHaMitzvah): "בארתי הבדלם" often means there
+    for cache in (COMMENTARY_CACHE, TORAH_CACHE):
+        if not cache.exists():
+            continue
+        for line in cache.read_text(encoding="utf-8").splitlines():
+            row = json.loads(line)
+            for vi, comments in enumerate(_merged(row["verses"]), start=1):
+                for c in comments:
+                    m = re.match(r"\s*<b>([^<]+)</b>\s*\.?\s*(.*)", c or "", re.S)
+                    if not m:
+                        continue
+                    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip().rstrip(":").strip()
+                    # only where he sets words apart: his running commentary on a verse is no explanation of a word
+                    if not text or is_cross_reference(text) or not _DIFF.search(text):
+                        continue
+                    words = _stems(m.group(1))
+                    idx[(row["book"], row["chapter"], vi)].append((words, text))
     return idx
 
 
 def resolve_cross_reference(heading: str, text: str, book: str, ch: int, vs: int, idx: dict):
     """(text, 'BOOK c:v') of the comment the pointer leads to, on a word of this heading; else None."""
-    mine = {re.sub(r"[וי]", "", to_modern_form(w, "hbo")) for w in re.split(r"[,\s]+", heading) if w}
-    mine = {w for w in mine if len(w) >= 2}
+    mine = _stems(heading)
     targets = _targets(text, book, ch, vs)
     for b, c, v in targets:
         verses = [v] if v else [k[2] for k in idx if k[0] == b and k[1] == c]
+        need = 1 if v else min(2, len(mine))        # a whole chapter: both words of a pair must be there
         for vv in sorted(set(verses)):
             for words, t in idx.get((b, c, vv), []):
-                if words & mine:
+                if len(words & mine) >= need:
                     return t, f"{b} {c}:{vv}"
     if not targets:                    # bare "above" / "below": the nearest comment on the same word in this book
         t2 = text.replace("״", '"')
@@ -285,7 +342,7 @@ def resolve_cross_reference(heading: str, text: str, book: str, ch: int, vs: int
             order = ([k for k in reversed(keys) if k < here] if back else []) + ([k for k in keys if k > here] if fwd else [])
             for k in order:
                 for words, t in idx.get(k, []):
-                    if words & mine:
+                    if len(words & mine) >= min(2, len(mine)):     # a whole book: both words of a pair
                         return t, f"{k[0]} {k[1]}:{k[2]}"
     return None
 
