@@ -22,7 +22,7 @@ import mcp.types as types
 from mcp.server.lowlevel import Server
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 
-from server.deps import get_shared_db
+from server.deps import db_connection
 from server.mcp.tools import call_tool as _call_tool
 from server.mcp.tools import list_tools as _list_tools
 
@@ -37,9 +37,12 @@ async def _handle_list_tools() -> list[types.Tool]:
 
 @_server.call_tool()
 async def _handle_call_tool(name: str, arguments: dict) -> dict:
-    db = get_shared_db()
-    # tools are sync and hit SQLite — run off the event loop so the transport stays responsive.
-    result = await anyio.to_thread.run_sync(lambda: _call_tool(name, arguments or {}, db))
+    # tools are sync and hit SQLite — run off the event loop so the transport stays responsive. Each call borrows its
+    # own pooled connection (a sqlite3 connection must not be used by concurrent threads).
+    def _run():
+        with db_connection() as db:
+            return _call_tool(name, arguments or {}, db)
+    result = await anyio.to_thread.run_sync(_run)
     # a dict → the SDK returns it as structuredContent AND serialized JSON in content.
     return result if isinstance(result, dict) else {"result": result}
 
