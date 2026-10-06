@@ -50,9 +50,48 @@ def _refs(compact_root: Path, book: str) -> list[str]:
     return list(json.loads(p.read_text(encoding="utf-8")).keys()) if p.exists() else []
 
 
+def _index(compact_root: Path, book: str) -> dict[str, list[str]]:
+    """verse -> the aligner's lexeme per srcOrd (its `_index/<BOOK>_lexemes.json`)."""
+    p = compact_root / "_index" / f"{book}_lexemes.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+
+
+def map_entries(theirs: list[str], mine: list[str]) -> dict[int, list[int]]:
+    """srcOrd -> positions in our content-token list of the verse, by aligning the two lexeme lists.
+
+    The aligner's entry i is NOT always our content token i (found 2026-10-05 with the rend sample: 7% of verses,
+    3.8% of entries): it counts a name written as two words (Beth + lehem, both lexeme 1035) once, and has a few
+    entries fewer. Their list is a subsequence of ours, so match the lexeme digits; a token of ours that has no
+    partner and repeats the lexeme of the entry before it is part of that entry (pooled name), any other extra
+    token has no entry and gets no feature. Where the lists differ in kind (not seen), position decides."""
+    from difflib import SequenceMatcher
+    norm = lambda x: x.split(":")[-1].lstrip("0")
+    out: dict[int, list[int]] = {}
+    sm = SequenceMatcher(None, [norm(x) for x in theirs], [norm(x) for x in mine], autojunk=False)
+    last = None
+    for tag, a, b, c, d in sm.get_opcodes():
+        if tag == "equal" or (tag == "replace" and b - a == d - c):
+            for k in range(b - a):
+                out[a + k] = [c + k]
+                last = a + k
+        elif tag == "insert" and last is not None:                        # extra tokens of ours
+            for j in range(c, d):
+                if norm(mine[j]) == norm(mine[out[last][-1]]):
+                    out[last].append(j)
+        elif tag == "replace":                                           # unequal blocks: pair from the start
+            for k in range(min(b - a, d - c)):
+                out[a + k] = [c + k]
+                last = a + k
+    return out
+
+
 def read(compact_root: Path, meta_root: Path, one_per_language: bool, out: Path) -> None:
     keys = content_keys()
-    refs = {b: _refs(compact_root, b) for b in OT_BOOKS}
+    spine_lex = {k: lx for k, lx in sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+                 .execute("SELECT key, lexeme FROM spine_words WHERE lexeme LIKE 'hbo:%'")}
+    index = {b: _index(compact_root, b) for b in OT_BOOKS}
+    refs = {b: list(index[b]) for b in OT_BOOKS}
+    mapped = {}                                                          # (ref) -> srcOrd -> positions, cached
     eds = []
     for iso_dir in sorted(compact_root.glob("?/*")):
         cands = []
@@ -87,10 +126,12 @@ def read(compact_root: Path, meta_root: Path, one_per_language: bool, out: Path)
                 if len(parts) != len(ids):
                     st["verses_length_mismatch"] += 1
                     continue
+                if ref not in mapped:
+                    mapped[ref] = map_entries(index[book][ref], [spine_lex[k] for k in ks])
+                    st["verses_realigned"] += mapped[ref] != {i: [i] for i in range(len(index[book][ref]))}
                 for part, rid in zip(parts, ids):
-                    o = int(part.split(":", 1)[0])
-                    if o < len(ks):
-                        feats[ks[o]].add((tag, rid))
+                    for pos in mapped[ref].get(int(part.split(":", 1)[0]), []):
+                        feats[ks[pos]].add((tag, rid))
                         st["occurrences"] += 1
         st["editions"] += 1
     out.parent.mkdir(parents=True, exist_ok=True)

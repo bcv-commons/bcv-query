@@ -1,6 +1,6 @@
 """Per-IP rate limiting for the public shoresh surface (via slowapi).
 
-shoresh is reachable from the open internet at `shoresh.up.qombi.com` (Caddy →
+shoresh is reachable from the open internet at `shoresh.qombi.com` (Caddy →
 uvicorn) and now serves a browser-facing, unauthenticated endpoint (`/words`).
 Several routes scan the corpus or run a model, so an unbounded public client is
 a cheap DoS vector. A blanket per-IP default limit caps that across every route;

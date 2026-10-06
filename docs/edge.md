@@ -8,8 +8,8 @@ app-level auth/rate-limit that complements it.
 Current topology (Caddy, `/etc/caddy/Caddyfile`):
 
 ```
-bcv-query.up.qombi.com  → localhost:8081   (bcv-RAG, incl. /mcp)
-shoresh.up.qombi.com    → localhost:8080   (shoresh)
+bcv-query.qombi.com  → localhost:8081   (bcv-RAG, incl. /mcp)
+shoresh.qombi.com    → localhost:8080   (shoresh)
 ```
 
 ## 1. shoresh's `:8080` exposure
@@ -46,12 +46,12 @@ headers — is worth adding:
 	}
 }
 
-bcv-query.up.qombi.com {
+bcv-query.qombi.com {
 	import hardened
 	reverse_proxy localhost:8081
 }
 
-shoresh.up.qombi.com {
+shoresh.qombi.com {
 	import hardened
 	reverse_proxy localhost:8080
 }
@@ -81,3 +81,7 @@ absorbs it upstream and adds a WAF + edge rate limiting without an `xcaddy` rebu
 | Caddy | TLS, routing, body-size limits, security headers | this doc |
 | Cloudflare | DDoS/volumetric, WAF, edge rate limiting, bot filtering | ops (checklist above) |
 | Provider caps | OpenAI / Cloudflare **spend ceilings + alerts** — the financial backstop | ops (dashboard) |
+
+> **Hostnames (2026-10-06):** the APIs moved from `*.up.qombi.com` to `bcv-query.qombi.com` and `shoresh.qombi.com`
+> (one level up, so a free Cloudflare certificate covers them). The old two-level names redirect with a 308 for a
+> transition period; update any client that does not follow redirects.

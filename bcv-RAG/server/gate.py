@@ -14,7 +14,8 @@ Everything else is open — semantic search included (embedding is Cloudflare BG
 - Auth: `verify()` is the single check on gated paths — swap for a per-client keys table
   later without touching call sites (mechanism A → B/C).
 - Rate limit: fixed 60s window per identity (API key if present, else client IP), applied to
-  all non-liveness paths; gated paths get a tighter cap. In-memory / per-process.
+  all non-liveness paths; gated paths and semantic search (its own bucket) get a tighter cap.
+  In-memory / per-process.
 """
 from __future__ import annotations
 
@@ -37,6 +38,7 @@ def _needs_key(method: str, path: str) -> bool:
 _WINDOW = 60.0
 LIMIT_DEFAULT = int(os.environ.get("BTMCP_RL_PER_MIN", "120"))    # open $0 reads
 LIMIT_PAID = int(os.environ.get("BTMCP_RL_PAID_PER_MIN", "20"))   # gated (LLM/MCP)
+LIMIT_SEMANTIC = int(os.environ.get("BTMCP_RL_SEMANTIC_PER_MIN", "20"))  # semantic search: ~4 s and Cloudflare embedding quota each
 _state: dict = {"window": -1, "hits": {}}
 
 
@@ -50,14 +52,24 @@ def _client_ip(headers: dict, scope) -> str:
     return client[0] if client else "unknown"
 
 
-def _rate_ok(ident: str, gated: bool) -> bool:
+def _is_semantic(path: str, query_string: bytes) -> bool:
+    """A search that embeds the query (GET /api/search...?semantic=true)."""
+    if not path.startswith("/api/search") or b"semantic" not in query_string.lower():
+        return False
+    from urllib.parse import parse_qs
+    vals = parse_qs(query_string.decode("latin-1")).get("semantic", [])
+    return any(v.lower() in ("true", "1", "yes", "on") for v in vals)
+
+
+def _rate_ok(ident: str, gated: bool, semantic: bool = False) -> bool:
     w = int(time.monotonic() // _WINDOW)
     if w != _state["window"]:
         _state["window"], _state["hits"] = w, {}
     hits = _state["hits"]
-    bucket = f"{ident}|{'paid' if gated else 'std'}"
+    kind, limit = ("sem", LIMIT_SEMANTIC) if semantic else (("paid", LIMIT_PAID) if gated else ("std", LIMIT_DEFAULT))
+    bucket = f"{ident}|{kind}"
     hits[bucket] = hits.get(bucket, 0) + 1
-    return hits[bucket] <= (LIMIT_PAID if gated else LIMIT_DEFAULT)
+    return hits[bucket] <= limit
 
 
 class Gate:
@@ -80,7 +92,7 @@ class Gate:
                                              "(Authorization: Bearer <key> or X-API-Key)")
         key = _present_password(headers.get("authorization"), headers.get("x-api-key"))
         ident = f"k:{key[:16]}" if key else f"ip:{_client_ip(headers, scope)}"
-        if not _rate_ok(ident, gated):
+        if not _rate_ok(ident, gated, _is_semantic(path, scope.get("query_string", b""))):
             return await _reject(send, 429, "rate limit exceeded", retry_after=int(_WINDOW))
         return await self.app(scope, receive, send)
 

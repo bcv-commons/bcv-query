@@ -13,7 +13,7 @@
 #     deploy/deploy-data.sh bcv-RAG/indexer/index.db
 #
 # Host target from deploy/deploy.local.env (gitignored):
-#   DATA_SSH   — ssh target, e.g. root@37.27.81.207
+#   DATA_SSH   — ssh target, e.g. lgunnars@37.27.81.207 (a normal account with passwordless sudo; root@… also works)
 #   DATA_DIR   — remote data dir (the compose `./data`), e.g. /opt/bcv-query/data
 #
 # The upload is atomic + keeps one .bak: rsync to a temp name, back up the current file,
@@ -29,19 +29,27 @@ DEST_ARG="${3:-}"                     # optional: override the remote dir (e.g. 
 
 [ -f "$SRC" ] || { echo "no such file: $SRC" >&2; exit 2; }
 
-CFG="$REPO/deploy/deploy.local.env"
+CFG="${DEPLOY_ENV:-$REPO/deploy/deploy.local.env}"      # DEPLOY_ENV=<file> overrides (testing another target)
 [ -f "$CFG" ] || { echo "missing $CFG — copy deploy/deploy.local.env.example and edit it" >&2; exit 2; }
 # shellcheck disable=SC1090
 . "$CFG"
-: "${DATA_SSH:?set DATA_SSH in deploy.local.env (e.g. root@1.2.3.4)}"
+: "${DATA_SSH:?set DATA_SSH in deploy.local.env (e.g. admin@1.2.3.4, an account with passwordless sudo)}"
 DEST="${DEST_ARG:-${DATA_DIR:?set DATA_DIR in deploy.local.env, or pass a remote-dir arg}}"
 
 SIZE="$(du -h "$SRC" | cut -f1)"
 echo "→ shipping $SRC ($SIZE) → $DATA_SSH:$DEST/$NAME"
-ssh "$DATA_SSH" "mkdir -p '$DEST'"
+# The data dirs are root-owned. With a root target (root@host) nothing changes; with a normal
+# account (the host's admin user, passwordless sudo) the privileged steps run under sudo.
+SUDO=""; RSYNC_SUDO=()
+case "$DATA_SSH" in
+  root@*) ;;
+  *) SUDO="sudo"; RSYNC_SUDO=(--rsync-path="sudo rsync") ;;
+esac
 
-rsync -h --progress --inplace "$SRC" "$DATA_SSH:$DEST/.$NAME.tmp"
-ssh "$DATA_SSH" "cd '$DEST' && { [ -f '$NAME' ] && cp -f '$NAME' '$NAME.bak' || true; } && mv -f '.$NAME.tmp' '$NAME'"
+ssh "$DATA_SSH" "$SUDO mkdir -p '$DEST'"
+
+rsync -h --progress --inplace "${RSYNC_SUDO[@]}" "$SRC" "$DATA_SSH:$DEST/.$NAME.tmp"
+ssh "$DATA_SSH" "cd '$DEST' && { [ -f '$NAME' ] && $SUDO cp -f '$NAME' '$NAME.bak' || true; } && $SUDO mv -f '.$NAME.tmp' '$NAME'"
 
 echo "✓ shipped $NAME (previous kept as $NAME.bak)"
 echo "  recreate the service to load it:  deploy/deploy.sh bcv-rag"

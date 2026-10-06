@@ -195,8 +195,11 @@ def list_files(request: Request) -> dict:
 
 
 @app.get("/files/{name}")
-def get_file(name: str):
-    """One published file (only names listed by /files; supports HTTP Range requests)."""
+@limiter.limit(lambda: os.environ.get("SHORESH_FILES_LIMIT", "8/hour"))
+def get_file(request: Request, name: str):
+    """One published file (only names listed by /files; supports HTTP Range requests). Tighter per-IP limit
+    than the other routes (SHORESH_FILES_LIMIT, default 8/hour): the files are up to 110 MB and the blanket
+    limit counts requests, not bytes."""
     from fastapi.responses import FileResponse
     entry = next((f for f in _public_manifest().get("files", []) if f.get("name") == name), None)
     path = os.path.join(PUBLIC_DIR, name)

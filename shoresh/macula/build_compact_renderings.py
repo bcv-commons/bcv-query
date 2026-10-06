@@ -7,6 +7,11 @@ aligner's own tokenizer, that gives the words each occurrence was rendered with,
 only the ~20 with manual alignments. srcOrd i is the i-th content token (strong and is_content) of the verse in
 lexeme-spine-macula.db, the spine the aligner runs on, so it maps straight onto our token keys.
 
+KNOWN FLAW (found 2026-10-05, superseded by build_rend_renderings.py): srcOrd is mapped to a spine token by
+POSITION in content_keys(), but the aligner's `_index/<BOOK>_lexemes.json` is the authority and differs in ~7% of
+verses (a name written as two words, e.g. Beth + lehem, counts once; a few entries fewer): ~3.8% of entries were
+attached to a neighbouring token. build_rend_renderings.map_entries() aligns the two lists instead.
+
 Used as extra features for the sense split (build_rendering_senses.py --compact FILE). Reads the aligner's
 repository and caches; changes nothing there.
 
