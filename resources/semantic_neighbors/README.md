@@ -1,5 +1,7 @@
 # `semantic_neighbors/` — CC0 data-derived semantic proximity
 
+> **Status (2026-10-07):** the published release is BHSA-free and CC0 (6,671 pairs, hosted at https://huggingface.co/datasets/bcv-commons/semantic-neighbors; see `manifest.json` here). The sections below describe the earlier pipeline and mention signals that are NOT part of the published data (BHSA structural pairs, BHSA parallelism detection, the Wiktionary-derived "corroborated" tier, SDBH figures). Read them as history, not as the licence statement.
+
 A **CC0** "which lexemes are semantically near" signal — a clean stand-in for the NC Louw-Nida / SDBH
 domains, **re-derived from open data** rather than laundered from the MARBLE taxonomy (which is UBS
 "used with permission," not CC-BY). Design + rationale: `internal-docs/semantic-neighbors-pack.md`.

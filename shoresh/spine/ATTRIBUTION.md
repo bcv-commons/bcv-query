@@ -1,9 +1,25 @@
 # Attribution & licensing — original-language spine
 
 The spine is built from third-party data. Several sources are
-**non-commercial (NC)**, which makes the spine — and any artifact derived
-from it (e.g. the embedded `index.db`) — **non-commercial**. This project
-operates under that constraint.
+**non-commercial (NC)**, which makes `spine.db` and the service data derived from
+it **non-commercial**. This project operates under that constraint **while it
+migrates off those sources** (status below). Published open datasets are BHSA-free:
+see `resources/LICENSES.md`.
+
+**Status 2026-10-07 (NC exit in progress):**
+- Still NC and used by the running service: the BHSA / ETCBC Nestle1904 text-fabric
+  corpus (`/structure*`, `/syntax/search`, trees), `hbo.db` (BHSA lexeme ids, stems,
+  senses), the Hebrew and Greek clause-search databases, `spine.db` (UHB plus the
+  OpenHebrewBible crosswalk), `resources/senses/hbo_lex.tsv`, and the BHSA-keyed
+  `word_glosses/` and `lexicons/`.
+- The embedded `index.db` (bcv-RAG) is built from open resources (translations, notes,
+  commentary) and carries exactly one BHSA-derived table, `clause_dependencies`
+  (20,791 rows). Its embeddings do not contain a BHSA-derived spine prefix.
+- Already open: the published `lexeme-spine-macula.db` (CC BY, MACULA only, Psalm titles
+  from Hebrew-only spans), `semantic-neighbors`, `prior-pack`, `hebrew-word-senses`,
+  `hebrew-lexical-references`, `strongs`.
+- Replacement path: MACULA Hebrew and Greek (CC BY 4.0), step by step; the NC-only
+  parts above are removed as each is replaced.
 
 ## Sources
 
@@ -19,10 +35,9 @@ operates under that constraint.
 
 CC BY-NC (OpenHebrewBible) and CC BY-NC-SA (BHSA) require that the work
 and its derivatives are **not used for commercial purposes**. Because the
-spine prefix incorporates BHSA-derived syntax and crosswalk-derived
-Strong's mappings, the resulting embeddings inherit NC. Keep the
-deployment non-commercial, and carry attribution in any distributed
-output.
+service still reads BHSA-derived syntax, lexeme and sense data and
+crosswalk-derived Strong's mappings (list above), keep the deployment
+non-commercial, and carry attribution in any distributed output.
 
 Required attribution line (e.g. in the API/about page):
 

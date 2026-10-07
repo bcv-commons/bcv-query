@@ -202,3 +202,9 @@ shoresh/macula/_fetch_dictalm_cuda.py
 # calibrate_dictalm.py). Calibration concluded negative for both tasks tested (see
 # internal-docs/phase-c-instrument-calibration-plan.md) -- kept on disk for reference, not published.
 resources/semantic_neighbors/dictalm_calibration_*.tsv
+
+# BHSA-derived data (CC BY-NC-SA): kept locally for the legacy builders, NOT published (NC exit, 2026-10-07; see resources/LICENSES.md)
+resources/bhsa_hierarchy/
+resources/bhsa_structural/
+resources/syntax_profiles/
+resources/parallelism/parallelism_pairs.local.tsv

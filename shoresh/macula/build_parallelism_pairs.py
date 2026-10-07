@@ -235,18 +235,27 @@ def main() -> int:
 
     rows = build(use_tomim=not args.no_tomim)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8") as fh:
-        fh.write(f"# Biblical Hebrew poetic-parallelism word pairs — two tiers. tomim_confirmed: expert-\n"
-                 f"# verified (Berlin/Fokkelman/Kugel/Watson/Tsumura via T'OMIM, CC BY 4.0, DOI "
-                 f"10.5281/zenodo.19135731). detected: our own BHSA half_verse extraction ({'/'.join(POETIC_BOOKS)}\n"
-                 f"# only, min_verses>={MIN_VERSES}), not found in T'OMIM (T'OMIM is a curated sample, not "
-                 f"exhaustive — absence isn't evidence against a pair). Independent of UBS MARBLE and Hebrew\n"
-                 f"# WordNet; the LLM signal is used only to LABEL relation, never to find pairs. `relation`:\n"
-                 f"# likely_synonym / likely_antonym / unclassified (parallelism found it, LLM has no opinion).\n"
-                 f"# See build_parallelism_pairs.py.\n")
-        fh.write("strong_a\tstrong_b\ttier\tevidence\trelation\tsample_ref\n")
+    hdr = "strong_a\tstrong_b\ttier\tevidence\trelation\tsample_ref\n"
+    # Two files (2026-10-07, NC exit): the tracked, openly licensed file carries ONLY the T'OMIM-confirmed tier (CC BY 4.0). The
+    # `detected` tier is our own BHSA half_verse extraction (CC BY-NC-SA input): it is written to a local, untracked
+    # `parallelism_pairs.local.tsv` and read only by legacy (non --tomim-only) builds.
+    local = args.out.with_name(args.out.stem + ".local.tsv")
+    with local.open("w", encoding="utf-8") as fh:
+        fh.write(f"# LOCAL ONLY (gitignored, BHSA-derived 'detected' tier included). tomim_confirmed: expert-verified (Berlin/Fokkelman/Kugel/Watson/Tsumura\n"
+                 f"# via T'OMIM, CC BY 4.0, DOI 10.5281/zenodo.19135731). detected: our own BHSA half_verse extraction ({'/'.join(POETIC_BOOKS)}\n"
+                 f"# only, min_verses>={MIN_VERSES}), not found in T'OMIM. See build_parallelism_pairs.py.\n")
+        fh.write(hdr)
         for a, b, tier, evidence, relation, ref in rows:
             fh.write(f"{a}\t{b}\t{tier}\t{evidence}\t{relation}\t{ref}\n")
+    with args.out.open("w", encoding="utf-8") as fh:
+        fh.write("# Biblical Hebrew poetic-parallelism word pairs, T'OMIM-confirmed tier ONLY: expert-verified (Berlin/Fokkelman/Kugel/Watson/Tsumura\n"
+                 "# via T'OMIM, Smiley 2026, CC BY 4.0, DOI 10.5281/zenodo.19135731). Independent of UBS MARBLE and Hebrew WordNet; the LLM signal\n"
+                 "# is used only to LABEL relation, never to find pairs. `relation`: likely_synonym / likely_antonym / unclassified.\n"
+                 "# No BHSA input. See build_parallelism_pairs.py.\n")
+        fh.write(hdr)
+        for a, b, tier, evidence, relation, ref in rows:
+            if tier == "tomim_confirmed":
+                fh.write(f"{a}\t{b}\t{tier}\t{evidence}\t{relation}\t{ref}\n")
     print(f"[parallelism] -> {args.out}", file=sys.stderr)
     return 0
 

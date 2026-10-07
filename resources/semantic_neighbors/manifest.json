@@ -1,29 +1,30 @@
 {
   "dataset": "semantic_neighbors",
-  "anchor": "MACULA lexeme (CC-BY)",
-  "testament": "OT/Hebrew",
+  "status": "corrected 2026-10-07: this manifest used to describe the pre-2026-10 pack (74,741 edges, with BHSA structural pairs, BHSA parallelism detection and Wiktionary-derived signals). The published release is BHSA-free.",
+  "published_at": "https://huggingface.co/datasets/bcv-commons/semantic-neighbors",
+  "published_file": "published_pairs.tsv (hosted on Hugging Face; not stored in this repo)",
   "license": "CC0-1.0",
+  "pairs": 6671,
+  "content_sha256": "a0c18562ad73cd8a83ea3e0785cd5d701c2737772682fe23d8f5ac0e46a4ba8d",
+  "anchor": "Strong's numbers (Hebrew); lexemes from MACULA Hebrew (CC BY 4.0)",
   "signals": [
-    "emb:context_emb__dicta_il_BEREL_3_0 clause centroids",
-    "lxx:shared-greek",
-    "gloss:overlap",
-    "llm:scholarly-prior",
-    "bdb_root:shared-etymological-root (public domain, OpenScriptures/HebrewLexicon)",
-    "parallelism:poetic-structural-pair (T'OMIM CC BY 4.0 + our own BHSA half_verse detection)",
-    "structural:coordination+apposition (Context-Fabric/BHSA syntactic structure)",
-    "corroborated:xling-agrees-with-wiktionary-roots",
-    "sefer_hashorashim:llm-verified (Radak, Public Domain, via Sefaria)"
+    "emb:BEREL 3.0 distributional embeddings over MACULA word windows (Apache 2.0 model, MACULA text CC BY 4.0)",
+    "lxx:shared-greek (LXX bridge from MACULA tagging, CC BY 4.0)",
+    "gloss:overlap (MACULA glosses, CC BY 4.0)",
+    "llm:scholarly-prior and per-pair verification (model judgments)",
+    "bdb_root:shared-etymological-root (Brown-Driver-Briggs 1906, public domain, via OpenScriptures CC BY 4.0)",
+    "parallelism:T'OMIM expert-verified poetic-parallelism pairs (CC BY 4.0), confirmed tier only",
+    "sefer_hashorashim:LLM-verified candidates (Radak, public domain, via Sefaria)"
   ],
-  "confidence_tiers": {
-    "high": 3300,
-    "recall": 32321,
-    "prior": 39120
-  },
-  "lexemes": 3597,
-  "edges": 74741,
-  "topk": 10,
-  "min_cos": 0.3,
-  "min_occ": 3,
-  "content_sha256": "c1e8da1c3b5e54d1b7e1f2e1ec7e5d7441ac752c5cebdf81d74ebe5cead8c5c2",
-  "note": "high = LLM prior + empirical embedding agree. NC domains used only as internal yardstick."
+  "not_used": [
+    "BHSA / ETCBC (CC BY-NC-SA)",
+    "OpenHebrewBible (CC BY-NC)",
+    "SDBH / UBS MARBLE domains",
+    "Wiktionary-derived roots (CC BY-SA)"
+  ],
+  "gates": [
+    "cross_signal",
+    "llm_verified",
+    "sefer_hashorashim_verified"
+  ]
 }

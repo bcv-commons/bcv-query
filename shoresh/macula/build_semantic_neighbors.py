@@ -834,9 +834,12 @@ def _load_parallelism_pairs(tomim_only: bool = False) -> tuple[set[frozenset], s
     pairs back in as a blanket 'similar' signal would reintroduce the exact antithetic-contamination
     problem that file's relation-labeling was built to solve."""
     syn, ant = set(), set()
-    if not PARALLELISM.exists():
+    src = PARALLELISM if tomim_only else PARALLELISM.with_name(PARALLELISM.stem + ".local.tsv")   # local file holds the BHSA-derived tier
+    if not src.exists():
+        src = PARALLELISM
+    if not src.exists():
         return syn, ant
-    with PARALLELISM.open(encoding="utf-8") as fh:
+    with src.open(encoding="utf-8") as fh:
         for line in fh:
             if line.startswith("#") or line.startswith("strong_a\t"):
                 continue
