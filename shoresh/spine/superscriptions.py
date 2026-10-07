@@ -26,6 +26,11 @@ say WHICH psalms have a title at all (confirming both sources above cover all 11
 the rare edge case neither source would reveal alone).
 
   python -m spine.superscriptions      # standalone check: prints coverage counts, no db writes
+
+NOTE (2026-10-07): this module serves spine.db (the service-side, non-commercial spine). The published MACULA spine
+(lexeme-spine-macula.db, CC BY) NO LONGER uses it: its flag now comes from the Hebrew-only table
+macula/psalm_title_spans.tsv (macula/psalm_title_spans.py), without BHSA, UHB or the BSB headings. The keyword walk below
+stops at the first token outside the title's vocabulary and so left 34 psalm titles partly unflagged in that spine.
 """
 from __future__ import annotations
 
