@@ -14,7 +14,7 @@ All under the service root. Deterministic endpoints have no external dependency.
 | `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine with morphology + gloss | $0 |
 | `GET /verse/{book}/{ch}/{v}/malbim` | Malbim's verse commentary in Hebrew (19th c.; whole Hebrew Bible), comment by comment | $0 |
 | `GET /files` | Data files published for direct download (the original-language spines): size, sha256, licence, source, URL | $0 |
-| `GET /files/{name}` | One published file, e.g. `lexeme-spine-macula.db` (HTTP Range supported); verify its sha256 against `/files` | $0 |
+| `GET /files/{name}` | One published file, e.g. `lexeme-spine-macula.db` (HTTP Range supported); verify its sha256 against `/files`. Served from the DNS-only host `https://files.qombi.com/files/{name}` (the same path on `shoresh.qombi.com` redirects there) | $0 |
 | `GET /word/{strong}` | Concordance — every occurrence of a Strong's number | $0 |
 | `GET /words` | Vocab-trainer feed — glosses in 11 languages, per-binyan for Hebrew verbs | $0 |
 | `GET /wordstudy/{strong}` | Word-study card — multilingual sense breakdown for a Strong's number | $0 |
@@ -113,6 +113,8 @@ re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
 | `CLOUDFLARE_API_TOKEN` | — | Required for cloudflare embedder |
 | `CORPUS_URL` | — | bcv-RAG private URL for `/structure` proxy |
 | `SHORESH_DATA` | `/data` | Clause vector directory |
+| `SHORESH_FILES_BASE` | — | Base URL advertised by `GET /files` (e.g. `https://files.qombi.com`); default: the host the client used |
+| `SHORESH_FILES_LIMIT` | `8/hour` | Per-IP limit on `GET /files/{name}` |
 
 ## Run locally
 

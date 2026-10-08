@@ -21,6 +21,9 @@ Tables:
   frames(verb_key, role, arg_key)              -- one row per (verb, role, argument)
   refs(src_key, tgt_key, kind)                 -- referent / subjref / participantref
 
+Per-word language (2026-10-07): `wlang` is H/A for Hebrew rows (Aramaic: Daniel, Ezra, Jeremiah 10:11, Genesis 31:47), `after` what follows a
+token (space, maqqef). Both are additive columns at the end of macula_words; older databases without them still work (verse_hebrew checks).
+
 Structured morphology (wishlist #2): both MACULA TSVs carry person/number/gender as decomposed
 columns already — no code-string parsing needed, just selection. Greek additionally has
 case/tense/voice/mood/degree; Hebrew additionally has `state` (construct/absolute). Grammatical
@@ -117,7 +120,9 @@ def _ingest(con: sqlite3.Connection, path: Path, lang: str) -> tuple[int, int, i
                       r.get(c["text"], ""), r.get(c.get("role", ""), "") or "",
                       r.get(c.get("class", ""), "") or "",
                       r.get(c.get("stem", ""), "") or "",
-                      *(r.get(f, "") or "" for f in MORPH_FIELDS)))
+                      *(r.get(f, "") or "" for f in MORPH_FIELDS),
+                      (r.get("lang", "") or "") if lang == "hbo" else "",     # wlang: per-WORD language, H (Hebrew) / A (Aramaic)
+                      r.get("after", "") or ""))                                # what follows the token: space, maqqef, ...
         nw += 1
         # frame: "A0:<id>;<id> A1:<id>" → one row per (role, arg)
         for token in (r.get("frame", "") or "").split():
@@ -134,7 +139,7 @@ def _ingest(con: sqlite3.Connection, path: Path, lang: str) -> tuple[int, int, i
                 ak = _key(a)
                 if ak:
                     refs.append((k, ak, kind)); nr += 1
-    con.executemany("INSERT OR IGNORE INTO macula_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", words)
+    con.executemany("INSERT OR IGNORE INTO macula_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", words)
     con.executemany("INSERT INTO frames VALUES (?,?,?)", frames)
     con.executemany("INSERT INTO refs VALUES (?,?,?)", refs)
     return nw, nf, nr
@@ -151,7 +156,7 @@ def build() -> None:
             book TEXT, chapter INT, verse INT, word INT,
             lemma TEXT, strong TEXT, gloss TEXT, text TEXT, role TEXT, class TEXT, stem TEXT,
             person TEXT, number TEXT, gender TEXT, case_ TEXT, tense TEXT, voice TEXT,
-            mood TEXT, degree TEXT, state TEXT);
+            mood TEXT, degree TEXT, state TEXT, wlang TEXT, after TEXT);
         CREATE TABLE frames(verb_key TEXT, role TEXT, arg_key TEXT);
         CREATE TABLE refs(src_key TEXT, tgt_key TEXT, kind TEXT);
     """)

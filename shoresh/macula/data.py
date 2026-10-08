@@ -7,17 +7,27 @@ from __future__ import annotations
 import os
 import re
 import sqlite3
+import threading
 from functools import lru_cache
 from pathlib import Path
 
 _DB = Path(os.environ.get("MACULA_DB", Path(__file__).resolve().parent / "macula-spine.db"))
 
 
-@lru_cache(maxsize=1)
+_local = threading.local()
+
+
 def _con() -> sqlite3.Connection | None:
+    """A read-only connection owned by the calling thread. One connection shared by all requests (as this was until 2026-10-07)
+    is unsafe: FastAPI runs the sync routes on a thread pool, and a sqlite3 connection used by two threads at once raised
+    `bad parameter or other API misuse` and returned other requests' rows (5,880 concurrent coref+frame calls: 1,342 exceptions,
+    1,278 wrong answers). Each worker thread keeps its own."""
     if not _DB.exists():
         return None
-    return sqlite3.connect(f"file:{_DB}?mode=ro", uri=True, check_same_thread=False)
+    con = getattr(_local, "con", None)
+    if con is None:
+        con = _local.con = sqlite3.connect(f"file:{_DB}?mode=ro", uri=True)
+    return con
 
 
 def available() -> bool:

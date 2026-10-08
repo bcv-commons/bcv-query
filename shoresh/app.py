@@ -186,10 +186,14 @@ def list_files(request: Request) -> dict:
     """Data files published for direct download (the original-language spines): name, bytes, sha256,
     license, source, description, url. Download one with GET /files/{name}; check its sha256 here."""
     m = _public_manifest()
-    # behind Caddy the app sees http on the Docker network: build the URL as the client saw it
-    proto = request.headers.get("x-forwarded-proto") or request.url.scheme
-    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc
-    base = f"{proto}://{host}"
+    # The big files are served from a separate DNS-only host (SHORESH_FILES_BASE, e.g. https://files.qombi.com): behind the
+    # Cloudflare proxy large downloads stalled intermittently and the free plan discourages them. Without the setting the URL
+    # is built as the client saw it (behind Caddy the app sees http on the Docker network).
+    base = (os.environ.get("SHORESH_FILES_BASE") or "").rstrip("/")
+    if not base:
+        proto = request.headers.get("x-forwarded-proto") or request.url.scheme
+        host = request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc
+        base = f"{proto}://{host}"
     return {"updated": m.get("updated"),
             "files": [{**f, "url": f"{base}/files/{f['name']}"} for f in m.get("files", [])]}
 

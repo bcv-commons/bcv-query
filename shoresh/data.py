@@ -1163,6 +1163,106 @@ def _strong_code(word_lang: str, strong: int | None) -> str | None:
     return f"{'H' if word_lang == 'hbo' else 'G'}{strong}"
 
 
+# ---------- /verse Hebrew words from MACULA (NC exit, step 1; design: internal-docs/nc-exit-step1-verse-design.md) ----------
+# Switch: VERSE_HEBREW_BASE=macula serves the Hebrew side from MACULA tokens in Hebrew (org) numbering, words with nested `parts`,
+# per-occurrence senses from hebrew-word-senses, structured morphology. Default "uhb" keeps the UHB-based path until the acceptance report passes.
+
+_MACULA_TOKEN_COLS = ("key", "text", "lemma", "strong", "gloss", "role", "class", "stem", "person", "number", "gender",
+                      "case_", "tense", "voice", "mood", "degree", "state")
+
+
+def hebrew_base() -> str:
+    return os.environ.get("VERSE_HEBREW_BASE", "uhb").lower()
+
+
+@lru_cache(maxsize=1)
+def _strong_equivalences() -> dict:
+    from spine.common import load_equivalences
+    return load_equivalences()
+
+
+def _macula_strong_code(raw: str | None) -> str | None:
+    """Raw MACULA Strong's ('0871a', '7225') -> the /verse code ('H871'): augment letter dropped and Hebrew variants
+    canonicalised, exactly as in the published lexeme-spine-macula.db."""
+    if not raw:
+        return None
+    from macula.build_spine_words import rollup_strong
+    return _strong_code("hbo", rollup_strong(raw, "hbo", _strong_equivalences()))
+
+
+def _macula_tokens(book: str, chapter: int, vrs: int) -> list[dict]:
+    """MACULA Hebrew tokens of a verse (Hebrew numbering), text order. `wlang` (H/A) is present once macula-spine.db is rebuilt with it."""
+    from macula import data as macula_data
+    if not macula_data._DB.exists():
+        return []
+    # a private connection per call: macula.data._con() is one cached connection shared by every request
+    con = sqlite3.connect(f"file:{macula_data._DB}?mode=ro", uri=True)
+    try:
+        have = {r[1] for r in con.execute("PRAGMA table_info(macula_words)")}
+        cols = list(_MACULA_TOKEN_COLS) + (["wlang"] if "wlang" in have else [])
+        rows = con.execute("SELECT " + ", ".join(f'"{c}"' for c in cols) +
+                           " FROM macula_words WHERE book=? AND chapter=? AND verse=? AND lang='hbo' ORDER BY key",
+                           (book, chapter, vrs)).fetchall()
+        return [dict(zip(cols, r)) for r in rows]
+    finally:
+        con.close()
+
+
+def _verse_senses_path() -> Path | None:
+    for c in (os.environ.get("VERSE_SENSES_DB"), "/data/verse-senses.db", str(HERE / "macula" / "verse-senses.db")):
+        if c and Path(c).exists():
+            return Path(c)
+    return None
+
+
+def _hebrew_senses(keys: list[str]) -> dict[str, str]:
+    """{token key: sense label} for every token that has an assigned sense (hebrew-word-senses, per occurrence). A lexeme with a single
+    sense gets its one label too, so `sense` is present wherever translators gave the occurrence a content rendering."""
+    path = _verse_senses_path()
+    if not path or not keys:
+        return {}
+    con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        rows = con.execute(
+            "SELECT o.key, s.label FROM occ o JOIN senses s ON s.lexeme=o.lexeme AND s.sense=o.sense "
+            f"WHERE o.key IN ({','.join('?' * len(keys))})", keys).fetchall()
+    finally:
+        con.close()
+    return {k: label for k, label in rows}
+
+
+def _verse_hebrew_macula(book: str, chapter: int, vrs: int, gloss_lang: str, domain_gloss: bool) -> list[dict]:
+    """The Hebrew `spine.words` of /verse from MACULA (see verse_hebrew.py for the shape). Empty when the verse does not exist in Hebrew numbering."""
+    import verse_hebrew
+    tokens = _macula_tokens(book, chapter, vrs)
+    if not tokens:
+        return []
+    words = verse_hebrew.build_words(tokens, _macula_strong_code)
+    senses = _hebrew_senses([w["head"] for w in words])
+    pending = collections.defaultdict(collections.deque)          # settings come keyed by Strong's in text order: match them in order
+    for n, (st_code, sid, via) in enumerate(_settings()[1].get((book, chapter, vrs), [])):
+        pending[st_code].append((sid, via, n))
+    for w in words:
+        code = w["strong"]
+        if code:
+            w.update(gloss_of(code) or {})
+        if senses.get(w["head"]):
+            w["sense"] = senses[w["head"]]
+        group = semantic_group(code, gloss_lang) if code else None
+        if group:
+            w["group"] = group
+            w["domain"] = group_label(group, domain_gloss)
+        if code and pending.get(_norm_strong(code)):
+            sid, via, _n = pending[_norm_strong(code)].popleft()
+            rec = setting_record(sid, gloss_lang, with_gloss=domain_gloss)
+            if rec:
+                w["setting"] = {**rec, "via": "word" if via == "w" else "passage"}
+    _match_leftover_settings(words, pending, gloss_lang, domain_gloss)
+    _attach_explanations(book, chapter, vrs, words)
+    _attach_menahem(book, chapter, vrs, words)
+    return words
+
+
 def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain_gloss: bool = False) -> dict:
     """Greek (LXX) + Hebrew/Greek (spine) words for one verse. `gloss_lang` localizes the per-word
     binyan-correct sense. Hebrew words carry `group` (CC0 semantic group) and `domain` = its Hebrew
@@ -1194,7 +1294,12 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
                  **(gloss_of(_strong_code("grc", r["strong"])) or {})}
                 for r in rows]}
 
-    scon = _ro(SPINE_DB)
+    use_macula = spine_lang == "hbo" and hebrew_base() == "macula"
+    if use_macula:
+        mwords = _verse_hebrew_macula(book, chapter, vrs, gloss_lang, domain_gloss)
+        if mwords:
+            result["spine"] = {"language": "hbo", "base": "macula", "versification": "org", "words": mwords}
+    scon = None if use_macula else _ro(SPINE_DB)
     if scon:
         rows = scon.execute(
             "SELECT idx, surface, strong, lemma, morph FROM spine_words "

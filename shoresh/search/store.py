@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
+import threading
 from pathlib import Path
 
 DATA_DIR = Path(os.environ.get("SHORESH_DATA", "/data"))
@@ -32,10 +33,17 @@ class ClauseStore:
         vec_path, meta_path = paths(lang)
         self.lang = lang
         self.matrix = np.load(vec_path, mmap_mode=None).astype("float32")
-        self.meta = sqlite3.connect(f"file:{meta_path}?mode=ro", uri=True,
-                                    check_same_thread=False)
-        self.meta.row_factory = sqlite3.Row
+        self._meta_path = meta_path
+        self._local = threading.local()     # one metadata connection per thread: a connection shared by concurrent requests is unsafe
         self.count = self.matrix.shape[0]
+
+    @property
+    def meta(self) -> sqlite3.Connection:
+        con = getattr(self._local, "con", None)
+        if con is None:
+            con = self._local.con = sqlite3.connect(f"file:{self._meta_path}?mode=ro", uri=True)
+            con.row_factory = sqlite3.Row
+        return con
 
     def search(self, qvec: list[float], k: int = 10) -> list[dict]:
         import numpy as np

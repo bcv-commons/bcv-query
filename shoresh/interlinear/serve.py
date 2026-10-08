@@ -22,6 +22,7 @@ from __future__ import annotations
 import collections
 import json
 import sqlite3
+import threading
 from functools import lru_cache
 from pathlib import Path
 
@@ -45,25 +46,29 @@ _WORD_ID_CHAPTER_MULT = 100_000
 _WORD_ID_VERSE_MULT = 100
 
 
+_local = threading.local()
+
+
 def _ro(path: Path) -> sqlite3.Connection | None:
+    """A read-only connection owned by the calling thread (one per thread and file). These used to be @lru_cache'd and shared by every
+    request on the theory that concurrent SELECTs on one connection are safe; they are not: FastAPI runs the sync routes on a thread
+    pool and 6,000 concurrent get_word calls gave 50 `bad parameter or other API misuse` errors and 1,921 wrong answers (2026-10-07)."""
     if not path.exists():
         return None
-    # check_same_thread=False: this connection is @lru_cache'd (created once, reused across
-    # requests), but FastAPI dispatches sync route handlers across a threadpool — a later request
-    # can land on a different thread than the one that created the connection. Safe here because
-    # every use in this module is a read (SELECT); sqlite3 permits concurrent reads from multiple
-    # threads on one connection, it only disallows the DEFAULT same-thread-only check.
-    con = sqlite3.connect(f"file:{path}?mode=ro", uri=True, check_same_thread=False)
-    con.row_factory = sqlite3.Row
+    cache = getattr(_local, "cons", None)
+    if cache is None:
+        cache = _local.cons = {}
+    con = cache.get(path)
+    if con is None:
+        con = cache[path] = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        con.row_factory = sqlite3.Row
     return con
 
 
-@lru_cache(maxsize=1)
 def _hg_db() -> sqlite3.Connection | None:
     return _ro(HG_DB)
 
 
-@lru_cache(maxsize=64)
 def _gloss_db(lang: str) -> sqlite3.Connection | None:
     return _ro(GLOSS_DIR / f"{lang}.db")
 

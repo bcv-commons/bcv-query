@@ -208,3 +208,6 @@ resources/bhsa_hierarchy/
 resources/bhsa_structural/
 resources/syntax_profiles/
 resources/parallelism/parallelism_pairs.local.tsv
+
+# per-occurrence senses for /verse (built by shoresh/macula/build_verse_senses.py, shipped to the data volume)
+shoresh/macula/verse-senses.db
