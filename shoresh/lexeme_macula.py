@@ -26,7 +26,7 @@ class NotAvailable(RuntimeError):
 
 
 def _first(env: str, name: str) -> Path | None:
-    for c in (os.environ.get(env), f"/data/{name}", str(HERE / "macula" / name)):
+    for c in (os.environ.get(env), f"/data/{name}", f"/data/public/{name}", str(HERE / "macula" / name)):    # /data/public: where the published spines (GET /files) live on the server
         if c and Path(c).exists():
             return Path(c)
     return None

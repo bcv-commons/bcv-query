@@ -38,7 +38,7 @@ Some data is built locally or fetched, not baked into the image or tracked in gi
 
 | Path in `/data` | What | How it gets there |
 |---|---|---|
-| `lexeme-spine-macula.db`, `verse-senses.db` | MACULA lexeme spine + per-occurrence senses (`LEXEME_BASE=macula`, `VERSE_HEBREW_BASE=macula`) | `deploy-data.sh` (also published at `/files`) |
+| `public/lexeme-spine-macula.db` (published at `/files`), `verse-senses.db` | MACULA lexeme spine + per-occurrence senses (`LEXEME_BASE=macula`; `VERSE_HEBREW_BASE=macula` reads `macula-spine.db`). Both are looked up in `/data` and `/data/public` | `deploy-data.sh` |
 | `word_glosses/hbo_lexeme/<Language>.csv` | MACULA-keyed BibleOL glosses (build output of `shoresh/macula/build_word_glosses_lexeme.py`) | one `deploy-data.sh` call per file with remote dir `.../word_glosses/hbo_lexeme` |
 | `vrs/` | bibles' versification files | fetched from `cdn.bibel.wiki` on first use and revalidated by ETag daily; `deploy-data.sh shoresh/data/vrs/index.json index.json <data>/vrs` pre-seeds it |
 

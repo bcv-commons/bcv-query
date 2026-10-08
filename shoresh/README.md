@@ -118,7 +118,7 @@ re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
 | `SHORESH_FILES_BASE` | — | Base URL advertised by `GET /files` (e.g. `https://files.qombi.com`); default: the host the client used |
 | `SHORESH_FILES_LIMIT` | `8/hour` | Per-IP limit on `GET /files/{name}` |
 | `LEXEME_BASE` | `bhsa` | `macula` serves `/senses`, `/lexeme`, `/wordstudy`, `/word` and the SDBH-shaped meanings from `lexeme-spine-macula.db` + `verse-senses.db` (CC BY, no BHSA input) instead of `hbo.db`; needs both files, else falls back to `bhsa`. Not flipped yet: per-stem sense labels for verbs are below the acceptance bar (`python -m macula.compare_lexeme_bases`) |
-| `LEXEME_SPINE_DB`, `VERSE_SENSES_DB` | `/data/<name>`, then `macula/` | The two MACULA lexeme databases |
+| `LEXEME_SPINE_DB`, `VERSE_SENSES_DB` | `/data/<name>`, `/data/public/<name>`, then `macula/` | The two MACULA lexeme databases |
 | `WORD_GLOSSES_DIR` | `/data/word_glosses` | Where the built `hbo_lexeme/<Language>.csv` tables are read from (MACULA-keyed BibleOL glosses; build output, not in git: `python -m macula.build_word_glosses_lexeme`, ship with `deploy/deploy-data.sh`); then `macula/data/word_glosses` |
 | `VERSE_HEBREW_BASE` | `uhb` | `macula` serves the Hebrew words of `/verse` from MACULA (words with parts, Hebrew numbering, per-occurrence senses) |
 | `VERSIFICATION_MAP_DIR` | `/data/vrs` | Where bibles' published versification files (`index.json`, `<scheme>.vrs`, `<scheme>-to-eng*.json`) are read from; fetched from the CDN when missing and revalidated by ETag at most daily (only changed files are downloaded) |
