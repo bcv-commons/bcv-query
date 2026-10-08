@@ -155,3 +155,34 @@ class TestVerseInTheReadersNumbering:
         a = self.data.verse("GEN", 1, 1, versification="rso")["spine"]["words"]
         b = self.data.verse("GEN", 1, 1)["spine"]["words"]
         assert [w["surface"] for w in a] == [w["surface"] for w in b]
+
+
+def test_revalidation_downloads_only_what_changed(tmp_path, monkeypatch):
+    """A cached file older than a day is revalidated with If-None-Match: 304 keeps it (age restarted), a new ETag replaces it and flags the tables for rebuild."""
+    import os, time, urllib.error, urllib.request, vrsmap
+    monkeypatch.setenv("VERSIFICATION_MAP_DIR", str(tmp_path))
+    (tmp_path / "a.json").write_text("old"); (tmp_path / "a.json.etag").write_text('"v1"')
+    (tmp_path / "b.json").write_text("old"); (tmp_path / "b.json.etag").write_text('"v1"')
+    old = time.time() - 3 * 86400
+    for n in ("a.json", "b.json"):
+        os.utime(tmp_path / n, (old, old))
+    seen = []
+
+    class Resp:
+        headers = {"ETag": '"v2"'}
+        def read(self): return b"new"
+
+    def fake_urlopen(req, timeout=0):
+        seen.append((req.full_url, req.headers.get("If-none-match")))
+        if req.full_url.endswith("a.json"):
+            raise urllib.error.HTTPError(req.full_url, 304, "Not Modified", {}, None)
+        return Resp()
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    vrsmap._failed.clear(); vrsmap._changed.clear()
+    assert vrsmap._bytes("a.json", "http://x/a.json", max_age=86400) == b"old"
+    assert not vrsmap._changed.is_set() and time.time() - (tmp_path / "a.json").stat().st_mtime < 60      # unchanged: kept, age restarted
+    assert vrsmap._bytes("b.json", "http://x/b.json", max_age=86400) == b"new"
+    assert vrsmap._changed.is_set() and (tmp_path / "b.json.etag").read_text() == '"v2"'
+    assert seen == [("http://x/a.json", '"v1"'), ("http://x/b.json", '"v1"')]
+    assert vrsmap._bytes("a.json", "http://x/a.json", max_age=86400) == b"old" and len(seen) == 2            # fresh again: no request at all

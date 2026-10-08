@@ -893,6 +893,9 @@ def lexicon_meanings_for_strongs(strong: str, lemma: str | None = None) -> list[
                 "comments": None,
                 "glosses": row["gloss"],
             })
+    elif code.startswith("H") and _on_macula():
+        import lexeme_macula
+        out = lexeme_macula.lexicon_meanings(code, base, lemma)
     elif code.startswith("H"):
         table = _lex_sense_table()
         n = 0
@@ -970,6 +973,11 @@ def _lex_senses(code: str, lang: str = "English") -> list[dict]:
     return out
 
 
+def _macula_call(name: str, code: str):
+    import lexeme_macula
+    return getattr(lexeme_macula, name)(code) if code.startswith("H") else []
+
+
 def word_study(strong: str, gloss_lang: str = "English") -> dict:
     """Composite word-study: gloss + keyness (how distinctively biblical) +
     semantic domain(s) + co-domain siblings + senses (polysemy) + cross-language
@@ -996,7 +1004,11 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
     cross = ([{"strong": g, "count": c, **(gloss_of(g) or {})} for g, c in fwd.get(code, [])][:3]
              or [{"strong": h, "count": c, **(gloss_of(h) or {})} for h, c in rev.get(code, [])][:3])
     head = gloss_of(code) or {}                        # headline gloss — localize it too (Hebrew)
-    if code.startswith("H") and gloss_lang and gloss_lang != "English":
+    if code.startswith("H") and gloss_lang and gloss_lang != "English" and _on_macula():
+        loc = _aligned_label_gloss(code, gloss_lang)            # no BHSA word_glosses on this path (step 2b re-keys them)
+        if loc:
+            head = {**head, "gloss": re.split(r"[;,]", loc)[0].strip()}
+    elif code.startswith("H") and gloss_lang and gloss_lang != "English":
         for lex in _strong_to_lex().get(code, []):
             loc = resolve_word_gloss("hbo", gloss_lang, lex, None)
             if loc:
@@ -1027,8 +1039,8 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         "menahem": menahem_senses(code) if code.startswith("H") else None,
         "siblings": siblings,                           # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
-        "stems": _stem_senses(code, gloss_lang),       # lex-anchored: per-binyan glosses + homographs
-        "lex_senses": _lex_senses(code, gloss_lang),   # Hebrew-context-derived senses (per lex, per stem)
+        "stems": _macula_call("stem_senses", code) if _on_macula() else _stem_senses(code, gloss_lang),   # lex-anchored: per-binyan glosses + homographs
+        "lex_senses": _macula_call("lex_senses", code) if _on_macula() else _lex_senses(code, gloss_lang),   # per lex, per stem
         # per-stem/sense occurrence distribution + sample refs (hbo.db); [] for Greek / db absent
         "sense_distribution": (sense_concordance(code).get("senses", []) if code.startswith("H") else []),
     }
@@ -1173,6 +1185,19 @@ _MACULA_TOKEN_COLS = ("key", "text", "lemma", "strong", "gloss", "role", "class"
 
 def hebrew_base() -> str:
     return os.environ.get("VERSE_HEBREW_BASE", "uhb").lower()
+
+
+def lexeme_base() -> str:
+    """LEXEME_BASE=macula serves /senses, /lexeme, /wordstudy senses and the concordance's senses from MACULA keys (lexeme_macula.py, NC exit step 2a);
+    the default "bhsa" keeps the hbo.db readers until the acceptance report passes."""
+    return os.environ.get("LEXEME_BASE", "bhsa").lower()
+
+
+def _on_macula() -> bool:
+    if lexeme_base() != "macula":
+        return False
+    import lexeme_macula
+    return lexeme_macula.available()
 
 
 @lru_cache(maxsize=1)
@@ -1523,7 +1548,11 @@ def concordance(strong: str, limit: int = 200) -> dict:
                             "surface": r["surface"], "morph": r["morph"]})
             lcon.close()
 
-    scon = _ro(SPINE_DB)
+    macula = lang == "hbo" and _on_macula()
+    if macula:                                         # Hebrew side from MACULA: Hebrew numbering, token keys, per-occurrence senses
+        import lexeme_macula
+        occ.extend(lexeme_macula.occurrences(strong, limit))
+    scon = None if macula else _ro(SPINE_DB)
     if scon:
         books = NT_BOOKS if lang == "grc" else OT_BOOKS
         qmarks = ",".join("?" * len(books))
@@ -1536,7 +1565,7 @@ def concordance(strong: str, limit: int = 200) -> dict:
                         "surface": r["surface"], "morph": r["morph"]})
         scon.close()
 
-    if lang == "hbo":                                  # attach the binyan-correct sense per occurrence
+    if lang == "hbo" and not macula:                   # attach the binyan-correct sense per occurrence
         by_ref = _strong_sense_by_ref(strong)
         for o in occ:
             label = by_ref.get(o["ref"])
@@ -1582,6 +1611,9 @@ def sense_concordance(strong: str, limit: int = 5000) -> dict:
     strong = strong.strip().upper()
     if not (strong.startswith("H") and strong[1:].isdigit()):
         return {"error": "sense-concordance is Hebrew-only (H####)"}
+    if _on_macula():
+        import lexeme_macula
+        return {"strong": strong, "language": "hbo", **(gloss_of(strong) or {}), **lexeme_macula.sense_concordance(strong, limit)}
     con = _ro(_hbo_path())
     if con is None:
         return {"error": "hbo.db unavailable (OT linguistic core not shipped)"}
@@ -1615,7 +1647,11 @@ def lexeme_profile(lex: str) -> dict:
     count × sample refs, from hbo.db. `lex` is normally the BHSA lex-id, but a Hebrew Strong's code
     (H####) is also accepted — resolved via the reverse Strong's->lexeme map (_strong_to_lex). Since
     one Strong's code can conflate several homograph lexemes (733 Hebrew codes do), a Strong's lookup
-    may fan out into multiple profiles rather than silently picking one."""
+    may fan out into multiple profiles rather than silently picking one.
+    With LEXEME_BASE=macula `lex` is a MACULA lexeme id (hbo:6942) or an H-code; BHSA lex-ids are no longer understood."""
+    if _on_macula():
+        import lexeme_macula
+        return lexeme_macula.lexeme_profile(lex)
     if _STRONG_LOOKALIKE.match(lex.strip()):
         code = _norm_strong(lex)
         if code.startswith("G"):

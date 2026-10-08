@@ -15,8 +15,9 @@ English is the hub: scheme A -> English -> scheme B. A reference is converted in
   4. otherwise it keeps its reference.
 A Psalm title is verse 0 in English, so a title that spans two Hebrew verses (Ps 51:1-2) is one English verse 0 and converts back to both.
 
-Files are read from VERSIFICATION_MAP_DIR (default /data/vrs, then ./data/vrs next to this file), fetched from the CDN once and cached there when missing; the index
-is refreshed weekly. Nothing is hard-coded: any scheme listed in the index works, and an unknown scheme is an error, not a guess.
+Files are read from VERSIFICATION_MAP_DIR (default /data/vrs, then ./data/vrs next to this file), fetched from the CDN when missing and cached there with their ETag.
+Each file is revalidated at most once a day with a conditional request: unchanged files answer 304 (a few hundred bytes), only a changed file is downloaded again and
+the converted tables are rebuilt. Nothing is hard-coded: any scheme listed in the index works, and an unknown scheme is an error, not a guess.
 
   from vrsmap import convert
   convert(("PSA", 3, 1), "eng", "org")   # -> [("PSA", 3, 2)]
@@ -32,6 +33,7 @@ import os
 import re
 import threading
 import time
+import urllib.error
 import urllib.request
 from functools import lru_cache
 from pathlib import Path
@@ -46,7 +48,7 @@ _SCHEME = re.compile(r"^[a-z][a-z0-9_]{1,15}$")
 _lock = threading.Lock()
 _failed: dict[str, float] = {}           # file name -> time of a failed fetch (retry later)
 _RETRY = 600
-_INDEX_MAX_AGE = 7 * 86400
+_MAX_AGE = 86400                          # every cached file is revalidated at most daily (a 304 when nothing changed)
 
 
 class UnknownScheme(ValueError):
@@ -66,35 +68,63 @@ def _path(name: str) -> Path | None:
     return None
 
 
-def _fetch(name: str, url: str) -> bytes | None:
+_changed = threading.Event()             # set when a revalidation brought different bytes: cached tables must be rebuilt
+
+
+def _fetch(name: str, url: str, etag: str | None = None) -> tuple[bytes | None, str | None]:
+    """(bytes, etag) of a changed or new file; (None, etag) when the CDN says 304 Not Modified; (None, None) when it cannot be reached."""
     with _lock:
         t0 = _failed.get(name)
         if t0 is not None and time.time() - t0 < _RETRY:
-            return None
+            return None, None
+    headers = {"User-Agent": "bcv-query"}
+    if etag:
+        headers["If-None-Match"] = etag
     try:
-        raw = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "bcv-query"}), timeout=8).read()
-    except Exception:                                        # noqa: BLE001 - offline, 404, ...: "not available"
+        resp = urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=8)
+        raw, new_etag = resp.read(), resp.headers.get("ETag")
+    except urllib.error.HTTPError as e:
+        if e.code == 304:
+            return None, etag
         with _lock:
             _failed[name] = time.time()
-        return None
+        return None, None
+    except Exception:                                        # noqa: BLE001 - offline, DNS, ...: "not available"
+        with _lock:
+            _failed[name] = time.time()
+        return None, None
     for d in _dirs():                                        # cache where we can write
         try:
             d.mkdir(parents=True, exist_ok=True)
             (d / name).write_bytes(raw)
+            (d / (name + ".etag")).write_text(new_etag or "", encoding="utf-8")
             break
         except OSError:
             continue
-    return raw
+    return raw, new_etag
 
 
 def _bytes(name: str, url: str, *, optional: bool = False, max_age: float | None = None) -> bytes | None:
+    """The file's bytes. A cached copy older than max_age is revalidated with a conditional request (ETag): unchanged files cost a 304, only
+    changed files are downloaded again. Without max_age a cached copy is used as is."""
     p = _path(name)
     if p is not None and (max_age is None or time.time() - p.stat().st_mtime < max_age):
         return p.read_bytes()
-    raw = _fetch(name, url)
+    etag = None
+    if p is not None:
+        try:
+            etag = (p.parent / (p.name + ".etag")).read_text(encoding="utf-8").strip() or None
+        except OSError:
+            pass
+    raw, _ = _fetch(name, url, etag if p is not None else None)
     if raw is not None:
+        _changed.set()
         return raw
-    if p is not None:                                        # stale beats nothing
+    if p is not None:                                        # 304, or unreachable: keep the copy and restart its age
+        try:
+            os.utime(p)
+        except OSError:
+            pass
         return p.read_bytes()
     if optional:
         return None
@@ -104,14 +134,19 @@ def _bytes(name: str, url: str, *, optional: bool = False, max_age: float | None
 # ---------------------------------------------------------------- the index: schemes and editions
 @lru_cache(maxsize=1)
 def _index_cached(bucket: int) -> dict:
-    raw = _bytes("index.json", f"{BASE}/dbt/_vrs/index.json", optional=True, max_age=_INDEX_MAX_AGE)
+    raw = _bytes("index.json", f"{BASE}/dbt/_vrs/index.json", optional=True, max_age=_MAX_AGE)
     if raw is None:
         return {"schemes": [], "l": {}, "vrs_base": f"{BASE}/_vrs/", "map_base": f"{BASE}/_vrs/map/", "maps": []}
     return json.loads(raw)
 
 
 def index() -> dict:
-    return _index_cached(int(time.time() // 86400))        # re-read at most daily; the file itself is refreshed weekly
+    """The edition/scheme index, revalidated daily. When the CDN served anything new (the index or a file it lists), the parsed tables are rebuilt."""
+    idx = _index_cached(int(time.time() // 86400))
+    if _changed.is_set():
+        _changed.clear()
+        table.cache_clear(); shape.cache_clear()
+    return idx
 
 
 def schemes() -> list[str]:
@@ -145,7 +180,7 @@ def parse_vrs(text: str) -> dict[tuple[str, int], int]:
 @lru_cache(maxsize=16)
 def shape(scheme: str) -> dict[tuple[str, int], int]:
     vrs_base, _ = _urls(index())
-    return parse_vrs(_bytes(f"{scheme}.vrs", f"{vrs_base}{scheme}.vrs").decode("utf-8"))
+    return parse_vrs(_bytes(f"{scheme}.vrs", f"{vrs_base}{scheme}.vrs", max_age=_MAX_AGE).decode("utf-8"))
 
 
 # ---------------------------------------------------------------- references and ranges
@@ -210,12 +245,12 @@ def table(scheme: str) -> Table:
     _, map_base = _urls(index())
     sh = shape(scheme)
     eng_sh = shape(HUB)
-    data = json.loads(_bytes(f"{scheme}-to-eng.json", f"{map_base}{scheme}-to-eng.json").decode("utf-8"))
+    data = json.loads(_bytes(f"{scheme}-to-eng.json", f"{map_base}{scheme}-to-eng.json", max_age=_MAX_AGE).decode("utf-8"))
     explicit: dict[Ref, list[Ref]] = {}
     for r in data.get("map", []):
         explicit.setdefault(_ref(r["s"]), []).append(_ref(r["t"]))
     multi: dict[Ref, list[Ref]] = {}
-    mraw = _bytes(f"{scheme}-to-eng.multiverse.json", f"{map_base}{scheme}-to-eng.multiverse.json", optional=True)
+    mraw = _bytes(f"{scheme}-to-eng.multiverse.json", f"{map_base}{scheme}-to-eng.multiverse.json", optional=True, max_age=_MAX_AGE)
     n_multi = 0
     if mraw:
         for r in json.loads(mraw.decode("utf-8")).get("map", []):
