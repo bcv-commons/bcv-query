@@ -15,6 +15,13 @@ So this page is the **human** doc: how to connect, authenticate, and what the to
 The **canonical, always-current** reference for an AI is the live `tools/list` (a snapshot
 is in [Tool catalog](#tool-catalog) below for quick human reference).
 
+## Connect in 2 minutes (remote)
+
+1. Get the key from the operator (one shared registration key, the server's `BTMCP_API_PASSWORD`).
+2. Point an MCP client at `https://bcv-query.qombi.com/mcp` (Streamable HTTP) and send `X-API-Key: <key>` (or `Authorization: Bearer <key>`). Claude Code: `claude mcp add --transport http bcv-query https://bcv-query.qombi.com/mcp --header "X-API-Key: <key>"`.
+3. Call `tools/list`; the descriptions are the reference. Good first calls: `word_study` (`H6942`), `lexeme_profile` (`hbo:6942`), `verse_interlinear` (`PSA 3:1` with `versification: "eng"`), `morphology_concordance` (`lexeme: "hbo:6942"`, `stem: "piel"`; needs the retagged index).
+4. Limits: the MCP surface allows about 20 requests a minute per key (`BTMCP_RL_PAID_PER_MIN`, default 20; `429` + `Retry-After` when exceeded). All tools are $0.
+
 ## Protocol
 
 Standard MCP via the official SDK — both transports below are spec-compliant, so any MCP

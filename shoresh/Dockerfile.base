@@ -16,7 +16,9 @@ COPY requirements.txt ./
 ARG SEARCH_EMBEDDER=cloudflare
 RUN pip install --no-cache-dir -r requirements.txt
 COPY requirements-berel.txt ./
+# torch from the CPU index first: the default PyPI wheel on Linux pulls the CUDA stack (several GB, no GPU on the host).
 RUN if [ "$SEARCH_EMBEDDER" = "berel" ]; then \
+      pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
       pip install --no-cache-dir -r requirements-berel.txt; \
     fi
 
