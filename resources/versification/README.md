@@ -3,6 +3,8 @@ license: cc-by-4.0
 tags: [bible, versification, kjv, hebrew, septuagint]
 ---
 
+> **Superseded in serving (2026-10-08).** `/verse?versification=` and bcv-RAG now convert only through the files bcv-commons/bibles publishes (`cdn.bibel.wiki/_vrs`: `.vrs` shapes + `<scheme>-to-eng.json` crosswalks, English as the hub), read by `shoresh/vrsmap.py`. This KJV registry is the original design and an internal build input for the LXX table; `/versify` is removed 2026-11-05. For numbering questions start from `shoresh/vrsmap.py`.
+
 # Versification (V1) — KJV-standard scheme registry
 
 Maps any Bible tradition's verse references to **one standard: KJV**. Versification is a per-version

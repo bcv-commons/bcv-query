@@ -36,6 +36,8 @@ Retrieval-augmented Q&A over Bible translation resources.
 | `BTMCP_EMBEDDING_PROVIDER` | No | auto-detect | `cloudflare`, `bge-m3-local`, `voyage`, `openai` |
 | `SHORESH_URL` | No | — | shoresh private URL for strategies 2-4, 6 |
 | `INDEX_DB_PATH` | No | `/data/index.db` | SQLite index location |
+| `VERSIFICATION_INDEX_URL` | No | `https://cdn.bibel.wiki/dbt/_vrs/index.json` | bibles' edition → versification scheme index; `server/versification.py` picks the reader's scheme per language (cards carry `numbering`) |
+| `BTMCP_VRS_CACHE` | No | `/tmp/bcv-vrs-index.json` | Local cache of that index (refreshed daily) |
 | `API_PASSWORD` | No | — | Password-protect `/api/ask` |
 
 ## Deploy

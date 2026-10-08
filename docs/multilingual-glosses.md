@@ -6,6 +6,8 @@ glosses are what let you search the Bible in any supported language: concept
 expansion (bcv-RAG Strategy 1) translates your query words into Strong's tags,
 and shoresh's `/words` vocab-trainer feed reads them directly.
 
+> **MACULA-keyed copy (NC exit step 2b).** The per-binyan BibleOL glosses (MIT) are also re-keyed on MACULA lexeme ids (`hbo:6942`, MACULA stem names) as `hbo_lexeme/<Language>.csv`, used by `/wordstudy` and `/lexeme` when `LEXEME_BASE=macula`. They are build output, not in git (`python -m macula.build_word_glosses_lexeme`, shipped to the data volume; see `deploy/README.md`). `/words` still reads the BHSA-keyed tables until the corpus moves.
+
 ## Coverage
 
 11 languages: **English, Spanish, French, Portuguese, Chinese (Simplified +

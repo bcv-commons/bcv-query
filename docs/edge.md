@@ -85,3 +85,7 @@ absorbs it upstream and adds a WAF + edge rate limiting without an `xcaddy` rebu
 > **Hostnames (2026-10-06):** the APIs moved from `*.up.qombi.com` to `bcv-query.qombi.com` and `shoresh.qombi.com`
 > (one level up, so a free Cloudflare certificate covers them). The old two-level names redirect with a 308 for a
 > transition period; update any client that does not follow redirects.
+>
+> **Files host (2026-10-08):** `files.qombi.com` is DNS-only (not proxied) and serves the large published data files
+> (`GET /files`, `/files/{name}`; Caddy block on the origin, limit `SHORESH_FILES_LIMIT`, default 8/hour per IP). Cloudflare's free plan
+> does not carry multi-GB bodies; the trade-off is that this name shows the origin IP. The same path on `shoresh.qombi.com` redirects there.

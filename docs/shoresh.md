@@ -27,7 +27,7 @@ All endpoints are plain `GET`s under the service root.
 
 | Endpoint | What it gives you | Cost |
 |---|---|---|
-| `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine, with morphology + gloss | $0 |
+| `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine, with morphology + gloss; `?versification=<scheme>` reads the reference in the reader's numbering | $0 |
 | `GET /word/{strong}` | Concordance — every occurrence of a Strong's number | $0 |
 | `GET /words` | Vocab-trainer feed — glosses in 11 languages, per-binyan for Hebrew verbs | $0 |
 | `GET /wordstudy/{strong}` | Word-study card — a multilingual sense breakdown for a Strong's number | $0 |
@@ -152,3 +152,5 @@ mounted directly when self-hosting).
 The original-language data is **non-commercial** (BHSA CC BY-NC-SA, OpenHebrewBible
 CC BY-NC; LXX morphology under the CATSS/CCAT declaration in `legal/`). The
 service **code** is MIT like the rest of the repo.
+
+The non-commercial inputs are being replaced by MACULA (CC BY) step by step; status in the "NC exit status" section of [ROADMAP.md](ROADMAP.md). Today the `/verse` Hebrew words are already MACULA-based (`VERSE_HEBREW_BASE=macula`); lexeme/senses (`LEXEME_BASE`) and the clause/syntax endpoints are not yet.

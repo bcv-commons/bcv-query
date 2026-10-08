@@ -243,7 +243,7 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   = high precision, fertility = threshold on `count`. Remaining = wire into the analyzer's phrase detection.
 - **D1 · Discourse connectives / coreference** — γάρ/οὖν/δέ, כִּי for argument
   flow; participant coreference to resolve "he/they" across a narrative.
-- **V1 · Versification** — 🟢 **BUILT (core)** — a **KJV-standard scheme registry**
+- **V1 · Versification** — 🟢 **BUILT (core); superseded in serving 2026-10-08** — shoresh now converts only on bibles' published `.vrs` shapes and `*-to-eng.json` crosswalks (`shoresh/vrsmap.py`, English as the hub, ETag revalidation); `/verse?versification=` and bcv-RAG's reader-language numbering use it. The KJV registry below is the original design and the `/versify` endpoint is on its way out. Original design:  a **KJV-standard scheme registry**
   (`resources/versification/`, `shoresh/versification/build.py` from STEPBible TVTMS CC-BY):
   per-scheme diffs → KJV, `hebrew` (2,031) + `lxx` (5,386). Resolver `to_standard`/`from_standard` +
   `/versify/{scheme}/{book}/{ch}/{v}` (**2026-10-05: deprecated, removal 2026-11-05** — verse maps between schemes are
@@ -442,3 +442,12 @@ Leitwörter/inclusio detection, and versional witnesses (Peshitta/Targum/Vulgate
 vs MT, niche but native to shoresh). And — once audio resources arrive — audio
 forced-alignment for word timing and read-along (see the stub in
 [aligner-plan.md](aligner-plan.md)).
+
+## NC exit status (2026-10-08)
+
+Replacing BHSA/OHB/ETCBC-derived inputs with MACULA (CC BY), step by step; the service stays non-commercial until the last step.
+- **Step 0** ✅ BHSA-derived legacy data untracked; licence register + guard test (`resources/LICENSES.md`, `tests/test_nc_register.py`).
+- **Step 1** ✅ `/verse` Hebrew words from MACULA (`VERSE_HEBREW_BASE=macula`, live): words with parts, Hebrew numbering, per-occurrence senses; reader numbering via `vrsmap`.
+- **Step 2a** 🟡 lexeme and senses on MACULA keys behind `LEXEME_BASE` (built, measured, default `bhsa`). Open: per-stem sense labels for verbs (12% vs 78% of sense groups with distinct stems, 65% vs 83% in the `/wordstudy` stem view); waits on the aligner's `rend` data. Report: `python -m macula.compare_lexeme_bases`.
+- **Step 2b** ✅ built: `word_glosses/hbo_lexeme` (MACULA-keyed BibleOL glosses, shipped as data, not in git). MCP retag built (`bcv-RAG/scripts/tag_lexeme_occurrences.py`); the index must be retagged and re-uploaded.
+- **Next** step 3 structure/tree/syntax search on MACULA lowfat trees (also moves `/words` off BHSA); 5 clause search on MACULA clauses; 4 `clause_dependencies`; 6 retire `spine.db`, `hbo.db`, text-fabric mount.

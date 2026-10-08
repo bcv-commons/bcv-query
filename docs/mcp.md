@@ -128,12 +128,12 @@ omit to default to English). The live `tools/list` is authoritative for full sch
 | Tool | Arguments | What it does |
 |---|---|---|
 | `word_study` | `strong*, lang` | Gloss · keyness · per-binyan senses · domains (Hebrew: semantic group with a Hebrew label) · settings · UBS synonyms/antonyms · Malbim's distinctions from near-synonyms (Hebrew) · Mahberet Menahem's sense divisions (Hebrew) · TW article · related lexemes. |
-| `verse_interlinear` | `reference*, lang` | Per-word gloss/sense/domain (Greek: Louw-Nida; Hebrew: "Hebrew label · gloss") + LXX parallel for a verse. Hebrew words also: setting, commentators' explanations (Metzudat Zion, Malbim), Mahberet Menahem's root and sense division; `malbim_comments` per verse. |
+| `verse_interlinear` | `reference*, lang, versification` | Per-word gloss/sense/domain (Greek: Louw-Nida; Hebrew: "Hebrew label · gloss") + LXX parallel for a verse. Hebrew words also: setting, commentators' explanations (Metzudat Zion, Malbim), Mahberet Menahem's root and sense division; `malbim_comments` per verse. |
 | `verse_commentary` | `reference*` | Malbim's commentary on one OT verse (Hebrew, 19th c.): his comments in order, each with the quoted words as heading. Also at shoresh `GET /verse/{book}/{ch}/{v}/malbim`. |
 | `verse_syntax` | `reference*` | Clause→phrase syntax tree (who-did-what). |
-| `lexeme_profile` | `lex*, lang` | A lexeme's stems × senses × counts × sample refs (finer than Strong's). |
+| `lexeme_profile` | `lex*, lang` | A lexeme's stems × senses × counts × sample refs (finer than Strong's). `lex` is a MACULA lexeme id (`hbo:6942`) or a Strong's code. |
 | `semantic_domain` | `code*, axis, lang` | Every lexeme in a Louw-Nida domain (`axis=sdbg`), a Hebrew semantic group (`axis=group`, ids like `c27`) or a Hebrew setting (`axis=setting`, ids `s01`-`s40`), glossed. |
-| `morphology_concordance` | `lex*, stem, sense, top_k, lang` | Verses by Hebrew lexeme + binyan + sense. |
+| `morphology_concordance` | `lexeme*, stem, sense, top_k, lang` | Verses by Hebrew lexeme (`hbo:6942`; a Strong's code `H6942` searches all its homographs) + binyan + sense. `lex` is accepted as an alias; BHSA ids (`QDC[`) are rejected. Needs the index retagged with `scripts/tag_lexeme_occurrences.py`, otherwise it says so. |
 | `cross_language` | `strong*` | Hebrew↔Greek equivalents via the LXX bridge. |
 
 **Torah literary structure** — Moshe Kline's "Woven Torah" hypothesis (86 units, CC BY 4.0). **Cited

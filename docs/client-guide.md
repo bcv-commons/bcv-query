@@ -192,6 +192,8 @@ The card `drill`/`syntax` paths point at shoresh. To localize per-word data, app
     } ] } }
 ```
 
+**Numbering follows the reader.** Hebrew words are numbered as in the Hebrew text (Psalm titles are verse 1) and Greek (LXX) words as in the LXX. If your reader's Bible numbers differently, pass its scheme with `?versification=` (`eng`, `rso`, `vul`, `org`, `orgw`, `lxx`, or any scheme bibles publishes a map for): the reference is read in that numbering and the same verse comes back in Hebrew numbering, with `versification` in the response giving the requested scheme, the resolved Hebrew and LXX references and the map revision. English Psalm 3:1 is Hebrew 3:2; a two-verse Hebrew title such as Psalm 51 comes back whole, each word carrying its own `verse`. An unknown scheme gives `400` and lists the valid ones. bcv-RAG passage cards pick the scheme from the reader's language and carry it as `numbering`.
+
 Hebrew words carry a **semantic group** instead of a Louw-Nida domain (CC0, built from our own
 semantic-neighbour data; it replaced SDBH's non-redistributable `core` axis in 2026-10). The group is
 named by a Hebrew exemplar word, and `domain` holds that Hebrew label. Add `domain_gloss=true` to append
@@ -290,11 +292,11 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 
 | Path | Purpose |
 |---|---|
-| `/verse/{book}/{ch}/{v}` | Interlinear: per-word gloss, sense, domain (+ LXX parallel for OT) |
+| `/verse/{book}/{ch}/{v}` | Interlinear: per-word gloss, sense, domain (+ LXX parallel for OT). Add `?versification=<scheme>` (the reader's numbering, see below) |
 | `/wordstudy/{strong}` | Composite word study (gloss, stems, senses, domains, TW articles) |
 | `/word/{strong}` | Concordance for a Strong's number |
 | `/senses/{strong}` | Sense distribution for a Strong's number |
-| `/lexeme/{lex}` | Lexeme profile (stems × senses × counts × sample refs) |
+| `/lexeme/{lex}` | Lexeme profile (stems × senses × counts × sample refs); `lex` is a MACULA lexeme id (`hbo:6942`) or a Strong's code |
 | `/concept/{word}` | Words sharing a concept |
 | `/domain/{code}` | Every lexeme in a semantic domain: `axis=sdbg` (Louw-Nida, default), `axis=group` (Hebrew semantic group, ids like `c27`), `axis=setting` (Hebrew setting, ids `s01`-`s40`); `axis=core` is an alias of `group`, `axis=ctx` of `setting` |
 | `/tw/{strong}` | Translation-Words article(s) for a Strong's number |

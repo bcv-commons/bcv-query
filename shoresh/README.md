@@ -15,7 +15,9 @@ All under the service root. Deterministic endpoints have no external dependency.
 | `GET /verse/{book}/{ch}/{v}/malbim` | Malbim's verse commentary in Hebrew (19th c.; whole Hebrew Bible), comment by comment | $0 |
 | `GET /files` | Data files published for direct download (the original-language spines): size, sha256, licence, source, URL | $0 |
 | `GET /files/{name}` | One published file, e.g. `lexeme-spine-macula.db` (HTTP Range supported); verify its sha256 against `/files`. Served from the DNS-only host `https://files.qombi.com/files/{name}` (the same path on `shoresh.qombi.com` redirects there) | $0 |
-| `GET /word/{strong}` | Concordance — every occurrence of a Strong's number | $0 |
+| `GET /word/{strong}` | Concordance — every occurrence of a Strong's number (Hebrew refs in Hebrew numbering and with the token `key` when `LEXEME_BASE=macula`) | $0 |
+| `GET /senses/{strong}` | Sense groups of a Hebrew Strong's: lexeme × stem × sense, with counts and sample refs | $0 |
+| `GET /lexeme/{lex}` | Lexeme profile. With `LEXEME_BASE=macula` `lex` is a MACULA lexeme id (`hbo:6942`, homographs `hbo:0871a`) or a Strong's code (`H6942`, which fans out to its homographs); BHSA ids (`QDC[`) are no longer accepted. A `hbo:` id is always answered from MACULA | $0 |
 | `GET /words` | Vocab-trainer feed — glosses in 11 languages, per-binyan for Hebrew verbs | $0 |
 | `GET /wordstudy/{strong}` | Word-study card — multilingual sense breakdown for a Strong's number | $0 |
 | `GET /tw/{strong}` | Translation-Words article(s) explaining a Strong's number, ranked (e.g. G0026 → bible/kt/love) | $0 |
@@ -115,8 +117,12 @@ re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
 | `SHORESH_DATA` | `/data` | Clause vector directory |
 | `SHORESH_FILES_BASE` | — | Base URL advertised by `GET /files` (e.g. `https://files.qombi.com`); default: the host the client used |
 | `SHORESH_FILES_LIMIT` | `8/hour` | Per-IP limit on `GET /files/{name}` |
+| `LEXEME_BASE` | `bhsa` | `macula` serves `/senses`, `/lexeme`, `/wordstudy`, `/word` and the SDBH-shaped meanings from `lexeme-spine-macula.db` + `verse-senses.db` (CC BY, no BHSA input) instead of `hbo.db`; needs both files, else falls back to `bhsa`. Not flipped yet: per-stem sense labels for verbs are below the acceptance bar (`python -m macula.compare_lexeme_bases`) |
+| `LEXEME_SPINE_DB`, `VERSE_SENSES_DB` | `/data/<name>`, then `macula/` | The two MACULA lexeme databases |
+| `WORD_GLOSSES_DIR` | `/data/word_glosses` | Where the built `hbo_lexeme/<Language>.csv` tables are read from (MACULA-keyed BibleOL glosses; build output, not in git: `python -m macula.build_word_glosses_lexeme`, ship with `deploy/deploy-data.sh`); then `macula/data/word_glosses` |
 | `VERSE_HEBREW_BASE` | `uhb` | `macula` serves the Hebrew words of `/verse` from MACULA (words with parts, Hebrew numbering, per-occurrence senses) |
-| `VERSIFICATION_MAP_DIR` | `/data/vrs` | Where `<scheme>-to-eng.json` maps (cdn.bibel.wiki/_vrs/map) are read from; fetched and cached there when missing |
+| `VERSIFICATION_MAP_DIR` | `/data/vrs` | Where bibles' published versification files (`index.json`, `<scheme>.vrs`, `<scheme>-to-eng*.json`) are read from; fetched from the CDN when missing and revalidated by ETag at most daily (only changed files are downloaded) |
+| `VERSIFICATION_BASE` | `https://cdn.bibel.wiki` | The CDN those files come from |
 
 ## Run locally
 
@@ -130,4 +136,4 @@ SHORESH_DATA=./data uvicorn app:app --port 8080
 
 ## License
 
-Non-commercial (BHSA CC BY-NC-SA, OpenHebrewBible CC BY-NC).
+Non-commercial (BHSA CC BY-NC-SA, OpenHebrewBible CC BY-NC), being replaced by MACULA (CC BY) step by step; see "NC exit status" in `docs/ROADMAP.md`.

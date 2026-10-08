@@ -31,3 +31,15 @@ container's healthcheck; if it isn't healthy within `HEALTH_TIMEOUT` seconds (de
 script restores `:previous` by itself and exits 1. To roll back by hand later:
 `deploy/deploy.sh <svc> --rollback` (one step back). For older versions:
 `git -C <repo> checkout <tag-or-sha> && deploy/deploy.sh <svc> --no-pull`.
+
+## Data artifacts on the shoresh volume
+
+Some data is built locally or fetched, not baked into the image or tracked in git. It lives under the shoresh `data/` volume (`/data` in the container) and is shipped with `deploy/deploy-data.sh <file> <name> [remote-dir]`:
+
+| Path in `/data` | What | How it gets there |
+|---|---|---|
+| `lexeme-spine-macula.db`, `verse-senses.db` | MACULA lexeme spine + per-occurrence senses (`LEXEME_BASE=macula`, `VERSE_HEBREW_BASE=macula`) | `deploy-data.sh` (also published at `/files`) |
+| `word_glosses/hbo_lexeme/<Language>.csv` | MACULA-keyed BibleOL glosses (build output of `shoresh/macula/build_word_glosses_lexeme.py`) | one `deploy-data.sh` call per file with remote dir `.../word_glosses/hbo_lexeme` |
+| `vrs/` | bibles' versification files | fetched from `cdn.bibel.wiki` on first use and revalidated by ETag daily; `deploy-data.sh shoresh/data/vrs/index.json index.json <data>/vrs` pre-seeds it |
+
+The switches (`VERSE_HEBREW_BASE`, `LEXEME_BASE`, `SHORESH_FILES_BASE`) are environment entries in the stack's `docker-compose.yml`; change one, then `docker compose up -d shoresh`. The bcv-RAG `index.db` is retagged locally (`bcv-RAG/scripts/tag_lexeme_occurrences.py <index.db>`) before upload.
