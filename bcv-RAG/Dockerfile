@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir \
     -r /app/query/requirements.txt \
     -r /app/server/requirements.txt
 
-# aligned_lex_hf: bcv-commons/lexeme-alignments (HF, CC0-1.0), ~924 languages as of 2026-07 —
+# aligned_lex_hf: bcv-commons/lexeme-alignments (HF, CC0-1.0), ~924 languages as of 2026-07 (more since); only an allowlist is fetched (ALIGNED_LEX_LANGS) —
 # fetched at image build (too large to commit — ~2GB at the manual aligned_lex/'s per-language rate —
 # so this is the only place it can come from; matches shoresh/Dockerfile.base's fetch-at-build-time
 # pattern). Placed BEFORE the app code and resources/ COPYs so the slow download is a cached layer: a
@@ -28,6 +28,9 @@ RUN pip install --no-cache-dir \
 # layer's cache). huggingface_hub/pyarrow aren't needed at runtime past this step, but kept installed
 # rather than multi-stage-stripped — not worth the complexity for two packages.
 ARG ALIGNED_LEX_REFRESH=2026-10-03
+# Which languages to fetch: empty = the allowlist in build_aligned_lex_hf.py (the gloss + manual-alignment languages + swe); "all" = every published one (~1800).
+ARG ALIGNED_LEX_LANGS=
+ENV ALIGNED_LEX_LANGS=${ALIGNED_LEX_LANGS}
 ENV BCV_RESOURCES_DIR=/app/resources
 COPY bcv-RAG/resource_paths.py /app/resource_paths.py
 COPY bcv-RAG/scripts/build_aligned_lex_hf.py /app/scripts/build_aligned_lex_hf.py

@@ -139,7 +139,7 @@ echo "✓ deployed $SVC — running image: $(docker inspect "$SVC" --format '{{.
 # NOT `docker image prune`: that would remove shoresh-base:latest (kept on
 # purpose above to skip its 3-4 min rebuild) since it has 0 running containers.
 echo "→ prune build cache"
-docker builder prune -f >/dev/null || true
+docker builder prune -f --filter until=336h >/dev/null || true       # keep two weeks of layers: the slow data layers (aligned_lex_hf) must survive between deploys
 # Untagged (dangling) images only: each deploy retags :latest and :previous, leaving the image they
 # pointed at before untagged. Tagged images (shoresh-base, both :latest, both :previous) are kept.
 echo "→ prune untagged images"

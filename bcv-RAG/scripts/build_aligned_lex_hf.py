@@ -33,12 +33,13 @@ Output: aligned_lex_hf/<iso>.tsv (surface, strong, count, share, hi_conf, method
 columns as aligned_lex/ (surface, strong, count, share) plus hi_conf/methods so a consumer can
 apply its own stricter filter later without re-deriving anything.
 
-  python3 scripts/build_aligned_lex_hf.py                  # all published languages
+  python3 scripts/build_aligned_lex_hf.py                  # the DEFAULT_LANGS allowlist (ALIGNED_LEX_LANGS=all for every published language)
   python3 scripts/build_aligned_lex_hf.py fra ind swe       # just these
 """
 from __future__ import annotations
 
 import collections
+import os
 import re
 import sys
 from pathlib import Path
@@ -69,10 +70,30 @@ def strong_of(lexeme: str) -> str:
     return ("H" if lang == "hbo" else "G") + digits.zfill(4)
 
 
+# The languages the product serves for now: the gloss languages (word_glosses/hbo) and the manual-alignment languages
+# (aligned_lex/), plus swe (karnbibeln.se). Widen with ALIGNED_LEX_LANGS="a,b,c" or ALIGNED_LEX_LANGS=all (Docker build arg).
+DEFAULT_LANGS = ("amh arb asm ben cmn dan deu eng fra hau hin ind nld por rus spa swe swh").split()
+
+
+def wanted_langs() -> list[str] | None:
+    """None = every published language (ALIGNED_LEX_LANGS=all); else the allowlist."""
+    raw = os.environ.get("ALIGNED_LEX_LANGS", "").strip().lower()
+    if raw == "all":
+        return None
+    return [x for x in re.split(r"[,\s]+", raw) if x] or list(DEFAULT_LANGS)
+
+
 def discover_isos() -> list[str]:
     from huggingface_hub import HfApi
     files = HfApi().list_repo_files(REPO, repo_type="dataset")
-    return sorted({f.split("/")[0][4:] for f in files if f.startswith("iso=") and f.endswith("data.parquet")})
+    published = sorted({f.split("/")[0][4:] for f in files if f.startswith("iso=") and f.endswith("data.parquet")})
+    want = wanted_langs()
+    if want is None:
+        return published
+    missing = [w for w in want if w not in published]
+    if missing:
+        print(f"[aligned_lex_hf] not published (skipped): {' '.join(missing)}", file=sys.stderr)
+    return [i for i in published if i in want]
 
 
 def build_one(iso: str) -> dict:
