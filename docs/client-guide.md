@@ -64,6 +64,37 @@ curl -X POST {BCV_RAG_BASE}/api/ask \
   -d '{"question": "What does John 3:16 teach about God'\''s love?"}'
 ```
 
+## REST quick start (no key)
+
+Everything below is open (anonymous, rate-limited to about 120 requests a minute per IP) and was checked against the live services. `S` is shoresh, `R` is bcv-RAG; add `?gloss_lang=German` (a display name) for localized glosses.
+
+```bash
+S=https://shoresh.qombi.com; R=https://bcv-query.qombi.com
+
+# 1. A verse, in the numbering the reader's Bible uses (English Psalm 3:1 is Hebrew 3:2):
+curl "$S/verse/PSA/3/1?versification=eng"
+
+# 2. One Hebrew word: card, occurrences, senses by binyan, lexeme profile, Greek equivalents
+curl "$S/wordstudy/H6942?gloss_lang=German"
+curl "$S/word/H6942"          # every occurrence (ref, surface, morph, sense)
+curl "$S/senses/H6942"        # lexeme x stem x sense, counts, sample refs
+curl "$S/lexeme/H6942"        # lexeme profile (a Strong's code fans out to its homographs)
+curl "$S/bridge/H6942"        # how the Septuagint translates it
+
+# 3. Semantic neighbours and groups
+curl "$S/domain/c27?axis=group"          # every word in a Hebrew semantic group
+
+# 4. Syntax of a verse
+curl "$S/structure/PSA/3/1"
+
+# 5. bcv-RAG: search the indexed content (keyword), then look things up
+curl "$R/api/search?q=sanctify&top_k=5"
+curl "$R/api/concordance/shepherd?limit=5"
+curl "$R/api/cross-references/45003024"  # Romans 3:24, 8-digit ref bbcccvvv
+```
+
+Both services answer JSON; errors are `{"detail": "..."}` with the HTTP status. A rare `502` from the edge is transient: retry. Semantic search (`/api/search?semantic=true`) and `/api/ask` need a key and have their own tighter limit. Two shapes to know: `/lexeme` and `/senses` return BHSA lexeme ids (`QDC[`) until the service switches to MACULA lexeme ids (`hbo:6942`), which a client should treat as opaque. Only `/verse` takes `?versification=`; with the MACULA switch, the references in `/word` and `/senses` are in Hebrew numbering.
+
 ## The main endpoint — `POST /api/ask`
 
 ### Request
