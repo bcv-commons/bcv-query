@@ -11,7 +11,7 @@ All under the service root. Deterministic endpoints have no external dependency.
 
 | Endpoint | What | Cost |
 |----------|------|------|
-| `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine with morphology + gloss | $0 |
+| `GET /verse/{book}/{ch}/{v}` | Interlinear — LXX Greek + Hebrew/Greek spine with morphology + gloss. `?versification=<scheme>` (eng, rso, vul, org, lxx, orgw, or any scheme bibles publishes a map for) reads the reference in the reader's numbering and serves the same verse in Hebrew (and LXX) numbering (MACULA base, `VERSE_HEBREW_BASE=macula`) | $0 |
 | `GET /verse/{book}/{ch}/{v}/malbim` | Malbim's verse commentary in Hebrew (19th c.; whole Hebrew Bible), comment by comment | $0 |
 | `GET /files` | Data files published for direct download (the original-language spines): size, sha256, licence, source, URL | $0 |
 | `GET /files/{name}` | One published file, e.g. `lexeme-spine-macula.db` (HTTP Range supported); verify its sha256 against `/files`. Served from the DNS-only host `https://files.qombi.com/files/{name}` (the same path on `shoresh.qombi.com` redirects there) | $0 |
@@ -115,6 +115,8 @@ re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
 | `SHORESH_DATA` | `/data` | Clause vector directory |
 | `SHORESH_FILES_BASE` | — | Base URL advertised by `GET /files` (e.g. `https://files.qombi.com`); default: the host the client used |
 | `SHORESH_FILES_LIMIT` | `8/hour` | Per-IP limit on `GET /files/{name}` |
+| `VERSE_HEBREW_BASE` | `uhb` | `macula` serves the Hebrew words of `/verse` from MACULA (words with parts, Hebrew numbering, per-occurrence senses) |
+| `VERSIFICATION_MAP_DIR` | `/data/vrs` | Where `<scheme>-to-eng.json` maps (cdn.bibel.wiki/_vrs/map) are read from; fetched and cached there when missing |
 
 ## Run locally
 

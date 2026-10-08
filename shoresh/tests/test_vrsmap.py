@@ -1,0 +1,157 @@
+"""vrsmap.py: conversion between numbering schemes, built only on bibles' published .vrs shapes, maps, multi-verse relations and edition index.
+  bcv-RAG/.venv/bin/python -m pytest shoresh/tests/test_vrsmap.py -q
+Unit tests use small synthetic files in the published formats; the integration tests use the real cached files (shoresh/data/vrs) and skip without them."""
+import json
+import sys
+from pathlib import Path
+
+import pytest
+
+SHORESH = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SHORESH))
+REAL = SHORESH / "data" / "vrs"
+HAVE_REAL = (REAL / "org-to-eng.json").exists() and (REAL / "index.json").exists()
+
+
+def _vrs(rows: dict) -> str:
+    return "# Versification\n" + "\n".join(f"{b} " + " ".join(f"{c}:{n}" for c, n in chs) for b, chs in rows.items()) + "\n"
+
+
+@pytest.fixture()
+def vm(tmp_path, monkeypatch):
+    """Synthetic scheme 'org' (Psalm 3 with title as verse 1, Psalm 51 two-verse title, Joel 3 = English 2:28-32, Numbers 25:19 joined to 26:1) and 'rso'
+    (Psalm 114 = first half of English 116, verse 9 has no row: the gap rule)."""
+    eng = {"PSA": [(3, 8), (51, 19), (114, 8), (115, 18), (116, 19)], "JOL": [(2, 32), (3, 21)], "NUM": [(25, 18), (26, 65)]}
+    org = {"PSA": [(3, 9), (51, 21)], "JOL": [(2, 27), (3, 5)], "NUM": [(25, 19), (26, 65)]}
+    rso = {"PSA": [(3, 9), (113, 26), (114, 9), (115, 18)]}
+    (tmp_path / "eng.vrs").write_text(_vrs(eng)); (tmp_path / "org.vrs").write_text(_vrs(org)); (tmp_path / "rso.vrs").write_text(_vrs(rso))
+    rows = [("PSA 3:1", "PSA 3:title"), *[(f"PSA 3:{i}", f"PSA 3:{i-1}") for i in range(2, 10)],
+            ("PSA 51:1", "PSA 51:title"), ("PSA 51:2", "PSA 51:title"), *[(f"PSA 51:{i}", f"PSA 51:{i-2}") for i in range(3, 22)],
+            *[(f"JOL 3:{i}", f"JOL 2:{27+i}") for i in range(1, 6)]]
+    (tmp_path / "org-to-eng.json").write_text(json.dumps({"tvtms_rev": "abc", "map": [{"s": s, "t": t, "a": "x"} for s, t in rows]}))
+    (tmp_path / "org-to-eng.multiverse.json").write_text(json.dumps({"map": [{"s": "NUM 25:19-26:1", "t": "NUM 26:1"}]}))
+    rows = [("PSA 3:1", "PSA 3:title"), *[(f"PSA 3:{i}", f"PSA 3:{i-1}") for i in range(2, 10)]] + [(f"PSA 114:{i}", f"PSA 116:{i}") for i in range(1, 9)] + [(f"PSA 115:{i}", f"PSA 116:{i+9}") for i in range(1, 11)]
+    (tmp_path / "rso-to-eng.json").write_text(json.dumps({"tvtms_rev": "abc", "map": [{"s": s, "t": t, "a": "x"} for s, t in rows]}))
+    (tmp_path / "index.json").write_text(json.dumps({"schemes": ["eng", "org", "rso"], "vrs_base": "http://127.0.0.1:9/_vrs/", "map_base": "http://127.0.0.1:9/_vrs/map/",
+                                                       "l": {"deu/A": "eng", "deu/B": "eng", "fra/A": "org", "fra/B": "eng", "rus/A": "rso", "xxx/Z": "undetermined"}}))
+    monkeypatch.setenv("VERSIFICATION_MAP_DIR", str(tmp_path))
+    import vrsmap
+    for f in (vrsmap.table, vrsmap.shape, vrsmap._index_cached):
+        f.cache_clear()
+    vrsmap._failed.clear()
+    return vrsmap
+
+
+def test_english_reference_to_hebrew_and_back(vm):
+    assert vm.convert(("PSA", 3, 1), "eng", "org") == [("PSA", 3, 2)]
+    assert vm.convert(("PSA", 3, 2), "org", "eng") == [("PSA", 3, 1)]
+    assert vm.convert(("JOL", 2, 28), "eng", "org") == [("JOL", 3, 1)]
+
+
+def test_a_title_is_english_verse_zero_and_may_be_two_hebrew_verses(vm):
+    assert vm.convert(("PSA", 3, 0), "eng", "org") == [("PSA", 3, 1)]
+    assert vm.convert(("PSA", 51, 0), "eng", "org") == [("PSA", 51, 1), ("PSA", 51, 2)]
+    assert vm.convert(("PSA", 51, 2), "org", "eng") == [("PSA", 51, 0)]
+
+
+def test_multiverse_relations_are_expanded_with_the_published_shapes(vm):
+    assert vm.convert(("NUM", 25, 19), "org", "eng") == [("NUM", 26, 1)]
+    assert vm.convert(("NUM", 26, 1), "eng", "org") == [("NUM", 25, 19), ("NUM", 26, 1)]
+
+
+def test_the_gap_rule_fills_a_verse_that_keeps_its_number_but_changes_chapter(vm):
+    # rso 114:1-8 -> eng 116:1-8 and rso 115:1 -> eng 116:10: rso 114:9 has no row and is eng 116:9 (doc/vrs-maps.md)
+    assert vm.convert(("PSA", 114, 9), "rso", "eng") == [("PSA", 116, 9)]
+
+
+def test_schemes_convert_through_english_and_unlisted_verses_keep_their_reference(vm):
+    assert vm.convert(("PSA", 3, 1), "rso", "org") == [("PSA", 3, 1)]
+    assert vm.convert(("PSA", 3, 2), "rso", "org") == [("PSA", 3, 2)]
+    assert vm.convert(("GEN", 1, 1), "eng", "org") == [("GEN", 1, 1)]
+    assert vm.convert(("PSA", 3, 1), "org", "org") == [("PSA", 3, 1)]
+
+
+def test_a_scheme_bibles_does_not_publish_is_unknown(vm):
+    for bad in ("luther", "../etc/passwd", ""):
+        with pytest.raises(vm.UnknownScheme):
+            vm.convert(("PSA", 3, 1), bad, "org")
+    assert vm.available("eng") and not vm.available("luther")
+
+
+def test_language_to_scheme_comes_from_bibles_edition_index(vm):
+    assert vm.scheme_for_language("deu")["scheme"] == "eng" and vm.scheme_for_language("deu")["agreement"] == 1.0
+    assert vm.scheme_for_language("rus")["scheme"] == "rso"
+    fr = vm.scheme_for_language("fra")
+    assert fr["editions"] == 2 and fr["agreement"] == 0.5                  # editions of one language disagree: reported, not hidden
+    assert vm.scheme_for_language("xxx") is None                            # undetermined editions do not count
+    assert vm.scheme_for_language("zzz") is None and vm.scheme_for_language(None) is None
+
+
+@pytest.mark.skipif(not HAVE_REAL, reason="bibles' files not cached locally (shoresh/data/vrs)")
+class TestRealFiles:
+    @pytest.fixture(autouse=True)
+    def real(self, monkeypatch):
+        monkeypatch.setenv("VERSIFICATION_MAP_DIR", str(REAL))
+        import vrsmap
+        for f in (vrsmap.table, vrsmap.shape, vrsmap._index_cached):
+            f.cache_clear()
+        self.vm = vrsmap
+
+    def test_every_published_scheme_loads_and_maps_into_the_english_shape(self):
+        for s in self.vm.schemes():
+            if s == "eng":
+                continue
+            c = self.vm.check(s)
+            assert c["verses"] > 20000, s
+            assert len(c["outside_english"]) < 1000, s
+
+    def test_documented_cases(self):
+        v = self.vm.convert
+        assert v(("PSA", 114, 9), "rso", "eng") == [("PSA", 116, 9)]                      # vrs-maps.md gap-rule example
+        assert v(("PSA", 12, 6), "rso", "eng") == [("PSA", 13, 5), ("PSA", 13, 6)]        # rso multiverse relation
+        assert v(("PSA", 3, 1), "eng", "org") == [("PSA", 3, 2)]
+        assert v(("PSA", 51, 0), "eng", "org") == [("PSA", 51, 1), ("PSA", 51, 2)]
+        assert v(("PSA", 22, 1), "vul", "org") == [("PSA", 23, 1)]
+
+    def test_language_registry_from_the_edition_index(self):
+        assert self.vm.scheme_for_language("rus")["scheme"] == "rso"
+        assert self.vm.scheme_for_language("deu")["scheme"] == "eng"
+        assert self.vm.scheme_for_language("en")["scheme"] == "eng"
+
+
+MACULA = SHORESH / "macula" / "macula-spine.db"
+
+
+@pytest.mark.skipif(not (HAVE_REAL and MACULA.exists()), reason="needs bibles' cached files and macula-spine.db")
+class TestVerseInTheReadersNumbering:
+    @pytest.fixture(autouse=True)
+    def base(self, monkeypatch):
+        monkeypatch.setenv("VERSE_HEBREW_BASE", "macula")
+        monkeypatch.setenv("VERSIFICATION_MAP_DIR", str(REAL))
+        import data, vrsmap
+        for f in (vrsmap.table, vrsmap.shape, vrsmap._index_cached):
+            f.cache_clear()
+        self.data = data
+
+    def test_the_same_verse_is_served_whatever_the_scheme(self):
+        he = self.data.verse("PSA", 3, 2, versification="org")["spine"]["words"]
+        en = self.data.verse("PSA", 3, 1, versification="eng")["spine"]["words"]
+        ru = self.data.verse("PSA", 3, 2, versification="rso")["spine"]["words"]
+        assert [w["key"] for w in he] == [w["key"] for w in en] == [w["key"] for w in ru]
+
+    def test_a_two_verse_title_comes_back_whole_and_the_greek_side_follows_its_own_numbering(self):
+        r = self.data.verse("PSA", 51, 0, versification="eng")
+        assert r["versification"]["hebrew"] == ["PSA 51:1", "PSA 51:2"] and r["versification"]["lxx"] == ["PSA 50:1", "PSA 50:2"]
+        assert {w["verse"] for w in r["spine"]["words"]} == {1, 2}
+        assert [w["idx"] for w in r["spine"]["words"]] == list(range(len(r["spine"]["words"])))
+
+    def test_an_unknown_scheme_is_an_error_not_a_guess(self):
+        import vrsmap
+        with pytest.raises(vrsmap.UnknownScheme):
+            self.data.verse("GEN", 1, 1, versification="luther")
+
+    def test_the_uhb_base_ignores_the_parameter(self, monkeypatch):
+        monkeypatch.setenv("VERSE_HEBREW_BASE", "uhb")
+        a = self.data.verse("GEN", 1, 1, versification="rso")["spine"]["words"]
+        b = self.data.verse("GEN", 1, 1)["spine"]["words"]
+        assert [w["surface"] for w in a] == [w["surface"] for w in b]

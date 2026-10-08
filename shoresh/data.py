@@ -1263,8 +1263,11 @@ def _verse_hebrew_macula(book: str, chapter: int, vrs: int, gloss_lang: str, dom
     return words
 
 
-def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain_gloss: bool = False) -> dict:
-    """Greek (LXX) + Hebrew/Greek (spine) words for one verse. `gloss_lang` localizes the per-word
+def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain_gloss: bool = False,
+          versification: str = "org") -> dict:
+    """Greek (LXX) + Hebrew/Greek (spine) words for one verse. `versification` is the numbering scheme the reference is given in (with the
+    MACULA Hebrew base only; default "org" = Hebrew numbering): the Hebrew words are served for the same verse in Hebrew numbering and the Greek
+    words in LXX numbering, whatever the scheme (eng, rso, vul, ... any scheme bibles publishes a map for; see vrsmap.py). `gloss_lang` localizes the per-word
     binyan-correct sense. Hebrew words carry `group` (CC0 semantic group) and `domain` = its Hebrew
     exemplar label, with the localized gloss appended ("אָב · father") when `domain_gloss`, and
     `setting` (the topical setting the word is used in here; CC BY), glossed the same way, and in the
@@ -1276,12 +1279,28 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
                     "lxx": None, "spine": None}
 
+    use_macula = spine_lang == "hbo" and hebrew_base() == "macula"
+    he_refs = lxx_refs = [(book, chapter, vrs)]
+    if use_macula:
+        import vrsmap
+        ref = (book, chapter, vrs)
+        he_refs = vrsmap.convert(ref, versification, "org")              # raises vrsmap.UnknownScheme for a scheme without a map
+        try:
+            lxx_refs = vrsmap.convert(ref, versification, "lxx")
+        except vrsmap.UnknownScheme:
+            lxx_refs = [ref]                                              # no LXX map available: as before, the numbers are used as given
+        result["versification"] = {"requested": versification, "ref": vrsmap.fmt(ref), "hebrew": [vrsmap.fmt(r) for r in he_refs],
+                                   "lxx": [vrsmap.fmt(r) for r in lxx_refs], "tvtms": vrsmap.revision(versification) if versification != "eng" else None}
+
     lcon = _ro(LXX_DB)
     if lcon:
-        rows = lcon.execute(
-            "SELECT idx, surface, plain, strong, wordid, morph, pos FROM lxx_words "
-            "WHERE book=? AND chapter=? AND verse=? ORDER BY idx",
-            (book, chapter, vrs)).fetchall()
+        rows = []
+        for lb, lc, lv in lxx_refs:
+            part = lcon.execute(
+                "SELECT idx, surface, plain, strong, wordid, morph, pos FROM lxx_words "
+                "WHERE book=? AND chapter=? AND verse=? ORDER BY idx",
+                (lb, lc, lv)).fetchall()
+            rows += part
         lcon.close()
         if rows:
             # wordid is only surfaced for strong-less (orphan) words — it's the click-through key
@@ -1294,9 +1313,16 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
                  **(gloss_of(_strong_code("grc", r["strong"])) or {})}
                 for r in rows]}
 
-    use_macula = spine_lang == "hbo" and hebrew_base() == "macula"
     if use_macula:
-        mwords = _verse_hebrew_macula(book, chapter, vrs, gloss_lang, domain_gloss)
+        mwords: list[dict] = []
+        for hb, hc, hv in he_refs:
+            part = _verse_hebrew_macula(hb, hc, hv, gloss_lang, domain_gloss)
+            if len(he_refs) > 1:
+                for w in part:
+                    w["verse"] = hv                      # a Psalm title can be two Hebrew verses: say which one each word is in
+            mwords += part
+        for i, w in enumerate(mwords):
+            w["idx"] = i
         if mwords:
             result["spine"] = {"language": "hbo", "base": "macula", "versification": "org", "words": mwords}
     scon = None if use_macula else _ro(SPINE_DB)

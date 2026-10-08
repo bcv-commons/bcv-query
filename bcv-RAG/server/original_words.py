@@ -85,16 +85,20 @@ def _menahem(m: dict | None) -> str:
     return f"{m['root']} ({m['division']}/{m['of']}){sense}"
 
 
-def verse_interlinear(book: str, ch: int, v: int, gloss_lang: str = "English") -> dict | None:
-    """{lang, words, lxx} for a single verse via shoresh /verse, or None. `lxx` = the compact LXX
+def verse_interlinear(book: str, ch: int, v: int, gloss_lang: str = "English", versification: str | None = None) -> dict | None:
+    """{lang, words, lxx, versification} for a single verse via shoresh /verse, or None. `lxx` = the compact LXX
     Greek parallel (present for OT verses, [] otherwise). `gloss_lang` localizes the per-word sense.
+    `versification` is the numbering scheme the reference is in (see versification.scheme_for_lang): shoresh then serves the same verse in
+    Hebrew (and LXX) numbering and reports what it served in `out["versification"]` (None when shoresh's UHB base ignores it).
     Reusable by the PassageStrategy card."""
     if not SHORESH_URL:
         return None
     try:
         with httpx.Client(base_url=SHORESH_URL, timeout=3.0) as client:
-            resp = client.get(f"/verse/{book}/{ch}/{v}",
-                              params={"gloss_lang": gloss_lang, "domain_gloss": "true"})
+            params = {"gloss_lang": gloss_lang, "domain_gloss": "true"}
+            if versification:
+                params["versification"] = versification
+            resp = client.get(f"/verse/{book}/{ch}/{v}", params=params)
             if resp.status_code != 200:
                 return None
             data = resp.json() or {}
@@ -105,7 +109,8 @@ def verse_interlinear(book: str, ch: int, v: int, gloss_lang: str = "English") -
     if not words:
         return None
     out = {"lang": (data.get("spine") or {}).get("language", ""), "words": words,
-           "lxx": _compact_words((data.get("lxx") or {}).get("words") or [])}
+           "lxx": _compact_words((data.get("lxx") or {}).get("words") or []),
+           "versification": data.get("versification")}
     if data.get("commentary"):             # Malbim comments on this verse: fetch them with verse_commentary
         out["malbim_comments"] = data["commentary"].get("comments", 0)
     return out

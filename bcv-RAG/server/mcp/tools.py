@@ -976,14 +976,21 @@ def _word_study(args: dict, db: sqlite3.Connection) -> dict:
         "properties": {
             "reference": {"type": "string", "description": "A single verse, e.g. 'John 3:16'."},
             "lang": {"type": "string", "default": "en"},
+            "versification": {"type": "string", "description": "Numbering scheme of the reference (eng, org, rso, vul, lxx, ...). Default: the one the reader's `lang` uses."},
         },
         "required": ["reference"],
     },
 )
 def _verse_interlinear(args: dict, db: sqlite3.Connection) -> dict:
     from server.original_words import verse_interlinear
+    from server.versification import scheme_for_lang
     code, ch, v = _ref_to_bcv(args.get("reference", ""))
-    return verse_interlinear(code, ch, v, _glang(args.get("lang"))) or {"reference": args.get("reference"), "unavailable": True}
+    num = {"scheme": args["versification"].lower(), "assumed": False, "explicit": True} if args.get("versification") else scheme_for_lang(args.get("lang"))
+    out = verse_interlinear(code, ch, v, _glang(args.get("lang")), num["scheme"])
+    if not out:
+        return {"reference": args.get("reference"), "unavailable": True}
+    out["numbering"] = num
+    return out
 
 
 @register_tool(

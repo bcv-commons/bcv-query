@@ -39,6 +39,13 @@ def _gloss_lang_map() -> dict:
     return out
 
 
+def _ref_bb(ref: str) -> int:
+    """'PSA 3:2' (shoresh's reference format) -> BBCCCVVV."""
+    from indexer.references import encode
+    m = re.match(r"^([A-Z0-9]{3}) (\d+):(\d+|title)$", ref)
+    return encode(m.group(1), int(m.group(2)), 0 if m.group(3) == "title" else int(m.group(3)))
+
+
 def _gloss_lang(lang: str) -> str:
     """The gloss-language NAME for a query lang code (default English) — for shoresh `gloss_lang`."""
     from lang import canon
@@ -486,10 +493,20 @@ class PassageStrategy(CardStrategy):
             code, ch, v = decode(bb)
         except Exception:
             return None
-        il = verse_interlinear(code, ch, v, _gloss_lang(lang))   # localized per-word sense
+        from server.versification import scheme_for_lang
+        num = scheme_for_lang(lang)                              # the numbering this reader's language uses (bibles' edition index)
+        il = verse_interlinear(code, ch, v, _gloss_lang(lang), num["scheme"])   # localized per-word sense
         if not il:
             return None
-        syntax = verse_syntax(code, ch, v) if il["lang"] in ("hbo", "grc") else None
+        # BHSA/Context-Fabric syntax is addressed in Hebrew numbering: use the verse shoresh actually served
+        scode, sch, sv = code, ch, v
+        served = ((il.get("versification") or {}).get("hebrew") or [])
+        if il["lang"] == "hbo" and served:
+            try:
+                scode, sch, sv = decode(_ref_bb(served[0]))
+            except Exception:
+                scode, sch, sv = code, ch, v
+        syntax = verse_syntax(scode, sch, sv) if il["lang"] in ("hbo", "grc") else None
         roles = _role_map(syntax)
         # ONE view: keyness-ranked content words (keyness>0 drops et/articles/particles at the source —
         # form-independent, so the sense-form "<OM>" can't leak), sense trimmed, role annotated inline.
@@ -515,6 +532,7 @@ class PassageStrategy(CardStrategy):
         return {"ref": human(bb, bb, lang), "lang": il["lang"], "words": words, "lxx": lxx,
                 "code": code, "ch": ch, "v": v,                  # USFM + numeric — for drill URLs
                 "speaker": verse_speaker(code, ch, v), "is_range": is_range,
+                "numbering": {**num, "served": il.get("versification")},
                 "frame": _clause_frame(syntax), "sensed": any(w["sensed"] for w in words)}
 
     @staticmethod

@@ -32,6 +32,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 import corpus
 import data
+import vrsmap
 from interlinear import normalization
 from interlinear import serve as interlinear
 from interlinear.morphology import expand_grammar
@@ -142,14 +143,21 @@ def root() -> dict:
 
 @app.get("/verse/{book}/{chapter}/{verse}")
 def get_verse(book: str, chapter: int, verse: int, gloss_lang: str = "English",
-              domain_gloss: bool = False) -> dict:
+              domain_gloss: bool = False, versification: str = "org") -> dict:
     """Greek (LXX) + Hebrew/Greek (spine) words of a verse, side by side.
     `gloss_lang` localizes the per-word binyan-correct sense (e.g. German, Spanish).
     Hebrew words carry `group` (CC0 semantic group: id, Hebrew label, gloss, confidence) and `domain`,
     the group's Hebrew label; `domain_gloss=true` appends the localized gloss ("אָב · father").
     Hebrew content words also carry `setting` {id, label, via}: the topical setting the word is used in
-    in this verse (e.g. "מִזְבֵּחַ, עֹלָה" = altar / burnt offering), glossed the same way."""
-    result = data.verse(book, chapter, verse, gloss_lang, domain_gloss)
+    in this verse (e.g. "מִזְבֵּחַ, עֹלָה" = altar / burnt offering), glossed the same way.
+    `versification` names the numbering scheme the reference is given in (org = Hebrew, the default; eng, rso = Russian/Slavonic, vul = Latin,
+    lxx, orgw, or any scheme bibles publishes a map for). With the MACULA base the Hebrew words come back for the SAME verse in Hebrew numbering
+    and the Greek words in LXX numbering, and `versification` in the response shows what was served. Ignored by the UHB base."""
+    try:
+        result = data.verse(book, chapter, verse, gloss_lang, domain_gloss, versification.lower())
+    except ValueError as e:                    # vrsmap.UnknownScheme: no map published for that numbering scheme
+        raise HTTPException(400, f"unknown versification {versification!r}: bibles publishes no map for it "
+                                 f"(known: {', '.join(vrsmap.schemes())}; published at https://cdn.bibel.wiki/dbt/_vrs/index.json)") from e
     if result["lxx"] is None and result["spine"] is None:
         raise HTTPException(404, f"no original-language words for {book} {chapter}:{verse}")
     return result
