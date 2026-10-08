@@ -107,6 +107,18 @@ def main() -> int:
         return len(multi), distinct
     vo = [verbs(rows) for rows in old.values() if rows]; vn = [verbs(rows) for rows in new.values() if rows]
     vo_n, vo_d = sum(x[0] for x in vo), sum(x[1] for x in vo); vn_n, vn_d = sum(x[0] for x in vn), sum(x[1] for x in vn)
+    def stem_view():                                   # /wordstudy `stems`: per-binyan glosses (English), the view that used word_glosses
+        res = {}
+        for base in ("bhsa", "macula"):
+            set_base(base); multi = distinct = 0
+            for c in codes:
+                for e in data.word_study(c, "English")["stems"]:
+                    if len(e["senses"]) >= 2:
+                        multi += 1; distinct += len(set(e["senses"].values())) == len(e["senses"])
+            res[base] = (multi, distinct)
+        set_base("bhsa")
+        return res
+    sv = stem_view()
     hom_old = sum(1 for c in codes if len({g["lex"] for g in old.get(c, [])}) > 1)
     hom_new = sum(1 for c in codes if len({g["lex"] for g in new.get(c, [])}) > 1)
     gap = abs(tot_old - tot_new) / max(tot_old, 1)
@@ -126,7 +138,10 @@ def main() -> int:
          f"- BHSA: {vo_n} verb lexemes, {vo_d} ({100*vo_d/max(vo_n,1):.1f}%) give every stem its own dominant sense",
          f"- MACULA: {vn_n} verb lexemes, {vn_d} ({100*vn_d/max(vn_n,1):.1f}%) give every stem its own dominant sense  "
          f"{'PASS' if vn_n and vn_d/vn_n >= 0.8*(vo_d/max(vo_n,1)) else 'CHECK'} (threshold: at least 80% of BHSA's share). Senses are global per lexeme in hebrew-word-senses; the stem comes from the token.", "",
-         "## 4. Homographs",
+         f"- `/wordstudy` stem view (per-binyan glosses, English): BHSA {sv['bhsa'][0]} verb lexemes, {sv['bhsa'][1]} ({100*sv['bhsa'][1]/max(sv['bhsa'][0],1):.1f}%) with distinct glosses per stem; "
+         f"MACULA {sv['macula'][0]}, {sv['macula'][1]} ({100*sv['macula'][1]/max(sv['macula'][0],1):.1f}%)  "
+         f"{'PASS' if sv['macula'][0] and sv['macula'][1]/sv['macula'][0] >= 0.8*sv['bhsa'][1]/max(sv['bhsa'][0],1) else 'CHECK'} (same threshold)",
+         "", "## 4. Homographs",
          f"- Strong's codes that split into 2+ lexemes: BHSA {hom_old}, MACULA {hom_new}  {'PASS' if hom_new >= 0.9*hom_old else 'CHECK'} (threshold: 90% of BHSA)", "",
          "## 5. Contract (same keys in both bases, example " + ex[0] + ")",
          f"- {'PASS' if shape_ok else 'CHECK'}: " + ("every BHSA key is present; added in MACULA: " + str({k: sorted(set(shp_new[k]) - set(shp_old[k])) for k in shp_old if set(shp_new[k]) - set(shp_old[k])}) if shape_ok else "; ".join(f"{k}: BHSA-only {sorted(set(shp_old[k]) - set(shp_new[k]))}, MACULA-only {sorted(set(shp_new[k]) - set(shp_old[k]))}" for k in shp_old if shp_old[k] != shp_new[k])), "",

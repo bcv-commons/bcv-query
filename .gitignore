@@ -211,3 +211,5 @@ resources/parallelism/parallelism_pairs.local.tsv
 
 # per-occurrence senses for /verse (built by shoresh/macula/build_verse_senses.py, shipped to the data volume)
 shoresh/macula/verse-senses.db
+shoresh/macula/data/lex_to_lexeme.tsv
+shoresh/macula/data/word_glosses/

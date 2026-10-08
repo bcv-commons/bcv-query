@@ -59,6 +59,10 @@ def _gloss_dir(src: str) -> Path:
     """resources/word_glosses/<src>/ — per source-language (hbo / grc). Each <Lang>.csv
     is keyed by `lex` (the value /words returns) with columns: lex, default, then one
     column per verbal stem (qal, nif, piel, …)."""
+    if src == "hbo_lexeme":              # built tables (not in git): $WORD_GLOSSES_DIR, the data volume, the local build output, then resources/
+        for base in (os.environ.get("WORD_GLOSSES_DIR"), "/data/word_glosses", str(HERE / "macula" / "data" / "word_glosses")):
+            if base and (Path(base) / src).is_dir():
+                return Path(base) / src
     return _resources_dir() / "word_glosses" / src
 
 
@@ -973,9 +977,26 @@ def _lex_senses(code: str, lang: str = "English") -> list[dict]:
     return out
 
 
-def _macula_call(name: str, code: str):
+def _macula_call(name: str, code: str, lang: str = "English"):
+    """lex_senses / stem_senses on MACULA lexemes. Outside English the dominant sense of each stem takes the BibleOL per-stem gloss in `lang`
+    (word_glosses/hbo_lexeme, MIT, keyed on MACULA lexemes; step 2b), as the BHSA path did; the other senses keep their English label."""
     import lexeme_macula
-    return getattr(lexeme_macula, name)(code) if code.startswith("H") else []
+    if not code.startswith("H"):
+        return []
+    rows = getattr(lexeme_macula, name)(code)
+    lang = lang or "English"                                  # English has per-stem BibleOL glosses too (hbo_lexeme/English.csv)
+    for e in rows:
+        if name == "lex_senses":
+            for stem, ss in e["stems"].items():
+                g = ss and resolve_word_gloss("hbo_lexeme", lang, e["lex"], stem or None)
+                if g:
+                    ss[0] = {**ss[0], "gloss": g}
+        else:
+            for stem in e["senses"]:
+                g = resolve_word_gloss("hbo_lexeme", lang, e["lex"], stem)
+                if g:
+                    e["senses"][stem] = g
+    return rows
 
 
 def word_study(strong: str, gloss_lang: str = "English") -> dict:
@@ -1005,7 +1026,9 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
              or [{"strong": h, "count": c, **(gloss_of(h) or {})} for h, c in rev.get(code, [])][:3])
     head = gloss_of(code) or {}                        # headline gloss — localize it too (Hebrew)
     if code.startswith("H") and gloss_lang and gloss_lang != "English" and _on_macula():
-        loc = _aligned_label_gloss(code, gloss_lang)            # no BHSA word_glosses on this path (step 2b re-keys them)
+        import lexeme_macula
+        lexemes = lexeme_macula.lexemes_of(int(code[1:])) if code[1:].isdigit() else []
+        loc = next((g for g in (resolve_word_gloss("hbo_lexeme", gloss_lang, lx, None) for lx in lexemes) if g), None) or _aligned_label_gloss(code, gloss_lang)
         if loc:
             head = {**head, "gloss": re.split(r"[;,]", loc)[0].strip()}
     elif code.startswith("H") and gloss_lang and gloss_lang != "English":
@@ -1039,8 +1062,8 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         "menahem": menahem_senses(code) if code.startswith("H") else None,
         "siblings": siblings,                           # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
-        "stems": _macula_call("stem_senses", code) if _on_macula() else _stem_senses(code, gloss_lang),   # lex-anchored: per-binyan glosses + homographs
-        "lex_senses": _macula_call("lex_senses", code) if _on_macula() else _lex_senses(code, gloss_lang),   # per lex, per stem
+        "stems": _macula_call("stem_senses", code, gloss_lang) if _on_macula() else _stem_senses(code, gloss_lang),   # lex-anchored: per-binyan glosses + homographs
+        "lex_senses": _macula_call("lex_senses", code, gloss_lang) if _on_macula() else _lex_senses(code, gloss_lang),   # per lex, per stem
         # per-stem/sense occurrence distribution + sample refs (hbo.db); [] for Greek / db absent
         "sense_distribution": (sense_concordance(code).get("senses", []) if code.startswith("H") else []),
     }
@@ -1649,8 +1672,8 @@ def lexeme_profile(lex: str) -> dict:
     one Strong's code can conflate several homograph lexemes (733 Hebrew codes do), a Strong's lookup
     may fan out into multiple profiles rather than silently picking one.
     With LEXEME_BASE=macula `lex` is a MACULA lexeme id (hbo:6942) or an H-code; BHSA lex-ids are no longer understood."""
-    if _on_macula():
-        import lexeme_macula
+    import lexeme_macula
+    if _on_macula() or (lexeme_macula.is_lexeme_id(lex) and lexeme_macula.available()):   # a MACULA lexeme id (hbo:6942) can only be answered from MACULA
         return lexeme_macula.lexeme_profile(lex)
     if _STRONG_LOOKALIKE.match(lex.strip()):
         code = _norm_strong(lex)

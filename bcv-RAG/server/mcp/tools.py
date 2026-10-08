@@ -9,6 +9,7 @@ from __future__ import annotations
 import collections
 import functools
 import json
+import re
 import sqlite3
 from typing import Callable
 
@@ -295,93 +296,89 @@ def _passage_lookup(args: dict, db: sqlite3.Connection) -> dict:
     }
 
 
-@functools.lru_cache(maxsize=1)
-def _lex_sense_inventory() -> dict:
-    """{(lex, stem): [(sense, gloss, share)]} from resources/senses/hbo_lex.tsv — the
-    Hebrew-context-derived sense inventory (sense identity decided in Hebrew, gloss = label)."""
-    from resource_paths import resource_path
-    out: dict = collections.defaultdict(list)
-    p = resource_path("senses/hbo_lex.tsv")
-    if p.exists():
-        with open(p, encoding="utf-8") as fh:
-            next(fh, None)
-            for line in fh:
-                parts = line.rstrip("\n").split("\t")
-                if len(parts) == 6:
-                    lex, stem, sense, gloss, _count, share = parts
-                    out[(lex, stem)].append((sense, gloss, round(float(share), 3)))
-    return out
+_LEXEME_RE = re.compile(r"^hbo:\d{4}[a-z]?$")
+_STRONG_RE = re.compile(r"^[Hh]0*(\d{1,4})$")
+_LEXEME_TAG = ("lexeme:", "lexeme;")                    # range over the tag prefix (uses the tag index; LIKE would not)
+
+
+def _lexemes_for(db: sqlite3.Connection, ident: str) -> list[str]:
+    """MACULA lexeme ids for 'hbo:6942' (as is) or a Strong's code 'H871' (all homograph lexemes that occur in the index, e.g. hbo:0871a, hbo:0871b)."""
+    ident = ident.strip()
+    if _LEXEME_RE.match(ident.lower()):
+        return [ident.lower()]
+    m = _STRONG_RE.match(ident)
+    if m:
+        pref = f"lexeme:hbo:{int(m.group(1)):04d}"
+        rows = db.execute("SELECT DISTINCT tag FROM tags WHERE tag >= ? AND tag < ?", (pref, pref + "{")).fetchall()
+        return sorted(r[0][len("lexeme:"):] for r in rows if re.fullmatch(r"hbo:\d{4}[a-z]?", r[0][len("lexeme:"):]))
+    raise ValueError(f"{ident!r} is not a MACULA lexeme id (hbo:6942, hbo:0871a) or a Strong's code (H6942); BHSA lex-ids are no longer supported")
 
 
 @register_tool(
     name="morphology_concordance",
     description=(
-        "Concordance by BHSA lexeme + verbal stem (binyan) + sense: every verse where a "
-        "Hebrew lexeme occurs in a given stem and/or sense. A PRECISE structured lookup (not "
-        "fuzzy search) over BHSA-derived tags — separating distinctions Strong's can't. "
-        "lex='QDC[', stem='hif' → verses where קדשׁ is causative, distinct from stem='piel'; "
-        "it distinguishes homographs a single Strong's conflates; and senses are derived from "
-        "HEBREW context (e.g. lex='>B/' sense='1' = 'father', sense='2' = a distinct usage). "
-        "The response lists the available `senses` for the lex+stem so you can drill in via "
-        "`sense`. `lex` is the BHSA lex-id (from shoresh /words or /wordstudy). Omit `stem`/"
-        "`sense` to broaden."
+        "Concordance by Hebrew lexeme + verbal stem (binyan) + sense: every verse where a lexeme occurs in a given stem and/or sense. "
+        "A PRECISE structured lookup (not fuzzy search) over MACULA-derived tags (CC BY): it separates homographs a single Strong's conflates "
+        "(hbo:0871a vs hbo:0871b), the stem (hiphil causative vs piel) and the sense of the occurrence (hebrew-word-senses, decided in Hebrew context). "
+        "`lexeme` is a MACULA lexeme id ('hbo:6942' = qadash) or a Strong's code ('H6942'; a code covering several homographs searches all of them). "
+        "The response lists the `senses` of a single lexeme, with their stems and counts, so you can drill in with `sense`. Omit `stem`/`sense` to broaden."
     ),
     input_schema={
         "type": "object",
         "properties": {
-            "lex": {"type": "string", "description": "BHSA lex-id, e.g. 'QDC[' (qadash)."},
-            "stem": {
-                "type": "string",
-                "description": "Verbal stem / binyan, e.g. 'qal','nif','piel','hif'. Omit for any.",
-            },
-            "sense": {
-                "type": "string",
-                "description": "Sense number within the lex+stem (see `senses` in the response). Omit for all.",
-            },
+            "lexeme": {"type": "string", "description": "MACULA lexeme id, e.g. 'hbo:6942', or a Strong's code, e.g. 'H6942'."},
+            "stem": {"type": "string", "description": "Verbal stem / binyan, e.g. 'qal','niphal','piel','hiphil'. Omit for any."},
+            "sense": {"type": "string", "description": "Sense number of the lexeme (see `senses` in the response). Omit for all."},
             "top_k": {"type": "integer", "default": 50, "minimum": 1, "maximum": 500},
             "lang": {"type": "string", "default": "en"},
         },
-        "required": ["lex"],
+        "required": ["lexeme"],
     },
 )
 def _morphology_concordance(args: dict, db: sqlite3.Connection) -> dict:
-    lex = args.get("lex", "").strip()
-    if not lex:
-        raise ValueError("'lex' is required (BHSA lex-id, e.g. 'QDC[')")
+    from server.original_words import shoresh_get
+    ident = (args.get("lexeme") or args.get("lex") or "").strip()      # `lex` kept as an alias of the argument name only
+    if not ident:
+        raise ValueError("'lexeme' is required (MACULA lexeme id such as 'hbo:6942', or a Strong's code such as 'H6942')")
     stem = args.get("stem", "").strip()
     sense = str(args.get("sense", "")).strip()
     top_k = int(args.get("top_k", 50))
-    if sense:
-        tag = f"sense:{lex}.{stem}.{sense}"
-    elif stem:
-        tag = f"lexstem:{lex}.{stem}"
-    else:
-        tag = f"lex:{lex}"
-    total = db.execute("SELECT count(*) FROM tags WHERE tag = ?", (tag,)).fetchone()[0]
+    if not db.execute("SELECT 1 FROM tags WHERE tag >= ? AND tag < ? LIMIT 1", _LEXEME_TAG).fetchone():
+        raise ValueError("this index carries no lexeme tags yet (run bcv-RAG/scripts/tag_lexeme_occurrences.py)")
+    lexemes = _lexemes_for(db, ident)
+    kind = "lexemestemsense" if sense and stem else "lexemesense" if sense else "lexemestem" if stem else "lexeme"
+    suffix = (f".{stem}" if stem else "") + (f".{sense}" if sense else "")
+    tags = [f"{kind}:{lx}{suffix}" for lx in lexemes]
+    marks = ",".join("?" * len(tags)) or "''"
+    total = db.execute(f"SELECT count(DISTINCT doc_id) FROM tags WHERE tag IN ({marks})", tags).fetchone()[0] if tags else 0
     rows = db.execute(
-        """
+        f"""
         SELECT chunks.id
         FROM chunks
-        JOIN tags ON tags.doc_id = chunks.doc_id AND tags.tag = ?
         JOIN passage_refs ON passage_refs.doc_id = chunks.doc_id
+        WHERE chunks.doc_id IN (SELECT doc_id FROM tags WHERE tag IN ({marks}))
         ORDER BY passage_refs.start_bbcccvvv
         LIMIT ?
         """,
-        (tag, top_k),
-    ).fetchall()
+        (*tags, top_k),
+    ).fetchall() if tags else []
     cards = citations_mod.resolve_many(db, [r[0] for r in rows])
-    inv = _lex_sense_inventory().get((lex, stem), [])
+    senses = []
+    if len(lexemes) == 1:
+        prof = shoresh_get(f"/lexeme/{lexemes[0]}") or {}
+        senses = [{"stem": g["stem"] or None, "sense": g["sense"], "gloss": g["label"], "count": g["count"]}
+                  for g in prof.get("senses", []) if g.get("label") and (not stem or g["stem"] == stem)]
     out = {
-        "lex": lex,
+        "lexemes": lexemes,
         "stem": stem or None,
         "sense": sense or None,
-        "tag": tag,
+        "tags": tags,
         "total": total,
-        "senses": [{"sense": s, "gloss": g, "share": sh} for s, g, sh in inv],
+        "senses": senses,
         "verses": [chunk_preview_from_card(c, lang=args.get("lang", "en")) for c in cards],
     }
-    if sense:
-        out["sense_gloss"] = next((g for s, g, _sh in inv if s == sense), None)
+    if sense and senses:
+        out["sense_gloss"] = next((g["gloss"] for g in senses if g["sense"] == sense), None)
     return out
 
 
@@ -610,8 +607,21 @@ def _torah_verse_text(db: sqlite3.Connection, start: int, end: int, lang: str) -
     return " ".join(bodies) if bodies else None
 
 
-def _torah_shared_lexemes(start_a: int, end_a: int, start_b: int, end_b: int) -> list[str] | None:
-    """Strong's numbers occurring in BOTH verse ranges (hbo.db) — best-effort, never raises."""
+def _torah_shared_lexemes(start_a: int, end_a: int, start_b: int, end_b: int, db: sqlite3.Connection | None = None) -> list[str] | None:
+    """Strong's numbers occurring in BOTH verse ranges, from the index's MACULA lexeme tags — best-effort, never raises.
+    Falls back to the BHSA sidecar (hbo.db) only while the index has no lexeme tags (removed once it is retagged everywhere)."""
+    if db is not None:
+        try:
+            def _codes(start: int, end: int) -> set[str]:
+                rows = db.execute(
+                    "SELECT DISTINCT t.tag FROM tags t JOIN passage_refs p ON p.doc_id = t.doc_id "
+                    "WHERE p.start_bbcccvvv >= ? AND p.end_bbcccvvv <= ? AND t.tag >= ? AND t.tag < ?", (start, end, *_LEXEME_TAG)).fetchall()
+                return {"H" + m.group(1) for r in rows if (m := re.match(r"^lexeme:hbo:(\d{4})", r[0]))}
+            a_codes, b_codes = _codes(start_a, end_a), _codes(start_b, end_b)
+            if a_codes and b_codes:
+                return sorted(a_codes & b_codes) or None
+        except Exception:
+            pass
     try:
         import sqlite3 as _sqlite3
         from resource_paths import resource_path
@@ -703,7 +713,7 @@ def _torah_unit_lookup(args: dict, db: sqlite3.Connection) -> dict:
             text = _torah_verse_text(db, p_start, p_end, lang)
             if text:
                 p["text"] = text
-        shared = _torah_shared_lexemes(c_start, c_end, p_start, p_end)
+        shared = _torah_shared_lexemes(c_start, c_end, p_start, p_end, db)
         if shared:
             p["shared_strongs"] = shared
         partner_out.append(p)
