@@ -169,6 +169,9 @@ def gbt_features() -> dict[str, set]:
     return feats
 
 
+RAW_TOK: dict = collections.defaultdict(dict)    # token key -> {English form: the surface the translator wrote}, filled by load_features (labels use the surfaces of the tokens in a sense, never a corpus-wide most-common surface)
+
+
 def load_features() -> tuple[dict[str, set], dict[str, collections.Counter]]:
     """token key (lexeme-spine key) -> {(lang, form)}, and form -> Counter(raw English surfaces) for labels."""
     feats: dict[str, set] = collections.defaultdict(set)
@@ -192,6 +195,7 @@ def load_features() -> tuple[dict[str, set], dict[str, collections.Counter]]:
             feats[sid[1:]].add((lang, f))
             if lang == "eng":
                 eng_raw[f][low] += 1
+                RAW_TOK[sid[1:]].setdefault(f, low)
     if USE_GBT:
         for k, fs in gbt_features().items():
             feats[k] |= fs
@@ -272,7 +276,10 @@ def build(out: Path | None = None, only: set[str] | None = None,
             for lang, f in feats.get(k, ()):
                 if lang == "eng":
                     eng[s][f] += 1
-        lab = {s: _label(eng[s], eng_raw) for s in set(a.values())}
+        by_sense = collections.defaultdict(list)
+        for k, s_ in a.items():
+            by_sense[s_].append(k)
+        lab = {s: _label(eng[s], eng_raw, by_sense[s]) for s in set(a.values())}
         # optional: senses with the same English label as one (two "soul" communities). Off by default:
         # it lowered agreement with the UBS sense index (ARI 0.202 -> 0.183 at resolution 1.0).
         first = {}
@@ -298,11 +305,21 @@ def build(out: Path | None = None, only: set[str] | None = None,
     return result
 
 
-def _label(c: collections.Counter, eng_raw: dict) -> str:
+def _label(c: collections.Counter, eng_raw: dict, tokens=None) -> str:
+    """Most frequent English form of a sense, written as the surface its own tokens carry. The English normaliser keeps five letters, so "sanctify",
+    "sanctified" and "sanctuary" are one form; the surface must come from the tokens (tokens=...), not from the corpus-wide most common surface of the form
+    (which labelled a verb "sanctuary")."""
     if not c:
         return ""
     f = c.most_common(1)[0][0]
+    if tokens is not None:
+        return token_surface(f, tokens) or f
     return eng_raw[f].most_common(1)[0][0] if eng_raw.get(f) else f
+
+
+def token_surface(form: str, tokens) -> str:
+    cnt = collections.Counter(RAW_TOK[k][form] for k in tokens if form in RAW_TOK.get(k, ()))
+    return cnt.most_common(1)[0][0] if cnt else ""
 
 
 # ---------- evaluation ----------

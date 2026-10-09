@@ -165,7 +165,7 @@ def test_search_marks_nested_words_and_head_only_drops_them(monkeypatch):
 
 def test_stem_labels_are_characteristic_and_voiced():
     from macula import build_stem_senses as b
-    raw = {"gather": "gathered", "assembl": "assembled", "been": "been"}
+    raw = {1: {"gather": "gathered", "assembl": "assembled", "been": "been"}}
     stems = {"qal": ({"k1": 1}, {1: "gathered"}, {1: {"gather": 5, "been": 9}}, raw),
              "niphal": ({"k2": 1}, {1: "gathered"}, {1: {"gather": 5, "assembl": 4}}, raw)}
     assert b.relabel(stems, "freq") == {"qal": {1: "gathered"}, "niphal": {1: "gathered"}}

@@ -47,8 +47,11 @@ def _work(item):
         for lang, f in _FEATS.get(k, ()):
             if lang == "eng":
                 eng[s][f] += 1
-    labels = {s: bs._label(eng[s], _ENG) for s in set(a.values())}
-    raw = {f: _ENG[f].most_common(1)[0][0] for c in eng.values() for f in c if _ENG.get(f)}
+    by_sense = collections.defaultdict(list)
+    for k, s in a.items():
+        by_sense[s].append(k)
+    labels = {s: bs._label(eng[s], _ENG, by_sense[s]) for s in set(a.values())}
+    raw = {s: {f: bs.token_surface(f, by_sense[s]) for f in eng[s]} for s in by_sense}            # per sense: the surface its own tokens carry
     return lexeme, stem, a, labels, {s: dict(c) for s, c in eng.items()}, raw
 
 
@@ -93,7 +96,20 @@ def split_all(a):
     per_lexeme: dict = collections.defaultdict(dict)
     for lexeme, stem, assign, labels, eng, raw in results:
         per_lexeme[lexeme][stem] = (assign, labels, eng, raw)
-    return dict(per_lexeme), tags, set(multi)
+    base = sqlite3.connect(f"file:{a.base}?mode=ro", uri=True)
+    toks = collections.defaultdict(list)
+    for key, lexeme, sense in base.execute("SELECT key, lexeme, sense FROM occ"):
+        toks[(lexeme, sense)].append(key)
+    # The published label of a sense keeps its form; only the surface is re-read from the sense's own tokens (the published build wrote the corpus-wide most
+    # common surface of the form: "sanctuary" for the verb sanctify). Labels whose form no token carries are left as published.
+    import re
+    base_labels = {}
+    for lexeme, sense, label in base.execute("SELECT lexeme, sense, label FROM senses"):
+        m = re.match(r"^(.*?)( \(\d+\))?$", label or "")
+        surf = bs.token_surface(bs.norm("eng", m.group(1)), toks.get((lexeme, sense), ())) if m and m.group(1) else ""
+        if surf and surf != m.group(1):
+            base_labels[(lexeme, sense)] = surf + (m.group(2) or "")
+    return dict(per_lexeme), tags, set(multi), base_labels
 
 
 PASSIVE = {"niphal", "pual", "hophal", "hithpael", "hothpael", "hithpolel", "nithpael"}
@@ -146,13 +162,14 @@ def relabel(stems: dict, mode: str, idf: dict | None = None) -> dict:
         labels = dict(freq_labels)                   # senses without English evidence keep their frequency label
         for sense, c in eng.items():
             n = sum(c.values()) or 1
-            ok = {f: v for f, v in c.items() if raw.get(f, f).lower() not in LABEL_STOP and len(raw.get(f, f)) >= 3}
+            rw = raw.get(sense, {})
+            ok = {f: v for f, v in c.items() if (rw.get(f) or f).lower() not in LABEL_STOP and len(rw.get(f) or f) >= 3}
             if not ok:
                 continue
             top = max(ok.values())
             cand = [f for f, v in ok.items() if v >= FLOOR * top]
             best = max(cand, key=lambda f: (ok[f] / n) ** 2 / ((ok[f] / n) + other.get(f, 0) / n_other) * max((idf or {}).get(f, 3.0), 0.1))
-            lab = raw.get(best, best)
+            lab = rw.get(best) or best
             if mode == "voice" and st in PASSIVE and _participle(lab):
                 lab = "be " + lab
             labels[sense] = lab
@@ -181,12 +198,12 @@ def main() -> int:
     if a.from_cache:
         with a.cache.open("rb") as fh:
             ck = pickle.load(fh)
-        per_lexeme, tags, multi = ck["per_lexeme"], ck["tags"], set(ck["per_lexeme"])
+        per_lexeme, tags, multi, base_labels = ck["per_lexeme"], ck["tags"], set(ck["per_lexeme"]), ck["base_labels"]
     else:
-        per_lexeme, tags, multi = split_all(a)
+        per_lexeme, tags, multi, base_labels = split_all(a)
         a.cache.parent.mkdir(parents=True, exist_ok=True)
         with a.cache.open("wb") as fh:
-            pickle.dump({"per_lexeme": per_lexeme, "tags": tags}, fh)
+            pickle.dump({"per_lexeme": per_lexeme, "tags": tags, "base_labels": base_labels}, fh)
     idf = make_idf(per_lexeme)
     for lexeme, stems in per_lexeme.items():
         labs = relabel(stems, a.label, idf)
@@ -205,7 +222,8 @@ def main() -> int:
     base = sqlite3.connect(f"file:{a.base}?mode=ro", uri=True)
     replaced = set(multi)
     out.executemany("INSERT INTO occ VALUES (?,?,?)", [r for r in base.execute("SELECT key, lexeme, sense FROM occ") if r[1] not in replaced])
-    out.executemany("INSERT INTO senses VALUES (?,?,?,?,?)", [r for r in base.execute("SELECT lexeme, sense, label, n, share FROM senses") if r[0] not in replaced])
+    out.executemany("INSERT INTO senses VALUES (?,?,?,?,?)", [(r[0], r[1], base_labels.get((r[0], r[1]), r[2]), r[3], r[4])
+                                                              for r in base.execute("SELECT lexeme, sense, label, n, share FROM senses") if r[0] not in replaced])
     n_senses = 0
     for lexeme, stems in per_lexeme.items():
         nxt = 0
