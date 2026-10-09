@@ -36,7 +36,7 @@ All endpoints are plain `GET`s under the service root.
 | `GET /morph?pattern=&book=&chapter=` | Morphology search — imperatives, participles, nouns, … | $0 |
 | `GET /bridge/{strong}` | LXX bridge — how the Septuagint renders a Hebrew word in Greek, or vice versa (H↔G) | $0 |
 | `GET /lxx-lexeme/{wordid}` | LXX-only Greek lexeme (no Strong's number — never occurs in the NT) — citation form + variants | $0 |
-| `GET /structure/{book}/{ch}/{v}` | Syntax — BHSA/Nestle1904 hierarchy (proxied from the corpus engine) | $0 |
+| `GET /structure/{book}/{ch}/{v}` | Syntax — clause/phrase hierarchy: BHSA/Nestle1904 from the corpus engine, or MACULA lowfat trees with `STRUCTURE_BASE=macula` | $0 |
 | `GET /search?q=&lang=hbo` | **Hebrew** clause search (88,131 BHSA clauses) | $0 |
 | `GET /search?q=&lang=grc` | **Greek** clause search (8,011 Nestle1904 sentences) | $0 |
 | `GET /search?translate=gloss` | Search an English query against Hebrew via deterministic gloss lookup | $0 |

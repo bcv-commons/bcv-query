@@ -30,6 +30,8 @@ MAP_OUT = HERE / "data" / "lex_to_lexeme.tsv"
 HBO = ROOT / "resources" / "occurrences" / "hbo.db"
 BRIDGE = HERE / "bhsa-macula-bridge.db"
 SPINE = HERE / "lexeme-spine-macula.db"
+TREES = HERE / "trees-macula.db"
+FUNCTION_CLASSES = ("cj", "art", "prep", "pron", "om", "rel", "ptcl", "adv", "ij")      # a homograph letter does not change what these glosses mean
 
 # BibleOL stem column -> MACULA stem name; columns without a MACULA stem (pasq, hotp, tif) are dropped
 STEMS = {"qal": "qal", "nif": "niphal", "piel": "piel", "pual": "pual", "hit": "hithpael", "hif": "hiphil", "hof": "hophal", "hsht": "hishtaphel",
@@ -93,6 +95,13 @@ def main() -> int:
             by_lexeme[lexeme] = [(0, l) for l in cand]
             recovered += 1
     print(f"second pass (Strong's crosswalk): {recovered} more lexemes")
+    # third pass: a function-word lexeme (conjunction, article, preposition, pronoun ...) that still has no gloss takes the gloss row of the most frequent sibling with the
+    # same Strong's number (hbo:2050d -> hbo:2050a). Content words are never copied: homograph letters there separate meanings.
+    fclass: dict[str, str] = {}
+    if TREES.exists():
+        tc = sqlite3.connect(f"file:{TREES}?mode=ro", uri=True)
+        for lexeme, cls in tc.execute("SELECT lexeme, class FROM words WHERE corpus='hbo' AND lexeme LIKE 'hbo:%' GROUP BY lexeme"):
+            fclass[lexeme] = cls
     OUT.mkdir(parents=True, exist_ok=True)
     for src in sorted(SRC.glob("*.csv")):
         with src.open(encoding="utf-8-sig", newline="") as fh:
@@ -115,12 +124,22 @@ def main() -> int:
                         merged += 1 if lex != sorted(by_lexeme[lexeme], reverse=True)[0][1] else 0
             if cells:
                 out_rows.append([lexeme] + [cells.get(c, "") for _, c in cols])
+        have = {r[0]: r for r in out_rows}
+        borrowed = 0
+        for lexeme in sorted(counts, key=lambda x: -counts[x]):
+            if lexeme in have or fclass.get(lexeme) not in FUNCTION_CLASSES:
+                continue
+            sibs = [x for x in lexemes_of[lexeme[4:8].lstrip("0")] if x in have and x != lexeme and fclass.get(x) == fclass.get(lexeme)]
+            if sibs:
+                best = max(sibs, key=lambda x: counts[x])
+                out_rows.append([lexeme] + have[best][1:]); borrowed += 1
+        out_rows.sort(key=lambda r: r[0])
         with (OUT / src.name).open("w", encoding="utf-8", newline="") as fh:
             w = csv.writer(fh)
             w.writerow(["lexeme"] + [STEMS.get(c, c) for _, c in cols])
             w.writerows(out_rows)
         src_rows = sum(1 for r in rows.values() if any(i < len(r) and r[i].strip() for i, _ in cols))           # lexes with a real gloss in a kept column
-        print(f"{src.name:26s} BHSA lexes with glosses {src_rows:6d} -> MACULA lexemes {len(out_rows):6d} (cells filled from a second lex: {merged})")
+        print(f"{src.name:26s} BHSA lexes with glosses {src_rows:6d} -> MACULA lexemes {len(out_rows):6d} (cells filled from a second lex: {merged}; function-word lexemes borrowed from a sibling: {borrowed})")
     low = [l for l, (_, _, sh) in mp.items() if sh < a.min_share]
     print(f"lexes mapped {len(mp)}; skipped for no majority: {len(low)} {low[:6]}; lexemes with a lex: {len(by_lexeme)}")
     return 0

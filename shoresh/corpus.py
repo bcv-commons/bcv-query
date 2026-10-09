@@ -15,7 +15,21 @@ Christian versification would misalign everything after Ruth; Greek names are US
 """
 from __future__ import annotations
 
+import os
 from functools import lru_cache
+
+
+def structure_base() -> str:
+    """STRUCTURE_BASE=macula serves /structure*, /syntax/search and /verse/.../tree from MACULA's lowfat trees (trees_macula.py, NC exit step 3);
+    the default "bhsa" keeps the Context-Fabric engine (BHSA + Nestle1904) until the acceptance report passes."""
+    return os.environ.get("STRUCTURE_BASE", "bhsa").lower()
+
+
+def _on_macula() -> bool:
+    if structure_base() != "macula":
+        return False
+    import trees_macula
+    return trees_macula.available()
 
 
 def _eng():
@@ -75,6 +89,9 @@ def name_to_usfm(corpus_id: str) -> dict[str, str]:
 
 
 def passage(book: str, chapter: int, verse: int) -> dict:
+    if _on_macula():
+        import trees_macula
+        return trees_macula.passage(book, chapter, verse)
     """Verse words + morphology for one verse (in-process engine)."""
     resolved = _resolve(book)
     if not resolved:
@@ -85,6 +102,9 @@ def passage(book: str, chapter: int, verse: int) -> dict:
 
 
 def context(book: str, chapter: int, verse: int, word_index: int = 0) -> dict:
+    if _on_macula():
+        import trees_macula
+        return trees_macula.context(book, chapter, verse, word_index)
     """Clause/phrase/sentence hierarchy for one word (in-process engine)."""
     resolved = _resolve(book)
     if not resolved:
@@ -109,6 +129,9 @@ def context_batch(refs: list[tuple[str, int, int]], word_index: int = 0) -> dict
 
 
 def syntax(book: str, chapter: int, verse: int) -> dict:
+    if _on_macula():
+        import trees_macula
+        return trees_macula.syntax(book, chapter, verse)
     """Whole-verse clause→phrase syntax tree (in-process engine)."""
     resolved = _resolve(book)
     if not resolved:
@@ -119,6 +142,9 @@ def syntax(book: str, chapter: int, verse: int) -> dict:
 
 
 def tree(book: str, chapter: int, verse: int) -> dict:
+    if _on_macula():
+        import trees_macula
+        return trees_macula.tree(book, chapter, verse)
     """Full sentence→clause→phrase→word syntactic tree of a verse (in-process engine)."""
     resolved = _resolve(book)
     if not resolved:
@@ -134,6 +160,9 @@ def syntax_search(function: str | None = None, strong: str | None = None,
     """Who-did-what search: clauses where a lexeme (`strong` or `lex`) fills a phrase
     `function`. The corpus is pinned by `book` if given, else inferred from the Strong's
     prefix (H→hebrew, G→greek), else `corpus` (default hebrew)."""
+    if _on_macula():
+        import trees_macula
+        return trees_macula.syntax_search(function=function, strong=strong, lex=lex, book=book, corpus=corpus, limit=limit)
     corpus_book = None
     if book:
         resolved = _resolve(book)

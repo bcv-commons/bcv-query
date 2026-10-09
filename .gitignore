@@ -115,6 +115,10 @@ shoresh/macula/tr-textus-receptus-spine.db-*
 # scratch git checkout (~400MB, fetched on demand, never committed)
 shoresh/macula/lowfat-hbo.db
 shoresh/macula/.lowfat-src/
+shoresh/macula/.lowfat-src-grc/
+shoresh/macula/trees-macula.db
+shoresh/macula/verse-senses-stem*.db
+shoresh/macula/data/rendering_senses_*/
 
 # interlinear: downloaded gbt/study-app source + built dbs (all re-derivable via interlinear.fetch +
 # .build_hebrew_greek / .build_gloss — see shoresh/interlinear/README.md)
