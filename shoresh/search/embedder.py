@@ -36,6 +36,8 @@ class PooledEncoder:
         self.tok = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModel.from_pretrained(model_id)
         self.model.eval()
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"      # build-time speed-up; the server has no GPU
+        self.model.to(self.device)
 
     def encode(self, texts: list[str]) -> list[list[float]]:
         torch = self.torch
@@ -44,12 +46,12 @@ class PooledEncoder:
         with torch.no_grad():
             for i in range(0, len(texts), 32):
                 enc = self.tok(texts[i:i + 32], padding=True, truncation=True,
-                               max_length=128, return_tensors="pt")
+                               max_length=128, return_tensors="pt").to(self.device)
                 hidden = self.model(**enc).last_hidden_state
                 mask = enc["attention_mask"].unsqueeze(-1).float()
                 pooled = (hidden * mask).sum(1) / mask.sum(1).clamp(min=1e-9)
                 pooled = torch.nn.functional.normalize(pooled, dim=1)
-                out.extend(pooled.tolist())
+                out.extend(pooled.cpu().tolist())
         return out
 
 
