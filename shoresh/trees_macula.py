@@ -327,8 +327,8 @@ def _canon(raw) -> str | None:
 
 
 def syntax_search(function: str | None = None, strong: str | None = None, lex: str | None = None, book: str | None = None,
-                  corpus: str | None = None, limit: int = 50) -> dict:
-    """Clauses where a lexeme fills a phrase function. `strong` is H#### or G####; `lex` is a MACULA lexeme id (hbo:6942) for Hebrew or a lemma for Greek."""
+                  corpus: str | None = None, limit: int = 50, head_only: bool = False) -> dict:
+    """Clauses where a lexeme fills a phrase function. Each hit has `head`: true when the word is a direct part of the phrase (or alone), false when it is nested inside it (\"the tent OF GOD\"); head_only drops the nested ones. `strong` is H#### or G####; `lex` is a MACULA lexeme id (hbo:6942) for Hebrew or a lemma for Greek."""
     book = book.upper() if book else None
     con = _con()
     try:
@@ -362,21 +362,26 @@ def syntax_search(function: str | None = None, strong: str | None = None, lex: s
         if book:
             where.append("w.book=?"); args.append(book)
         rows = con.execute("SELECT w.*, p.role AS ph_role FROM words w LEFT JOIN nodes p ON p.id=w.ph WHERE " + " AND ".join(where) + " ORDER BY " + TEXT_ORDER, args).fetchall()
-        seen: set = set()
-        out = []
+        hits: dict = {}                        # clause -> [first matching word, any matching word is the phrase's own (a direct child, or a phrase of one word)]
         for w in rows:
             fn_raw = w["ph_role"] if w["ph"] is not None else w["role"]
             if wanted is not None and _canon(fn_raw) not in wanted:
                 continue
-            if w["cl"] in seen:
+            own = w["ph"] is None or w["parent"] == w["ph"]
+            if w["cl"] in hits:
+                hits[w["cl"]][2] = hits[w["cl"]][2] or own
+            else:
+                hits[w["cl"]] = [w, fn_raw, own]
+        out = []
+        for w, fn_raw, own in hits.values():
+            if head_only and not own:
                 continue
-            seen.add(w["cl"])
             if w["ph"] is not None:
                 pw = con.execute("SELECT surface, after FROM words w WHERE cl=? AND ph=? AND inserted=0 ORDER BY " + TEXT_ORDER, (w["cl"], w["ph"])).fetchall()
             else:
                 pw = [w]
             out.append({"book": book_name(c, w["book"]), "chapter": w["chapter"], "verse": w["verse"], "function": _label(fn_raw),
-                        "phrase": _text(pw, c), "clause_text": _span_text(con, _node(con, w["cl"]))})
+                        "phrase": _text(pw, c), "clause_text": _span_text(con, _node(con, w["cl"])), "head": own})
             if len(out) >= limit:
                 break
         return {"corpus": _CORPUS[c], "corpus_book": book_name(c, book) if book else None,

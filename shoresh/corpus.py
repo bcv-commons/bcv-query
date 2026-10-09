@@ -156,13 +156,13 @@ def tree(book: str, chapter: int, verse: int) -> dict:
 
 def syntax_search(function: str | None = None, strong: str | None = None,
                   lex: str | None = None, book: str | None = None,
-                  corpus: str | None = None, limit: int = 50) -> dict:
+                  corpus: str | None = None, limit: int = 50, head_only: bool = False) -> dict:
     """Who-did-what search: clauses where a lexeme (`strong` or `lex`) fills a phrase
     `function`. The corpus is pinned by `book` if given, else inferred from the Strong's
     prefix (H→hebrew, G→greek), else `corpus` (default hebrew)."""
     if _on_macula():
         import trees_macula
-        return trees_macula.syntax_search(function=function, strong=strong, lex=lex, book=book, corpus=corpus, limit=limit)
+        return trees_macula.syntax_search(function=function, strong=strong, lex=lex, book=book, corpus=corpus, limit=limit, head_only=head_only)
     corpus_book = None
     if book:
         resolved = _resolve(book)

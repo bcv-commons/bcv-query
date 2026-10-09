@@ -150,3 +150,14 @@ def test_real_trees_cover_the_text(monkeypatch):
     import trees_macula
     d = trees_macula.syntax("PSA", 3, 1)["data"]
     assert d["clauses"] and any(p["function"] == "Verb" for c in d["clauses"] for p in c["phrases"])
+
+
+@pytest.mark.skipif(not REAL.exists() or not (HERE / "macula" / "lexeme-spine-macula.db").exists(), reason="trees not built locally")
+def test_search_marks_nested_words_and_head_only_drops_them(monkeypatch):
+    monkeypatch.delenv("TREES_DB", raising=False)
+    monkeypatch.delenv("LEXEME_SPINE_DB", raising=False)
+    import trees_macula
+    allr = trees_macula.syntax_search(strong="G2316", function="Subject", limit=1000)["data"]["clauses"]
+    only = trees_macula.syntax_search(strong="G2316", function="Subject", limit=1000, head_only=True)["data"]["clauses"]
+    assert all("head" in c for c in allr)
+    assert 0 < len(only) < len(allr) and all(c["head"] for c in only)

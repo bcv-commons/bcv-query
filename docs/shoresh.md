@@ -37,6 +37,7 @@ All endpoints are plain `GET`s under the service root.
 | `GET /bridge/{strong}` | LXX bridge — how the Septuagint renders a Hebrew word in Greek, or vice versa (H↔G) | $0 |
 | `GET /lxx-lexeme/{wordid}` | LXX-only Greek lexeme (no Strong's number — never occurs in the NT) — citation form + variants | $0 |
 | `GET /structure/{book}/{ch}/{v}` | Syntax — clause/phrase hierarchy: BHSA/Nestle1904 from the corpus engine, or MACULA lowfat trees with `STRUCTURE_BASE=macula` | $0 |
+| `GET /syntax/search?strong=&function=` | Who-did-what: clauses where a lexeme fills a phrase function. With `STRUCTURE_BASE=macula` each hit has `head` (true: the word is a direct part of the phrase; false: nested, "the tent OF GOD") and `head_only=true` drops the nested ones | $0 |
 | `GET /search?q=&lang=hbo` | **Hebrew** clause search (88,131 BHSA clauses) | $0 |
 | `GET /search?q=&lang=grc` | **Greek** clause search (8,011 Nestle1904 sentences) | $0 |
 | `GET /search?translate=gloss` | Search an English query against Hebrew via deterministic gloss lookup | $0 |

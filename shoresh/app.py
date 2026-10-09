@@ -727,17 +727,19 @@ def get_structure_syntax(book: str, chapter: int, verse: int) -> dict:
 @app.get("/syntax/search")
 def get_syntax_search(function: str | None = None, strong: str | None = None,
                       lex: str | None = None, book: str | None = None,
-                      corpus_id: str | None = None, limit: int = 50) -> dict:
+                      corpus_id: str | None = None, limit: int = 50, head_only: bool = False) -> dict:
     """Who-did-what search across the BHSA/Nestle1904 graph: clauses where a lexeme fills a
     phrase function. Identify the word by **strong** (`H0430` / `G0026`) or **lex** (BHSA
     `lex` / Nestle1904 `lemma`); filter by **function** (`Subj`/`Subject`/`s`, `Objc`/`Object`/`o`,
     `Pred`, `Adju`/`Adverbial` … — omit to match any). Corpus is pinned by **book** (USFM code,
     optional scope) if given, else inferred from the Strong's prefix. e.g.
-    `/syntax/search?strong=H0430&function=Subject` → clauses where *God* is the subject."""
+    `/syntax/search?strong=H0430&function=Subject` → clauses where *God* is the subject.
+    With STRUCTURE_BASE=macula every hit has `head` (true: the word is a direct part of the phrase or alone;
+    false: nested inside it, "the tent OF GOD"); **head_only**=true drops the nested ones."""
     if not strong and not lex:
         raise HTTPException(422, "provide strong= or lex=")
     result = corpus.syntax_search(function=function, strong=strong, lex=lex,
-                                  book=book, corpus=corpus_id, limit=limit)
+                                  book=book, corpus=corpus_id, limit=limit, head_only=head_only)
     if "error" in result:
         raise HTTPException(404, result["error"])
     data = result.get("data", {})
