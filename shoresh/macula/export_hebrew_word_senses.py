@@ -27,23 +27,27 @@ SPINE = HERE / "lexeme-spine-macula.db"
 def distinctive_labels(sense_of: dict, counts: collections.Counter) -> dict:
     """For words with several senses: label each sense by its most DISTINCTIVE English rendering (share in
     this sense minus the highest share in another sense), so two senses never both read "land"."""
-    from macula.build_rendering_senses import load_features
+    from macula.build_rendering_senses import load_features, token_surface
     feats, eng_raw = load_features()
     multi = {lx for (lx, _s) in counts if sum(1 for (l, _x) in counts if l == lx) > 1}
     eng = collections.defaultdict(collections.Counter)
     n = collections.Counter()
+    toks = collections.defaultdict(list)
     for key, (lx, sense) in sense_of.items():
         if lx not in multi:
             continue
+        toks[(lx, sense)].append(key)
         n[(lx, sense)] += 1
         for lang, f in feats.get(key, ()):
             if lang == "eng":
                 eng[(lx, sense)][f] += 1
-    raw = lambda f: eng_raw[f].most_common(1)[0][0] if eng_raw.get(f) else f
+    # the surface a label shows is the one this sense's own tokens carry: the English normaliser keeps five letters, so sanctify / sanctified / sanctuary are one form
+    # and the corpus-wide most common surface labelled a verb "sanctuary" (fixed 2026-10-09)
+    raw = lambda f, lx, s_: token_surface(f, toks[(lx, s_)]) or (eng_raw[f].most_common(1)[0][0] if eng_raw.get(f) else f)
     out = {}
     for lx in multi:
         senses = sorted((s_ for (l, s_) in n if l == lx), key=lambda s_: -n[(lx, s_)])   # largest first
-        used = set()
+        used = set()                       # forms already naming a larger sense
         for s_ in senses:
             share = {f: c / n[(lx, s_)] for f, c in eng[(lx, s_)].items()}
             def score(f):
@@ -54,13 +58,30 @@ def distinctive_labels(sense_of: dict, counts: collections.Counter) -> dict:
             order = (sorted(share, key=lambda f: -share[f]) if s_ == senses[0]
                      else sorted(share, key=score, reverse=True))
             for f in order:
-                if raw(f) not in used:
-                    out[(lx, s_)] = raw(f)
-                    used.add(raw(f))
+                if f not in used:
+                    out[(lx, s_)] = raw(f, lx, s_)
+                    used.add(f)
                     break
             else:
                 if order:                      # every English rendering already names a larger sense
-                    out[(lx, s_)] = f"{raw(order[0])} ({senses.index(s_) + 1})"
+                    out[(lx, s_)] = f"{raw(order[0], lx, s_)} ({senses.index(s_) + 1})"
+    return out
+
+
+def surface_labels(labels: dict, sense_of: dict) -> dict:
+    """Keep each published label's form, read its surface from the sense's own tokens (see distinctive_labels). Labels whose form no token carries stay as they are."""
+    import re
+    from macula.build_rendering_senses import norm, token_surface
+    toks = collections.defaultdict(list)
+    for key, (lx, sense) in sense_of.items():
+        toks[(lx, str(sense))].append(key)
+    out, changed = {}, 0
+    for (lx, sense), label in labels.items():
+        m = re.match(r"^(.*?)( \(\d+\))?$", label or "")
+        surf = token_surface(norm("eng", m.group(1)), toks.get((lx, str(sense)), ())) if m and m.group(1) else ""
+        out[(lx, sense)] = (surf + (m.group(2) or "")) if surf else label
+        changed += out[(lx, sense)] != label
+    print(f"[hebrew-word-senses] {changed} labels re-read from their own tokens", file=sys.stderr)
     return out
 
 
@@ -94,6 +115,7 @@ def main() -> int:
     counts = collections.Counter(zip(occ["lexeme"], occ["sense"]))
     totals = collections.Counter(occ["lexeme"])
     labels.update(distinctive_labels(sense_of, counts))
+    labels = surface_labels(labels, sense_of)
     with (OUT / "senses.tsv").open("w", encoding="utf-8") as fh:
         fh.write("lexeme\tstrong\tlemma\tsense\tlabel\tcount\tshare\n")
         for (lexeme, sense), n in sorted(counts.items(), key=lambda kv: (kv[0][0], kv[0][1])):
