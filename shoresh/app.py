@@ -457,7 +457,8 @@ def get_words(
             if g:
                 w["gloss"] = g
         elif strong and ((on_macula and corpus == "hebrew") or (w.get("gloss") or "").strip() in ("", "-")):       # MACULA token glosses are inflected phrases ("you.will.consecrate"): use the lexeme's
-            g = data.gloss_of(strong)
+            lexg = data.resolve_word_gloss("hbo_lexeme", "English", w.get("lex", ""), None) if (on_macula and corpus == "hebrew") else None     # a lexeme's own gloss first: a Strong's number is shared by homographs and prefixes (H0871 is "Atharim", the prefix בְּ is hbo:0871a "in")
+            g = {"gloss": lexg} if lexg else data.gloss_of(strong)
             if g and g.get("gloss"):
                 w["gloss"] = g["gloss"]
         w["priority"] = _study_priority(w.get("rank"), w["keyness"])

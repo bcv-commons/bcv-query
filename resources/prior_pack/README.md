@@ -50,7 +50,7 @@ Also: 34 Hebrew proper nouns (e.g. H11 Abaddon, H435 Eliezer) now have `pos = na
 | `translit` | romanized form (`da.vid`, `Iēsous`) — for gap-name / cross-script matching |
 | `word_class` | `content` \| `function`, derived from `pos` |
 | `keyness` | biblical-salience (function-word filter); null for non-content |
-| `lxx_greek` / `lxx_hebrew` | cross-testament bridge (OT→Greek / NT→Hebrew), freq-ordered |
+| `lxx_greek` / `lxx_hebrew` | cross-testament bridge (OT→Greek / NT→Hebrew), freq-ordered. **Source:** the per-occurrence `greekstrong` column of MACULA Hebrew (`Clear-Bible/macula-hebrew`, WLC TSV; MACULA describes it as "Greek equivalents drawn from the Septuagint"), CC BY 4.0 (Biblica), counted into `resources/lxx_bridge.tsv` by `bcv-RAG/scripts/build_lxx_bridge.py`. **Which Hebrew–LXX alignment sits upstream of that column is not stated by MACULA and is an open question (macula-hebrew issue #145); we cannot confirm its licence.** **MARBLE:** the builder reads only the two Strong's columns (`strongnumberx`, `greekstrong`); no UBS MARBLE field (domain, sense, ln, lexdomain) is read, so no MARBLE content is in these columns beyond whatever the upstream column itself carries. |
 | `neighbors` | `[{lexeme, score, relation, confidence}]` — semantic field (OT); `confidence` is `high`, `prior` or `recall` |
 | `xling_confidence` | # of published `aligned-lex` languages that align this lexeme with a hi_conf dominant (0–7); high=stable anchor, low=fragile |
 
