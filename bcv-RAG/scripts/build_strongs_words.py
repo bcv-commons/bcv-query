@@ -15,12 +15,14 @@ Design rules:
 Three tiers (the per-occurrence file is canonical; the other two are roll-ups):
 
   attestations/<code>.tsv      one row per aligned occurrence (opt-in, heavy)
-      strong lemma surface ref target_id source_id method source_corpus base_text
+      strong lemma surface ref target_id source_id method source_corpus base_text source_unit
   surfaces_by_method/<code>.tsv  per (strong,surface,method) with count
       strong lemma surface method source_corpus base_text count
   surfaces/<code>.tsv          per (strong,surface): friendly default download
       strong lemma surface count share methods review
 
+  source_unit = word (the link covers every morpheme of one Hebrew word) · morpheme (a part of a multi-morpheme
+              word) · span (several words). strong/source_id are the CONTENT morpheme's (not a prefix's) for Hebrew.
   ref       = BBCCCVVV verse
   target_id = occurrence id (BBCCCVVV + WWW) in the target translation
   source_id = Clear/BCVW original-language token id (e.g. n40010030011)
@@ -132,7 +134,7 @@ def build_language(data_dir: Path, iso3: str, code: str,
     with att_path.open("w", encoding="utf-8") as att:
         _header(att, "attestations", code, versions, quality)
         att.write("strong\tlemma\tsurface\tref\ttarget_id\tsource_id\t"
-                  "method\tsource_corpus\tbase_text\n")
+                  "method\tsource_corpus\tbase_text\tsource_unit\n")
         for version in versions:
             for r in read_aligned_occurrences(data_dir, iso3, version):
                 surf = _clean(r["surface"])
@@ -145,7 +147,7 @@ def build_language(data_dir: Path, iso3: str, code: str,
                 att.write(
                     f"{strong}\t{lemma}\t{surf}\t{r['ref']}\t{r['target_id']}\t"
                     f"{r['source_id']}\t{r['method']}\t{r['source_corpus']}\t"
-                    f"{version}\n"
+                    f"{version}\t{r['source_unit']}\n"
                 )
                 # occurrence identity includes the version: the same target_id
                 # in two editions (en BSB+YLT, ar AVD+ONAV) is a different word

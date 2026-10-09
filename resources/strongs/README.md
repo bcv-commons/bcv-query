@@ -133,6 +133,7 @@ Three tiers of increasing detail; **pick the one you need**:
 | `target_id` | occurrence id in the translation (`BBCCCVVV`+`WWW`) |
 | `source_id` | the original-language token id (Clear/BCVW, e.g. `n40001001001`) |
 | `method`, `source_corpus`, `base_text` | full provenance |
+| `source_unit` | `word` = the source link covers every morpheme of one Hebrew word (BSB, IRVHin and some others link whole words); `morpheme` = it covers part of a multi-morpheme word; `span` = several words. For Hebrew, `strong` and `source_id` are always the **content morpheme's** (noun, verb, adjective, adverb, pronoun), never a prefix's: a word-level link is not attributed to the conjunction/preposition/article prefix. Corrected 2026-10-09; earlier files attributed word-level links to the first morpheme. |
 
 This is the **canonical source of truth** — the friendly and full tiers are
 aggregations of it. Download it only if you need to verify each word back to a

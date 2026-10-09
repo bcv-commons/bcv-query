@@ -88,8 +88,37 @@ def _load_sources_rich(data_dir: Path, src_ids: set[str]) -> dict[str, dict]:
                     "strong": code,
                     "lemma": (row.get("lemma") or "").strip(),
                     "id": row["id"],
+                    "pos": (row.get("pos") or "").strip(),
                 }
     return out
+
+
+# Hebrew source tokens are MORPHEMES (prefix, stem, suffix); the id's last digit numbers them within the word.
+# A word-level alignment (BSB, IRVHin) lists all of them; the prefix (conjunction, preposition, article) must not
+# take the link. Content parts, in preference order; anything else (suffix, bare prefix) never wins over them.
+_CONTENT_POS = ("noun", "verb", "adjective", "adverb", "pronoun")
+
+
+def _word_of(bare_id: str) -> str:
+    return bare_id[:-1]
+
+
+def _pick_source(src_tokens: list[str], sources: dict[str, dict], hebrew: bool) -> dict | None:
+    """The source token an alignment record is attributed to.
+
+    Greek / single token: the first token with a Strong's (as before). Hebrew record with several morphemes:
+    the first content morpheme (noun/verb/adjective/adverb/pronoun); if none, the last non-suffix morpheme
+    (the stem follows its prefixes); the first token only as a last resort."""
+    infos = [i for i in (sources.get(_bare(s)) for s in src_tokens) if i]
+    if not infos:
+        return None
+    if not hebrew or len(infos) == 1:
+        return infos[0]
+    for i in infos:
+        if i.get("pos") in _CONTENT_POS:
+            return i
+    body = [i for i in infos if i.get("pos") != "suffix"]
+    return (body or infos)[-1] if body else infos[0]
 
 
 def read_aligned_occurrences(data_dir: str | Path, lang: str, version: str):
@@ -117,6 +146,9 @@ def read_aligned_occurrences(data_dir: str | Path, lang: str, version: str):
     # every <SRC> referenced by an alignment file (SBLGNT, WLCM, BGNT, …)
     src_ids = {f.name.split("-")[0] for f in align_files}
     sources = _load_sources_rich(data_dir, src_ids)
+    morphemes: dict[str, int] = {}                      # word id -> how many source morphemes it has
+    for bare in sources:
+        morphemes[_word_of(bare)] = morphemes.get(_word_of(bare), 0) + 1
 
     for af in align_files:
         parts = af.stem.split("-")           # <SRC>-<VERSION>-<method>
@@ -124,15 +156,17 @@ def read_aligned_occurrences(data_dir: str | Path, lang: str, version: str):
         method = "manual" if af.stem.endswith("-manual") else "transfer"
         rec = json.loads(af.read_text(encoding="utf-8"))
         for r in rec.get("records", []):
-            # first source token carrying a Strong's wins (matches read_aligned)
-            picked = None
-            for s in r.get("source", []):
-                info = sources.get(_bare(s))
-                if info:
-                    picked = info
-                    break
+            src_tokens = r.get("source", [])
+            picked = _pick_source(src_tokens, sources, src_corpus.startswith("WLC"))
             if not picked:
                 continue
+            words = {_word_of(_bare(s)) for s in src_tokens}
+            if len(words) > 1:
+                unit = "span"                            # several words
+            elif len(src_tokens) >= morphemes.get(next(iter(words)), 1):
+                unit = "word"                            # every morpheme of one word (word-level link)
+            else:
+                unit = "morpheme"                        # a part of a multi-morpheme word
             for t in r.get("target", []):
                 tok = targets.get(t)
                 if not tok or tok["verse"] is None:
@@ -146,6 +180,7 @@ def read_aligned_occurrences(data_dir: str | Path, lang: str, version: str):
                     "lemma": picked["lemma"],
                     "method": method,
                     "source_corpus": src_corpus,
+                    "source_unit": unit,
                     "version": version,
                 }
 
@@ -194,19 +229,18 @@ def read_aligned(data_dir: str | Path, lang: str, version: str):
 
     targets = _load_targets(target_files)
     src_ids = set(chosen)                                       # e.g. SBLGNT, WLCM
-    sources = _load_sources(data_dir, src_ids)
+    sources = _load_sources_rich(data_dir, src_ids)
 
-    # target_id -> aligned source strong (first non-empty wins)
+    # target_id -> aligned source strong (content morpheme of a Hebrew word-level link, see _pick_source)
     tgt_strong: dict[str, str] = {}
     for af in align_files:
         rec = json.loads(af.read_text(encoding="utf-8"))
         for r in rec.get("records", []):
-            codes = [sources.get(_bare(s)) for s in r.get("source", [])]
-            codes = [c for c in codes if c]
-            if not codes:
+            picked = _pick_source(r.get("source", []), sources, af.name.startswith("WLC"))
+            if not picked:
                 continue
             for t in r.get("target", []):
-                tgt_strong.setdefault(t, codes[0])
+                tgt_strong.setdefault(t, picked["strong"])
 
     # group target tokens by verse, in token-id order (reconstruct text)
     verses: dict[int, list[str]] = {}
