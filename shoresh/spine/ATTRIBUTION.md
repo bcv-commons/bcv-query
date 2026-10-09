@@ -16,7 +16,7 @@ see `resources/LICENSES.md`.
   `/morph` and the `/gloss` counts. It is not NC.
 - Still NC and only used **offline** (build scripts, local, git-ignored outputs): the BHSA text-fabric corpus
   (`corpus_engine/`, `macula/build_*` scripts, `spine/reconcile.py`), `resources/senses/hbo_lex.tsv`,
-  the BHSA-keyed `word_glosses/hbo` and `lexicons/` (all excluded from the images since 2026-10-09). The Greek half of the
+  the BHSA-keyed `word_glosses/hbo`, `word_freq/hbo*` and `lexicons/` (untracked from the public repo and excluded from the images since 2026-10-09; the MACULA-keyed `word_glosses/hbo_lexeme` replaces them). The Greek half of the
   engine, `ETCBC/nestle1904`, is **not NC**: its repository is MIT (checked 2026-10-09) and is a conversion of Clear-Bible
   MACULA Greek (CC BY 4.0); keep the attribution to ETCBC and Clear Bible. Open datasets published from this repo are BHSA-free.
 - Already open: the published `lexeme-spine-macula.db` (CC BY, MACULA only, Psalm titles from Hebrew-only spans),

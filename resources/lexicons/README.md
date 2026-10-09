@@ -12,10 +12,8 @@ Hishtafal, Passive Qal, Etpaal, Nitpael, Hotpaal, Tifal, Hitpoal, Poal, Poel`.
 (which lexeme×stem cells exist, + transliteration + English reference gloss) when
 generating a new language's per-binyan glosses.
 
-Committed here so per-stem generation no longer depends on a local (gitignored)
-`example/BibleOL/` checkout. If absent, the script falls back to the committed
-`resources/word_glosses/hbo/English.csv` (same per-stem data, without the
-transliteration hint).
+LOCAL ONLY since 2026-10-09 (git-ignored; BHSA-keyed, see resources/LICENSES.md). The script falls back to
+`example/BibleOL/lexicons/heb_en.csv` or the local `word_glosses/hbo/English.csv`.
 
 **Provenance / licence:** BibleOL (https://github.com/EzerIT/BibleOL), © 2015 Ezer IT
 Consulting — **MIT License** (see the upstream `LICENSE`; ch.7 of its techdoc notes

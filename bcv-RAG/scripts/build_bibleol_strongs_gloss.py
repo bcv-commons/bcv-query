@@ -5,8 +5,8 @@ RAG/study layer — the generalized version of build_danish_strongs_gloss.py.
   python scripts/build_bibleol_strongs_gloss.py                    # all BibleOL languages
   python scripts/build_bibleol_strongs_gloss.py German de deu      # just one
 
-Hebrew/Aramaic: bridge the lex-keyed trainer glosses (word_glosses/hbo/<Language>.csv)
-to Strong's via word_freq/hbo_strong.tsv (representative gloss = default else first real
+Hebrew/Aramaic: the MACULA-keyed trainer glosses (word_glosses/hbo_lexeme/<Language>.csv);
+the Strong's number is read from the lexeme id (representative gloss = default else first real
 column; placeholders skipped). Greek: read the natively-Strong's-keyed greek_<suffix>.csv
 (if present). Merge as lang=<lang3>; idempotent (drops existing <lang3> rows first).
 """
@@ -28,16 +28,32 @@ def _real(v: str | None) -> str:
 
 
 def _hebrew(language: str) -> dict[str, str]:
-    bridge: dict[str, str] = {}
-    with (ROOT / "resources/word_freq/hbo_strong.tsv").open(encoding="utf-8") as fh:
-        next(fh, None)
-        for line in fh:
-            lex, strong = line.rstrip("\n").split("\t")
-            bridge[lex] = strong
-    csvp = ROOT / "resources/word_glosses/hbo" / f"{language}.csv"
+    """Strong's -> gloss from the MACULA-keyed tables (resources/word_glosses/hbo_lexeme; the lexeme id carries the Strong's number: hbo:0871a -> H0871)."""
+    csvp = ROOT / "resources/word_glosses/hbo_lexeme" / f"{language}.csv"
     out: dict[str, str] = {}
     if not csvp.exists():
         return out
+    with csvp.open(encoding="utf-8-sig", newline="") as fh:
+        reader = csv.reader(fh)
+        cols = [c.strip() for c in next(reader)]
+        lex_i = cols.index("lexeme")
+        di = cols.index("default") if "default" in cols else -1
+        gloss_idx = [i for i, c in enumerate(cols) if c and i != lex_i]
+        for r in reader:
+            lexeme = r[lex_i].strip() if lex_i < len(r) else ""
+            m = re.match(r"^hbo:(\d+)", lexeme)
+            if not m:
+                continue
+            strong = f"H{int(m.group(1)):04d}"
+            g = _real(r[di]) if 0 <= di < len(r) else ""
+            if not g:
+                for i in gloss_idx:
+                    g = _real(r[i] if i < len(r) else "")
+                    if g:
+                        break
+            if g and (strong not in out or len(g) > len(out[strong])):
+                out[strong] = g
+    return out
     with csvp.open(encoding="utf-8-sig", newline="") as fh:
         reader = csv.reader(fh)
         cols = [c.strip() for c in next(reader)]

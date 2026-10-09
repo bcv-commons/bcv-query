@@ -10,7 +10,7 @@ Two layers live here:
 | file | key | what |
 |---|---|---|
 | `hbo.tsv`, `grc.tsv` | **Strong's** | per-Strong's sense inventory from the **UBS open release** (rebuilt 2026-10) |
-| `hbo_lex.tsv` | **BHSA lex + stem** | newer Hebrew sense layer, derived from Hebrew **context** — binyan-aware, splits the homographs Strong's conflates |
+| `hbo_lex.tsv` | **BHSA lex + stem** (LOCAL ONLY since 2026-10-09, git-ignored; replaced by the MACULA `hebrew-word-senses`) | newer Hebrew sense layer, derived from Hebrew **context** — binyan-aware, splits the homographs Strong's conflates |
 
 > **Licensing.** `hbo.tsv` / `grc.tsv` are built by `shoresh/macula/build_ubs_open.py` from the UBS
 > Dictionary of Biblical Hebrew and the UBS Dictionary of the Greek New Testament (© United Bible

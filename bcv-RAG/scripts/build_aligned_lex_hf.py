@@ -70,7 +70,7 @@ def strong_of(lexeme: str) -> str:
     return ("H" if lang == "hbo" else "G") + digits.zfill(4)
 
 
-# The languages the product serves for now: the gloss languages (word_glosses/hbo) and the manual-alignment languages
+# The languages the product serves for now: the gloss languages (word_glosses/hbo_lexeme) and the manual-alignment languages
 # (aligned_lex/), plus swe (karnbibeln.se). Widen with ALIGNED_LEX_LANGS="a,b,c" or ALIGNED_LEX_LANGS=all (Docker build arg).
 DEFAULT_LANGS = ("amh arb asm ben cmn dan deu eng fra hau hin ind nld por rus spa swe swh").split()
 

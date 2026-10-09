@@ -90,3 +90,13 @@ def test_published_spine_has_no_bhsa_columns_or_provenance():
     meta = dict(db.execute("SELECT key, value FROM spine_meta"))
     assert "no BHSA-derived columns" in meta["variant"] and "no BHSA" in meta["superscription_source"]
     assert meta["license"].startswith("CC BY")
+
+
+def test_bhsa_keyed_build_inputs_are_not_tracked_any_more():
+    """NC exit option 3: the BHSA-keyed inputs stay local; the MACULA-keyed tables are the tracked source."""
+    tracked = _tracked_resources()
+    for path in ("resources/senses/hbo_lex.tsv", "resources/senses/senses_i18n/_gaps.tsv", "resources/word_freq/hbo.tsv",
+                 "resources/word_freq/hbo_strong.tsv", "resources/lexicons/heb_en.csv"):
+        assert path not in tracked, f"{path} is BHSA-keyed and must stay untracked"
+    assert not [f for f in tracked if f.startswith("resources/word_glosses/hbo/")], "word_glosses/hbo/ (BHSA lex keys) must stay untracked"
+    assert [f for f in tracked if f.startswith("resources/word_glosses/hbo_lexeme/")], "word_glosses/hbo_lexeme/ (MACULA keys) is the tracked source"

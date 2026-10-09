@@ -23,7 +23,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-WG = ROOT / "resources/word_glosses/hbo"
+WG = ROOT / "resources/word_glosses/hbo_lexeme"
 OUT = ROOT / "resources/related_langs"
 
 # Curated taxonomy: GROUP -> BRANCH -> members ordered by within-branch proximity

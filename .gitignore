@@ -219,3 +219,12 @@ shoresh/macula/data/word_glosses/
 shoresh/macula/data/stem_senses_cache.pkl
 # pre-exit (BHSA-derived) neighbour files, kept locally only
 shoresh/macula/data/pre_exit_neighbors/
+
+# BHSA-keyed files (NC exit option 3, 2026-10-09): local build inputs only, never published. The tracked, MACULA-keyed source of the Hebrew
+# glosses is resources/word_glosses/hbo_lexeme/ (MIT glosses on MACULA lexeme ids). They remain in git history.
+resources/word_glosses/hbo/
+resources/word_freq/hbo.tsv
+resources/word_freq/hbo_strong.tsv
+resources/senses/hbo_lex.tsv
+resources/senses/senses_i18n/_gaps.tsv
+resources/lexicons/heb_en.csv

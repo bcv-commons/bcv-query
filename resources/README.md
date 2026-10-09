@@ -35,16 +35,16 @@ in Phase 0.
 | `strongs_gloss.tsv` | authoritative UBS/English glosses | `strong → gloss` |
 | `strongs_freq.tsv` | Strong's frequency + `is_function` flag | `strong` |
 | `strongs_keyness.tsv` | per-Strong's biblical-salience weight (`bible − general` zipf), **content words only** (noun/verb/adj — matches the Greek scope; function words have no keyness). anchor `he` = spine OT − modern Hebrew (wordfreq) w/ `modern_he` (`0` = archaic); `grc` = NT1904 − pagan Koine (LAGT) w/ `koine_general` (`0` = scripture_only); `arc` = biblical Aramaic (no presence flag — modern Hebrew is the wrong denominator for it). At most one general column set per row | `strong, keyness, anchor, modern_he, koine_general` |
-| `word_freq/{hbo,grc}.tsv` | corpus-internal lemma frequency **rank** for the `/words` trainer (lex-keyed, NOT Strong's; OT BHSA / NT Nestle1904) — built by `shoresh/corpus_engine/build_freq.py` | `lex, count, rank` |
-| `word_freq/{hbo,grc}_strong.tsv` | TF lexeme → Strong's bridge so `/words` can attach keyness (Gr from Nestle1904 `strong`; He via spine.db 3-tier resolver, ~96% freq-weighted) — built by `shoresh/corpus_engine/build_lex_strong.py` | `lex, strong` |
+| `word_freq/grc.tsv` (+ local-only `hbo.tsv`) | corpus-internal lemma frequency **rank** for the `/words` trainer (lex-keyed, NOT Strong's; OT BHSA / NT Nestle1904) — built by `shoresh/corpus_engine/build_freq.py` | `lex, count, rank` |
+| `word_freq/grc_strong.tsv` (+ local-only `hbo_strong.tsv`) | TF lexeme → Strong's bridge so `/words` can attach keyness (Gr from Nestle1904 `strong`; He via spine.db 3-tier resolver, ~96% freq-weighted) — built by `shoresh/corpus_engine/build_lex_strong.py` | `lex, strong` |
 | `strongs_tw.tsv` | Strong's → unfoldingWord Translation-Words article(s), ranked by occurrence | `strong, tw_article, category, is_kt, lemma, n` |
 | `topic_strongs.tsv` | Nave's-style topic → Strong's | `topic_id, strong, verse_count` |
 | `speaker_quotations/` | who speaks where — quotations → speaker, verse-range, red-letter flag (S1) | `speaker, …, start_bbcccvvv, end_bbcccvvv, divine` |
 | `lxx_bridge.tsv` | Hebrew→Greek LXX bridge (from MACULA `greekstrong`); concept expansion across the Testaments | `hebrew_strong, greek_strong, count` |
 | `semantic_domains/<lang>.tsv` | Strong's → semantic domain (SDBG Greek / SDBH Hebrew, from MACULA); broaden a lexeme to its domain (S2) — see its README | `strong, domain_type, domain, label, count, share` |
 | `senses/{hbo,grc}.tsv` | **Strong's**-keyed word-sense inventory (polysemy; e.g. ruach → spirit/wind/breath), from MACULA — see its README | `strong, sense, gloss, count, share` |
-| `senses/hbo_lex.tsv` | **lex**-keyed, binyan-aware, homograph-split sense inventory derived from Hebrew context (the newer Hebrew sense layer) — see its README | `lex, stem, sense, gloss, count, share` |
-| `word_glosses/{hbo,grc}/<Language>.csv` | target-language glosses for shoresh `/words`, keyed by **BHSA lex** (NOT Strong's), 11 langs, per-binyan columns for Hebrew verbs — see its README | `lex, default, qal, nif, …` |
+| `senses/hbo_lex.tsv` (local only, git-ignored) | **lex**-keyed, binyan-aware, homograph-split sense inventory derived from Hebrew context (the newer Hebrew sense layer) — see its README | `lex, stem, sense, gloss, count, share` |
+| `word_glosses/{hbo_lexeme,grc}/<Language>.csv` (`hbo/` is local only) | target-language glosses for shoresh `/words`, keyed by **BHSA lex** (NOT Strong's), 11 langs, per-binyan columns for Hebrew verbs — see its README | `lex, default, qal, nif, …` |
 | `related_langs/` | language registry + genetic/typological relatedness (which langs are X's closest relatives) — see its README | `iso639_3`-keyed |
 | `regional_langs/` | regional/script/locale variants *within* one ISO 639-3 code — see its README | `iso639_3`-keyed |
 | `languages/` | **all-ISO-639-3** registry (7.9k langs) from ISO 639-3 + Glottolog — superset successor to `related_langs/`; Phase A of `languages.db` — see its README | `iso639_3`-keyed |

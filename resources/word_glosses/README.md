@@ -6,7 +6,8 @@ without the client shipping its own CSV.
 
 ```
 word_glosses/
-  hbo/<Language>.csv      # Hebrew + Aramaic (BHSA lex)
+  hbo_lexeme/<Language>.csv  # Hebrew + Aramaic, keyed on MACULA lexeme ids (tracked; what the service reads)
+  hbo/<Language>.csv         # LOCAL ONLY (git-ignored since 2026-10-09): the same glosses keyed on BHSA lex, the input of macula.build_word_glosses_lexeme
   grc/<Language>.csv      # Greek (Nestle1904 lemma) — its own sources
 ```
 
