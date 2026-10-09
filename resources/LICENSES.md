@@ -28,5 +28,5 @@ non-commercial terms, not an open release. Do not copy them into CC0/CC BY outpu
 `parallelism/parallelism_pairs.local.tsv` (the BHSA-derived "detected" tier). They remain in the git history of this public repository.
 
 ## Rules for new files
-1. Anything published as CC0 / CC BY / CC BY-SA must not take BHSA, OpenHebrewBible, ETCBC Nestle1904, or UBS MARBLE fields as input. Use MACULA (and the open sources named in `internal-docs`).
+1. Anything published as CC0 / CC BY / CC BY-SA must not take BHSA, OpenHebrewBible, or UBS MARBLE fields (ETCBC Nestle1904 is MIT / MACULA-derived, not NC, but prefer MACULA Greek directly) as input. Use MACULA (and the open sources named in `internal-docs`).
 2. Facts about the Hebrew or Greek text are derived from original-language and versification sources, never from English translations.

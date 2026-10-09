@@ -150,8 +150,7 @@ shoresh/macula/bhsa-macula-bridge.db-*
 # in this sense and stay tracked — see each one's own comment further down.
 resources/semantic_neighbors/*.parquet
 resources/semantic_neighbors/llm_edges.tsv
-resources/semantic_neighbors/by_lexeme.tsv
-resources/semantic_neighbors/by_strong.tsv
+# by_strong/by_lexeme are tracked: /field reads them (BHSA-free CC0 build 2026-10-04, see manifest.json)
 resources/semantic_neighbors/domain_clusters.tsv
 resources/semantic_neighbors/confidence_tiers.tsv
 resources/semantic_neighbors/llm_pair_verification.tsv
@@ -218,3 +217,5 @@ shoresh/macula/verse-senses.db
 shoresh/macula/data/lex_to_lexeme.tsv
 shoresh/macula/data/word_glosses/
 shoresh/macula/data/stem_senses_cache.pkl
+# pre-exit (BHSA-derived) neighbour files, kept locally only
+shoresh/macula/data/pre_exit_neighbors/

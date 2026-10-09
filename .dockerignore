@@ -63,3 +63,11 @@ bcv-RAG/.dockerignore
 
 # built inside the bcv-RAG image (build_aligned_lex_hf.py); never ship a local copy over it
 resources/aligned_lex_hf/
+
+# BHSA-keyed files (NC exit audit 2026-10-09): build inputs / dev data only, never read by the services;
+# kept out of the images so the deployed data holds no BHSA lexeme keys. The files stay tracked for the build scripts.
+resources/word_glosses/hbo/
+resources/senses/hbo_lex.tsv
+resources/senses/hbo_lex_export.tsv
+resources/word_freq/
+resources/lexicons/
