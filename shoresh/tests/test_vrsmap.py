@@ -179,3 +179,37 @@ def test_revalidation_downloads_only_what_changed(tmp_path, monkeypatch):
     assert vrsmap._changed.is_set() and (tmp_path / "b.json.etag").read_text() == '"v2"'
     assert seen == [("http://x/a.json", '"v1"'), ("http://x/b.json", '"v1"')]
     assert vrsmap._bytes("a.json", "http://x/a.json", max_age=86400) == b"old" and len(seen) == 2            # fresh again: no request at all
+
+
+def test_an_unlisted_verse_is_left_unmapped_when_another_verse_lands_on_it(tmp_path, monkeypatch):
+    """Sirach-like case: the row 1:21 -> 1:17 exists, verse 1:17 has no row; identity would put two verses on English 1:17."""
+    (tmp_path / "eng.vrs").write_text(_vrs({"SIR": [(1, 17)]}))
+    (tmp_path / "vul.vrs").write_text(_vrs({"SIR": [(1, 21)]}))
+    (tmp_path / "vul-to-eng.json").write_text(json.dumps({"tvtms_rev": "abc", "map": [{"s": "SIR 1:21", "t": "SIR 1:17", "a": "x"}]}))
+    (tmp_path / "index.json").write_text(json.dumps({"schemes": ["eng", "vul"], "vrs_base": "http://127.0.0.1:9/_vrs/", "map_base": "http://127.0.0.1:9/_vrs/map/",
+                                                      "l": {}, "maps": ["vul-to-eng.json"]}))
+    monkeypatch.setenv("VERSIFICATION_MAP_DIR", str(tmp_path))
+    import vrsmap
+    for f in (vrsmap.table, vrsmap.shape, vrsmap._index_cached, vrsmap._nt_rows):
+        f.cache_clear()
+    assert vrsmap.to_eng(("SIR", 1, 21), "vul") == [("SIR", 1, 17)]
+    assert vrsmap.to_eng(("SIR", 1, 17), "vul") == []
+    assert vrsmap.check("vul")["collisions"] == {}
+
+
+def test_nt_variants_replace_the_scheme_map_for_new_testament_verses(vm, tmp_path):
+    (tmp_path / "nt-variants.json").write_text(json.dumps({"variants": {
+        "1TI6-22": {"kind": "renumbering", "map": [{"s": "1TI 6:22", "t": ["1TI 6:21"]}]},
+        "REV12-17": {"kind": "renumbering", "map": [{"s": "REV 13:1", "t": ["REV 12:18", "REV 13:1"]}]}}}))
+    idx = json.loads((tmp_path / "index.json").read_text())
+    idx.update({"nt_variants": "nt-variants.json", "nt": {"arb/X": {"variants": ["1TI6-22", "REV12-17"]}, "arb/Y": {"variants": []}}})
+    (tmp_path / "index.json").write_text(json.dumps(idx))
+    for f in (vm._index_cached, vm._nt_rows):
+        f.cache_clear()
+    assert vm.to_eng(("1TI", 6, 22), "eng", "arb/X") == [("1TI", 6, 21)]
+    assert vm.to_eng(("REV", 13, 1), "eng", "arb/X") == [("REV", 12, 18), ("REV", 13, 1)]
+    assert vm.from_eng(("REV", 12, 18), "eng", "arb/X") == [("REV", 13, 1)]
+    assert vm.to_eng(("1TI", 6, 22), "eng", "arb/Y") == [("1TI", 6, 22)]          # an nt entry without variants: identity
+    assert vm.to_eng(("1TI", 6, 22), "eng") == [("1TI", 6, 22)]                   # no edition: unchanged
+    assert vm.to_eng(("1TI", 6, 22), "eng", "arb/none") == [("1TI", 6, 22)]       # an edition without an nt entry: unchanged
+    assert vm.to_eng(("PSA", 3, 2), "org", "arb/X") == [("PSA", 3, 1)]            # Old Testament still uses the scheme's map

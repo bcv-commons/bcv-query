@@ -140,12 +140,16 @@ def _index_cached(bucket: int) -> dict:
     return json.loads(raw)
 
 
+def _bucket() -> int:
+    return int(time.time() // 86400)
+
+
 def index() -> dict:
     """The edition/scheme index, revalidated daily. When the CDN served anything new (the index or a file it lists), the parsed tables are rebuilt."""
-    idx = _index_cached(int(time.time() // 86400))
+    idx = _index_cached(_bucket())
     if _changed.is_set():
         _changed.clear()
-        table.cache_clear(); shape.cache_clear()
+        table.cache_clear(); shape.cache_clear(); _nt_rows.cache_clear()
     return idx
 
 
@@ -283,6 +287,13 @@ def table(scheme: str) -> Table:
         if g is not None and landed[g] == 0 and g != r:
             landed[r] -= 1; landed[g] += 1
             fwd[r] = [g]; gap += 1
+    # the identity default, third pass: a verse with no row of its own stays itself only while no other verse lands on it; where one does
+    # (SIR 1:17 when the row SIR 1:21 -> 1:17 exists) it has no English counterpart and is left unmapped instead of colliding.
+    landed = collections.Counter(t for ts in fwd.values() for t in ts)
+    unmapped = 0
+    for r in pending:
+        if fwd.get(r) == [r] and landed[r] > 1:
+            fwd[r] = []; unmapped += 1
     for s, ts in explicit.items():                          # rows for verses outside the shape are kept as published
         fwd.setdefault(s, list(ts))
     inv: dict[Ref, list[Ref]] = {}
@@ -291,7 +302,7 @@ def table(scheme: str) -> Table:
             inv.setdefault(t, []).append(s)
     for v in inv.values():
         v.sort()
-    return Table(scheme, fwd, inv, data.get("tvtms_rev"), {"rows": len(explicit), "multiverse": n_multi, "gap_filled": gap})
+    return Table(scheme, fwd, inv, data.get("tvtms_rev"), {"rows": len(explicit), "multiverse": n_multi, "gap_filled": gap, "unmapped": unmapped})
 
 
 def available(scheme: str) -> bool:
@@ -302,26 +313,72 @@ def available(scheme: str) -> bool:
         return False
 
 
+# ---------------------------------------------------------------- New Testament numbering variants (index `nt`, map nt-variants.json)
+NT_BOOKS = frozenset("MAT MRK LUK JHN ACT ROM 1CO 2CO GAL EPH PHP COL 1TH 2TH 1TI 2TI TIT PHM HEB JAS 1PE 2PE 1JN 2JN 3JN JUD REV".split())
+
+
+def nt_entry(edition: str | None) -> dict | None:
+    """The index's `nt` entry of an edition ({variants: [...], profile?, unexplained?}); None for an edition without one (then nothing changes)."""
+    if not edition:
+        return None
+    return (index().get("nt") or {}).get(edition)
+
+
+@lru_cache(maxsize=64)
+def _nt_rows(variants: tuple[str, ...], bucket: int) -> tuple[dict, dict]:
+    """({edition verse: [eng verses]}, {eng verse: [edition verses]}) of the named variants (first variant wins for a verse both define)."""
+    name = index().get("nt_variants") or "nt-variants.json"
+    _, map_base = _urls(index())
+    raw = _bytes(name, f"{map_base}{name}", optional=True, max_age=_MAX_AGE)
+    known = (json.loads(raw.decode("utf-8")).get("variants") or {}) if raw else {}
+    fwd: dict[Ref, list[Ref]] = {}
+    for v in variants:
+        for row in (known.get(v) or {}).get("map", []):
+            fwd.setdefault(_ref(row["s"]), [_ref(t) for t in row["t"]])
+    inv: dict[Ref, list[Ref]] = {}
+    for s, ts in fwd.items():
+        for t in ts:
+            inv.setdefault(t, []).append(s)
+    return fwd, {t: sorted(v) for t, v in inv.items()}
+
+
+def _nt(edition: str | None, ref: Ref) -> tuple[dict, dict] | None:
+    """The variant rows for this edition when the rule applies (the edition has an `nt` entry and the verse is New Testament)."""
+    e = nt_entry(edition)
+    if e is None or ref[0] not in NT_BOOKS:
+        return None
+    return _nt_rows(tuple(e.get("variants") or ()), _bucket())
+
+
 # ---------------------------------------------------------------- conversion
-def to_eng(ref: Ref, scheme: str) -> list[Ref]:
+def to_eng(ref: Ref, scheme: str, edition: str | None = None) -> list[Ref]:
+    """English verse(s) of `ref`. With `edition` (a key of the index's `l`/`nt`, e.g. "deu/LUTH"), New Testament verses follow the edition's `nt`
+    variants (identity where no variant row exists) instead of the scheme's map; an edition without an `nt` entry is unchanged."""
+    nt = _nt(edition, ref)
+    if nt is not None:
+        return list(nt[0].get(ref, [ref]))
     if scheme == HUB:
         return [ref]
     return list(table(scheme).fwd.get(ref, [ref]))
 
 
-def from_eng(ref: Ref, scheme: str) -> list[Ref]:
+def from_eng(ref: Ref, scheme: str, edition: str | None = None) -> list[Ref]:
+    nt = _nt(edition, ref)
+    if nt is not None:
+        return list(nt[1].get(ref, [ref]))
     if scheme == HUB:
         return [ref]
     return list(table(scheme).inv.get(ref, [ref]))
 
 
-def convert(ref: Ref, src: str, dst: str) -> list[Ref]:
-    """The verse(s) of scheme `dst` that are the verse `ref` of scheme `src` (usually one; a Psalm title can be two Hebrew verses)."""
-    if src == dst:
+def convert(ref: Ref, src: str, dst: str, src_edition: str | None = None, dst_edition: str | None = None) -> list[Ref]:
+    """The verse(s) of scheme `dst` that are the verse `ref` of scheme `src` (usually one; a Psalm title can be two Hebrew verses).
+    `src_edition` / `dst_edition` apply the New Testament variants of those editions (see to_eng)."""
+    if src == dst and not (src_edition or dst_edition):
         return [ref]
     out: list[Ref] = []
-    for e in to_eng(ref, src):
-        for r in from_eng(e, dst):
+    for e in to_eng(ref, src, src_edition):
+        for r in from_eng(e, dst, dst_edition):
             if r not in out:
                 out.append(r)
     return out

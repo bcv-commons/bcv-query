@@ -143,7 +143,7 @@ def root() -> dict:
 
 @app.get("/verse/{book}/{chapter}/{verse}")
 def get_verse(book: str, chapter: int, verse: int, gloss_lang: str = "English",
-              domain_gloss: bool = False, versification: str = "org") -> dict:
+              domain_gloss: bool = False, versification: str = "org", edition: str | None = None) -> dict:
     """Greek (LXX) + Hebrew/Greek (spine) words of a verse, side by side.
     `gloss_lang` localizes the per-word binyan-correct sense (e.g. German, Spanish).
     Hebrew words carry `group` (CC0 semantic group: id, Hebrew label, gloss, confidence) and `domain`,
@@ -152,9 +152,11 @@ def get_verse(book: str, chapter: int, verse: int, gloss_lang: str = "English",
     in this verse (e.g. "מִזְבֵּחַ, עֹלָה" = altar / burnt offering), glossed the same way.
     `versification` names the numbering scheme the reference is given in (org = Hebrew, the default; eng, rso = Russian/Slavonic, vul = Latin,
     lxx, orgw, or any scheme bibles publishes a map for). With the MACULA base the Hebrew words come back for the SAME verse in Hebrew numbering
-    and the Greek words in LXX numbering, and `versification` in the response shows what was served. Ignored by the UHB base."""
+    and the Greek words in LXX numbering, and `versification` in the response shows what was served. Ignored by the UHB base.
+    `edition` (e.g. `arb/ARBVDV`, a key of https://cdn.bibel.wiki/dbt/_vrs/index.json) applies to the New Testament: the reference is read in that
+    edition's numbering (its `nt` variants: for example Arabic 1TI 6:22 is English 6:21) and the Greek words come back for the corresponding verse(s)."""
     try:
-        result = data.verse(book, chapter, verse, gloss_lang, domain_gloss, versification.lower())
+        result = data.verse(book, chapter, verse, gloss_lang, domain_gloss, versification.lower(), edition)
     except ValueError as e:                    # vrsmap.UnknownScheme: no map published for that numbering scheme
         raise HTTPException(400, f"unknown versification {versification!r}: bibles publishes no map for it "
                                  f"(known: {', '.join(vrsmap.schemes())}; published at https://cdn.bibel.wiki/dbt/_vrs/index.json)") from e

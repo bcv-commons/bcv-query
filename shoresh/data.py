@@ -1156,7 +1156,7 @@ def _verse_hebrew_macula(book: str, chapter: int, vrs: int, gloss_lang: str, dom
 
 
 def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain_gloss: bool = False,
-          versification: str = "org") -> dict:
+          versification: str = "org", edition: str | None = None) -> dict:
     """Greek (LXX) + Hebrew/Greek (spine) words for one verse. `versification` is the numbering scheme the reference is given in (with the
     MACULA Hebrew base only; default "org" = Hebrew numbering): the Hebrew words are served for the same verse in Hebrew numbering and the Greek
     words in LXX numbering, whatever the scheme (eng, rso, vul, ... any scheme bibles publishes a map for; see vrsmap.py). `gloss_lang` localizes the per-word
@@ -1165,7 +1165,9 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
     `setting` (the topical setting the word is used in here; CC BY), glossed the same way, and in the
     Prophets and Writings `explanations`: Hebrew explanations of the word (Metzudat Zion, Malbim),
     and `menahem` where Mahberet Menahem cites this occurrence: its root and which division (sense).
-    `commentary` {source, comments, path}: Malbim comments on this verse, served in full by /verse/{book}/{chapter}/{verse}/malbim."""
+    `commentary` {source, comments, path}: Malbim comments on this verse, served in full by /verse/{book}/{chapter}/{verse}/malbim.
+    `edition` (a key of bibles' edition index, e.g. "arb/ARBVDV"): for a New Testament verse, the reference is read in that edition's numbering
+    (its `nt` variants, see vrsmap.py) and the Greek words come back for the corresponding verse(s) of the Greek text; Old Testament verses ignore it."""
     book = book.upper()
     spine_lang = "hbo" if book in OT_BOOKS else "grc"
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
@@ -1219,10 +1221,21 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
             result["spine"] = {"language": "hbo", "base": "macula", "versification": "org", "words": mwords}
     scon = None if use_macula else _ro(SPINE_DB)      # the Greek NT words (UGNT); the Hebrew words are MACULA's
     if scon:
-        rows = scon.execute(
-            "SELECT idx, surface, strong, lemma, morph FROM spine_words "
-            "WHERE book=? AND chapter=? AND verse=? ORDER BY idx",
-            (book, chapter, vrs)).fetchall()
+        gr_refs = [(book, chapter, vrs)]
+        if edition and not use_macula:                  # the Greek text is numbered like eng.vrs; the edition's nt variants say how it differs
+            import vrsmap
+            gr_refs = vrsmap.to_eng((book, chapter, vrs), versification, edition)
+            nt = vrsmap.nt_entry(edition)
+            result["versification"] = {"requested": versification, "edition": edition, "ref": vrsmap.fmt((book, chapter, vrs)),
+                                       "greek": [vrsmap.fmt(r) for r in gr_refs],
+                                       "nt": (nt or {}).get("variants") if nt is not None else None}
+        rows = []
+        for gb, gc, gv in gr_refs:
+            part = scon.execute(
+                "SELECT idx, surface, strong, lemma, morph FROM spine_words "
+                "WHERE book=? AND chapter=? AND verse=? ORDER BY idx",
+                (gb, gc, gv)).fetchall()
+            rows += [dict(r) | ({"verse": gv} if len(gr_refs) > 1 else {}) for r in part]
         scon.close()
         if rows:
             doms = _strong_domains()          # Greek per-word domain (Louw-Nida `sdbg`)
@@ -1230,7 +1243,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
             for r in rows:
                 code = _strong_code(spine_lang, r["strong"])
                 w = {"idx": r["idx"], "surface": r["surface"], "lemma": r["lemma"],
-                     "strong": code, "morph": r["morph"], **(gloss_of(code) or {})}
+                     "strong": code, "morph": r["morph"], **(gloss_of(code) or {}), **({"verse": r["verse"]} if "verse" in r else {})}
                 # Localize the per-word gloss where the spine lemma is the word_glosses key (Greek)
                 if gloss_lang and gloss_lang != "English" and r["lemma"]:
                     loc = resolve_word_gloss(spine_lang, gloss_lang, r["lemma"], None)
