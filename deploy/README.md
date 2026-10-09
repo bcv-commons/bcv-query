@@ -22,7 +22,7 @@ deploy/deploy.sh bcv-rag --no-pull # build the current tree without pulling (loc
 ## New host (one-time provisioning)
 1. Checkout this repo on the host (public — `git clone https://github.com/bcv-commons/bcv-query.git`).
 2. `cp deploy/deploy.local.env.example deploy/deploy.local.env` and set `BCV_RAG_STACK` / `SHORESH_STACK` to where each stack will live.
-3. For each service: create the stack dir, copy `deploy/examples/<svc>.compose.yml` → `<stack>/docker-compose.yml`, create its `.env` (secrets) and `data/`, and provision any host volumes the compose references (e.g. the text-fabric corpus for shoresh, and `index.db` in bcv-rag's `data/`).
+3. For each service: create the stack dir, copy `deploy/examples/<svc>.compose.yml` → `<stack>/docker-compose.yml`, create its `.env` (secrets) and `data/`, and provision any host volumes the compose references (e.g. `index.db` in bcv-rag's `data/`; shoresh needs no corpus volume since NC exit step 6).
 4. `deploy/deploy.sh <svc>`.
 
 Requirements on the host: docker + compose (v2 plugin or v1) and git.

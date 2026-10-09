@@ -13,7 +13,7 @@ from the same kind of evidence (which occurrences translators render alike), and
   4. the label of a sense is the most frequent English rendering among its tokens (as before).
 
   cd shoresh && .venv/bin/python3 -m macula.build_stem_senses [--rend macula/data/rend_renderings.pkl] [--languages 60] [--out macula/verse-senses-stem.db] [--gbt]
-Use it with LEXEME_BASE=macula VERSE_SENSES_DB=macula/verse-senses-stem.db python -m macula.compare_lexeme_bases to measure the binyan lines against BHSA.
+Serve it with VERSE_SENSES_DB=macula/verse-senses-stem.db (or ship it as verse-senses.db). The BHSA comparison that justified it (compare_lexeme_bases) is in internal-docs/binyan-fair-comparison.md.
 """
 from __future__ import annotations
 

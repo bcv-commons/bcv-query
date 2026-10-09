@@ -65,7 +65,7 @@ def greek_lex_strong(api) -> dict[str, str]:
 
 def hebrew_lex_strong(api) -> dict[str, str]:
     """BHSA lex → Strong's via the three-tier resolver (see module docstring)."""
-    from corpus import name_to_usfm
+    from corpus_engine.legacy_corpus import name_to_usfm
     F, L, T = api.F, api.L, api.T
     lex, voc, cons = api.Fs("lex"), api.Fs("voc_lex_utf8"), api.Fs("g_cons_utf8")
     con = sqlite3.connect(SPINE_DB)

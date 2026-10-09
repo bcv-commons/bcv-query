@@ -609,7 +609,7 @@ def _torah_verse_text(db: sqlite3.Connection, start: int, end: int, lang: str) -
 
 def _torah_shared_lexemes(start_a: int, end_a: int, start_b: int, end_b: int, db: sqlite3.Connection | None = None) -> list[str] | None:
     """Strong's numbers occurring in BOTH verse ranges, from the index's MACULA lexeme tags — best-effort, never raises.
-    Falls back to the BHSA sidecar (hbo.db) only while the index has no lexeme tags (removed once it is retagged everywhere)."""
+    None when the index carries no lexeme tags for either range."""
     if db is not None:
         try:
             def _codes(start: int, end: int) -> set[str]:
@@ -622,33 +622,7 @@ def _torah_shared_lexemes(start_a: int, end_a: int, start_b: int, end_b: int, db
                 return sorted(a_codes & b_codes) or None
         except Exception:
             pass
-    try:
-        import sqlite3 as _sqlite3
-        from resource_paths import resource_path
-        hbo = _sqlite3.connect(f"file:{resource_path('occurrences/hbo.db')}?mode=ro", uri=True)
-    except Exception:
-        return None
-
-    def _strongs(start: int, end: int) -> set[str]:
-        b1, c1, v1 = decode(start)
-        b2, c2, v2 = decode(end)
-        if b1 != b2:
-            return set()  # Kline's cells never cross books; a defensive no-op if that ever changes
-        rows = hbo.execute(
-            "SELECT DISTINCT strong FROM occurrence WHERE book = ? AND strong != '' "
-            "AND (chapter > ? OR (chapter = ? AND verse >= ?)) "
-            "AND (chapter < ? OR (chapter = ? AND verse <= ?))",
-            (b1, c1, c1, v1, c2, c2, v2),
-        ).fetchall()
-        return {r[0] for r in rows}
-
-    try:
-        shared = sorted(_strongs(start_a, end_a) & _strongs(start_b, end_b))
-    except Exception:
-        return None
-    finally:
-        hbo.close()
-    return shared or None
+    return None
 
 
 @register_tool(
@@ -755,73 +729,6 @@ def _torah_units(args: dict, db: sqlite3.Connection) -> dict:
         for s, b, n, t, a, e, f in db.execute(sql, params).fetchall()
     ]
     return {"count": len(units), "units": units, "attribution": _KLINE_ATTRIBUTION}
-
-
-# ---------- BHSA clause-level dependency graph ----------
-#
-# Discourse structure (which clause grammatically depends on which, and how), not a lexical/word-pair
-# signal -- see indexer/schema.sql's clause_dependencies comment for the full caveat list. Surfaced
-# in every response so a caller can't miss it, same posture as the Torah attribution above.
-_CLAUSE_DEP_CAVEAT = (
-    "BHSA clause-level dependency (Objc/Attr/Adju/Coor/Resu/...), not a bcv-query claim -- Context "
-    "Fabric reports grammatical annotation, it doesn't infer. One caveat worth knowing before reading "
-    "'depth' as meaningful: a long flat coordinated list (Coor chains, e.g. a genealogy/name roster) "
-    "chains exactly as deep as genuine narrative subordination -- checked directly, this dataset's "
-    "single deepest chain (20 clauses) is 1 Chronicles 11:27's roster of names, not an argument."
-)
-
-
-@register_tool(
-    name="clause_dependency_lookup",
-    description=(
-        "A verse's clause-level BHSA dependency structure: which of its clauses depend on which "
-        "other clause/phrase/word, and how (Objc/Attr/Adju/Coor/Resu/...) -- discourse structure, "
-        "'why does this clause relate to that one', not word-level syntax. Also reports which OTHER "
-        "clauses depend on this verse's clauses (the reverse direction), so a governing/'hub' clause "
-        "shows its full set of dependents. Hebrew Bible only."
-    ),
-    input_schema={
-        "type": "object",
-        "properties": {
-            "reference": {"type": "string", "description": "A Hebrew Bible verse, e.g. 'Zechariah 8:14'"},
-        },
-        "required": ["reference"],
-    },
-)
-def _clause_dependency_lookup(args: dict, db: sqlite3.Connection) -> dict:
-    ref = args.get("reference", "").strip()
-    passages = parse_references(ref)
-    if not passages:
-        raise ValueError(f"could not parse Bible reference: {ref!r}")
-    bb = passages[0][0]
-
-    as_dependent = db.execute(
-        "SELECT dependent_text, mother_text, mother_otype, mother_start_bbcccvvv, "
-        "mother_end_bbcccvvv, rela FROM clause_dependencies "
-        "WHERE dependent_start_bbcccvvv <= ? AND dependent_end_bbcccvvv >= ?",
-        (bb, bb),
-    ).fetchall()
-    as_mother = db.execute(
-        "SELECT mother_text, dependent_text, rela FROM clause_dependencies "
-        "WHERE mother_start_bbcccvvv <= ? AND mother_end_bbcccvvv >= ? AND mother_otype = 'clause'",
-        (bb, bb),
-    ).fetchall()
-
-    depends_on = [
-        {"clause": dep_txt, "depends_on": mom_txt, "mother_otype": mom_ot,
-         "mother_reference": human(mom_s, mom_e), "rela": rela}
-        for dep_txt, mom_txt, mom_ot, mom_s, mom_e, rela in as_dependent
-    ]
-    dependents = [
-        {"clause": mom_txt, "dependent_clause": dep_txt, "rela": rela}
-        for mom_txt, dep_txt, rela in as_mother
-    ]
-    return {
-        "reference": human(bb, bb),
-        "depends_on": depends_on,
-        "dependents_of_this_verses_clauses": dependents,
-        "note": _CLAUSE_DEP_CAVEAT,
-    }
 
 
 @register_tool(

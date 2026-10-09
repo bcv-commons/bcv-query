@@ -308,19 +308,6 @@ _IRREGULAR = {"said": "say", "took": "take", "taken": "take", "came": "come", "w
 
 
 @lru_cache(maxsize=1)
-def _hbo_lex_counts() -> dict[str, int]:
-    """BHSA lex -> occurrences (resources/word_freq/hbo.tsv): ties between homographs go to the common one."""
-    path = _resources_dir() / "word_freq" / "hbo.tsv"
-    out = {}
-    if path.exists():
-        for line in path.read_text(encoding="utf-8").splitlines()[1:]:
-            p = line.split("\t")
-            if len(p) >= 2 and p[1].isdigit():
-                out[p[0]] = int(p[1])
-    return out
-
-
-@lru_cache(maxsize=1)
 def _aligned_glosses() -> dict:
     """(H####, iso) -> gloss from resources/aligned_glosses/hbo.tsv: the lexeme-aligner's most frequent
     rendering per language (CC0; macula/build_aligned_glosses.py). Fills labels the BibleOL route leaves English."""
@@ -339,23 +326,22 @@ def _aligned_label_gloss(strong: str, gloss_lang: str) -> str | None:
 
 @lru_cache(maxsize=4096)
 def _label_gloss(label_strong: str, gloss_en: str, gloss_lang: str) -> str:
-    """The exemplar's gloss in the reader's language (word_glosses via the Strong's lexemes), else English."""
+    """The exemplar's gloss in the reader's language (word_glosses/hbo_lexeme via the Strong's lexemes), else English."""
     if gloss_lang and gloss_lang != "English":
-        lexes = _strong_to_lex().get(label_strong, [])
+        import lexeme_macula
+        lexes = lexeme_macula.lexemes_of(int(label_strong[1:])) if label_strong[1:].isdigit() and lexeme_macula.available() else []     # homographs, most frequent first
         if lexes and gloss_en:
             # the lexeme meant here: its English gloss must share a word beginning with the label's English
-            # (buried/bury, stones/stone); homographs and crosswalk gaps otherwise give a wrong-sense
-            # translation (H7462 "shepherd" -> R<H=[ "associate with")
+            # (buried/bury, stones/stone); homographs otherwise give a wrong-sense translation
             stems = lambda t: {_IRREGULAR.get(w, w)[:3] for w in re.findall(r"[a-z]+", t.lower()) if len(w) > 2}
             want = stems(gloss_en)
             def overlap(lex):
-                return len(want & stems(resolve_word_gloss("hbo", "English", lex, None) or ""))
-            counts = _hbo_lex_counts()
-            lexes = sorted(lexes, key=lambda lx: (overlap(lx), counts.get(lx, 0)), reverse=True)
+                return len(want & stems(resolve_word_gloss("hbo_lexeme", "English", lex, None) or ""))
+            lexes = sorted(lexes, key=overlap, reverse=True)          # stable: ties keep the frequency order
             if want and overlap(lexes[0]) == 0:
                 return _aligned_label_gloss(label_strong, gloss_lang) or gloss_en
         for lex in lexes:
-            loc = resolve_word_gloss("hbo", gloss_lang, lex, None)
+            loc = resolve_word_gloss("hbo_lexeme", gloss_lang, lex, None)
             if loc:
                 return re.split(r"[;,]", loc)[0].strip()
     return (_aligned_label_gloss(label_strong, gloss_lang) or gloss_en) if gloss_lang and gloss_lang != "English" else gloss_en
@@ -795,65 +781,6 @@ def keyness_of(code: str) -> dict | None:
 
 
 @lru_cache(maxsize=1)
-def _strong_to_lex() -> dict[str, list[str]]:
-    """{padded Strong's: [BHSA lex, ...]} — reverse of word_freq/hbo_strong.tsv. Lets a
-    Strong's-keyed card recover the distinct lexemes (homographs) a single Strong's conflates
-    — 733 Hebrew Strong's codes cover 2+ lexemes — and thus their per-stem (binyan) senses."""
-    path = _resources_dir() / "word_freq" / "hbo_strong.tsv"
-    out: dict[str, list[str]] = {}
-    if not path.exists():
-        return out
-    with path.open(encoding="utf-8") as fh:
-        next(fh, None)
-        for line in fh:
-            parts = line.rstrip("\n").split("\t")
-            if len(parts) >= 2 and parts[0]:
-                out.setdefault(_norm_strong(parts[1]), []).append(parts[0])
-    return out
-
-
-def _stem_senses(code: str, lang: str = "English") -> list[dict]:
-    """Per-lexeme, per-stem (binyan) senses behind a Hebrew Strong's — the lex-anchored
-    granularity Strong's can't express. Each entry: {lex, senses: {qal: …, nif: …}}; only verb
-    lexemes (≥1 stem gloss) are included. Localized to `lang` (per-lex English fallback where a
-    language has no per-stem cell yet). Empty for Greek / non-verbs."""
-    if not code.startswith("H"):
-        return []
-    table, stem_cols, _gc = _gloss_table("hbo", lang)
-    en_table = en_cols = None
-    out = []
-    for lex in _strong_to_lex().get(_norm_strong(code), []):
-        row = table.get(lex)
-        senses = {c: _real_gloss(row.get(c)) for c in stem_cols if row and _real_gloss(row.get(c))}
-        if not senses and lang != "English":            # fall back to English per-stem for this lex
-            if en_table is None:
-                en_table, en_cols, _ = _gloss_table("hbo", "English")
-            er = en_table.get(lex)
-            senses = {c: _real_gloss(er.get(c)) for c in en_cols if er and _real_gloss(er.get(c))}
-        if senses:
-            out.append({"lex": lex, "senses": senses})
-    return out
-
-
-@lru_cache(maxsize=1)
-def _lex_sense_table() -> dict:
-    """{lex: {stem: [{sense, gloss, share}]}} — the Hebrew-context-derived sense inventory
-    (resources/senses/hbo_lex.tsv). Sense identity decided in Hebrew usage; gloss is the
-    label. stem '' = non-verb."""
-    out: dict = collections.defaultdict(dict)
-    p = _resources_dir() / "senses" / "hbo_lex.tsv"
-    if p.exists():
-        with p.open(encoding="utf-8") as fh:
-            next(fh, None)
-            for line in fh:
-                c = line.rstrip("\n").split("\t")
-                if len(c) == 6:
-                    out[c[0]].setdefault(c[1], []).append(
-                        {"sense": c[2], "gloss": c[3], "share": round(float(c[5]), 3)})
-    return out
-
-
-@lru_cache(maxsize=1)
 def _grc_sense_table() -> dict[str, list[dict]]:
     """{Strong's: [{sense, gloss, count, share}, ...]} — the older Strong's-keyed Greek sense
     inventory (resources/senses/grc.tsv). Same UBS-derived data as SDBG, already in-house."""
@@ -900,21 +827,6 @@ def lexicon_meanings_for_strongs(strong: str, lemma: str | None = None) -> list[
     elif code.startswith("H") and _on_macula():
         import lexeme_macula
         out = lexeme_macula.lexicon_meanings(code, base, lemma)
-    elif code.startswith("H"):
-        table = _lex_sense_table()
-        n = 0
-        for lex in _strong_to_lex().get(code, []):
-            for stem, senses in table.get(lex, {}).items():
-                for row in senses:
-                    n += 1
-                    out.append({
-                        "lexId": base * 1000 + n,
-                        "lemma": lemma,
-                        "grammar": stem or None,
-                        "definitionShort": row["gloss"],
-                        "comments": None,
-                        "glosses": row["gloss"],
-                    })
     return out
 
 
@@ -924,57 +836,6 @@ _GLOSS_LANG_ISO = {
     "Indonesian": "ind", "Portuguese": "por", "Spanish": "spa", "Swahili": "swa",
     "Amharic": "amh", "Chinese-Simplified": "cmn-Hans", "Chinese-Traditional": "cmn-Hant",
 }
-
-
-@lru_cache(maxsize=None)
-def _sense_i18n(iso: str) -> dict:
-    """{(lex, stem, sense): localized gloss} from resources/senses/senses_i18n/<iso>.tsv — the
-    non-dominant (polysemous sub-)sense translations. Empty until a language file is filled (the
-    dominant sense localizes for free via the per-stem gloss). Memoized per language."""
-    out: dict = {}
-    if not iso:
-        return out
-    p = _resources_dir() / "senses" / "senses_i18n" / f"{iso}.tsv"
-    if not p.exists():
-        return out
-    with p.open(encoding="utf-8") as fh:
-        for line in fh:
-            if line.startswith("#"):
-                continue
-            c = line.rstrip("\n").split("\t")
-            if len(c) >= 4 and c[0] != "lex":
-                out[(c[0], c[1], c[2])] = c[3]
-    return out
-
-
-def _lex_senses(code: str, lang: str = "English") -> list[dict]:
-    """Per-lexeme, per-stem Hebrew-context senses behind a Hebrew Strong's (homographs split,
-    binyan-aware). Each: {lex, stems: {qal: [{sense,gloss,share}], …}}. The DOMINANT sense's
-    label is the curated per-stem gloss in `lang` (multilingual — sense identity is Hebrew,
-    label is pluggable); sub-senses use senses_i18n/<lang> if present, else the English label.
-    Empty for Greek."""
-    if not code.startswith("H"):
-        return []
-    table = _lex_sense_table()
-    ov = _sense_i18n(_GLOSS_LANG_ISO.get(lang, "")) if lang != "English" else {}
-    out = []
-    for lex in _strong_to_lex().get(code, []):
-        if lex not in table:
-            continue
-        stems = {}
-        for stem, senses in table[lex].items():
-            ss = [dict(s) for s in senses]
-            if lang != "English" and ss:                       # dominant: reuse the per-stem gloss
-                g = resolve_word_gloss("hbo", lang, lex, stem or None)
-                if g:
-                    ss[0] = {**ss[0], "gloss": g}
-            for i in range(1, len(ss)):                        # sub-senses: per-language override
-                g = ov.get((lex, stem, ss[i]["sense"]))
-                if g:
-                    ss[i] = {**ss[i], "gloss": g}
-            stems[stem] = ss
-        out.append({"lex": lex, "stems": stems})
-    return out
 
 
 def _macula_call(name: str, code: str, lang: str = "English"):
@@ -1031,12 +892,6 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         loc = next((g for g in (resolve_word_gloss("hbo_lexeme", gloss_lang, lx, None) for lx in lexemes) if g), None) or _aligned_label_gloss(code, gloss_lang)
         if loc:
             head = {**head, "gloss": re.split(r"[;,]", loc)[0].strip()}
-    elif code.startswith("H") and gloss_lang and gloss_lang != "English":
-        for lex in _strong_to_lex().get(code, []):
-            loc = resolve_word_gloss("hbo", gloss_lang, lex, None)
-            if loc:
-                head = {**head, "gloss": re.split(r"[;,]", loc)[0].strip()}
-                break
     # attach localized TW article text (title + definition) to each strong→slug entry;
     # requested language, else English fallback. Body from tw_articles/<lang3>.json.
     lang3 = _tw_lang_by_name().get(gloss_lang, "eng")
@@ -1062,9 +917,9 @@ def word_study(strong: str, gloss_lang: str = "English") -> dict:
         "menahem": menahem_senses(code) if code.startswith("H") else None,
         "siblings": siblings,                           # nudge 3: related words
         "senses": _strong_senses().get(code, []), "cross_language": cross,
-        "stems": _macula_call("stem_senses", code, gloss_lang) if _on_macula() else _stem_senses(code, gloss_lang),   # lex-anchored: per-binyan glosses + homographs
-        "lex_senses": _macula_call("lex_senses", code, gloss_lang) if _on_macula() else _lex_senses(code, gloss_lang),   # per lex, per stem
-        # per-stem/sense occurrence distribution + sample refs (hbo.db); [] for Greek / db absent
+        "stems": _macula_call("stem_senses", code, gloss_lang) if _on_macula() else [],   # lex-anchored: per-binyan glosses + homographs
+        "lex_senses": _macula_call("lex_senses", code, gloss_lang) if _on_macula() else [],   # per lex, per stem
+        # per-stem/sense occurrence distribution + sample refs (MACULA keys); [] for Greek / db absent
         "sense_distribution": (sense_concordance(code).get("senses", []) if code.startswith("H") else []),
     }
 
@@ -1206,19 +1061,8 @@ _MACULA_TOKEN_COLS = ("key", "text", "lemma", "strong", "gloss", "role", "class"
                       "case_", "tense", "voice", "mood", "degree", "state")
 
 
-def hebrew_base() -> str:
-    return os.environ.get("VERSE_HEBREW_BASE", "uhb").lower()
-
-
-def lexeme_base() -> str:
-    """LEXEME_BASE=macula serves /senses, /lexeme, /wordstudy senses and the concordance's senses from MACULA keys (lexeme_macula.py, NC exit step 2a);
-    the default "bhsa" keeps the hbo.db readers until the acceptance report passes."""
-    return os.environ.get("LEXEME_BASE", "bhsa").lower()
-
-
 def _on_macula() -> bool:
-    if lexeme_base() != "macula":
-        return False
+    """The lexeme / sense read path is MACULA's (lexeme_macula.py); False only where its databases are absent (a bare checkout)."""
     import lexeme_macula
     return lexeme_macula.available()
 
@@ -1327,7 +1171,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
     result: dict = {"book": book, "chapter": chapter, "verse": vrs,
                     "lxx": None, "spine": None}
 
-    use_macula = spine_lang == "hbo" and hebrew_base() == "macula"
+    use_macula = spine_lang == "hbo"                  # Hebrew words: MACULA
     he_refs = lxx_refs = [(book, chapter, vrs)]
     if use_macula:
         import vrsmap
@@ -1373,7 +1217,7 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
             w["idx"] = i
         if mwords:
             result["spine"] = {"language": "hbo", "base": "macula", "versification": "org", "words": mwords}
-    scon = None if use_macula else _ro(SPINE_DB)
+    scon = None if use_macula else _ro(SPINE_DB)      # the Greek NT words (UGNT); the Hebrew words are MACULA's
     if scon:
         rows = scon.execute(
             "SELECT idx, surface, strong, lemma, morph FROM spine_words "
@@ -1381,51 +1225,24 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
             (book, chapter, vrs)).fetchall()
         scon.close()
         if rows:
-            senses = _verse_sense_map(book, chapter, vrs, gloss_lang) if spine_lang == "hbo" else {}
-            # settings come keyed by Strong's in text order (MACULA tokens); match them in order
-            pending = collections.defaultdict(collections.deque)
-            verse_settings = _settings()[1].get((book, chapter, vrs), []) if spine_lang == "hbo" else []
-            for n, (st_code, sid, via) in enumerate(verse_settings):
-                pending[st_code].append((sid, via, n))
             doms = _strong_domains()          # Greek per-word domain (Louw-Nida `sdbg`)
             words = []
             for r in rows:
                 code = _strong_code(spine_lang, r["strong"])
                 w = {"idx": r["idx"], "surface": r["surface"], "lemma": r["lemma"],
                      "strong": code, "morph": r["morph"], **(gloss_of(code) or {})}
-                # Localize the per-word gloss where the spine lemma IS the word_glosses key
-                # (Greek/Nestle1904). Hebrew's pointed lemma doesn't match the ETCBC-lex key, so
-                # it stays on the binyan-correct `sense` path below (going via strong→lex here
-                # would mis-pick homographs, e.g. אֵת → a content gloss).
+                # Localize the per-word gloss where the spine lemma is the word_glosses key (Greek)
                 if gloss_lang and gloss_lang != "English" and r["lemma"]:
                     loc = resolve_word_gloss(spine_lang, gloss_lang, r["lemma"], None)
                     if loc:
                         w["gloss"] = re.split(r"[;,]", loc)[0].strip()
-                if senses.get(code):                       # binyan-correct sense (OT, hbo.db)
-                    w["sense"] = senses[code]
-                if spine_lang == "hbo":
-                    # CC0 semantic group (replaced SDBH `core` 2026-10); `domain` stays a plain string
-                    group = semantic_group(code, gloss_lang) if code else None
-                    if group:
-                        w["group"] = group
-                        w["domain"] = group_label(group, domain_gloss)
-                    if code and pending.get(_norm_strong(code)):
-                        sid, via, _n = pending[_norm_strong(code)].popleft()
-                        rec = setting_record(sid, gloss_lang, with_gloss=domain_gloss)
-                        if rec:
-                            w["setting"] = {**rec, "via": "word" if via == "w" else "passage"}
-                else:
-                    dd = doms.get(_norm_strong(code)) if code else None
-                    dd_axis = [x for x in dd if x[0] == "sdbg"] if dd else []
-                    if dd_axis:                            # dominant Louw-Nida domain
-                        best = _dominant_domain(dd_axis)   # top-domain gate + finer subdomain label
-                        if best:
-                            w["domain"] = _localize_domain(best[0], best[1], gloss_lang)
+                dd = doms.get(_norm_strong(code)) if code else None
+                dd_axis = [x for x in dd if x[0] == "sdbg"] if dd else []
+                if dd_axis:                            # dominant Louw-Nida domain
+                    best = _dominant_domain(dd_axis)   # top-domain gate + finer subdomain label
+                    if best:
+                        w["domain"] = _localize_domain(best[0], best[1], gloss_lang)
                 words.append(w)
-            if spine_lang == "hbo":
-                _match_leftover_settings(words, pending, gloss_lang, domain_gloss)
-                _attach_explanations(book, chapter, vrs, words)
-                _attach_menahem(book, chapter, vrs, words)
             result["spine"] = {"language": spine_lang, "words": words}
     n = len(_malbim_commentary().get((book, chapter, vrs), ()))
     if n:                                  # the full comments are long: /verse/.../malbim
@@ -1571,170 +1388,40 @@ def concordance(strong: str, limit: int = 200) -> dict:
                             "surface": r["surface"], "morph": r["morph"]})
             lcon.close()
 
-    macula = lang == "hbo" and _on_macula()
-    if macula:                                         # Hebrew side from MACULA: Hebrew numbering, token keys, per-occurrence senses
+    if lang == "hbo":                                  # Hebrew side from MACULA: Hebrew numbering, token keys, per-occurrence senses
         import lexeme_macula
         occ.extend(lexeme_macula.occurrences(strong, limit))
-    scon = None if macula else _ro(SPINE_DB)
-    if scon:
-        books = NT_BOOKS if lang == "grc" else OT_BOOKS
-        qmarks = ",".join("?" * len(books))
+    elif (scon := _ro(SPINE_DB)):
+        qmarks = ",".join("?" * len(NT_BOOKS))
         for r in scon.execute(
             f"SELECT book, chapter, verse, surface, morph FROM spine_words "
             f"WHERE strong=? AND book IN ({qmarks}) "
             f"ORDER BY INSTR(?, ','||book||','), chapter, verse LIMIT ?",
-            (num, *sorted(books), ORDER_STR, limit)).fetchall():
+            (num, *sorted(NT_BOOKS), ORDER_STR, limit)).fetchall():
             occ.append({"corpus": "spine", "ref": f"{r['book']} {r['chapter']}:{r['verse']}",
                         "surface": r["surface"], "morph": r["morph"]})
         scon.close()
-
-    if lang == "hbo" and not macula:                   # attach the binyan-correct sense per occurrence
-        by_ref = _strong_sense_by_ref(strong)
-        for o in occ:
-            label = by_ref.get(o["ref"])
-            if label:
-                o["sense"] = label
 
     return {"strong": strong, "language": lang, **(gloss_of(strong) or {}),
             "count": len(occ), "truncated": len(occ) >= limit, "occurrences": occ}
 
 
-# ---------- OT linguistic core (hbo.db): sense-concordance + lexeme profile ----------
-# hbo.db = per-occurrence BHSA (ref, lex, stem, strong, sense). Hebrew/OT only; shipped as a host
-# data volume (HBO_DB_PATH), NOT baked. See internal-docs/roadmap.md (Phase 1).
-
-def _hbo_path() -> Path:
-    env = os.environ.get("HBO_DB_PATH")
-    return Path(env) if env else _resources_dir() / "occurrences" / "hbo.db"
-
-
-def _sense_groups(rows) -> list[dict]:
-    """Group occurrence rows (lex/stem/sense + book/chapter/verse) by (lex, stem, sense) → each a
-    binyan-correct sense with its label, count, and sample refs. Count-sorted."""
-    labels = _lex_sense_table()                       # {lex: {stem: [{sense, gloss, share}]}}
-    groups: dict = collections.OrderedDict()
-    for r in rows:
-        stem, sense = r["stem"] or "", r["sense"] or ""
-        key = (r["lex"], stem, sense)
-        g = groups.get(key)
-        if g is None:
-            label = next((s["gloss"] for s in labels.get(r["lex"], {}).get(stem, [])
-                          if s["sense"] == sense), None)
-            g = groups[key] = {"lex": r["lex"], "stem": stem, "sense": sense,
-                               "label": label, "count": 0, "refs": []}
-        g["count"] += 1
-        if len(g["refs"]) < 6:
-            g["refs"].append(f"{r['book']} {r['chapter']}:{r['verse']}")
-    return sorted(groups.values(), key=lambda x: -x["count"])
-
+# ---------- OT linguistic core (MACULA lexeme keys): sense-concordance + lexeme profile ----------
 
 def sense_concordance(strong: str, limit: int = 5000) -> dict:
-    """Occurrences of a Hebrew Strong's GROUPED by binyan/sense (hbo.db) — e.g. H6942 → piel
-    'consecrate' (63×) · niphal 'be shown holy' (9×) · qal 'be holy' (7×). Hebrew/OT only."""
+    """Occurrences of a Hebrew Strong's GROUPED by lexeme, binyan and sense (MACULA keys) - e.g. H6942 -> piel 'consecrate'. Hebrew/OT only."""
     strong = strong.strip().upper()
     if not (strong.startswith("H") and strong[1:].isdigit()):
         return {"error": "sense-concordance is Hebrew-only (H####)"}
-    if _on_macula():
-        import lexeme_macula
-        return {"strong": strong, "language": "hbo", **(gloss_of(strong) or {}), **lexeme_macula.sense_concordance(strong, limit)}
-    con = _ro(_hbo_path())
-    if con is None:
-        return {"error": "hbo.db unavailable (OT linguistic core not shipped)"}
-    rows = con.execute(
-        "SELECT book, chapter, verse, lex, stem, sense FROM occurrence WHERE strong=? "
-        "ORDER BY node LIMIT ?", (_norm_strong(strong), limit)).fetchall()
-    con.close()
-    return {"strong": strong, "language": "hbo", **(gloss_of(strong) or {}),
-            "senses": _sense_groups(rows)}
-
-
-_STRONG_LOOKALIKE = re.compile(r"^[GgHh]\d")
-
-
-def _lexeme_profile_one(lex: str) -> dict:
-    con = _ro(_hbo_path())
-    if con is None:
-        return {"error": "hbo.db unavailable (OT linguistic core not shipped)"}
-    rows = con.execute(
-        "SELECT book, chapter, verse, lex, stem, sense, strong FROM occurrence WHERE lex=? "
-        "ORDER BY node", (lex,)).fetchall()
-    con.close()
-    if not rows:
-        return {"error": f"no occurrences for lex {lex!r}"}
-    return {"lex": lex, "strong": sorted({r["strong"] for r in rows if r["strong"]}),
-            "total": len(rows), "senses": _sense_groups(rows)}
+    import lexeme_macula
+    return {"strong": strong, "language": "hbo", **(gloss_of(strong) or {}), **lexeme_macula.sense_concordance(strong, limit)}
 
 
 def lexeme_profile(lex: str) -> dict:
-    """A BHSA-lexeme profile (the granular anchor a shared Strong's conflates): every stem × sense ×
-    count × sample refs, from hbo.db. `lex` is normally the BHSA lex-id, but a Hebrew Strong's code
-    (H####) is also accepted — resolved via the reverse Strong's->lexeme map (_strong_to_lex). Since
-    one Strong's code can conflate several homograph lexemes (733 Hebrew codes do), a Strong's lookup
-    may fan out into multiple profiles rather than silently picking one.
-    With LEXEME_BASE=macula `lex` is a MACULA lexeme id (hbo:6942) or an H-code; BHSA lex-ids are no longer understood."""
+    """A lexeme's profile (the granular anchor a shared Strong's conflates): every stem x sense x count x sample refs, from MACULA keys.
+    `lex` is a MACULA lexeme id (hbo:6942) or a Hebrew Strong's code (H####, all its homographs)."""
     import lexeme_macula
-    if _on_macula() or (lexeme_macula.is_lexeme_id(lex) and lexeme_macula.available()):   # a MACULA lexeme id (hbo:6942) can only be answered from MACULA
-        return lexeme_macula.lexeme_profile(lex)
-    if _STRONG_LOOKALIKE.match(lex.strip()):
-        code = _norm_strong(lex)
-        if code.startswith("G"):
-            return {"error": f"BHSA is Hebrew-only — Greek Strong's {code!r} has no BHSA lexeme"}
-        lexes = _strong_to_lex().get(code, [])
-        if not lexes:
-            return {"error": f"no occurrences for Strong's {code!r} (not found in the BHSA lexeme map)"}
-        if len(lexes) == 1:
-            return _lexeme_profile_one(lexes[0])
-        return {"strong": code, "lexemes": [_lexeme_profile_one(l) for l in lexes]}
-    return _lexeme_profile_one(lex)
-
-
-def _verse_sense_map(book: str, chapter: int, vrs: int, gloss_lang: str = "English") -> dict:
-    """{strong: binyan-correct sense label} for a verse's Hebrew words (hbo.db ⋈ sense inventory).
-    `gloss_lang` localizes the label via the per-stem multilingual gloss (falls back to the English
-    sense). First occurrence of a strong wins. Empty when hbo.db is unavailable / the verse is non-OT."""
-    con = _ro(_hbo_path())
-    if con is None:
-        return {}
-    english = _lex_sense_table()
-    localize = bool(gloss_lang) and gloss_lang != "English"
-    rows = con.execute(
-        "SELECT strong, lex, stem, sense FROM occurrence WHERE book=? AND chapter=? AND verse=?",
-        (book, chapter, vrs)).fetchall()
-    con.close()
-    out: dict = {}
-    for r in rows:
-        code = _spine_code(r["strong"]) if r["strong"] else None   # unpad (H0430→H430) → spine word code
-        if not code or code in out:
-            continue
-        label = resolve_word_gloss("hbo", gloss_lang, r["lex"], r["stem"] or None) if localize else None
-        if not label:
-            label = next((s["gloss"] for s in english.get(r["lex"], {}).get(r["stem"] or "", [])
-                          if s["sense"] == (r["sense"] or "")), None)
-        if label:
-            out[code] = label
-    return out
-
-
-def _strong_sense_by_ref(strong: str) -> dict:
-    """{'BOOK C:V': sense label} for a Hebrew strong (hbo.db ⋈ inventory) — attaches the sense to each
-    occurrence of a concordance. First sense per verse wins."""
-    con = _ro(_hbo_path())
-    if con is None:
-        return {}
-    labels = _lex_sense_table()
-    out: dict = {}
-    for r in con.execute(
-            "SELECT book, chapter, verse, lex, stem, sense FROM occurrence WHERE strong=? ORDER BY node",
-            (_norm_strong(strong),)):
-        ref = f"{r['book']} {r['chapter']}:{r['verse']}"
-        if ref in out:
-            continue
-        label = next((s["gloss"] for s in labels.get(r["lex"], {}).get(r["stem"] or "", [])
-                      if s["sense"] == (r["sense"] or "")), None)
-        if label:
-            out[ref] = label
-    con.close()
-    return out
+    return lexeme_macula.lexeme_profile(lex)
 
 
 # -- Bridge 3: morphological pattern search --

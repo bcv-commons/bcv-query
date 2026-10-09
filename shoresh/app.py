@@ -309,15 +309,10 @@ def get_gloss_languages(language: str) -> dict:
     dropdown. `English` is always present (inline from the corpus); others are the
     `<Lang>.csv` files in resources/word_glosses/<src>/. Availability differs by source
     (e.g. a Hebrew/Aramaic-only set won't appear for Greek)."""
-    src = {"Hebrew": "hbo", "Aramaic": "hbo", "Greek": "grc"}.get(language)
+    src = {"Hebrew": "hbo_lexeme", "Aramaic": "hbo_lexeme", "Greek": "grc"}.get(language)
     if src is None:
         raise HTTPException(400, f"language must be Hebrew, Aramaic, or Greek (got '{language}')")
     return {"language": language, "languages": data.gloss_languages(src)}
-
-
-def _structure_on_macula() -> bool:
-    import corpus as _corpus
-    return _corpus._on_macula()
 
 
 @app.get("/words")
@@ -412,8 +407,7 @@ def get_words(
     # resolve each word's gloss from resources/word_glosses and restrict the pool to
     # lexemes that have a gloss in it (so total_pool stays accurate). Omitted/English
     # keeps the inline corpus gloss.
-    on_macula = _structure_on_macula()               # STRUCTURE_BASE=macula: MACULA tokens, lexeme ids; glosses from word_glosses/hbo_lexeme
-    gloss_src = ("hbo_lexeme" if on_macula else "hbo") if corpus == "hebrew" else "grc"
+    gloss_src = "hbo_lexeme" if corpus == "hebrew" else "grc"
     use_glang = bool(gloss_lang) and gloss_lang.strip().lower() != "english"
     lex_filter = None
     if use_glang:
@@ -423,10 +417,7 @@ def get_words(
         lex_filter = data.gloss_lexemes(gloss_src, gloss_lang)
 
     try:
-        if on_macula:
-            import words_macula as engine
-        else:
-            from corpus_engine import engine
+        import words_macula as engine
         result = engine.list_words_filtered(
             corpus=corpus,
             language=language if corpus == "hebrew" else None,
@@ -452,12 +443,12 @@ def get_words(
         w["keyness"] = data.keyness_of(strong) if strong else None
         if use_glang:
             import words_macula
-            stem_name = words_macula.STEM_NAME.get(w.get("stem"), w.get("stem")) if on_macula else w.get("stem")     # hbo_lexeme columns carry MACULA stem names
+            stem_name = words_macula.STEM_NAME.get(w.get("stem"), w.get("stem"))     # hbo_lexeme columns carry MACULA stem names
             g = data.resolve_word_gloss(gloss_src, gloss_lang, w.get("lex", ""), stem_name)
             if g:
                 w["gloss"] = g
-        elif strong and ((on_macula and corpus == "hebrew") or (w.get("gloss") or "").strip() in ("", "-")):       # MACULA token glosses are inflected phrases ("you.will.consecrate"): use the lexeme's
-            lexg = data.resolve_word_gloss("hbo_lexeme", "English", w.get("lex", ""), None) if (on_macula and corpus == "hebrew") else None     # a lexeme's own gloss first: a Strong's number is shared by homographs and prefixes (H0871 is "Atharim", the prefix בְּ is hbo:0871a "in")
+        elif strong and (corpus == "hebrew" or (w.get("gloss") or "").strip() in ("", "-")):       # MACULA token glosses are inflected phrases ("you.will.consecrate"): use the lexeme's
+            lexg = data.resolve_word_gloss("hbo_lexeme", "English", w.get("lex", ""), None) if corpus == "hebrew" else None     # a lexeme's own gloss first: a Strong's number is shared by homographs and prefixes (H0871 is "Atharim", the prefix בְּ is hbo:0871a "in")
             g = {"gloss": lexg} if lexg else data.gloss_of(strong)
             if g and g.get("gloss"):
                 w["gloss"] = g["gloss"]

@@ -6,24 +6,19 @@ it **non-commercial**. This project operates under that constraint **while it
 migrates off those sources** (status below). Published open datasets are BHSA-free:
 see `resources/LICENSES.md`.
 
-**Status 2026-10-07 (NC exit in progress):**
-- Still NC and used by the running service: the BHSA / ETCBC Nestle1904 text-fabric
-  corpus (`/structure*`, `/syntax/search`, trees), `hbo.db` (BHSA lexeme ids, stems,
-  senses), the Hebrew and Greek clause-search databases, `spine.db` (UHB plus the
-  OpenHebrewBible crosswalk), `resources/senses/hbo_lex.tsv`, and the BHSA-keyed
-  `word_glosses/` and `lexicons/`.
-- The embedded `index.db` (bcv-RAG) is built from open resources (translations, notes,
-  commentary) and carries exactly one BHSA-derived table, `clause_dependencies`
-  (20,791 rows). Its embeddings do not contain a BHSA-derived spine prefix.
-- Already open: the published `lexeme-spine-macula.db` (CC BY, MACULA only, Psalm titles
-  from Hebrew-only spans), `semantic-neighbors`, `prior-pack`, `hebrew-word-senses`,
-  `hebrew-lexical-references`, `strongs`.
-- Step 3 built (2026-10-08, `STRUCTURE_BASE=macula`, not yet the default): structure,
-  trees, syntax search and the `/words` feed from MACULA lowfat trees (CC BY 4.0;
-  UBS MARBLE fields are never read). Once flipped, the BHSA / Nestle1904 text-fabric
-  corpus is only read by clause search (step 5) and the build scripts.
-- Replacement path: MACULA Hebrew and Greek (CC BY 4.0), step by step; the NC-only
-  parts above are removed as each is replaced.
+**Status 2026-10-09 (NC exit, service side complete):**
+- The running service reads **no BHSA / ETCBC / OpenHebrewBible files**: structure, trees, syntax search, `/words`,
+  senses, `/verse` Hebrew words and clause search are all MACULA (CC BY 4.0). The BHSA text-fabric corpus mount and
+  `hbo.db` are retired; `clause_dependencies` was dropped from `index.db` (MACULA has no clause-to-clause relations).
+  Served resources that were *derived* from BHSA earlier (for example tiers of the semantic-neighbours pack) are
+  not yet audited here; `resources/LICENSES.md` is the register. Keep the deployment non-commercial until that audit says otherwise.
+- `spine.db` stays, built from UHB / UGNT (unfoldingWord, CC BY-SA 4.0) only: it serves the Greek NT `/verse` words,
+  `/morph` and the `/gloss` counts. It is not NC.
+- Still NC and only used **offline** (build scripts, local, git-ignored outputs): the BHSA / Nestle1904 text-fabric
+  corpus (`corpus_engine/`, `macula/build_*` scripts, `spine/reconcile.py`), `resources/senses/hbo_lex.tsv`,
+  the BHSA-keyed `word_glosses/hbo` and `lexicons/`. Open datasets published from this repo are BHSA-free.
+- Already open: the published `lexeme-spine-macula.db` (CC BY, MACULA only, Psalm titles from Hebrew-only spans),
+  `semantic-neighbors`, `prior-pack`, `hebrew-word-senses`, `hebrew-lexical-references`, `strongs`.
 
 ## Sources
 

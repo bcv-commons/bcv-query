@@ -1,4 +1,4 @@
-"""Lexeme/sense read path on MACULA keys (lexeme_macula.py) and the LEXEME_BASE switch in data.py (NC exit step 2a).
+"""Lexeme/sense read path on MACULA keys (lexeme_macula.py) and data.py's use of it (NC exit step 2a).
 Runs on the real lexeme-spine-macula.db + verse-senses.db and skips without them."""
 import sys
 from pathlib import Path
@@ -47,30 +47,21 @@ def test_concordance_rows_are_in_hebrew_numbering_with_token_keys_and_senses():
     assert rows[0]["ref"] == "GEN 1:1" and len(rows[0]["key"]) == 12 and rows[0]["sense"] == "beginning"
 
 
-def test_the_switch_in_data_py(monkeypatch):
+def test_data_py_reads_the_macula_keys():
     import data
-    monkeypatch.setenv("LEXEME_BASE", "bhsa")
-    assert not data._on_macula()
-    monkeypatch.setenv("LEXEME_BASE", "macula")
     assert data._on_macula()
     assert data.sense_concordance("H6942")["senses"][0]["lex"] == "hbo:6942"
     ws = data.word_study("H6942")
     assert ws["lex_senses"][0]["lex"] == "hbo:6942" and ws["stems"][0]["senses"]["qal"]
     assert data.lexicon_meanings_for_strongs("H6942", "x")[0]["grammar"]
     assert data.concordance("H7225", 2)["occurrences"][0]["key"]
-
-
-def test_a_macula_lexeme_id_is_answered_from_macula_even_with_the_bhsa_default(monkeypatch):
-    import data
-    monkeypatch.setenv("LEXEME_BASE", "bhsa")
-    assert data.lexeme_profile("hbo:6942")["lex"] == "hbo:6942"                       # the id form can only be MACULA (the MCP tool relies on this)
+    assert data.lexeme_profile("hbo:6942")["lex"] == "hbo:6942"
 
 
 def test_localized_stem_labels_come_from_the_rekeyed_glosses(monkeypatch):
     import data
     if not (data._gloss_dir("hbo_lexeme") / "German.csv").exists():
         pytest.skip("word_glosses/hbo_lexeme not built")
-    monkeypatch.setenv("LEXEME_BASE", "macula")
     en = data.word_study("H6942", "English")
     de = data.word_study("H6942", "German")
     assert en["stems"][0]["senses"]["piel"] != de["stems"][0]["senses"]["piel"]            # German per-stem gloss replaces the English sense label

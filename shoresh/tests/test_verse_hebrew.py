@@ -98,7 +98,6 @@ MACULA = SHORESH / "macula" / "macula-spine.db"
 class TestAgainstTheRealSpine:
     @pytest.fixture(autouse=True)
     def base(self, monkeypatch):
-        monkeypatch.setenv("VERSE_HEBREW_BASE", "macula")
         import data
         self.data = data
 
@@ -113,11 +112,6 @@ class TestAgainstTheRealSpine:
         assert len(r["words"]) == 6 and r["words"][0]["lemma"].startswith("מִזְמוֹר")
         assert self.data.verse("PSA", 3, 0)["spine"] is None
 
-    def test_the_old_base_is_untouched_by_default(self, monkeypatch):
-        monkeypatch.delenv("VERSE_HEBREW_BASE", raising=False)
-        sp = self.data.verse("GEN", 1, 1)["spine"]
-        assert "base" not in sp and isinstance(sp["words"][0]["morph"], str)
-
     def test_the_nt_side_is_not_affected(self):
         sp = self.data.verse("JHN", 1, 1)["spine"]
         assert sp["language"] == "grc" and "base" not in sp
@@ -126,7 +120,6 @@ class TestAgainstTheRealSpine:
 @pytest.mark.skipif(not MACULA.exists(), reason="macula-spine.db not built locally")
 def test_concurrent_verse_requests_get_their_own_answers(monkeypatch):
     import concurrent.futures as cf
-    monkeypatch.setenv("VERSE_HEBREW_BASE", "macula")
     import data
     refs = [("GEN", 1, v) for v in range(1, 20)] + [("PSA", 23, v) for v in range(1, 7)]
     serial = {r: [w["surface"] for w in data.verse(*r)["spine"]["words"]] for r in refs}

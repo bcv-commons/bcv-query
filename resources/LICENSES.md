@@ -23,7 +23,7 @@ non-commercial terms, not an open release. Do not copy them into CC0/CC BY outpu
 - `parallelism/parallelism_pairs.tsv` — T'OMIM-confirmed tier only (CC BY 4.0).
 
 ## Removed from tracking 2026-10-07 (kept locally, git-ignored, never published)
-`bhsa_hierarchy/` (BHSA clause and apposition hierarchy; `clause_mother.tsv` is read by bcv-RAG's `ingest/clause_dependencies.py` from a local copy),
+`bhsa_hierarchy/` (BHSA clause and apposition hierarchy; `clause_mother.tsv` fed the retired `clause_dependency_lookup` tool (step 4)),
 `bhsa_structural/` (coordination and apposition pairs), `syntax_profiles/` (verb argument-slot fillers), and
 `parallelism/parallelism_pairs.local.tsv` (the BHSA-derived "detected" tier). They remain in the git history of this public repository.
 

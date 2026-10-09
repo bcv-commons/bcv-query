@@ -154,14 +154,6 @@ carries the source citation.
 | `torah_unit_lookup` | `reference*, lang` | A Torah verse's literary unit + claimed structurally-paired cell(s), optionally overlaid with the paired verses' text in `lang` and any Strong's numbers shared between them — both best-effort. |
 | `torah_units` | `book` | Browse the 86 units as a Torah outline (title + verse range per unit), independent of the pairing claim. |
 
-**BHSA clause-level dependency** — grammatical annotation (Context Fabric reports it, doesn't infer),
-not a lexical/word-pair signal. Read `clause_dependency_lookup`'s own response `note` field before
-reading "depth" as meaningful — coordinated lists (name rosters) chain as deep as real subordination.
-
-| Tool | Arguments | What it does |
-|---|---|---|
-| `clause_dependency_lookup` | `reference*` | A verse's clause-level dependency structure (Objc/Attr/Adju/Coor/Resu/...) — which clauses it depends on, and which other clauses depend on it (the reverse direction, surfacing "hub" clauses). Hebrew Bible only. |
-
 ## Notes
 
 - Tool results are best-effort JSON; enrichment that can't be produced is omitted rather

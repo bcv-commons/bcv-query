@@ -126,7 +126,6 @@ MACULA = SHORESH / "macula" / "macula-spine.db"
 class TestVerseInTheReadersNumbering:
     @pytest.fixture(autouse=True)
     def base(self, monkeypatch):
-        monkeypatch.setenv("VERSE_HEBREW_BASE", "macula")
         monkeypatch.setenv("VERSIFICATION_MAP_DIR", str(REAL))
         import data, vrsmap
         for f in (vrsmap.table, vrsmap.shape, vrsmap._index_cached):
@@ -149,12 +148,6 @@ class TestVerseInTheReadersNumbering:
         import vrsmap
         with pytest.raises(vrsmap.UnknownScheme):
             self.data.verse("GEN", 1, 1, versification="luther")
-
-    def test_the_uhb_base_ignores_the_parameter(self, monkeypatch):
-        monkeypatch.setenv("VERSE_HEBREW_BASE", "uhb")
-        a = self.data.verse("GEN", 1, 1, versification="rso")["spine"]["words"]
-        b = self.data.verse("GEN", 1, 1)["spine"]["words"]
-        assert [w["surface"] for w in a] == [w["surface"] for w in b]
 
 
 def test_revalidation_downloads_only_what_changed(tmp_path, monkeypatch):

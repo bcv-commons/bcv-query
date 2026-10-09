@@ -134,12 +134,6 @@ def test_bhsa_style_codes_map_both_ways():
     assert wm.STEM_CODE["niphal"] == "nif" and wm.STEM_NAME["hif"] == "hiphil" and wm.HBO_TENSE["wayyiqtol"] == "wayq"
 
 
-def test_corpus_switch_defaults_to_the_engine(monkeypatch):
-    import corpus
-    monkeypatch.delenv("STRUCTURE_BASE", raising=False)
-    assert corpus.structure_base() == "bhsa" and corpus._on_macula() is False
-
-
 REAL = HERE / "macula" / "trees-macula.db"
 
 

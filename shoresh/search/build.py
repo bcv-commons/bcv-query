@@ -1,16 +1,10 @@
 """Build the clause vector store — the one-off embed step.
 
-Fetches BHSA clauses from the corpus engine, embeds them with the
-original-language model (BEREL for Hebrew), and writes `clauses_<lang>.npy` +
-`clauses_<lang>.sqlite` to DATA_DIR.
+Reads the clauses of MACULA's lowfat trees (macula/trees-macula.db; CC BY 4.0: the words of one clause node in reading order),
+embeds them with the original-language model (BEREL for Hebrew, SPhilBERTa for Greek) and writes `clauses_<lang>.npy` +
+`clauses_<lang>.sqlite` to --out (default DATA_DIR). Needs a GPU for speed (minutes) and no text-fabric corpus.
 
-The Context-Fabric corpus engine is now in-process in shoresh (migration), so
-this reads clauses directly from the local engine — no CORPUS_URL / network hop.
-Needs the corpus volume mounted ($HOME/text-fabric-data). Run inside the shoresh
-container (or any env with the engine + corpus data), then the .npy/.sqlite land
-in DATA_DIR (/data):
-
-    SHORESH_DATA=/data python3 -m search.build --lang hbo
+    SEARCH_EMBEDDER=berel python3 -m search.build --lang hbo --out ./out      # then ship the files with deploy/deploy-data.sh
 """
 from __future__ import annotations
 
@@ -24,18 +18,6 @@ from search.embedder import get_encoder
 from search.store import DATA_DIR
 
 CORPUS_OF = {"hbo": "hebrew", "grc": "greek"}
-
-
-def fetch_clauses(corpus: str) -> list[dict]:
-    """All clauses of a corpus, gathered book by book from the local engine."""
-    from corpus_engine import engine
-    clauses: list[dict] = []
-    for b in engine.list_books(corpus):
-        rows = engine.list_clauses(corpus, b.name)
-        rows = [r for r in rows if "error" not in r]
-        print(f"  {b.name}: {len(rows)} clauses", file=sys.stderr)
-        clauses.extend(rows)
-    return clauses
 
 
 def fetch_clauses_macula(corpus: str, db: Path) -> list[dict]:
@@ -57,13 +39,11 @@ def fetch_clauses_macula(corpus: str, db: Path) -> list[dict]:
     return [c for c in clauses if c["text"]]
 
 
-def build(lang: str, base: str = "bhsa", db: Path | None = None, out: Path | None = None) -> None:
+def build(lang: str, db: Path, out: Path | None = None) -> None:
     import numpy as np
-    from corpus import name_to_usfm
     corpus = CORPUS_OF[lang]
-    name2usfm = {} if base == "macula" else name_to_usfm(corpus)          # corpus book name -> USFM (from the one helper); MACULA rows carry USFM already
     print(f"reading {corpus} clauses from the local corpus engine …", file=sys.stderr)
-    clauses = fetch_clauses_macula(corpus, db) if base == "macula" else fetch_clauses(corpus)
+    clauses = fetch_clauses_macula(corpus, db)
     print(f"embedding {len(clauses)} clauses with the {lang} model …", file=sys.stderr)
 
     encoder = get_encoder(lang)
@@ -86,7 +66,7 @@ def build(lang: str, base: str = "bhsa", db: Path | None = None, out: Path | Non
                "chapter INTEGER, verse INTEGER, text TEXT)")
     db.executemany(
         "INSERT INTO clauses VALUES (?,?,?,?,?)",
-        [(i, name2usfm.get(c["book"], c["book"]),
+        [(i, c["book"],
           c["chapter"], c["verse"], c["text"])
          for i, c in enumerate(clauses)])
     db.commit()
@@ -101,13 +81,12 @@ def main():
     ap.add_argument("--embedder", choices=["cloudflare", "bge-m3-local", "berel"],
                     default=None,
                     help="Override SEARCH_EMBEDDER for this build")
-    ap.add_argument("--base", choices=["bhsa", "macula"], default="bhsa", help="clause source: text-fabric engine (BHSA/Nestle, non-commercial) or MACULA trees")
     ap.add_argument("--trees", type=Path, default=Path(__file__).resolve().parents[1] / "macula" / "trees-macula.db")
     ap.add_argument("--out", type=Path, default=None, help="write the vectors here instead of DATA_DIR")
     args = ap.parse_args()
     if args.embedder:
         os.environ["SEARCH_EMBEDDER"] = args.embedder
-    build(args.lang, args.base, args.trees, args.out)
+    build(args.lang, args.trees, args.out)
 
 
 if __name__ == "__main__":

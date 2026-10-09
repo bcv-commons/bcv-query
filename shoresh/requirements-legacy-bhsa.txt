@@ -1,0 +1,4 @@
+# Dev-only (NC exit step 6): the BHSA / Nestle1904 Context-Fabric engine, kept in shoresh/corpus_engine/ for the offline build scripts.
+# The service does not use it. Install with: pip install -r requirements.txt -r requirements-legacy-bhsa.txt
+context-fabric>=0.5.0
+text-fabric>=12.0.0

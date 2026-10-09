@@ -77,17 +77,16 @@ curl -X POST "$HOST/upload/clauses_hbo.sqlite?secret=$SECRET" --data-binary @dat
 | `spine.db` | 41MB | UHB/UGNT, 443k words, 99.59% BHSA-reconciled |
 | `lxx.db` | — | Rahlfs 1935, 587k words, 54 books, 93% Strong's-tagged |
 | `spine_glosses.tsv` | 465KB | STEPBible TBESH/TBESG (CC BY), 14,300 entries |
-| `clauses_hbo.npy` | 344MB | 88,131 BHSA clauses, 1024d BGE-M3 vectors |
-| `clauses_grc.npy` | 31MB | 8,011 Nestle1904 sentences, 1024d BGE-M3 vectors |
+| `clauses_hbo.npy` | 311MB | 101,200 MACULA clauses, 768d BEREL vectors |
+| `clauses_grc.npy` | 141MB | 46,050 MACULA clauses, 768d SPhilBERTa vectors |
 
-## Corpus engine (BHSA / Nestle1904 via Context-Fabric)
+## Corpus engine (BHSA / Nestle1904 via Context-Fabric): dev-only, not part of the service
 
-`shoresh/corpus_engine/` and several `macula/build_*.py` scripts (`extract_hbo_syntax.py`,
+Since NC exit step 6 the service reads no BHSA data (structure, trees, syntax search, `/words`, senses and clause search are MACULA, CC BY). `shoresh/corpus_engine/` and several `macula/build_*.py` scripts (`extract_hbo_syntax.py`,
 `build_bhsa_structural_pairs.py`, `build_parallelism_pairs.py`, `spine/reconcile.py`,
 `bcv-RAG/scripts/build_lex_occurrences.py`) read the ETCBC/BHSA (Hebrew) and ETCBC/nestle1904 (Greek)
 corpora in Text-Fabric format, expected at `~/text-fabric-data`. This is a **CC BY-NC-SA download**,
-not part of the repo or baked into any Docker image (production mounts it as a host volume — see
-`internal-docs/hosting.md`) — a fresh clone or new dev machine needs to fetch it once:
+not part of the repo, not in any Docker image and no longer mounted in production — a fresh clone or new dev machine needs to fetch it once:
 
 ```bash
 python -c "from tf.app import use; use('ETCBC/bhsa', version='2021')"   # Hebrew — version pinned to
@@ -101,7 +100,7 @@ This downloads into `~/text-fabric-data/github/ETCBC/<repo>/tf/<version>` — th
 scripts hardcode. `context-fabric`'s own `cfabric.downloader` has no BHSA/Nestle1904 registration as
 of 0.5.7 (`list_corpora()` returns `{}`); fetch via classic `text-fabric`'s `tf.app.use()` above —
 `shoresh/corpus_engine/cf_engine.py` reads whatever lands at that path regardless of which tool
-fetched it.
+fetched it. Install its Python deps with `requirements-legacy-bhsa.txt`.
 
 Loading the full corpus (`CF.loadAll()`) takes ~1.6GB RAM — `internal-docs/hosting.md` warns not to
 re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
@@ -117,8 +116,6 @@ re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
 | `SHORESH_DATA` | `/data` | Clause vector directory |
 | `SHORESH_FILES_BASE` | — | Base URL advertised by `GET /files` (e.g. `https://files.qombi.com`); default: the host the client used |
 | `SHORESH_FILES_LIMIT` | `8/hour` | Per-IP limit on `GET /files/{name}` |
-| `LEXEME_BASE` | `bhsa` | `macula` serves `/senses`, `/lexeme`, `/wordstudy`, `/word` and the SDBH-shaped meanings from `lexeme-spine-macula.db` + `verse-senses.db` (CC BY, no BHSA input) instead of `hbo.db`; needs both files, else falls back to `bhsa`. Not flipped yet: per-stem sense labels for verbs are below the acceptance bar (`python -m macula.compare_lexeme_bases`) |
-| `STRUCTURE_BASE` | `bhsa` | `macula` serves `/structure*`, `/verse/.../tree`, `/syntax/search` and the `/words` feed from MACULA's lowfat trees (`trees-macula.db`, CC BY, no BHSA/ETCBC input) instead of the Context-Fabric engine; needs `trees-macula.db` and `lexeme-spine-macula.db`, else falls back to `bhsa`. Build: `python -m macula.build_trees`; acceptance: `python -m macula.compare_structure_bases`, `python -m macula.compare_words_bases` |
 | `TREES_DB` | `/data/trees-macula.db`, `/data/public/…`, then `macula/` | The tree database |
 | `LEXEME_SPINE_DB`, `VERSE_SENSES_DB` | `/data/<name>`, `/data/public/<name>`, then `macula/` | The two MACULA lexeme databases |
 | `WORD_GLOSSES_DIR` | `/data/word_glosses` | Where the built `hbo_lexeme/<Language>.csv` tables are read from (MACULA-keyed BibleOL glosses; build output, not in git: `python -m macula.build_word_glosses_lexeme`, ship with `deploy/deploy-data.sh`); then `macula/data/word_glosses` |
