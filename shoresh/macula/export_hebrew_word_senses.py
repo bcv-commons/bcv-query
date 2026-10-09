@@ -85,9 +85,37 @@ def surface_labels(labels: dict, sense_of: dict) -> dict:
     return out
 
 
+STEM_DB = HERE / "verse-senses-stem.db"
+
+
+def from_stem_db(path: Path) -> tuple[dict, dict, dict]:
+    """(labels, sense_of, stem_of) from build_stem_senses' database: lexeme-level senses everywhere except the verbs that occur in 2+ stems, whose senses are per stem.
+    A token of such a verb that has no translation evidence (so no sense of its own) takes the largest sense of its stem."""
+    con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    labels = {(lx, str(s)): lab for lx, s, lab in con.execute("SELECT lexeme, sense, label FROM senses")}
+    sense_of = {k: (lx, str(s)) for k, lx, s in con.execute("SELECT key, lexeme, sense FROM occ")}
+    stem_of = {(lx, str(s)): st for lx, s, st in con.execute("SELECT lexeme, sense, stem FROM sense_stem")}
+    first = {}                                                           # (lexeme, stem) -> its largest sense (numbered by size within a stem)
+    for (lx, s), st in sorted(stem_of.items(), key=lambda kv: int(kv[0][1])):
+        first.setdefault((lx, st), s)
+    sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
+    filled = 0
+    for key, lx, st in sp.execute("SELECT key, lexeme, stem FROM spine_words WHERE lexeme LIKE 'hbo:%' AND stem!='' AND stem IS NOT NULL"):
+        if key not in sense_of and (lx, st) in first:
+            sense_of[key] = (lx, first[(lx, st)])
+            filled += 1
+    print(f"[hebrew-word-senses] {len(stem_of)} stem-bound senses; {filled} evidence-less verb tokens given their stem's largest sense", file=sys.stderr)
+    return labels, sense_of, stem_of
+
+
 def main() -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--stem-db", type=Path, default=None, help="publish the per-stem senses of build_stem_senses (adds a `stem` column to senses.tsv)")
+    args = ap.parse_args()
     prior = {r["lexeme"]: r for r in pq.read_table(ROOT / "resources" / "prior_pack" / "prior_pack.parquet",
                                                     columns=["lexeme", "strong", "lemma"]).to_pylist()}
+    stem_of: dict = {}
     labels = {}
     for line in (SRC / "senses.tsv").read_text(encoding="utf-8").splitlines()[1:]:
         lexeme, sense, label, _n, _sh = line.split("\t")
@@ -98,6 +126,8 @@ def main() -> int:
         # names keep their splits: translations often spell same-named people or places differently
         # (Abimelech of Gerar / son of Gideon), and merging them lowered agreement with UBS 0.317 -> 0.289
         sense_of[key] = (lexeme, sense)
+    if args.stem_db:
+        labels, sense_of, stem_of = from_stem_db(args.stem_db)
     db = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
     occ = collections.defaultdict(list)
     for key, book, ch, vs, word, lexeme in db.execute(
@@ -114,14 +144,15 @@ def main() -> int:
 
     counts = collections.Counter(zip(occ["lexeme"], occ["sense"]))
     totals = collections.Counter(occ["lexeme"])
-    labels.update(distinctive_labels(sense_of, counts))
-    labels = surface_labels(labels, sense_of)
+    if not args.stem_db:                                  # the stem database carries final labels
+        labels.update(distinctive_labels(sense_of, counts))
+        labels = surface_labels(labels, sense_of)
     with (OUT / "senses.tsv").open("w", encoding="utf-8") as fh:
-        fh.write("lexeme\tstrong\tlemma\tsense\tlabel\tcount\tshare\n")
+        fh.write("lexeme\tstrong\tlemma\tsense\tlabel\tcount\tshare" + ("\tstem" if args.stem_db else "") + "\n")
         for (lexeme, sense), n in sorted(counts.items(), key=lambda kv: (kv[0][0], kv[0][1])):
             p = prior.get(lexeme, {})
             fh.write(f"{lexeme}\t{p.get('strong') or ''}\t{p.get('lemma') or ''}\t{sense}\t"
-                     f"{labels.get((lexeme, str(sense)), '')}\t{n}\t{n / totals[lexeme]:.3f}\n")
+                     f"{labels.get((lexeme, str(sense)), '')}\t{n}\t{n / totals[lexeme]:.3f}" + (f"\t{stem_of.get((lexeme, str(sense)), '')}" if args.stem_db else "") + "\n")
     n_multi = sum(1 for lx in totals if len({s for (l, s) in counts if l == lx}) > 1)
     print(f"[hebrew-word-senses] {len(totals)} lexemes, {len(counts)} senses, {n_multi} lexemes with >1 sense, "
           f"{len(occ['key'])} occurrences -> {OUT}", file=sys.stderr)
