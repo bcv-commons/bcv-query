@@ -219,8 +219,9 @@ def expand(rng: str, sh: dict[tuple[str, int], int]) -> list[Ref]:
 # ---------------------------------------------------------------- one scheme's table
 class Table:
     """fwd: every verse of the scheme -> English verse(s); inv: English verse -> scheme verse(s)."""
-    def __init__(self, scheme: str, fwd: dict, inv: dict, rev: str | None, notes: dict):
+    def __init__(self, scheme: str, fwd: dict, inv: dict, rev: str | None, notes: dict, blocks: dict | None = None):
         self.scheme, self.fwd, self.inv, self.rev, self.notes = scheme, fwd, inv, rev, notes
+        self.blocks = blocks or {}              # verse -> number of the multiverse relation it belongs to (several verses = one English verse by design)
 
 
 def _gap_target(r: Ref, rows: list[tuple[tuple[int, int], Ref]], taken: set[Ref]) -> Ref | None:
@@ -256,12 +257,14 @@ def table(scheme: str) -> Table:
     multi: dict[Ref, list[Ref]] = {}
     mraw = _bytes(f"{scheme}-to-eng.multiverse.json", f"{map_base}{scheme}-to-eng.multiverse.json", optional=True, max_age=_MAX_AGE)
     n_multi = 0
+    blocks: dict[Ref, int] = {}
     if mraw:
         for r in json.loads(mraw.decode("utf-8")).get("map", []):
             src, tgt = expand(r["s"], sh), expand(r["t"], eng_sh)
             n_multi += 1
             for s in src:
                 multi[s] = tgt
+                blocks[s] = n_multi
     by_book: dict[str, list] = collections.defaultdict(list)
     for s, ts in explicit.items():
         by_book[s[0]].append(((s[1], s[2]), ts[0]))
@@ -302,7 +305,7 @@ def table(scheme: str) -> Table:
             inv.setdefault(t, []).append(s)
     for v in inv.values():
         v.sort()
-    return Table(scheme, fwd, inv, data.get("tvtms_rev"), {"rows": len(explicit), "multiverse": n_multi, "gap_filled": gap, "unmapped": unmapped})
+    return Table(scheme, fwd, inv, data.get("tvtms_rev"), {"rows": len(explicit), "multiverse": n_multi, "gap_filled": gap, "unmapped": unmapped}, blocks)
 
 
 def available(scheme: str) -> bool:
@@ -434,7 +437,7 @@ def scheme_for_language(code: str | None) -> dict | None:
 # ---------------------------------------------------------------- self-check against the published shapes
 def check(scheme: str) -> dict:
     """Does the scheme's table agree with the published shapes? Every verse of the scheme must map into the English shape (or be its title);
-    verses sharing one English verse (collisions) and English verses nobody maps to (unreached) are reported, excluding titles."""
+    verses sharing one English verse are reported as `collisions` (conflicts between rows) or `block_relations` (the source side of one multiverse relation: intended), and English verses nobody maps to (unreached), excluding titles."""
     t, eng_sh, sh = table(scheme), shape(HUB), shape(scheme)
     outside, hits = [], collections.defaultdict(set)
     for r, ts in t.fwd.items():
@@ -445,6 +448,10 @@ def check(scheme: str) -> dict:
                 outside.append((r, e))
             hits[e].add(r)
     books = {b for b, _ in sh}
-    collisions = {e: sorted(s) for e, s in hits.items() if len(s) > 1}
+    shared = {e: sorted(s) for e, s in hits.items() if len(s) > 1}
+    # several verses landing on one English verse is intended when they are the source side of ONE multiverse relation (Vulgate Sirach 1:17-20 = English 1:16);
+    # anything else is a conflict between rows.
+    block_relations = {e: s for e, s in shared.items() if len({t.blocks.get(x) for x in s}) == 1 and t.blocks.get(s[0]) is not None}
+    collisions = {e: s for e, s in shared.items() if e not in block_relations}
     unreached = [(b, c, v) for (b, c), last in eng_sh.items() if b in books for v in range(1, last + 1) if (b, c, v) not in hits]
-    return {"verses": len(t.fwd), "outside_english": outside, "collisions": collisions, "unreached": unreached, "notes": t.notes}
+    return {"verses": len(t.fwd), "outside_english": outside, "collisions": collisions, "block_relations": block_relations, "unreached": unreached, "notes": t.notes}

@@ -213,3 +213,10 @@ def test_nt_variants_replace_the_scheme_map_for_new_testament_verses(vm, tmp_pat
     assert vm.to_eng(("1TI", 6, 22), "eng") == [("1TI", 6, 22)]                   # no edition: unchanged
     assert vm.to_eng(("1TI", 6, 22), "eng", "arb/none") == [("1TI", 6, 22)]       # an edition without an nt entry: unchanged
     assert vm.to_eng(("PSA", 3, 2), "org", "arb/X") == [("PSA", 3, 1)]            # Old Testament still uses the scheme's map
+
+
+def test_check_separates_block_relations_from_conflicts(vm):
+    """NUM 25:19 and NUM 26:1 (org) are one multiverse relation = English NUM 26:1: intended, not a conflict."""
+    r = vm.check("org")
+    assert ("NUM", 26, 1) in r["block_relations"] and ("NUM", 26, 1) not in r["collisions"]
+    assert r["collisions"] == {}
