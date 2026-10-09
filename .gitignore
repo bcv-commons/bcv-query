@@ -217,3 +217,4 @@ resources/parallelism/parallelism_pairs.local.tsv
 shoresh/macula/verse-senses.db
 shoresh/macula/data/lex_to_lexeme.tsv
 shoresh/macula/data/word_glosses/
+shoresh/macula/data/stem_senses_cache.pkl

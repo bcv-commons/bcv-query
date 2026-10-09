@@ -48,7 +48,8 @@ def _work(item):
             if lang == "eng":
                 eng[s][f] += 1
     labels = {s: bs._label(eng[s], _ENG) for s in set(a.values())}
-    return lexeme, stem, a, labels
+    raw = {f: _ENG[f].most_common(1)[0][0] for c in eng.values() for f in c if _ENG.get(f)}
+    return lexeme, stem, a, labels, {s: dict(c) for s, c in eng.items()}, raw
 
 
 def pick_languages(editions: list[str], n: int, seed: int) -> set[str]:
@@ -62,18 +63,9 @@ def pick_languages(editions: list[str], n: int, seed: int) -> set[str]:
     return {by_lang[l][0] for l in langs[:n]}
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--base", type=Path, default=BASE)
-    ap.add_argument("--rend", type=Path, default=REND)
-    ap.add_argument("--languages", type=int, default=60)
-    ap.add_argument("--seed", type=int, default=13)
-    ap.add_argument("--out", type=Path, default=HERE / "verse-senses-stem.db")
-    ap.add_argument("--gbt", action="store_true", help="add Global Bible Tools glosses to the evidence, as the published build does")
-    ap.add_argument("--workers", type=int, default=6)
-    a = ap.parse_args()
-    t0 = time.time()
+def split_all(a):
     bs.USE_GBT = a.gbt
+    t0 = time.time()
     feats, eng_raw = bs.load_features()
     with a.rend.open("rb") as fh:
         pk = pickle.load(fh)
@@ -89,7 +81,6 @@ def main() -> int:
     print(f"features: attestations + {len(tags)} rend editions on {n_rend} tokens ({time.time() - t0:.0f}s)", file=sys.stderr)
     global _FEATS, _ENG
     _FEATS, _ENG = feats, eng_raw
-
     sp = sqlite3.connect(f"file:{SPINE}?mode=ro", uri=True)
     groups: dict = collections.defaultdict(lambda: collections.defaultdict(list))
     for key, lexeme, stem in sp.execute("SELECT key, lexeme, stem FROM spine_words WHERE lexeme LIKE 'hbo:%' AND stem!='' AND stem IS NOT NULL"):
@@ -99,10 +90,108 @@ def main() -> int:
     print(f"{len(multi)} verb lexemes with 2+ stems, {len(items)} (lexeme, stem) groups", file=sys.stderr)
     with mp.get_context("fork").Pool(a.workers) as pool:
         results = pool.map(_work, items, chunksize=8)
-
     per_lexeme: dict = collections.defaultdict(dict)
-    for lexeme, stem, assign, labels in results:
-        per_lexeme[lexeme][stem] = (assign, labels)
+    for lexeme, stem, assign, labels, eng, raw in results:
+        per_lexeme[lexeme][stem] = (assign, labels, eng, raw)
+    return dict(per_lexeme), tags, set(multi)
+
+
+PASSIVE = {"niphal", "pual", "hophal", "hithpael", "hothpael", "hithpolel", "nithpael"}
+# English words that are never a sense label on their own (auxiliaries and light words that translations of many different Hebrew verbs share)
+LABEL_STOP = {"be", "been", "being", "am", "is", "are", "was", "were", "have", "has", "had", "having", "do", "does", "did", "done", "will", "shall", "would", "should", "may", "might",
+              "can", "could", "must", "get", "got", "let", "not", "nor", "yet", "also", "then", "thus", "who", "whom", "which", "that", "this", "these", "those", "they", "them", "him",
+              "her", "his", "its", "our", "you", "your", "their", "there", "here", "come", "came", "go", "went"}
+FLOOR = 0.4                                          # a candidate label must be at least this fraction as frequent in the group as its commonest rendering
+
+
+def _participle(label: str) -> bool:
+    return label.endswith(("ed", "en")) and " " not in label
+
+
+def make_idf(per_lexeme: dict) -> dict:
+    """form -> log(N / (1 + number of verb lexemes it is a real rendering of, at least 5% of that lexeme's English evidence)): generic words (made, thing, cause)
+    are renderings of many verbs and make poor labels."""
+    import math
+    df = collections.Counter()
+    for stems in per_lexeme.values():
+        tot = collections.Counter()
+        for _a, _l, eng, _r in stems.values():
+            for c in eng.values():
+                tot.update(c)
+        n = sum(tot.values()) or 1
+        df.update(f for f, v in tot.items() if v / n >= 0.05)
+    N = len(per_lexeme)
+    return {f: math.log(N / (1 + d)) for f, d in df.items()}
+
+
+def relabel(stems: dict, mode: str, idf: dict | None = None) -> dict:
+    """{stem: {sense: label}} for one lexeme. freq = the most frequent English rendering of the group (the published way).
+    distinct = among the group's frequent renderings (at least FLOOR of the top one, no auxiliaries), the one most specific to the group against the lexeme's other
+    stems: p / (p + p_other). No label is forced to differ, so it differs only where the translations do.
+    voice = distinct, and a participle label of a passive/reflexive stem (niphal, pual, hophal, hithpael ...: the stem comes from the Hebrew morphology) is written
+    "be gathered" instead of "gathered", the way a dictionary glosses the passive."""
+    if mode == "freq":
+        return {st: v[1] for st, v in stems.items()}
+    stem_tot = {st: collections.Counter() for st in stems}
+    for st, (_a, _l, eng, _r) in stems.items():
+        for c in eng.values():
+            stem_tot[st].update(c)
+    out = {}
+    for st, (assign, freq_labels, eng, raw) in stems.items():
+        other = collections.Counter()
+        for o, c in stem_tot.items():
+            if o != st:
+                other.update(c)
+        n_other = sum(other.values()) or 1
+        labels = dict(freq_labels)                   # senses without English evidence keep their frequency label
+        for sense, c in eng.items():
+            n = sum(c.values()) or 1
+            ok = {f: v for f, v in c.items() if raw.get(f, f).lower() not in LABEL_STOP and len(raw.get(f, f)) >= 3}
+            if not ok:
+                continue
+            top = max(ok.values())
+            cand = [f for f, v in ok.items() if v >= FLOOR * top]
+            best = max(cand, key=lambda f: (ok[f] / n) ** 2 / ((ok[f] / n) + other.get(f, 0) / n_other) * max((idf or {}).get(f, 3.0), 0.1))
+            lab = raw.get(best, best)
+            if mode == "voice" and st in PASSIVE and _participle(lab):
+                lab = "be " + lab
+            labels[sense] = lab
+        out[st] = labels
+    return out
+
+
+MODES = {"freq", "distinct", "voice"}
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--base", type=Path, default=BASE)
+    ap.add_argument("--rend", type=Path, default=REND)
+    ap.add_argument("--languages", type=int, default=60)
+    ap.add_argument("--seed", type=int, default=13)
+    ap.add_argument("--out", type=Path, default=HERE / "verse-senses-stem.db")
+    ap.add_argument("--gbt", action="store_true", help="add Global Bible Tools glosses to the evidence, as the published build does")
+    ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--cache", type=Path, default=HERE / "data" / "stem_senses_cache.pkl", help="split results (assignments + English forms per sense); written after a split, read by --from-cache")
+    ap.add_argument("--from-cache", action="store_true", help="skip the split: relabel the cached groups (seconds), for label experiments")
+    ap.add_argument("--label", default="voice", choices=sorted(MODES), help="how a group is labelled (see relabel)")
+    a = ap.parse_args()
+    t0 = time.time()
+    multi: set = set()
+    if a.from_cache:
+        with a.cache.open("rb") as fh:
+            ck = pickle.load(fh)
+        per_lexeme, tags, multi = ck["per_lexeme"], ck["tags"], set(ck["per_lexeme"])
+    else:
+        per_lexeme, tags, multi = split_all(a)
+        a.cache.parent.mkdir(parents=True, exist_ok=True)
+        with a.cache.open("wb") as fh:
+            pickle.dump({"per_lexeme": per_lexeme, "tags": tags}, fh)
+    idf = make_idf(per_lexeme)
+    for lexeme, stems in per_lexeme.items():
+        labs = relabel(stems, a.label, idf)
+        for stem, (assign, _l, eng, raw) in stems.items():
+            stems[stem] = (assign, labs[stem], eng, raw)
 
     if a.out.exists():
         a.out.unlink()
@@ -120,8 +209,8 @@ def main() -> int:
     n_senses = 0
     for lexeme, stems in per_lexeme.items():
         nxt = 0
-        total = sum(len(a_) for a_, _ in stems.values())
-        for stem, (assign, labels) in sorted(stems.items(), key=lambda kv: -len(kv[1][0])):
+        total = sum(len(v[0]) for v in stems.values())
+        for stem, (assign, labels, _e, _r) in sorted(stems.items(), key=lambda kv: -len(kv[1][0])):
             local = collections.Counter(assign.values())
             for s, n in local.most_common():
                 nxt += 1
@@ -130,7 +219,7 @@ def main() -> int:
                 out.executemany("INSERT INTO occ VALUES (?,?,?)", [(k, lexeme, nxt) for k, v in assign.items() if v == s])
                 n_senses += 1
     out.executemany("INSERT INTO meta VALUES (?,?)", [
-        ("base", str(a.base.name)), ("rend_editions", str(len(tags))), ("seed", str(a.seed)), ("verb_lexemes_resplit", str(len(multi))),
+        ("base", str(a.base.name)), ("rend_editions", str(len(tags))), ("seed", str(a.seed)), ("label_mode", a.label), ("verb_lexemes_resplit", str(len(multi))),
         ("note", "verb lexemes with 2+ stems re-split per (lexeme, stem) from rend + attestation evidence; everything else is the published hebrew-word-senses"),
         ("license", "CC BY 4.0 (keys and sense numbers); evidence: aligner rend ids (CC0) and Clear-Bible attestations")])
     out.commit()
