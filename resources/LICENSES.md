@@ -12,6 +12,14 @@ The BHSA-keyed build inputs were untracked and are git-ignored, kept only on the
 Their replacements are tracked: `word_glosses/hbo_lexeme/` (BibleOL glosses, MIT, on MACULA lexeme ids; the lex -> lexeme mapping stays local) and the published `hebrew-word-senses` (MACULA).
 `strongs_gloss.tsv` is built from `hbo_lexeme` (the Strong's number comes from the lexeme id), not from the BHSA lex -> Strong's bridge.
 
+## Still non-commercial: the CATSS/CCAT Septuagint (decision 2026-10-09: the deployment stays non-commercial for this source only)
+The Septuagint morphology behind `shoresh/lxx/lxx.db` (Rahlfs 1935 text with CATSS/CCAT lemmas and morphology, via `eliranwong/LXX-Rahlfs-1935`) is licensed for
+non-commercial use (`shoresh/legal/CATSS-user-declaration.md`). Served from it: the `lxx` words of `/verse`, `/lxx-lexeme`, the LXX part of the Greek concordance and
+the bcv-rag passage-card `lxx` words. Tracked data built from it, treat as **non-commercial**:
+- `lxx_orphan_lexemes/` — LXX-only Greek lexemes, grouped from `lxx.db`.
+- `ot_nt_quotations/` — OT-in-NT quotations from LXX Strong's overlap (`lxx/build_quotations.py`).
+Not affected: `lxx_bridge.tsv` (MACULA Hebrew `greekstrong`) and the `lxx` versification map (TVTMS). A replacement is open: see `internal-docs/nc-register-check-2026-10-09.md`.
+
 ## Mention BHSA only to describe or to exclude it (no BHSA content)
 - `lexicons/README.md` — describes the untracked, BHSA-keyed local files above (no BHSA data in this README).
 - `senses/README.md` — describes the untracked, BHSA-keyed local files above (no BHSA data in this README).

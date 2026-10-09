@@ -10,8 +10,10 @@ see `resources/LICENSES.md`.
 - The running service reads **no BHSA / ETCBC / OpenHebrewBible files**: structure, trees, syntax search, `/words`,
   senses, `/verse` Hebrew words and clause search are all MACULA (CC BY 4.0). The BHSA text-fabric corpus mount and
   `hbo.db` are retired; `clause_dependencies` was dropped from `index.db` (MACULA has no clause-to-clause relations).
-  Served resources that were *derived* from BHSA earlier (for example tiers of the semantic-neighbours pack) are
-  not yet audited here; `resources/LICENSES.md` is the register. Keep the deployment non-commercial until that audit says otherwise.
+  The audit of served resources derived from BHSA is done (2026-10-09, `resources/LICENSES.md` is the register): nothing served or published is BHSA-derived.
+  **The deployment still stays non-commercial, now for one reason: the CATSS/CCAT Septuagint** (`shoresh/lxx/`, see
+  `shoresh/legal/CATSS-user-declaration.md`), which feeds `/verse` `lxx`, `/lxx-lexeme`, the LXX concordance, bcv-rag cards,
+  `resources/lxx_orphan_lexemes/` and `resources/ot_nt_quotations/`. Decision 2026-10-09: keep it non-commercial for this source only until an open replacement is found.
 - `spine.db` stays, built from UHB / UGNT (unfoldingWord, CC BY-SA 4.0) only: it serves the Greek NT `/verse` words,
   `/morph` and the `/gloss` counts. It is not NC.
 - Still NC and only used **offline** (build scripts, local, git-ignored outputs): the BHSA text-fabric corpus
@@ -32,6 +34,7 @@ see `resources/LICENSES.md`.
 | **OpenHebrewBible** — `eliranwong/OpenHebrewBible` | BHSA↔Strong's crosswalk (`002`), versification map (`019`) | **CC BY-NC 4.0** | Eliran Wong, *Open Hebrew Bible Project* |
 | **MACULA Hebrew** — `Clear-Bible/macula-hebrew` (`WLC/lowfat`) | verse structure, trees, syntax search, `/words` feed (`trees-macula.db`); lexeme spine | CC BY 4.0 | Biblica, Inc. / Clear Bible; Westminster Hebrew Syntax © Groves Center (CC BY 4.0); OpenScriptures Hebrew Bible morphology (CC BY 4.0); Westminster Leningrad Codex text (public domain) |
 | **MACULA Greek** — `Clear-Bible/macula-greek` (`Nestle1904/lowfat`) | Greek structure, trees, syntax search (`trees-macula.db`); Greek spine | CC BY 4.0 | Clear Bible (Nestle 1904 text: public domain) |
+| **CATSS / CCAT Septuagint** (Rahlfs 1935 with CATSS morphology) — via `eliranwong/LXX-Rahlfs-1935` | `lxx.db`: `/verse` `lxx` words, `/lxx-lexeme`, LXX concordance | **non-commercial**, attribution + user declaration | CCAT / CATSS Project, University of Pennsylvania |
 | **STEPBible TBESH/TBESG** — `STEPBible/STEPBible-Data` | Strong's→gloss dictionary (Lexical line) | CC BY 4.0 | Tyndale House, *STEPBible.org* |
 
 ## What the NC clause means here

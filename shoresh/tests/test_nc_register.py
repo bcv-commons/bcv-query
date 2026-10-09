@@ -13,7 +13,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 SHORESH = REPO / "shoresh"
 sys.path.insert(0, str(SHORESH))
-PAT = re.compile(r"BHSA|ETCBC|OpenHebrewBible|Open Hebrew Bible|hbo\.db", re.I)
+PAT = re.compile(r"BHSA|ETCBC|OpenHebrewBible|Open Hebrew Bible|hbo\.db|CATSS|CCAT", re.I)
 TEXT = (".tsv", ".csv", ".md", ".json", ".txt")
 
 
