@@ -1047,6 +1047,11 @@ def databases_status() -> dict:
             "speaker_quotations": SPEAKER_TSV.exists()}
 
 
+def _lxx_columns(con) -> set[str]:
+    """Columns of lxx_words: the GLAUx-based store has strong_form and morph_inferred, the CATSS-based one does not."""
+    return {r[1] for r in con.execute("PRAGMA table_info(lxx_words)")}
+
+
 def _strong_code(word_lang: str, strong: int | None) -> str | None:
     if strong is None:
         return None
@@ -1188,10 +1193,12 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
 
     lcon = _ro(LXX_DB)
     if lcon:
+        cols = _lxx_columns(lcon)
+        extra = "".join(f", {c}" for c in ("strong_form", "morph_inferred") if c in cols)
         rows = []
         for lb, lc, lv in lxx_refs:
             part = lcon.execute(
-                "SELECT idx, surface, plain, strong, wordid, morph, pos FROM lxx_words "
+                f"SELECT idx, surface, plain, strong, wordid, morph, pos{extra} FROM lxx_words "
                 "WHERE book=? AND chapter=? AND verse=? ORDER BY idx",
                 (lb, lc, lv)).fetchall()
             rows += part
@@ -1200,12 +1207,18 @@ def verse(book: str, chapter: int, vrs: int, gloss_lang: str = "English", domain
             # wordid is only surfaced for strong-less (orphan) words — it's the click-through key
             # for GET /lxx-lexeme/{wordid}; tagged words already have `strong` for that role, and
             # /lxx-lexeme only serves orphan groups, so a tagged word's wordid wouldn't resolve there.
-            result["lxx"] = {"language": "grc", "words": [
-                {"idx": r["idx"], "surface": r["surface"], "plain": r["plain"],
-                 "strong": _strong_code("grc", r["strong"]), "morph": r["morph"],
-                 **({"wordid": r["wordid"]} if r["strong"] is None and r["wordid"] is not None else {}),
-                 **(gloss_of(_strong_code("grc", r["strong"])) or {})}
-                for r in rows]}
+            # `strong` is the lemma-level number (all forms of ἐγώ are G1473); `strong_form` (GLAUx store only) is the classic number of the form where it
+            # differs (μου G3450) and then also gives the gloss ("of me"); `morph_inferred` says which context rule filled a name's case/number/gender.
+            def _lxx_word(r) -> dict:
+                keys = r.keys()
+                code = _strong_code("grc", r["strong"])
+                sf = _strong_code("grc", r["strong_form"]) if "strong_form" in keys and r["strong_form"] else None
+                return {"idx": r["idx"], "surface": r["surface"], "plain": r["plain"],
+                        "strong": code, **({"strong_form": sf} if sf else {}), "morph": r["morph"],
+                        **({"morph_inferred": r["morph_inferred"]} if "morph_inferred" in keys and r["morph_inferred"] else {}),
+                        **({"wordid": r["wordid"]} if r["strong"] is None and r["wordid"] is not None else {}),
+                        **(gloss_of(sf or code) or {} if (sf or code) else {})}
+            result["lxx"] = {"language": "grc", "words": [_lxx_word(r) for r in rows]}
 
     if use_macula:
         mwords: list[dict] = []
@@ -1354,6 +1367,9 @@ def _reverse_glosses() -> dict[str, list[dict]]:
             "SELECT strong, COUNT(*) c FROM lxx_words "
             "WHERE strong IS NOT NULL GROUP BY strong"):
             counts[f"G{r['strong']}"] = counts.get(f"G{r['strong']}", 0) + r["c"]
+        if "strong_form" in _lxx_columns(lcon):                    # classic form numbers count their own forms
+            for r in lcon.execute("SELECT strong_form, COUNT(*) c FROM lxx_words WHERE strong_form IS NOT NULL GROUP BY strong_form"):
+                counts[f"G{r['strong_form']}"] = counts.get(f"G{r['strong_form']}", 0) + r["c"]
         lcon.close()
     result: dict[str, list[dict]] = {}
     for word, entries in inv.items():
@@ -1393,10 +1409,11 @@ def concordance(strong: str, limit: int = 200) -> dict:
     if lang == "grc":
         lcon = _ro(LXX_DB)
         if lcon:
+            where = "(strong=? OR strong_form=?)" if "strong_form" in _lxx_columns(lcon) else "strong=?"      # a classic form number (G3450) finds its forms
             for r in lcon.execute(
-                "SELECT book, chapter, verse, surface, morph FROM lxx_words "
-                "WHERE strong=? ORDER BY INSTR(?, ','||book||','), chapter, verse LIMIT ?",
-                (num, ORDER_STR, limit)).fetchall():
+                f"SELECT book, chapter, verse, surface, morph FROM lxx_words "
+                f"WHERE {where} ORDER BY INSTR(?, ','||book||','), chapter, verse LIMIT ?",
+                (*((num, num) if where.startswith("(") else (num,)), ORDER_STR, limit)).fetchall():
                 occ.append({"corpus": "LXX", "ref": f"{r['book']} {r['chapter']}:{r['verse']}",
                             "surface": r["surface"], "morph": r["morph"]})
             lcon.close()

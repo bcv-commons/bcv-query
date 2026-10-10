@@ -333,6 +333,8 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 | `/tw/{strong}` | Translation-Words article(s) for a Strong's number |
 | `/bridge/{strong}` | Hebrew ↔ Greek (LXX) equivalents |
 | `/lxx-lexeme/{wordid}` | LXX-only Greek lexeme lookup (words with no Strong's number — `/verse` returns `wordid` on these in place of `strong`) |
+
+Note for the Septuagint words in `/verse` `lxx.words[]` once the GLAUx store is in use (see `shoresh/lxx/README.md`): `strong` is the lemma-level number, an optional `strong_form` carries the classic number of the form, `gloss` follows `strong_form`, an optional `morph_inferred` marks a name whose case/number/gender was filled from its context, and gaps inside `morph` are written `-`.
 | `/morph` | Morphology search |
 | `/structure/{book}/{ch}/{v}[/syntax]` | Verse clause/phrase structure |
 | `/speakers`, `/speakers/at/{book}/{ch}/{v}`, `/speaker/{name}` | Speaker / red-letter index |
