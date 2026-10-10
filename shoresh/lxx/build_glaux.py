@@ -11,7 +11,8 @@ What is built here, and from what:
   * words, lemma, morphology, POS, verse numbers: GLAUx.
   * strong: lemma -> Strong's number from OPEN sources only (UGNT in spine.db, unfoldingWord CC BY-SA; MACULA Greek in trees-macula.db, CC BY 4.0). Nothing is
     learned from the CATSS-based lxx.db; a lemma that never occurs in the New Testament has no Strong's number, as before.
-  * wordid = lexid = a lemma id of this file (sorted lemma order; not stable across releases); glaux_id = GLAUx's own word id.
+  * wordid = lexid = a stable id of the lemma (first 31 bits of the SHA-1 of the NFC lemma, probed upward on a collision), so /lxx-lexeme/{wordid} URLs survive
+    rebuilds; glaux_id = GLAUx's own word id.
   * morph: CCAT-like display string converted from the AGDT code (N.DSF, V.AAI3S, V.AAPNSM, RA.NSM); indeclinables carry the POS code only. A missing feature
     inside the nominal string is written `-` (N.-SM = number and gender known, case not); trailing gaps are dropped; a name with no features is plain `N`.
   * morph_inferred: GLAUx does not tag case, number or gender of indeclinable names (Ἰσραήλ, Δαυίδ ...). They are filled from the context and listed here:
@@ -19,6 +20,7 @@ What is built here, and from what:
     syntactic relation: attribute -> genitive, subject -> nominative; about 91% right against CATSS, the others about 96-99%). Empty when nothing was inferred.
   * strong_form: the classic (1890) Strong's number of the FORM where it differs from the lemma-level `strong` (μου G3450 against ἐγώ G1473, εἶπεν G2036 against
     λέγω G3004, Ἰερουσαλήμ G2419, Ἰούδα G2448, Σαούλ G4549 ...). A short table of public-domain Strong's numbers (CLASSIC_FORMS), not learned from CATSS.
+is_content is 1 for nouns, verbs, adjectives and numerals (the CATSS store counted numerals as adjectives).
 Book mapping: TLG 0527-0nn -> our book codes; Esdras II is split into EZR (chapters 1-10) and NEH (11-23, renumbered). Where GLAUx has two versions of a book
 (Tobit, Daniel, Susanna, Bel and the Dragon) the one whose words match the existing store best is used when the store is available (--compare), else the first.
 
@@ -29,6 +31,7 @@ from __future__ import annotations
 import argparse
 import collections
 import difflib
+import hashlib
 import re
 import sqlite3
 import sys
@@ -325,8 +328,13 @@ def main() -> int:
             if book == "EZR+NEH":
                 bk, c = ("EZR", ch) if ch <= 10 else ("NEH", ch - 10)
             words.append((bk, c, v, form, lemma, tag, gid, rel))
+    taken: set[int] = set()
     for lemma in sorted({w[4] for w in words}):
-        lemma_ids[lemma] = len(lemma_ids) + 1
+        lid = int.from_bytes(hashlib.sha1(lemma.encode("utf-8")).digest()[:4], "big") & 0x7FFFFFFF
+        while lid in taken or lid == 0:
+            lid = (lid + 1) & 0x7FFFFFFF
+        taken.add(lid)
+        lemma_ids[lemma] = lid
     words.sort(key=lambda w: (w[0], w[1], w[2]))
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
@@ -365,7 +373,7 @@ def main() -> int:
                 sf = None
             stats["inferred " + w["inferred"]] += 1 if w["inferred"] else 0
             con.execute("INSERT INTO lxx_words VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        (bk, c, v, i, w["form"], pl, st, lid, lid, w["morph"], w["pos"], int(w["pos"] in ("N", "V", "A")), int(bk in CANONICAL),
+                        (bk, c, v, i, w["form"], pl, st, lid, lid, w["morph"], w["pos"], int(w["pos"] in ("N", "V", "A", "M")), int(bk in CANONICAL),
                          w["lemma"], w["gid"], sf, w["inferred"] or None))
             n += 1
     print(f"inferred morphology: { {k: c for k, c in stats.items() if c} }", file=sys.stderr)

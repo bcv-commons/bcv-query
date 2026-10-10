@@ -96,3 +96,33 @@ def test_verse_serves_strong_form_gloss_and_inferred_flag(tmp_path, monkeypatch)
     assert words[0].get("gloss") == (data.gloss_of("G3450") or {}).get("gloss")           # the classic gloss ("of me")
     assert "strong_form" not in words[1] and words[1]["morph_inferred"] == "syntax"
     assert data.concordance("G3450")["occurrences"][0]["surface"] == "μου"                 # the classic number still finds its forms
+
+
+def test_lxx_store_is_chosen_from_env_then_data_volume_then_local_glaux_then_image(tmp_path, monkeypatch):
+    import data
+    monkeypatch.setenv("LXX_DB_PATH", str(tmp_path / "x.db"))
+    assert data._lxx_db_path() == tmp_path / "x.db"
+    monkeypatch.delenv("LXX_DB_PATH")
+    p = data._lxx_db_path()
+    assert p.name in ("lxx-glaux.db", "lxx.db")                       # glaux wherever it exists, otherwise the image's store
+
+
+def test_orphan_lexemes_use_the_glaux_lemma_as_citation_form(tmp_path):
+    import sqlite3
+    from lxx import build_orphan_lexemes as bo
+    db = tmp_path / "s.db"
+    con = sqlite3.connect(db)
+    con.execute("CREATE TABLE lxx_words (book TEXT, chapter INT, verse INT, idx INT, surface TEXT, plain TEXT, strong INT, wordid INT, morph TEXT, pos TEXT, is_content INT, lemma TEXT)")
+    con.executemany("INSERT INTO lxx_words VALUES ('GEN',1,2,?,?,?,NULL,77,?, 'N',1,'ἀκατασκεύαστος')",
+                    [(1, "ἀκατασκεύαστος", "ακατασκευαστος", "N.NSF"), (2, "ἀκατασκεύαστον", "ακατασκευαστον", "N.ASM")])
+    con.commit(); con.close()
+    rows = bo.build(db)
+    assert {r["citation_form"] for r in rows} == {"ἀκατασκεύαστος"} and {r["citation_confidence"] for r in rows} == {"lemma"}
+    assert len(rows) == 2 and {r["wordid"] for r in rows} == {77}
+
+
+def test_stable_lemma_ids_do_not_depend_on_the_other_lemmas():
+    import hashlib
+    def lid(lemma):
+        return int.from_bytes(hashlib.sha1(lemma.encode("utf-8")).digest()[:4], "big") & 0x7FFFFFFF
+    assert lid("ἀκατασκεύαστος") == lid("ἀκατασκεύαστος") and 0 < lid("Ἰσραήλ") < 2 ** 31

@@ -12,13 +12,16 @@ The BHSA-keyed build inputs were untracked and are git-ignored, kept only on the
 Their replacements are tracked: `word_glosses/hbo_lexeme/` (BibleOL glosses, MIT, on MACULA lexeme ids; the lex -> lexeme mapping stays local) and the published `hebrew-word-senses` (MACULA).
 `strongs_gloss.tsv` is built from `hbo_lexeme` (the Strong's number comes from the lexeme id), not from the BHSA lex -> Strong's bridge.
 
-## Still non-commercial: the CATSS/CCAT Septuagint (decision 2026-10-09: the deployment stays non-commercial for this source only)
-The Septuagint morphology behind `shoresh/lxx/lxx.db` (Rahlfs 1935 text with CATSS/CCAT lemmas and morphology, via `eliranwong/LXX-Rahlfs-1935`) is licensed for
-non-commercial use (`shoresh/legal/CATSS-user-declaration.md`). Served from it: the `lxx` words of `/verse`, `/lxx-lexeme`, the LXX part of the Greek concordance and
-the bcv-rag passage-card `lxx` words. Tracked data built from it, treat as **non-commercial**:
-- `lxx_orphan_lexemes/` — LXX-only Greek lexemes, grouped from `lxx.db`.
-- `ot_nt_quotations/` — OT-in-NT quotations from LXX Strong's overlap (`lxx/build_quotations.py`).
-Not affected: `lxx_bridge.tsv` (MACULA Hebrew `greekstrong`) and the `lxx` versification map (TVTMS). A replacement is open: see `internal-docs/nc-register-check-2026-10-09.md`.
+## Derived from GLAUx (CC BY-SA 4.0, share-alike; decision 2026-10-10)
+The Septuagint word store served by shoresh (`lxx-glaux.db`: `/verse` `lxx` words, `/word/G####`, `/lxx-lexeme`, bcv-rag passage-card `lxx` words) is built from
+**GLAUx** (Alek Keersmaekers, KU Leuven, https://github.com/alekkeersmaekers/glaux; CC BY-SA 4.0), whose Septuagint texts come from el.wikisource (CC BY-SA 3.0) and whose
+Genesis annotation is Pedalion Trees (CC BY-SA 4.0). It replaces the CATSS/CCAT-based store, which was licensed for non-commercial use only. Data built from it is
+**CC BY-SA 4.0**; keep the attribution and the share-alike:
+- `lxx_orphan_lexemes/` — LXX-only Greek lexemes, grouped by GLAUx lemma.
+- `ot_nt_quotations/` — OT-in-NT quotations from LXX Strong's overlap (Odes excluded).
+Strong's numbers on this data come from the open lemma lists of UGNT (unfoldingWord, CC BY-SA 4.0) and MACULA Greek (CC BY 4.0) and from a short table of public-domain
+classic Strong's numbers; the case of names that GLAUx leaves untagged is inferred from the context and flagged (`morph_inferred`). The CATSS-based tables of 2026-10-09 and
+earlier remain in the git history of this public repository and stay non-commercial. Not affected: `lxx_bridge.tsv` (MACULA Hebrew `greekstrong`), the `lxx` versification map (TVTMS).
 
 ## Mention BHSA only to describe or to exclude it (no BHSA content)
 - `lexicons/README.md` — describes the untracked, BHSA-keyed local files above (no BHSA data in this README).

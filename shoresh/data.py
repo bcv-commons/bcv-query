@@ -28,7 +28,18 @@ from spine.common import FILENUM, to_modern_form
 from references import encode, decode, norm_strong as _norm_strong
 
 HERE = Path(__file__).resolve().parent
-LXX_DB = HERE / "lxx" / "lxx.db"
+def _lxx_db_path() -> Path:
+    """The Septuagint word store: $LXX_DB_PATH, else the GLAUx-based lxx-glaux.db on the data volume (/data) or built locally, else the image's CATSS-based lxx.db."""
+    env = os.environ.get("LXX_DB_PATH")
+    if env:
+        return Path(env)
+    for p in (Path("/data/lxx-glaux.db"), HERE / "lxx" / "data" / "lxx-glaux.db"):
+        if p.exists():
+            return p
+    return HERE / "lxx" / "lxx.db"
+
+
+LXX_DB = _lxx_db_path()
 SPINE_DB = HERE / "spine" / "spine.db"
 GLOSS_TSV = HERE / "spine" / "spine_glosses.tsv"
 

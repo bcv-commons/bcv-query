@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """LXX-only Greek lexemes — words with no Strong's number, grouped into (lemma, variants).
 
-93% of the LXX (Rahlfs 1935, via lxx.db) carries a Strong's number; the remaining ~7% never occurs
+93% of the LXX (via lxx.db / lxx-glaux.db) carries a Strong's number; the remaining ~7% never occurs
 in the NT, so Strong's numbering (which only covers NT-catalogued words) has no code for them —
 karnbibeln.se's own example is Genesis 1:2's ἀκατασκεύαστος. Their Strong's-scoped lexicon has
 nowhere to link these words to.
@@ -35,7 +35,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-DB_PATH = HERE / "lxx.db"
+DB_PATH = HERE / "data" / "lxx-glaux.db" if (HERE / "data" / "lxx-glaux.db").exists() else HERE / "lxx.db"
 OUT = ROOT / "resources" / "lxx_orphan_lexemes" / "lexemes.tsv"
 
 # Priority order for picking a verb citation form (best first). PAI1S is the classic Greek lexicon
@@ -73,8 +73,9 @@ def _citation(pos: str, variants: list[tuple]) -> tuple[str, str, str]:
 def build(db_path: Path) -> list[dict]:
     con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
+    has_lemma = "lemma" in {c[1] for c in con.execute("PRAGMA table_info(lxx_words)")}
     rows = con.execute(
-        "SELECT wordid, surface, plain, morph, pos, book, chapter, verse FROM lxx_words "
+        f"SELECT wordid, surface, plain, morph, pos, book, chapter, verse{', lemma' if has_lemma else ''} FROM lxx_words "
         "WHERE strong IS NULL AND is_content=1 AND wordid IS NOT NULL "
         "ORDER BY wordid").fetchall()
     con.close()
@@ -82,7 +83,7 @@ def build(db_path: Path) -> list[dict]:
     groups: dict[int, dict] = {}
     for r in rows:
         g = groups.setdefault(r["wordid"], {
-            "pos": r["pos"], "variants": collections.OrderedDict(),
+            "pos": r["pos"], "variants": collections.OrderedDict(), "lemma": r["lemma"] if has_lemma else None,
         })
         key = (r["surface"], r["plain"], r["morph"])
         v = g["variants"].setdefault(key, {"count": 0, "ref": f"{r['book']} {r['chapter']}:{r['verse']}"})
@@ -91,7 +92,10 @@ def build(db_path: Path) -> list[dict]:
     out = []
     for wordid, g in groups.items():
         variants = [(surf, plain, morph, v["count"]) for (surf, plain, morph), v in g["variants"].items()]
-        citation_surface, citation_morph, confidence = _citation(g["pos"], variants)
+        if g["lemma"]:                                   # GLAUx store: the real lemma is known, nothing to guess
+            citation_surface, citation_morph, confidence = g["lemma"], "", "lemma"
+        else:
+            citation_surface, citation_morph, confidence = _citation(g["pos"], variants)
         for (surf, plain, morph), v in g["variants"].items():
             out.append({
                 "wordid": wordid, "citation_form": citation_surface, "citation_morph": citation_morph,
@@ -110,9 +114,8 @@ def main() -> int:
 
     rows = build(args.db)
     n_groups = len({r["wordid"] for r in rows})
-    n_standard = len({r["wordid"] for r in rows if r["citation_confidence"] == "standard"})
-    print(f"[orphan-lexemes] {n_groups:,} lemma groups ({n_standard:,} standard citation-form, "
-          f"{n_groups - n_standard:,} fallback), {len(rows):,} variant rows", file=sys.stderr)
+    by_conf = collections.Counter({r["wordid"]: r["citation_confidence"] for r in rows}.values())
+    print(f"[orphan-lexemes] {n_groups:,} lemma groups ({dict(by_conf)}), {len(rows):,} variant rows", file=sys.stderr)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
@@ -124,7 +127,8 @@ def main() -> int:
                  "# preferring active + 1st singular, even if not literally the ideal PAI1S); fallback\n"
                  "# means nothing on that list was attested and the most frequent form was used regardless\n"
                  "# of shape — worth a lexicographer's eye before treating as a final headword.\n"
-                 "# CATSS-derived (non-commercial) — see shoresh/legal/CATSS-user-declaration.md.\n"
+                 "# citation_confidence=lemma: the citation form is the lemma of the GLAUx corpus, not chosen from the attested forms.\n"
+                 "# Derived from GLAUx (A. Keersmaekers, KU Leuven; texts el.wikisource) — CC BY-SA 4.0, share-alike.\n"
                  "# See shoresh/lxx/build_orphan_lexemes.py.\n")
         fh.write("wordid\tcitation_form\tcitation_morph\tpos\tcitation_confidence\t"
                  "variant_surface\tvariant_plain\tvariant_morph\tcount\tsample_ref\n")

@@ -5,7 +5,8 @@
 bag of content Strong's and the score is their **cosine similarity** — rare shared words (ἄρτος,
 μάννα) drive the match, common ones (θεός, λέγω) barely count, and the cosine's length normalization
 stops long LXX verses (the 3-Kingdoms/Esther narrative expansions) from colliding with everything.
-Built by `shoresh/lxx/build_quotations.py`.
+Built by `shoresh/lxx/build_quotations.py` from the GLAUx Septuagint store (`lxx-glaux.db`, CC BY-SA 4.0, share-alike; the Odes are excluded because they contain
+the New Testament canticles themselves). Same licence as the store.
 
 ## Columns
 | col | meaning |

@@ -32,8 +32,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 SPINE_DB = ROOT / "shoresh" / "spine" / "spine.db"
-LXX_DB = ROOT / "shoresh" / "lxx" / "lxx.db"
-OUTPUT = Path(__file__).resolve().parent.parent / "strongs_freq.tsv"
+LXX_DB = ROOT / "shoresh" / "lxx" / "data" / "lxx-glaux.db"
+if not LXX_DB.exists():
+    LXX_DB = ROOT / "shoresh" / "lxx" / "lxx.db"
+OUTPUT = ROOT / "resources" / "strongs_freq.tsv"
 
 # Canonical OT/NT book split — imported from shoresh's single source of truth
 # (spine/common.py) rather than duplicated here. Used to assign H vs G to the
@@ -95,6 +97,9 @@ def main() -> None:
         ).fetchall()
         for strong, total, content in lxx_rows:
             add(_norm("G", strong), total, content or 0)
+        if "strong_form" in {c[1] for c in lcon.execute("PRAGMA table_info(lxx_words)")}:            # classic form numbers (G3450 ...) count their own forms
+            for strong, total, content in lcon.execute("SELECT strong_form, COUNT(*), SUM(is_content) FROM lxx_words WHERE strong_form IS NOT NULL GROUP BY strong_form"):
+                add(_norm("G", strong), total, content or 0)
         lcon.close()
         print(f"lxx: {len(lxx_rows)} Greek (LXX) merged into G", file=sys.stderr)
     else:

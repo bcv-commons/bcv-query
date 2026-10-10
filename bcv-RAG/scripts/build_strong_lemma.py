@@ -28,7 +28,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 SPINE_DB = ROOT / "shoresh" / "spine" / "spine.db"
-LXX_DB = ROOT / "shoresh" / "lxx" / "lxx.db"
+LXX_DB = ROOT / "shoresh" / "lxx" / "data" / "lxx-glaux.db"
+if not LXX_DB.exists():
+    LXX_DB = ROOT / "shoresh" / "lxx" / "lxx.db"
 OUTPUT = Path(__file__).resolve().parent.parent / "strong_lemma.tsv"
 
 sys.path.insert(0, str(ROOT / "shoresh"))
@@ -83,6 +85,13 @@ def main() -> None:
             "WHERE strong IS NOT NULL GROUP BY strong"
         ).fetchall():
             slot(_norm("G", strong), "grc")["total"] += c
+        if "strong_form" in {c[1] for c in lcon.execute("PRAGMA table_info(lxx_words)")}:            # GLAUx store: classic form numbers count their own forms; its lemma is known
+            for strong, c, lemma in lcon.execute(
+                    "SELECT strong_form, COUNT(*) c, MIN(lemma) FROM lxx_words WHERE strong_form IS NOT NULL GROUP BY strong_form").fetchall():
+                s_ = slot(_norm("G", strong), "grc")
+                s_["total"] += c
+                if lemma:
+                    s_["lemmas"][lemma] = s_["lemmas"].get(lemma, 0) + c
         lcon.close()
     else:
         print(f"WARN: {LXX_DB} not found — Greek counts are NT-only", file=sys.stderr)

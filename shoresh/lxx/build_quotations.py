@@ -22,7 +22,7 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE.parent))
 from references import BOOK_NUMBERS  # noqa: E402
 
-LXX = HERE / "lxx.db"
+LXX = HERE / "data" / "lxx-glaux.db" if (HERE / "data" / "lxx-glaux.db").exists() else HERE / "lxx.db"
 MACULA = ROOT / "shoresh" / "macula" / "macula-spine.db"
 OUT_DIR = ROOT / "resources" / "ot_nt_quotations"
 
@@ -73,7 +73,7 @@ def build():
     lxx_verse: dict = collections.defaultdict(set)          # (book,ch,v) -> {strong}
     for book, ch, v, strong in lx.execute(
             "SELECT book, chapter, verse, strong FROM lxx_words "
-            "WHERE is_content=1 AND strong IS NOT NULL AND strong != ''"):
+            "WHERE is_content=1 AND strong IS NOT NULL AND strong != '' AND book != 'ODA'"):      # the Odes contain Luke's canticles: not a source of quotations
         lxx_verse[(book, ch, v)].update(int(x) for x in re.findall(r"\d+", str(strong)))
     N = len(lxx_verse)
     df: collections.Counter = collections.Counter()
