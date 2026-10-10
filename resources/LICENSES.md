@@ -1,7 +1,7 @@
 # resources/ — licence register (NC exit)
 
-Status 2026-10-07: the project is moving off every non-commercial (NC) source (BHSA/ETCBC CC BY-NC-SA, OpenHebrewBible CC BY-NC) and onto
-MACULA (CC BY 4.0). Each `resources/<folder>/` still records its own `source` / `license` in its README or manifest. **This file lists every
+Status 2026-10-10: the project has left every non-commercial (NC) source (BHSA/ETCBC CC BY-NC-SA, OpenHebrewBible CC BY-NC, the CATSS/CCAT Septuagint); the service
+and the tracked data are on MACULA (CC BY 4.0), UHB/UGNT and GLAUx (CC BY-SA 4.0). Each `resources/<folder>/` still records its own `source` / `license` in its README or manifest. **This file lists every
 tracked file that is tied to BHSA, plus the ones that mention it only to say it is not used.** A test (`shoresh/tests/test_nc_register.py`)
 fails if a tracked resources file mentions BHSA/ETCBC/OpenHebrewBible in its provenance header and is not listed below, so NC data cannot
 come back unnoticed. Plan and status: `internal-docs/` (NC exit) and the project notes.

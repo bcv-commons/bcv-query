@@ -36,7 +36,7 @@ from spine.common import to_modern_form
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-LXX_DB = ROOT / "lxx" / "lxx.db"
+LXX_DB = ROOT / "lxx" / "data" / "lxx-glaux.db"
 SPINE_DB = ROOT / "spine" / "spine.db"
 
 
@@ -205,7 +205,7 @@ def main():
     cfg = CONFIGS[args.config]
     if not cfg["db"].exists():
         sys.exit(f"missing {cfg['db']} — build it first "
-                 f"(lxx.parse --all / spine.parse)")
+                 f"(lxx.build_glaux / spine.parse)")
     db = sqlite3.connect(f"file:{cfg['db']}?mode=ro", uri=True)
     corpus = build_corpus(db, cfg, args.per_word)
     groups = [s for *_, s, _ in corpus]

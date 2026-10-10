@@ -20,7 +20,7 @@ in Phase 0.
   the Bible-data ecosystem and scales past 2-letter codes; new languages use their
   639-3 code. The runtime accepts legacy 2-letter input (`en`→`eng`) and emits the
   short form (`eng`→`en`) for the web/Hugging Face. Helper: `bcv-RAG/lang.py`.
-- **Licenses:** CC-BY-SA and CC-NC both acceptable here — just attribute.
+- **Licenses:** CC-BY and CC-BY-SA, attribute; no non-commercial data since 2026-10-10 (see `LICENSES.md`).
 
 ## Contents
 | Path | What | Key |

@@ -100,3 +100,16 @@ def test_bhsa_keyed_build_inputs_are_not_tracked_any_more():
         assert path not in tracked, f"{path} is BHSA-keyed and must stay untracked"
     assert not [f for f in tracked if f.startswith("resources/word_glosses/hbo/")], "word_glosses/hbo/ (BHSA lex keys) must stay untracked"
     assert [f for f in tracked if f.startswith("resources/word_glosses/hbo_lexeme/")], "word_glosses/hbo_lexeme/ (MACULA keys) is the tracked source"
+
+
+def test_the_catss_store_and_the_bhsa_comparison_files_are_gone():
+    """NC exit step 8: no CATSS parser or declaration, no BHSA / Open Hebrew Bible comparison in spine/, and the base image does not build the CATSS store."""
+    gone = ("shoresh/lxx/parse.py", "shoresh/legal/CATSS-user-declaration.md", "shoresh/spine/reconcile.py")
+    tracked = subprocess.run(["git", "ls-files", "shoresh"], cwd=REPO, capture_output=True, text=True, check=True).stdout.split()
+    for path in gone:
+        assert path not in tracked, f"{path} must stay removed"
+    assert not [f for f in tracked if f.startswith("shoresh/spine/reconciliation/")], "spine/reconciliation/ (BHSA comparison) must stay removed"
+    base = (SHORESH / "Dockerfile.base").read_text(encoding="utf-8")
+    assert "lxx.parse" not in base, "Dockerfile.base must not build the CATSS-based lxx.db"
+    clauses = (SHORESH / "spine" / "psalm_superscription_clauses.tsv").read_text(encoding="utf-8").splitlines()
+    assert clauses[0] == "chapter\tstrong_sequence" and len(clauses) == 53 and all(row.split("\t")[1].startswith("H") for row in clauses[1:]), "title vocabulary: 52 MACULA-derived rows"

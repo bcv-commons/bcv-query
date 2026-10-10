@@ -1,11 +1,9 @@
-# Strong's equivalence table — closes the OSHB(UHB) ↔ crosswalk assignment gap.
+# Strong's equivalence table — Strong's numbers that name the same word.
 #
-# When UHB and the OpenHebrewBible 002 crosswalk tag the same word with
-# different Strong's numbers, list (variant -> canonical) here. spine/reconcile.py
-# applies these to BOTH sequences before comparing, so direction only needs to be
-# consistent. Entries below are the high-frequency cases from the full-OT
-# reconciliation (see reconciliation/residual_pairs.csv), all known
-# Strong's variant/homograph pairs. A lexicon spot-check is still advisable.
+# (variant -> canonical) pairs of Strong's numbers for the same Hebrew word: suppletive stems (yalak / halak), qere / ketiv variants of the divine name, spelling
+# doublets. They are lexical facts (public-domain Strong's numbering). spine/common.py applies them when the spine is built. The list was first compiled while comparing
+# the UHB tagging with another Strong's tagging; that comparison (spine/reconcile.py and its report) was removed on 2026-10-10 and nothing here is read from it.
+# A lexicon spot-check of each pair is still advisable.
 #
 # Columns (tab-separated):  variant   canonical   note
 #

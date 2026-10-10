@@ -108,7 +108,7 @@ GROQ_API_KEY=... python -m query.ask "what does Titus 1:1 say?"   # ask (Mode C)
 # ── shoresh: build the data and serve it ──
 cd shoresh
 pip install -r requirements.txt
-python -m lxx.parse --all && python -m spine.parse   # build lxx.db + spine.db
+python -m spine.parse                                  # build spine.db (the Septuagint store: python -m lxx.build_glaux)
 SHORESH_DATA=./data uvicorn app:app --port 8080
 ```
 
@@ -151,7 +151,7 @@ Issues, ideas, and pull requests are welcome.
 ## License
 
 Code: **MIT.** Content and data retain their source licenses — Door43/unfoldingWord
-CC BY-SA 4.0, STEPBible CC BY 4.0, BHSA CC BY-NC-SA, and others per source (each
+CC BY-SA 4.0, STEPBible CC BY 4.0, MACULA CC BY 4.0, GLAUx CC BY-SA 4.0, and others per source (each
 `resources/` subfolder and data table records its own `source` / `license`).
-The project accepts both share-alike (CC-BY-SA) and non-commercial (CC-NC) data;
-attribute, and keep SA-derived data under a compatible license.
+Since 2026-10-10 the deployed service reads no non-commercial data (the earlier BHSA / ETCBC, Open Hebrew Bible and CATSS sources remain only in the git history under their
+own terms). Attribute, and keep share-alike-derived data under a compatible license (`shoresh/spine/ATTRIBUTION.md`, `resources/LICENSES.md`).

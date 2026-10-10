@@ -26,7 +26,7 @@ python -m interlinear.build_gloss                      # every real gloss langua
 
 Pinned to commit `f5af0eb89e4b845b2b30beb9f4360b50ddb08f6a` (2026-07-12) in `fetch.py` for
 globalbibletools/data, `a0bcfbbcfe217c66f31b1c886dd95c4424061e0e` (2026-07-17) for bsb-data-output —
-same discipline as `macula/parse.py`'s MACULA fetch and `lxx/parse.py`'s `LXX_COMMIT`: re-pin
+same discipline as `macula/parse.py`'s MACULA fetch: re-pin
 deliberately (bump the relevant `*_COMMIT`, re-fetch, re-build, re-verify), never float on live HEAD.
 All `.db` files + fetched source trees (`data/gbt/`, `data/bsb/`) are gitignored, rebuilt from source.
 

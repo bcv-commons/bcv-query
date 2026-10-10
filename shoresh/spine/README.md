@@ -1,7 +1,7 @@
 # spine/
 
 The original-language spine: per-word Strong's + lemma + morphology from
-UHB (Hebrew OT) and UGNT (Greek NT), 99.59% reconciled to BHSA.
+UHB (Hebrew OT) and UGNT (Greek NT).
 
 Originally built to test prepending a language-neutral anchor to embedding
 inputs. That investigation **concluded: do not re-embed** — the anchor
@@ -24,16 +24,15 @@ Parser spec: [../docs/spine-parser.md](../docs/spine-parser.md).
 | `prefix.py` | **the prefix builder** — `PrefixBuilder.build(passage_refs)` → Location + Lexical lines for a chunk |
 | `ablation.py` | easy thematic ablation (saturated — production model already nails distinct-verse + cross-lingual retrieval) |
 | `ablation_wordstudy.py` | **discriminating ablation** — original-language precision: clustering separation + word-study queries over confusable create-family verbs (ULT bodies, spine.db ground truth). Arms: body / code+gloss / gloss-only / **hebrew_lemma** / **lemma+gloss** (the last two = arm A, anchoring in the original language's own space) |
-| `reconcile.py` | UHB↔BHSA Strong's reconciliation (validation + residual catalogue) |
-| `strongs_equivalence.tsv` | hand-built variant→canonical Strong's map (closes the OSHB↔crosswalk gap) |
-| `reconciliation/` | reconciliation outputs (per-book rates, residual pairs, summary) |
+| `strongs_equivalence.tsv` | variant→canonical Strong's map (suppletive stems, qere variants, doublets) |
+| `build_clause_vocab.py` | builds `psalm_superscription_clauses.tsv` (Psalm title vocabulary) from MACULA |
 | `spine.db` | parser output (SQLite `spine_words`) — gitignored, re-derivable |
 | `data/` | downloaded sources (crosswalk CSV, etc.) — gitignored |
-| `ATTRIBUTION.md` | source licenses — **note the non-commercial constraint** |
+| `ATTRIBUTION.md` | source licenses and attribution |
 
 ## Status
 
-- Reconciliation **solved at 99.59%** OT-wide (`reconciliation/summary.md`).
+- The UHB↔BHSA reconciliation (99.59% OT-wide) was an offline comparison; its script and report were removed on 2026-10-10 (git history).
 - Parser **implemented** (`parse.py`) — fetches the pinned UHB `v2.1.32` /
   UGNT `v0.34`, parses to per-word records with fidelity assertions,
   writes `spine.db`. Spec: [`../docs/spine-parser.md`](../docs/spine-parser.md).
@@ -59,7 +58,6 @@ cd bcv-RAG
 PYTHONPATH=. python3 -m spine.parse           # build spine.db (OT+NT) — needs httpx
 PYTHONPATH=. python3 -m spine.parse --ot      # OT only
 PYTHONPATH=. python3 -m spine.build_glosses   # build spine_glosses.tsv — needs httpx
-PYTHONPATH=. python3 -m spine.reconcile       # validate vs BHSA — needs cfabric + local BHSA
 
 # ablation — needs voyageai (pip install voyageai); set the model to match production:
 PYTHONPATH=. BTMCP_EMBEDDING_MODEL=voyage-3-large VOYAGE_API_KEY=... \
@@ -75,6 +73,5 @@ kept to reproduce that result.
 
 ## Licensing
 
-Sources include **non-commercial** data (OpenHebrewBible CC BY-NC, BHSA
-CC BY-NC-SA). The spine and anything derived from it are therefore
-non-commercial. See `ATTRIBUTION.md`.
+The spine is built from UHB / UGNT (unfoldingWord, CC BY-SA 4.0) and the Strong's glosses of STEPBible (CC BY): it is share-alike, not non-commercial (since
+2026-10-10 no non-commercial source is read). See `ATTRIBUTION.md`.

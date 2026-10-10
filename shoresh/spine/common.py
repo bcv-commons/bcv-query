@@ -1,4 +1,4 @@
-"""Shared spine constants + helpers (used by parse.py, reconcile.py, prefix.py)."""
+"""Shared spine constants + helpers (used by parse.py, prefix.py)."""
 from __future__ import annotations
 
 import re

@@ -74,8 +74,8 @@ curl -X POST "$HOST/upload/clauses_hbo.sqlite?secret=$SECRET" --data-binary @dat
 
 | Asset | Size | Source |
 |-------|------|--------|
-| `spine.db` | 41MB | UHB/UGNT, 443k words, 99.59% BHSA-reconciled |
-| `lxx.db` | — | Rahlfs 1935, 587k words, 54 books, 93% Strong's-tagged |
+| `spine.db` | 41MB | UHB/UGNT, 443k words |
+| `lxx-glaux.db` | 82MB | GLAUx (CC BY-SA), 592k words, 54 books, 93% Strong's-tagged |
 | `spine_glosses.tsv` | 465KB | STEPBible TBESH/TBESG (CC BY), 14,300 entries |
 | `clauses_hbo.npy` | 311MB | 101,200 MACULA clauses, 768d BEREL vectors |
 | `clauses_grc.npy` | 141MB | 46,050 MACULA clauses, 768d SPhilBERTa vectors |
@@ -83,7 +83,7 @@ curl -X POST "$HOST/upload/clauses_hbo.sqlite?secret=$SECRET" --data-binary @dat
 ## Corpus engine (BHSA / Nestle1904 via Context-Fabric): dev-only, not part of the service
 
 Since NC exit step 6 the service reads no BHSA data (structure, trees, syntax search, `/words`, senses and clause search are MACULA, CC BY). `shoresh/corpus_engine/` and several `macula/build_*.py` scripts (`extract_hbo_syntax.py`,
-`build_bhsa_structural_pairs.py`, `build_parallelism_pairs.py`, `spine/reconcile.py`,
+`build_bhsa_structural_pairs.py`, `build_parallelism_pairs.py`,
 `bcv-RAG/scripts/build_lex_occurrences.py`) read the ETCBC/BHSA (Hebrew) and ETCBC/nestle1904 (Greek)
 corpora in Text-Fabric format, expected at `~/text-fabric-data`. This is a **CC BY-NC-SA download**,
 not part of the repo, not in any Docker image and no longer mounted in production — a fresh clone or new dev machine needs to fetch it once:
@@ -129,10 +129,10 @@ re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
 pip install -r requirements.txt          # default (no torch)
 pip install -r requirements-berel.txt    # opt-in for BEREL/SPhilBERTa
 pip install -r requirements-macula.txt   # opt-in for macula/ build scripts (networkx, pyarrow)
-python -m lxx.parse --all && python -m spine.parse
+python -m spine.parse && python -m lxx.build_glaux   # spine.db; lxx/data/lxx-glaux.db (ship it to /data)
 SHORESH_DATA=./data uvicorn app:app --port 8080
 ```
 
 ## License
 
-Non-commercial (BHSA CC BY-NC-SA, OpenHebrewBible CC BY-NC), being replaced by MACULA (CC BY) step by step; see "NC exit status" in `docs/ROADMAP.md`.
+Code MIT; data per source (UHB/UGNT and GLAUx CC BY-SA, MACULA CC BY). The service reads no non-commercial data since 2026-10-10 ("NC exit status" in `docs/ROADMAP.md`); attribution in `spine/ATTRIBUTION.md`.

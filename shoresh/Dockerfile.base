@@ -3,7 +3,7 @@
 # GC, unlike inline build cache). The app image (Dockerfile) builds FROM this, so
 # editing app code never re-downloads model weights or re-parses the corpus.
 #
-# REBUILD THIS BASE only when requirements*.txt or the spine/ or lxx/ packages
+# REBUILD THIS BASE only when requirements*.txt or the spine/ package
 # change:
 #   docker build -f Dockerfile.base --build-arg SEARCH_EMBEDDER=berel \
 #     -t shoresh-base:latest .
@@ -32,13 +32,10 @@ RUN if [ "$SEARCH_EMBEDDER" = "berel" ]; then \
         AutoModel.from_pretrained('bowphs/SPhilBerta')"; \
     fi
 
-# Parse OT/LXX source into spine.db / lxx.db (imports only the lxx + spine
-# packages + a network fetch). Built here once; the app image inherits the .db
-# files. (.dockerignore keeps the source data/.db out of the context, so parse
-# regenerates them.)
+# Parse the UHB / UGNT source into spine.db (spine package + a network fetch). Built here once; the app image inherits the .db
+# file. (.dockerignore keeps the source data/.db out of the context, so parse regenerates it.) The Septuagint store lxx-glaux.db is built
+# locally (python -m lxx.build_glaux) and shipped to the data volume (/data/lxx-glaux.db); the CATSS-based lxx.db is no longer built (2026-10-10).
 COPY spine/ ./spine/
-COPY lxx/ ./lxx/
-RUN python -m lxx.parse --all
 RUN python -m spine.parse
 
 # MACULA per-token semantics (frames / coreference) → macula-spine.db. Fetches the

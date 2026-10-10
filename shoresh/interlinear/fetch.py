@@ -7,7 +7,7 @@ files below (fetch_strongs_data — small, license-clean, and unrelated to the l
 at one point and are deliberately no longer used — see shoresh/interlinear/serve.py's module
 docstring and internal-docs/gbt-alignment-handover.md for what replaced each.
 
-Same discipline as shoresh/macula/parse.py's MACULA fetch and shoresh/lxx/parse.py's LXX_COMMIT:
+Same discipline as shoresh/macula/parse.py's MACULA fetch:
 pinned to a commit SHA, re-pinned deliberately — NOT a live `git pull` to whatever HEAD happens to
 be. A tarball fetch (not a full `git clone`) keeps this dependency-free (stdlib only) and avoids
 pulling repo history we don't need.

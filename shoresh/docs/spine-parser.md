@@ -6,7 +6,7 @@ Validation and data: [`../spine/`](../spine/).
 
 Status: **implemented** — [`spine/parse.py`](../spine/parse.py) (+
 [`spine/common.py`](../spine/common.py)). Reconciliation solved at 99.59%
-OT-wide (`spine/reconciliation/summary.md`). This doc is the contract the
+OT-wide (an offline comparison; the report was removed on 2026-10-10, see git history). This doc is the contract the
 parser implements.
 
 ## Inputs (pin exact versions)

@@ -56,7 +56,7 @@ precise. How it's built is documented separately in
 
 | Module | Purpose |
 |---|---|
-| `spine/` | The original-language **spine** — UHB (Hebrew OT) + UGNT (Greek NT), ~443k words, 99.6% reconciled against BHSA. Builds `spine.db`. |
+| `spine/` | The original-language **spine** — UHB (Hebrew OT) + UGNT (Greek NT), ~443k words. Builds `spine.db`. |
 | `lxx/` | The **Septuagint** (Greek OT), Rahlfs 1935 — ~587k words across 54 books, 93% Strong's-tagged. Builds `lxx.db`. |
 | `search/` | Clause-level semantic search: the embedder selector, the build pipeline, and a brute-force cosine store loaded at startup. |
 | `embed_eval/` | A harness for measuring embedder quality (sense separation + word-study retrieval) — how we know BEREL/SPhilBERTa beat the baseline. |
@@ -68,7 +68,7 @@ precise. How it's built is documented separately in
 
 | Asset | Size | Source |
 |---|---|---|
-| `spine.db` | 41 MB | UHB/UGNT, 443k words, 99.59% BHSA-reconciled |
+| `spine.db` | 41 MB | UHB/UGNT, 443k words |
 | `lxx.db` | — | Rahlfs 1935, 587k words, 54 books, 93% Strong's-tagged |
 | `strongs_gloss.tsv` | 465 KB | STEPBible TBESH/TBESG (CC BY), ~14,300 entries |
 | `clauses_hbo.npy` | ~270 MB | 88,131 BHSA clauses, 1024-d BGE-M3 vectors |
@@ -101,7 +101,7 @@ pip install -r requirements.txt          # default (no torch)
 # pip install -r requirements-berel.txt  # only if you want the BEREL/SPhilBERTa embedder
 
 # build the data
-python -m lxx.parse --all && python -m spine.parse
+python -m spine.parse && python -m lxx.build_glaux
 
 # serve
 SHORESH_DATA=./data uvicorn app:app --port 8080

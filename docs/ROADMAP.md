@@ -443,9 +443,9 @@ vs MT, niche but native to shoresh). And — once audio resources arrive — aud
 forced-alignment for word timing and read-along (see the stub in
 [aligner-plan.md](aligner-plan.md)).
 
-## NC exit status (2026-10-08)
+## NC exit status (2026-10-10): complete
 
-Replacing BHSA/OHB/ETCBC-derived inputs with MACULA (CC BY), step by step; the service stays non-commercial until the last step.
+BHSA/OHB/ETCBC-derived inputs replaced by MACULA (CC BY); the Septuagint replaced by GLAUx (CC BY-SA). The deployed service reads no non-commercial data.
 - **Step 0** ✅ BHSA-derived legacy data untracked; licence register + guard test (`resources/LICENSES.md`, `tests/test_nc_register.py`).
 - **Step 1** ✅ `/verse` Hebrew words from MACULA (`VERSE_HEBREW_BASE=macula`, live): words with parts, Hebrew numbering, per-occurrence senses; reader numbering via `vrsmap`.
 - **Step 2a** ✅ lexeme and senses on MACULA keys (live; the `LEXEME_BASE` switch was removed in step 6). Open: per-stem sense labels for verbs (12% vs 78% of sense groups with distinct stems, 65% vs 83% in the `/wordstudy` stem view); waits on the aligner's `rend` data. Report: `python -m macula.compare_lexeme_bases`.
@@ -454,3 +454,5 @@ Replacing BHSA/OHB/ETCBC-derived inputs with MACULA (CC BY), step by step; the s
 - **Step 4** ✅ `clause_dependency_lookup` and the `clause_dependencies` table dropped (MACULA has no clause-to-clause relation labels, only embedding; BHSA's discourse relations cannot be rebuilt from it).
 - **Step 5** ✅ clause search on MACULA clauses (101,200 Hebrew, 46,050 Greek; BEREL / SPhilBERTa), live.
 - **Step 6** ✅ the service reads no BHSA / ETCBC data: structure, `/words`, senses and `/verse` are MACULA only (defaults, switches removed); `hbo.db` and the text-fabric mount are retired. `spine.db` stays, but only for the Greek NT `/verse` words, `/morph` and `/gloss` counts (UHB/UGNT, CC BY-SA, no BHSA).
+- **Step 7** ✅ (2026-10-10) the Septuagint word store is GLAUx-based (`lxx-glaux.db`, CC BY-SA): lemma-level Strong's numbers plus classic form numbers (`strong_form`), inferred name morphology (`morph_inferred`), stable lemma ids; `lxx_orphan_lexemes`, `ot_nt_quotations`, `strongs_freq`, `strong_lemma`, `concepts` rebuilt from it. Before/after: `internal-docs/lxx-glaux-before-after.md`.
+- **Step 8** ✅ (2026-10-10) the CATSS-based `lxx.db`, its parser and user declaration, and the BHSA / Open Hebrew Bible comparison files in `spine/` removed; the Psalm title vocabulary comes from MACULA (`spine/build_clause_vocab.py`).

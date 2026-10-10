@@ -28,9 +28,10 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 LEMMA = HERE / "strong_lemma.tsv"
-KEYNESS = HERE / "strongs_keyness.tsv"
-FREQ = HERE / "strongs_freq.tsv"
-GLOSS = HERE / "strongs_gloss.tsv"
+RES = HERE.parent / "resources"                      # the shared data lives in the repo-root resources/ (it moved from bcv-RAG/)
+KEYNESS = RES / "strongs_keyness.tsv"
+FREQ = RES / "strongs_freq.tsv"
+GLOSS = RES / "strongs_gloss.tsv"
 TW_LINKS = HERE / "tw_links.tsv"
 OUTPUT = HERE / "concepts.tsv"
 
@@ -87,7 +88,7 @@ def main() -> None:
             next(fh, None)
             for line in fh:
                 p = line.rstrip("\n").split("\t")
-                if len(p) >= 4 and p[3] == "en" and p[0] not in gloss_en:
+                if len(p) >= 4 and p[3] in ("en", "eng") and p[0] not in gloss_en:
                     gloss_en[p[0]] = p[1]
 
     # --- Phase 2: importance = blend(tw_kt, lexical elaboration) ---

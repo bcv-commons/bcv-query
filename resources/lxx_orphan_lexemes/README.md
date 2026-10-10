@@ -6,7 +6,7 @@ e.g. Genesis 1:2's ἀκατασκεύαστος. Grouped by lemma into a citati
 variants, so these words can be given lexicon entries of their own.
 
 **Grouping key:** the LXX source format carries a `wordid` per token that VALIDATED (2026-08, see
-`shoresh/lxx/parse.py`'s module docstring) reliably groups inflected forms of the same lemma — 0/4,050
+the former parser's docstring) reliably groups inflected forms of the same lemma — 0/4,050
 distinct `wordid`s that co-occur with a real Strong's number ever map to more than one — even though
 it was previously treated as a throwaway per-occurrence id and discarded during parsing.
 

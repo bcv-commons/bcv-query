@@ -6,7 +6,7 @@ in the NT, so Strong's numbering (which only covers NT-catalogued words) has no 
 karnbibeln.se's own example is Genesis 1:2's ἀκατασκεύαστος. Their Strong's-scoped lexicon has
 nowhere to link these words to.
 
-VALIDATED 2026-08 (see lxx/parse.py's module docstring): the LXX source format carries a `wordid`
+VALIDATED 2026-08 on the former CATSS-based store: its source format carried a `wordid`
 per token that reliably groups inflected forms of the same lemma — including on words with no
 Strong's, where it's the only lemma-grouping signal available. This script groups the untagged
 content words by `wordid` and derives a citation (dictionary-headword) form per group from the
@@ -120,7 +120,7 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as fh:
         fh.write("# LXX-only Greek lexemes (no Strong's number) grouped by wordid (validated per-lemma\n"
-                 "# key, see lxx/parse.py) into a citation form + all attested inflected variants, with\n"
+                 "# key) into a citation form + all attested inflected variants, with\n"
                  "# per-variant occurrence count + a sample verse ref. citation_confidence=standard means\n"
                  "# the chosen form is on a fixed priority list of lexicon-headword-shaped forms (nom.\n"
                  "# singular for nouns/adjectives; for verbs, present/aorist indicative or infinitive,\n"

@@ -32,5 +32,5 @@ First run downloads the models to the HF cache (`~/.cache/huggingface`).
 Models are ~0.1–0.3 B and run on CPU in minutes for this small corpus. `$0`
 (HF models are free; only an optional Voyage reference arm would cost cents).
 
-Requires `lxx.db` (`python -m lxx.parse --all`) and, for Plan C, `spine.db`
+Requires the Septuagint store (`python -m lxx.build_glaux`) and, for Plan C, `spine.db`
 (`python -m spine.parse`).

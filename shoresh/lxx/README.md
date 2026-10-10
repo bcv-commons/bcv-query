@@ -1,84 +1,39 @@
 # lxx/
 
-The **Septuagint** (Greek Old Testament) as a per-word original-language
-store — the Tier 1 gap-fill (the Greek OT the current English corpus lacks,
-and the text the NT quotes). See
-[`../../docs/resource-inventory.md`](../../docs/resource-inventory.md) Gap 1
-for the source survey.
+The **Septuagint** (Greek Old Testament) as a per-word original-language store: the Greek OT the English corpus lacks, and the text the NT quotes.
 
-## Current store (2026-10-10): GLAUx, CC BY-SA 4.0
+## Source and licence
 
-The service reads **`lxx-glaux.db`** (built by `python -m lxx.build_glaux`, shipped to the data volume as `/data/lxx-glaux.db`; `data.py` picks it up automatically, or set
-`LXX_DB_PATH`). The sections below describe the former CATSS-based `lxx.db`, kept only until `Dockerfile.base` stops building it; its licence is non-commercial.
-Attribution: GLAUx (Alek Keersmaekers, KU Leuven; CC BY-SA 4.0), texts el.wikisource (CC BY-SA 3.0), Genesis annotation Pedalion Trees (CC BY-SA 4.0). Everything built from it is share-alike.
+**GLAUx** (Alek Keersmaekers, KU Leuven, https://github.com/alekkeersmaekers/glaux; **CC BY-SA 4.0**, share-alike). The Septuagint texts (TLG 0527) come from el.wikisource
+(CC BY-SA 3.0); lemmas, morphology and syntax are GLAUx's (the Genesis annotation is hand-checked, Pedalion Trees, CC BY-SA 4.0; the rest is automatic: about 98.8% lemmas,
+97.2% morphology over the whole corpus). Everything built from it is share-alike, with the attribution in `../spine/ATTRIBUTION.md`.
 
-## Source (former CATSS-based store)
+History: until 2026-10-10 the store came from the CATSS / CCAT-based `eliranwong/LXX-Rahlfs-1935`, licensed for non-commercial use only. Its parser, user declaration and
+build step were removed; the file stays in the git history only. `compare_glaux.py` needs a copy of the old `lxx.db` if you want to rerun the before/after report
+(`internal-docs/lxx-glaux-before-after.md`).
 
-`eliranwong/LXX-Rahlfs-1935`, the assembled MyBible export
-`11_end-users_files/MyBible/Bibles/LXX_final_main.csv` (Rahlfs 1935 base,
-**B-text** recension; the A-text is `LXX_final_alternate.csv`). Pinned to
-commit `a1b5ff1` (see `LXX_COMMIT` in `parse.py`).
+## Output: `lxx-glaux.db`
 
-**Licence:** CATSS-derived — **non-commercial**, with attribution. Sign and
-keep [`../legal/CATSS-user-declaration.md`](../legal/CATSS-user-declaration.md);
-attribution in [`../spine/ATTRIBUTION.md`](../spine/ATTRIBUTION.md). The
-public-domain **Swete 1930** is the zero-CATSS fallback if needed.
+`python -m lxx.build_glaux` (from `shoresh/`, needs `spine/spine.db` and `macula/trees-macula.db` for the Strong's lemma lists; downloads the GLAUx XML into `lxx/data/glaux/`)
+writes `lxx/data/lxx-glaux.db` (gitignored, re-derivable). It is shipped to the data volume (`deploy/deploy-data.sh shoresh/lxx/data/lxx-glaux.db lxx-glaux.db /opt/shoresh/data`)
+and `data.py` reads `/data/lxx-glaux.db` (or `$LXX_DB_PATH`, or the local build).
 
-## Output: `lxx.db` (gitignored, re-derivable)
-
-Table `lxx_words`, schema parallel to the spine's `spine_words` so canonical
-OT verses join **LXX ↔ spine ↔ BHSA** on `(book, chapter, verse, strong)`:
+Table `lxx_words`, schema parallel to the spine's `spine_words`:
 
 | column | meaning |
 |---|---|
-| `book` | USFM code (canonical) or USFM-deutero code; `canonical` flags which |
-| `chapter`, `verse`, `idx` | reference + word position in the verse |
-| `surface` | accented Greek (`ἀρχῇ`) |
-| `plain` | monotonic, de-accented form (`αρχη`) — matches Greek-model orthography, via `spine.common.to_modern_form` |
-| `strong` | Strong's number (int; first `<S>` after the `<m>` tag) — NULL for rare untagged words |
-| `lexid` | eliranwong analytical-lexicon **lexeme id** (second `<S>`; ὁ = 73459 everywhere) — homograph-precise *within* the LXX, but **opaque** (not Strong's, not MACULA `grc:`). Greek's homograph rate is ~1.6% so it rarely differs from `strong` (only 4 Strong's split in the whole LXX); kept for internal precision. Do NOT feed derived CC0/CC-BY artifacts — CATSS-NC. See `internal-docs/greek-lexeme-and-neighbors.md`. |
-| `morph`, `pos` | CCAT/Packard code (`N.DSF`) and head POS (`N`) |
-| `is_content` | POS ∈ {N, V, A} — same content rule as the spine |
-| `canonical` | 1 = the 39 OT books (join the spine); 0 = deuterocanon |
-
-## Coverage (full parse)
-
-**586,992 words · 54 books** (39 canonical + 15 deuterocanonical) · 93% carry
-Strong's · 48% content words. All MyBible book numbers map (no unmapped books).
-
-## Run (from `shoresh/` with `PYTHONPATH=.`)
-
-```bash
-PYTHONPATH=. python3 -m lxx.parse              # smoke test: Genesis only
-PYTHONPATH=. python3 -m lxx.parse --canonical  # the 39 canonical OT books
-PYTHONPATH=. python3 -m lxx.parse --all        # full LXX incl. deuterocanon
-PYTHONPATH=. python3 -m lxx.parse --book PSA ISA
-```
-
-First run downloads the pinned CSV to `data/` (cached); `--src PATH` uses a
-local copy.
-
-## Next (follow-ups)
-
-- **Lemmas** — the inline data carries a lexeme id; resolve it against the
-  repo's `02_lexemes` / `09a_LXX_lexicon` tables to add a `lemma` column.
-- **Versification** — LXX numbering differs from MT/Protestant (esp. Psalms,
-  Jeremiah, Esdras B = Ezra+Nehemiah); a mapping is needed before tight
-  verse-level LXX↔BHSA joins.
-- **Embedding** — feed `plain` (or clause windows) to a Greek model
-  (SPhilBERTa) behind the service's embedding interface.
-
-## The GLAUx store: `lxx-glaux.db`
-
-`python -m lxx.build_glaux` builds the same table from GLAUx (KU Leuven, A. Keersmaekers; CC BY-SA 4.0), which is not CATSS-derived; see its docstring and
-`internal-docs/lxx-glaux-before-after.md` (generated by `python -m lxx.compare_glaux`) for what changes for clients. Extra columns and how `/verse` words use them:
-
-| column / field | meaning |
-|---|---|
-| `lemma` | the lemma (GLAUx), also the key of `wordid` / `lexid` in this store |
-| `strong` | lemma-level Strong's number from the open UGNT / MACULA Greek lists (every form of ἐγώ is G1473) |
+| `book`, `chapter`, `verse`, `idx` | USFM code, reference and word position in the verse (Septuagint numbering); `canonical` is 1 for the 39 Hebrew-canon books |
+| `surface`, `plain` | accented Greek and its lower-case, de-accented form (`αρχη`) |
+| `lemma` | the GLAUx lemma |
+| `strong` | lemma-level Strong's number from the open UGNT / MACULA Greek lemma lists (every form of ἐγώ is G1473); NULL for lemmas that never occur in the NT |
 | `strong_form` (`/verse` `strong_form`) | classic 1890 number of the form where it differs (μου G3450, εἶπεν G2036, Ἰερουσαλήμ G2419, Ἰούδα G2448, Σαούλ G4549 …); the `gloss` of the word comes from it; `/word/G3450` finds these forms |
-| `morph` | CCAT-like string; a gap inside it is `-` (`N.-SM`), trailing gaps are dropped, a name with no feature is `N` |
-| `morph_inferred` (`/verse` `morph_inferred`) | for names GLAUx leaves untagged: `article`, `preposition` or `syntax`, the rule that filled case / number / gender |
+| `lexid`, `wordid` | stable id of the lemma (31 bits of the SHA-1 of the NFC lemma): the `/lxx-lexeme/{wordid}` key of words without a Strong's number |
+| `morph`, `pos` | CCAT-like string (`N.DSF`, `V.AAI3S`); a gap inside it is `-` (`N.-SM`), trailing gaps are dropped, a name with no feature is `N` |
+| `morph_inferred` (`/verse` `morph_inferred`) | for names GLAUx leaves untagged: `article`, `preposition` or `syntax`, the rule that filled case / number / gender from the context |
+| `is_content` | noun, verb, adjective or numeral |
+| `glaux_id` | GLAUx's own word id |
 
-The store has no pseudo-Strong's numbers (the CATSS store has 58 ids G70121–G75179 on 924 words, without glosses).
+591,686 words · 54 books · 92.8% carry a Strong's number. See `build_glaux.py` for the details of each column and `internal-docs/lxx-glaux-before-after.md` for the comparison with the old store.
+
+Derived tables: `python -m lxx.build_orphan_lexemes` (`resources/lxx_orphan_lexemes`, words without a Strong's number grouped by lemma) and `python -m lxx.build_quotations`
+(`resources/ot_nt_quotations`, Odes excluded).
