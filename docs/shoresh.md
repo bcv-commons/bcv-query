@@ -36,10 +36,11 @@ All endpoints are plain `GET`s under the service root.
 | `GET /morph?pattern=&book=&chapter=` | Morphology search — imperatives, participles, nouns, … | $0 |
 | `GET /bridge/{strong}` | LXX bridge — how the Septuagint renders a Hebrew word in Greek, or vice versa (H↔G) | $0 |
 | `GET /lxx-lexeme/{wordid}` | LXX-only Greek lexeme (no Strong's number — never occurs in the NT) — citation form + variants | $0 |
-| `GET /structure/{book}/{ch}/{v}` | Syntax — clause/phrase hierarchy: BHSA/Nestle1904 from the corpus engine, or MACULA lowfat trees with `STRUCTURE_BASE=macula` | $0 |
-| `GET /syntax/search?strong=&function=` | Who-did-what: clauses where a lexeme fills a phrase function. With `STRUCTURE_BASE=macula` each hit has `head` (true: the word is a direct part of the phrase; false: nested, "the tent OF GOD") and `head_only=true` drops the nested ones | $0 |
-| `GET /search?q=&lang=hbo` | **Hebrew** clause search (88,131 BHSA clauses) | $0 |
-| `GET /search?q=&lang=grc` | **Greek** clause search (8,011 Nestle1904 sentences) | $0 |
+| `GET /structure/{book}/{ch}/{v}` | Syntax — clause/phrase hierarchy from MACULA lowfat trees (CC BY); `/verse/{book}/{ch}/{v}/tree` adds the sentence level | $0 |
+| `GET /scaffold/{book}/{ch}` | Original-language scaffold of a chapter: every Hebrew/Greek token keyed by its MACULA token key (the key lexeme-aligner publishes), with lemma, lexeme, gloss, morphology and clause/phrase ids; the client joins it to an alignment and the edition text — [example](examples/interlinear) | $0 |
+| `GET /syntax/search?strong=&function=` | Who-did-what: clauses where a lexeme fills a phrase function. Each hit has `head` (true: the word is a direct part of the phrase; false: nested, "the tent OF GOD") and `head_only=true` drops the nested ones | $0 |
+| `GET /search?q=&lang=hbo` | **Hebrew** clause search (MACULA clauses) | $0 |
+| `GET /search?q=&lang=grc` | **Greek** clause search (MACULA Greek sentences) | $0 |
 | `GET /search?translate=gloss` | Search an English query against Hebrew via deterministic gloss lookup | $0 |
 | `GET /search?translate=llm` | …or translate the query with an LLM first | ~$0.0001 |
 | `GET /search?enrich=true` | Add a per-word breakdown to each search result | $0 |
@@ -57,11 +58,10 @@ precise. How it's built is documented separately in
 | Module | Purpose |
 |---|---|
 | `spine/` | The original-language **spine** — UHB (Hebrew OT) + UGNT (Greek NT), ~443k words. Builds `spine.db`. |
-| `lxx/` | The **Septuagint** (Greek OT), Rahlfs 1935 — ~587k words across 54 books, 93% Strong's-tagged. Builds `lxx.db`. |
+| `lxx/` | The **Septuagint** (Greek OT) from GLAUx (CC BY-SA 4.0) — ~592k words across 54 books, 93% Strong's-tagged. Builds `lxx-glaux.db`. |
 | `search/` | Clause-level semantic search: the embedder selector, the build pipeline, and a brute-force cosine store loaded at startup. |
 | `embed_eval/` | A harness for measuring embedder quality (sense separation + word-study retrieval) — how we know BEREL/SPhilBERTa beat the baseline. |
 | `data/` | Runtime volume: the clause vectors (`clauses_<lang>.npy`) + metadata (`clauses_<lang>.sqlite`). |
-| `legal/` | The CATSS/CCAT user declaration governing the LXX morphological data. |
 | `docs/` | [`spine-parser.md`](../shoresh/docs/spine-parser.md) and [`embedding-enrichment.md`](../shoresh/docs/embedding-enrichment.md). |
 
 ### Data assets
@@ -69,10 +69,10 @@ precise. How it's built is documented separately in
 | Asset | Size | Source |
 |---|---|---|
 | `spine.db` | 41 MB | UHB/UGNT, 443k words |
-| `lxx.db` | — | Rahlfs 1935, 587k words, 54 books, 93% Strong's-tagged |
+| `lxx-glaux.db` | — | GLAUx Septuagint, 592k words, 54 books, 93% Strong's-tagged |
 | `strongs_gloss.tsv` | 465 KB | STEPBible TBESH/TBESG (CC BY), ~14,300 entries |
-| `clauses_hbo.npy` | ~270 MB | 88,131 BHSA clauses, 1024-d BGE-M3 vectors |
-| `clauses_grc.npy` | ~25 MB | 8,011 Nestle1904 sentences, 1024-d BGE-M3 vectors |
+| `clauses_hbo.npy` | ~270 MB | Hebrew clauses, 1024-d BGE-M3 vectors |
+| `clauses_grc.npy` | ~25 MB | Greek sentences, 1024-d BGE-M3 vectors |
 
 The source databases and clause vectors are **re-derivable** and not committed —
 you build them locally (see below).
@@ -150,8 +150,4 @@ mounted directly when self-hosting).
 
 ## License
 
-The original-language data is **non-commercial** (BHSA CC BY-NC-SA, OpenHebrewBible
-CC BY-NC; LXX morphology under the CATSS/CCAT declaration in `legal/`). The
-service **code** is MIT like the rest of the repo.
-
-The non-commercial inputs are being replaced by MACULA (CC BY) step by step; status in the "NC exit status" section of [ROADMAP.md](ROADMAP.md). Today the `/verse` Hebrew words are already MACULA-based (`VERSE_HEBREW_BASE=macula`); lexeme/senses (`LEXEME_BASE`) and the clause/syntax endpoints are not yet.
+Since 2026-10-10 the service reads **no non-commercial data**. The Hebrew and Greek original-language data is MACULA (CC BY 4.0) with UHB/UGNT (CC BY-SA 4.0); the Septuagint is GLAUx (CC BY-SA 4.0). Data derived from the share-alike sources is share-alike; attribution is in `spine/ATTRIBUTION.md` and `resources/LICENSES.md`. The earlier BHSA / OpenHebrewBible / CATSS sources remain only in the git history under their own terms (status and steps: "NC exit status" in [ROADMAP.md](ROADMAP.md)). The service **code** is MIT like the rest of the repo.

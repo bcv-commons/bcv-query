@@ -47,3 +47,7 @@ def syntax_search(function: str | None = None, strong: str | None = None, lex: s
                   corpus: str | None = None, limit: int = 50, head_only: bool = False) -> dict:
     """Who-did-what search: clauses where a lexeme (`strong` or `lex`) fills a phrase `function`. The corpus is pinned by `book`, else inferred from the Strong's prefix."""
     return trees_macula.syntax_search(function=function, strong=strong, lex=lex, book=book, corpus=corpus, limit=limit, head_only=head_only)
+
+
+def scaffold(book: str, chapter: int, gloss_lang: str | None = None) -> dict:
+    return trees_macula.scaffold(book, chapter, gloss_lang)

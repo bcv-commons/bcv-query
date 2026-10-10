@@ -17,7 +17,7 @@ All under the service root. Deterministic endpoints have no external dependency.
 | `GET /files/{name}` | One published file, e.g. `lexeme-spine-macula.db` (HTTP Range supported); verify its sha256 against `/files`. Served from the DNS-only host `https://files.qombi.com/files/{name}` (the same path on `shoresh.qombi.com` redirects there) | $0 |
 | `GET /word/{strong}` | Concordance — every occurrence of a Strong's number (Hebrew refs in Hebrew numbering and with the token `key` when `LEXEME_BASE=macula`) | $0 |
 | `GET /senses/{strong}` | Sense groups of a Hebrew Strong's: lexeme × stem × sense, with counts and sample refs | $0 |
-| `GET /lexeme/{lex}` | Lexeme profile. With `LEXEME_BASE=macula` `lex` is a MACULA lexeme id (`hbo:6942`, homographs `hbo:0871a`) or a Strong's code (`H6942`, which fans out to its homographs); BHSA ids (`QDC[`) are no longer accepted. A `hbo:` id is always answered from MACULA | $0 |
+| `GET /lexeme/{lex}` | Lexeme profile. `lex` is a MACULA lexeme id (`hbo:6942`, homographs `hbo:0871a`) or a Strong's code (`H6942`, which fans out to its homographs); BHSA ids (`QDC[`) are no longer accepted. A `hbo:` id is always answered from MACULA | $0 |
 | `GET /words` | Vocab-trainer feed — glosses in 11 languages, per-binyan for Hebrew verbs | $0 |
 | `GET /wordstudy/{strong}` | Word-study card — multilingual sense breakdown for a Strong's number | $0 |
 | `GET /tw/{strong}` | Translation-Words article(s) explaining a Strong's number, ranked (e.g. G0026 → bible/kt/love) | $0 |
@@ -26,9 +26,10 @@ All under the service root. Deterministic endpoints have no external dependency.
 | `GET /morph?pattern=&book=&chapter=` | Morphology search — imperatives, participles, verbs, nouns | $0 |
 | `GET /bridge/{strong}` | LXX bridge — how the Septuagint translates a Hebrew word, or vice versa | $0 |
 | `GET /lxx-lexeme/{wordid}` | LXX-only Greek lexeme (no Strong's number) — citation form + variants | $0 |
-| `GET /structure/{book}/{ch}/{v}` | Syntax — BHSA/Nestle1904 hierarchy (proxied from bcv-RAG) | $0 |
-| `GET /search?q=&lang=hbo&k=10` | Hebrew clause search (88,131 BHSA clauses) | $0 |
-| `GET /search?q=&lang=grc&k=10` | Greek clause search (8,011 Nestle1904 sentences) | $0 |
+| `GET /structure/{book}/{ch}/{v}` | Syntax — clause/phrase hierarchy from MACULA lowfat trees | $0 |
+| `GET /scaffold/{book}/{ch}` | Original-language scaffold of a chapter, every token keyed by its MACULA token key (joins to lexeme-aligner alignments); example client in `docs/examples/interlinear` | $0 |
+| `GET /search?q=&lang=hbo&k=10` | Hebrew clause search (MACULA clauses) | $0 |
+| `GET /search?q=&lang=grc&k=10` | Greek clause search (MACULA Greek sentences) | $0 |
 | `GET /search?translate=gloss` | English→Hebrew via deterministic gloss lookup | $0 |
 | `GET /search?translate=llm` | English→Hebrew via LLM | ~$0.0001 |
 | `GET /search?enrich=true` | Add word-level breakdown per search result | $0 |
@@ -80,31 +81,6 @@ curl -X POST "$HOST/upload/clauses_hbo.sqlite?secret=$SECRET" --data-binary @dat
 | `clauses_hbo.npy` | 311MB | 101,200 MACULA clauses, 768d BEREL vectors |
 | `clauses_grc.npy` | 141MB | 46,050 MACULA clauses, 768d SPhilBERTa vectors |
 
-## Corpus engine (BHSA / Nestle1904 via Context-Fabric): dev-only, not part of the service
-
-Since NC exit step 6 the service reads no BHSA data (structure, trees, syntax search, `/words`, senses and clause search are MACULA, CC BY). `shoresh/corpus_engine/` and several `macula/build_*.py` scripts (`extract_hbo_syntax.py`,
-`build_bhsa_structural_pairs.py`, `build_parallelism_pairs.py`,
-`bcv-RAG/scripts/build_lex_occurrences.py`) read the ETCBC/BHSA (Hebrew) and ETCBC/nestle1904 (Greek)
-corpora in Text-Fabric format, expected at `~/text-fabric-data`. This is a **CC BY-NC-SA download**,
-not part of the repo, not in any Docker image and no longer mounted in production — a fresh clone or new dev machine needs to fetch it once:
-
-```bash
-python -c "from tf.app import use; use('ETCBC/bhsa', version='2021')"   # Hebrew — version pinned to
-                                                                          # match the hardcoded tf/2021
-                                                                          # path in the scripts above
-python -c "from tf.app import use; use('ETCBC/nestle1904')"             # Greek — no version pinned in
-                                                                          # code, latest is fine
-```
-
-This downloads into `~/text-fabric-data/github/ETCBC/<repo>/tf/<version>` — the exact path those
-scripts hardcode. `context-fabric`'s own `cfabric.downloader` has no BHSA/Nestle1904 registration as
-of 0.5.7 (`list_corpora()` returns `{}`); fetch via classic `text-fabric`'s `tf.app.use()` above —
-`shoresh/corpus_engine/cf_engine.py` reads whatever lands at that path regardless of which tool
-fetched it. Install its Python deps with `requirements-legacy-bhsa.txt`.
-
-Loading the full corpus (`CF.loadAll()`) takes ~1.6GB RAM — `internal-docs/hosting.md` warns not to
-re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
-
 ## Environment variables
 
 | Variable | Default | Purpose |
@@ -112,14 +88,13 @@ re-bake it into a Docker image ("BHSA `loadAll` OOMs the box").
 | `SEARCH_EMBEDDER` | `cloudflare` | `cloudflare`, `bge-m3-local`, or `berel` |
 | `CLOUDFLARE_ACCOUNT_ID` | — | Required for cloudflare embedder |
 | `CLOUDFLARE_API_TOKEN` | — | Required for cloudflare embedder |
-| `CORPUS_URL` | — | bcv-RAG private URL for `/structure` proxy |
+| `CORPUS_URL` | — | Legacy: only reported by `/health` and used by the offline clause-vector builds below |
 | `SHORESH_DATA` | `/data` | Clause vector directory |
 | `SHORESH_FILES_BASE` | — | Base URL advertised by `GET /files` (e.g. `https://files.qombi.com`); default: the host the client used |
 | `SHORESH_FILES_LIMIT` | `8/hour` | Per-IP limit on `GET /files/{name}` |
 | `TREES_DB` | `/data/trees-macula.db`, `/data/public/…`, then `macula/` | The tree database |
 | `LEXEME_SPINE_DB`, `VERSE_SENSES_DB` | `/data/<name>`, `/data/public/<name>`, then `macula/` | The two MACULA lexeme databases |
 | `WORD_GLOSSES_DIR` | `/data/word_glosses` | Where the built `hbo_lexeme/<Language>.csv` tables are read from (MACULA-keyed BibleOL glosses; build output, not in git: `python -m macula.build_word_glosses_lexeme`, ship with `deploy/deploy-data.sh`); then `macula/data/word_glosses` |
-| `VERSE_HEBREW_BASE` | `uhb` | `macula` serves the Hebrew words of `/verse` from MACULA (words with parts, Hebrew numbering, per-occurrence senses) |
 | `VERSIFICATION_MAP_DIR` | `/data/vrs` | Where bibles' published versification files (`index.json`, `<scheme>.vrs`, `<scheme>-to-eng*.json`) are read from; fetched from the CDN when missing and revalidated by ETag at most daily (only changed files are downloaded) |
 | `VERSIFICATION_BASE` | `https://cdn.bibel.wiki` | The CDN those files come from |
 

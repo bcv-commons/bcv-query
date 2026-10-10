@@ -6,8 +6,7 @@ study resources — or, if you'd rather, just the **ranked source passages** wit
 LLM involved at all.
 
 This page is the friendly tour. To **connect a client** and call the service, see the
-[Client Integration Guide](client-guide.md) (REST) or the [MCP Guide](mcp.md) (AI-assistant
-tools). For the exact request/response shapes see
+[Client Integration Guide](client-guide.md). For the exact request/response shapes see
 [`bcv-RAG/docs/API.md`](../bcv-RAG/docs/API.md); for the internals see
 [`bcv-RAG/docs/architecture.md`](../bcv-RAG/docs/architecture.md).
 
@@ -74,8 +73,7 @@ Question → Analyzer → [3 automatic strategies] → 13 Retrievers → RRF fus
 
 Everything lives in **one SQLite file** (`index.db`): documents, chunks, an FTS5
 full-text index, `sqlite-vec` vectors (1024-d BGE-M3), passage references, and
-tags. The Hebrew/Greek **corpus engine** (BHSA + Nestle 1904, via Text/Context-
-Fabric) is embedded as a local module — no network call.
+tags. The Hebrew/Greek structure data (MACULA trees) is read from shoresh over `SHORESH_URL`; bcv-RAG has no corpus engine of its own.
 
 ## Three ways to use it
 
@@ -155,7 +153,7 @@ original-language-aware experience. The connection is one env var: `SHORESH_URL`
 ## Deployment
 
 Currently **self-hosted on Hetzner** with Docker Compose (the image bakes in the
-BHSA/Nestle1904 corpus and the shared `resources/`; `index.db` lives on a mounted
+shared `resources/`; `index.db` lives on a mounted
 volume). The repo still ships a `Dockerfile` and `railway.toml` so it can run on
 Railway or any Docker host. Operator-specific runbooks (host, hardening, incident
 response) are kept in private notes, not in this public repo.

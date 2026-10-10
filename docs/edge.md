@@ -2,7 +2,7 @@
 
 The public edge for the hosted services. Caddy already terminates TLS and reverse-proxies
 both services; this covers the hardening the app layer can't do (TLS, volumetric/DDoS,
-cheap pre-filtering) — see [MCP Guide](mcp.md) and [Client Guide](client-guide.md) for the
+cheap pre-filtering) — see the [Client Guide](client-guide.md) for the
 app-level auth/rate-limit that complements it.
 
 Current topology (Caddy, `/etc/caddy/Caddyfile`):

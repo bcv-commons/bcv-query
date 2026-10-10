@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interlinear example</title>
+<style>
+  :root { --fg:#1c1c1c; --bg:#fff; --mut:#777; --hit:#ffe9a8; --line:#e2e2e2 }
+  @media (prefers-color-scheme: dark) { :root { --fg:#e8e8e8; --bg:#171717; --mut:#9a9a9a; --hit:#5a4a10; --line:#333 } }
+  body { font:16px/1.5 system-ui,sans-serif; color:var(--fg); background:var(--bg); margin:0 auto; max-width:60rem; padding:1rem 16px }
+  form { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1rem } input,button { font:inherit; padding:.25rem .5rem }
+  .verse { border-top:1px solid var(--line); padding:.75rem 0 }
+  .vn { color:var(--mut); font-size:.8em }
+  .src { display:flex; flex-wrap:wrap; gap:.25rem .75rem; direction:ltr }
+  .src.rtl { direction:rtl }
+  .w { text-align:center; padding:.1rem .25rem; border-radius:4px; cursor:default }
+  .w .o { font-size:1.4em } .w .g { font-size:.75em; color:var(--mut) } .w .t { font-size:.85em; min-height:1.3em }
+  .w.fn .o { opacity:.55 } .w.hit,.tw.hit { background:var(--hit) }
+  .scattered .t { font-style:italic }
+  .text { margin-top:.4rem } .tw { padding:0 1px; border-radius:3px }
+  .tag { font-size:.65em; color:var(--mut); display:block }
+</style></head>
+<body>
+<h1>Interlinear</h1>
+<form id="f">
+  <input name="iso" value="fra" size="4" aria-label="language (ISO 639-3)">
+  <input name="edition" value="fra_lsg" size="10" aria-label="helloAO edition id">
+  <input name="book" value="GEN" size="4" aria-label="book">
+  <input name="chapter" value="1" size="3" aria-label="chapter">
+  <input name="glossLang" value="English" size="8" aria-label="gloss language">
+  <button>Show</button>
+</form>
+<p id="status" role="status"></p>
+<div id="out"></div>
+<script type="module">
+import { loadChapter } from "./interlinear.js";
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, text) => Object.assign(document.createElement(tag), { className: cls ?? "", textContent: text ?? "" });
+
+$("#f").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const q = Object.fromEntries(new FormData(e.target));
+  q.chapter = Number(q.chapter);
+  $("#status").textContent = "Loading…"; $("#out").replaceChildren();
+  try {
+    const ch = await loadChapter(q);
+    $("#status").textContent = `${ch.edition} ${ch.book} ${ch.chapter} · alignment ${ch.alignmentFile}`;
+    $("#out").append(...ch.verses.map((v) => verse(ch, v)));
+  } catch (err) { $("#status").textContent = String(err); }
+});
+
+function verse(ch, v) {
+  const root = el("div", "verse");
+  root.append(el("span", "vn", v.ref));
+  const src = el("div", "src" + (/^(?:GEN|EXO|LEV|NUM|DEU)/.test(v.ref) || v.source[0]?.lexeme?.startsWith("hbo") ? " rtl" : ""));
+  const text = el("div", "text");
+  const tw = new Map(v.target.map((t) => [t.i, Object.assign(el("span", "tw", t.text + " "), { })]));
+  text.append(...tw.values());
+  const sw = new Map();
+  for (const s of v.source) {
+    const w = el("div", "w" + (s.content ? "" : " fn") + (s.scattered ? " scattered" : ""));
+    w.title = [s.lemma, s.sp, s.wtype, s.stem, s.tense, s.person, s.gender, s.number, ch.phrases[s.phrase]?.function].filter(Boolean).join(" · ");
+    w.append(el("div", "o", s.text), el("div", "g", s.gloss ?? ""), el("div", "t", s.links.map((l) => l.text).join(" ")));
+    sw.set(s.key, w); src.append(w);
+    // both directions: a source word lights up its translation words, and a translation word its source words
+    const mine = s.links.map((l) => tw.get(l.i));
+    w.addEventListener("mouseenter", () => { w.classList.add("hit"); mine.forEach((n) => n.classList.add("hit")); });
+    w.addEventListener("mouseleave", () => { w.classList.remove("hit"); mine.forEach((n) => n.classList.remove("hit")); });
+  }
+  for (const t of v.target) {
+    const n = tw.get(t.i);
+    n.addEventListener("mouseenter", () => { n.classList.add("hit"); t.keys.forEach((k) => sw.get(k)?.classList.add("hit")); });
+    n.addEventListener("mouseleave", () => { n.classList.remove("hit"); t.keys.forEach((k) => sw.get(k)?.classList.remove("hit")); });
+  }
+  root.append(src, text);
+  return root;
+}
+</script>
+</body></html>

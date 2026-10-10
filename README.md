@@ -15,8 +15,7 @@ senses. Granular original first; everything else falls out of it.
 > New here? Start with **[What it is](#what-it-is)**, then read the deep-dive for
 > whichever service interests you: **[bcv-RAG](docs/bcv-RAG.md)** (search & Q&A)
 > or **[shoresh](docs/shoresh.md)** (original languages). Building an app on top?
-> See the **[Client Integration Guide](docs/client-guide.md)** (REST) or the
-> **[MCP Guide](docs/mcp.md)** (AI-assistant tools). Want to help build it? Jump to
+> See the **[Client Integration Guide](docs/client-guide.md)** (REST). Want to help build it? Jump to
 > the **[ROADMAP](docs/ROADMAP.md)** — it's written for new contributors.
 
 ---
@@ -82,10 +81,14 @@ keyed by USFM book codes + Strong's numbers.
   server via Docker Compose (they previously ran on Railway; the Railway configs
   are still in the repo for portability). Hosting specifics are kept in
   operator-only notes, not in this public repo.
-- **An `aligner` is coming.** A new sibling service that word-aligns *any*
-  translation to the Strong's-bearing original — turning a plain translation into
-  a Strong's-tagged interlinear and growing `resources/aligned_lex` to new
-  languages. It's at the planning stage: see **[docs/aligner-plan.md](docs/aligner-plan.md)**.
+- **An interlinear for any edition.** The sibling project
+  [`lexeme-aligner`](https://github.com/bcv-commons/lexeme-aligner) word-aligns hundreds of
+  translations to the Hebrew/Greek original and publishes the alignments (CC0, on Hugging Face as
+  `bcv-commons/compact-alignments`). shoresh supplies the other half, the original-language
+  **scaffold** (`GET /scaffold/{book}/{chapter}`: every token of a chapter keyed by its MACULA token key, with
+  lemma, gloss, morphology and clause/phrase structure). A client joins the two with the edition's text
+  (e.g. from helloAO) in the browser; a working example in JavaScript is in
+  **[docs/examples/interlinear](docs/examples/interlinear)**.
 - **A living roadmap.** Lots of the value here comes from *derived* data tables
   (speaker/red-letter index, semantic domains, OT-in-NT quotations, …). The plan
   and the open datasets to build them from are catalogued in
@@ -124,7 +127,7 @@ bcv-query/
 │   ├── bcv-RAG.md          the RAG / Q&A service, explained
 │   ├── shoresh.md          the original-language service, explained
 │   ├── ROADMAP.md          the vision + how to contribute
-│   ├── aligner-plan.md     the upcoming word-aligner (planning)
+│   ├── examples/interlinear  JavaScript example: scaffold + alignment + edition text
 │   └── multilingual-glosses.md
 ├── bcv-RAG/             ← service 1: retrieval + Q&A  (its own README + docs/)
 ├── shoresh/             ← service 2: original languages (its own README + docs/)

@@ -251,6 +251,67 @@ def tree(book: str, chapter: int, verse: int) -> dict:
         con.close()
 
 
+def scaffold(book: str, chapter: int, gloss_lang: str | None = None) -> dict:
+    """Everything this service knows about the original-language tokens of one chapter, keyed by MACULA token key
+    (the key lexeme-aligner publishes in `_index/<BOOK>_keys.json` and `_fn_keys.json`, so a client joins an alignment to
+    this with no matching step). Flat: `tokens` in text order, plus `clauses` and `phrases` the tokens point to by id.
+    Inserted (implied) words are left out, as they are in the aligner's index. `content` is the aligner's content flag (a Psalm title word counts as a function token there)."""
+    book = book.upper()
+    con = _con()
+    try:
+        corpus = corpus_of(book)
+        if not corpus:
+            return {"error": f"no corpus mapping for book '{book}'"}
+        hebrew = corpus == "hbo"
+        rows = con.execute("SELECT w.*, s.lexeme AS slex, s.gloss AS sgloss, s.is_content AS content, s.is_superscription AS superscription, s.person AS person, "
+                           "s.number AS number, s.gender AS gender, s.state AS state, s.mood AS mood, s.case_ AS case_, s.degree AS degree "
+                           "FROM words w LEFT JOIN sp.spine_words s ON s.key=w.key WHERE w.corpus=? AND w.book=? AND w.chapter=? AND w.inserted=0 ORDER BY " + TEXT_ORDER,
+                           (corpus, book, chapter)).fetchall()
+        if not rows:
+            return {"error": f"chapter not found: {book_name(corpus, book)} {chapter}"}
+        import data
+        tokens, cl_ids, ph_ids = [], set(), set()
+        for w in rows:
+            gloss = None
+            if gloss_lang and hebrew and w["slex"]:
+                gloss = data.resolve_word_gloss("hbo_lexeme", gloss_lang, w["slex"], w["stem"])
+            if not gloss and w["sgloss"] and w["sgloss"] != "-":
+                gloss = w["sgloss"].replace(".", " ")             # MACULA joins a multi-word gloss with dots
+            t = {"key": w["key"], "verse": w["verse"], "text": w["surface"], "trailer": w["after"] or "", "lexeme": w["slex"] or None,
+                 "lemma": w["lemma"] or None, "strong": w["strong"] or None, "gloss": gloss, "sp": w["class"] or None, "content": bool(w["content"]) and not w["superscription"],
+                 "role": w["role"] or None, "clause": w["cl"], "phrase": w["ph"]}
+            if w["superscription"]:
+                t["superscription"] = True
+            for k in ("stem", "tense", "voice", "person", "number", "gender", "state", "mood", "case_", "degree", "wtype"):
+                if w[k]:
+                    t[k.rstrip("_")] = w[k]
+            tokens.append(t)
+            if w["cl"] is not None:
+                cl_ids.add(w["cl"])
+            if w["ph"] is not None:
+                ph_ids.add(w["ph"])
+        def up(n):
+            while n is not None and n["parent"] is not None:
+                n = _node(con, n["parent"])
+                if n is not None and n["id"] in cl_ids:
+                    return n["id"]
+            return None
+        clauses = {}
+        for cid in sorted(cl_ids):
+            n = _node(con, cid)
+            own = [w for w in rows if w["cl"] == cid]
+            clauses[cid] = {"parent": up(n), "role": n["role"], "function": _label(n["role"]), "rela": _clause_rela(n), "type": n["clausetype"],
+                            "kind": _clause_kind(own), "rule": n["rule"], "sentence": own[0]["sent"], "first": own[0]["key"], "last": own[-1]["key"]}
+        phrases = {}
+        for pid in sorted(ph_ids):
+            n = _node(con, pid)
+            phrases[pid] = {"role": n["role"], "function": _label(n["role"]), "type": n["cls"]}
+        return {"corpus": _CORPUS[corpus], "book": book, "corpus_book": book_name(corpus, book), "chapter": chapter, "gloss_lang": gloss_lang,
+                "tokens": tokens, "clauses": clauses, "phrases": phrases}
+    finally:
+        con.close()
+
+
 def _features(n, otype: str, hebrew: bool, kind: str | None = None) -> dict:
     f = {"otype": otype}
     for k in ("cls", "role", "rule", "type", "junction", "clausetype", "articular", "head"):

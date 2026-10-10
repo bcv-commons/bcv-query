@@ -54,26 +54,24 @@ frames/coref; Greek pagan-Koine keyness; branched retrieval; and a
 ### The anchoring principle (now central)
 
 The guiding rule across the project: **anchor on the most granular ORIGINAL and
-derive everything coarser.** Hebrew word data is anchored on the **BHSA lexeme
-(`lex`)** and the **per-occurrence BHSA word node** — *not* Strong's. Strong's,
-English glosses, and coarser senses are **derived views**. This matters because
-`lex` distinguishes homographs Strong's conflates (733 codes cover 2+ lexemes) and
-supports **per-binyan (stem) senses** for Hebrew verbs.
+derive everything coarser.** Hebrew word data is anchored on the **MACULA lexeme**
+(`hbo:6942`, homographs `hbo:0871a`) and the **per-occurrence MACULA token key** — *not*
+Strong's. Strong's, English glosses, and coarser senses are **derived views**. This matters
+because the lexeme distinguishes homographs Strong's conflates (733 codes cover 2+ lexemes)
+and supports **per-binyan (stem) senses** for Hebrew verbs.
 
 Strong's still earns its keep as the **cross-language join key** (keyness, the LXX
 bridge, Translation-Words, `concept_expand`, semantic-domain expansion) — but it
-sits *above* the lex anchor, not at the root. Live today on this principle:
+sits *above* the lexeme anchor, not at the root. Live today on this principle:
 
 - **Multilingual glosses** — 11 languages, **per-binyan** granularity for Hebrew
   verbs; lex-keyed CSVs in `resources/word_glosses/`, served by shoresh `/words`.
-- **Occurrence sense layer** — a per-occurrence `lex+stem` sidecar from BHSA
-  (stable word-node id) gives a binyan-conditioned, homograph-precise concordance
-  (`morphology_concordance` MCP tool + `sense:` tags). Senses are **derived from
-  Hebrew context** (bge-m3 embedding of the Hebrew clause, clustered within each
-  `lex+stem`), then labeled with the curated per-stem glosses (multilingual).
-  Surfaced in the concordance (`sense` param) and the `/wordstudy` card
-  (`lex_senses`, multilingual via `gloss_lang`).
+- **Occurrence sense layer** — a per-occurrence sense on every MACULA token (`verse-senses.db`,
+  from the CC BY `hebrew-word-senses` release; per-stem re-split for verbs) gives a binyan-conditioned,
+  homograph-precise concordance (`morphology_concordance` MCP tool + `lexeme*:` tags); see
+  [sense-layer-pipeline.md](sense-layer-pipeline.md).
 
+  
 ## Publishing & open data
 
 Reusable datasets are published under the **[`bcv-commons`](https://github.com/bcv-commons)**
@@ -228,14 +226,13 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   word2vec"; live in `/field` + `/concept`, now **homograph-precise** (served split by MACULA lexeme —
   `by_lexeme.tsv` — since 64% of Strong's conflate >1 lexeme). Remaining = coverage (see
   `internal-docs/domain-replacement-roadmap.md`) and the Greek side (G1 below).
-- **G1 · Greek-side semantic neighbors (CC0)** — 🔵 **SCOPED, not started** — the neighbors pack is
-  Hebrew-only (Hebrew clause centroids). Extending it to Greek *and publishing CC0* needs a **CATSS-free**
-  LXX (public-domain **Swete** — already our zero-CATSS fallback) + **open lemmas**
-  (`openscriptures/GreekResources`, NT+LXX), because the current `lxx.db` is CATSS-NC and can't feed a
-  CC0 artifact. LXX `lexid` is now captured (internal) but Greek's homograph rate is ~1.6%, so the value
-  is the *Greek coverage*, not precision. Full plan: `internal-docs/greek-lexeme-and-neighbors.md`.
+- **G1 · Greek-side semantic neighbors (CC0)** — 🔵 **UNBLOCKED, not started** — the neighbors pack is
+  Hebrew-only (Hebrew clause centroids). The Septuagint is now GLAUx (CC BY-SA, `lxx-glaux.db`, stable lemma ids)
+  and the NT is UGNT/MACULA Greek, so the CATSS obstacle is gone; a CC0 artifact still has to avoid
+  share-alike inputs (GLAUx, UGNT), so the Greek side needs either an open-by-CC0 lemma source or an
+  explicit CC BY-SA label. Greek's homograph rate is ~1.6%, so the value is the *Greek coverage*, not precision.
 - **M1 · Multi-word expressions → Strong's** — 🟢 **BUILT (revised scope)** — the new
-  `bcv-commons/lexeme-alignments` carries the aligner's **contiguous multi-word surfaces** (the old
+  `bcv-commons/lexeme-alignments` (from [lexeme-aligner](https://github.com/bcv-commons/lexeme-aligner)) carries **contiguous multi-word surfaces** (the old
   `aligned-lex` had none), so M1 is now mineable: `resources/multiword_expressions/<iso>.tsv`
   (`build_multiword.py`) — target phrase → original lexeme(s), `phrasal` (multi-lexeme, e.g.
   `bear fruit → {G2592,G2590,G5342}`) + `fertility` (single-lexeme, `only begotten ← G3439`). ~21k over
@@ -251,8 +248,7 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   as an internal build input, and declares its spines' own numbering in `spine_meta`). **Wired into X1** (OT refs → KJV; retired the hardcoded Psalm
   map + `vrs=lxx?`, 15→0). Versification is now a **per-version property** (each Bible declares its
   scheme, external metadata — see `internal-docs/bibles-recipe-layer.md`). Remaining: (a) auto-tag our
-  corpora + spec the bibles-layer `versification` field; (b) hand the aligner the `hebrew` Psalm map to
-  unblock Psalm alignment; (c) ranges/sub-verses + Latin/NT (out of v1 scope).
+  corpora + spec the bibles-layer `versification` field; (b) ranges/sub-verses + Latin/NT (out of v1 scope).
 
 ---
 
@@ -274,7 +270,7 @@ by it. Concrete wins from the shared data:
 | `aligned_lex` | `/gloss` + `/concept` accept **non-English** input (Spanish word → Strong's). |
 | semantic_domains (S2) | ✅ live — Louw-Nida/SDBH domain in the `/wordstudy` card + `/domain/{code}` browse. |
 | speaker_quotations (S1) | speaker per word/verse in `/verse`, `/structure` — shoresh is the natural token-level home. |
-| OT-in-NT (X1) | shoresh already has `/bridge` + `lxx.db` → the natural quotation-detection engine. |
+| OT-in-NT (X1) | shoresh already has `/bridge` + `lxx-glaux.db` → the natural quotation-detection engine. |
 
 *Consolidation note:* shoresh builds its own glosses while bcv-RAG ships
 `strongs_gloss.tsv` + LLM glosses. Under the shared `resources/` these should
@@ -282,28 +278,6 @@ converge to **one gloss source both read** — avoid two divergent copies.
 
 ---
 
-## The aligner
-
-A whole sibling effort — word-align *any* translation to the Strong's-bearing
-original, generalizing how `aligned_lex` is built to any language. **Extracted to
-its own repo: `github.com/bcv-commons/strongs-aligner`** (GPLv3); design + plan
-live there now.
-
-**Status — the shoresh↔aligner data loop is live (2026-07):**
-- **Aligner → HF (published):** `bcv-commons/aligned-lex` (CC0), `bcv-commons/senses-attested`
-  (CC-BY, lexeme-anchored, label-free) — eflomal alignments for 7 / 5 languages.
-- **shoresh → aligner leverage (published, complete):** `bcv-commons/prior-pack` — one
-  language-independent artifact per lexeme (keyness · LXX bridge · sense inventory · CC0
-  semantic-neighbors · cross-lingual `xling_confidence`), plus four documented recipes (LXX NT-gap,
-  keyness-filter, sense-surface, gap-map) the aligner runs on data it already owns. **No per-language
-  files needed from us** — see the operator handover (`internal-docs/aligner-handover.md`).
-- **By-product landed in shoresh:** the CC0 semantic-neighbors pack now serves `/field` + `/concept`
-  (a MARBLE-free "related words" signal, synonyms + antonyms) — *alongside* the NC domains for now;
-  full domain replacement is a deferred, phased track (`internal-docs/domain-replacement-roadmap.md`).
-- **Aligner's turn:** run its gloss + neural modes consuming `prior-pack` → publish
-  `method=gloss/neural/ensemble`. (Its NT-gap leverage wants OT partitions published for all langs.)
-
----
 
 ## Open datasets to build from
 
@@ -425,8 +399,8 @@ A few on-ramps, easiest first:
 3. **Onboard a language** — add Bible text, study content, analyzer config, and
    (eventually) an `aligned_lex` for a new language. `ben`/`asm`/`hau` need the most
    love.
-4. **The aligner or the versification map (V1)** — for contributors who want a
-   meatier, NLP-flavored project. See [aligner-plan.md](aligner-plan.md).
+4. **The versification map (V1)** — for contributors who want a
+   meatier, NLP-flavored project.
 
 When you pick something up, open an issue describing the item, the dataset, and
 the table you'll produce — so we can sanity-check the keys and license before you
@@ -440,8 +414,7 @@ aligned inflections), a topic ontology from co-occurrence, multi-granular
 embeddings (pericope/book level), Hebrew root families, poetic-parallelism pairs,
 Leitwörter/inclusio detection, and versional witnesses (Peshitta/Targum/Vulgate
 vs MT, niche but native to shoresh). And — once audio resources arrive — audio
-forced-alignment for word timing and read-along (see the stub in
-[aligner-plan.md](aligner-plan.md)).
+forced-alignment for word timing and read-along.
 
 ## NC exit status (2026-10-10): complete
 

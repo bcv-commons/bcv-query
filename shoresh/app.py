@@ -8,7 +8,8 @@ language word stores (lxx.db + spine.db):
   GET /                             service descriptor + data status
   GET /verse/{book}/{chapter}/{verse}   Greek (LXX) + Hebrew/Greek (spine) interlinear
   GET /word/{strong}                concordance for a Strong's number (e.g. G2316, H7225)
-  GET /structure/{book}/{ch}/{v}    BHSA/Nestle1904 structure from bcv-corpus
+  GET /structure/{book}/{ch}/{v}    clause/phrase structure (MACULA trees)
+  GET /scaffold/{book}/{ch}         original-language tokens of a chapter, keyed for alignment joins
   GET /search?q=&lang=hbo           clause-level original-language semantic search
   GET /words?language=&pos=&...     filtered corpus word sampler (vocab-trainer feed)
 
@@ -42,7 +43,7 @@ from references import BOOK_NUMBERS, norm_strong
 
 logger = logging.getLogger("shoresh")
 
-# bcv-corpus (BHSA/Nestle1904 structural graph) over Railway private networking.
+# Legacy: the bcv-corpus URL; only reported by /health and used by the offline clause-vector builds.
 CORPUS_URL = os.environ.get("CORPUS_URL", "")
 
 # Loaded clause vector stores, keyed by language (populated at startup).
@@ -244,9 +245,8 @@ def get_senses(strong: str) -> dict:
 
 @app.get("/lexeme/{lex:path}")
 def get_lexeme(lex: str) -> dict:
-    """BHSA-lexeme profile (the granular anchor a shared Strong's conflates): every stem × sense ×
-    count × sample refs, from hbo.db. `lex` is normally the BHSA lex-id (URL-encode the [ < > = chars;
-    a literal or %2F-encoded `/` both work — many BHSA lex-ids end in one, e.g. `R>CJT/`); a Hebrew
+    """Lexeme profile (the granular anchor a shared Strong's conflates): every stem × sense ×
+    count × sample refs. `lex` is a MACULA lexeme id (`hbo:6942`, homographs `hbo:0871a`); a Hebrew
     Strong's code (H0430) is also accepted and resolved to its lexeme(s) — if the code conflates
     multiple homograph lexemes, the response is `{strong, lexemes: [profile, ...]}` instead of a
     single profile."""
@@ -700,7 +700,7 @@ def get_context_batch(refs: str, idx: int = 0) -> dict:
 
 @app.get("/structure/{book}/{chapter}/{verse}")
 def get_structure(book: str, chapter: int, verse: int) -> dict:
-    """BHSA/Nestle1904 morphological view of a verse, from bcv-corpus (private)."""
+    """Morphological view of a verse (MACULA tokens)."""
     result = corpus.passage(book, chapter, verse)
     if "error" in result:
         raise HTTPException(503 if "CORPUS_URL" in result["error"] else 404,
@@ -711,7 +711,7 @@ def get_structure(book: str, chapter: int, verse: int) -> dict:
 @app.get("/structure/{book}/{chapter}/{verse}/syntax")
 def get_structure_syntax(book: str, chapter: int, verse: int) -> dict:
     """Whole-verse clause→phrase SYNTAX tree (who-did-what: phrase function Subj / Pred / Objc / …),
-    one graph traversal. Hebrew (BHSA) and Greek (Nestle1904) — the corpus is chosen from the book."""
+    one graph traversal. Hebrew and Greek (MACULA lowfat trees) — the corpus is chosen from the book."""
     result = corpus.syntax(book, chapter, verse)
     if "error" in result:
         raise HTTPException(503 if "not found for" in result["error"] else 404, result["error"])
@@ -722,13 +722,12 @@ def get_structure_syntax(book: str, chapter: int, verse: int) -> dict:
 def get_syntax_search(function: str | None = None, strong: str | None = None,
                       lex: str | None = None, book: str | None = None,
                       corpus_id: str | None = None, limit: int = 50, head_only: bool = False) -> dict:
-    """Who-did-what search across the BHSA/Nestle1904 graph: clauses where a lexeme fills a
-    phrase function. Identify the word by **strong** (`H0430` / `G0026`) or **lex** (BHSA
-    `lex` / Nestle1904 `lemma`); filter by **function** (`Subj`/`Subject`/`s`, `Objc`/`Object`/`o`,
+    """Who-did-what search across the MACULA trees: clauses where a lexeme fills a
+    phrase function. Identify the word by **strong** (`H0430` / `G0026`) or **lex** (MACULA lexeme id / Greek lemma); filter by **function** (`Subj`/`Subject`/`s`, `Objc`/`Object`/`o`,
     `Pred`, `Adju`/`Adverbial` … — omit to match any). Corpus is pinned by **book** (USFM code,
     optional scope) if given, else inferred from the Strong's prefix. e.g.
     `/syntax/search?strong=H0430&function=Subject` → clauses where *God* is the subject.
-    With STRUCTURE_BASE=macula every hit has `head` (true: the word is a direct part of the phrase or alone;
+    Every hit has `head` (true: the word is a direct part of the phrase or alone;
     false: nested inside it, "the tent OF GOD"); **head_only**=true drops the nested ones."""
     if not strong and not lex:
         raise HTTPException(422, "provide strong= or lex=")
@@ -745,13 +744,26 @@ def get_syntax_search(function: str | None = None, strong: str | None = None,
 @app.get("/verse/{book}/{chapter}/{verse}/tree")
 def get_verse_tree(book: str, chapter: int, verse: int) -> dict:
     """Full syntactic tree of a verse: sentence → clause → phrase → word (superset of
-    `/structure/{…}/syntax`, adding the sentence grouping). Hebrew (BHSA) + Greek (Nestle1904)."""
+    `/structure/{…}/syntax`, adding the sentence grouping). Hebrew + Greek (MACULA)."""
     result = corpus.tree(book, chapter, verse)
     if "error" in result:
         raise HTTPException(503 if "not found for" in result["error"] else 404, result["error"])
     data = result.get("data", {})
     if isinstance(data, dict) and "error" in data:
         raise HTTPException(404, data["error"])
+    return result
+
+
+@app.get("/scaffold/{book}/{chapter}")
+def get_scaffold(book: str, chapter: int, gloss_lang: str | None = None) -> dict:
+    """The original-language side of an interlinear, one chapter: every Hebrew/Greek token in text order, keyed by its MACULA token key
+    (the key lexeme-aligner publishes in `_index/<BOOK>_keys.json` / `_fn_keys.json`; `content` follows its flag but differs on about 130 tokens of the 440,000 (Psalm titles and ten single tokens, a spine version difference): number `srcOrd` from the aligner's own `_keys.json`, and use this for the token data looked up by key).
+    Each token has text, lemma, `lexeme`, Strong's, `gloss`, `sp`, morphology and points to its `clause` and `phrase` by id; `clauses` and `phrases`
+    carry the role (`function`), type and clause nesting. Independent of the translation: a client combines it with a compact alignment and the
+    edition's text. `gloss_lang` (e.g. German) localizes Hebrew glosses; default is MACULA's English."""
+    result = corpus.scaffold(book, chapter, gloss_lang)
+    if "error" in result:
+        raise HTTPException(404, result["error"])
     return result
 
 

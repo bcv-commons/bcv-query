@@ -45,8 +45,7 @@ Retrieval-augmented Q&A over Bible translation resources.
 Docker. Currently **self-hosted on Hetzner** via Docker Compose; the `Dockerfile`
 and `railway.toml` also run it on Railway or any Docker host. The image is built
 from the **repo root** (`docker build -f bcv-RAG/Dockerfile .`) so the shared
-`resources/` is in context; the corpus data (BHSA/Nestle1904) is baked in at build
-time, and `index.db` lives on a mounted volume.
+`resources/` is in context and baked in at build time (structure data comes from shoresh), and `index.db` lives on a mounted volume.
 
 ## Docs
 

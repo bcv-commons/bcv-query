@@ -228,3 +228,6 @@ resources/word_freq/hbo_strong.tsv
 resources/senses/hbo_lex.tsv
 resources/senses/senses_i18n/_gaps.tsv
 resources/lexicons/heb_en.csv
+
+# Superseded documentation kept for reference
+doc-bak/

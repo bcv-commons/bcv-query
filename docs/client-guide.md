@@ -14,8 +14,7 @@ The normal flow: your client sends a question to **bcv-RAG**; the response inclu
 `cards[]`, each with a relative `drill` path into **shoresh**; your client fetches those
 paths (with the reader's language) to render deeper study views.
 
-> Building an **AI assistant** rather than a REST client? bcv-RAG also speaks **MCP** —
-> see the [MCP Guide](mcp.md).
+> Building an **AI assistant** rather than a REST client? bcv-RAG also speaks **MCP** at `/mcp`.
 
 ## Connecting
 
@@ -44,7 +43,7 @@ Authorization: Bearer <your key>
 
 **Requires a key:**
 - `POST /api/ask`, `POST /api/ask/branched` — the LLM-synthesized answer.
-- the whole **MCP** surface (`/mcp`) — see the [MCP Guide](mcp.md).
+- the whole **MCP** surface (`/mcp`).
 - any write method (PUT/PATCH/DELETE).
 
 **Open (no key)** — everything else, including **semantic search** (embedding is Cloudflare
@@ -317,7 +316,7 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 | GET | `/api/trees`, `/api/tree/{name}[/{path}]` | Browsable trees (entities, topics) |
 | GET | `/api/chunk/{chunk_id}` | Raw source chunk behind a citation |
 | GET | `/api/health` · `GET /` | Liveness / discovery (open) |
-| POST/GET | `/mcp` | MCP tool surface — see the [MCP Guide](mcp.md) |
+| POST/GET | `/mcp` | MCP tool surface |
 
 ### shoresh (`{SHORESH_BASE}`) — all accept `?gloss_lang=` where a gloss is returned
 
@@ -334,14 +333,16 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 | `/bridge/{strong}` | Hebrew ↔ Greek (LXX) equivalents |
 | `/lxx-lexeme/{wordid}` | LXX-only Greek lexeme lookup (words with no Strong's number — `/verse` returns `wordid` on these in place of `strong`) |
 
-Note for the Septuagint words in `/verse` `lxx.words[]` once the GLAUx store is in use (see `shoresh/lxx/README.md`): `strong` is the lemma-level number, an optional `strong_form` carries the classic number of the form, `gloss` follows `strong_form`, an optional `morph_inferred` marks a name whose case/number/gender was filled from its context, and gaps inside `morph` are written `-`.
 | `/morph` | Morphology search |
-| `/structure/{book}/{ch}/{v}[/syntax]` | Verse clause/phrase structure |
+| `/structure/{book}/{ch}/{v}[/syntax]`, `/verse/{book}/{ch}/{v}/tree` | Verse clause/phrase structure (MACULA) |
+| `/scaffold/{book}/{ch}` | Chapter scaffold for an interlinear: every Hebrew/Greek token keyed by its MACULA token key, with lemma, lexeme, gloss (`?gloss_lang=`, Hebrew), morphology and clause/phrase ids. Join it in the client to a lexeme-aligner compact alignment and the edition text: see [examples/interlinear](examples/interlinear) |
 | `/speakers`, `/speakers/at/{book}/{ch}/{v}`, `/speaker/{name}` | Speaker / red-letter index |
 | `/participants/{book}/{ch}/{v}`, `/coref/…`, `/frame/…` | Coreference / semantic-role data |
 | `/gloss-languages` | Languages available for `gloss_lang` (display names) |
 | `/words`, `/gloss/{word}` | Vocabulary lookups for a trainer |
 | `/health` | Liveness |
+
+Note for the Septuagint words in `/verse` `lxx.words[]` once the GLAUx store is in use (see `shoresh/lxx/README.md`): `strong` is the lemma-level number, an optional `strong_form` carries the classic number of the form, `gloss` follows `strong_form`, an optional `morph_inferred` marks a name whose case/number/gender was filled from its context, and gaps inside `morph` are written `-`.
 
 ## Notes & good practices
 
