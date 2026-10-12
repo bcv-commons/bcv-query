@@ -31,3 +31,19 @@ def test_daniel_2_aramaic_and_no_glued_words():
     assert s[0]["language"] == "hbo" and s[-1]["language"] == "arc"
     v9 = " ".join(x["text"] for x in s if x["verse"] == 9)
     assert "֙לְ" not in v9                                                                     # MACULA's empty trailer at a ketiv/qere word gets a space
+
+
+def test_ketiv_qere_from_uhb_cache():
+    """Uses the downloaded UHB (macula/data/uhb); skipped when it is not there."""
+    from pathlib import Path
+    import collections
+    from macula import build_clause_layout as b
+    cache = Path(b.SHORESH) / "macula" / "data" / "uhb"
+    if not (cache / b.UHB_TAG / "27-DAN.usfm").exists():
+        pytest.skip("UHB not downloaded")
+    con = sqlite3.connect(f"file:{trees_macula.trees_path()}?mode=ro", uri=True)
+    kq = b.ketiv_qere(con, "DAN", cache, collections.Counter())
+    assert kq["270020090131"]["ketiv"] == "הזמנתון" and b._cons(kq["270020090131"]["qere"]) == "הזדמנתון"
+    rut = b.ketiv_qere(con, "RUT", cache, collections.Counter())
+    assert rut["080030120061"] == {"key": "080030120061", "ketiv": "אם", "qere": None}           # ketiv without qere
+    assert rut["080030050061"]["ketiv"] is None                                                   # qere without ketiv (אֵלַי)

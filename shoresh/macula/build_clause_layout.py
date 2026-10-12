@@ -11,7 +11,7 @@ text-level hierarchy (`discourse_parent`, `text_depth`) is phase 2 and is writte
 Text: MACULA's WLC surface forms and trailers. A word-final token with an empty trailer gets a space (MACULA leaves it empty at some
 ketiv/qere words, which glues two words together); paseq is written ` ׀ `; the setuma/petucha marks after sof pasuq are dropped.
 `verse_ref_en` comes from the bibles verse map org-to-eng (TVTMS, CC BY 4.0) through vrsmap; a Psalm title is `PSA 3:title`.
-`ketiv_qere` is empty until the UHB reading is wired in.
+`ketiv_qere` lists the ketiv (from UHB, unpointed) and qere of the segment's words; the text shows the qere, as MACULA does.
 
   python -m macula.build_clause_layout [--books RUT,DAN] [--out macula/data/clause-layout]
 
@@ -22,8 +22,10 @@ from __future__ import annotations
 import argparse
 import collections
 import datetime
+import difflib
 import hashlib
 import json
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -32,10 +34,89 @@ SHORESH = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SHORESH))
 
 import trees_macula  # noqa: E402
+from macula import discourse_rules  # noqa: E402
 import vrsmap  # noqa: E402
+from spine.common import FILENUM  # noqa: E402
+
+# UHB for ketiv/qere only. Pinned separately from the spine's UHB (v2.1.32): v3.0.0 marks 1,281 ketiv, v2.1.32 only 672.
+UHB_TAG = "v3.0.0"
+UHB_URL = "https://git.door43.org/unfoldingWord/hbo_uhb/raw/tag/%s/{nn:02d}-{code}.usfm" % UHB_TAG
 
 FORMAT_VERSION = 1
 LANG = {"H": "hbo", "A": "arc"}
+# Hebrew verses that English numbering divides inside the verse (TVTMS MergedPrevVerse): from this word key on, the segment is in the
+# second English verse. The other split verses (NUM 25:19, 1SA 21:1, 1KI 22:44, 1CH 12:5) map whole through org-to-eng.multiverse.
+SPLIT_VERSES = {("PSA", 13, 6): ("190130060071", "PSA 13:6"),       # אָשִׁירָה לַיהוָה ...; before it English 13:5
+                ("ISA", 63, 19): ("230630190101", "ISA 64:1")}      # לוּא־קָרַעְתָּ ...; before it English 63:19
+
+
+# ---------------------------------------------------------------- ketiv/qere from UHB (CC BY-SA 4.0)
+# UHB writes the ketiv unpointed in the text and the qere as a footnote `\f + \ft Q \+w ...\f*` (Daniel has no footnotes). MACULA gives
+# the pointed qere and skips the ketiv's word number. The two word streams of a book are aligned by consonants: a ketiv is a mismatch
+# opposite MACULA's qere word(s). Verse numbers are not used (UHB numbers 1,977 verses differently, most of them Psalm titles).
+_KQ_FOOT = re.compile(r"\\f \+ \\ft Q (.*?)\\f\*|\\w ([^|]*)\|")
+_VOWELS = re.compile(r"[\u05B0-\u05BC\u05C1\u05C2\u05C7]")
+
+
+def _cons(s: str) -> str:
+    return re.sub(r"[^\u05D0-\u05EA]", "", s)
+
+
+def _uhb_words(text: str) -> list[dict]:
+    words: list[dict] = []
+    for m in _KQ_FOOT.finditer(text):
+        if m.group(1) is not None:
+            if words:
+                words[-1]["qere"] = " ".join(x.replace("\u2060", "") for x in re.findall(r"\\\+w ([^|]*)\|", m.group(1)))
+        else:
+            f = m.group(2).replace("\u2060", "")
+            words.append({"form": f, "qere": None, "ketiv": bool(re.search("[\u05D0-\u05EA]", f)) and not _VOWELS.search(f)})
+    return words
+
+
+def _uhb_book(code: str, cache: Path) -> str:
+    f = cache / UHB_TAG / f"{FILENUM[code]:02d}-{code}.usfm"
+    if not f.exists():
+        import httpx
+        r = httpx.get(UHB_URL.format(nn=FILENUM[code], code=code), timeout=120, follow_redirects=True)
+        r.raise_for_status()
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(r.text, encoding="utf-8")
+    return f.read_text(encoding="utf-8")
+
+
+def ketiv_qere(con: sqlite3.Connection, book: str, cache: Path, stats: collections.Counter) -> dict[str, dict]:
+    """MACULA word key (its first token) -> {key, ketiv, qere}. A ketiv over several qere words (or the reverse) is one entry on the first
+    word; ketiv without qere has qere null and sits on the next word; qere without ketiv has ketiv null."""
+    u = _uhb_words(_uhb_book(book, cache))
+    m = con.execute("SELECT MIN(key), GROUP_CONCAT(surface, '') FROM (SELECT * FROM words WHERE corpus='hbo' AND book=? AND inserted=0 "
+                    "ORDER BY chapter, verse, word, part) GROUP BY chapter, verse, word ORDER BY chapter, verse, word", (book,)).fetchall()
+    out: dict[str, dict] = {}
+
+    def put(key, ketiv, qere, kind):
+        out[key] = {"key": key, "ketiv": ketiv, "qere": qere}
+        stats[kind] += 1
+
+    sm = difflib.SequenceMatcher(None, [_cons(x["form"]) for x in u], [_cons(s) for _, s in m], autojunk=False)
+    for op, i1, i2, j1, j2 in sm.get_opcodes():
+        kt = [i for i in range(i1, i2) if u[i]["ketiv"]]
+        if op == "equal":
+            for i in kt:                                    # same consonants, the qere is in the vowels only
+                put(m[j1 + i - i1][0], u[i]["form"], u[i]["qere"] or m[j1 + i - i1][1], "vowels_only")
+        elif op == "replace" and kt:
+            if i2 - i1 == j2 - j1:
+                for i in kt:
+                    put(m[j1 + i - i1][0], u[i]["form"], u[i]["qere"] or m[j1 + i - i1][1], "paired")
+            else:
+                put(m[j1][0], " ".join(u[i]["form"] for i in range(i1, i2)), " ".join(s for _, s in m[j1:j2]), "split_or_joined")
+        elif op == "delete" and kt and j1 < len(m):
+            put(m[j1][0], " ".join(u[i]["form"] for i in kt), None, "ketiv_only")
+        elif op == "insert" and j2 - j1 <= 2:
+            for j in range(j1, j2):
+                put(m[j][0], None, m[j][1], "qere_only")
+        elif kt:
+            stats["unresolved"] += len(kt)
+    return out
 
 
 def _clause_parents(con: sqlite3.Connection) -> dict[int, int | None]:
@@ -51,6 +132,38 @@ def _clause_parents(con: sqlite3.Connection) -> dict[int, int | None]:
         while p is not None and not (nodes.get(p, (None, None))[1] == "cl" and p in worded):
             p = nodes.get(p, (None, None))[0]
         out[nid] = p
+    return out
+
+
+def _verb_person(con: sqlite3.Connection, keys: set[str]) -> dict[str, str]:
+    import lexeme_macula
+    sp = sqlite3.connect(f"file:{lexeme_macula.spine_path()}?mode=ro", uri=True)
+    return {k: p for k, p in sp.execute("SELECT key, person FROM spine_words WHERE person IN ('first', 'second', 'third')") if k in keys}
+
+
+def _attachments(con: sqlite3.Connection, parents: dict[int, int | None], clause_key: dict[int, str]) -> dict[int, str]:
+    """Clause id -> first word key of the head it hangs on, when the MACULA tree nests it inside a phrase of its parent clause (a relative
+    clause in a noun phrase: the antecedent). None when it hangs on the parent clause directly."""
+    nodes = {r[0]: r for r in con.execute("SELECT id, parent, cls, head, lo, hi FROM nodes WHERE corpus='hbo'")}
+    kids: dict[int, list[int]] = collections.defaultdict(list)
+    for nid, r in nodes.items():
+        if r[1] is not None:
+            kids[r[1]].append(nid)
+    seq_key = dict(con.execute("SELECT seq, key FROM words WHERE corpus='hbo' AND inserted=0"))
+    out = {}
+    for cid, p in parents.items():
+        if p is None or cid not in clause_key:
+            continue
+        prev, a = cid, nodes[cid][1]
+        while a is not None and a != p:
+            heads = [k for k in kids[a] if k != prev and nodes[k][3] == "true" and nodes[k][4] is not None]
+            if heads:
+                h = nodes[heads[0]]
+                ks = [seq_key[q] for q in range(h[4], h[5] + 1) if q in seq_key]
+                if ks:
+                    out[cid] = min(ks)
+                break
+            prev, a = a, nodes[a][1]
     return out
 
 
@@ -97,9 +210,10 @@ def chapter_segments(rows: list[sqlite3.Row], nodes: dict[int, sqlite3.Row], par
             s["words"] += [k for k in keys if k != s["words"][-1]]
             s["text"] += text
             s["_lang"].update(t["wlang"] for t in w)
+            s["_toks"] += w
         else:
             segs.append({"verse": last["verse"], "clause": cid, "words": list(dict.fromkeys(keys)), "text": text,
-                         "_lang": collections.Counter(t["wlang"] for t in w)})
+                         "_lang": collections.Counter(t["wlang"] for t in w), "_toks": list(w)})
     out = []
     for n, s in enumerate(segs, 1):
         cid, node = s["clause"], nodes.get(s["clause"])
@@ -109,7 +223,7 @@ def chapter_segments(rows: list[sqlite3.Row], nodes: dict[int, sqlite3.Row], par
                     "depth": _depth(cid, parents) if cid is not None else 0, "discourse_parent": None, "text_depth": None,
                     "kind": trees_macula._clause_kind(own) if own else None, "rule": (node["rule"] if node else None) or None,
                     "language": LANG.get(lang, "hbo"), "first": s["words"][0], "last": s["words"][-1], "words": s["words"],
-                    "text": " ".join(s["text"].split()).replace(" ׀ ", " ׀ "), "ketiv_qere": []})
+                    "text": " ".join(s["text"].split()).replace(" ׀ ", " ׀ "), "ketiv_qere": [], "_toks": s["_toks"]})
     return out
 
 
@@ -117,6 +231,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--books", help="comma-separated USFM codes (default: all Hebrew books)")
     ap.add_argument("--out", default=str(SHORESH / "macula" / "data" / "clause-layout"))
+    ap.add_argument("--uhb-cache", default=str(SHORESH / "macula" / "data" / "uhb"), help="downloaded UHB USFM (cached per tag)")
     a = ap.parse_args()
     out = Path(a.out)
     tp = trees_macula.trees_path()
@@ -125,35 +240,88 @@ def main() -> None:
     nodes = {r["id"]: r for r in con.execute("SELECT id, rule FROM nodes WHERE corpus='hbo' AND cls='cl'")}
     parents = _clause_parents(con)
     books = a.books.upper().split(",") if a.books else [r[0] for r in con.execute("SELECT book FROM words WHERE corpus='hbo' GROUP BY book ORDER BY MIN(seq)")]
-    n_seg = n_ch = 0
+    chapters_out: list[tuple[str, int, list[dict]]] = []
+    kq_stats: collections.Counter = collections.Counter()
     for book in books:
+        kq = ketiv_qere(con, book, Path(a.uhb_cache), kq_stats)
         chapters = [r[0] for r in con.execute("SELECT DISTINCT chapter FROM words WHERE corpus='hbo' AND book=? ORDER BY chapter", (book,))]
         for ch in chapters:
             rows = con.execute("SELECT * FROM words w WHERE corpus='hbo' AND book=? AND chapter=? AND inserted=0 ORDER BY " + trees_macula.TEXT_ORDER,
                                (book, ch)).fetchall()
             segs = chapter_segments(rows, nodes, parents)
-            eng = {}
+            for sg in segs:
+                sg["ketiv_qere"] = [kq[k] for k in sg["words"] if k in kq]
+            eng: dict[int, str] = {}
+            split_at = None
             for s in segs:
-                if s["verse"] not in eng:
-                    eng[s["verse"]] = _eng(book, ch, s["verse"])
-            full = [{"book": book, "chapter": ch, "verse": s["verse"], "seg": s["seg"], "verse_ref_en": eng[s["verse"]], **{k: v for k, v in s.items() if k not in ("verse", "seg")}}
-                    for s in segs]
-            for d in ("clauses", "layout"):
-                (out / d / book).mkdir(parents=True, exist_ok=True)
-            with open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", "w", encoding="utf-8") as f:
-                for r in full:
-                    f.write(json.dumps(r, ensure_ascii=False) + "\n")
-            lines = [f"{book} {ch}"] + [f"{r['verse']}:{r['depth']} {r['text']}" for r in full]
-            (out / "layout" / book / f"{book}_{ch:03d}.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
-            n_seg += len(full)
-            n_ch += 1
+                v = s["verse"]
+                if v not in eng:
+                    eng[v] = _eng(book, ch, v)
+                sp = SPLIT_VERSES.get((book, ch, v))
+                if sp and s["first"] == sp[0]:
+                    split_at = sp[1]
+                ref = split_at if (sp and split_at) else eng[v]
+                if not sp:
+                    split_at = None
+                s["_eng"] = ref
+            chapters_out.append((book, ch, segs))
         print(f"{book}: {len(chapters)} chapters")
+    # stable ids: a clause is named by the first word key of its first segment (row ids of the tree build change on every rebuild)
+    clause_key: dict[int, str] = {}
+    for _, _, segs in chapters_out:
+        for s in segs:
+            if s["clause"] is not None:
+                clause_key.setdefault(s["clause"], s["first"])
+    # text-level hierarchy (phase 2): one record per clause, in order of first appearance
+    toks_of: dict[int, list] = collections.defaultdict(list)
+    first_seen: dict[int, tuple] = {}
+    for book, ch, segs in chapters_out:
+        for s in segs:
+            if s["clause"] is not None:
+                toks_of[s["clause"]] += s["_toks"]
+                first_seen.setdefault(s["clause"], (book, ch, s["verse"]))
+    person = _verb_person(con, set(t["key"] for ts in toks_of.values() for t in ts if t["class"] == "verb"))
+    attach_of = _attachments(con, parents, clause_key)
+    disc: dict[str, dict] = {}
+    by_book: dict[str, list] = collections.defaultdict(list)
+    for cid, (book, ch, v) in first_seen.items():
+        by_book[book].append({"key": clause_key[cid], "verse": (book, ch, v), "parent_key": clause_key.get(parents.get(cid)) if parents.get(cid) else None,
+                              "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person)})
+    for book, cl in by_book.items():
+        disc.update(discourse_rules.derive(cl))
+    seg_hash = hashlib.sha256()
+    n_seg = 0
+    for book, ch, segs in chapters_out:
+        full = []
+        for s in segs:
+            r = {"book": book, "chapter": ch, "verse": s["verse"], "seg": s["seg"], "verse_ref_en": s.pop("_eng"),
+                 "clause_key": clause_key.get(s["clause"]), "parent_key": clause_key.get(s["parent"]) if s["parent"] is not None else None,
+                 **{k: v for k, v in s.items() if k not in ("verse", "seg", "_toks")}}
+            d = disc.get(r["clause_key"])
+            if d:
+                r.update({"discourse_parent": d["parent"], "discourse_attach": d["attach"], "text_depth": d["depth"], "discourse_rule": d["rule"]})
+            else:
+                r.update({"discourse_attach": None, "discourse_rule": None})
+            full.append(r)
+            seg_hash.update(f"{book} {ch}:{r['verse']} {r['first']} {r['last']}\n".encode())
+        for d in ("clauses", "layout"):
+            (out / d / book).mkdir(parents=True, exist_ok=True)
+        with open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", "w", encoding="utf-8") as f:
+            for r in full:
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        lines = [f"{book} {ch}"] + [f"{r['verse']}:{r['text_depth'] if r['text_depth'] is not None else r['depth']} {r['text']}" for r in full]
+        (out / "layout" / book / f"{book}_{ch:03d}.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        n_seg += len(full)
+    n_ch = len(chapters_out)
     meta = dict(con.execute("SELECT key, value FROM meta").fetchall())
     build = {"format_version": FORMAT_VERSION, "built": datetime.date.today().isoformat(), "books": len(books), "chapters": n_ch, "segments": n_seg,
              "trees_macula": {"built": meta.get("built"), "source": meta.get("source_hbo"), "sha256": hashlib.sha256(Path(tp).read_bytes()).hexdigest()},
              "versification": {"map": "org-to-eng (bcv-commons/bibles, from STEPBible TVTMS, CC BY 4.0)", "tvtms_rev": vrsmap.revision("org")},
-             "depth": "clause ancestors in the MACULA tree, within the verse", "discourse_rules": None,
-             "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), versification TVTMS (CC BY 4.0)"}
+             "segmentation": {"version": seg_hash.hexdigest()[:16], "note": "sha256 over every segment's book, chapter, verse, first and last word key; "
+                              "changes only when segment boundaries change (levels, text and ketiv/qere do not affect it)"},
+             "uhb": {"tag": UHB_TAG, "licence": "CC BY-SA 4.0", "ketiv_qere": dict(kq_stats)},
+             "depth": "clause ancestors in the MACULA tree, within the verse", "discourse_rules": discourse_rules.RULES_VERSION,
+             "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0)"}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"{n_ch} chapters, {n_seg} segments -> {out}")
 
