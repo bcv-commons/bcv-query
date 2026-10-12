@@ -280,8 +280,8 @@ def main() -> None:
                 if mark_pending:                   # the previous chapter ended with a paragraph mark
                     marks.add(rows[0]["key"])
                 paras.update(marks)
-                if book in RESET_AT_PARAGRAPH:
-                    resets.update(marks)
+                if book in RESET_AT_PARAGRAPH and mark_pending:
+                    resets.add(rows[0]["key"])     # poetry and prophecy: a chapter that starts after ס/פ starts afresh
                 mark_pending = any(m in (rows[-1]["after"] or "") for m in "ספ")
             for sg in segs:
                 sg["ketiv_qere"] = [kq[k] for k in sg["words"] if k in kq]
@@ -366,9 +366,10 @@ def main() -> None:
              "uhb": {"tag": UHB_TAG, "licence": "CC BY-SA 4.0", "ketiv_qere": dict(kq_stats)},
              "books": {b: {"segments_sha256": h.hexdigest()} for b, h in book_hash.items()},
              "depth": "clause ancestors in the MACULA tree, within the verse", "discourse_rules": discourse_rules.RULES_VERSION,
-             "relations": {"all": discourse_rules.RELATIONS, "flat": sorted(discourse_rules.FLAT), "tree_flat": sorted(discourse_rules.TREE_FLAT),
+             "relations": {"all": discourse_rules.RELATIONS, "flat": sorted(discourse_rules.FLAT), "flat_rules": sorted(discourse_rules.FLAT_RULES),
+                           "tree_flat": sorted(discourse_rules.TREE_FLAT),
                            "chain_forms": sorted(discourse_rules.CHAIN_FORMS), "chain_forms_in_speech_with_waw": sorted(discourse_rules.CHAIN_FORMS_SPEECH),
-                           "text_depth": "number of links up the discourse_parent chain whose relation is not in flat",
+                           "text_depth": "number of links up the discourse_parent chain whose relation is not in flat and whose discourse_rule is not in flat_rules",
                            "tree_depth": "number of links up the discourse_parent chain whose relation is not in tree_flat",
                            "conditional_inversion": "a protasis hangs under its apodosis (relation conditional). To invert, for each conditional link "
                                                     "whose protasis comes before the clause it hangs on (and that is the first of a series): the "

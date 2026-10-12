@@ -8,7 +8,9 @@ relative, preposition), the verb's lemma (verbs of speaking, oaths), the clause'
 nesting). No BHSA input. The segmentation gives a clause-opening subordinator or relative to the clause it opens.
 
 ONE TREE. Every clause has a discourse_parent (an earlier clause, or for a protasis the later apodosis) and a relation on that link,
-except the first clause of a line: a book, a chapter, a new Psalm, and in poetry and prophecy a paragraph mark (ס/פ).
+except the first clause of a line: a book, a chapter, a new Psalm, and in poetry and prophecy a chapter that starts after a paragraph
+mark (ס/פ). Inside a chapter a paragraph mark closes only the speeches opened by כֹּה אָמַר or a command to say; a speech opened by a
+narrative speaking clause (Amos 1:2 "וַיֹּאמַר", "וַיְהִי דְבַר־יְהוָה אֵלַי לֵאמֹר") stays open over ס/פ until the narrative resumes.
 
   LINES. The narrative is one line; a speech opens a line of its own under its speaking clause. Main clauses chain along their line:
     continuation   a wayyiqtol or weqatal; in speech also a yiqtol, qatal, imperative, jussive or cohortative with וְ   (CHAIN_FORMS).
@@ -28,7 +30,9 @@ except the first clause of a line: a book, a chapter, a new Psalm, and in poetry
     - Inside a speech only a narrated speaking clause (3rd person wayyiqtol/qatal, or a participle) or a לֵאמֹר opens a nested speech;
       a nested speech ends after the verse following the one it opened in.
     - In poetry a participle of saying (Ps 3:3 "many say") opens a quotation that ends with its verse or at סֶלָה.
-    - The messenger formula כֹּה אָמַר (יְהוָה), and inside a speech a command to say something (אֱמֹר, וְאָמַרְתָּ אֲלֵהֶם, כֹּה תֹאמַר),
+    - שָׁאַל with an object or with לְשָׁלוֹם quotes nothing and opens no speech.
+    - The messenger formula כֹּה אָמַר (יְהוָה), and inside a speech a command to say something without an object of its own (אֱמֹר,
+      וְאָמַרְתָּ אֲלֵהֶם, כֹּה תֹאמַר; not Dan 2:4 "אֱמַר חֶלְמָא"),
       open a speech that lasts to the next paragraph mark (ס/פ), nested if inside a speech; in poetry only to the end of the verse or סֶלָה.
       A command to say that comes at the start of a speech (in its first two verses: Lev 1:2 "דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל וְאָמַרְתָּ
       אֲלֵהֶם") carries the rest of that speech: it lasts as long as the speech, over paragraph marks.
@@ -69,7 +73,11 @@ under the protasis with relation conditional.
 A wayyiqtol with a 1st- or 2nd-person pronoun ("וַתִּפָּעֶם רוּחִי", Dan 2:3) stays in its speech.
 CONDITIONALS in a series: the inversion applies to the first clause of the series only; the others stay parallel on it.
 
-DEPTHS: tree_depth counts every link up to the root of the line, except parallel. text_depth counts only the links whose relation is not in FLAT
+DEPTHS: tree_depth counts every link up to the root of the line, except parallel.
+text_depth (the flat view) does not count continuation, coordination, asyndetic, inquit, parallel, vocative and circumstantial links,
+nor links with discourse_rule embedded_flat: an embedded clause with no opener (conjunction, relative, preposition), no infinitive, and a
+participle or no verb (Deut 28:25 "נִגָּף לִפְנֵי אֹיְבֶיךָ"), which stands next to its parent clause. An address and a circumstantial
+clause stay on the line of the clause they belong to; the relation still says what they are. text_depth counts only the links whose relation is not in FLAT
 (continuation, coordination, asyndetic, inquit): the flat view, where a chain stays on one level.
 """
 from __future__ import annotations
@@ -81,7 +89,7 @@ def _n(s: str | None) -> str:
     return unicodedata.normalize("NFC", s or "")
 
 
-RULES_VERSION = "0.8"
+RULES_VERSION = "0.9"
 
 SPEAK = {"559", "1696", "6680", "6030", "7592",          # אָמַר, דָּבַר, צָוָה, עָנָה, שָׁאַל (Strong's, MACULA strong column)
          "560", "6032", "4449"}                           # Aramaic אֲמַר, עֲנָה, מְלַל
@@ -95,7 +103,9 @@ CHAIN_FORMS = {"wayyiqtol", "weqatal"}
 CHAIN_FORMS_SPEECH = {"yiqtol", "qatal", "imperative", "jussive", "cohortative"}
 INFINITIVE = {"infinitive construct", "infinitive absolute"}
 PARTICIPLE = {"participle active", "participle passive"}
-FLAT = {"continuation", "coordination", "asyndetic", "inquit", "parallel"}     # add no level to text_depth
+FLAT = {"continuation", "coordination", "asyndetic", "inquit", "parallel",    # add no level to text_depth
+        "vocative", "circumstantial"}
+FLAT_RULES = {"embedded_flat"}                                                 # links set by these rules add no level to text_depth
 TREE_FLAT = {"parallel"}                                                       # add no level to tree_depth
 RELATIONS = ["continuation", "coordination", "asyndetic", "speech", "inquit", "causal", "purpose", "temporal", "conditional", "relative",
              "circumstantial", "complement", "vocative", "embedded", "parallel"]
@@ -114,6 +124,7 @@ ADAYIN, QABEL, KOL, DENA = _n("אֱדַיִן"), _n("קֳבֵל"), _n("כֹּל"
 KO, HAY, MELEK = _n("כֹּה"), _n("חַי"), _n("מֶלֶךְ")
 FORMULA = {_n("נְאֻם")}
 SELAH = _n("סֶלָה")
+SHALOM = _n("שָׁלוֹם")
 HEAR = {"8085", "238", "995", "3947"}                     # שִׁמְעוּ, הַאֲזִינוּ, הָבִינוּ, קְחוּ: imperatives of hearing count as one opening
 
 
@@ -153,7 +164,9 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
     after_qabel = _n(lead[qi + 1]["lemma"]) if qi is not None and qi + 1 < len(lead) else ""
     if sub_kind is None and after_qabel == DI:
         sub_kind = "causal"
-    speak = bool(v) and _strong(v) in SPEAK and (bool(finite) or (aramaic and v["wtype"] in PARTICIPLE))
+    has_object = "O" in (rule or "").split("-")
+    speak = bool(v) and _strong(v) in SPEAK and (bool(finite) or (aramaic and v["wtype"] in PARTICIPLE)) and not (
+        _strong(v) == "7592" and (has_object or any(_n(t["lemma"]) == SHALOM for t in toks)))    # "מַיִם שָׁאַל", "שָׁאַל לְשָׁלוֹם"
     # a participle is a clause of its own (nominal clause, main) when it has the article or a subject of its own
     ptc_free = bool(v) and v["wtype"] in PARTICIPLE and not finite and not speak and not (
         any(t["class"] == "art" and (t["verse"], t["word"]) == (v["verse"], v["word"]) for t in toks) or any(t["role"] == "s" for t in toks)
@@ -163,8 +176,8 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
         before = [t for t in toks if (t["verse"], t["word"]) == (verbs[0]["verse"], verbs[0]["word"]) and t["class"] == "prep"]
         p = _n(before[0]["lemma"]) if before else ""
         sub_kind = "purpose" if p == LE else "temporal" if p in (BE, KE) else "complement"
-    elif sub_kind is None and ptc_free:
-        sub_kind = "circumstantial"
+    elif sub_kind is None and ptc_free and waw:            # without וְ a participle clause is a main clause (Dan 2:21-22, a hymn's
+        sub_kind = "circumstantial"                         # predicates on God)
     actor = any(t["wtype"] == "proper" or _n(t["lemma"]) == MELEK for t in toks)
     noun_head = bool(lead) and not finite and (lead[0]["class"] == "noun" or lead[0]["wtype"] in PARTICIPLE)
     return {"verb": _strong(v) if v else None, "form": v["wtype"] if v else None, "person": person.get(v["key"]) if v else None,
@@ -186,13 +199,17 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "pron1": any(t["class"] == "pron" and person.get(t["key"]) == "first" for t in toks),
             # the messenger formula כֹּה אָמַר (יְהוָה), and a command to say something: אֱמֹר, וְאָמַרְתָּ, כֹּה תֹאמַר
             "messenger": l0 == KO and bool(v) and _strong(v) in AMAR and v["wtype"] == "qatal",
-            "command_say": bool(v) and _strong(v) in AMAR and (v["wtype"] == "imperative" or (
+            "command_say": bool(v) and _strong(v) in AMAR and not has_object and (v["wtype"] == "imperative" or (
                 person.get(v["key"]) == "second" and (v["wtype"] == "weqatal" or (l0 == KO and v["wtype"] == "yiqtol")))),
             "lead_verb": (_strong(lead[0]), lead[0]["wtype"]) if lead and lead[0]["class"] == "verb" else None,
             "subj": "S" in (rule or "").split("-"),
             "opener": ("HEAR" if bool(v) and v["wtype"] == "imperative" and _strong(v) in HEAR and lead and lead[0] is v else
                        # the whole first word (all its token lemmas): בְּצֶדֶק and בְּרֹאשׁ differ, לָמָּה and לָמָּה agree
                        "+".join(_n(t["lemma"]) for t in lead if (t["verse"], t["word"]) == (lead[0]["verse"], lead[0]["word"])) if lead else None),          # the clause names its subject (MACULA rule V-S-O, S-V ...)
+            # an embedded clause with no opener (conjunction, relative, preposition) and no infinitive, whose verb is a participle or
+            # that has no verb, stands next to its parent clause in the flat view (predicative participles, elliptic halves)
+            "plain_embedded": bool(toks) and toks[0]["class"] not in ("cj", "rel", "prep") and not any(t["wtype"] in INFINITIVE for t in verbs)
+                              and not finite and (not verbs or verbs[0]["wtype"] in PARTICIPLE),
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
 
@@ -289,7 +306,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             rel = ("relative" if f["sub_kind"] == "relative" or c["attach"] else
                    "complement" if f["lemor"] or f["role"] in ("o", "o2", "s", "p") else
                    f["sub_kind"] if f["sub_kind"] in ("purpose", "temporal", "causal", "conditional", "complement") else "embedded")
-            link(k, c["parent_key"], rel, "embedded", c["attach"])
+            link(k, c["parent_key"], rel, "embedded_flat" if f["plain_embedded"] else "embedded", c["attach"])
             if f["lemor"]:                        # the speech hangs on the לֵאמֹר clause
                 if len(lines) > 1 and lines[-1].spk == c["parent_key"]:
                     lines[-1].spk = k
@@ -426,7 +443,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     for k in out:
         ch = chain(k)
         out[k]["tree_depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in TREE_FLAT)
-        out[k]["depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in FLAT)
+        out[k]["depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("imperative", None)
         out[k].pop("subj", None)
     return out
