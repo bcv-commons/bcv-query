@@ -45,6 +45,7 @@ UHB_URL = "https://git.door43.org/unfoldingWord/hbo_uhb/raw/tag/%s/{nn:02d}-{cod
 FORMAT_VERSION = 1
 LANG = {"H": "hbo", "A": "arc"}
 # poetry and prophecy: a paragraph mark (petuha/setuma) ends any speech in progress (narrative speeches run over them)
+POETRY = {"JOB", "PSA", "PRO", "SNG", "LAM"}
 RESET_AT_PARAGRAPH = {"JOB", "PSA", "PRO", "ECC", "SNG", "LAM", "ISA", "JER", "EZK", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB",
                       "ZEP", "HAG", "ZEC", "MAL"}
 # Hebrew verses that English numbering divides inside the verse (TVTMS MergedPrevVerse): from this word key on, the segment is in the
@@ -308,8 +309,8 @@ def main() -> None:
     by_book: dict[str, list] = collections.defaultdict(list)
     for cid, (book, ch, v) in first_seen.items():
         by_book[book].append({"key": clause_key[cid], "verse": (book, ch, v), "parent_key": clause_key.get(parents.get(cid)) if parents.get(cid) else None,
-                              "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person),
-                              "reset": clause_key[cid] in resets})
+                              "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None),
+                              "reset": clause_key[cid] in resets, "poetry": book in POETRY})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     seg_hash = hashlib.sha256()
