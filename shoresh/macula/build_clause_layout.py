@@ -365,8 +365,10 @@ def main() -> None:
                            "chain_forms": sorted(discourse_rules.CHAIN_FORMS), "chain_forms_in_speech_with_waw": sorted(discourse_rules.CHAIN_FORMS_SPEECH),
                            "text_depth": "number of links up the discourse_parent chain whose relation is not in flat",
                            "tree_depth": "number of links up the discourse_parent chain whose relation is not in tree_flat",
-                           "conditional_inversion": "a protasis hangs under its apodosis (relation conditional); to invert, the protasis takes the "
-                                                    "apodosis's parent and relation, and the apodosis hangs under the protasis with relation conditional"},
+                           "conditional_inversion": "a protasis hangs under its apodosis (relation conditional). To invert, for each conditional link "
+                                                    "whose protasis comes before the clause it hangs on (and that is the first of a series): the "
+                                                    "protasis takes the apodosis's parent and relation, and the apodosis hangs under the protasis "
+                                                    "with relation conditional. A protasis after its main clause is left as it is."},
              "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0)"}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"{n_ch} chapters, {n_seg} segments -> {out}")

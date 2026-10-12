@@ -11,7 +11,10 @@ ONE TREE. Every clause has a discourse_parent (an earlier clause, or for a prota
 except the first clause of a line: a book, a chapter, a new Psalm, and in poetry and prophecy a paragraph mark (ס/פ).
 
   LINES. The narrative is one line; a speech opens a line of its own under its speaking clause. Main clauses chain along their line:
-    continuation   a wayyiqtol or weqatal; in speech also a yiqtol, qatal, imperative, jussive or cohortative with וְ   (CHAIN_FORMS)
+    continuation   a wayyiqtol or weqatal; in speech also a yiqtol, qatal, imperative, jussive or cohortative with וְ   (CHAIN_FORMS).
+                   A chain clause that names its subject (MACULA rule with S) starts a new step: it hangs on the nearest earlier
+                   chain clause that also names one (over continuation, coordination and parallel links), and the subjectless
+                   clauses after it fill that step in (Gen 22:5 וַיֹּאמֶר אַבְרָהָם → 22:4 וַיִּשָּׂא אַבְרָהָם).
     coordination   any other clause with וְ
     asyndetic      no conjunction (poetry, lists, a new address)
     speech         the first clause of a speech, on its speaking or לֵאמֹר clause
@@ -47,8 +50,8 @@ except the first clause of a line: a book, a chapter, a new Psalm, and in poetry
   EMBEDDED clauses keep their MACULA parent; relation relative (in a noun phrase, discourse_attach = the antecedent's first word),
     complement (MACULA role o/s/p, or לֵאמֹר), purpose/temporal (לְ / בְּ כְּ + infinitive), or embedded.
 
-CONDITIONALS: the protasis hangs under its apodosis (the first clause of the run that follows), relation conditional. A client that
-wants the other direction inverts exactly those links: the protasis takes the apodosis's parent and relation, and the apodosis hangs
+CONDITIONALS: the protasis hangs under its apodosis, relation conditional. A client that wants the other direction inverts the
+conditional links whose protasis comes before the clause it hangs on (a protasis after its main clause is left as it is): the protasis takes the apodosis's parent and relation, and the apodosis hangs
 under the protasis with relation conditional.
 
 A wayyiqtol with a 1st- or 2nd-person pronoun ("וַתִּפָּעֶם רוּחִי", Dan 2:3) stays in its speech.
@@ -66,7 +69,7 @@ def _n(s: str | None) -> str:
     return unicodedata.normalize("NFC", s or "")
 
 
-RULES_VERSION = "0.5"
+RULES_VERSION = "0.6"
 
 SPEAK = {"559", "1696", "6680", "6030", "7592",          # אָמַר, דָּבַר, צָוָה, עָנָה, שָׁאַל (Strong's, MACULA strong column)
          "560", "6032", "4449"}                           # Aramaic אֲמַר, עֲנָה, מְלַל
@@ -168,6 +171,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             # a 1st/2nd-person pronoun in a wayyiqtol clause ("וַתִּפָּעֶם רוּחִי") marks it as part of a speech, not the narrative
             "pron12": any(t["class"] == "pron" and person.get(t["key"]) in ("first", "second") for t in toks),
             "lead_verb": (_strong(lead[0]), lead[0]["wtype"]) if lead and lead[0]["class"] == "verb" else None,
+            "subj": "S" in (rule or "").split("-"),          # the clause names its subject (MACULA rule V-S-O, S-V ...)
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
 
@@ -334,10 +338,17 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 while out.get(parent, {}).get("relation") in ("continuation", "coordination", "parallel") and out[parent]["parent"] \
                         and clauses_verse.get(out[parent]["parent"]) == run_verse:
                     parent = out[parent]["parent"]
+        if rel == "continuation" and f["subj"]:   # a chain clause naming its subject goes on the last chain clause that named one
+            x = parent
+            while x and not out[x].get("subj") and out[x]["relation"] in ("continuation", "coordination", "parallel") and out[x]["parent"]:
+                x = out[x]["parent"]
+            if out.get(x, {}).get("subj"):
+                parent = x
         turn = f["lead_verb"] if f["speak"] and f["lead_verb"] and not f["waw"] and f["form"] != "wayyiqtol" else None
         if turn and turn in line.turns:           # a turn that repeats the opening of the turn before (Dan 2:8 עָנֵה מַלְכָּא on 2:5)
             parent, rel = line.turns[turn], "parallel"
         link(k, parent, rel, "main")
+        out[k]["subj"] = f["subj"]
         if turn:
             line.turns[turn] = k
         out[k]["imperative"] = f["imperative"]
@@ -364,5 +375,6 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k]["tree_depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in TREE_FLAT)
         out[k]["depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in FLAT)
         out[k].pop("imperative", None)
+        out[k].pop("subj", None)
     return out
 
