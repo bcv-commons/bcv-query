@@ -28,6 +28,12 @@ except the first clause of a line: a book, a chapter, a new Psalm, and in poetry
     - Inside a speech only a narrated speaking clause (3rd person wayyiqtol/qatal, or a participle) or a לֵאמֹר opens a nested speech;
       a nested speech ends after the verse following the one it opened in.
     - In poetry a participle of saying (Ps 3:3 "many say") opens a quotation that ends with its verse or at סֶלָה.
+    - The messenger formula כֹּה אָמַר (יְהוָה), and inside a speech a command to say something (אֱמֹר, וְאָמַרְתָּ אֲלֵהֶם, כֹּה תֹאמַר),
+      open a speech that lasts to the next paragraph mark (ס/פ), nested if inside a speech; in poetry only to the end of the verse or סֶלָה.
+      A command to say that comes at the start of a speech (in its first two verses: Lev 1:2 "דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל וְאָמַרְתָּ
+      אֲלֵהֶם") carries the rest of that speech: it lasts as long as the speech, over paragraph marks.
+    - A 1st-person wayyiqtol (וָאֹמַר) resumes the narrative when an open speech was addressed to "me" (Jer 1:4 "וַיְהִי דְבַר־יְהוָה
+      אֵלַי לֵאמֹר"): the narrator speaks in the first person. In a speech addressed to someone else it is a retelling (Gen 24:42).
     inquit         a 3rd-person speaking clause without וְ that is not the first clause of its verse (Isa 40:1 "יֹאמַר אֱלֹהֵיכֶם"), and a formula
                    such as נְאֻם יְהוָה: it hangs on the clause before it on its line, opens no speech, and the line goes on past it.
     asyndetic links hang on the head of the run before: from the previous main clause, up over continuation, coordination and parallel
@@ -51,7 +57,8 @@ except the first clause of a line: a book, a chapter, a new Psalm, and in poetry
     of hearing (שִׁמְעוּ, הַאֲזִינוּ, הָבִינוּ, קְחוּ) count as one opening.
   vocative       an address (MACULA rule Np2CL with a noun or participle, in a verse with an imperative or a 2nd-person verb): on the
                  nearest main clause before it in the verse, else on the next.
-  circumstantial a verbless clause opened by וְ + a non-verb in narrative: on the preceding main clause.
+  circumstantial a verbless clause opened by וְ + a non-verb right after a wayyiqtol main clause of its verse, in narrative (not in the
+                 poetic books, where such a clause is the second half of a couplet: coordination).
   EMBEDDED clauses keep their MACULA parent; relation relative (in a noun phrase, discourse_attach = the antecedent's first word),
     complement (MACULA role o/s/p, or לֵאמֹר), purpose/temporal (לְ / בְּ כְּ + infinitive), or embedded.
 
@@ -74,7 +81,7 @@ def _n(s: str | None) -> str:
     return unicodedata.normalize("NFC", s or "")
 
 
-RULES_VERSION = "0.7"
+RULES_VERSION = "0.8"
 
 SPEAK = {"559", "1696", "6680", "6030", "7592",          # אָמַר, דָּבַר, צָוָה, עָנָה, שָׁאַל (Strong's, MACULA strong column)
          "560", "6032", "4449"}                           # Aramaic אֲמַר, עֲנָה, מְלַל
@@ -176,6 +183,11 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "second": bool(v) and (v["wtype"] == "imperative" or person.get(v["key"]) == "second"),
             # a 1st/2nd-person pronoun in a wayyiqtol clause ("וַתִּפָּעֶם רוּחִי") marks it as part of a speech, not the narrative
             "pron12": any(t["class"] == "pron" and person.get(t["key"]) in ("first", "second") for t in toks),
+            "pron1": any(t["class"] == "pron" and person.get(t["key"]) == "first" for t in toks),
+            # the messenger formula כֹּה אָמַר (יְהוָה), and a command to say something: אֱמֹר, וְאָמַרְתָּ, כֹּה תֹאמַר
+            "messenger": l0 == KO and bool(v) and _strong(v) in AMAR and v["wtype"] == "qatal",
+            "command_say": bool(v) and _strong(v) in AMAR and (v["wtype"] == "imperative" or (
+                person.get(v["key"]) == "second" and (v["wtype"] == "weqatal" or (l0 == KO and v["wtype"] == "yiqtol")))),
             "lead_verb": (_strong(lead[0]), lead[0]["wtype"]) if lead and lead[0]["class"] == "verb" else None,
             "subj": "S" in (rule or "").split("-"),
             "opener": ("HEAR" if bool(v) and v["wtype"] == "imperative" and _strong(v) in HEAR and lead and lead[0] is v else
@@ -186,8 +198,11 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
 
 class _Line:
     """A line of main clauses: the narrative, or one speech."""
-    def __init__(self, spk: str | None, opened: int = 0, scoped: bool = False):
+    def __init__(self, spk: str | None, opened: int = 0, scoped: bool = False, long: bool = False, to_me: bool = False):
         self.spk, self.opened, self.scoped = spk, opened, scoped
+        self.long = long                          # a messenger or commanded speech: lasts to the next paragraph mark
+        self.carries = False                      # a command to say at the start of a speech: lasts as long as that speech
+        self.to_me = to_me                        # the speech is addressed to "me" (וַיְהִי דְבַר־יְהוָה אֵלַי): a 1st-person narrator
         self.last: str | None = None              # last main clause on the line
         self.verse_mains: dict = {}               # verse -> main clauses of the line in that verse
         self.oath: str | None = None
@@ -203,10 +218,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     out: dict[str, dict] = {}
     lines: list[_Line] = [_Line(None)]
     pending: list[str] = []                       # clauses waiting for the next main clause (protasis, fronted temporal clause ...)
-    narrative = False
     vi, prev_v = 0, None
     prev_top: str | None = None                   # previous non-embedded clause
     clauses_verse: dict = {}                      # clause key -> verse
+    pron1_of: dict = {}                           # clause key -> it has a 1st-person pronoun
+    form_of: dict = {}                            # main clause key -> verb form
 
     # lookahead: עָנָה needs a following אָמַר in the verse; indirect speech has only a לְ + infinitive after it in the verse
     n = len(clauses)
@@ -248,7 +264,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         if c.get("reset"):
             lines = [_Line(None, vi)]
             pending.clear()
-        elif c.get("chapter_start"):
+        elif c.get("para"):                       # a paragraph mark ends a messenger or commanded speech (and what is nested in it)
+            j = next((x for x in range(1, len(lines)) if lines[x].long and not lines[x].carries), None)
+            if j is not None:
+                lines = lines[:j]
+        if not c.get("reset") and c.get("chapter_start"):
             for ln in lines:                      # a chapter starts each line afresh (the speech goes on, its chain restarts)
                 ln.last = None
                 ln.openers = {}
@@ -256,12 +276,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             vi, prev_v = vi + 1, vref
             while len(lines) > 1 and lines[-1].scoped:                  # a poetry quotation ends with its verse
                 lines.pop()
-            while len(lines) > 2 and lines[-1].opened < vi - 1:         # a nested speech ends after the next verse
+            while len(lines) > 2 and not lines[-1].long and lines[-1].opened < vi - 1:   # a nested speech ends after the next verse
                 lines.pop()
         if f["selah"]:
             while len(lines) > 1 and lines[-1].scoped:
                 lines.pop()
         line = lines[-1]
+        pron1_of[k] = f["pron1"]
 
         # ---- embedded: keep the MACULA parent
         if c["parent_key"]:
@@ -273,11 +294,12 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 if len(lines) > 1 and lines[-1].spk == c["parent_key"]:
                     lines[-1].spk = k
                 else:
-                    lines.append(_Line(k, vi))
+                    lines.append(_Line(k, vi, to_me=pron1_of.get(c["parent_key"], False) or f["pron1"]))
             continue
 
         # ---- the narrative resumes
         resumes = (f["form"] == "wayyiqtol" and f["person"] == "third" and not f["pron12"]) or (
+            f["form"] == "wayyiqtol" and f["person"] == "first" and any(ln.to_me for ln in lines[1:])) or (
             f["aramaic"] and (f["step"] or (f["speak"] and f["person"] in ("third", None) and f["form"] in ("qatal",) + tuple(PARTICIPLE)
                                          and (f["verb"] not in ANSWER or amar_after[i]))))
         if len(lines) > 1 and resumes:
@@ -288,7 +310,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         prev_top_key, prev_top = prev_top, k
 
         # ---- inquit: a speaking formula inside or after the words it quotes
-        if line.last is not None and (f["formula"] or (f["speak"] and f["person"] == "third" and not f["waw"] and not first_in_verse and f["form"] != "wayyiqtol"
+        if line.last is not None and (f["formula"] or (f["speak"] and f["person"] == "third" and not f["waw"] and not first_in_verse
+                                                       and f["form"] != "wayyiqtol" and not f["messenger"]
                                                        and clauses_verse.get(line.last) == vref)):
             link(k, line.last, "inquit", "inquit")
             continue
@@ -332,7 +355,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             continue
 
         # ---- circumstantial
-        if f["circ"] and narrative and len(lines) == 1 and line.verse_mains.get(vref):
+        if f["circ"] and not c.get("poetry") and len(lines) == 1 and line.verse_mains.get(vref) \
+                and form_of.get(line.verse_mains[vref][-1]) == "wayyiqtol":
             link(k, line.verse_mains[vref][-1], "circumstantial", "circ")
             continue
 
@@ -370,6 +394,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             parent, rel = line.turns[turn], "parallel"
         link(k, parent, rel, "main")
         out[k]["subj"] = f["subj"]
+        form_of[k] = f["form"]
         if c.get("poetry") and first_in_verse and f["opener"]:
             line.openers[f["opener"]] = k
         if turn:
@@ -384,12 +409,17 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             line.oath_last = k
         elif line.oath_last == prev_top_key and f["waw"] and clauses_verse.get(line.oath) == vref:
             line.oath_last = k                    # וְכֹה יֹסִיף continues the oath
-        if not in_speech and f["form"] == "wayyiqtol":
-            narrative = True
         speaks = f["speak"] and (f["verb"] not in ANSWER or amar_after[i]) and not only_inf_after[i] and f["form"] != "imperative"
         narrated = (f["person"] == "third" and f["form"] in ("wayyiqtol", "qatal")) or f["form"] in PARTICIPLE
-        if f["lemor"] or (speaks and (not in_speech or narrated)):
-            lines.append(_Line(k, vi))
+        if f["messenger"] or (f["command_say"] and in_speech and not only_inf_after[i]):
+            # כֹּה אָמַר יְהוָה, or a command to say (אֱמֹר, וְאָמַרְתָּ אֲלֵהֶם): the words follow, to the next paragraph mark
+            # (in poetry to the end of the verse or סֶלָה)
+            ln = _Line(k, vi, scoped=bool(c.get("poetry")), long=not c.get("poetry"), to_me=f["pron1"])
+            # Lev 1:2 "דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל וְאָמַרְתָּ אֲלֵהֶם": a command to say at the start of a speech carries the rest of it
+            ln.carries = f["command_say"] and in_speech and line.opened >= vi - 1 and not c.get("poetry")
+            lines.append(ln)
+        elif f["lemor"] or (speaks and (not in_speech or narrated)):
+            lines.append(_Line(k, vi, to_me=f["pron1"]))
         elif c.get("poetry") and f["ptc_saying"]:
             lines.append(_Line(k, vi, scoped=True))
 

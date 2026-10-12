@@ -263,6 +263,7 @@ def main() -> None:
     books = a.books.upper().split(",") if a.books else [r[0] for r in con.execute("SELECT book FROM words WHERE corpus='hbo' GROUP BY book ORDER BY MIN(seq)")]
     chapters_out: list[tuple[str, int, list[dict]]] = []
     resets: set[str] = set()               # first word key after which a speech cannot continue
+    paras: set[str] = set()                # first word key after a paragraph mark (ס/פ), any book
     kq_stats: collections.Counter = collections.Counter()
     for book in books:
         kq = ketiv_qere(con, book, Path(a.uhb_cache), kq_stats)
@@ -274,10 +275,13 @@ def main() -> None:
             segs = chapter_segments(rows, nodes, parents)
             if rows and book == "PSA":
                 resets.add(rows[0]["key"])
-            if book in RESET_AT_PARAGRAPH and rows:
+            if rows:
+                marks = {rows[i + 1]["key"] for i in range(len(rows) - 1) if any(m in (rows[i]["after"] or "") for m in "ספ")}
                 if mark_pending:                   # the previous chapter ended with a paragraph mark
-                    resets.add(rows[0]["key"])
-                resets.update(rows[i + 1]["key"] for i in range(len(rows) - 1) if any(m in (rows[i]["after"] or "") for m in "ספ"))
+                    marks.add(rows[0]["key"])
+                paras.update(marks)
+                if book in RESET_AT_PARAGRAPH:
+                    resets.update(marks)
                 mark_pending = any(m in (rows[-1]["after"] or "") for m in "ספ")
             for sg in segs:
                 sg["ketiv_qere"] = [kq[k] for k in sg["words"] if k in kq]
@@ -322,7 +326,7 @@ def main() -> None:
                               "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
                                                              nodes[cid]["role"] if cid in nodes else None),
                               "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "poetry": book in POETRY,
-                              "poetic": book in RESET_AT_PARAGRAPH})
+                              "poetic": book in RESET_AT_PARAGRAPH, "para": clause_key[cid] in paras})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     seg_hash = hashlib.sha256()
