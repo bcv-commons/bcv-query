@@ -213,6 +213,13 @@ def chapter_segments(rows: list[sqlite3.Row], nodes: dict[int, sqlite3.Row], par
         if (w[-1]["verse"] == nxt[0]["verse"] and cids[i + 1] is not None and cids[i] != cids[i + 1]
                 and discourse_rules.is_subordinator(w[-1]) and all(t["class"] in ("cj", "prep") or t is w[-1] for t in w)):
             cids[i] = cids[i + 1]
+        elif (i + 2 < len(words) and w[-1]["verse"] == nxt[0]["verse"] and cids[i] != cids[i + 1] and cids[i + 1] is not None
+              and discourse_rules._n(w[-1]["lemma"]) == discourse_rules.QABEL and discourse_rules._n(nxt[-1]["lemma"]) == discourse_rules.DI):
+            cids[i] = cids[i + 1]                  # Aramaic כָּל־קֳבֵל דִּי "because" goes with its clause as a whole
+        elif (w[-1]["verse"] == nxt[0]["verse"] and cids[i] != cids[i + 1] and cids[i + 1] is not None and all(t["class"] == "prep" for t in w)
+              and discourse_rules._n(nxt[0]["lemma"]) == discourse_rules.QABEL and i + 2 < len(words)
+              and discourse_rules._n(words[i + 2][-1]["lemma"]) == discourse_rules.DI):
+            cids[i] = cids[i + 1]                  # its כָּל־ (MACULA: כְּ + לְ) too
     segs: list[dict] = []
     for i, w in enumerate(words):
         last = w[-1]
@@ -306,7 +313,7 @@ def main() -> None:
                 first_seen.setdefault(s["clause"], (book, ch, s["verse"]))
         if segs and segs[0]["clause"] is not None:
             chapter_first.add(segs[0]["clause"])
-    person = _verb_person(con, set(t["key"] for ts in toks_of.values() for t in ts if t["class"] == "verb"))
+    person = _verb_person(con, set(t["key"] for ts in toks_of.values() for t in ts if t["class"] in ("verb", "pron")))
     attach_of = _attachments(con, parents, clause_key)
     disc: dict[str, dict] = {}
     by_book: dict[str, list] = collections.defaultdict(list)
@@ -354,10 +361,10 @@ def main() -> None:
              "uhb": {"tag": UHB_TAG, "licence": "CC BY-SA 4.0", "ketiv_qere": dict(kq_stats)},
              "books": {b: {"segments_sha256": h.hexdigest()} for b, h in book_hash.items()},
              "depth": "clause ancestors in the MACULA tree, within the verse", "discourse_rules": discourse_rules.RULES_VERSION,
-             "relations": {"all": discourse_rules.RELATIONS, "flat": sorted(discourse_rules.FLAT),
+             "relations": {"all": discourse_rules.RELATIONS, "flat": sorted(discourse_rules.FLAT), "tree_flat": sorted(discourse_rules.TREE_FLAT),
                            "chain_forms": sorted(discourse_rules.CHAIN_FORMS), "chain_forms_in_speech_with_waw": sorted(discourse_rules.CHAIN_FORMS_SPEECH),
                            "text_depth": "number of links up the discourse_parent chain whose relation is not in flat",
-                           "tree_depth": "number of links up the discourse_parent chain",
+                           "tree_depth": "number of links up the discourse_parent chain whose relation is not in tree_flat",
                            "conditional_inversion": "a protasis hangs under its apodosis (relation conditional); to invert, the protasis takes the "
                                                     "apodosis's parent and relation, and the apodosis hangs under the protasis with relation conditional"},
              "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0)"}

@@ -20,16 +20,21 @@ except the first clause of a line: a book, a chapter, a new Psalm, and in poetry
     - עָנָה opens one only when an אָמַר clause follows in the verse (Ps 3:5 "he answered me" opens none).
     - Indirect speech opens none: a speaking clause whose only follow-up in the verse is a לְ + infinitive (Dan 2:12 "and he commanded to
       destroy") gets the infinitive as a complement.
-    - The narrative resumes, closing all speeches, at a 3rd-person wayyiqtol; in Aramaic at a 3rd-person speaking clause ("the king
-      answered and said", which opens the next speech), or at אֱדַיִן / כָּל־קֳבֵל דְּנָה with a named actor (not inside a retold dream).
+    - The narrative resumes, closing all speeches, at a 3rd-person wayyiqtol; in Aramaic at a 3rd-person speaking clause in qatal or
+      participle ("the king answered and said", which opens the next speech; a yiqtol "let the king tell" is speech content), or at אֱדַיִן / כָּל־קֳבֵל דְּנָה with a named actor (not inside a retold dream).
     - Inside a speech only a narrated speaking clause (3rd person wayyiqtol/qatal, or a participle) or a לֵאמֹר opens a nested speech;
       a nested speech ends after the verse following the one it opened in.
     - In poetry a participle of saying (Ps 3:3 "many say") opens a quotation that ends with its verse or at סֶלָה.
     inquit         a 3rd-person speaking clause without וְ that is not the first clause of its verse (Isa 40:1 "יֹאמַר אֱלֹהֵיכֶם"), and a formula
                    such as נְאֻם יְהוָה: it hangs on the clause before it on its line, opens no speech, and the line goes on past it.
+    asyndetic links hang on the head of the run before: from the previous main clause, up over continuation, coordination and parallel
+    links within that clause's verse (not over an earlier asyndetic link).
+    parallel       a turn that repeats the opening of the turn before (the same speaking verb and form, without וְ: Dan 2:5, 2:8 עָנֵה מַלְכָּא), and
+                   the second and later clauses of a series of subordinate clauses with the same opener (Isa 40:2 כִּי, כִּי, כִּי; Lev 1:3,
+                   1:10, 1:14 אִם; within a chapter for conditionals, else adjacent): each on the one before. Flat for both depths.
   SUBORDINATE clauses (opened by a subordinator; an infinitive clause; a participle clause without the article and without a subject,
-    i.e. MACULA's rule has no S) hang on the first main clause of the run directly before them in the verse (a clause without וְ that is
-    not a chain link starts a new run; formulas are skipped). With none before them they hang on the next main clause, except a
+    i.e. MACULA's rule has no S) hang on the nearest main clause before them in the verse (formulas are skipped). A subordinate clause
+    that opens a speech is the speech's first clause (Ruth 1:10). With none before them they hang on the next main clause, except a
     verse-initial Aramaic דִּי or a verse-initial participle, which look back to the previous verse's line. Relation by the opener:
     causal (כִּי after its main clause, יַעַן, עֵקֶב, Aramaic כָּל־קֳבֵל דִּי, verse-initial דִּי), purpose (לְמַעַן, פֶּן, לְ + infinitive),
     temporal (כַּאֲשֶׁר, עַד, טֶרֶם, בְּ/כְּ + infinitive), conditional (אִם, לוּ, לוּלֵא, אִלּוּ, Aramaic הֵן, and a כִּי before its main
@@ -46,7 +51,10 @@ CONDITIONALS: the protasis hangs under its apodosis (the first clause of the run
 wants the other direction inverts exactly those links: the protasis takes the apodosis's parent and relation, and the apodosis hangs
 under the protasis with relation conditional.
 
-DEPTHS: tree_depth counts every link up to the root of the line. text_depth counts only the links whose relation is not in FLAT
+A wayyiqtol with a 1st- or 2nd-person pronoun ("וַתִּפָּעֶם רוּחִי", Dan 2:3) stays in its speech.
+CONDITIONALS in a series: the inversion applies to the first clause of the series only; the others stay parallel on it.
+
+DEPTHS: tree_depth counts every link up to the root of the line, except parallel. text_depth counts only the links whose relation is not in FLAT
 (continuation, coordination, asyndetic, inquit): the flat view, where a chain stays on one level.
 """
 from __future__ import annotations
@@ -58,7 +66,7 @@ def _n(s: str | None) -> str:
     return unicodedata.normalize("NFC", s or "")
 
 
-RULES_VERSION = "0.4"
+RULES_VERSION = "0.5"
 
 SPEAK = {"559", "1696", "6680", "6030", "7592",          # אָמַר, דָּבַר, צָוָה, עָנָה, שָׁאַל (Strong's, MACULA strong column)
          "560", "6032", "4449"}                           # Aramaic אֲמַר, עֲנָה, מְלַל
@@ -72,9 +80,10 @@ CHAIN_FORMS = {"wayyiqtol", "weqatal"}
 CHAIN_FORMS_SPEECH = {"yiqtol", "qatal", "imperative", "jussive", "cohortative"}
 INFINITIVE = {"infinitive construct", "infinitive absolute"}
 PARTICIPLE = {"participle active", "participle passive"}
-FLAT = {"continuation", "coordination", "asyndetic", "inquit"}
+FLAT = {"continuation", "coordination", "asyndetic", "inquit", "parallel"}     # add no level to text_depth
+TREE_FLAT = {"parallel"}                                                       # add no level to tree_depth
 RELATIONS = ["continuation", "coordination", "asyndetic", "speech", "inquit", "causal", "purpose", "temporal", "conditional", "relative",
-             "circumstantial", "complement", "vocative", "embedded"]
+             "circumstantial", "complement", "vocative", "embedded", "parallel"]
 
 _SUB_KIND = {"כִּי": "causal", "יַעַן": "causal", "עֵקֶב": "causal", "אִם": "conditional", "לוּ": "conditional", "לוּלֵא": "conditional",
              "אִלּוּ": "conditional", "לְמַעַן": "purpose", "פֶּן": "purpose", "עַד": "temporal", "טֶרֶם": "temporal",
@@ -156,6 +165,9 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "vocative": (rule or "") == "Np2CL" and noun_head,
             "imperative": bool(v) and v["wtype"] == "imperative",
             "second": bool(v) and (v["wtype"] == "imperative" or person.get(v["key"]) == "second"),
+            # a 1st/2nd-person pronoun in a wayyiqtol clause ("וַתִּפָּעֶם רוּחִי") marks it as part of a speech, not the narrative
+            "pron12": any(t["class"] == "pron" and person.get(t["key"]) in ("first", "second") for t in toks),
+            "lead_verb": (_strong(lead[0]), lead[0]["wtype"]) if lead and lead[0]["class"] == "verb" else None,
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
 
@@ -164,11 +176,11 @@ class _Line:
     def __init__(self, spk: str | None, opened: int = 0, scoped: bool = False):
         self.spk, self.opened, self.scoped = spk, opened, scoped
         self.last: str | None = None              # last main clause on the line
-        self.run_first: str | None = None         # first main clause of the current run in the current verse
-        self.run_verse = None
         self.verse_mains: dict = {}               # verse -> main clauses of the line in that verse
         self.oath: str | None = None
         self.oath_last: str | None = None         # the oath clause or a clause continuing it directly
+        self.subs: dict = {}                      # opener lemma -> last subordinate clause with it (series)
+        self.turns: dict = {}                     # (speaking verb, form) -> last turn clause opened by it (Dan 2: עָנֵה מַלְכָּא ... עֲנוֹ)
 
 
 def derive(clauses: list[dict]) -> dict[str, dict]:
@@ -224,7 +236,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             pending.clear()
         elif c.get("chapter_start"):
             for ln in lines:                      # a chapter starts each line afresh (the speech goes on, its chain restarts)
-                ln.last = ln.run_first = None
+                ln.last = None
         if vref != prev_v:
             vi, prev_v = vi + 1, vref
             while len(lines) > 1 and lines[-1].scoped:                  # a poetry quotation ends with its verse
@@ -250,8 +262,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             continue
 
         # ---- the narrative resumes
-        resumes = (f["form"] == "wayyiqtol" and f["person"] == "third") or (
-            f["aramaic"] and (f["step"] or (f["speak"] and f["person"] in ("third", None) and (f["verb"] not in ANSWER or amar_after[i]))))
+        resumes = (f["form"] == "wayyiqtol" and f["person"] == "third" and not f["pron12"]) or (
+            f["aramaic"] and (f["step"] or (f["speak"] and f["person"] in ("third", None) and f["form"] in ("qatal",) + tuple(PARTICIPLE)
+                                         and (f["verb"] not in ANSWER or amar_after[i]))))
         if len(lines) > 1 and resumes:
             lines = lines[:1]
             line = lines[0]
@@ -282,18 +295,25 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             link(k, line.oath, "complement" if f["lead"] in (KI, IM) else "causal", "oath")
             continue
 
-        # ---- subordinate clauses
-        if f["sub_kind"]:
-            run = line.run_first if line.run_verse == vref else None
-            if run is not None:
-                link(k, run, f["sub_kind"], "sub_back")
-            elif first_in_verse and (f["di_first"] and f["aramaic"] or f["participle"]) and line.last is not None:
-                link(k, line.last, "causal" if f["di_first"] else f["sub_kind"], "look_back")
+        # ---- subordinate clauses (a subordinate clause that opens a speech is the speech's first clause: Ruth 1:10)
+        if f["sub_kind"] and not (line.spk and line.last is None):
+            prev = line.subs.get(f["lead"]) if f["lead"] else None
+            same_ch = prev is not None and clauses_verse.get(prev, (None, None))[:2] == vref[:2]
+            if prev is not None and (prev_top_key == prev or (f["sub_kind"] == "conditional" and same_ch)):
+                link(k, prev, "parallel", "series")             # a series of the same opener chains on the one before
             else:
-                rel = "conditional" if f["sub_kind"] == "causal" and f["lead"] == KI else f["sub_kind"]
-                link(k, None, None, "sub_fwd")
-                out[k]["relation"] = rel
-                pending.append(k)
+                mains = line.verse_mains.get(vref, [])
+                if mains:
+                    link(k, mains[-1], f["sub_kind"], "sub_back")  # the nearest main clause before it
+                elif first_in_verse and (f["di_first"] and f["aramaic"] or f["participle"]) and line.last is not None:
+                    link(k, line.last, "causal" if f["di_first"] else f["sub_kind"], "look_back")
+                else:
+                    rel = "conditional" if f["sub_kind"] == "causal" and f["lead"] == KI else f["sub_kind"]
+                    link(k, None, None, "sub_fwd")
+                    out[k]["relation"] = rel
+                    pending.append(k)
+            if f["lead"]:
+                line.subs[f["lead"]] = k
             continue
 
         # ---- circumstantial
@@ -309,12 +329,19 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             parent = line.last
             chain_form = f["form"] in CHAIN_FORMS or (in_speech and f["waw"] and f["form"] in CHAIN_FORMS_SPEECH)
             rel = "continuation" if chain_form else "coordination" if f["waw"] else "asyndetic"
+            if rel == "asyndetic":                # on the head of the run before: climb over continuation/coordination/parallel
+                run_verse = clauses_verse.get(parent)  # links, within the verse of the clause before
+                while out.get(parent, {}).get("relation") in ("continuation", "coordination", "parallel") and out[parent]["parent"] \
+                        and clauses_verse.get(out[parent]["parent"]) == run_verse:
+                    parent = out[parent]["parent"]
+        turn = f["lead_verb"] if f["speak"] and f["lead_verb"] and not f["waw"] and f["form"] != "wayyiqtol" else None
+        if turn and turn in line.turns:           # a turn that repeats the opening of the turn before (Dan 2:8 עָנֵה מַלְכָּא on 2:5)
+            parent, rel = line.turns[turn], "parallel"
         link(k, parent, rel, "main")
+        if turn:
+            line.turns[turn] = k
         out[k]["imperative"] = f["imperative"]
         resolve_pending(k)
-        if line.run_verse != vref or (not f["waw"] and rel == "asyndetic"):
-            if not (line.run_verse == vref and line.run_first and f["formula"]):
-                line.run_first, line.run_verse = k, vref
         line.last = k
         line.verse_mains.setdefault(vref, []).append(k)
         if f["oath"]:
@@ -334,7 +361,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
 
     for k in out:
         ch = chain(k)
-        out[k]["tree_depth"] = len(ch) - 1
+        out[k]["tree_depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in TREE_FLAT)
         out[k]["depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in FLAT)
         out[k].pop("imperative", None)
     return out
