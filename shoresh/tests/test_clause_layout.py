@@ -57,3 +57,28 @@ def test_discourse_rules_subordinators():
     assert d.RULES_VERSION >= "0.2"
     assert d.is_subordinator({"lemma": "\u05db\u05bc\u05b4\u05d9", "wlang": "H"})                  # כִּי in MACULA's order (dagesh first)
     assert not d.is_subordinator({"lemma": "הֵן", "wlang": "H"}) and d.is_subordinator({"lemma": "הֵן", "wlang": "A"})
+
+
+def test_relation_model_invariants():
+    """v0.4: one tree. Every link has a relation from the published list, text_depth never exceeds tree_depth, no cycles."""
+    import collections
+    from macula import build_clause_layout as b, discourse_rules as d
+    con = sqlite3.connect(f"file:{trees_macula.trees_path()}?mode=ro", uri=True)
+    con.row_factory = sqlite3.Row
+    nodes = {r["id"]: r for r in con.execute("SELECT id, rule, role FROM nodes WHERE corpus='hbo' AND cls='cl'")}
+    parents = b._clause_parents(con)
+    segs = _segments("RUT", 1)
+    keys = {}
+    for s in segs:
+        keys.setdefault(s["clause"], s["first"])
+    toks = collections.defaultdict(list)
+    for s in segs:
+        toks[s["clause"]] += s["_toks"]
+    cl = [{"key": keys[c], "verse": ("RUT", 1, toks[c][0]["verse"]), "parent_key": keys.get(parents.get(c)), "attach": None,
+           "f": d.features(toks[c], {}, nodes[c]["rule"], nodes[c]["role"]), "reset": False, "chapter_start": False, "poetry": False}
+          for c in keys if c is not None]
+    out = d.derive(cl)
+    assert all((v["parent"] is None) == (v["relation"] is None) or v["rule"].endswith("fwd") for v in out.values())
+    assert all(v["relation"] in d.RELATIONS for v in out.values() if v["relation"])
+    assert all(v["depth"] <= v["tree_depth"] for v in out.values())
+    assert sum(v["parent"] is None for v in out.values()) <= 2

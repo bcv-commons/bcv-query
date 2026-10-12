@@ -251,7 +251,7 @@ def main() -> None:
     tp = trees_macula.trees_path()
     con = sqlite3.connect(f"file:{tp}?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
-    nodes = {r["id"]: r for r in con.execute("SELECT id, rule FROM nodes WHERE corpus='hbo' AND cls='cl'")}
+    nodes = {r["id"]: r for r in con.execute("SELECT id, rule, role FROM nodes WHERE corpus='hbo' AND cls='cl'")}
     parents = _clause_parents(con)
     books = a.books.upper().split(",") if a.books else [r[0] for r in con.execute("SELECT book FROM words WHERE corpus='hbo' GROUP BY book ORDER BY MIN(seq)")]
     chapters_out: list[tuple[str, int, list[dict]]] = []
@@ -298,19 +298,23 @@ def main() -> None:
     # text-level hierarchy (phase 2): one record per clause, in order of first appearance
     toks_of: dict[int, list] = collections.defaultdict(list)
     first_seen: dict[int, tuple] = {}
+    chapter_first: set[int] = set()
     for book, ch, segs in chapters_out:
         for s in segs:
             if s["clause"] is not None:
                 toks_of[s["clause"]] += s["_toks"]
                 first_seen.setdefault(s["clause"], (book, ch, s["verse"]))
+        if segs and segs[0]["clause"] is not None:
+            chapter_first.add(segs[0]["clause"])
     person = _verb_person(con, set(t["key"] for ts in toks_of.values() for t in ts if t["class"] == "verb"))
     attach_of = _attachments(con, parents, clause_key)
     disc: dict[str, dict] = {}
     by_book: dict[str, list] = collections.defaultdict(list)
     for cid, (book, ch, v) in first_seen.items():
         by_book[book].append({"key": clause_key[cid], "verse": (book, ch, v), "parent_key": clause_key.get(parents.get(cid)) if parents.get(cid) else None,
-                              "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None),
-                              "reset": clause_key[cid] in resets, "poetry": book in POETRY})
+                              "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
+                                                             nodes[cid]["role"] if cid in nodes else None),
+                              "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "poetry": book in POETRY})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     seg_hash = hashlib.sha256()
@@ -324,9 +328,10 @@ def main() -> None:
                  **{k: v for k, v in s.items() if k not in ("verse", "seg", "_toks")}}
             d = disc.get(r["clause_key"])
             if d:
-                r.update({"discourse_parent": d["parent"], "discourse_attach": d["attach"], "text_depth": d["depth"], "discourse_rule": d["rule"]})
+                r.update({"discourse_parent": d["parent"], "relation": d["relation"], "discourse_attach": d["attach"],
+                          "tree_depth": d["tree_depth"], "text_depth": d["depth"], "discourse_rule": d["rule"]})
             else:
-                r.update({"discourse_attach": None, "discourse_rule": None})
+                r.update({"relation": None, "discourse_attach": None, "tree_depth": None, "discourse_rule": None})
             full.append(r)
             line = f"{book} {ch}:{r['verse']} {r['first']} {r['last']}\n".encode()
             seg_hash.update(line)
@@ -349,6 +354,12 @@ def main() -> None:
              "uhb": {"tag": UHB_TAG, "licence": "CC BY-SA 4.0", "ketiv_qere": dict(kq_stats)},
              "books": {b: {"segments_sha256": h.hexdigest()} for b, h in book_hash.items()},
              "depth": "clause ancestors in the MACULA tree, within the verse", "discourse_rules": discourse_rules.RULES_VERSION,
+             "relations": {"all": discourse_rules.RELATIONS, "flat": sorted(discourse_rules.FLAT),
+                           "chain_forms": sorted(discourse_rules.CHAIN_FORMS), "chain_forms_in_speech_with_waw": sorted(discourse_rules.CHAIN_FORMS_SPEECH),
+                           "text_depth": "number of links up the discourse_parent chain whose relation is not in flat",
+                           "tree_depth": "number of links up the discourse_parent chain",
+                           "conditional_inversion": "a protasis hangs under its apodosis (relation conditional); to invert, the protasis takes the "
+                                                    "apodosis's parent and relation, and the apodosis hangs under the protasis with relation conditional"},
              "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0)"}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"{n_ch} chapters, {n_seg} segments -> {out}")
