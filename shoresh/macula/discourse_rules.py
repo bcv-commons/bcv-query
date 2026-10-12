@@ -44,6 +44,11 @@ except the first clause of a line: a book, a chapter, a new Psalm, and in poetry
     clause: casuistic law), relative (אֲשֶׁר, דִּי, שֶׁ), circumstantial (participle), complement (infinitive without a preposition).
   OATHS (נִשְׁבַּעְתִּי, כֹּה יַעֲשֶׂה … וְכֹה יֹסִיף, חַי ...): while the speech goes on, a following כִּי/אִם clause that opens its verse or
     follows the oath directly is its complement (the content of the oath), and a reason clause (יַעַן, עֵקֶב) is causal on the oath.
+  POETRY AND PROPHECY: a וְ-clause right after a subordinate clause in the same verse (no main clause between) continues it, with
+    coordination on it (Prov 8:7 "וְתוֹעֲבַת שְׂפָתַי רֶשַׁע" on "כִּי־אֱמֶת יֶהְגֶּה חִכִּי"). In poetry (Job, Psalms, Proverbs, Song,
+    Lamentations) a verse-initial asyndetic clause whose first word (the lemmas of all its parts) repeats the first word of an earlier verse-initial clause on
+    its line hangs on that one as parallel: a stanza head (Job 3:20 לָמָּה → 3:11 לָמָּה; Prov 8:10 קְחוּ → 8:6 שִׁמְעוּ). Imperatives
+    of hearing (שִׁמְעוּ, הַאֲזִינוּ, הָבִינוּ, קְחוּ) count as one opening.
   vocative       an address (MACULA rule Np2CL with a noun or participle, in a verse with an imperative or a 2nd-person verb): on the
                  nearest main clause before it in the verse, else on the next.
   circumstantial a verbless clause opened by וְ + a non-verb in narrative: on the preceding main clause.
@@ -69,7 +74,7 @@ def _n(s: str | None) -> str:
     return unicodedata.normalize("NFC", s or "")
 
 
-RULES_VERSION = "0.6"
+RULES_VERSION = "0.7"
 
 SPEAK = {"559", "1696", "6680", "6030", "7592",          # אָמַר, דָּבַר, צָוָה, עָנָה, שָׁאַל (Strong's, MACULA strong column)
          "560", "6032", "4449"}                           # Aramaic אֲמַר, עֲנָה, מְלַל
@@ -102,6 +107,7 @@ ADAYIN, QABEL, KOL, DENA = _n("אֱדַיִן"), _n("קֳבֵל"), _n("כֹּל"
 KO, HAY, MELEK = _n("כֹּה"), _n("חַי"), _n("מֶלֶךְ")
 FORMULA = {_n("נְאֻם")}
 SELAH = _n("סֶלָה")
+HEAR = {"8085", "238", "995", "3947"}                     # שִׁמְעוּ, הַאֲזִינוּ, הָבִינוּ, קְחוּ: imperatives of hearing count as one opening
 
 
 def is_subordinator(t) -> bool:
@@ -171,7 +177,10 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             # a 1st/2nd-person pronoun in a wayyiqtol clause ("וַתִּפָּעֶם רוּחִי") marks it as part of a speech, not the narrative
             "pron12": any(t["class"] == "pron" and person.get(t["key"]) in ("first", "second") for t in toks),
             "lead_verb": (_strong(lead[0]), lead[0]["wtype"]) if lead and lead[0]["class"] == "verb" else None,
-            "subj": "S" in (rule or "").split("-"),          # the clause names its subject (MACULA rule V-S-O, S-V ...)
+            "subj": "S" in (rule or "").split("-"),
+            "opener": ("HEAR" if bool(v) and v["wtype"] == "imperative" and _strong(v) in HEAR and lead and lead[0] is v else
+                       # the whole first word (all its token lemmas): בְּצֶדֶק and בְּרֹאשׁ differ, לָמָּה and לָמָּה agree
+                       "+".join(_n(t["lemma"]) for t in lead if (t["verse"], t["word"]) == (lead[0]["verse"], lead[0]["word"])) if lead else None),          # the clause names its subject (MACULA rule V-S-O, S-V ...)
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
 
@@ -184,6 +193,7 @@ class _Line:
         self.oath: str | None = None
         self.oath_last: str | None = None         # the oath clause or a clause continuing it directly
         self.subs: dict = {}                      # opener lemma -> last subordinate clause with it (series)
+        self.openers: dict = {}                   # poetry: first word of a verse-initial clause -> that clause (stanza heads)
         self.turns: dict = {}                     # (speaking verb, form) -> last turn clause opened by it (Dan 2: עָנֵה מַלְכָּא ... עֲנוֹ)
 
 
@@ -241,6 +251,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         elif c.get("chapter_start"):
             for ln in lines:                      # a chapter starts each line afresh (the speech goes on, its chain restarts)
                 ln.last = None
+                ln.openers = {}
         if vref != prev_v:
             vi, prev_v = vi + 1, vref
             while len(lines) > 1 and lines[-1].scoped:                  # a poetry quotation ends with its verse
@@ -325,6 +336,12 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             link(k, line.verse_mains[vref][-1], "circumstantial", "circ")
             continue
 
+        # ---- poetry and prophecy: a וְ-clause right after a subordinate clause (same verse, no main clause between) continues it
+        if c.get("poetic") and f["waw"] and prev_top_key and clauses_verse.get(prev_top_key) == vref and \
+                out.get(prev_top_key, {}).get("rule") in ("sub_back", "sub_fwd", "look_back", "series", "oath"):
+            link(k, prev_top_key, "coordination", "sub_continued")
+            continue
+
         # ---- main clause on its line
         in_speech = len(lines) > 1
         if line.last is None:
@@ -344,11 +361,17 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 x = out[x]["parent"]
             if out.get(x, {}).get("subj"):
                 parent = x
+        if c.get("poetry") and rel == "asyndetic" and first_in_verse and f["opener"]:
+            head = line.openers.get(f["opener"])      # a verse opening like an earlier verse: on that stanza head
+            if head is not None:
+                parent, rel = head, "parallel"
         turn = f["lead_verb"] if f["speak"] and f["lead_verb"] and not f["waw"] and f["form"] != "wayyiqtol" else None
         if turn and turn in line.turns:           # a turn that repeats the opening of the turn before (Dan 2:8 עָנֵה מַלְכָּא on 2:5)
             parent, rel = line.turns[turn], "parallel"
         link(k, parent, rel, "main")
         out[k]["subj"] = f["subj"]
+        if c.get("poetry") and first_in_verse and f["opener"]:
+            line.openers[f["opener"]] = k
         if turn:
             line.turns[turn] = k
         out[k]["imperative"] = f["imperative"]

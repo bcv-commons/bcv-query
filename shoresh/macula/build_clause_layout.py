@@ -321,7 +321,8 @@ def main() -> None:
         by_book[book].append({"key": clause_key[cid], "verse": (book, ch, v), "parent_key": clause_key.get(parents.get(cid)) if parents.get(cid) else None,
                               "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
                                                              nodes[cid]["role"] if cid in nodes else None),
-                              "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "poetry": book in POETRY})
+                              "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "poetry": book in POETRY,
+                              "poetic": book in RESET_AT_PARAGRAPH})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     seg_hash = hashlib.sha256()
