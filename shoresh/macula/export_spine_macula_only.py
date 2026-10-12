@@ -49,6 +49,8 @@ def export(spine: Path, lowfat: Path, out: Path) -> dict:
     db.close()
     stats["construct_role_set"] = sqlite3.connect(f"file:{out}?mode=ro", uri=True).execute(
         "SELECT COUNT(*) FROM spine_words WHERE construct_role IS NOT NULL").fetchone()[0]
+    from macula.spine_stamp import stamp
+    stats["spine_content_sha256"] = stamp(out)["spine_content_sha256"]
     stats["sha256"] = hashlib.sha256(out.read_bytes()).hexdigest()
     return stats
 

@@ -27,6 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from spine.common import load_equivalences  # variant→canonical Hebrew Strong's (spine.db parity)
 from macula.psalm_title_spans import SOURCE_NOTE as SUPERSCRIPTION_NOTE, flagged_keys, load_spans
+from macula.spine_stamp import gap_strong
 
 HERE = Path(__file__).resolve().parent
 IN_DEFAULT = HERE / "macula-spine.db"
@@ -100,6 +101,9 @@ def build(in_path: Path, out_path: Path) -> tuple[int, int]:
         cvk = (book, ch, v)
         idx = idx + 1 if cvk == prev else 0
         prev = cvk
+        gap = gap_strong(lang, strong, lemma)        # MACULA Greek Strong's 0 -> STEPBible extended number
+        if gap is not None:
+            strong = str(gap)
         lexeme = f"{lang}:{strong}" if strong else f"{lang}:"
         is_content = 1 if cls in _CONTENT_CLASSES else 0
         content_rows += is_content

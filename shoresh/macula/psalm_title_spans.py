@@ -59,6 +59,8 @@ def apply(db_path: Path, spans: list[dict] | None = None) -> tuple[int, int]:
                        (s["first_key"], s["last_key"]))
         after = db.execute("SELECT count(*) FROM spine_words WHERE is_superscription=1").fetchone()[0]
         db.execute("INSERT OR REPLACE INTO spine_meta(key, value) VALUES ('superscription_source', ?)", (SOURCE_NOTE,))
+    from macula.spine_stamp import stamp
+    stamp(db_path)                        # the flags are part of the content version
     return before, after
 
 

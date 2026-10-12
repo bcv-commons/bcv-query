@@ -44,6 +44,9 @@ UHB_URL = "https://git.door43.org/unfoldingWord/hbo_uhb/raw/tag/%s/{nn:02d}-{cod
 
 FORMAT_VERSION = 1
 LANG = {"H": "hbo", "A": "arc"}
+# poetry and prophecy: a paragraph mark (petuha/setuma) ends any speech in progress (narrative speeches run over them)
+RESET_AT_PARAGRAPH = {"JOB", "PSA", "PRO", "ECC", "SNG", "LAM", "ISA", "JER", "EZK", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB",
+                      "ZEP", "HAG", "ZEC", "MAL"}
 # Hebrew verses that English numbering divides inside the verse (TVTMS MergedPrevVerse): from this word key on, the segment is in the
 # second English verse. The other split verses (NUM 25:19, 1SA 21:1, 1KI 22:44, 1CH 12:5) map whole through org-to-eng.multiverse.
 SPLIT_VERSES = {("PSA", 13, 6): ("190130060071", "PSA 13:6"),       # אָשִׁירָה לַיהוָה ...; before it English 13:5
@@ -86,8 +89,9 @@ def _uhb_book(code: str, cache: Path) -> str:
 
 
 def ketiv_qere(con: sqlite3.Connection, book: str, cache: Path, stats: collections.Counter) -> dict[str, dict]:
-    """MACULA word key (its first token) -> {key, ketiv, qere}. A ketiv over several qere words (or the reverse) is one entry on the first
-    word; ketiv without qere has qere null and sits on the next word; qere without ketiv has ketiv null."""
+    """MACULA word key (its first token) -> {key, ketiv, qere}. A ketiv over several qere words gives one entry per qere word, each with
+    the whole ketiv (several ketiv words over one qere word: one entry); ketiv without qere has qere null and sits on the next word;
+    qere without ketiv has ketiv null."""
     u = _uhb_words(_uhb_book(book, cache))
     m = con.execute("SELECT MIN(key), GROUP_CONCAT(surface, '') FROM (SELECT * FROM words WHERE corpus='hbo' AND book=? AND inserted=0 "
                     "ORDER BY chapter, verse, word, part) GROUP BY chapter, verse, word ORDER BY chapter, verse, word", (book,)).fetchall()
@@ -107,8 +111,9 @@ def ketiv_qere(con: sqlite3.Connection, book: str, cache: Path, stats: collectio
             if i2 - i1 == j2 - j1:
                 for i in kt:
                     put(m[j1 + i - i1][0], u[i]["form"], u[i]["qere"] or m[j1 + i - i1][1], "paired")
-            else:
-                put(m[j1][0], " ".join(u[i]["form"] for i in range(i1, i2)), " ".join(s for _, s in m[j1:j2]), "split_or_joined")
+            else:                                           # one entry per MACULA word, each with the whole ketiv
+                for j in range(j1, j2):
+                    put(m[j][0], " ".join(u[i]["form"] for i in range(i1, i2)), m[j][1], "split_or_joined")
         elif op == "delete" and kt and j1 < len(m):
             put(m[j1][0], " ".join(u[i]["form"] for i in kt), None, "ketiv_only")
         elif op == "insert" and j2 - j1 <= 2:
@@ -199,10 +204,18 @@ def chapter_segments(rows: list[sqlite3.Row], nodes: dict[int, sqlite3.Row], par
             words[-1].append(r)
         else:
             words.append([r])
+    cids = [next((t["cl"] for t in reversed(w) if t["cl"] is not None), None) for w in words]
+    # MACULA puts a clause-opening subordinator or relative (אִם, כִּי, אֲשֶׁר, עַד, דִּי ...) in the parent clause; it goes with the clause
+    # it opens, as a prefix goes with its word (backwards, so that עַד אֲשֶׁר moves as a pair)
+    for i in range(len(words) - 2, -1, -1):
+        w, nxt = words[i], words[i + 1]
+        if (w[-1]["verse"] == nxt[0]["verse"] and cids[i + 1] is not None and cids[i] != cids[i + 1]
+                and discourse_rules.is_subordinator(w[-1]) and all(t["class"] in ("cj", "prep") or t is w[-1] for t in w)):
+            cids[i] = cids[i + 1]
     segs: list[dict] = []
     for i, w in enumerate(words):
         last = w[-1]
-        cid = next((t["cl"] for t in reversed(w) if t["cl"] is not None), None)
+        cid = cids[i]
         text = "".join(t["surface"] + (t["after"] or "") for t in w[:-1]) + last["surface"] + _trailer(last["after"] or "", True)
         keys = [t["key"] for t in w]
         if segs and segs[-1]["verse"] == last["verse"] and segs[-1]["clause"] == cid:
@@ -241,14 +254,23 @@ def main() -> None:
     parents = _clause_parents(con)
     books = a.books.upper().split(",") if a.books else [r[0] for r in con.execute("SELECT book FROM words WHERE corpus='hbo' GROUP BY book ORDER BY MIN(seq)")]
     chapters_out: list[tuple[str, int, list[dict]]] = []
+    resets: set[str] = set()               # first word key after which a speech cannot continue
     kq_stats: collections.Counter = collections.Counter()
     for book in books:
         kq = ketiv_qere(con, book, Path(a.uhb_cache), kq_stats)
         chapters = [r[0] for r in con.execute("SELECT DISTINCT chapter FROM words WHERE corpus='hbo' AND book=? ORDER BY chapter", (book,))]
+        mark_pending = False
         for ch in chapters:
             rows = con.execute("SELECT * FROM words w WHERE corpus='hbo' AND book=? AND chapter=? AND inserted=0 ORDER BY " + trees_macula.TEXT_ORDER,
                                (book, ch)).fetchall()
             segs = chapter_segments(rows, nodes, parents)
+            if rows and book == "PSA":
+                resets.add(rows[0]["key"])
+            if book in RESET_AT_PARAGRAPH and rows:
+                if mark_pending:                   # the previous chapter ended with a paragraph mark
+                    resets.add(rows[0]["key"])
+                resets.update(rows[i + 1]["key"] for i in range(len(rows) - 1) if any(m in (rows[i]["after"] or "") for m in "ספ"))
+                mark_pending = any(m in (rows[-1]["after"] or "") for m in "ספ")
             for sg in segs:
                 sg["ketiv_qere"] = [kq[k] for k in sg["words"] if k in kq]
             eng: dict[int, str] = {}
@@ -286,10 +308,12 @@ def main() -> None:
     by_book: dict[str, list] = collections.defaultdict(list)
     for cid, (book, ch, v) in first_seen.items():
         by_book[book].append({"key": clause_key[cid], "verse": (book, ch, v), "parent_key": clause_key.get(parents.get(cid)) if parents.get(cid) else None,
-                              "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person)})
+                              "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person),
+                              "reset": clause_key[cid] in resets})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     seg_hash = hashlib.sha256()
+    book_hash: dict[str, "hashlib._Hash"] = {}
     n_seg = 0
     for book, ch, segs in chapters_out:
         full = []
@@ -303,7 +327,9 @@ def main() -> None:
             else:
                 r.update({"discourse_attach": None, "discourse_rule": None})
             full.append(r)
-            seg_hash.update(f"{book} {ch}:{r['verse']} {r['first']} {r['last']}\n".encode())
+            line = f"{book} {ch}:{r['verse']} {r['first']} {r['last']}\n".encode()
+            seg_hash.update(line)
+            book_hash.setdefault(book, hashlib.sha256()).update(line)
         for d in ("clauses", "layout"):
             (out / d / book).mkdir(parents=True, exist_ok=True)
         with open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", "w", encoding="utf-8") as f:
@@ -320,6 +346,7 @@ def main() -> None:
              "segmentation": {"version": seg_hash.hexdigest()[:16], "note": "sha256 over every segment's book, chapter, verse, first and last word key; "
                               "changes only when segment boundaries change (levels, text and ketiv/qere do not affect it)"},
              "uhb": {"tag": UHB_TAG, "licence": "CC BY-SA 4.0", "ketiv_qere": dict(kq_stats)},
+             "books": {b: {"segments_sha256": h.hexdigest()} for b, h in book_hash.items()},
              "depth": "clause ancestors in the MACULA tree, within the verse", "discourse_rules": discourse_rules.RULES_VERSION,
              "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0)"}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

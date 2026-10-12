@@ -5,33 +5,52 @@ hierarchy is derived, not passed through. Inputs per clause, all MACULA (CC BY 4
 verb form (`wtype`: wayyiqtol, weqatal, qatal, yiqtol, imperative, infinitive, participle ...), the clause's first words (conjunction,
 relative, preposition), the verb's lemma (verbs of speaking), the MACULA tree (`parent`, phrase nesting). No BHSA input.
 
-Rules, applied to the clauses of a book in text order (a clause is named by its clause_key; all its segments share its values):
+Rules, applied to the clauses of a book in text order (a clause is named by its clause_key; all its segments share its values).
+The segmentation gives a clause-opening subordinator or relative (כִּי, אִם, אֲשֶׁר, עַד, דִּי ...) to the clause it opens.
 
   embedded   the clause sits inside another clause in the MACULA tree (an infinitive in a prepositional phrase, a relative clause in a noun
              phrase): discourse_parent = that clause; discourse_attach = first word of the head the clause hangs on, when it hangs on a phrase.
-  speech     a clause whose finite verb is a verb of speaking (אָמַר, דִּבֶּר, צִוָּה, עָנָה, שָׁאַל), or a לֵאמֹר clause, opens a speech:
-             the following clauses belong to it, one level deeper, until the narrative resumes (a wayyiqtol in the 3rd person). Inside a
-             speech only a wayyiqtol of speaking or a לֵאמֹר opens a nested speech, and a nested speech ends after the verse following the
-             one it opened in. Top-level clauses of the speech: discourse_parent = the speaking (or לֵאמֹר) clause.
-  sub_back   a clause opened by a subordinator (כִּי, אֲשֶׁר, כַּאֲשֶׁר, לְמַעַן, פֶּן, יַעַן, עֵקֶב, ...) or an infinitive/participle clause
-             with no finite verb, after a main clause of the same verse: discourse_parent = that preceding main clause.
+  speech     a clause whose verb is a verb of speaking (Hebrew אָמַר, דִּבֶּר, צִוָּה, עָנָה, שָׁאַל: finite; Aramaic אֲמַר, עֲנָה, מְלַל: finite
+             or participle), or a לֵאמֹר clause, opens a speech: the following clauses belong to it, one level deeper. The narrative
+             resumes, closing the speech, at a 3rd-person wayyiqtol; in Aramaic at אֱדַיִן or a 3rd-person speaking clause ("the king
+             answered and said", which opens the next speech). Inside a speech only a wayyiqtol of speaking or a לֵאמֹר opens a nested
+             speech, and a nested speech ends after the verse following the one it opened in. A new Psalm, and a paragraph mark (ס/פ) in
+             poetry and prophecy, end any speech. Top-level clauses of a speech: discourse_parent = the speaking (or לֵאמֹר) clause.
+  sub_back   a clause opened by a subordinator, or an infinitive clause, or a participle clause without the article and without a subject
+             of its own, after a main clause of the same verse: discourse_parent = that preceding main clause.
   sub_fwd    the same, with no main clause before it in the verse (a conditional or temporal clause ahead of its main clause, casuistic
              law כִּי/אִם): discourse_parent = the next main clause.
   circ       a verbless clause opened by וְ + a non-verb, inside narrative (after a wayyiqtol): discourse_parent = the preceding main clause.
-  main       everything else is on the main line of its level: discourse_parent = the speaking clause of the current speech, or null
-             in narrative.
+  main       everything else, including a participle with the article or with its own subject (a nominal clause): on the main line of
+             its level, discourse_parent = the speaking clause of the current speech, or null in narrative.
 text_depth is the length of the discourse_parent chain.
 """
 from __future__ import annotations
 
-RULES_VERSION = "0.1"
+import unicodedata
 
-SPEAK = {"559", "1696", "6680", "6030", "7592"}          # אָמַר, דָּבַר, צָוָה, עָנָה, שָׁאַל (Strong's, MACULA strong column)
+
+def _n(s: str | None) -> str:
+    return unicodedata.normalize("NFC", s or "")
+
+RULES_VERSION = "0.2"
+
+SPEAK = {"559", "1696", "6680", "6030", "7592",          # אָמַר, דָּבַר, צָוָה, עָנָה, שָׁאַל (Strong's, MACULA strong column)
+         "560", "6032", "4449"}                           # Aramaic אֲמַר, עֲנָה, מְלַל
 LEMOR = "559"                                             # לֵאמֹר = infinitive construct of אָמַר with לְ
-SUB_CJ = {"כִּי", "אִם", "לְמַעַן", "פֶּן", "לוּלֵא", "אִלּוּ", "יַעַן", "עֵקֶב", "לוּ", "טֶרֶם", "בְּטֶרֶם"}
+SUB_CJ = {"כִּי", "אִם", "לְמַעַן", "פֶּן", "לוּלֵא", "אִלּוּ", "יַעַן", "עֵקֶב", "לוּ", "טֶרֶם", "בְּטֶרֶם", "עַד", "תַּחַת"}
+SUB_ARC = {"הֵן"}                                         # Aramaic "if" (Hebrew הֵן is "behold")
+ADAYIN = "אֱדַיִן"                                        # Aramaic "then": a new narrative step
 REL = {"אֲשֶׁר", "שֶׁ", "דִּי", "זוּ"}
 FINITE = {"wayyiqtol", "weqatal", "qatal", "yiqtol", "imperative", "jussive", "cohortative"}
-NONFINITE = {"infinitive construct", "infinitive absolute", "participle active", "participle passive"}
+SUB_CJ, SUB_ARC, REL, ADAYIN = {_n(x) for x in SUB_CJ}, {_n(x) for x in SUB_ARC}, {_n(x) for x in REL}, _n(ADAYIN)
+INFINITIVE = {"infinitive construct", "infinitive absolute"}
+PARTICIPLE = {"participle active", "participle passive"}
+
+
+def is_subordinator(t) -> bool:
+    lem = _n(t["lemma"])
+    return lem in SUB_CJ or lem in REL or (lem in SUB_ARC and t["wlang"] == "A")
 
 
 def _strong(t) -> str:
@@ -40,20 +59,22 @@ def _strong(t) -> str:
 
 
 def features(toks: list, person: dict[str, str]) -> dict:
-    """toks: MACULA word rows of the clause's own words, text order."""
+    """toks: MACULA word rows of the clause's words (whole words, as segmented), text order."""
     verbs = [t for t in toks if t["class"] == "verb"]
     finite = [t for t in verbs if t["wtype"] in FINITE]
     v = finite[0] if finite else (verbs[0] if verbs else None)
-    head = [t for t in toks if t["class"] != "cj" or t["lemma"] not in ("וְ",)]
-    first = head[0] if head else None
-    lemmas = [t["lemma"] for t in toks[:3]]
-    sub = (any(l in SUB_CJ for l in lemmas[:2]) or (first is not None and first["lemma"] in REL)
-           or (len(toks) > 1 and toks[0]["class"] == "prep" and toks[1]["lemma"] in REL))
-    return {"form": v["wtype"] if v else None, "person": person.get(v["key"]) if v else None, "finite": bool(finite),
-            "speak": bool(v) and _strong(v) in SPEAK and v["wtype"] != "participle active" or False,
+    aramaic = sum(t["wlang"] == "A" for t in toks) * 2 > len(toks)
+    lead = [t for t in toks if not (t["class"] in ("cj", "prep") and _n(t["lemma"]) in (_n("וְ"), _n("בְּ")))][:2]
+    sub = any(is_subordinator(t) for t in toks[:3])
+    # a participle is a clause of its own (nominal clause, main) when it has the article or a subject of its own
+    ptc_free = bool(v) and v["wtype"] in PARTICIPLE and not finite and not (
+        any(t["class"] == "art" and (t["verse"], t["word"]) == (v["verse"], v["word"]) for t in toks) or any(t["role"] == "s" for t in toks))
+    speak = bool(v) and _strong(v) in SPEAK and (bool(finite) or (aramaic and v["wtype"] in PARTICIPLE))
+    return {"form": v["wtype"] if v else None, "person": person.get(v["key"]) if v else None, "finite": bool(finite) or speak,
+            "aramaic": aramaic, "adayin": any(_n(t["lemma"]) == ADAYIN for t in lead), "speak": speak,
             "lemor": any(t["class"] == "verb" and _strong(t) == LEMOR and t["wtype"] == "infinitive construct" for t in toks),
-            "sub": sub, "nonfinite_only": bool(verbs) and not finite and verbs[0]["wtype"] in NONFINITE,
-            "waw_nonverb": bool(toks) and toks[0]["lemma"] == "וְ" and len(toks) > 1 and toks[1]["class"] != "verb" and not finite}
+            "sub": sub, "nonfinite_only": bool(verbs) and not finite and not speak and (verbs[0]["wtype"] in INFINITIVE or ptc_free),
+            "waw_nonverb": bool(toks) and _n(toks[0]["lemma"]) == _n("וְ") and len(toks) > 1 and toks[1]["class"] != "verb" and not finite}
 
 
 def derive(clauses: list[dict]) -> dict[str, dict]:
@@ -86,6 +107,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
 
     for c in clauses:
         k, f, vref = c["key"], c["f"], c["verse"]
+        if c.get("reset"):                 # a new Psalm, or a paragraph mark (ס/פ) in poetry and prophecy
+            frames.clear()
+            opened.clear()
         if vref != prev_v:
             vi, prev_v = vi + 1, vref
             while len(frames) > 1 and opened[-1] < vi - 1:     # a speech inside a speech ends after the next verse
@@ -99,8 +123,10 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 else:
                     push(k)
             continue
-        if frames and f["form"] == "wayyiqtol" and f["person"] == "third":
-            frames.clear()                 # the narrative resumes
+        resumes = (f["form"] == "wayyiqtol" and f["person"] == "third") or (
+            f["aramaic"] and (f["adayin"] or (f["speak"] and f["person"] in ("third", None))))
+        if frames and resumes and not (c["parent_key"]):
+            frames.clear()                 # the narrative resumes (Aramaic: אֱדַיִן, or "the king answered and said")
             opened.clear()
         if f["sub"] or f["nonfinite_only"]:
             m = last_main.get((vref, len(frames)))
@@ -121,7 +147,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         last_main[(vref, len(frames))] = k
         if not frames and f["form"] == "wayyiqtol":
             narrative = True
-        if f["lemor"] or (f["speak"] and f["finite"] and (not frames or f["form"] == "wayyiqtol")):
+        if f["lemor"] or (f["speak"] and (not frames or f["form"] == "wayyiqtol")):
             push(k)                        # inside a speech only a narrated "and he said" or לֵאמֹר opens a nested speech
     for k in out:
         out[k]["depth"] = depth(k)

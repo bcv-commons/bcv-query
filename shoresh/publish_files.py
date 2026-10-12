@@ -60,6 +60,7 @@ def entry(path: Path) -> dict:
     source = "; ".join(v for k, v in sorted(meta.items()) if k.startswith("source_") and not k.endswith("sha256"))
     return {"name": path.name, "bytes": path.stat().st_size, "sha256": sha256(path),
             "license": meta.get("license", ""), "source": source,
+            "spine_content_sha256": meta.get("spine_content_sha256", ""),
             "description": DESCRIPTION.get(path.name, ""),
             "modified": datetime.datetime.fromtimestamp(path.stat().st_mtime, datetime.timezone.utc)
                         .isoformat(timespec="seconds")}
@@ -75,6 +76,9 @@ def main() -> int:
             sys.exit(f"refusing {p.name}: {REFUSE[p.name]}")
         if not p.exists():
             sys.exit(f"missing: {p}")
+    from macula.spine_stamp import stamp
+    for p in paths:                       # the content version the aligner pins; it changes with any row
+        stamp(p)
     files = [entry(p) for p in paths]
     for f in files:
         if not f["license"]:
