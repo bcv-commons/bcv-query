@@ -251,11 +251,15 @@ def tree(book: str, chapter: int, verse: int) -> dict:
         con.close()
 
 
+_LANG = {"H": "hbo", "A": "arc"}
+
+
 def scaffold(book: str, chapter: int, gloss_lang: str | None = None) -> dict:
     """Everything this service knows about the original-language tokens of one chapter, keyed by MACULA token key
     (the key lexeme-aligner publishes in `_index/<BOOK>_keys.json` and `_fn_keys.json`, so a client joins an alignment to
     this with no matching step). Flat: `tokens` in text order, plus `clauses` and `phrases` the tokens point to by id.
-    Inserted (implied) words are left out, as they are in the aligner's index. `content` is the aligner's content flag (a Psalm title word counts as a function token there)."""
+    Inserted (implied) words are left out, as they are in the aligner's index. `content` is the aligner's content flag (a Psalm title word counts as a function token there).
+    `language` is hbo, arc (Aramaic) or grc per token; a clause's `depth` is its number of clause ancestors (`parent`), within the verse."""
     book = book.upper()
     con = _con()
     try:
@@ -271,13 +275,16 @@ def scaffold(book: str, chapter: int, gloss_lang: str | None = None) -> dict:
             return {"error": f"chapter not found: {book_name(corpus, book)} {chapter}"}
         import data
         tokens, cl_ids, ph_ids = [], set(), set()
-        for w in rows:
+        for i, w in enumerate(rows):
             gloss = None
             if gloss_lang and hebrew and w["slex"]:
                 gloss = data.resolve_word_gloss("hbo_lexeme", gloss_lang, w["slex"], w["stem"])
             if not gloss and w["sgloss"] and w["sgloss"] != "-":
                 gloss = w["sgloss"].replace(".", " ")             # MACULA joins a multi-word gloss with dots
-            t = {"key": w["key"], "verse": w["verse"], "text": w["surface"], "trailer": w["after"] or "", "lexeme": w["slex"] or None,
+            trailer = w["after"] or ""
+            if not trailer and i + 1 < len(rows) and (rows[i + 1]["verse"], rows[i + 1]["word"]) != (w["verse"], w["word"]):
+                trailer = " "                                     # MACULA leaves the trailer empty at some ketiv/qere words, gluing two words
+            t = {"key": w["key"], "verse": w["verse"], "text": w["surface"], "trailer": trailer, "language": _LANG.get(w["wlang"], corpus), "lexeme": w["slex"] or None,
                  "lemma": w["lemma"] or None, "strong": w["strong"] or None, "gloss": gloss, "sp": w["class"] or None, "content": bool(w["content"]) and not w["superscription"],
                  "role": w["role"] or None, "clause": w["cl"], "phrase": w["ph"]}
             if w["superscription"]:
@@ -302,6 +309,11 @@ def scaffold(book: str, chapter: int, gloss_lang: str | None = None) -> dict:
             own = [w for w in rows if w["cl"] == cid]
             clauses[cid] = {"parent": up(n), "role": n["role"], "function": _label(n["role"]), "rela": _clause_rela(n), "type": n["clausetype"],
                             "kind": _clause_kind(own), "rule": n["rule"], "sentence": own[0]["sent"], "first": own[0]["key"], "last": own[-1]["key"]}
+        for c in clauses.values():
+            d, p = 0, c["parent"]
+            while p is not None:
+                d, p = d + 1, clauses[p]["parent"]
+            c["depth"] = d
         phrases = {}
         for pid in sorted(ph_ids):
             n = _node(con, pid)

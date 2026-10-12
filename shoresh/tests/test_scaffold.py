@@ -23,3 +23,14 @@ def test_greek_lexeme_is_the_aligner_lexeme():
 
 def test_unknown_chapter_is_an_error():
     assert "error" in trees_macula.scaffold("GEN", 99)
+
+
+def test_language_depth_and_trailer():
+    r = trees_macula.scaffold("DAN", 2)
+    t = r["tokens"]
+    assert t[0]["language"] == "hbo" and t[-1]["language"] == "arc"                            # Daniel 2:4b onward is Aramaic
+    v9 = "".join(x["text"] + x["trailer"] for x in t if x["verse"] == 9)
+    assert "֙לְ" not in v9                                                                      # no glued words at ketiv/qere
+    c = r["clauses"]
+    assert all(x["depth"] == (0 if x["parent"] is None else c[x["parent"]]["depth"] + 1) for x in c.values())
+    assert trees_macula.scaffold("JHN", 1)["tokens"][0]["language"] == "grc"

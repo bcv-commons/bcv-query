@@ -37,7 +37,7 @@ All endpoints are plain `GET`s under the service root.
 | `GET /bridge/{strong}` | LXX bridge — how the Septuagint renders a Hebrew word in Greek, or vice versa (H↔G) | $0 |
 | `GET /lxx-lexeme/{wordid}` | LXX-only Greek lexeme (no Strong's number — never occurs in the NT) — citation form + variants | $0 |
 | `GET /structure/{book}/{ch}/{v}` | Syntax — clause/phrase hierarchy from MACULA lowfat trees (CC BY); `/verse/{book}/{ch}/{v}/tree` adds the sentence level | $0 |
-| `GET /scaffold/{book}/{ch}` | Original-language scaffold of a chapter: every Hebrew/Greek token keyed by its MACULA token key (the key lexeme-aligner publishes), with lemma, lexeme, gloss, morphology and clause/phrase ids; the client joins it to an alignment and the edition text — [example](examples/interlinear) | $0 |
+| `GET /scaffold/{book}/{ch}` | Original-language scaffold of a chapter: every Hebrew/Greek token keyed by its MACULA token key (the key lexeme-aligner publishes), with language (hbo/arc/grc), lemma, lexeme, gloss, morphology and clause/phrase ids (clauses with `parent` and `depth`); the client joins it to an alignment and the edition text — [example](examples/interlinear) | $0 |
 | `GET /syntax/search?strong=&function=` | Who-did-what: clauses where a lexeme fills a phrase function. Each hit has `head` (true: the word is a direct part of the phrase; false: nested, "the tent OF GOD") and `head_only=true` drops the nested ones | $0 |
 | `GET /search?q=&lang=hbo` | **Hebrew** clause search (MACULA clauses) | $0 |
 | `GET /search?q=&lang=grc` | **Greek** clause search (MACULA Greek sentences) | $0 |

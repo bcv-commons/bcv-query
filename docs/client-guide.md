@@ -335,7 +335,7 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 
 | `/morph` | Morphology search |
 | `/structure/{book}/{ch}/{v}[/syntax]`, `/verse/{book}/{ch}/{v}/tree` | Verse clause/phrase structure (MACULA) |
-| `/scaffold/{book}/{ch}` | Chapter scaffold for an interlinear: every Hebrew/Greek token keyed by its MACULA token key, with lemma, lexeme, gloss (`?gloss_lang=`, Hebrew), morphology and clause/phrase ids. Join it in the client to a lexeme-aligner compact alignment and the edition text: see [examples/interlinear](examples/interlinear) |
+| `/scaffold/{book}/{ch}` | Chapter scaffold for an interlinear: every Hebrew/Greek token keyed by its MACULA token key, with language (hbo/arc/grc), lemma, lexeme, gloss (`?gloss_lang=`, Hebrew), morphology and clause/phrase ids; clauses carry `parent` and `depth`. Join it in the client to a lexeme-aligner compact alignment and the edition text: see [examples/interlinear](examples/interlinear) |
 | `/speakers`, `/speakers/at/{book}/{ch}/{v}`, `/speaker/{name}` | Speaker / red-letter index |
 | `/participants/{book}/{ch}/{v}`, `/coref/…`, `/frame/…` | Coreference / semantic-role data |
 | `/gloss-languages` | Languages available for `gloss_lang` (display names) |
