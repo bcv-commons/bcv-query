@@ -162,3 +162,24 @@ def test_sources_pinned_and_checked(tmp_path, monkeypatch):
     finally:
         d.configure()
     assert not out.exists()
+
+
+def test_text_depth_law():
+    """[depth.law]: a protasis before its apodosis takes the apodosis's parent and counts one level; the apodosis and what hangs on it
+    stand level beside it. A protasis after its main clause is left as in text_depth."""
+    from macula import discourse_rules as d
+    out = {"01": {"parent": None, "relation": None, "rule": "main"},
+           "02": {"parent": "03", "relation": "conditional", "rule": "sub_fwd"},        # protasis before its apodosis
+           "03": {"parent": "01", "relation": "continuation", "rule": "main"},          # apodosis
+           "04": {"parent": "03", "relation": "continuation", "rule": "main"},          # goes on from the apodosis
+           "05": {"parent": "04", "relation": "conditional", "rule": "sub_back"}}       # protasis after its main clause
+    law = d._law_depths(out)
+    assert law == {"01": 0, "02": 1, "03": 1, "04": 1, "05": 2}
+    # laws in a row stand level: the second protasis takes the first one's parent, not a place under the first apodosis
+    row = {"01": {"parent": None, "relation": None, "rule": "main"},
+           "02": {"parent": "03", "relation": "conditional", "rule": "sub_fwd"},
+           "03": {"parent": "01", "relation": "continuation", "rule": "main"},
+           "04": {"parent": "03", "relation": "continuation", "rule": "main"},
+           "05": {"parent": "06", "relation": "conditional", "rule": "sub_fwd"},
+           "06": {"parent": "04", "relation": "continuation", "rule": "main"}}
+    assert d._law_depths(row) == {"01": 0, "02": 1, "03": 1, "04": 1, "05": 1, "06": 1}

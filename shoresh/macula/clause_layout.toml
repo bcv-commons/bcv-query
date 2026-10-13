@@ -29,7 +29,7 @@
 # - build.json records this file's sha256, so every output says which settings made it. Raise `version` when a change alters the output.
 # - Try a changed copy without editing this one: python -m macula.build_clause_layout --config my.toml --out /tmp/x
 
-version = "0.12"
+version = "0.13"
 
 
 # ------------------------------------------------------------------------------------------------------------------------- sources
@@ -89,6 +89,11 @@ doc = """Poetry and prophecy: the poetic books, Ecclesiastes and the Latter Prop
 narrative's rules for when a speech ends."""
 books = ["JOB", "PSA", "PRO", "ECC", "SNG", "LAM", "ISA", "JER", "EZK", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB", "ZEP",
          "HAG", "ZEC", "MAL"]
+
+[books.oracles_framed_by_word_event]
+doc = """Books whose oracles are framed by the word-event formula and its commands to speak, so that a paragraph mark divides an oracle
+rather than ending it (Ezekiel: "וַיְהִי דְבַר־יְהוָה אֵלַי לֵאמֹר … בֶּן־אָדָם … וְאָמַרְתָּ … כֹּה אָמַר")."""
+books = ["EZK"]
 
 [books.first_person_narrator]
 doc = """Books (or parts of books) whose narrator speaks in the first person: "וַיֹּאמֶר אֵלַי", "וָאֵרֶא". Elsewhere "אֵלַי" in a speech
@@ -387,11 +392,24 @@ the links whose relation adds a text level and whose discourse_rule is not in fl
 circumstantial clause stay on the line of the clause they belong to (the relation still says what they are)."""
 flat_rules = ["embedded_flat"]           # see rules.embedded_keeps_macula_parent
 
+[depth.law]
+doc = """text_depth_law: the flat view with conditionals laid out as in BHSA. Where a protasis comes before its apodosis (a link with
+this relation to a later clause; the later clauses of a series stay parallel on the first), the protasis takes the apodosis's parent
+and counts one level: it is indented one level from the clause the apodosis hung on. The apodosis hangs on the protasis and counts no
+level: it stands level beside it, and what hangs on the apodosis moves with it. Every other link counts as for text_depth.
+Laws in a row stand level (laws_in_a_row_stand_level): a protasis whose apodosis goes on, over flat links only, from the apodosis of
+an earlier protasis takes that protasis's parent, so the next law stands beside the one before instead of under it (Deut 22, Deut
+28:15 beside 28:1)."""
+relation = "conditional"
+laws_in_a_row_stand_level = true
+
 
 [conventions.conditional_inversion]
-doc = """A protasis hangs under its apodosis (relation conditional). To invert, for each conditional link whose protasis comes before
-the clause it hangs on (and that is the first of a series): the protasis takes the apodosis's parent and relation, and the apodosis
-hangs under the protasis with relation conditional. A protasis after its main clause is left as it is."""
+doc = """In the tree a protasis hangs under its apodosis (relation conditional). A client that wants the other direction in the tree
+inverts each conditional link whose protasis comes before the clause it hangs on (and that is the first of a series): the protasis
+takes the apodosis's parent and relation, and the apodosis hangs under the protasis with relation conditional. A protasis after its
+main clause is left as it is. This is a tree operation; for a flat view use text_depth_law ([depth.law]), not text_depth recomputed
+on the inverted tree."""
 
 
 # ------------------------------------------------------------------------------------------------------------------------- features
@@ -534,9 +552,16 @@ open over paragraph marks until the narrative resumes."""
 # ---- where speeches end
 
 [rules.paragraph_mark_closes_commanded_speech]
-scope = "all"
+scope = "not oracles_framed_by_word_event"
 doc = """A paragraph mark (ס/פ) ends a speech opened by a messenger formula or a command to say, and what is nested in it, unless the
 command carries its speech (rule command_at_speech_start_carries)."""
+
+[rules.closed_oracle_returns_to_frame]
+scope = "all"
+doc = """When a paragraph mark closes an oracle whose messenger formula was the first clause of a commanded speech (and nothing came
+after the formula on that speech's line), the speech goes on from its frame: the next clause hangs on the frame (the לֵאמֹר), level
+with it, not on the formula."""
+examples = ["Jer 2:4 \"שִׁמְעוּ דְבַר־יְהוָה\" on the לֵאמֹר of 2:2, as the next thing Jeremiah is to proclaim"]
 
 [rules.chapter_closes_prophetic_speech]
 scope = "all"

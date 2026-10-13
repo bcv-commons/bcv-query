@@ -355,7 +355,8 @@ def main() -> None:
             d = disc.get(r["clause_key"])
             if d:
                 r.update({"discourse_parent": d["parent"], "relation": d["relation"], "discourse_attach": d["attach"],
-                          "tree_depth": d["tree_depth"], "text_depth": d["depth"], "discourse_rule": d["rule"]})
+                          "tree_depth": d["tree_depth"], "text_depth": d["depth"], "text_depth_law": d["depth_law"],
+                          "discourse_rule": d["rule"]})
             else:
                 r.update({"relation": None, "discourse_attach": None, "tree_depth": None, "discourse_rule": None})
             full.append(r)
@@ -386,6 +387,7 @@ def main() -> None:
                            "chain_forms": sorted(discourse_rules.CHAIN_FORMS), "chain_forms_in_speech_with_waw": sorted(discourse_rules.CHAIN_FORMS_SPEECH),
                            "text_depth": "number of links up the discourse_parent chain whose relation is not in flat and whose discourse_rule is not in flat_rules",
                            "tree_depth": "number of links up the discourse_parent chain whose relation is not in tree_flat",
+                           "text_depth_law": " ".join(discourse_rules.CFG["depth"]["law"]["doc"].split()),
                            "conditional_inversion": " ".join(discourse_rules.CFG["conventions"]["conditional_inversion"]["doc"].split())},
              "rules_config": {"file": discourse_rules.CONFIG_FILE, "sha256": discourse_rules.CONFIG_SHA256,
                               "limited_rules": {r: sc for r, sc in discourse_rules.SCOPE.items() if sc != "all"}},

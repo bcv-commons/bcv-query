@@ -37,7 +37,7 @@ def configure(path: str | Path | None = None) -> None:
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
-    global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES
+    global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS
     p = Path(path) if path else CONFIG_PATH
     raw = p.read_bytes()
     CFG = tomllib.loads(raw.decode("utf-8"))
@@ -75,6 +75,7 @@ def configure(path: str | Path | None = None) -> None:
     FLAT = {r for r, v in CFG["relations"].items() if not v["adds_text_level"]}
     TREE_FLAT = {r for r, v in CFG["relations"].items() if not v["adds_tree_level"]}
     FLAT_RULES = set(CFG["depth"]["flat_rules"])
+    LAW_RELATION, LAW_SIBLINGS = CFG["depth"]["law"]["relation"], CFG["depth"]["law"]["laws_in_a_row_stand_level"]
     SPLIT_VERSES = {}
     for ref, v in CFG.get("versification", {}).get("split_verses", {}).items():
         book, cv = ref.split()
@@ -323,6 +324,10 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         elif c.get("para") and on("paragraph_mark_closes_commanded_speech"):
             j = next((x for x in range(1, len(lines)) if lines[x].long and not lines[x].carries), None)
             if j is not None:
+                below, formula = lines[j - 1], lines[j].spk
+                if on("closed_oracle_returns_to_frame") and lines[j].messenger and below.spk and below.last == formula \
+                        and out.get(formula, {}).get("parent") == below.spk and out[formula]["relation"] == "speech":
+                    below.last = below.spk        # the oracle's formula opened the speech below: go on from that speech's frame
                 lines = lines[:j]
         if not c.get("reset") and c.get("chapter_start"):
             j = next((x for x in range(1, len(lines)) if lines[x].prophetic), None)
@@ -568,4 +573,42 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k]["tree_depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in TREE_FLAT)
         out[k]["depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("subj", None)
+    for k, d in _law_depths(out).items():
+        out[k]["depth_law"] = d
     return out
+
+
+def _law_depths(out: dict[str, dict]) -> dict[str, int]:
+    """text_depth_law ([depth] law): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
+    level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth."""
+    par = {k: v["parent"] for k, v in out.items()}
+    w = {k: int(v["relation"] not in FLAT and v["rule"] not in FLAT_RULES) for k, v in out.items()}
+    protases: set[str] = set()
+    for p in sorted(k for k, v in out.items() if v["relation"] == LAW_RELATION and v["parent"] and k < v["parent"]):
+        a = out[p]["parent"]
+        if par[p] != a or par.get(a) == p:
+            continue
+        new_parent = par[a]
+        if LAW_SIBLINGS:                          # laws in a row: up the flat links from the apodosis to an earlier protasis
+            x, seen = par[a], set()
+            while x is not None and x not in seen and x not in protases and w.get(x) == 0:
+                seen.add(x)
+                x = par[x]
+            if x in protases:
+                new_parent = par[x]               # stand level with it, not under its apodosis
+        par[p], w[p] = new_parent, 1
+        par[a], w[a] = p, 0
+        protases.add(p)
+    memo: dict[str, int] = {}
+
+    def depth(k: str) -> int:
+        seen, x = [], k
+        while x is not None and x not in memo and x not in seen and par.get(x) is not None:
+            seen.append(x)
+            x = par[x]
+        base = memo.get(x, 0)
+        for y in reversed(seen):
+            base += w[y]
+            memo[y] = base
+        return memo.get(k, 0)
+    return {k: depth(k) for k in out}
