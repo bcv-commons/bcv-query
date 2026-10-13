@@ -29,7 +29,7 @@
 # - build.json records this file's sha256, so every output says which settings made it. Raise `version` when a change alters the output.
 # - Try a changed copy without editing this one: python -m macula.build_clause_layout --config my.toml --out /tmp/x
 
-version = "0.14"
+version = "0.15"
 
 
 # ------------------------------------------------------------------------------------------------------------------------- sources
@@ -407,9 +407,16 @@ and counts one level: it is indented one level from the clause the apodosis hung
 level: it stands level beside it, and what hangs on the apodosis moves with it. Every other link counts as for text_depth.
 Laws in a row stand level (laws_in_a_row_stand_level): a protasis whose apodosis goes on, over flat links only, from the apodosis of
 an earlier protasis takes that protasis's parent, so the next law stands beside the one before instead of under it (Deut 22, Deut
-28:15 beside 28:1)."""
+28:15 beside 28:1).
+Return after a law (return_after_law): an apodosis's chain carries on over a verse end only with וְ + weqatal clauses (Lev 26:4-13);
+any other main clause that opens a new verse after it (an x-yiqtol "וְכֵן תַּעֲשֶׂה", לֹא + yiqtol, an imperative, a nominal clause)
+goes back to the level the law stands on, so the line's next commands don't move in with the apodosis (Deut 22:3). Off: tried in
+0.15, it pulled whole apodoses back (Deut 28:3 "בָּרוּךְ אַתָּה" 1.57 -> 0.63 against BHSA's 1.68; Lev 4:7 "וְאֵת כָּל־דַּם … יִשְׁפֹּךְ")
+and raised the law view's gap to BHSA's per-chapter reference for Leviticus and Deuteronomy from 0.61 to 0.73; limited to new commands
+without וְ (לֹא + yiqtol, an imperative) it fixed Deut 22 (2.98 -> 2.35, BHSA 1.40) but still came out worse overall (0.65)."""
 relation = "conditional"
 laws_in_a_row_stand_level = true
+return_after_law = false
 
 
 [conventions.verse_division]
@@ -646,6 +653,12 @@ scope = "all"
 doc = """A לֵאמֹר opens a speech, which hangs on the לֵאמֹר clause. When the speaking clause has just opened a speech, the speech moves
 to its לֵאמֹר. A speech under the word-event formula is prophetic."""
 
+[rules.speech_in_subordinate_ends_with_verse]
+scope = "law"
+doc = """A speech opened by a לֵאמֹר under a subordinate or embedded clause (not the word-event formula) is a quotation that ends with
+its verse: words quoted inside a protasis don't run on into the apodosis."""
+examples = ["Deut 13:3 \"אֲשֶׁר־דִּבֶּר אֵלֶיךָ לֵאמֹר נֵלְכָה\" ends before 13:4 \"לֹא תִשְׁמַע\"", "Deut 13:7"]
+
 [rules.commanded_lemor]
 scope = "not poetry"
 doc = """A לֵאמֹר under a command, inside a speech, opens a commanded speech, like וְאָמַרְתָּ אֲלֵהֶם: it lasts to the next paragraph
@@ -755,7 +768,7 @@ doc = """The second and later clauses of a series of subordinate clauses with th
 right after it, or for conditionals anywhere in the same chapter. (A subordinate clause that opens a speech is the speech's first
 clause, Ruth 1:10.) A convention: the cases of a law stand side by side as alternatives. BHSA hangs each new case one level under
 the case before (in Exodus-Deuteronomy 54 such "וְאִם" clauses as conditional, 7 as parallel), so the law steps in further with every
-case; that is most of the remaining depth gap in Leviticus (Lev 4:13, 4:22, 4:27; Lev 26:14-27)."""
+case; that is most of the remaining depth gap in Leviticus (Lev 4:13, 4:22, 4:27; Lev 26:14-27) and in Exodus 21-22."""
 examples = ["Isa 40:2 כִּי, כִּי, כִּי", "Lev 1:3, 1:10, 1:14 אִם"]
 
 [rules.ki_series_and_look_back]
@@ -799,12 +812,14 @@ the apodosis comes back to it on the line, level with it."""
 examples = ["Num 5:12 \"אִישׁ אִישׁ כִּי־תִשְׂטֶה אִשְׁתּוֹ\" … 5:15 \"וְהֵבִיא הָאִישׁ\"", "Lev 4:2 \"נֶפֶשׁ כִּי־תֶחֱטָא\""]
 
 [rules.protasis_continued]
-scope = "law"
+scope = ["LEV"]
 doc = """While a protasis waits for its apodosis (a fronted conditional, or a case under its topic), a וְ-clause in the protasis's own
 verse goes on with the protasis (continuation or coordination on the clause before it in the protasis); the first clause that opens
 a new verse, or has no וְ, is the apodosis. The verse end is the Masoretic signal used here: in BHSA's law an apodosis opens a new
 verse 2.6 times as often as a continuation (bsb-add-books' figures), but a continuation can open a verse and an apodosis can follow in
-the same verse (Lev 4:3 "וְהִקְרִיב"), so this rule is an approximation."""
+the same verse (Lev 4:3 "וְהִקְרִיב"), so this rule is an approximation. It applies to a protasis in a series too (Lev 26:14). Limited
+to Leviticus, whose laws are long: in Deuteronomy's short laws the apodosis often stands in the protasis's verse (Deut 22:2, 22:8,
+22:22), and the rule was neutral for the steps over the law chapters (bsb-add-books, v0.14)."""
 examples = ["Lev 26:3 \"אִם־בְּחֻקֹּתַי תֵּלֵכוּ וְאֶת־מִצְוֺתַי תִּשְׁמְרוּ וַעֲשִׂיתֶם אֹתָם\" … 26:4 \"וְנָתַתִּי\""]
 
 [rules.ki_before_main_is_conditional]
@@ -848,6 +863,12 @@ parallel links within that clause's verse (not over an earlier asyndetic link)."
 scope = "all"
 doc = "A clause opened by words.consequence hangs on the last main clause of its line with relation consequence."
 examples = ["Jer 2:9 \"לָכֵן עֹד אָרִיב אִתְּכֶם\""]
+
+[rules.apodosis_keeps_its_chain]
+scope = "all"
+doc = """A chain clause that names its subject does not climb past an apodosis (a main clause that took a fronted protasis): the
+apodosis's continuation stays with it (rule subject_starts_new_step)."""
+examples = ["Lev 26:4 \"וְנָתְנָה הָאָרֶץ\" stays on \"וְנָתַתִּי גִשְׁמֵיכֶם\", not on 26:2 \"אֲנִי יְהוָה\""]
 
 [rules.subject_starts_new_step]
 scope = "all"

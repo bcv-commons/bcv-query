@@ -37,7 +37,7 @@ def configure(path: str | Path | None = None) -> None:
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
-    global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS
+    global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS
     p = Path(path) if path else CONFIG_PATH
     raw = p.read_bytes()
     CFG = tomllib.loads(raw.decode("utf-8"))
@@ -77,6 +77,7 @@ def configure(path: str | Path | None = None) -> None:
     TREE_FLAT = {r for r, v in CFG["relations"].items() if not v["adds_tree_level"]}
     FLAT_RULES = set(CFG["depth"]["flat_rules"])
     LAW_RELATION, LAW_SIBLINGS = CFG["depth"]["law"]["relation"], CFG["depth"]["law"]["laws_in_a_row_stand_level"]
+    LAW_RETURNS = CFG["depth"]["law"]["return_after_law"]
     SPLIT_VERSES = {}
     for ref, v in CFG.get("versification", {}).get("split_verses", {}).items():
         book, cv = ref.split()
@@ -286,6 +287,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                  and clauses[i + 1]["f"]["lead"] in CASE_OPENERS for i, c in enumerate(clauses)]
     cp_of: dict = {}                              # clause key -> it is a casus pendens
     prot: dict | None = None                      # the open protasis (rule protasis_continued): key, verse, last clause
+    apod: set = set()                             # main clauses that took a fronted protasis (apodoses)
+    subish_of: dict = {}                          # clause key -> it is subordinate or embedded (rule speech_in_subordinate_ends_with_verse)
+    back: set = set()                             # main clauses that open their verse other than with "and" + weqatal ([depth.law])
     wayehi_when = [c["f"]["verb"] in BE_VERB and c["f"]["form"] == "wayyiqtol" and i + 1 < n and clauses[i + 1]["verse"] == c["verse"]
                    and clauses[i + 1]["f"]["sub_kind"] == "temporal" for i, c in enumerate(clauses)]
     for i in range(n):
@@ -307,6 +311,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         for p in pending:
             if p not in chain(k):
                 out[p]["parent"] = k
+                if out[p]["relation"] == LAW_RELATION:
+                    apod.add(k)                   # k is an apodosis (rule apodosis_keeps_its_chain)
                 if out[p]["relation"] is None:
                     out[p]["relation"] = "embedded"
             elif pending_prev.get(p) and active("fallback_to_clause_before", book_of[p]):
@@ -370,6 +376,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             lines.pop()
         line = lines[-1]
         pron1_of[k], we_of[k], neg_of[k] = f["pron1"], f["word_event"], f["negated"]
+        subish_of[k] = bool(f["sub_kind"]) or bool(c["parent_key"])
 
         # ---- rule embedded_keeps_macula_parent
         if c["parent_key"]:
@@ -383,6 +390,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 else:
                     ln = _Line(k, vi, to_me=pron1_of.get(c["parent_key"], False) or f["pron1"])
                     ln.prophetic = ln.divine = we_of.get(c["parent_key"], False)
+                    ln.scoped = on("speech_in_subordinate_ends_with_verse") and subish_of.get(c["parent_key"], False) \
+                        and not we_of.get(c["parent_key"], False)
                     if on("commanded_lemor") and cmd_of.get(c["parent_key"]) and len(lines) > 1:
                         ln.long = True
                         ln.carries = on("command_at_speech_start_carries") and lines[-1].opened >= vi - carry_within
@@ -463,6 +472,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 pt = out[pt]["parent"]
             if on("subordinate_series") and prev is not None and (pt == prev or (f["sub_kind"] == "conditional" and same_ch)):
                 link(k, prev, "parallel", "series")
+                if f["sub_kind"] == "conditional":
+                    prot = {"verse": vref, "last": k}     # a protasis in a series has its own continuation (Lev 26:14)
             else:
                 mains = line.verse_mains.get(vref, [])
                 if mains and on("frame_be_protasis_hangs_forward") and frame_be_of.get(mains[-1]) and f["sub_kind"] in ("conditional", "temporal"):
@@ -533,7 +544,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             parent = line.last
         if on("subject_starts_new_step") and rel == "continuation" and f["subj"]:
             x = parent
-            while x and not out[x].get("subj") and out[x]["relation"] in ("continuation", "coordination", "parallel") and out[x]["parent"]:
+            while x and not out[x].get("subj") and out[x]["relation"] in ("continuation", "coordination", "parallel") and out[x]["parent"] \
+                    and not (x in apod and on("apodosis_keeps_its_chain")):
                 x = out[x]["parent"]
             if out.get(x, {}).get("subj"):
                 parent = x
@@ -553,6 +565,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             line.turns[turn] = k
         cmd_of[k] = f["command"]
         frame_be_of[k] = f["frame_be"]
+        if first_in_verse and not (f["waw"] and f["form"] == "weqatal"):
+            back.add(k)
         resolve_pending(k)
         line.last = k
         line.verse_mains.setdefault(vref, []).append(k)
@@ -598,17 +612,19 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k]["tree_depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in TREE_FLAT)
         out[k]["depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("subj", None)
-    for k, d in _law_depths(out).items():
+    for k, d in _law_depths(out, back).items():
         out[k]["depth_law"] = d
     return out
 
 
-def _law_depths(out: dict[str, dict]) -> dict[str, int]:
-    """text_depth_law ([depth] law): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
-    level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth."""
+def _law_depths(out: dict[str, dict], back: set[str] = frozenset()) -> dict[str, int]:
+    """text_depth_law ([depth.law]): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
+    level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth. back: main clauses that open
+    their verse other than with "and" + weqatal; after an apodosis they go back to the level the law stands on."""
     par = {k: v["parent"] for k, v in out.items()}
     w = {k: int(v["relation"] not in FLAT and v["rule"] not in FLAT_RULES) for k, v in out.items()}
     protases: set[str] = set()
+    apodoses: dict[str, str] = {}                 # apodosis -> its protasis
     for p in sorted(k for k, v in out.items() if v["relation"] == LAW_RELATION and v["parent"] and k < v["parent"]):
         a = out[p]["parent"]
         if par[p] != a or par.get(a) == p:
@@ -624,6 +640,17 @@ def _law_depths(out: dict[str, dict]) -> dict[str, int]:
         par[p], w[p] = new_parent, 1
         par[a], w[a] = p, 0
         protases.add(p)
+        apodoses[a] = p
+    if LAW_RETURNS:                               # after a law, a clause that opens its verse otherwise than "and" + weqatal goes back
+        for k in sorted(back):                    # to the level the law stands on (Deut 22:3)
+            if k in apodoses:
+                continue
+            x, seen = par.get(k), set()
+            while x is not None and x not in seen and x not in apodoses and w.get(x) == 0:
+                seen.add(x)
+                x = par[x]
+            if x in apodoses:
+                par[k] = par[apodoses[x]]
     memo: dict[str, int] = {}
 
     def depth(k: str) -> int:
