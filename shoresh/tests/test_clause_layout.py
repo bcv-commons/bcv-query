@@ -387,6 +387,34 @@ def test_v022_rules_at_their_places(tmp_path, monkeypatch):
     assert frame["discourse_parent"] is None and frame["text_depth_law"] == 0               # the narrative frame after a law
 
 
+def test_release_packaging(tmp_path, monkeypatch):
+    """The release packaging: version stamp per book matching build.json, the card filled in, checksums, and a reproducible archive."""
+    import json
+    import tarfile
+    from macula import build_clause_layout as b, release_clause_layout as rel
+    src = tmp_path / "src"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "RUT", "--out", str(src)])
+    b.main()
+    sums = []
+    for name in ("a", "b"):
+        monkeypatch.setattr("sys.argv", ["x", "--src", str(src), "--out", str(tmp_path / name), "--allow-dirty"])
+        rel.main()
+        sums.append((tmp_path / name / "SHA256SUMS").read_text())
+    assert sums[0] == sums[1]                                                                # reproducible archive and data
+    out = tmp_path / "a"
+    stamp = json.loads((out / "_clauses_source.json").read_text())
+    build = json.loads((src / "build.json").read_text())
+    assert stamp["segmentation"] == build["segmentation"]["version"] and stamp["levels"].startswith(build["discourse_rules"] + "+")
+    assert stamp["books"]["RUT"]["sha256"] == build["books"]["RUT"]["segments_sha256"] and stamp["books"]["RUT"]["verses"] == 85
+    card = (out / "README.md").read_text()
+    assert "@TAG@" not in card and f"v{build['discourse_rules']}" in card
+    tag = stamp["release"]
+    with tarfile.open(out / f"hebrew-clause-layout-{tag}.tar.gz") as tar:
+        names = tar.getnames()
+    assert f"hebrew-clause-layout-{tag}/clauses/RUT/RUT_001.jsonl" in names and f"hebrew-clause-layout-{tag}/_clauses_source.json" in names
+    assert f"hebrew-clause-layout-{tag}.tar.gz" in sums[0] and "data/clauses-RUT.parquet" in sums[0]
+
+
 def test_shipped_profiles(tmp_path, monkeypatch):
     """Every profile in macula/profiles loads over what it extends, names itself after its file, passes the relation-model checks, and
     builds into its own folder with the profile recorded in build.json."""
