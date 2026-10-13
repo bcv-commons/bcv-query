@@ -37,7 +37,7 @@ def configure(path: str | Path | None = None) -> None:
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
-    global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS
+    global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE
     p = Path(path) if path else CONFIG_PATH
     raw = p.read_bytes()
     CFG = tomllib.loads(raw.decode("utf-8"))
@@ -78,6 +78,7 @@ def configure(path: str | Path | None = None) -> None:
     FLAT_RULES = set(CFG["depth"]["flat_rules"])
     LAW_RELATION, LAW_SIBLINGS = CFG["depth"]["law"]["relation"], CFG["depth"]["law"]["laws_in_a_row_stand_level"]
     LAW_RETURNS = CFG["depth"]["law"]["return_after_law"]
+    LAW_STAIRCASE = CFG["depth"]["law"]["staircase"]
     SPLIT_VERSES = {}
     for ref, v in CFG.get("versification", {}).get("split_verses", {}).items():
         book, cv = ref.split()
@@ -290,6 +291,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     apod: set = set()                             # main clauses that took a fronted protasis (apodoses)
     subish_of: dict = {}                          # clause key -> it is subordinate or embedded (rule speech_in_subordinate_ends_with_verse)
     back: set = set()                             # main clauses that open their verse other than with "and" + weqatal ([depth.law])
+    cond_series: set = set()                      # later protases of a series of conditionals ([depth.law] staircase)
     wayehi_when = [c["f"]["verb"] in BE_VERB and c["f"]["form"] == "wayyiqtol" and i + 1 < n and clauses[i + 1]["verse"] == c["verse"]
                    and clauses[i + 1]["f"]["sub_kind"] == "temporal" for i, c in enumerate(clauses)]
     for i in range(n):
@@ -473,6 +475,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             if on("subordinate_series") and prev is not None and (pt == prev or (f["sub_kind"] == "conditional" and same_ch)):
                 link(k, prev, "parallel", "series")
                 if f["sub_kind"] == "conditional":
+                    cond_series.add(k)
                     prot = {"verse": vref, "last": k}     # a protasis in a series has its own continuation (Lev 26:14)
             else:
                 mains = line.verse_mains.get(vref, [])
@@ -612,17 +615,20 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k]["tree_depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in TREE_FLAT)
         out[k]["depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("subj", None)
-    for k, d in _law_depths(out, back).items():
+    for k, d in _law_depths(out, back, cond_series).items():
         out[k]["depth_law"] = d
     return out
 
 
-def _law_depths(out: dict[str, dict], back: set[str] = frozenset()) -> dict[str, int]:
+def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series: set[str] = frozenset()) -> dict[str, int]:
     """text_depth_law ([depth.law]): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
     level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth. back: main clauses that open
     their verse other than with "and" + weqatal; after an apodosis they go back to the level the law stands on."""
     par = {k: v["parent"] for k, v in out.items()}
     w = {k: int(v["relation"] not in FLAT and v["rule"] not in FLAT_RULES) for k, v in out.items()}
+    if LAW_STAIRCASE:                             # each later case of a series one level under the case before (BHSA's practice)
+        for k in cond_series:
+            w[k] = 1
     protases: set[str] = set()
     apodoses: dict[str, str] = {}                 # apodosis -> its protasis
     for p in sorted(k for k, v in out.items() if v["relation"] == LAW_RELATION and v["parent"] and k < v["parent"]):

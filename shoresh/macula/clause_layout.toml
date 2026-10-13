@@ -413,10 +413,20 @@ any other main clause that opens a new verse after it (an x-yiqtol "וְכֵן �
 goes back to the level the law stands on, so the line's next commands don't move in with the apodosis (Deut 22:3). Off: tried in
 0.15, it pulled whole apodoses back (Deut 28:3 "בָּרוּךְ אַתָּה" 1.57 -> 0.63 against BHSA's 1.68; Lev 4:7 "וְאֵת כָּל־דַּם … יִשְׁפֹּךְ")
 and raised the law view's gap to BHSA's per-chapter reference for Leviticus and Deuteronomy from 0.61 to 0.73; limited to new commands
-without וְ (לֹא + yiqtol, an imperative) it fixed Deut 22 (2.98 -> 2.35, BHSA 1.40) but still came out worse overall (0.65)."""
+without וְ (לֹא + yiqtol, an imperative) it fixed Deut 22 (2.98 -> 2.35, BHSA 1.40) but still came out worse overall (0.65). In BHSA's
+own links (bsb-add-books' figures, the law chapters) a verse-initial clause after an apodosis stays with the law 735 times and returns
+215 times: "always stay" is right in 77%, and no rule from verb form, person, וְ, subject or negation does better (55-67%). A return
+is more often nominal, without וְ and in another person, but each of these also catches clauses that stay. "(וְ)כֵּן תַּעֲשֶׂה" returns
+in Deut 20:15 and 22:3 but stays in Num 18:28, too rare to carry a rule; Deut 22 (one return at 22:3 that carries through the chapter)
+is left as a known case.
+Staircase (staircase): each later protasis of a series of conditionals (rule subordinate_series) counts one level, so every new case
+stands one level under the case before, as in BHSA (in text_depth the cases stay side by side). Measured against BHSA's per-chapter
+reference (379 chapters, law view): mean gap 0.410 -> 0.392; Job 31 -3.94 -> -1.44, Lev 27 -2.54 -> +0.26, Lev 3 -2.06 -> -1.67,
+Lev 26 -2.32 -> -1.90. Proposed for 0.16; off until decided."""
 relation = "conditional"
 laws_in_a_row_stand_level = true
 return_after_law = false
+staircase = false
 
 
 [conventions.verse_division]
