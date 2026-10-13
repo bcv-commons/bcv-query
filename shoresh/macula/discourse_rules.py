@@ -93,7 +93,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
-    global VOCATIVE_RULE, TOPIC_RULES, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE, CHAPTER_MARGIN
+    global VOCATIVE_RULE, TOPIC_RULES, SUBJECT_FIRST, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE, CHAPTER_MARGIN
     CFG, files, PROFILE_CHANGED = load_settings(path, profile)
     CONFIG_FILES = files
     CONFIG_FILE, PROFILE, RULES_VERSION = files[-1][0], CFG["profile"]["name"], CFG["version"]
@@ -140,6 +140,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     EXTENSION_FORMS = set(F["extension"])
     VOCATIVE_RULE, COMPLEMENT_ROLES = CFG["macula"]["vocative_rule"], set(CFG["macula"]["complement_roles"])
     TOPIC_RULES = set(CFG["macula"]["topic_rules"])
+    SUBJECT_FIRST = CFG["macula"]["subject_first_prefix"]
     PARAGRAPH_MARKS = list(CFG["text"]["paragraph_marks"])
     RELATIONS = list(CFG["relations"])
     FLAT = {r for r, v in CFG["relations"].items() if not v["adds_text_level"]}
@@ -355,6 +356,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "or_topic_np": (rule or "") in TOPIC_RULES and not finite and not sub_kind and bool(or_lead) and or_lead[0]["class"] == "noun"
                            and _n(or_lead[0]["lemma"]) not in TIME_WORDS,
             "only_cj": bool(toks) and all(t["class"] == "cj" for t in toks),
+            "subject_first": (rule or "").startswith(SUBJECT_FIRST) and not sub_kind and bool(art_lead) and art_lead[0]["class"] == "noun",
             "place_there": any(_strong(t) in PLACE_THERE for t in toks),
             "subj_nouns": sorted({_strong(t) for t in subject if t["class"] == "noun"}),
             "chain_end": l0 in CHAIN_END,
@@ -390,6 +392,7 @@ class _Line:
         self.openers: dict = {}                   # first word of a verse-initial clause -> that clause (stanza heads)
         self.turns: dict = {}                     # (speaking verb, form) -> last turn clause opened by it
         self.law_head: str | None = None          # the last law head on the line (rule law_heads_stand_parallel)
+        self.law_top: str | None = None           # the last law head on the line that is no law inside a law (rule subject_relative_law_head)
         self.you_case: str | None = None          # a law opened by a case that speaks to "you", no law head since (rule relative_law_head)
         self.summarised = False                   # a law's summary came after the last law head (rule relative_law_head)
         self.law_case: str | None = None          # the last case of the current law (rule law_cases_continue_the_law)
@@ -453,6 +456,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                                                for x in clauses[i + 1:i + 8] if x["verse"] == c["verse"]) for i, c in enumerate(clauses)]
     cp_of: dict = {}                              # clause key -> it is a casus pendens
     lone_nodes: list = []                         # conjunction-only nodes placed by rule lone_conjunction_takes_its_place
+    inner_heads: set = set()                      # law heads inside a running law (rule subject_relative_law_head)
+    series_heads: set = set()                     # law heads that are a noun phrase or a subject with a relative clause, not a law's opening
     # rule relative_law_head: a noun phrase standing alone, a relative clause on it next, and a main clause after that in its verse
     # (the relative clause may come after other segments under the noun phrase, or be a segment of its own: "and the soul | that eats")
     # (when the noun phrase and its relative clauses fill the verse, the main clause opens the next verse: "any man … who slaughters"
@@ -533,6 +538,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         if c.get("reset") or c.get("chapter_start"):
             fallback_pending()
             prot = None
+            case_waiting = None
         if c.get("reset"):                        # rules each_psalm_starts_afresh, chapter_after_mark_starts_afresh (builder)
             lines = [_Line(None, vi)]
             pending.clear()
@@ -695,6 +701,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         if len(lines) > 1 and (resumes or (f["word_event"] and f["form"] == "wayyiqtol" and on("word_event_resumes"))):
             lines = lines[:1]
             line = lines[0]
+            case_waiting = None                   # a case's apodosis is in its speech, never the narrative frame after it
         # rule son_of_man_returns_to_oracle_top: "and you, son of man" goes back to the top level of the oracle it stands in
         to_top = None
         if on("son_of_man_returns_to_oracle_top") and f["waw"] and f["you_lead"] and (f["son_of_man"] or (
@@ -746,6 +753,26 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 and not you_open and len(lines) > 1:
             line.law_case = line.law_thing = None     # "and the man who …": a new law
             law_heads.add(k)
+            if not f["law_summary"]:
+                series_heads.add(k)
+        # rule subject_relative_law_head: a clause whose subject comes first with a relative clause on it ("and the flesh that touches
+        # … shall not be eaten") heads a law; after an open case of the running law it is a law inside that law: it stays where it is,
+        # and the next law head stands level with it
+        in_law_head = line.law_head is not None and clauses_verse.get(line.law_head, (None, None))[:2] == vref[:2]
+        if on("subject_relative_law_head") and k not in law_heads and first_in_verse and f["subject_first"] and len(lines) > 1 \
+                and in_law_head and i + 1 < n and clauses[i + 1]["parent_key"] == k and clauses[i + 1]["f"]["sub_kind"] == "relative" \
+                and not you_open:
+            # (inside only when the running law was opened by another kind of head: a casus pendens before "ki", a law-head word, a
+            # heading; after a series of such heads it is one more of them)
+            case_open = line.law_case is not None and line.law_case > line.law_head \
+                and clauses_verse.get(line.law_case, (None, None))[:2] == vref[:2] \
+                and line.law_head not in series_heads and line.law_head not in inner_heads
+            line.law_case = line.law_thing = None
+            if case_open:
+                inner_heads.add(k)
+            else:
+                law_heads.add(k)
+                series_heads.add(k)
         # rule noun_phrase_law_head: a noun phrase at a verse start followed directly by its main clause, after a law head on its line
         # in the chapter, or before a prohibition
         in_law = line.law_head is not None and clauses_verse.get(line.law_head, (None, None))[:2] == vref[:2]
@@ -754,6 +781,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 and not you_open and len(lines) > 1:
             line.law_case = line.law_thing = None
             law_heads.add(k)
+            series_heads.add(k)
             f = dict(f, sub_kind=None)            # "and the vow of a widow or a divorced woman": a topic
         # rule summary_case_stands_with_the_law: "and it shall be, when he is guilty in one of these" is about all the cases before it
         if on("summary_case_stands_with_the_law") and f["frame_be"] and i + 1 < n and clauses[i + 1]["verse"] == vref \
@@ -1004,7 +1032,10 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             parent, rel = line.turns[turn], "parallel"
         if to_top is not None:
             parent, rel = to_top, "parallel"
-        same_ch_head = line.law_head if line.law_head and clauses_verse.get(line.law_head, (None, None))[:2] == vref[:2] else None
+        # a casus pendens before "ki", a law-head word or a law's summary is a new top-level law: it stands with the last top-level head;
+        # other heads stand with the nearest law head, also one inside a law (rule subject_relative_law_head)
+        ref = line.law_top if (cp or f["law_head"] or f["law_summary"]) and on("subject_relative_law_head") else line.law_head
+        same_ch_head = ref if ref and clauses_verse.get(ref, (None, None))[:2] == vref[:2] else None
         if k in law_heads and on("law_heads_stand_parallel") and same_ch_head:
             parent, rel = same_ch_head, "parallel"    # a new law stands parallel to the law head before it
         elif f["law_summary"] and on("law_summary_stands_with_the_law") and (same_ch_head or line.first):
@@ -1035,7 +1066,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         line.last = k
         if line.first is None:
             line.first = k
+        if k in inner_heads:
+            line.law_head = k
+        if f["law_summary"] and k not in law_heads and on("subject_relative_law_head"):
+            line.law_top = line.law_head = k      # "this is the law of …" opens (or closes) a law: the laws after it go inside it
         if k in law_heads:
+            if k not in series_heads:
+                line.law_top = k
             if on("commanded_law_carries") and line.commanded and line.first == k:
                 line.carries = True               # "and to them you shall say: any man …": a speech of laws runs on past paragraph marks
             line.law_head = k
@@ -1123,14 +1160,15 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k]["depth"] = sum(1 for x in counted if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("subj", None)
     for k, d in _law_depths(out, back if LAW_RETURNS else set(), cond_series, ext, case_apod, law_heads, cp_cases,
-                            chap_of if CHAPTER_MARGIN else None, be_cases).items():
+                            chap_of if CHAPTER_MARGIN else None, be_cases, inner_heads).items():
         out[k]["depth_law"] = d
     return out
 
 
 def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series: set[str] = frozenset(),
                 ext: set[str] = frozenset(), case_apod: dict | None = None, law_heads: set[str] = frozenset(),
-                cp_cases: dict | None = None, chap_of: dict | None = None, be_cases: set[str] = frozenset()) -> dict[str, int]:
+                cp_cases: dict | None = None, chap_of: dict | None = None, be_cases: set[str] = frozenset(),
+                inner_heads: set[str] = frozenset()) -> dict[str, int]:
     """text_depth_law ([depth.law]): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
     level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth. back: main clauses that open
     their verse other than with "and" + weqatal; after an apodosis they go back to the level the law stands on."""
@@ -1159,7 +1197,10 @@ def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series:
         # links to the earlier law's first case, its casus pendens, or an earlier law head
         cp_cases = cp_cases or {}
         done: set[str] = set()
-        for h in sorted(law_heads):
+        for h in sorted(set(law_heads) | set(inner_heads)):
+            if h in inner_heads:                  # a law inside a running law stays where it is; the next head stands level with it
+                done.add(h)
+                continue
             x, seen = par.get(h), set()
             while x is not None and x not in seen and x not in protases and x not in cp_cases and x not in done \
                     and (w.get(x) == 0 or x in cond_series):

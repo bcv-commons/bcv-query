@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.21"
+version = "0.22"
 
 [profile]
 name = "default"
@@ -452,6 +452,7 @@ extension = ["yiqtol", "weqatal"]                                        # the 2
 doc = "MACULA codes the rules test for."
 vocative_rule = "Np2CL"                          # clause rule of an address
 topic_rules = ["Np2CL", "S2CL"]                  # clause rules of a noun phrase standing alone (features.topic_np)
+subject_first_prefix = "S-"                      # clause rules whose subject comes first (features.subject_first)
 complement_roles = ["o", "o2", "s", "p"]         # roles of an embedded clause that is a complement
 
 
@@ -767,6 +768,9 @@ doc = "The Strong's numbers of the clause's verbs (rule repeated_condition_stand
 doc = "The clause has a demonstrative that refers back (words.back_reference)."
 [features.or_topic_np]
 doc = """A noun phrase standing alone after "or" (words.alternative), as features.topic_np: "אוֹ נֶפֶשׁ" (Lev 5:2)."""
+[features.subject_first]
+doc = """A clause whose subject comes first (macula.subject_first_prefix), headed by a noun, without an opener: "וְהַבָּשָׂר … לֹא יֵאָכֵל"
+(Lev 7:19), "וְכָל־תְּרוּמָה … לוֹ יִהְיֶה" (Num 5:9)."""
 [features.topic_np_circ]
 doc = """A noun phrase standing alone that MACULA's participle makes look circumstantial ("וְנֵדֶר אַלְמָנָה וּגְרוּשָׁה", Num 30:10): headed
 by a noun, not a time word; it can head a law (rule noun_phrase_law_head)."""
@@ -1240,7 +1244,8 @@ to the law head before it in its chapter, not on the previous law's last apodosi
 before. The law's apodosis hangs on its own case: a subject climb never crosses a law head (rule subject_starts_new_step), and in the
 law view the apodosis stands beside the casus pendens case. In the law books BHSA's links have 46 laws headed by a noun phrase before
 כִּי: 20 parallel to the previous law head, 14 under the speech (the first law of a speech), 7 coordinated, 3 asyndetic, 2 roots; none
-under the previous case or its apodosis (bsb-add-books). In the law view a law head that stands where the law head
+under the previous case or its apodosis (bsb-add-books). A case still waiting for its apodosis when the narrative resumes or a chapter
+starts has none: the frame after a law ("וַיְדַבֵּר יְהוָה", Lev 7:22) is never a case's apodosis (v0.22). In the law view a law head that stands where the law head
 before it stands also takes that head's level (v0.21): the second law of a speech is level with the first, not one level above it
 (Lev 13 law view 2.95 → 3.80, BHSA 3.80; Lev 17 3.81 → 4.36; Lev 27 4.29 → 4.90)."""
 examples = ["Lev 13: 13:18 → 13:24 → 13:29 → 13:38 → 13:40 → 13:47", "Lev 27: 27:2 → 27:14 → 27:26 → 27:28",
@@ -1293,6 +1298,23 @@ scope = "law"
 doc = """In law, a "כִּי" right after a lone "אוֹ" (words.alternative), or a "כִּי / אִם" clause that a lone conjunction coordinates, is
 "or if": a protasis (conditional), never "for" ("אוֹ כִי יִגַּע", Lev 5:3; "וְכִי־יִשְׁאַל", Exod 22:13)."""
 examples = ["Lev 5:3", "Lev 15:25", "Exod 22:13"]
+
+[rules.subject_relative_law_head]
+scope = "law"
+doc = """In the law books, inside a speech and after a law head on its line in the chapter, a clause at a verse start whose subject comes
+first with a relative clause on it (features.subject_first: "וְאִישׁ אֲשֶׁר יִשְׁכַּב … מוֹת־יוּמְתוּ", Lev 20:11) heads a law, as a
+noun phrase with a relative clause does (rule relative_law_head).
+- A law inside a law: when a case of the running law is open ("וְאִם …" after the law's head) and the nearest law head is that law's
+  own head (a casus pendens before כִּי, a law-head word, or a heading "זֹאת תּוֹרַת …"), the clause stays where it is, and the next law
+  heads stand level with it, not with the law's top head (the law view keeps it in place). "וְהַבָּשָׂר אֲשֶׁר־יִגַּע בְּכָל־טָמֵא" (Lev
+  7:19) after the cases of the peace offering (7:11-18), and "וְכָל־תְּרוּמָה … אֲשֶׁר־יַקְרִיבוּ" (Num 5:9) after 5:8 "וְאִם־אֵין לָאִישׁ
+  גֹּאֵל": BHSA keeps them inside their law, with 7:20 level with 7:19 and Num 5:10 level with 5:9 (bsb-add-books).
+- After a series of heads of its own kind (noun phrases, subjects with a relative clause: Lev 15:4-12) it is one more of them, level
+  with the nearest.
+- Heads of these kinds stand with the nearest law head; a casus pendens before כִּי, a law-head word or a law's summary is a new
+  top-level law and stands with the last head of those kinds ("וְאִישׁ כִּי־תֵצֵא", Lev 15:16, with 15:2, not inside the law of the
+  zav)."""
+examples = ["Lev 7:19-20", "Num 5:9-10", "Lev 20:11, 20:15, 20:20", "Lev 15:4-12"]
 
 [rules.noun_phrase_law_head]
 scope = "law"

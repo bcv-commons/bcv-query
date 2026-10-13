@@ -366,6 +366,27 @@ def test_v021_rules_at_their_places(tmp_path, monkeypatch):
     assert len({h["text_depth_law"] for h in heads}) == 1                                    # the laws of Lev 13 stand level
 
 
+def test_v022_rules_at_their_places(tmp_path, monkeypatch):
+    """v0.22: subject_relative_law_head (a law inside a law: Lev 7:19-20, Num 5:9-10), and a waiting case never takes the narrative frame
+    after it as its apodosis (Lev 7:22)."""
+    import json
+    from macula import build_clause_layout as b
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "LEV,NUM", "--out", str(out)])
+    b.main()
+
+    def rows(book, ch, v=None):
+        rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
+        return [r for r in rs if v is None or r["verse"] == v]
+    for book, ch, inner, nxt in (("LEV", 7, 19, 20), ("NUM", 5, 9, 10)):
+        by_key = {r["clause_key"]: r for r in rows(book, ch)}
+        h, n = rows(book, ch, inner)[0], rows(book, ch, nxt)[0]
+        assert n["relation"] == "parallel" and by_key[n["discourse_parent"]]["verse"] == inner, (book, ch)
+        assert n["text_depth_law"] == h["text_depth_law"] > 0, (book, ch)                  # inside the law, the next head level with it
+    frame = rows("LEV", 7, 22)[0]
+    assert frame["discourse_parent"] is None and frame["text_depth_law"] == 0               # the narrative frame after a law
+
+
 def test_shipped_profiles(tmp_path, monkeypatch):
     """Every profile in macula/profiles loads over what it extends, names itself after its file, passes the relation-model checks, and
     builds into its own folder with the profile recorded in build.json."""
