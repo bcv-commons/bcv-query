@@ -209,3 +209,47 @@ def test_expression_rules_at_their_places(tmp_path, monkeypatch):
     assert ext["text_depth_law"] == first["text_depth_law"]                                    # back at the law's level
     case = next(r for r in deu if r["verse"] == 6)
     assert case["relation"] != "parallel"                                                       # not a series member of 22:5's reason
+
+
+def test_shipped_profiles(tmp_path, monkeypatch):
+    """Every profile in macula/profiles loads over what it extends, names itself after its file, passes the relation-model checks, and
+    builds into its own folder with the profile recorded in build.json."""
+    import json
+    from macula import build_clause_layout as b, discourse_rules as d
+    names = sorted(p.stem for p in d.PROFILES_DIR.glob("*.toml"))
+    assert names, "no profiles shipped"
+    try:
+        for name in names:
+            d.configure(profile=name)
+            assert d.PROFILE == name and d.CFG["profile"].get("doc") and d.PROFILE_CHANGED
+            assert d.RULES_VERSION == d.load_settings()[0]["version"]                          # a profile can't change the version
+            test_relation_model_invariants()
+        out = tmp_path / "out"
+        monkeypatch.setattr("sys.argv", ["x", "--books", "RUT", "--profile", names[0], "--out", str(out)])
+        b.main()
+        rc = json.load(open(out / "build.json", encoding="utf-8"))["rules_config"]
+        assert rc["profile"] == names[0] and [f["file"] for f in rc["files"]][-1] == f"{names[0]}.toml" and rc["changed_by_profile"]
+    finally:
+        d.configure()
+    assert d.PROFILE == d.BASE_PROFILE
+
+
+def test_profile_limits(tmp_path, monkeypatch):
+    """A profile may only set keys the settings it extends have (new book groups excepted), may not change the sources, and may not
+    extend itself in a cycle."""
+    from macula import discourse_rules as d
+
+    def profile(name, extends, body):
+        f = tmp_path / f"{name}.toml"
+        f.write_text(f'[profile]\nname = "{name}"\nextends = "{extends}"\ndoc = "test"\n\n{body}\n', encoding="utf-8")
+        return f
+    cfg, files, changed = d.load_settings(profile("ok", "default", '[books.mine]\ndoc = "x"\nbooks = ["RUT"]\n\n[rules.vocative]\nscope = "mine"'))
+    assert cfg["rules"]["vocative"]["scope"] == "mine" and set(changed) == {"books.mine", "rules.vocative.scope"} and len(files) == 2
+    with pytest.raises(ValueError, match="don't have"):
+        d.load_settings(profile("typo", "default", '[rules.vocativ]\nscope = "none"'))
+    with pytest.raises(ValueError, match="may not change"):
+        d.load_settings(profile("src", "default", '[sources.uhb]\ntag = "v2"'))
+    monkeypatch.setattr(d, "PROFILES_DIR", tmp_path)
+    profile("a", "b", ""), profile("b", "a", "")
+    with pytest.raises(ValueError, match="cycle"):
+        d.load_settings(profile="a")

@@ -13,35 +13,90 @@ where it applies (its scope). This module keeps only the mechanics:
   order of [rules.*] and links each clause; on("name") asks whether a rule applies in the clause's book.
 It contains no Hebrew words, Strong's numbers or book names (a test checks this).
 
-configure(path) loads another settings file (build_clause_layout --config).
+PROFILES. A profile is a settings file that names itself and extends another ([profile] extends = "default" or another profile's
+name) and overrides only what it changes. configure(profile=NAME) loads macula/profiles/NAME.toml merged over what it extends;
+configure(path) loads any settings file, a full one or a profile (build_clause_layout --config / --profile). A profile may not change
+the external sources, the versification data or the rules version, and may only set keys the base has (new book groups excepted).
 """
 from __future__ import annotations
 
+import copy
 import hashlib
+import json
 import tomllib
 import unicodedata
 from pathlib import Path
 
 CONFIG_PATH = Path(__file__).with_name("clause_layout.toml")
+PROFILES_DIR = Path(__file__).with_name("profiles")
+BASE_PROFILE = "default"                          # the profile of clause_layout.toml
+PROFILE_FIXED = ("sources", "versification", "version")    # what a profile may not change
 
 
 def _n(s: str | None) -> str:
     return unicodedata.normalize("NFC", s or "")
 
 
-def configure(path: str | Path | None = None) -> None:
-    """Load the settings (default clause_layout.toml next to this module) into the module's constants."""
-    global CFG, CONFIG_FILE, CONFIG_SHA256, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
+def _profile_path(name: str) -> Path:
+    return CONFIG_PATH if name == BASE_PROFILE else PROFILES_DIR / f"{name}.toml"
+
+
+def _merge(base: dict, over: dict, where: str, changed: list[str]) -> None:
+    for key, value in over.items():
+        here = f"{where}.{key}" if where else key
+        if not where and key in PROFILE_FIXED:
+            raise ValueError(f"a profile may not change [{key}]")
+        if key not in base:
+            if where == "books":              # a profile may add a book group for its scopes
+                base[key] = copy.deepcopy(value)
+                changed.append(here)
+                continue
+            raise ValueError(f"the profile sets {here}, which the settings it extends don't have")
+        if isinstance(value, dict) and isinstance(base[key], dict):
+            _merge(base[key], value, here, changed)
+        else:
+            base[key] = copy.deepcopy(value)
+            changed.append(here)
+
+
+def load_settings(path: str | Path | None = None, profile: str | None = None, _seen: tuple = ()) -> tuple[dict, list, list]:
+    """(settings, files, changed): the settings of a file or a profile, merged over what it extends; files = [(name, sha256)] in load
+    order; changed = the dotted keys the profiles set."""
+    p = Path(path) if path else _profile_path(profile or BASE_PROFILE)
+    raw = p.read_bytes()
+    cfg = tomllib.loads(raw.decode("utf-8"))
+    files = [(p.name, hashlib.sha256(raw).hexdigest())]
+    prof = cfg.get("profile", {})
+    name, parent = prof.get("name"), prof.get("extends")
+    if not name:
+        raise ValueError(f"{p.name}: no [profile] name")
+    if profile and name != profile:
+        raise ValueError(f"{p.name}: [profile] name is {name!r}, expected {profile!r}")
+    if parent is None:
+        return cfg, files, []
+    if parent in _seen + (name,):
+        raise ValueError(f"profile {name!r}: a cycle of extends")
+    base, base_files, changed = load_settings(None, parent, _seen + (name,))
+    over = {k: v for k, v in cfg.items() if k != "profile"}
+    _merge(base, over, "", changed)
+    base["profile"] = prof
+    return base, base_files + files, changed
+
+
+def configure(path: str | Path | None = None, profile: str | None = None) -> None:
+    """Load the settings into the module's constants: clause_layout.toml (profile "default"), a profile by name, or a settings file."""
+    global CFG, CONFIG_FILE, CONFIG_SHA256, CONFIG_FILES, PROFILE, PROFILE_CHANGED, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM
     global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
     global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE
-    p = Path(path) if path else CONFIG_PATH
-    raw = p.read_bytes()
-    CFG = tomllib.loads(raw.decode("utf-8"))
-    CONFIG_FILE, CONFIG_SHA256, RULES_VERSION = p.name, hashlib.sha256(raw).hexdigest(), CFG["version"]
+    CFG, files, PROFILE_CHANGED = load_settings(path, profile)
+    CONFIG_FILES = files
+    CONFIG_FILE, PROFILE, RULES_VERSION = files[-1][0], CFG["profile"]["name"], CFG["version"]
+    # the effective settings, whatever files they came from
+    CONFIG_SHA256 = hashlib.sha256(json.dumps(CFG, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
     GROUPS = {g: set(v["books"]) for g, v in CFG["books"].items()}
     RULES = CFG["rules"]
     SCOPE = {name: r["scope"] for name, r in RULES.items()}

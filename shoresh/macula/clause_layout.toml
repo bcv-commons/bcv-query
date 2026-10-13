@@ -28,8 +28,28 @@
 # - Change which relations add a level of indentation in [relations.*].
 # - build.json records this file's sha256, so every output says which settings made it. Raise `version` when a change alters the output.
 # - Try a changed copy without editing this one: python -m macula.build_clause_layout --config my.toml --out /tmp/x
+#
+# Profiles
+# - A profile is a small file in macula/profiles/ that names itself, extends this file (or another profile) and overrides only what it
+#   changes, e.g. one rule's scope or whether a relation adds a level:
+#       [profile]
+#       name = "reader"
+#       extends = "default"
+#       doc = "..."
+#       [relations.consequence]
+#       adds_text_level = false
+# - Build it with python -m macula.build_clause_layout --profile reader (output in macula/data/clause-layout-profiles/reader/).
+#   build.json records the profile, the files it was built from and their sha256, the sha256 of the effective settings, and the keys
+#   the profile changed.
+# - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
+#   Every shipped profile is loaded and checked by the tests.
 
 version = "0.16"
+
+[profile]
+name = "default"
+doc = """The default layout: BHSA-near steps, a law view (text_depth_law) for conditionals as in BHSA, cases of a law side by side in
+text_depth. Other profiles (macula/profiles/<name>.toml) extend this one and override only what they change."""
 
 
 # ------------------------------------------------------------------------------------------------------------------------- sources

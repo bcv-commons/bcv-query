@@ -14,6 +14,8 @@ ketiv/qere words, which glues two words together); paseq is written ` ׀ `; the 
 `ketiv_qere` lists the ketiv (from UHB, unpointed) and qere of the segment's words; the text shows the qere, as MACULA does.
 
   python -m macula.build_clause_layout [--books RUT,DAN] [--out macula/data/clause-layout]
+  python -m macula.build_clause_layout --profile reader     # a profile (macula/profiles/reader.toml), into its own folder
+  python -m macula.build_clause_layout --config my.toml     # any settings file, a full one or a profile
 
 Writes clauses/<BOOK>/<BOOK>_<CCC>.jsonl, layout/<BOOK>/<BOOK>_<CCC>.txt and build.json.
 """
@@ -250,13 +252,19 @@ def chapter_segments(rows: list[sqlite3.Row], nodes: dict[int, sqlite3.Row], par
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--books", help="comma-separated USFM codes (default: all Hebrew books)")
-    ap.add_argument("--out", default=str(SHORESH / "macula" / "data" / "clause-layout"))
+    ap.add_argument("--out", help="output folder (default macula/data/clause-layout, or clause-layout-profiles/<profile> for a profile)")
     ap.add_argument("--uhb-cache", default=str(SHORESH / "macula" / "data" / "uhb"), help="downloaded UHB USFM (cached per tag)")
     ap.add_argument("--config", help="rules and settings file (default macula/clause_layout.toml)")
+    ap.add_argument("--profile", help="a profile in macula/profiles/<name>.toml, merged over what it extends")
     a = ap.parse_args()
-    if a.config:
-        discourse_rules.configure(a.config)
-    out = Path(a.out)
+    if a.config and a.profile:
+        ap.error("give --config or --profile, not both")
+    if a.config or a.profile:
+        discourse_rules.configure(a.config, a.profile)
+    profile = discourse_rules.PROFILE
+    data = SHORESH / "macula" / "data"
+    out = Path(a.out) if a.out else data / "clause-layout" if profile == discourse_rules.BASE_PROFILE else data / "clause-layout-profiles" / profile
+    print(f"profile {profile} -> {out}")
     tp = trees_macula.trees_path()
     con = sqlite3.connect(f"file:{tp}?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
@@ -391,7 +399,9 @@ def main() -> None:
                            "tree_depth": "number of links up the discourse_parent chain whose relation is not in tree_flat",
                            "text_depth_law": " ".join(discourse_rules.CFG["depth"]["law"]["doc"].split()),
                            "conditional_inversion": " ".join(discourse_rules.CFG["conventions"]["conditional_inversion"]["doc"].split())},
-             "rules_config": {"file": discourse_rules.CONFIG_FILE, "sha256": discourse_rules.CONFIG_SHA256,
+             "rules_config": {"profile": profile, "profile_doc": " ".join(discourse_rules.CFG["profile"]["doc"].split()),
+                              "files": [{"file": f, "sha256": h} for f, h in discourse_rules.CONFIG_FILES],
+                              "sha256": discourse_rules.CONFIG_SHA256, "changed_by_profile": discourse_rules.PROFILE_CHANGED,
                               "limited_rules": {r: sc for r, sc in discourse_rules.SCOPE.items() if sc != "all"}},
              "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0)"}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

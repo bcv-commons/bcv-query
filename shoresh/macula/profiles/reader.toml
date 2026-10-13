@@ -1,0 +1,10 @@
+# A profile: it extends the default settings (macula/clause_layout.toml) and overrides only what it changes. See the header there.
+
+[profile]
+name = "reader"
+extends = "default"
+doc = """A flatter view for reading: a "therefore" sentence (לָכֵן / עַל־כֵּן, relation consequence) stays on the line of the clause
+before it instead of one level in. Everything else as the default profile."""
+
+[relations.consequence]
+adds_text_level = false
