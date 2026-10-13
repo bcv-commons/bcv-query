@@ -82,3 +82,22 @@ def test_relation_model_invariants():
     assert all(v["relation"] in d.RELATIONS for v in out.values() if v["relation"])
     assert all(v["depth"] <= v["tree_depth"] for v in out.values())
     assert sum(v["parent"] is None for v in out.values()) <= 2
+
+
+def test_rule_scopes():
+    """v0.11: every named rule is used in derive, and a scope limits it to its books ("poetic" = poetry and the prophets)."""
+    import inspect
+    from macula import discourse_rules as d
+    src = inspect.getsource(d.derive)
+    assert all(f'on("{name}")' in src for name in d.SCOPE)
+    c = {"verse": ("DEU", 2, 9), "poetic": False, "poetry": False}
+    assert d.active("quotation_lines", c) and not d.active("narrator_frames", c)                 # Deut 2:9: Moses retelling, no 1st-person narrator
+    assert d.active("narrator_frames", {**c, "verse": ("EZK", 11, 5)})
+    old = d.SCOPE["quotation_lines"]
+    try:
+        d.SCOPE["quotation_lines"] = "poetic"
+        assert not d.active("quotation_lines", c) and d.active("quotation_lines", {**c, "poetic": True})
+        d.SCOPE["quotation_lines"] = "none"
+        assert not d.active("quotation_lines", {**c, "poetic": True})
+    finally:
+        d.SCOPE["quotation_lines"] = old

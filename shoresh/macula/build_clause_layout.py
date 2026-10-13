@@ -260,6 +260,9 @@ def main() -> None:
     con.row_factory = sqlite3.Row
     nodes = {r["id"]: r for r in con.execute("SELECT id, rule, role FROM nodes WHERE corpus='hbo' AND cls='cl'")}
     parents = _clause_parents(con)
+    subj_ranges: dict[int, list] = collections.defaultdict(list)     # clause id -> word seq ranges of its subject phrases (role s)
+    for r in con.execute("SELECT parent, lo, hi FROM nodes WHERE corpus='hbo' AND role='s'"):
+        subj_ranges[r["parent"]].append((r["lo"], r["hi"]))
     books = a.books.upper().split(",") if a.books else [r[0] for r in con.execute("SELECT book FROM words WHERE corpus='hbo' GROUP BY book ORDER BY MIN(seq)")]
     chapters_out: list[tuple[str, int, list[dict]]] = []
     resets: set[str] = set()               # first word key after which a speech cannot continue
@@ -324,7 +327,7 @@ def main() -> None:
     for cid, (book, ch, v) in first_seen.items():
         by_book[book].append({"key": clause_key[cid], "verse": (book, ch, v), "parent_key": clause_key.get(parents.get(cid)) if parents.get(cid) else None,
                               "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
-                                                             nodes[cid]["role"] if cid in nodes else None),
+                                                             nodes[cid]["role"] if cid in nodes else None, subj_ranges.get(cid)),
                               "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "poetry": book in POETRY,
                               "poetic": book in RESET_AT_PARAGRAPH, "para": clause_key[cid] in paras})
     for book, cl in by_book.items():
