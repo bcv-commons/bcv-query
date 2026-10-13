@@ -54,7 +54,7 @@ def test_ketiv_qere_from_uhb_cache():
 def test_discourse_rules_subordinators():
     """Lemma sets compare in NFC (MACULA's pointing order differs from typed literals); Hebrew הֵן is "behold", Aramaic הֵן is "if"."""
     from macula import discourse_rules as d
-    assert d.RULES_VERSION >= "0.2"
+    assert tuple(int(x) for x in d.RULES_VERSION.split(".")) >= (0, 2)
     assert d.is_subordinator({"lemma": "\u05db\u05bc\u05b4\u05d9", "wlang": "H"})                  # כִּי in MACULA's order (dagesh first)
     assert not d.is_subordinator({"lemma": "הֵן", "wlang": "H"}) and d.is_subordinator({"lemma": "הֵן", "wlang": "A"})
 

@@ -52,6 +52,16 @@ narrative speaking clause (Amos 1:2 "וַיֹּאמַר", "וַיְהִי דְב
     causal (כִּי after its main clause, יַעַן, עֵקֶב, Aramaic כָּל־קֳבֵל דִּי, verse-initial דִּי), purpose (לְמַעַן, פֶּן, לְ + infinitive),
     temporal (כַּאֲשֶׁר, עַד, טֶרֶם, בְּ/כְּ + infinitive), conditional (אִם, לוּ, לוּלֵא, אִלּוּ, Aramaic הֵן, and a כִּי before its main
     clause: casuistic law), relative (אֲשֶׁר, דִּי, שֶׁ), circumstantial (participle), complement (infinitive without a preposition).
+  PROPHETIC SPEECH (opened by כֹּה אָמַר, a command to say, or the word-event formula with its לֵאמֹר): a wayyiqtol inside it is retold
+    history (Jer 2:5 "וַיֵּלְכוּ אַחֲרֵי הַהֶבֶל וַיֶּהְבָּלוּ"; Ezek 16, 20, 23), not the narrative resuming. The narrative resumes only
+    with a narrative frame: a new word-event formula, a wayyiqtol of saying with a named speaker ("וַיֹּאמֶר יְהוָה אֵלַי"), a 3rd-person
+    wayyiqtol with a named subject and no 1st/2nd-person pronoun (Jonah 1:3 "וַיָּקָם יוֹנָה"; not Ezek 23:5 "וַתִּזֶן אָהֳלָה תַּחְתָּי"), a dated
+    וַיְהִי, a new chapter, or the narrator's own "וָאֹמַר" (1st person, without a 3rd-person addressee: not God's "וָאֹמַר אֲלֵהֶם").
+    A quotation introduced by a 2nd-person or future verb of saying (Mal 1:2 "וַאֲמַרְתֶּם", "תֹּאמְרוּ") ends with its verse.
+    adversative    "כִּי אִם" right after a negated clause: "not … but" (Jer 7:22-23), on that clause; flat.
+    consequence    לָכֵן / עַל־כֵּן "therefore", on the main clause before it, one level deeper (BHSA's convention).
+    A verse-initial "for" (כִּי) in poetry and prophecy looks back to the clause before; a clause meant to hang forward that finds
+    nothing to hang on (or only a clause inside itself) hangs on the clause before it.
   OATHS (נִשְׁבַּעְתִּי, כֹּה יַעֲשֶׂה … וְכֹה יֹסִיף, חַי ...): while the speech goes on, a following כִּי/אִם clause that opens its verse or
     follows the oath directly is its complement (the content of the oath), and a reason clause (יַעַן, עֵקֶב) is causal on the oath.
   POETRY AND PROPHECY: a וְ-clause right after a subordinate clause in the same verse (no main clause between) continues it, with
@@ -89,7 +99,7 @@ def _n(s: str | None) -> str:
     return unicodedata.normalize("NFC", s or "")
 
 
-RULES_VERSION = "0.9"
+RULES_VERSION = "0.10"
 
 SPEAK = {"559", "1696", "6680", "6030", "7592",          # אָמַר, דָּבַר, צָוָה, עָנָה, שָׁאַל (Strong's, MACULA strong column)
          "560", "6032", "4449"}                           # Aramaic אֲמַר, עֲנָה, מְלַל
@@ -104,11 +114,11 @@ CHAIN_FORMS_SPEECH = {"yiqtol", "qatal", "imperative", "jussive", "cohortative"}
 INFINITIVE = {"infinitive construct", "infinitive absolute"}
 PARTICIPLE = {"participle active", "participle passive"}
 FLAT = {"continuation", "coordination", "asyndetic", "inquit", "parallel",    # add no level to text_depth
-        "vocative", "circumstantial"}
+        "vocative", "circumstantial", "adversative"}
 FLAT_RULES = {"embedded_flat"}                                                 # links set by these rules add no level to text_depth
 TREE_FLAT = {"parallel"}                                                       # add no level to tree_depth
 RELATIONS = ["continuation", "coordination", "asyndetic", "speech", "inquit", "causal", "purpose", "temporal", "conditional", "relative",
-             "circumstantial", "complement", "vocative", "embedded", "parallel"]
+             "circumstantial", "complement", "vocative", "embedded", "parallel", "adversative", "consequence"]
 
 _SUB_KIND = {"כִּי": "causal", "יַעַן": "causal", "עֵקֶב": "causal", "אִם": "conditional", "לוּ": "conditional", "לוּלֵא": "conditional",
              "אִלּוּ": "conditional", "לְמַעַן": "purpose", "פֶּן": "purpose", "עַד": "temporal", "טֶרֶם": "temporal",
@@ -125,6 +135,8 @@ KO, HAY, MELEK = _n("כֹּה"), _n("חַי"), _n("מֶלֶךְ")
 FORMULA = {_n("נְאֻם")}
 SELAH = _n("סֶלָה")
 SHALOM = _n("שָׁלוֹם")
+LAKHEN, AL, KEN = _n("לָכֵן"), _n("עַל"), _n("כֵּן")
+TIME_WORDS = {_n(x) for x in ("יוֹם", "שָׁנָה", "חֹדֶשׁ", "עֵת", "אַחַר", "בֹּקֶר", "עֶרֶב", "לַיְלָה")}
 HEAR = {"8085", "238", "995", "3947"}                     # שִׁמְעוּ, הַאֲזִינוּ, הָבִינוּ, קְחוּ: imperatives of hearing count as one opening
 
 
@@ -197,6 +209,15 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             # a 1st/2nd-person pronoun in a wayyiqtol clause ("וַתִּפָּעֶם רוּחִי") marks it as part of a speech, not the narrative
             "pron12": any(t["class"] == "pron" and person.get(t["key"]) in ("first", "second") for t in toks),
             "pron1": any(t["class"] == "pron" and person.get(t["key"]) == "first" for t in toks),
+            "pron3": any(t["class"] == "pron" and person.get(t["key"]) == "third" for t in toks),
+            "l1": l1, "negated": any(t["wtype"] == "negative" for t in toks),
+            "proper": any(t["wtype"] == "proper" for t in toks),
+            "named_subject": any(t["wtype"] == "proper" and t["role"] == "s" for t in toks),
+            # the word-event formula (וַיְהִי דְבַר־יְהוָה אֵלַי; הַדָּבָר אֲשֶׁר הָיָה אֶל־יִרְמְיָהוּ מֵאֵת יְהוָה) and a dated וַיְהִי
+            "word_event": bool(v) and _strong(v) == "1961" and any(_strong(t) in ("1697", "3068") for t in toks),
+            "time_wayehi": bool(v) and _strong(v) == "1961" and v["wtype"] == "wayyiqtol" and any(_n(t["lemma"]) in TIME_WORDS for t in toks),
+            # לָכֵן / עַל־כֵּן "therefore": the consequence of what was said before
+            "consequence": l0 == LAKHEN or (l0 == AL and l1 == KEN),
             # the messenger formula כֹּה אָמַר (יְהוָה), and a command to say something: אֱמֹר, וְאָמַרְתָּ, כֹּה תֹאמַר
             "messenger": l0 == KO and bool(v) and _strong(v) in AMAR and v["wtype"] == "qatal",
             "command_say": bool(v) and _strong(v) in AMAR and not has_object and (v["wtype"] == "imperative" or (
@@ -219,6 +240,9 @@ class _Line:
         self.spk, self.opened, self.scoped = spk, opened, scoped
         self.long = long                          # a messenger or commanded speech: lasts to the next paragraph mark
         self.carries = False                      # a command to say at the start of a speech: lasts as long as that speech
+        self.prophetic = False                    # opened by כֹּה אָמַר, a command to say, or the word-event formula: a wayyiqtol inside
+                                                  # it is retold history, not the narrative resuming
+        self.short = False                        # a quotation introduced by a 2nd-person or future verb of saying: ends after the next verse
         self.to_me = to_me                        # the speech is addressed to "me" (וַיְהִי דְבַר־יְהוָה אֵלַי): a 1st-person narrator
         self.last: str | None = None              # last main clause on the line
         self.verse_mains: dict = {}               # verse -> main clauses of the line in that verse
@@ -239,6 +263,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     prev_top: str | None = None                   # previous non-embedded clause
     clauses_verse: dict = {}                      # clause key -> verse
     pron1_of: dict = {}                           # clause key -> it has a 1st-person pronoun
+    we_of: dict = {}                              # clause key -> it is a word-event formula
+    neg_of: dict = {}                             # clause key -> it is negated
+    pending_prev: dict = {}                       # forward clause -> the clause before it (fallback parent)
     form_of: dict = {}                            # main clause key -> verb form
 
     # lookahead: עָנָה needs a following אָמַר in the verse; indirect speech has only a לְ + infinitive after it in the verse
@@ -274,10 +301,20 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 out[p]["parent"] = k
                 if out[p]["relation"] is None:
                     out[p]["relation"] = "embedded"
+            elif pending_prev.get(p):             # the next main clause lies inside it: the clause before it instead
+                out[p]["parent"] = pending_prev[p]
+        pending.clear()
+
+    def fallback_pending():
+        for p in pending:                        # nothing came to hang on: the clause before it
+            if out[p]["parent"] is None and pending_prev.get(p):
+                out[p]["parent"] = pending_prev[p]
         pending.clear()
 
     for i, c in enumerate(clauses):
         k, f, vref = c["key"], c["f"], c["verse"]
+        if c.get("reset") or c.get("chapter_start"):
+            fallback_pending()
         if c.get("reset"):
             lines = [_Line(None, vi)]
             pending.clear()
@@ -286,6 +323,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             if j is not None:
                 lines = lines[:j]
         if not c.get("reset") and c.get("chapter_start"):
+            j = next((x for x in range(1, len(lines)) if lines[x].prophetic), None)
+            if j is not None:                     # a new chapter ends a prophetic speech
+                lines = lines[:j]
             for ln in lines:                      # a chapter starts each line afresh (the speech goes on, its chain restarts)
                 ln.last = None
                 ln.openers = {}
@@ -293,13 +333,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             vi, prev_v = vi + 1, vref
             while len(lines) > 1 and lines[-1].scoped:                  # a poetry quotation ends with its verse
                 lines.pop()
-            while len(lines) > 2 and not lines[-1].long and lines[-1].opened < vi - 1:   # a nested speech ends after the next verse
-                lines.pop()
+            while len(lines) > 1 and not lines[-1].long and lines[-1].opened < vi - 1 and (len(lines) > 2 or lines[-1].short):
+                lines.pop()                       # a nested speech, or a short quotation, ends after the next verse
         if f["selah"]:
             while len(lines) > 1 and lines[-1].scoped:
                 lines.pop()
         line = lines[-1]
-        pron1_of[k] = f["pron1"]
+        pron1_of[k], we_of[k], neg_of[k] = f["pron1"], f["word_event"], f["negated"]
 
         # ---- embedded: keep the MACULA parent
         if c["parent_key"]:
@@ -311,14 +351,24 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 if len(lines) > 1 and lines[-1].spk == c["parent_key"]:
                     lines[-1].spk = k
                 else:
-                    lines.append(_Line(k, vi, to_me=pron1_of.get(c["parent_key"], False) or f["pron1"]))
+                    ln = _Line(k, vi, to_me=pron1_of.get(c["parent_key"], False) or f["pron1"])
+                    ln.prophetic = we_of.get(c["parent_key"], False)
+                    lines.append(ln)
             continue
 
         # ---- the narrative resumes
         resumes = (f["form"] == "wayyiqtol" and f["person"] == "third" and not f["pron12"]) or (
-            f["form"] == "wayyiqtol" and f["person"] == "first" and any(ln.to_me for ln in lines[1:])) or (
+            f["form"] == "wayyiqtol" and f["person"] == "first" and f["verb"] in AMAR and not f["pron3"]
+            and any(ln.to_me for ln in lines[1:])) or (
             f["aramaic"] and (f["step"] or (f["speak"] and f["person"] in ("third", None) and f["form"] in ("qatal",) + tuple(PARTICIPLE)
                                          and (f["verb"] not in ANSWER or amar_after[i]))))
+        if any(ln.prophetic for ln in lines[1:]):
+            # inside a prophetic speech a wayyiqtol is retold history (Jer 2:5); the narrative resumes only with a narrative frame
+            resumes = f["word_event"] or f["time_wayehi"] or (f["speak"] and f["form"] == "wayyiqtol" and f["proper"]) or (
+                # a narrative step names its actor and refers to no "me"/"you" (Jonah 1:3 "וַיָּקָם יוֹנָה"), unlike retold history
+                f["form"] == "wayyiqtol" and f["person"] == "third" and f["named_subject"] and not f["pron12"]) or (
+                f["form"] == "wayyiqtol" and f["person"] == "first" and f["verb"] in AMAR and not f["pron3"]
+                and any(ln.to_me for ln in lines[1:]))
         if len(lines) > 1 and resumes:
             lines = lines[:1]
             line = lines[0]
@@ -342,6 +392,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 link(k, None, None, "vocative_fwd")
                 out[k]["relation"] = "vocative"
                 pending.append(k)
+                pending_prev[k] = prev_top_key
             continue
 
         # ---- oath content and reasons
@@ -351,6 +402,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             continue
 
         # ---- subordinate clauses (a subordinate clause that opens a speech is the speech's first clause: Ruth 1:10)
+        if f["lead"] == KI and f["l1"] == IM and prev_top_key and neg_of.get(prev_top_key):
+            link(k, prev_top_key, "adversative", "adversative")   # "כִּי לֹא … כִּי אִם": not … but (Jer 7:22-23)
+            continue
         if f["sub_kind"] and not (line.spk and line.last is None):
             prev = line.subs.get(f["lead"]) if f["lead"] else None
             same_ch = prev is not None and clauses_verse.get(prev, (None, None))[:2] == vref[:2]
@@ -360,13 +414,16 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 mains = line.verse_mains.get(vref, [])
                 if mains:
                     link(k, mains[-1], f["sub_kind"], "sub_back")  # the nearest main clause before it
-                elif first_in_verse and (f["di_first"] and f["aramaic"] or f["participle"]) and line.last is not None:
+                elif first_in_verse and line.last is not None and (f["di_first"] and f["aramaic"] or f["participle"]
+                                                                   or (f["sub_kind"] == "causal" and c.get("poetic"))):
+                    # a verse-initial Aramaic דִּי, participle, or (poetry and prophecy) "for": it explains what came before
                     link(k, line.last, "causal" if f["di_first"] else f["sub_kind"], "look_back")
                 else:
-                    rel = "conditional" if f["sub_kind"] == "causal" and f["lead"] == KI else f["sub_kind"]
+                    rel = "conditional" if f["sub_kind"] == "causal" and f["lead"] == KI and not c.get("poetic") else f["sub_kind"]
                     link(k, None, None, "sub_fwd")
                     out[k]["relation"] = rel
                     pending.append(k)
+                    pending_prev[k] = prev_top_key
             if f["lead"]:
                 line.subs[f["lead"]] = k
             continue
@@ -396,6 +453,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 while out.get(parent, {}).get("relation") in ("continuation", "coordination", "parallel") and out[parent]["parent"] \
                         and clauses_verse.get(out[parent]["parent"]) == run_verse:
                     parent = out[parent]["parent"]
+        if f["consequence"] and line.last is not None:
+            rel = "consequence"                   # לָכֵן / עַל־כֵּן on the clause before it (BHSA's convention: one level deeper)
+            parent = line.last
         if rel == "continuation" and f["subj"]:   # a chain clause naming its subject goes on the last chain clause that named one
             x = parent
             while x and not out[x].get("subj") and out[x]["relation"] in ("continuation", "coordination", "parallel") and out[x]["parent"]:
@@ -434,12 +494,17 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             ln = _Line(k, vi, scoped=bool(c.get("poetry")), long=not c.get("poetry"), to_me=f["pron1"])
             # Lev 1:2 "דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל וְאָמַרְתָּ אֲלֵהֶם": a command to say at the start of a speech carries the rest of it
             ln.carries = f["command_say"] and in_speech and line.opened >= vi - 1 and not c.get("poetry")
+            ln.prophetic = True
             lines.append(ln)
         elif f["lemor"] or (speaks and (not in_speech or narrated)):
-            lines.append(_Line(k, vi, to_me=f["pron1"]))
+            ln = _Line(k, vi, to_me=f["pron1"])
+            # "וַאֲמַרְתֶּם", "תֹּאמְרוּ", "יֹאמַר": a quotation, not a narrated speech; it ends with its verse (Mal 1:6-7 disputations)
+            ln.scoped = not f["lemor"] and not narrated and not (f["person"] == "first" and f["form"] in ("wayyiqtol", "qatal"))
+            lines.append(ln)
         elif c.get("poetry") and f["ptc_saying"]:
             lines.append(_Line(k, vi, scoped=True))
 
+    fallback_pending()
     for k in out:
         ch = chain(k)
         out[k]["tree_depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in TREE_FLAT)
