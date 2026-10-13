@@ -3,6 +3,7 @@
 #
 # Every decision of the clause-layout build that is not mechanics lives in this file:
 #
+#   [sources.*]        the external inputs (MACULA Hebrew, the lexeme spine, UHB, the versification map), pinned and checked
 #   [books.*]          book groups that rules can be limited to
 #   [scopes]           what a rule's `scope` can say
 #   [words.*]          the words the rules look for (Strong's numbers, lemmas)
@@ -29,6 +30,52 @@
 # - Try a changed copy without editing this one: python -m macula.build_clause_layout --config my.toml --out /tmp/x
 
 version = "0.11"
+
+
+# ------------------------------------------------------------------------------------------------------------------------- sources
+# The external inputs of the build, pinned. The build checks every input it uses against these pins before it writes anything, and
+# stops with the value it found when one differs. Updating a source is a deliberate edit here (and shows in the output's build.json).
+
+[sources.macula_hebrew]
+doc = """MACULA Hebrew syntax trees (Clear Bible): words, clauses, roles, Strong's numbers. Read through trees-macula.db, built by
+`python -m macula.parse_lowfat_hbo` (a shallow clone of the repository at its newest commit) and `python -m macula.build_trees`, which
+records the commit it was built from. The current trees-macula.db (built 2026-10-08) predates that record; it was built from the
+clone made on 2026-10-03, at the commit below."""
+repository = "https://github.com/Clear-Bible/macula-hebrew"
+path = "WLC/lowfat"
+commit = "47db250bd55d0d8577f2a94fba114ef16c35b23c"      # 2026-04-24
+licence = "CC BY 4.0"
+trees_db_sha256 = "efe5b5a1c5e8cea4f8b273328b665c58a49cd663ee24537ddac52c4f7c192f44"
+
+[sources.lexeme_spine]
+doc = """Our lexeme spine (bcv-commons, built from MACULA Hebrew and Greek, with STEPBible extended Strong's numbers): the person of each
+verb and pronoun. Pinned by its spine_content_sha256 (spine_meta), which changes with any row."""
+file = "lexeme-spine-macula.db"
+spine_content_sha256 = "471a3ac7fb152fac5f31e28a383451a0ff35b8d4f2fb5f9a73ff2fe108d742a8"
+licence = "CC BY 4.0"
+
+[sources.uhb]
+doc = """unfoldingWord Hebrew Bible, for the ketiv (which MACULA leaves out) only. Downloaded per book from the tag and cached in
+macula/data/uhb/<tag>/. v3.0.0 marks 1,281 ketiv, v2.1.32 only 672."""
+repository = "https://git.door43.org/unfoldingWord/hbo_uhb"
+tag = "v3.0.0"
+url = "https://git.door43.org/unfoldingWord/hbo_uhb/raw/tag/{tag}/{nn:02d}-{code}.usfm"
+licence = "CC BY-SA 4.0"
+
+[sources.versification]
+doc = """bcv-commons/bibles' verse map from Hebrew (org) to English numbering, derived from STEPBible TVTMS, for verse_ref_en. Read
+through vrsmap from cdn.bibel.wiki (cached in data/vrs, revalidated daily), so a change published by bibles stops the build here."""
+repository = "https://github.com/bcv-commons/bibles"
+cdn = "https://cdn.bibel.wiki/_vrs/"
+tvtms_rev = "902681f77a4a2975b809555ff3c35ffe3c48a1d5"
+licence = "CC BY 4.0"
+
+[sources.versification.sha256]
+"org-to-eng.json" = "efed1a4ea7e4e4ac5bab19f78a759ba641d0f25af086863c1fb1ff5327b83c98"
+"org-to-eng.multiverse.json" = "814549a9d64256e36a44c59c1106e4b269156a8cf19accdd64a649690771985d"
+"org.vrs" = "bf70cea4115322d4b286206f240e90d12cf16abeec39ba351df1ef8cf9174e23"
+"eng.vrs" = "743d88327cf2e0c6dd0cafb15f61cde0e67512a9ede03011520ffd660a9cb256"
+
 
 
 # ------------------------------------------------------------------------------------------------------------------------- books
@@ -803,3 +850,48 @@ verse_ref_en = "PSA 13:6"
 [versification.split_verses."ISA 63:19"]
 from_key = "230630190101"                # לוּא־קָרַעְתָּ ...; before it English 63:19
 verse_ref_en = "ISA 64:1"
+
+
+# ------------------------------------------------------------------------------------------------------------------------- source checksums
+# The UHB files as downloaded from the tag (see [sources.uhb]).
+
+[sources.uhb.sha256]
+"01-GEN.usfm" = "5b9391454b6b6f358838f2cbfd4f5b5cd90b447ad4320e087b698f2b9c167d71"
+"02-EXO.usfm" = "53524941aba828f1d43f4597d90c87b4c6cb20af19a8da9a207b5f3d3cf9b1af"
+"03-LEV.usfm" = "743851eea946322a46a2aa73e24bfabd2c74bee18461a866f0cc3123ad149764"
+"04-NUM.usfm" = "1f7ca4b811cbbfcf1573dc8b031459ae4b8e5ae2a68aee9931e3c7ba99feb5f2"
+"05-DEU.usfm" = "9b78a57142945378c9f40790a02f938a5f983068851d696cc8e346ee80a91b99"
+"06-JOS.usfm" = "3a5d806df6a1e99ce103cb51c1ecbc6c679116b86a31d843a20752e7230e8c12"
+"07-JDG.usfm" = "8f1ddd216266a3ae89bbcb43bd7a9daf11d4f751f3ad06681d5d2200851b59be"
+"08-RUT.usfm" = "1aabf446e31eba7603aa2998d9e69b0b8490533b06fa39b1b35ac7968315e4b4"
+"09-1SA.usfm" = "5ccb143d41a2df45a9e974b4d43bafe2ab05a4dda4117b2013c64f416170c425"
+"10-2SA.usfm" = "33a8b6ab46c0ac89dc52753ffcde741968835abb963e8022f3d4fd00c0874f34"
+"11-1KI.usfm" = "8574c256c68d56675b39a2b94697e5e770992c32c0e2179d7abdd27ad2c24129"
+"12-2KI.usfm" = "ceb209c29343873294df19d43383d595f81d6311e03f1506e11f0e55f4b88cb6"
+"13-1CH.usfm" = "8d3e9d7820fab78a2039ff5aff4190b1ada848b454b8df806e609db7e48b0170"
+"14-2CH.usfm" = "d7fdf85b9e301be330bc21e580e3c8cc1da6864163133bf60bc4ab362ddb41c7"
+"15-EZR.usfm" = "970b897c2ccbf9dd0a1cc6c7062906c5a03fe75c0d74b6b7562c0db2a60aac4d"
+"16-NEH.usfm" = "905af5be17f86afdd7788bc6ce737892fcc1765b6b9466f7cc4330393cb160e9"
+"17-EST.usfm" = "0ef7f517beed824ccd56ebb38ec7e7fc98a0ccf924bfa2cf07468398a14c58d9"
+"18-JOB.usfm" = "7870767cf008277c637a431a89a76fb5524f74ae862f3466f37a08136d22c40c"
+"19-PSA.usfm" = "65ee8cad3b1f5a51f3b1def641720aceb2dfa24e167cca3bf7a69ba611c378de"
+"20-PRO.usfm" = "d131891fdc6c16564321217a4571328b823ae295f12c40379c97ba0e86080f19"
+"21-ECC.usfm" = "ab764de7ba02203dbf0b695384c840aefc8da7a522dcb219b985a321cad7a9a8"
+"22-SNG.usfm" = "04f46d42fa80c4235104ab68224984a565de3c7f5b3746cf977746589a83d4ff"
+"23-ISA.usfm" = "babc954b429e5badb506ae0eb43155604f457bcee2f3b55d93a1dfd6d8dcd1a2"
+"24-JER.usfm" = "a0e4e421260e5d7e22abb75716f239470fb25a922501780ce2877042e3ac7224"
+"25-LAM.usfm" = "64de95dde6f15da4c2ac2a66e8008af1275f04fad33483d92091bb0fd1d1556a"
+"26-EZK.usfm" = "23b9f380391adacbc99b5a2118a8d90999c35a9ef892ca69c13cb92d8800bfe0"
+"27-DAN.usfm" = "1b407e3cd265bcfc54397029c4c8d85c99092679086509f8f4d252b39b9bf50e"
+"28-HOS.usfm" = "48266ed77b7cfeef9975f663661ac9f897a7e7098cf81ceea76578195bd4587a"
+"29-JOL.usfm" = "70f107074fe3f2c38ca4e8b903c34925fd6a8010d000ec20823c93f8daf19079"
+"30-AMO.usfm" = "44cf5fa1397ffc614bfb13649e55a9d2e11eda88a58b1ebfaf8760d18169b9f6"
+"31-OBA.usfm" = "20f1c5608b69610ba14849a2c9e94b7c222e32b1e5904d750793c0df834bd409"
+"32-JON.usfm" = "55a36ef7ab573305e6281d5ae28223fe525e478f7e12e946b64099f6b646ca7b"
+"33-MIC.usfm" = "b70bb5e8771f1417c54b6801f6598e95a76afd8976650b8e149aed3c428cd8fd"
+"34-NAM.usfm" = "c003b432e70f191ed4021c1ec2606e42887217d3235200d7e53a7903c785de70"
+"35-HAB.usfm" = "cea0106e6a87406b2674bf7bee00d8844bbcfbad1c2129eedd80e728ba4164f3"
+"36-ZEP.usfm" = "6d360c0c82fc119306a7c305e8484ddb6f934d57e18de64ecc03d2837398dd32"
+"37-HAG.usfm" = "00a781e80615b027d9bde6daaedf20584725b6ee7ae98b47b4538495a8422818"
+"38-ZEC.usfm" = "7ac70cb64c902ebfb24b25c2d85b14378091718d350e102445cbf1537233a496"
+"39-MAL.usfm" = "8deb41e02987d94ba55958efd9359e850e9149d855a2927dc2d33775a68a87e6"

@@ -38,9 +38,13 @@ from macula import discourse_rules  # noqa: E402
 import vrsmap  # noqa: E402
 from spine.common import FILENUM  # noqa: E402
 
-# UHB for ketiv/qere only. Pinned separately from the spine's UHB (v2.1.32): v3.0.0 marks 1,281 ketiv, v2.1.32 only 672.
-UHB_TAG = "v3.0.0"
-UHB_URL = "https://git.door43.org/unfoldingWord/hbo_uhb/raw/tag/%s/{nn:02d}-{code}.usfm" % UHB_TAG
+# The external sources (MACULA Hebrew, the lexeme spine, UHB for ketiv/qere, the versification map) are pinned in
+# macula/clause_layout.toml [sources.*] and checked by macula.sources before anything is written.
+_uhb_read: set[str] = set()                # UHB files this build read (checked against their pins)
+
+
+def uhb_source() -> dict:
+    return discourse_rules.CFG["sources"]["uhb"]
 
 FORMAT_VERSION = 1
 LANG = {"H": "hbo", "A": "arc"}
@@ -72,10 +76,12 @@ def _uhb_words(text: str) -> list[dict]:
 
 
 def _uhb_book(code: str, cache: Path) -> str:
-    f = cache / UHB_TAG / f"{FILENUM[code]:02d}-{code}.usfm"
+    u = uhb_source()
+    f = cache / u["tag"] / f"{FILENUM[code]:02d}-{code}.usfm"
+    _uhb_read.add(f.name)
     if not f.exists():
         import httpx
-        r = httpx.get(UHB_URL.format(nn=FILENUM[code], code=code), timeout=120, follow_redirects=True)
+        r = httpx.get(u["url"].format(tag=u["tag"], nn=FILENUM[code], code=code), timeout=120, follow_redirects=True)
         r.raise_for_status()
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(r.text, encoding="utf-8")
@@ -328,6 +334,15 @@ def main() -> None:
                               "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "para": clause_key[cid] in paras})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
+    # every external input this build used, against its pin in clause_layout.toml; nothing is written when one differs
+    import lexeme_macula
+    from macula import sources
+    src_record, problems = sources.check(
+        discourse_rules.CFG["sources"], trees_db=Path(tp), spine_db=Path(lexeme_macula.spine_path()), uhb_dir=Path(a.uhb_cache),
+        uhb_files=sorted(_uhb_read), vrs_files={name: vrsmap._path(name) for name in discourse_rules.CFG["sources"]["versification"]["sha256"]},
+        tvtms_rev=vrsmap.revision("org"))
+    if problems:
+        raise SystemExit("A source differs from its pin in " + discourse_rules.CONFIG_FILE + "; nothing written.\n- " + "\n- ".join(problems))
     seg_hash = hashlib.sha256()
     book_hash: dict[str, "hashlib._Hash"] = {}
     n_seg = 0
@@ -358,11 +373,12 @@ def main() -> None:
     n_ch = len(chapters_out)
     meta = dict(con.execute("SELECT key, value FROM meta").fetchall())
     build = {"format_version": FORMAT_VERSION, "built": datetime.date.today().isoformat(), "books": len(books), "chapters": n_ch, "segments": n_seg,
-             "trees_macula": {"built": meta.get("built"), "source": meta.get("source_hbo"), "sha256": hashlib.sha256(Path(tp).read_bytes()).hexdigest()},
+             "trees_macula": {"built": meta.get("built"), "source": meta.get("source_hbo"), "sha256": src_record["macula_hebrew"]["trees_db_sha256"]},
              "versification": {"map": "org-to-eng (bcv-commons/bibles, from STEPBible TVTMS, CC BY 4.0)", "tvtms_rev": vrsmap.revision("org")},
              "segmentation": {"version": seg_hash.hexdigest()[:16], "note": "sha256 over every segment's book, chapter, verse, first and last word key; "
                               "changes only when segment boundaries change (levels, text and ketiv/qere do not affect it)"},
-             "uhb": {"tag": UHB_TAG, "licence": "CC BY-SA 4.0", "ketiv_qere": dict(kq_stats)},
+             "uhb": {"tag": uhb_source()["tag"], "licence": uhb_source()["licence"], "ketiv_qere": dict(kq_stats)},
+             "sources": src_record,
              "books": {b: {"segments_sha256": h.hexdigest()} for b, h in book_hash.items()},
              "depth": "clause ancestors in the MACULA tree, within the verse", "discourse_rules": discourse_rules.RULES_VERSION,
              "relations": {"all": discourse_rules.RELATIONS, "flat": sorted(discourse_rules.FLAT), "flat_rules": sorted(discourse_rules.FLAT_RULES),

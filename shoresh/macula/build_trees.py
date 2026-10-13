@@ -191,6 +191,15 @@ def finish(con: sqlite3.Connection, spine: Path | None = None) -> None:
     con.execute("DROP INDEX tmp_word_part")
 
 
+def _git_commit(d: Path) -> str | None:
+    """The commit of the git checkout that holds `d` (the MACULA Hebrew clone), recorded in meta and pinned by the clause layout."""
+    import subprocess
+    try:
+        return subprocess.run(["git", "-C", str(d), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip() or None
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--hbo", type=Path, default=Path(os.environ.get("MACULA_HBO_LOWFAT_DIR", HBO_DIR)))
@@ -221,6 +230,7 @@ def main() -> int:
     finish(con, a.spine)
     con.executemany("INSERT INTO meta VALUES (?,?)", [
         ("built", time.strftime("%Y-%m-%d")), ("source_hbo", "Clear-Bible/macula-hebrew WLC/lowfat (CC BY 4.0)"),
+        *([("source_hbo_commit", hbo_commit)] if (hbo_commit := _git_commit(a.hbo)) else []),
         ("source_grc", "Clear-Bible/macula-greek Nestle1904/lowfat (CC BY 4.0)"),
         ("note", "structural attributes only; UBS MARBLE fields and translations are never read")])
     con.commit()

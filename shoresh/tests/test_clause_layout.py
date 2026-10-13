@@ -41,7 +41,7 @@ def test_ketiv_qere_from_uhb_cache():
     import collections
     from macula import build_clause_layout as b
     cache = Path(b.SHORESH) / "macula" / "data" / "uhb"
-    if not (cache / b.UHB_TAG / "27-DAN.usfm").exists():
+    if not (cache / b.uhb_source()["tag"] / "27-DAN.usfm").exists():
         pytest.skip("UHB not downloaded")
     con = sqlite3.connect(f"file:{trees_macula.trees_path()}?mode=ro", uri=True)
     kq = b.ketiv_qere(con, "DAN", cache, collections.Counter())
@@ -135,3 +135,30 @@ def test_configure_another_file(tmp_path):
     finally:
         d.configure()
     assert d.active("circumstantial", "GEN")
+
+
+def test_sources_pinned_and_checked(tmp_path, monkeypatch):
+    """The build checks its inputs against [sources.*] and writes nothing when one differs (here: a changed spine pin)."""
+    import copy
+    from pathlib import Path
+    import lexeme_macula
+    from macula import build_clause_layout as b, discourse_rules as d, sources
+    src = d.CFG["sources"]
+    spine = Path(lexeme_macula.spine_path())
+    common = dict(trees_db=Path(trees_macula.trees_path()), spine_db=spine, uhb_dir=tmp_path, uhb_files=[], vrs_files={}, tvtms_rev=None)
+    bad = copy.deepcopy(src)
+    bad["lexeme_spine"]["spine_content_sha256"] = "0" * 64
+    _, problems = sources.check(bad, **common)
+    assert any(p.startswith("lexeme_spine:") and "spine_content_sha256 = " in p for p in problems)
+    assert any(p.startswith("versification:") for p in problems)                                  # no map files given: reported, not skipped
+    text = d.CONFIG_PATH.read_text(encoding="utf-8").replace(src["lexeme_spine"]["spine_content_sha256"], "0" * 64)
+    alt = tmp_path / "alt.toml"
+    alt.write_text(text, encoding="utf-8")
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "RUT", "--out", str(out), "--config", str(alt)])
+    try:
+        with pytest.raises(SystemExit, match="lexeme_spine"):
+            b.main()
+    finally:
+        d.configure()
+    assert not out.exists()
