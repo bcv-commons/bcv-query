@@ -34,7 +34,7 @@ def configure(path: str | Path | None = None) -> None:
     global CFG, CONFIG_FILE, CONFIG_SHA256, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM
     global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE
-    global OATH_CONTENT, OATH_REASON, QUOTING_SUBS
+    global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
     global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS
@@ -62,6 +62,7 @@ def configure(path: str | Path | None = None) -> None:
     FORMULA, TIME_WORDS = lemmas("formula"), lemmas("time")
     CONSEQUENCE = [[_n(x) for x in seq] for seq in W["consequence"]["sequences"]]
     OATH_CONTENT, OATH_REASON, QUOTING_SUBS = lemmas("oath_content"), lemmas("oath_reason"), lemmas("quoting_subordinators")
+    CASE_OPENERS = lemmas("case_openers")
     P = {k: _n(v) for k, v in W["particle"].items() if k != "doc"}
     WAW, BE, KE, LE, KI, IM, DI = P["waw"], P["be"], P["ke"], P["le"], P["ki"], P["im"], P["di"]
     ADAYIN, QABEL, DENA, KO, HAY, MELEK = P["adayin"], P["qabel"], P["dena"], P["ko"], P["hay"], P["melek"]
@@ -222,6 +223,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "plain_embedded": bool(toks) and toks[0]["class"] not in ("cj", "rel", "prep") and not any(t["wtype"] in INFINITIVE for t in verbs)
                               and not finite and (not verbs or verbs[0]["wtype"] in PARTICIPLE),
             "frame_be": bool(v) and _strong(v) in BE_VERB and v["wtype"] == "weqatal" and len(lead) == 1,
+            "bare_np": not verbs and not waw and bool(lead) and lead[0]["class"] == "noun" and not sub_kind,
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
 
@@ -279,6 +281,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     for c in clauses:
         if c["f"]["second"]:
             second_in_verse[c["verse"]] = True
+    # rule casus_pendens: a bare noun phrase followed in its verse by a clause opened by words.case_openers
+    next_case = [i + 1 < n and clauses[i + 1]["verse"] == c["verse"] and not clauses[i + 1]["parent_key"]
+                 and clauses[i + 1]["f"]["lead"] in CASE_OPENERS for i, c in enumerate(clauses)]
+    cp_of: dict = {}                              # clause key -> it is a casus pendens
+    prot: dict | None = None                      # the open protasis (rule protasis_continued): key, verse, last clause
     wayehi_when = [c["f"]["verb"] in BE_VERB and c["f"]["form"] == "wayyiqtol" and i + 1 < n and clauses[i + 1]["verse"] == c["verse"]
                    and clauses[i + 1]["f"]["sub_kind"] == "temporal" for i, c in enumerate(clauses)]
     for i in range(n):
@@ -318,6 +325,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         indirect = only_inf_after[i] and on("indirect_speech_opens_none")
         if c.get("reset") or c.get("chapter_start"):
             fallback_pending()
+            prot = None
         if c.get("reset"):                        # rules each_psalm_starts_afresh, chapter_after_mark_starts_afresh (builder)
             lines = [_Line(None, vi)]
             pending.clear()
@@ -415,8 +423,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             link(k, line.last, "inquit", "inquit")
             continue
 
+        cp = on("casus_pendens") and f["bare_np"] and next_case[i]
+        cp_of[k] = cp
+
         # ---- rule vocative
-        if on("vocative") and f["vocative"] and second_in_verse.get(vref):
+        if not cp and on("vocative") and f["vocative"] and second_in_verse.get(vref):
             mains = line.verse_mains.get(vref, [])
             if mains:
                 link(k, mains[-1], "vocative", "vocative")
@@ -439,6 +450,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             continue
 
         # ---- subordinate clauses (one that opens a speech is the speech's first clause)
+        if f["sub_kind"] and on("casus_pendens") and prev_top_key and cp_of.get(prev_top_key) and f["lead"] in CASE_OPENERS:
+            link(k, prev_top_key, "conditional", "casus_pendens")    # the case hangs under its topic
+            line.subs[f["lead"]] = k
+            prot = {"verse": vref, "last": k}
+            continue
         if f["sub_kind"] and not (line.spk and line.last is None):
             prev = line.subs.get(f["lead"]) if f["lead"] else None
             same_ch = prev is not None and clauses_verse.get(prev, (None, None))[:2] == vref[:2]
@@ -462,6 +478,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                     rel = "conditional" if f["sub_kind"] == "causal" and f["lead"] == KI and on("ki_before_main_is_conditional") else f["sub_kind"]
                     link(k, None, None, "sub_fwd")
                     out[k]["relation"] = rel
+                    if rel == "conditional":
+                        prot = {"verse": vref, "last": k}
                     pending.append(k)
                     pending_prev[k] = prev_top_key
             if f["lead"]:
@@ -488,6 +506,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                     ("sub_continued",) if on("ki_series_and_look_back") else ()):
             link(k, prev_top_key, "continuation" if f["form"] in CHAIN_FORMS else "coordination", "sub_continued")
             continue
+
+        # ---- rule protasis_continued: an "and"-clause in the open protasis's verse goes on with the protasis
+        if prot is not None and on("protasis_continued") and f["waw"] and vref == prot["verse"] and not f["speak"]:
+            link(k, prot["last"], "continuation" if f["form"] in CHAIN_FORMS else "coordination", "protasis_continued")
+            prot["last"] = k
+            continue
+        prot = None
 
         # ---- rule main_clause_chain
         in_speech = len(lines) > 1

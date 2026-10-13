@@ -29,7 +29,7 @@
 # - build.json records this file's sha256, so every output says which settings made it. Raise `version` when a change alters the output.
 # - Try a changed copy without editing this one: python -m macula.build_clause_layout --config my.toml --out /tmp/x
 
-version = "0.13"
+version = "0.14"
 
 
 # ------------------------------------------------------------------------------------------------------------------------- sources
@@ -94,6 +94,10 @@ books = ["JOB", "PSA", "PRO", "ECC", "SNG", "LAM", "ISA", "JER", "EZK", "HOS", "
 doc = """Books whose oracles are framed by the word-event formula and its commands to speak, so that a paragraph mark divides an oracle
 rather than ending it (Ezekiel: "וַיְהִי דְבַר־יְהוָה אֵלַי לֵאמֹר … בֶּן־אָדָם … וְאָמַרְתָּ … כֹּה אָמַר")."""
 books = ["EZK"]
+
+[books.law]
+doc = "The books of the law: Exodus to Deuteronomy, where casuistic law (\"כִּי …\", \"אִם …\") is frequent."
+books = ["EXO", "LEV", "NUM", "DEU"]
 
 [books.first_person_narrator]
 doc = """Books (or parts of books) whose narrator speaks in the first person: "וַיֹּאמֶר אֵלַי", "וָאֵרֶא". Elsewhere "אֵלַי" in a speech
@@ -245,6 +249,10 @@ lemmas = ["כִּי", "אִם"]
 [words.oath_reason]
 doc = "Conjunctions that open the reason for an oath."
 lemmas = ["יַעַן", "עֵקֶב"]
+
+[words.case_openers]
+doc = "Conjunctions that open a case of law after its topic (\"אִישׁ אִישׁ כִּי־תִשְׂטֶה אִשְׁתּוֹ\") (rule casus_pendens)."
+lemmas = ["כִּי", "אִם"]
 
 [words.quoting_subordinators]
 doc = "A clause opened by one of these with a verb of saying introduces a quotation (Mal 1:4 \"כִּי־תֹאמַר אֱדוֹם\")."
@@ -404,6 +412,17 @@ relation = "conditional"
 laws_in_a_row_stand_level = true
 
 
+[conventions.verse_division]
+doc = """The structure uses only the Masoretic division of the Hebrew text as MACULA gives it (WLC): the verse end (sof pasuq) and the
+paragraph marks (ס/פ, text.paragraph_marks). A paragraph mark inside a verse counts where MACULA's text has one (only Ezra 2:69 and
+2 Chr 27:5); the pisqa be'emtsa pasuq of other editions (Gen 35:22 and others) is not in MACULA's text and is not used. Segments
+never cross a verse; links may. In the Decalogue (Exod 20, Deut 5), which has two accent systems, WLC's verse division counts.
+English versification is only a label (verse_ref_en): it never decides a segment, a link or a level; a verse that English numbering
+divides inside the verse (versification.split_verses) only changes the label of the segments from the given word on.
+Several rules use the verse end ("a quotation ends with its verse", "a verse-initial 'for' looks back"): the sof pasuq is a real
+Masoretic marker but a break in the reading, not the end of a speech, so these rules use it as the signal where nothing better is
+known."""
+
 [conventions.conditional_inversion]
 doc = """In the tree a protasis hangs under its apodosis (relation conditional). A client that wants the other direction in the tree
 inverts each conditional link whose protasis comes before the clause it hangs on (and that is the first of a series): the protasis
@@ -523,6 +542,8 @@ doc = """An embedded clause with no opener (conjunction, relative, preposition),
 "נִגָּף לִפְנֵי אֹיְבֶיךָ"): predicative participles, elliptic halves."""
 [features.frame_be]
 doc = "A bare \"וְהָיָה\": a weqatal of words.be with nothing but וְ (the frame of a fronted condition or time)."
+[features.bare_np]
+doc = "A clause that is a bare noun phrase: no verb, no וְ, no opener, headed by a noun (\"אִישׁ אִישׁ\", \"נֶפֶשׁ\")."
 [features.role]
 doc = "The MACULA clause node's role."
 [features.circ]
@@ -573,7 +594,8 @@ doc = "A new chapter starts each open line afresh: the speech goes on, but its c
 
 [rules.quotation_ends_with_verse]
 scope = "all"
-doc = "A quotation (a line marked as one by the rules that open it) ends with its verse."
+doc = """A quotation (a line marked as one by the rules that open it) ends with its verse: the Masoretic verse end as the signal where
+nothing better is known (conventions.verse_division)."""
 
 [rules.nested_speech_ends_after_next_verse]
 scope = "all"
@@ -731,7 +753,9 @@ examples = ["Jer 7:22-23"]
 scope = "all"
 doc = """The second and later clauses of a series of subordinate clauses with the same opener hang on the one before, as parallel:
 right after it, or for conditionals anywhere in the same chapter. (A subordinate clause that opens a speech is the speech's first
-clause, Ruth 1:10.)"""
+clause, Ruth 1:10.) A convention: the cases of a law stand side by side as alternatives. BHSA hangs each new case one level under
+the case before (in Exodus-Deuteronomy 54 such "וְאִם" clauses as conditional, 7 as parallel), so the law steps in further with every
+case; that is most of the remaining depth gap in Leviticus (Lev 4:13, 4:22, 4:27; Lev 26:14-27)."""
 examples = ["Isa 40:2 כִּי, כִּי, כִּי", "Lev 1:3, 1:10, 1:14 אִם"]
 
 [rules.ki_series_and_look_back]
@@ -766,6 +790,22 @@ scope = "all"
 doc = """A conditional or temporal clause right after a bare "וְהָיָה" (features.frame_be) hangs forward on its apodosis, like a fronted
 protasis, not back on "וְהָיָה". The depths stay the same; the link matters for the conditional inversion."""
 examples = ["Deut 28:1 \"וְהָיָה אִם־שָׁמוֹעַ תִּשְׁמַע … וּנְתָנְךָ\""]
+
+[rules.casus_pendens]
+scope = "law"
+doc = """In law, a bare noun phrase (features.bare_np) followed in its verse by a clause opened by words.case_openers is the topic of the
+law (casus pendens), not an address: it stands on its line as a main clause, the case hangs under it (conditional, one level in), and
+the apodosis comes back to it on the line, level with it."""
+examples = ["Num 5:12 \"אִישׁ אִישׁ כִּי־תִשְׂטֶה אִשְׁתּוֹ\" … 5:15 \"וְהֵבִיא הָאִישׁ\"", "Lev 4:2 \"נֶפֶשׁ כִּי־תֶחֱטָא\""]
+
+[rules.protasis_continued]
+scope = "law"
+doc = """While a protasis waits for its apodosis (a fronted conditional, or a case under its topic), a וְ-clause in the protasis's own
+verse goes on with the protasis (continuation or coordination on the clause before it in the protasis); the first clause that opens
+a new verse, or has no וְ, is the apodosis. The verse end is the Masoretic signal used here: in BHSA's law an apodosis opens a new
+verse 2.6 times as often as a continuation (bsb-add-books' figures), but a continuation can open a verse and an apodosis can follow in
+the same verse (Lev 4:3 "וְהִקְרִיב"), so this rule is an approximation."""
+examples = ["Lev 26:3 \"אִם־בְּחֻקֹּתַי תֵּלֵכוּ וְאֶת־מִצְוֺתַי תִּשְׁמְרוּ וַעֲשִׂיתֶם אֹתָם\" … 26:4 \"וְנָתַתִּי\""]
 
 [rules.ki_before_main_is_conditional]
 scope = "not poetic"
