@@ -218,6 +218,46 @@ def test_expression_rules_at_their_places(tmp_path, monkeypatch):
     assert case15["discourse_parent"] == case14["clause_key"]
 
 
+def test_v018_rules_at_their_places(tmp_path, monkeypatch):
+    """v0.18 rules pinned to the places bsb-add-books named: chapter_starts_at_margin (Lev 7:1), poem_wayyiqtol_continues (Ps 18:8),
+    first_person_wayyiqtol_continues_speech (Lev 17:14), word_content_runs_on (Lev 17:3), wayyiqtol_continues_subordinate (Deut 17:3),
+    the word-event formula needs the word (Ezek 34:24), son_of_man_returns_to_oracle_top (Ezek 33:30), guided_narrative (Ezek 42:1),
+    poem_quotation_ends_with_verse (Ps 73:12), therefore_steps_out (Ps 45:4), lone_subordinator_passes_relation (Eccl 12:1),
+    law_heads_stand_parallel (Lev 13:38), ki_after_be_is_conditional (Exod 12:26)."""
+    import json
+    from macula import build_clause_layout as b
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "LEV,DEU,PSA,EZK,ECC,EXO", "--out", str(out)])
+    b.main()
+
+    def rows(book, ch, v=None):
+        rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
+        return [r for r in rs if v is None or r["verse"] == v]
+    lev7 = rows("LEV", 7)
+    assert lev7[0]["text_depth"] == 0 and lev7[0]["tree_depth"] > 0                    # at the margin; the speech link stays in the tree
+    psa18 = rows("PSA", 18)
+    assert rows("PSA", 18, 8)[0]["text_depth"] > next(r for r in psa18 if r["verse"] == 2)["text_depth"]   # "וַתִּגְעַשׁ" in the song
+    assert all(r["text_depth"] > 0 for v in (14, 15, 16) for r in rows("LEV", 17, v))   # "וָאֹמַר" stays in the LORD's speech
+    lev17 = rows("LEV", 17)
+    by_key = {r["clause_key"]: r for r in lev17}
+    assert by_key[rows("LEV", 17, 3)[0]["discourse_parent"]]["relation"] == "complement"    # the commandment on the לֵאמֹר of 17:2
+    assert rows("DEU", 17, 3)[0]["discourse_rule"] == "sub_continued"                         # "וַיֵּלֶךְ" continues "אֲשֶׁר יַעֲשֶׂה"
+    assert all(r["text_depth"] > 0 for v in range(24, 32) for r in rows("EZK", 34, v))         # "וַאֲנִי יְהוָה" stays in the oracle
+    ezk33 = {r["clause_key"]: r for r in rows("EZK", 33)}
+    you = rows("EZK", 33, 30)[0]
+    assert you["relation"] == "parallel" and ezk33[you["discourse_parent"]]["verse"] == 24     # "וְאַתָּה בֶן־אָדָם" at the oracle's top
+    assert rows("EZK", 42, 1)[0]["text_depth"] == 0                                           # "וַיּוֹצִאֵנִי" is the narrative
+    assert rows("PSA", 73, 12)[0]["text_depth"] == 0                                          # the quotation of 73:11 has ended
+    assert rows("PSA", 45, 4)[0]["text_depth"] == 0                                           # back out after "עַל־כֵּן" (45:3)
+    ecc = rows("ECC", 12, 1)
+    lone = next(i for i, r in enumerate(ecc) if r["relation"] == "temporal")
+    assert ecc[lone + 1]["discourse_rule"] == "sub_continued"                                  # "עַד אֲשֶׁר לֹא" + "יָבֹאוּ"
+    lev13 = {r["clause_key"]: r for r in rows("LEV", 13)}
+    head38 = next(r for r in rows("LEV", 13, 38) if r["discourse_rule"] == "main")
+    assert head38["relation"] == "parallel" and lev13[head38["discourse_parent"]]["verse"] == 29
+    assert any(r["relation"] == "conditional" for r in rows("EXO", 12, 26))                   # "וְהָיָה כִּי־יֹאמְרוּ": when, not for
+
+
 def test_shipped_profiles(tmp_path, monkeypatch):
     """Every profile in macula/profiles loads over what it extends, names itself after its file, passes the relation-model checks, and
     builds into its own folder with the profile recorded in build.json."""

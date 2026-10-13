@@ -1,0 +1,10 @@
+# A profile: it extends the default settings (macula/clause_layout.toml) and overrides only what it changes. See the header there.
+
+[profile]
+name = "continuous"
+extends = "default"
+doc = """Depth counted across chapter breaks: a speech carried over a chapter break keeps its level (Lev 7:1 stays inside God's speech
+of Lev 6, two levels in). The default starts each chapter at the margin."""
+
+[depth]
+chapter_starts_at_margin = false

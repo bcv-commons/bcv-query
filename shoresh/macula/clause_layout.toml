@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.17"
+version = "0.18"
 
 [profile]
 name = "default"
@@ -123,6 +123,10 @@ books = ["EXO", "LEV", "NUM", "DEU"]
 doc = "The narrative books outside the law and the prophets."
 books = ["GEN", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI", "2KI", "1CH", "2CH", "EZR", "NEH", "EST"]
 
+[books.poems]
+doc = "The books of poems: Job, Psalms, Proverbs, Song of Songs, Lamentations, Ecclesiastes."
+books = ["JOB", "PSA", "PRO", "SNG", "LAM", "ECC"]
+
 [books.first_person_narrator]
 doc = """Books (or parts of books) whose narrator speaks in the first person: "וַיֹּאמֶר אֵלַי", "וָאֵרֶא". Elsewhere "אֵלַי" in a speech
 is a character retelling (Deut 2:9 "וַיֹּאמֶר יְהוָה אֵלַי" in Moses' speech)."""
@@ -162,6 +166,17 @@ strong = ["559", "560"]                  # אָמַר, Aramaic אֲמַר
 doc = "The verb whose infinitive with לְ is לֵאמֹר, and with another preposition introduces a quotation (בֶּאֱמָרְכֶם)."
 strong = ["559"]                         # אָמַר
 
+[words.sing_pray]
+doc = "Verbs of singing and praying: the frame of a song or prayer (features.song, rule song_and_prayer_are_poems)."
+strong = [
+    "7891",   # שִׁיר sing
+    "6419",   # פָּלַל pray
+]
+
+[words.song]
+doc = """The song, as the object of a verb of speaking: "וַיְדַבֵּר דָּוִד … אֶת־דִּבְרֵי הַשִּׁירָה הַזֹּאת" (2 Sam 22:1, Deut 31:30)."""
+strong = ["7892"]                        # שִׁיר, שִׁירָה
+
 [words.answer]
 doc = "Verbs of answering: they open a speech only when a verb of saying follows in the verse (rule answer_needs_say)."
 strong = ["6030", "6032"]                # עָנָה, Aramaic עֲנָה
@@ -183,8 +198,9 @@ doc = "הָיָה: the word-event formula (וַיְהִי דְבַר־יְהוָ
 strong = ["1961"]
 
 [words.word_event]
-doc = """With הָיָה, a word of the word-event formula: "וַיְהִי דְבַר־יְהוָה אֵלַי", "הַדָּבָר אֲשֶׁר הָיָה אֶל־יִרְמְיָהוּ מֵאֵת יְהוָה"."""
-strong = ["1697", "3068"]                # דָּבָר, יְהוָה
+doc = """With הָיָה and the word (words.word), the LORD of the word-event formula: "וַיְהִי דְבַר־יְהוָה אֵלַי", "הַדָּבָר אֲשֶׁר הָיָה
+אֶל־יִרְמְיָהוּ מֵאֵת יְהוָה"."""
+strong = ["3068"]                        # יְהוָה
 
 [words.do]
 doc = "עָשָׂה: the compliance formula \"וַיַּעַשׂ כֵּן\", \"וַיַּעֲשׂוּ כֵן\"."
@@ -219,6 +235,43 @@ strong = [
 doc = """Verbs of a command to the prophet to speak (Jer 7:27 "וְדִבַּרְתָּ אֲלֵיהֶם", Ezek "הִנָּבֵא"). Not קָרָא: Lev 25:10
 "וּקְרָאתֶם דְּרוֹר" is law, not a command to speak."""
 strong = ["559", "1696", "5012"]         # אָמַר, דִּבֶּר, נִבָּא
+
+[words.lead_me]
+doc = """Verbs of the guide leading the prophet, with "me" as object: "וַיְבִאֵנִי", "וַיּוֹצִאֵנִי", "וַיְשִׁבֵנִי", "וַיּוֹלִכֵנִי",
+"וַיַּעֲבִרֵנִי", "וַיְנִיחֵנִי", "וַיְסִבֵּנִי", "וַתִּשָּׂאֵנִי רוּחַ", "וַיַּרְאֵנִי" (rule guided_narrative)."""
+strong = [
+    "935",    # בּוֹא, hiphil bring
+    "3318",   # יָצָא, hiphil bring out
+    "7725",   # שׁוּב, hiphil bring back
+    "1980",   # הָלַךְ, hiphil lead
+    "3212",   # יָלַךְ
+    "5674",   # עָבַר, hiphil lead through
+    "5117",   # נוּחַ, hiphil set down
+    "5437",   # סָבַב, hiphil lead around
+    "5375",   # נָשָׂא, lift up
+    "7200",   # רָאָה, hiphil show
+]
+
+[words.object_marker]
+doc = """The object marker: "אֹתִי" ("me") as the verb's object (features.lead_me)."""
+strong = ["853"]                         # אֵת
+
+[words.hand]
+doc = """The hand of the formula "וְיַד־יְהוָה הָיְתָה אֵלַי", "וַתִּפֹּל עָלַי שָׁם יַד אֲדֹנָי יְהוִה" (rule hand_of_the_lord_resumes)."""
+strong = ["3027"]                        # יָד
+
+[words.hand_verbs]
+doc = """The verbs of the hand formula: the hand "was" or "fell" on me. Not "כְּחֶזְקַת הַיָּד" (Isa 8:11) or "כְּיַד־יְהוָה … עָלַי"
+with another verb (Ezra 7:28)."""
+strong = ["1961", "5307"]                # הָיָה, נָפַל
+
+[words.you]
+doc = """The pronoun of address that opens "וְאַתָּה בֶן־אָדָם" (rule son_of_man_returns_to_oracle_top)."""
+strong = ["859"]                         # אַתָּה
+
+[words.son_of_man]
+doc = """The address of the prophet in Ezekiel, "בֶּן־אָדָם": both words (rule son_of_man_returns_to_oracle_top)."""
+strong = ["1121", "120"]                 # בֵּן, אָדָם
 
 [words.subordinators]
 doc = """Conjunctions that open a subordinate clause, and the relation they give. A כִּי before its main clause is conditional outside
@@ -274,6 +327,14 @@ lemmas = ["כִּי", "אִם"]
 doc = "Conjunctions that open the reason for an oath."
 lemmas = ["יַעַן", "עֵקֶב"]
 
+[words.summary_this]
+doc = """The demonstrative of a law's closing summary, "זֹאת תּוֹרַת …" (rule law_summary_stands_with_the_law)."""
+strong = ["2063"]                        # זֹאת
+
+[words.summary_law]
+doc = """The "law" of a closing summary: "זֹאת תּוֹרַת נֶגַע־צָרַעַת" (Lev 13:59), "זֹאת תּוֹרַת הַקְּנָאֹת" (Num 5:29)."""
+strong = ["8451"]                        # תּוֹרָה
+
 [words.case_openers]
 doc = "Conjunctions that open a case of law after its topic (\"אִישׁ אִישׁ כִּי־תִשְׂטֶה אִשְׁתּוֹ\") (rule casus_pendens)."
 lemmas = ["כִּי", "אִם"]
@@ -283,7 +344,10 @@ doc = "Words that open an apodosis: \"then\" after a fronted protasis (Prov 2:5 
 lemmas = ["אָז"]
 
 [words.law_heads]
-doc = "Words that open a new law (rule law_cases_continue_the_law): \"אַךְ\" (Lev 27:26, 28)."
+doc = """Words that open a new law (rule law_cases_continue_the_law) when a noun follows: "אַךְ־בְּכוֹר" (Lev 27:26), "אַךְ כָּל־חֵרֶם"
+(27:28), "אַךְ מַעְיָן" (Lev 11:36), "אַךְ בְּכוֹר־שׁוֹר" (Num 18:17). Before anything else "אַךְ" qualifies the law it stands in
+("אַךְ כַּאֲשֶׁר", Deut 12:22; "אַךְ אִם", Exod 21:21; "אַךְ אֶת־זֶה", Lev 11:4): in the law books BHSA keeps those 12 inside their law
+(bsb-add-books)."""
 lemmas = ["אַךְ"]
 
 [words.word]
@@ -436,6 +500,11 @@ doc = """tree_depth counts every link up the discourse_parent chain whose relati
 the links whose relation adds a text level and whose discourse_rule is not in flat_rules: a chain stays on one level, an address and a
 circumstantial clause stay on the line of the clause they belong to (the relation still says what they are)."""
 flat_rules = ["embedded_flat"]           # see rules.embedded_keeps_macula_parent
+# Each chapter starts at the margin: text_depth and text_depth_law count only the links inside the clause's chapter; a link into another
+# chapter (a speech carried over the chapter break, Lev 7:1 in God's speech of Lev 6) stays in the tree (discourse_parent) but adds no
+# level, so a reader who opens a chapter sees it start at the left. BHSA starts 925 of its 929 chapters with a root. tree_depth is not
+# affected. Profile "continuous" sets this to false and counts across the break.
+chapter_starts_at_margin = true
 
 [depth.law]
 doc = """text_depth_law: the flat view with conditionals laid out as in BHSA. Where a protasis comes before its apodosis (a link with
@@ -569,7 +638,14 @@ doc = "The subject names God (words.divine)."
 [features.compliance]
 doc = "The compliance formula: a wayyiqtol of words.do with כֵּן."
 [features.word_event]
-doc = "The word-event formula: words.be with a word of words.word_event."
+doc = """The word-event formula: words.be with the word (words.word) and the LORD (words.word_event) in the clause. A relative clause of
+words.be with the LORD whose antecedent is the word ("הַדָּבָר אֲשֶׁר הָיָה … מֵאֵת יְהוָה", Jer 7:1) counts too. Not "וַאֲנִי יְהוָה
+אֶהְיֶה לָהֶם לֵאלֹהִים" (Ezek 34:24), which has no word."""
+[features.song]
+doc = """The narrator says someone sang or prayed: a 3rd-person verb of words.sing_pray, not a participle, imperative or infinitive
+("וַתִּתְפַּלֵּל חַנָּה", "אָז יָשִׁיר־מֹשֶׁה"), or a verb of speaking with the song (words.song) in the clause."""
+[features.be_with_lord]
+doc = "words.be with the LORD (words.word_event) in the clause."
 [features.time_wayehi]
 doc = "A dated וַיְהִי: a wayyiqtol of words.be with a time word (words.time)."
 [features.consequence]
@@ -583,7 +659,25 @@ or כֹּה + a 2nd-person yiqtol (כֹּה תֹאמַר). A 2nd-person weqatal 
 [features.say_weqatal]
 doc = "A 2nd-person weqatal of words.say without an object (וְאָמַרְתָּ, וַאֲמַרְתֶּם)."
 [features.proclaim]
-doc = "A command to the prophet to speak: an imperative of words.proclaim, or a 2nd-person weqatal of it with an addressee."
+doc = """A command to the prophet to speak: an imperative of words.proclaim, a 2nd-person weqatal of it with an addressee, or
+"כֹּה תֹאמַר" (כֹּה and a 2nd-person yiqtol of it)."""
+[features.lead_me]
+doc = """A 3rd-person wayyiqtol, weqatal or וְ + qatal of words.lead_me with "me" as its object (a 1st-person suffix on the verb, or on
+words.object_marker: "וַיָּבֵא אֹתִי"): the guide leads "me". Not "וְרָאוּ … יְשׁוּעַת אֱלֹהֵינוּ" (Isa 52:10)."""
+[features.hand]
+doc = "A verb of words.hand_verbs with words.hand, the LORD (words.divine) and a 1st-person pronoun: \"וְיַד־יְהוָה הָיְתָה אֵלַי\"."
+[features.you_lead]
+doc = "The clause opens (after its וְ) with words.you."
+[features.word_noun]
+doc = "The clause has the word (words.word)."
+[features.lone_sub]
+doc = """A segment that is only a subordinator: it opens a subordinate clause and has no verb, only a preposition with a relative
+(and conjunctions or a negation): "עַד אֲשֶׁר לֹא־" (Eccl 12:1). Not an elliptical condition, which is complete: "וְאִם לֹא", "אִם אַיִן"
+("and if not")."""
+[features.has_object]
+doc = "The MACULA clause rule has an object (O)."
+[features.son_of_man]
+doc = "The clause has both words of words.son_of_man."
 [features.command]
 doc = "An imperative or a 2nd-person weqatal."
 [features.lead_verb]
@@ -599,7 +693,8 @@ doc = """An embedded clause with no opener (conjunction, relative, preposition),
 [features.frame_be]
 doc = "A bare \"וְהָיָה\": a weqatal of words.be with nothing but וְ (the frame of a fronted condition or time)."
 [features.bare_np]
-doc = "A clause that is a bare noun phrase: no verb, no opener, headed by a noun (\"אִישׁ אִישׁ\", \"נֶפֶשׁ\", \"וְאִישׁ\")."
+doc = """A clause that is a bare noun phrase: no verb, no opener, headed by a noun after any conjunction or article ("אִישׁ אִישׁ",
+"נֶפֶשׁ", "וְאִישׁ", "אוֹ בָשָׂר", "וְהַבֶּגֶד")."""
 [features.extension]
 doc = """The legal extension formula: כֵּן in the first two words, a 2nd-person yiqtol or weqatal of words.do, and לְ with the further case
 ("וְכֵן תַּעֲשֶׂה לַחֲמֹרוֹ", Deut 22:3)."""
@@ -608,7 +703,9 @@ doc = "The clause opens with an apodosis marker (words.apodosis_markers)."
 [features.number]
 doc = "The verb's number (singular, plural), from the lexeme spine."
 [features.law_head]
-doc = "The clause opens with a word that starts a new law (words.law_heads)."
+doc = "The clause opens with a word that starts a new law (words.law_heads), followed by a noun."
+[features.law_summary]
+doc = "The clause opens with words.summary_this and has words.summary_law: \"זֹאת תּוֹרַת …\"."
 [features.role]
 doc = "The MACULA clause node's role."
 [features.circ]
@@ -694,7 +791,8 @@ examples = ["Jer 2:6 \"וְלֹא אָמְרוּ אַיֵּה יְהוָה\"", "
 scope = "all"
 doc = """A new command to the prophet to speak (features.proclaim) returns to the line that gave an earlier command to speak: the
 speeches opened since then close."""
-examples = ["Jer 7:27 \"וְדִבַּרְתָּ אֲלֵיהֶם\" goes back to the level of 7:2 \"וְאָמַרְתָּ\"", "Ezek 20:30 \"לָכֵן אֱמֹר\""]
+examples = ["Jer 7:27 \"וְדִבַּרְתָּ אֲלֵיהֶם\" goes back to the level of 7:2 \"וְאָמַרְתָּ\"", "Ezek 20:30 \"לָכֵן אֱמֹר\"",
+            "Ezek 33:27 \"כֹּה־תֹאמַר אֲלֵהֶם\" level with 33:25 \"אֱמֹר אֲלֵיהֶם\""]
 
 # ---- embedded clauses
 
@@ -722,6 +820,22 @@ examples = ["Amos 3:1 \"שִׁמְעוּ אֶת־הַדָּבָר הַזֶּה �
 scope = "all"
 doc = """A לֵאמֹר opens a speech, which hangs on the לֵאמֹר clause. When the speaking clause has just opened a speech, the speech moves
 to its לֵאמֹר. A speech under the word-event formula is prophetic."""
+
+[rules.quotation_in_oracle_ends_with_verse]
+scope = "all"
+doc = """Inside a prophetic speech, a speech opened by a לֵאמֹר under a clause that is not the word-event formula, not a command to say,
+not spoken by God and not in the 1st person is what people say, quoted in the oracle: it ends with its verse. The oracle goes on after
+it, and a command to say that answers it ("לָכֵן אֱמֹר אֲלֵיהֶם") stands in the oracle, not inside the quotation."""
+examples = ["Ezek 33:24 \"יֹשְׁבֵי הֶחֳרָבוֹת … אֹמְרִים לֵאמֹר אֶחָד הָיָה אַבְרָהָם\" ends before 33:25 \"לָכֵן אֱמֹר אֲלֵיהֶם\"",
+            "Jer 11:21", "Ezek 12:22"]
+
+[rules.word_content_runs_on]
+scope = "all"
+doc = """A speech opened by a לֵאמֹר in a relative clause whose antecedent is the word (words.word, as the noun the relative clause is
+attached to or in the clause it hangs on: "זֶה הַדָּבָר אֲשֶׁר צִוָּה יְהוָה לֵאמֹר") is the content of that word, the commandment that follows: it does not end with its verse (rules
+speech_in_subordinate_ends_with_verse and quotation_in_oracle_ends_with_verse don't apply). BHSA's links hang the commandment on the
+לֵאמֹר in all three places with לֵאמֹר; without it (Exod 16:16, 16:32, Lev 8:5, 9:6, Num 30:2) BHSA has no quotation (bsb-add-books)."""
+examples = ["Lev 17:3 \"אִישׁ אִישׁ מִבֵּית יִשְׂרָאֵל\" on the לֵאמֹר of 17:2", "Exod 35:5", "Num 36:6"]
 
 [rules.speech_in_subordinate_ends_with_verse]
 scope = "law"
@@ -789,11 +903,79 @@ for a narrative frame (rule retold_history_in_prophetic_speech). In the law and 
 commanded speech is the oracle itself and retells history (Deut 26:5)."""
 examples = ["2 Kgs 9:4 \"וַיֵּלֶךְ הַנַּעַר\" after the message of 9:3", "Josh 20:7 \"וַיַּקְדִּשׁוּ\" after 20:2-6"]
 
+[rules.poem_wayyiqtol_continues]
+scope = "poems"
+doc = """In the books of poems a speech opened by a narrated frame that names its speaker (a 3rd-person narrative verb with a named
+subject, or a verb of saying right after one in its verse: "וַיַּעַן אִיּוֹב וַיֹּאמַר"), or by a song frame (features.song in its verse or
+the verse before: Ps 18:1-2 "אֲשֶׁר דִּבֶּר לַיהוָה אֶת־דִּבְרֵי הַשִּׁירָה הַזֹּאת … וַיֹּאמַר"), is a poem (a quotation inside the poem,
+"וַיְדַבְּרוּ בֵּאלֹהִים אָמְרוּ" in Ps 78:19, is not). A wayyiqtol inside the poem continues it, with or without a named subject
+("וַיַּרְעֵם בַּשָּׁמַיִם יְהוָה"). It closes the quotations opened inside the poem, but not the poem. Only a frame of speaking with a proper noun or definite
+subject, or the word-event formula, resumes the narrative. In BHSA's links wayyiqtols in the poetic books hang on a clause of the poem
+521 times (Job 3–42:6 124, Psalms 331, the other books 66) and on the narrative frame once (Ps 106:24) (bsb-add-books' counts)."""
+examples = ["Ps 18:8 \"וַתִּגְעַשׁ וַתִּרְעַשׁ הָאָרֶץ\"", "Job 20:15 \"וַיְקִאֶנּוּ\"", "Job 10:22"]
+
+[rules.therefore_steps_out]
+scope = "all"
+doc = """After a verse that ends with a "therefore" clause (relation consequence: "עַל־כֵּן", "לָכֵן", with the chain that follows it in
+its verse), the next verse returns to the line the "therefore" clause hangs on instead of hanging on it. In BHSA's links the verse after
+such a verse goes back out 78 times, stays level 37 times and goes deeper 15 times (poetry 15/8/4, prophets 24/18/6, other 39/11/5;
+bsb-add-books' counts): right 60% of the time, against 28% for staying level."""
+examples = ["Ps 45:4 after \"עַל־כֵּן בֵּרַכְךָ אֱלֹהִים\" (45:3)", "Lam 3:22 after \"עַל־כֵּן אוֹחִיל\" (3:21)", "Amos 3:3"]
+
+[rules.poem_quotation_ends_with_verse]
+scope = "poems"
+doc = """In the books of poems a speech whose frame neither names its speaker nor sings (rule poem_wayyiqtol_continues) is a quotation
+inside the poem: it ends with its verse, and the poem goes on. "וְאָמְרוּ אֵיכָה יָדַע־אֵל" (Ps 73:11) ends before "הִנֵּה־אֵלֶּה
+רְשָׁעִים" (73:12); BHSA's links go back to the psalmist there (bsb-add-books)."""
+examples = ["Ps 73:11-12", "Ps 10:6", "Ps 41:6"]
+
+[rules.song_and_prayer_are_poems]
+scope = "all"
+doc = """A speech whose frame sings or prays (features.song in the speaking clause, or in any clause of its verse or the verse before
+when the speaking clause names no subject or addressee of its own: "וַתִּתְפַּלֵּל חַנָּה וַתֹּאמַר", "אָז
+יָשִׁיר־מֹשֶׁה … וַיֹּאמְרוּ", "וַיְדַבֵּר דָּוִד … אֶת־דִּבְרֵי הַשִּׁירָה … וַיֹּאמַר") is a song or a prayer. From the verse after its frame,
+like an oracle, its wayyiqtols retell and continue it, and the narrative resumes only with a narrative frame or at a new chapter (once
+the song has begun). Not "וַיִּתְפַּלֵּל אֶל־יְהוָה וַיֹּאמֶר לוֹ" (2 Chr 32:24), where God answers. In
+BHSA's links the songs
+in narrative books (Exod 15, Deut 32, Judg 5, 1 Sam 2, 2 Sam 22, Jonah 2, Hab 3) have 94 wayyiqtols on the song and one on the frame
+(Jonah 2:11, after the prayer). In the frame's own verse a wayyiqtol still resumes the narrative: "וַיִּתְפַּלֵּל אֱלִישָׁע … וַיֹּאמַר
+הַךְ־נָא … וַיַּכֵּם" (2 Kgs 6:18)."""
+examples = ["Exod 15:1 \"אָז יָשִׁיר־מֹשֶׁה … וַיֹּאמְרוּ לֵאמֹר\"", "Judg 5:1 \"וַתָּשַׁר דְּבוֹרָה\"", "Jonah 2:2 \"וַיִּתְפַּלֵּל יוֹנָה\""]
+
+[rules.first_person_wayyiqtol_continues_speech]
+scope = "not first_person_narrator"
+doc = """Outside the books with a first-person narrator, the speaker's own wayyiqtol of saying with a proper noun ("וָאֹמַר לִבְנֵי
+יִשְׂרָאֵל") is not a narrative frame: it continues the speech. bsb-add-books counts 226 first-person wayyiqtols inside speeches outside
+the Latter Prophets in BHSA's links (Gen 50, Josh 26, Judg 19, 1 Sam 19, 1 Kgs 19, Deut 18, 2 Sam 15, Exod 12, Job 12 and others). In
+the first-person narrator books it is the narrative (rule narrator_says)."""
+examples = ["Lev 17:14 \"וָאֹמַר לִבְנֵי יִשְׂרָאֵל\" stays in the LORD's speech"]
+
 [rules.narrative_frames]
 scope = "all"
 doc = """More narrative frames in a prophetic speech: a וַיְהִי followed in its verse by a temporal clause, the compliance formula, and a
 wayyiqtol of saying with a definite speaker (features.def_subject)."""
 examples = ["Ezek 11:13 \"וַיְהִי כְּהִנָּבְאִי\"", "Exod 8:13 \"וַיַּעֲשׂוּ־כֵן\"", "Hag 2:12 \"וַיַּעֲנוּ הַכֹּהֲנִים וַיֹּאמְרוּ\""]
+
+[rules.guided_narrative]
+scope = "first_person_narrator"
+doc = """When the outermost speech is addressed to "me", the guide leading "me" (features.lead_me: "וַיּוֹצִאֵנִי אֶל־הֶחָצֵר",
+"וְהוֹצִיאַנִי דֶּרֶךְ הַשַּׁעַר") is the narrative: the guide's speech before it closes. In Ezek 40–48 BHSA's links put all 25
+wayyiqtols with a 1st-person object in the narrative, none inside a speech (bsb-add-books' counts)."""
+examples = ["Ezek 42:1 \"וַיּוֹצִאֵנִי\" after the guide's \"וַיְדַבֵּר אֵלַי\" of 41:22", "Ezek 42:15 \"וְהוֹצִיאַנִי\"", "Ezek 47:1-6"]
+
+[rules.hand_of_the_lord_resumes]
+scope = "first_person_narrator"
+doc = """The hand of the LORD on "me" (features.hand: "וְיַד־יְהוָה הָיְתָה אֵלַי", "וַתִּפֹּל עָלַי שָׁם יַד אֲדֹנָי יְהוִה") is the
+narrative: any speech before it closes."""
+examples = ["Ezek 33:22 \"וְיַד־יְהוָה הָיְתָה אֵלַי בָּעֶרֶב\" after the fugitive's \"הֻכְּתָה הָעִיר\" (33:21)", "Ezek 8:1", "Ezek 37:1"]
+
+[rules.son_of_man_returns_to_oracle_top]
+scope = "oracles_framed_by_word_event"
+doc = """"וְאַתָּה בֶן־אָדָם" (features.you_lead and features.son_of_man, in the clause or in the address right after it) inside an
+oracle goes back to the oracle's top level: the speeches opened inside the oracle close, and it stands parallel to the oracle's first
+main clause. The LORD turns to the prophet again. Occurs 23 times, all in Ezekiel. bsb-add-books measured 18 against the top level of
+their oracle in BHSA's links: 9 at the top, 8 above it (at a chapter or oracle start), one deeper (Ezek 24:25)."""
+examples = ["Ezek 33:30 at the level of \"בֶּן־אָדָם\" (33:24)", "Ezek 13:17", "Ezek 21:11"]
 
 [rules.narrator_frames]
 scope = "first_person_narrator"
@@ -902,6 +1084,38 @@ doc = """A conditional or temporal clause right after a bare "וְהָיָה" (f
 protasis, not back on "וְהָיָה". The depths stay the same; the link matters for the conditional inversion."""
 examples = ["Deut 28:1 \"וְהָיָה אִם־שָׁמוֹעַ תִּשְׁמַע … וּנְתָנְךָ\""]
 
+[rules.law_heads_stand_parallel]
+scope = "law"
+doc = """A new law whose head is a main clause (a casus pendens, rule casus_pendens; a law-head word, words.law_heads) stands parallel
+to the law head before it in its chapter, not on the previous law's last apodosis; the first law of a speech hangs on the speech as
+before. The law's apodosis hangs on its own case: a subject climb never crosses a law head (rule subject_starts_new_step), and in the
+law view the apodosis stands beside the casus pendens case. In the law books BHSA's links have 46 laws headed by a noun phrase before
+כִּי: 20 parallel to the previous law head, 14 under the speech (the first law of a speech), 7 coordinated, 3 asyndetic, 2 roots; none
+under the previous case or its apodosis (bsb-add-books)."""
+examples = ["Lev 13: 13:18 → 13:24 → 13:29 → 13:38 → 13:40 → 13:47", "Lev 27: 27:2 → 27:14 → 27:26 → 27:28",
+            "Lev 13:30 \"וְרָאָה הַכֹּהֵן\" on its case \"כִּי־יִהְיֶה בוֹ נָגַע\" (13:29), not on \"וְטִהֲרוֹ הַכֹּהֵן\" (13:28)"]
+
+[rules.law_summary_stands_with_the_law]
+scope = "law"
+doc = """A law's closing summary (features.law_summary: "זֹאת תּוֹרַת …") stands where the law stands: parallel to the last law head in its
+chapter, or to the first clause of its speech when the chapter has none. In BHSA's links such a summary closes the law and stands at the
+law's level (Lev 13:59 at 2, Num 5:29 at 3; bsb-add-books). Whether it is inside the speech BHSA is split on (20 places), so it stays
+inside."""
+examples = ["Lev 13:59 \"זֹאת תּוֹרַת נֶגַע־צָרַעַת\"", "Num 5:29 \"זֹאת תּוֹרַת הַקְּנָאֹת\"", "Lev 7:37"]
+
+[rules.be_case_stands_level]
+scope = "law"
+doc = """In the law view's staircase ([depth.law] staircase), a case opened by "וְהָיָה" ("וְהָיָה אִם / כִּי", rule
+frame_be_protasis_hangs_forward) stands level with the case before it instead of stepping in. In the law books BHSA's links have such a
+case deeper than the previous case once, level 3 times and shallower once, against 53 / 13 / 15 for "וְאִם" (bsb-add-books)."""
+examples = ["Deut 28:15 \"וְהָיָה אִם־לֹא תִשְׁמַע\" level with 28:1"]
+
+[rules.ki_after_be_is_conditional]
+scope = "all"
+doc = """After "וְהָיָה" in the verse (features.frame_be), a כִּי clause with a yiqtol is "when/if", never "for": it is a protasis
+(conditional) and hangs forward (rule frame_be_protasis_hangs_forward). BHSA has these as temporal or conditional (bsb-add-books)."""
+examples = ["Exod 12:26 \"וְהָיָה כִּי־יֹאמְרוּ אֲלֵיכֶם בְּנֵיכֶם\"", "Josh 22:28 \"וְהָיָה כִּי־יֹאמְרוּ\""]
+
 [rules.casus_pendens]
 scope = "law"
 doc = """In law, a bare noun phrase (features.bare_np) followed in its verse by a clause opened by words.case_openers is the topic of the
@@ -956,6 +1170,24 @@ it."""
 scope = "not poetry"
 doc = """A verbless clause opened by וְ + a non-verb (features.circ) right after a wayyiqtol main clause of its verse, in the narrative
 line, is circumstantial on that clause. In the poetic books such a clause is the second half of a couplet (coordination)."""
+
+[rules.wayyiqtol_continues_subordinate]
+scope = "law"
+doc = """Inside a speech, a wayyiqtol right after a relative or causal/conditional clause continues that clause (the nearest such clause
+the previous clause belongs to) and never starts a root or resumes the narrative: in the subordinate clause's own verse, or in a later
+verse while a protasis still waits for its apodosis. Only where the wayyiqtol can't be the narrative: it is in the 1st or 2nd person
+or has a 1st- or 2nd-person pronoun, or the protasis still waits; never a narrative frame (a named subject, compliance, a dated וַיְהִי,
+the word-event formula, a verb of saying with a proper noun). Mostly retold history in a כִּי clause ("כִּי עֶבֶד הָיִיתָ … וַיִּפְדְּךָ"). In
+the law corpus (Exod 21–23, Deut 12–26) BHSA's links have 8 such wayyiqtols: Deut 15:15, 17:3 (three), 18:17, 23:6, 24:18, 25:18
+(bsb-add-books' counts)."""
+examples = ["Deut 17:3 \"וַיֵּלֶךְ וַיַּעֲבֹד אֱלֹהִים אֲחֵרִים\" on \"אֲשֶׁר יַעֲשֶׂה אֶת־הָרַע\" (17:2)", "Deut 24:18 \"כִּי עֶבֶד הָיִיתָ … וַיִּפְדְּךָ\""]
+
+[rules.lone_subordinator_passes_relation]
+scope = "all"
+doc = """A segment that is only a subordinator (features.lone_sub) hangs back on the last main clause, and the segment after it, which
+holds its verb, continues it: the subordinator and its verb read as one clause. The segmentation splits "עַד אֲשֶׁר לֹא־" from its verb
+in Eccl 12:1, 12:2 and 12:6 (also in 2 Sam 17:13 and 1 Kgs 17:17)."""
+examples = ["Eccl 12:1 \"עַד אֲשֶׁר לֹא־ | יָבֹאוּ יְמֵי הָרָעָה\""]
 
 [rules.waw_continues_subordinate]
 scope = "poetic"
@@ -1068,7 +1300,9 @@ wayyiqtol/qatal) is a quotation: it ends with its verse ("יֹאמַר")."""
 
 [rules.participle_of_saying_quotes]
 scope = "poetry"
-doc = "A participle of saying opens a quotation that ends with its verse or at סֶלָה."
+doc = """A participle of saying without an object of its own opens a quotation that ends with its verse or at סֶלָה. With an object
+the clause says what is said, not a quotation: "אֹמֵר אָנִי מַעֲשַׂי לְמֶלֶךְ" (Ps 45:2) is the psalmist's statement about his poem
+(BHSA has no quotation there), "כֻּלּוֹ אֹמֵר כָּבוֹד" (Ps 29:9)."""
 examples = ["Ps 3:3 \"רַבִּים אֹמְרִים לְנַפְשִׁי\""]
 
 
