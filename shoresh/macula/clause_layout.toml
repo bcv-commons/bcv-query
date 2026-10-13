@@ -29,7 +29,7 @@
 # - build.json records this file's sha256, so every output says which settings made it. Raise `version` when a change alters the output.
 # - Try a changed copy without editing this one: python -m macula.build_clause_layout --config my.toml --out /tmp/x
 
-version = "0.11"
+version = "0.12"
 
 
 # ------------------------------------------------------------------------------------------------------------------------- sources
@@ -482,7 +482,8 @@ doc = "A dated וַיְהִי: a wayyiqtol of words.be with a time word (words.t
 [features.consequence]
 doc = "The clause opens with a consequence (words.consequence)."
 [features.messenger]
-doc = "The messenger formula: כֹּה + a qatal of words.say (כֹּה אָמַר יְהוָה)."
+doc = """The messenger formula: כֹּה in the first or second word, with a qatal of words.say (כֹּה אָמַר יְהוָה; לָכֵן כֹּה אָמַר, כִּי כֹה
+אָמַר, וְעַתָּה כֹּה אָמַר)."""
 [features.command_say]
 doc = """A command to say something, without an object of its own: an imperative of words.say (אֱמֹר; not Dan 2:4 "אֱמַר חֶלְמָא"),
 or כֹּה + a 2nd-person yiqtol (כֹּה תֹאמַר). A 2nd-person weqatal (וְאָמַרְתָּ) is decided in rule command_needs_addressee."""
@@ -502,6 +503,8 @@ doc = """The clause's first word after וְ, as the lemmas of all its parts (ב�
 [features.plain_embedded]
 doc = """An embedded clause with no opener (conjunction, relative, preposition), no infinitive, and a participle or no verb (Deut 28:25
 "נִגָּף לִפְנֵי אֹיְבֶיךָ"): predicative participles, elliptic halves."""
+[features.frame_be]
+doc = "A bare \"וְהָיָה\": a weqatal of words.be with nothing but וְ (the frame of a fronted condition or time)."
 [features.role]
 doc = "The MACULA clause node's role."
 [features.circ]
@@ -562,6 +565,19 @@ examples = ["Jer 7:24 \"וְלֹא שָׁמְעוּ\" after the command quoted i
 scope = "all"
 doc = "סֶלָה ends a quotation."
 
+[rules.messenger_returns]
+scope = "all"
+doc = """A new messenger formula while the oracle of an earlier one is open (and no command or other long speech was opened after it)
+closes that oracle: the new formula hangs where the earlier one did, not on the oracle's last clause."""
+examples = ["Jer 7:21 \"כֹּה אָמַר יְהוָה צְבָאוֹת\" level with 7:20 \"לָכֵן כֹּה אָמַר\"", "Amos 3:12 after 3:11"]
+
+[rules.negated_saying_is_quotation]
+scope = "all"
+doc = """Words that were not said: a speech opened by a negated verb of saying (words.say) is a quotation that ends with its verse. In
+its verse it also ends at a וְ-clause that names its own subject and has a 1st-person pronoun (God speaking again, where the words
+spoke of God in the 3rd person): the next item of a list, not part of the words."""
+examples = ["Jer 2:6 \"וְלֹא אָמְרוּ אַיֵּה יְהוָה\"", "Jer 2:8 \"הַכֹּהֲנִים לֹא אָמְרוּ אַיֵּה יְהוָה וְתֹפְשֵׂי הַתּוֹרָה לֹא יְדָעוּנִי\""]
+
 [rules.proclaim_returns]
 scope = "all"
 doc = """A new command to the prophet to speak (features.proclaim) returns to the line that gave an earlier command to speak: the
@@ -609,9 +625,10 @@ doc = """The narrative resumes, closing all speeches, at a 3rd-person wayyiqtol.
 
 [rules.narrator_says]
 scope = "all"
-doc = """The narrator's own "וָאֹמַר" (a 1st-person wayyiqtol of saying, without a 3rd-person pronoun and not followed only by an
+doc = """The narrator's own "וָאֹמַר" (a 1st-person wayyiqtol of saying, without a 2nd- or 3rd-person pronoun and not followed only by an
 infinitive) resumes the narrative when the outermost speech is addressed to "me" (Jer 1:4 "וַיְהִי דְבַר־יְהוָה אֵלַי לֵאמֹר"). In a
-speech addressed to someone else it is a retelling (Gen 24:42), and "I said to pour out" (Ezek 20:8 "וָאֹמַר לִשְׁפֹּךְ") is a thought."""
+speech addressed to someone else it is a retelling (Gen 24:42); "I said to you" is God retelling (Ezek 16:6 "וָאֹמַר לָךְ בְּדָמַיִךְ
+חֲיִי"), and "I said to pour out" (Ezek 20:8 "וָאֹמַר לִשְׁפֹּךְ") is a thought."""
 
 [rules.aramaic_narrative_steps]
 scope = "all"
@@ -628,6 +645,11 @@ subject (features.named_subject) and no 1st/2nd-person pronoun, the narrator's "
 narrative_frames and narrator_frames. A new chapter also ends it (rule chapter_closes_prophetic_speech)."""
 examples = ["Jer 2:5 \"וַיֵּלְכוּ אַחֲרֵי הַהֶבֶל וַיֶּהְבָּלוּ\" stays in the oracle", "Ezek 16, 20, 23", "Deut 26:5 \"וַיֵּרֶד מִצְרַיְמָה\"",
             "Jonah 1:3 \"וַיָּקָם יוֹנָה\" resumes", "Isa 37:8 \"וַיָּשָׁב רַב־שָׁקֵה\" resumes"]
+
+[rules.dated_frame_without_you]
+scope = "all"
+doc = """A dated or temporal וַיְהִי with a 2nd-person pronoun is not a narrative frame: a date told to "you" belongs to the speech."""
+examples = ["Ezek 16:23 \"וַיְהִי אַחֲרֵי כָּל־רָעָתֵךְ\" stays in the oracle"]
 
 [rules.narrative_frames]
 scope = "all"
@@ -714,6 +736,12 @@ switchable = false
 doc = """Any other subordinate clause with no main clause before it in its verse waits for the next main clause and hangs on it (a
 fronted protasis or time clause). If that main clause lies inside it, it hangs on the clause before it."""
 
+[rules.frame_be_protasis_hangs_forward]
+scope = "all"
+doc = """A conditional or temporal clause right after a bare "וְהָיָה" (features.frame_be) hangs forward on its apodosis, like a fronted
+protasis, not back on "וְהָיָה". The depths stay the same; the link matters for the conditional inversion."""
+examples = ["Deut 28:1 \"וְהָיָה אִם־שָׁמוֹעַ תִּשְׁמַע … וּנְתָנְךָ\""]
+
 [rules.ki_before_main_is_conditional]
 scope = "not poetic"
 doc = """A כִּי before its main clause is conditional (casuistic law: "if a man …"); elsewhere it keeps the relation of its opener."""
@@ -779,7 +807,8 @@ examples = ["Dan 2:8 עָנֵה מַלְכָּא on 2:5"]
 [rules.messenger_formula_opens_speech]
 scope = "all"
 doc = """The messenger formula כֹּה אָמַר opens a speech that lasts to the next paragraph mark (rule
-paragraph_mark_closes_commanded_speech), nested if inside a speech."""
+paragraph_mark_closes_commanded_speech), nested if inside a speech. In a subordinate clause ("כִּי כֹה אָמַר יְהוָה") the oracle hangs
+under that clause."""
 
 [rules.command_to_say_opens_speech]
 scope = "all"

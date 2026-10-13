@@ -139,6 +139,14 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
     lead = [t for t in toks if not (t["class"] == "cj" and _n(t["lemma"]) == WAW)]
     lead_l = [_n(t["lemma"]) for t in lead[:3]] + ["", "", ""]
     l0, l1 = lead_l[0], lead_l[1]
+    lead_words = []                               # the first two words after "and", as the lemmas of their tokens
+    for t in lead:
+        if not lead_words or (t["verse"], t["word"]) != lead_words[-1][0]:
+            if len(lead_words) == 2:
+                break
+            lead_words.append(((t["verse"], t["word"]), []))
+        lead_words[-1][1].append(_n(t["lemma"]))
+    in_first_two = {lem for _, lems in lead_words for lem in lems}
     # the subordinator must open the clause (an Aramaic relative inside a clause is the genitive particle)
     sub_kind = None
     if l0 in SUB_CJ or (l0 in SUB_ARC and lead[0]["wlang"] == "A"):
@@ -200,7 +208,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "word_event": bool(v) and _strong(v) in BE_VERB and any(_strong(t) in WORD_EVENT for t in toks),
             "time_wayehi": bool(v) and _strong(v) in BE_VERB and v["wtype"] == "wayyiqtol" and any(_n(t["lemma"]) in TIME_WORDS for t in toks),
             "consequence": any(lead_l[:len(s)] == s for s in CONSEQUENCE),
-            "messenger": l0 == KO and bool(v) and _strong(v) in SAY and v["wtype"] == "qatal",
+            "messenger": KO in in_first_two and bool(v) and _strong(v) in SAY and v["wtype"] == "qatal",
             "command_say": bool(v) and _strong(v) in SAY and not has_object and (v["wtype"] == "imperative" or (
                 second and l0 == KO and v["wtype"] == "yiqtol")),
             "say_weqatal": bool(v) and _strong(v) in SAY and not has_object and second and v["wtype"] == "weqatal",
@@ -212,6 +220,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
                        "+".join(_n(t["lemma"]) for t in lead if (t["verse"], t["word"]) == (lead[0]["verse"], lead[0]["word"])) if lead else None),
             "plain_embedded": bool(toks) and toks[0]["class"] not in ("cj", "rel", "prep") and not any(t["wtype"] in INFINITIVE for t in verbs)
                               and not finite and (not verbs or verbs[0]["wtype"] in PARTICIPLE),
+            "frame_be": bool(v) and _strong(v) in BE_VERB and v["wtype"] == "weqatal" and len(lead) == 1,
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
 
@@ -225,6 +234,8 @@ class _Line:
         self.divine = False                       # God speaks on this line
         self.commander = False                    # a command to speak was given on this line (rule proclaim_returns)
         self.to_me = to_me                        # the speech is addressed to "me" (rules narrator_says, narrator_frames)
+        self.messenger = False                    # opened by a messenger formula (rule messenger_returns)
+        self.negated = False                      # opened by a negated verb of saying (rule negated_saying_is_quotation)
         self.last: str | None = None              # last main clause on the line
         self.verse_mains: dict = {}               # verse -> main clauses of the line in that verse
         self.oath: str | None = None
@@ -249,6 +260,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     pending_prev: dict = {}                       # forward clause -> the clause before it (fallback parent)
     form_of: dict = {}                            # main clause key -> verb form
     cmd_of: dict = {}                             # main clause key -> it is a command (imperative or 2nd-person weqatal)
+    frame_be_of: dict = {}                        # main clause key -> it is a bare "and it shall be" (rule frame_be_protasis_hangs_forward)
     book_of = {c["key"]: c["verse"][0] for c in clauses}
     verses_after = param("nested_speech_ends_after_next_verse", "verses_after")
     carry_within = param("command_at_speech_start_carries", "within_verses")
@@ -336,6 +348,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             j = next((x for x in range(len(lines) - 1, 0, -1) if lines[x].commander), None)
             if j is not None and j < len(lines) - 1:
                 lines = lines[:j + 1]
+        if on("messenger_returns") and f["messenger"] and not c["parent_key"]:
+            j = next((x for x in range(len(lines) - 1, 0, -1) if lines[x].long), None)
+            if j is not None and lines[j].messenger:
+                lines = lines[:j]
+        if on("negated_saying_is_quotation") and len(lines) > 1 and lines[-1].negated and not c["parent_key"] and f["waw"] and f["subj"] \
+                and f["pron1"] and not f["sub_kind"] and clauses_verse.get(lines[-1].spk) == vref:
+            lines.pop()
         line = lines[-1]
         pron1_of[k], we_of[k], neg_of[k] = f["pron1"], f["word_event"], f["negated"]
 
@@ -366,13 +385,15 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         narrator = on("narrator_frames") and to_me and f["form"] == "wayyiqtol" and f["person"] == "third" and f["pron1"] and not f["pron2"] and (
             f["speak"] or f["divine"])
         narrator_says = on("narrator_says") and f["form"] == "wayyiqtol" and f["person"] == "first" and f["verb"] in SAY and not f["pron3"] \
+            and not f["pron2"] \
             and not only_inf_after[i] and to_me
         resumes = (f["form"] == "wayyiqtol" and f["person"] == "third" and not f["pron12"]) or narrator or narrator_says or (
             on("aramaic_narrative_steps") and f["aramaic"] and (f["step"] or (
                 f["speak"] and f["person"] in ("third", None) and (f["form"] == "qatal" or f["form"] in PARTICIPLE)
                 and (f["verb"] not in ANSWER or amar_after[i] or not on("answer_needs_say")))))
         if on("retold_history_in_prophetic_speech") and any(ln.prophetic for ln in lines[1:]):
-            resumes = f["word_event"] or f["time_wayehi"] or ((wayehi_when[i] or f["compliance"]) and on("narrative_frames")) or narrator or (
+            dated = (f["time_wayehi"] or (wayehi_when[i] and on("narrative_frames"))) and not (f["pron2"] and on("dated_frame_without_you"))
+            resumes = f["word_event"] or dated or (f["compliance"] and on("narrative_frames")) or narrator or (
                 f["speak"] and f["form"] == "wayyiqtol" and (f["proper"] or (f["def_subject"] and on("narrative_frames")))) or (
                 f["form"] == "wayyiqtol" and f["person"] == "third" and f["named_subject"] and not f["pron12"]) or narrator_says
         if len(lines) > 1 and (resumes or (f["word_event"] and f["form"] == "wayyiqtol" and on("word_event_resumes"))):
@@ -423,6 +444,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 link(k, prev, "parallel", "series")
             else:
                 mains = line.verse_mains.get(vref, [])
+                if mains and on("frame_be_protasis_hangs_forward") and frame_be_of.get(mains[-1]) and f["sub_kind"] in ("conditional", "temporal"):
+                    mains = []                    # the protasis after a bare "and it shall be" hangs forward on its apodosis
                 if mains:                         # rule subordinate_hangs_back
                     link(k, mains[-1], f["sub_kind"], "sub_back")
                 elif line.last is not None and (
@@ -438,7 +461,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                     pending_prev[k] = prev_top_key
             if f["lead"]:
                 line.subs[f["lead"]] = k
-            if on("quotation_lines") and ((f["say_any"] and f["lead"] in QUOTING_SUBS) or f["quote_say"]) and not indirect:
+            if f["messenger"] and on("messenger_formula_opens_speech"):
+                poem = on("commanded_speech_in_poetry_ends_with_verse")
+                ln = _Line(k, vi, scoped=poem, long=not poem, to_me=f["pron1"])
+                ln.prophetic = f["divine"] or not on("prophetic_needs_god")
+                ln.divine, ln.messenger = f["divine"], True
+                lines.append(ln)
+            elif on("quotation_lines") and ((f["say_any"] and f["lead"] in QUOTING_SUBS) or f["quote_say"]) and not indirect:
                 lines.append(_Line(k, vi, scoped=True))
             continue
 
@@ -493,6 +522,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         if turn:
             line.turns[turn] = k
         cmd_of[k] = f["command"]
+        frame_be_of[k] = f["frame_be"]
         resolve_pending(k)
         line.last = k
         line.verse_mains.setdefault(vref, []).append(k)
@@ -515,6 +545,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             ln.carries = command and in_speech and line.opened >= vi - carry_within and not poem and on("command_at_speech_start_carries")
             ln.prophetic = command or f["divine"] or not on("prophetic_needs_god")
             ln.divine = f["messenger"] and f["divine"]
+            ln.messenger = f["messenger"]
             if command:
                 line.commander = True
             lines.append(ln)
@@ -525,6 +556,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             ln.scoped = on("future_saying_is_quotation") and not f["lemor"] and not narrated and not (
                 f["person"] == "first" and f["form"] in NARRATED)
             ln.divine = f["divine"] and narrated
+            if on("negated_saying_is_quotation") and f["negated"] and f["verb"] in SAY and not f["lemor"]:
+                ln.scoped = ln.negated = True
             lines.append(ln)
         elif on("participle_of_saying_quotes") and f["ptc_saying"]:
             lines.append(_Line(k, vi, scoped=True))
