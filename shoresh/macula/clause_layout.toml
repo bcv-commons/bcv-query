@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.16"
+version = "0.17"
 
 [profile]
 name = "default"
@@ -118,6 +118,10 @@ books = ["EZK"]
 [books.law]
 doc = "The books of the law: Exodus to Deuteronomy, where casuistic law (\"כִּי …\", \"אִם …\") is frequent."
 books = ["EXO", "LEV", "NUM", "DEU"]
+
+[books.narrative]
+doc = "The narrative books outside the law and the prophets."
+books = ["GEN", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI", "2KI", "1CH", "2CH", "EZR", "NEH", "EST"]
 
 [books.first_person_narrator]
 doc = """Books (or parts of books) whose narrator speaks in the first person: "וַיֹּאמֶר אֵלַי", "וָאֵרֶא". Elsewhere "אֵלַי" in a speech
@@ -277,6 +281,10 @@ lemmas = ["כִּי", "אִם"]
 [words.apodosis_markers]
 doc = "Words that open an apodosis: \"then\" after a fronted protasis (Prov 2:5 \"אָז תָּבִין\") (rule then_clause_is_apodosis)."
 lemmas = ["אָז"]
+
+[words.law_heads]
+doc = "Words that open a new law (rule law_cases_continue_the_law): \"אַךְ\" (Lev 27:26, 28)."
+lemmas = ["אַךְ"]
 
 [words.word]
 doc = "The noun \"word\", whose content a quotation can be (rule word_quote_hangs_on_main)."
@@ -449,13 +457,15 @@ is more often nominal, without וְ and in another person, but each of these als
 in Deut 20:15 and 22:3 but stays in Num 18:28, too rare to carry a rule; Deut 22 (one return at 22:3 that carries through the chapter)
 is left as a known case.
 Staircase (staircase): each later protasis of a series of conditionals (rule subordinate_series) counts one level, so every new case
-stands one level under the case before, as in BHSA (in text_depth the cases stay side by side). Measured against BHSA's per-chapter
+stands one level under the case before, as in BHSA (in text_depth the cases stay side by side). Since 0.17 a later case's own
+apodosis (the next main clause) stands beside it and takes its chain along, a case steps in only after a case that has its own
+apodosis (alternatives without one stand level), and the count restarts at each new law (rule law_cases_continue_the_law). Measured against BHSA's per-chapter
 reference (379 chapters, law view): mean gap 0.410 -> 0.392; Job 31 -3.94 -> -1.44, Lev 27 -2.54 -> +0.26, Lev 3 -2.06 -> -1.67,
 Lev 26 -2.32 -> -1.90. On since 0.16."""
 relation = "conditional"
 laws_in_a_row_stand_level = true
 return_after_law = false
-staircase = true
+staircase = "law"
 
 
 [conventions.verse_division]
@@ -589,12 +599,16 @@ doc = """An embedded clause with no opener (conjunction, relative, preposition),
 [features.frame_be]
 doc = "A bare \"וְהָיָה\": a weqatal of words.be with nothing but וְ (the frame of a fronted condition or time)."
 [features.bare_np]
-doc = "A clause that is a bare noun phrase: no verb, no וְ, no opener, headed by a noun (\"אִישׁ אִישׁ\", \"נֶפֶשׁ\")."
+doc = "A clause that is a bare noun phrase: no verb, no opener, headed by a noun (\"אִישׁ אִישׁ\", \"נֶפֶשׁ\", \"וְאִישׁ\")."
 [features.extension]
 doc = """The legal extension formula: כֵּן in the first two words, a 2nd-person yiqtol or weqatal of words.do, and לְ with the further case
 ("וְכֵן תַּעֲשֶׂה לַחֲמֹרוֹ", Deut 22:3)."""
 [features.then]
 doc = "The clause opens with an apodosis marker (words.apodosis_markers)."
+[features.number]
+doc = "The verb's number (singular, plural), from the lexeme spine."
+[features.law_head]
+doc = "The clause opens with a word that starts a new law (words.law_heads)."
 [features.role]
 doc = "The MACULA clause node's role."
 [features.circ]
@@ -699,7 +713,9 @@ doc = """"The word which X spoke, saying …": a לֵאמֹר under a relative c
 the main clause that names the word: the quotation is the content of that word, and the relative clause only says who spoke it. An
 exception to rule embedded_keeps_macula_parent (discourse_rule word_quote). A relative clause of the word-event ("הַדָּבָר אֲשֶׁר
 הָיָה … לֵאמֹר", Jer 7:1) is not one: its verb is not a verb of speaking. Found in Amos 3:1, where BHSA hangs the לֵאמֹר on the main
-clause; it also occurs in Gen 39:19, 1 Kgs 2:4 (twice), 2 Kgs 9:36 and 2 Kgs 15:12, not checked against BHSA."""
+clause. Narrowed in 0.17 to the call with an imperative of hearing ("שִׁמְעוּ אֶת־הַדָּבָר … אֲשֶׁר דִּבֶּר … לֵאמֹר"): BHSA hangs the
+לֵאמֹר on the main clause in only 2 of the 6 places of the wider form (Amos 3:1, 2 Kgs 9:36; not Gen 39:19, 2 Kgs 15:12 of the same
+shape as 2 Kgs 9:36, or 1 Kgs 2:4), so beyond the call there is no grammatical line to follow."""
 examples = ["Amos 3:1 \"שִׁמְעוּ אֶת־הַדָּבָר הַזֶּה אֲשֶׁר דִּבֶּר יְהוָה עֲלֵיכֶם … לֵאמֹר\""]
 
 [rules.lemor_opens_speech]
@@ -765,6 +781,14 @@ scope = "all"
 doc = """A dated or temporal וַיְהִי with a 2nd-person pronoun is not a narrative frame: a date told to "you" belongs to the speech."""
 examples = ["Ezek 16:23 \"וַיְהִי אַחֲרֵי כָּל־רָעָתֵךְ\" stays in the oracle"]
 
+[rules.told_speech_ends_at_narrative]
+scope = "narrative"
+doc = """In the narrative books a speech someone is told to give (a command to say, with any messenger formula quoted in it) is a message
+to deliver, not God speaking now: the narrative resumes after it at a 3rd-person wayyiqtol, as after any speech, instead of waiting
+for a narrative frame (rule retold_history_in_prophetic_speech). In the law and the prophets the protection stays, because there the
+commanded speech is the oracle itself and retells history (Deut 26:5)."""
+examples = ["2 Kgs 9:4 \"וַיֵּלֶךְ הַנַּעַר\" after the message of 9:3", "Josh 20:7 \"וַיַּקְדִּשׁוּ\" after 20:2-6"]
+
 [rules.narrative_frames]
 scope = "all"
 doc = """More narrative frames in a prophetic speech: a וַיְהִי followed in its verse by a temporal clause, the compliance formula, and a
@@ -796,6 +820,12 @@ examples = ["Isa 40:1 \"יֹאמַר אֱלֹהֵיכֶם\"", "\"נְאֻם יְ
 scope = "all"
 doc = "An inquit may follow subordinate clauses in its verse, with no main clause of its line in that verse."
 examples = ["Mal 1:11 \"אָמַר יְהוָה צְבָאוֹת\" after two כִּי clauses"]
+
+[rules.inquit_not_subordinate]
+scope = "all"
+doc = """A subordinate clause with a verb of saying is never an inquit: it keeps its subordinate relation, and a quotation after it hangs
+on it (rule quotation_lines)."""
+examples = ["Isa 40:5 \"כִּי פִּי יְהוָה דִּבֵּר\"", "Exod 12:26 \"כִּי־יֹאמְרוּ אֲלֵיכֶם בְּנֵיכֶם\"", "Deut 20:11 \"אִם־שָׁלוֹם תַּעַנְךָ\""]
 
 [rules.vocative]
 scope = "all"
@@ -830,6 +860,14 @@ scope = "all"
 doc = """A subordinate clause joins a series only when it would have the same relation as the series's first clause, not only the same
 opener: a fronted "כִּי" (a case of law, conditional) is no series member of a "כִּי" reason clause before it."""
 examples = ["Deut 22:6 \"כִּי יִקָּרֵא קַן־צִפּוֹר\" after 22:5 \"כִּי תוֹעֲבַת יְהוָה\""]
+
+[rules.law_cases_continue_the_law]
+scope = "law"
+doc = """In law, the cases of one law form one series, whatever their opener: an "אִם" case continues the series of the current law's
+last case (Lev 27:15 "וְאִם־הַמַּקְדִּישׁ" after the case of 27:14). A new law starts afresh: a casus pendens with its case ("וְאִישׁ
+כִּי־יַקְדִּשׁ", Lev 27:14), a fronted "כִּי" law, or "אַךְ" (words.law_heads, Lev 27:26, 28). In the law view each later case then
+steps one level under the case before ([depth.law] staircase)."""
+examples = ["Lev 27:14-15", "Lev 27:26 \"אַךְ\""]
 
 [rules.ki_series_and_look_back]
 scope = "poetic"
@@ -889,6 +927,10 @@ clause: the main clauses between go on with the protasis, and the "then" clause 
 per-chapter reference); it also applies in Gen 24:41, Job 9:31, Ps 119:92, Isa 58:14 and wherever a protasis is followed by "then"."""
 examples = ["Prov 2:1 \"בְּנִי אִם־תִּקַּח אֲמָרָי\" … 2:5 \"אָז תָּבִין יִרְאַת יְהוָה\""]
 within_verses = 4
+# Narrowed in 0.17 (bsb-add-books' check of v0.16, where it was right in Prov 2:1 and Isa 58:13 and wrong in six places): only a
+# protasis that opens its verse or follows an address waits; not "אִם־לֹא" after a negated clause or in an oath ("but rather", Gen
+# 24:38); waiting stops at a wayyiqtol, a new speaker (1 Kgs 3:15, Gen 24:39), or a main clause in the protasis's own verse whose finite
+# verb differs in person or number (the apodosis is already there: 1 Kgs 3:14, Josh 20:5).
 
 [rules.extension_formula_returns]
 scope = "all"

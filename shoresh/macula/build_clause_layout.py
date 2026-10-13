@@ -142,10 +142,17 @@ def _clause_parents(con: sqlite3.Connection) -> dict[int, int | None]:
     return out
 
 
-def _verb_person(con: sqlite3.Connection, keys: set[str]) -> dict[str, str]:
+def _verb_person(con: sqlite3.Connection, keys: set[str]) -> tuple[dict[str, str], dict[str, str]]:
+    """(person, number) of verbs and pronouns, from the lexeme spine."""
     import lexeme_macula
     sp = sqlite3.connect(f"file:{lexeme_macula.spine_path()}?mode=ro", uri=True)
-    return {k: p for k, p in sp.execute("SELECT key, person FROM spine_words WHERE person IN ('first', 'second', 'third')") if k in keys}
+    person, number = {}, {}
+    for k, p, n in sp.execute("SELECT key, person, number FROM spine_words WHERE person IN ('first', 'second', 'third')"):
+        if k in keys:
+            person[k] = p
+            if n:
+                number[k] = n
+    return person, number
 
 
 def _attachments(con: sqlite3.Connection, parents: dict[int, int | None], clause_key: dict[int, str]) -> dict[int, str]:
@@ -331,7 +338,7 @@ def main() -> None:
                 first_seen.setdefault(s["clause"], (book, ch, s["verse"]))
         if segs and segs[0]["clause"] is not None:
             chapter_first.add(segs[0]["clause"])
-    person = _verb_person(con, set(t["key"] for ts in toks_of.values() for t in ts if t["class"] in ("verb", "pron")))
+    person, number = _verb_person(con, set(t["key"] for ts in toks_of.values() for t in ts if t["class"] in ("verb", "pron")))
     attach_of = _attachments(con, parents, clause_key)
     strong_of_key = {t["key"]: discourse_rules._strong(t) for ts in toks_of.values() for t in ts}
     disc: dict[str, dict] = {}
@@ -340,7 +347,7 @@ def main() -> None:
         by_book[book].append({"key": clause_key[cid], "verse": (book, ch, v), "parent_key": clause_key.get(parents.get(cid)) if parents.get(cid) else None,
                               "attach": attach_of.get(cid), "attach_strong": strong_of_key.get(attach_of.get(cid)),
                               "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
-                                                             nodes[cid]["role"] if cid in nodes else None, subj_ranges.get(cid)),
+                                                             nodes[cid]["role"] if cid in nodes else None, subj_ranges.get(cid), number),
                               "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "para": clause_key[cid] in paras})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))

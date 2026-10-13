@@ -192,7 +192,7 @@ def test_expression_rules_at_their_places(tmp_path, monkeypatch):
     import json
     from macula import build_clause_layout as b
     out = tmp_path / "out"
-    monkeypatch.setattr("sys.argv", ["x", "--books", "AMO,DEU,PRO", "--out", str(out)])
+    monkeypatch.setattr("sys.argv", ["x", "--books", "AMO,DEU,PRO,2KI,LEV", "--out", str(out)])
     b.main()
 
     def rows(book, ch):
@@ -209,6 +209,13 @@ def test_expression_rules_at_their_places(tmp_path, monkeypatch):
     assert ext["text_depth_law"] == first["text_depth_law"]                                    # back at the law's level
     case = next(r for r in deu if r["verse"] == 6)
     assert case["relation"] != "parallel"                                                       # not a series member of 22:5's reason
+    # 0.17: told_speech_ends_at_narrative (2 Kgs 9:4 back in the narrative), law_cases_continue_the_law (Lev 27:15 continues 27:14)
+    kgs = rows("2KI", 9)
+    assert next(r for r in kgs if r["verse"] == 4)["text_depth"] == kgs[0]["text_depth"]
+    lev = rows("LEV", 27)
+    case14 = next(r for r in lev if r["verse"] == 14 and r["discourse_rule"] == "casus_pendens")
+    case15 = next(r for r in lev if r["verse"] == 15 and r["relation"] == "parallel")
+    assert case15["discourse_parent"] == case14["clause_key"]
 
 
 def test_shipped_profiles(tmp_path, monkeypatch):
