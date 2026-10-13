@@ -85,19 +85,53 @@ def test_relation_model_invariants():
 
 
 def test_rule_scopes():
-    """v0.11: every named rule is used in derive, and a scope limits it to its books ("poetic" = poetry and the prophets)."""
-    import inspect
+    """Every rule's scope limits it to its books ("poetic" = the group in [books.poetic], "not poetry", a list, "none")."""
     from macula import discourse_rules as d
-    src = inspect.getsource(d.derive)
-    assert all(f'on("{name}")' in src for name in d.SCOPE)
-    c = {"verse": ("DEU", 2, 9), "poetic": False, "poetry": False}
-    assert d.active("quotation_lines", c) and not d.active("narrator_frames", c)                 # Deut 2:9: Moses retelling, no 1st-person narrator
-    assert d.active("narrator_frames", {**c, "verse": ("EZK", 11, 5)})
+    assert d.active("quotation_lines", "DEU") and not d.active("narrator_frames", "DEU")        # Deut 2:9: Moses retelling
+    assert d.active("narrator_frames", "EZK") and d.active("circumstantial", "GEN") and not d.active("circumstantial", "PSA")
     old = d.SCOPE["quotation_lines"]
     try:
         d.SCOPE["quotation_lines"] = "poetic"
-        assert not d.active("quotation_lines", c) and d.active("quotation_lines", {**c, "poetic": True})
+        assert not d.active("quotation_lines", "DEU") and d.active("quotation_lines", "MAL")
         d.SCOPE["quotation_lines"] = "none"
-        assert not d.active("quotation_lines", {**c, "poetic": True})
+        assert not d.active("quotation_lines", "MAL")
     finally:
         d.SCOPE["quotation_lines"] = old
+
+
+def test_rules_config_matches_code():
+    """clause_layout.toml documents every rule, feature and relation the code uses, and the code has no Hebrew words, Strong's
+    numbers or book names of its own."""
+    import inspect
+    import re
+    from macula import build_clause_layout as b, discourse_rules as d
+    src = inspect.getsource(d).replace(d.__doc__, "")                                          # the code, without the module docstring
+    used = set(re.findall(r'\bon\("(\w+)"\)', src)) | set(re.findall(r'active\("(\w+)"', src + inspect.getsource(b)))
+    switchable = {name for name, r in d.RULES.items() if r.get("switchable", True)}
+    assert used == switchable, (used - switchable, switchable - used)
+    assert all(r.get("doc") for r in d.RULES.values())
+    keys = set(d.features([], {}).keys())
+    assert keys == set(d.CFG["features"]), (keys - set(d.CFG["features"]), set(d.CFG["features"]) - keys)
+    assert not re.search("[\u0590-\u05FF]", src)                                              # no Hebrew in discourse_rules.py
+    assert not re.search(r'"\d{3,4}"', src)                                                     # no Strong's numbers
+    assert not re.search(r'"(GEN|EXO|LEV|NUM|DEU|PSA|JOB|PRO|ISA|JER|EZK|MAL)"', src + inspect.getsource(b))
+    assert set(d.RELATIONS) == set(d.CFG["relations"]) and "parallel" in d.TREE_FLAT and "speech" not in d.FLAT
+
+
+def test_configure_another_file(tmp_path):
+    """configure(path) loads another settings file; a turned-off rule is off; the default comes back."""
+    from macula import discourse_rules as d
+    text = d.CONFIG_PATH.read_text(encoding="utf-8").replace(
+        '[rules.circumstantial]\nscope = "not poetry"', '[rules.circumstantial]\nscope = "none"')
+    alt = tmp_path / "alt.toml"
+    alt.write_text(text, encoding="utf-8")
+    try:
+        d.configure(alt)
+        assert not d.active("circumstantial", "GEN") and d.CONFIG_SHA256 != ""
+        bad = tmp_path / "bad.toml"
+        bad.write_text(text.replace('[rules.main_clause_chain]\nscope = "all"', '[rules.main_clause_chain]\nscope = "none"'), encoding="utf-8")
+        with pytest.raises(ValueError):
+            d.configure(bad)                                                                     # a rule of the model cannot be turned off
+    finally:
+        d.configure()
+    assert d.active("circumstantial", "GEN")

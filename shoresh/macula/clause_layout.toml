@@ -1,0 +1,805 @@
+# Hebrew clause layout: rules and settings
+# ========================================
+#
+# Every decision of the clause-layout build that is not mechanics lives in this file:
+#
+#   [books.*]          book groups that rules can be limited to
+#   [scopes]           what a rule's `scope` can say
+#   [words.*]          the words the rules look for (Strong's numbers, lemmas)
+#   [forms]            groups of verb forms (MACULA wtype)
+#   [macula]           MACULA rule and role codes the rules look for
+#   [text]             marks in the text the rules look for
+#   [relations.*]      the relation vocabulary, and which relations add a level of indentation
+#   [depth]            the two depths, and other depth conventions
+#   [conventions.*]    conventions a client can apply to the output
+#   [features.*]       what each clause feature means (computed per clause in discourse_rules.features)
+#   [rules.*]          every rule: what it does, examples, where it applies, and its parameters
+#   [versification.*]  verses that English numbering divides inside the verse
+#
+# The Python code (macula/discourse_rules.py, macula/build_clause_layout.py) keeps only the mechanics: the stack of speech lines, the
+# order in which the rules are tried, and how a link is made. discourse_rules.py contains no Hebrew words, Strong's numbers or book
+# names; a test checks that every rule here is used in the code and every rule in the code is described here.
+#
+# Editing
+# - Limit a rule to some books, or turn it off, with its `scope` (see [scopes]). A rule with `switchable = false` is part of the model
+#   itself and stays "all".
+# - Add or remove a word in a word list; lemmas are compared in Unicode NFC, so the order of the points does not matter.
+# - Change which relations add a level of indentation in [relations.*].
+# - build.json records this file's sha256, so every output says which settings made it. Raise `version` when a change alters the output.
+# - Try a changed copy without editing this one: python -m macula.build_clause_layout --config my.toml --out /tmp/x
+
+version = "0.11"
+
+
+# ------------------------------------------------------------------------------------------------------------------------- books
+
+[books.poetry]
+doc = "The poetic books."
+books = ["JOB", "PSA", "PRO", "SNG", "LAM"]
+
+[books.poetic]
+doc = """Poetry and prophecy: the poetic books, Ecclesiastes and the Latter Prophets. Their speeches and oracles do not follow the
+narrative's rules for when a speech ends."""
+books = ["JOB", "PSA", "PRO", "ECC", "SNG", "LAM", "ISA", "JER", "EZK", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB", "ZEP",
+         "HAG", "ZEC", "MAL"]
+
+[books.first_person_narrator]
+doc = """Books (or parts of books) whose narrator speaks in the first person: "וַיֹּאמֶר אֵלַי", "וָאֵרֶא". Elsewhere "אֵלַי" in a speech
+is a character retelling (Deut 2:9 "וַיֹּאמֶר יְהוָה אֵלַי" in Moses' speech)."""
+books = ["ISA", "JER", "EZK", "HOS", "AMO", "MIC", "HAB", "ZEC", "DAN", "EZR", "NEH"]
+
+
+[scopes]
+doc = """Where a rule applies:
+  "all"            every book
+  "none"           no book: the rule is turned off
+  "<group>"        the books of a group in [books.*], e.g. "poetic"
+  "not <group>"    the books outside a group, e.g. "not poetry"
+  ["GEN", ...]     a list of USFM book codes"""
+
+
+# ------------------------------------------------------------------------------------------------------------------------- words
+# Strong's numbers as in MACULA's strong column, without leading zeros and letter suffixes.
+
+[words.speak]
+doc = """Verbs of speaking. A finite form opens a speech (rule speaking_clause_opens_speech); in Aramaic a participle does too."""
+strong = [
+    "559",    # אָמַר say
+    "1696",   # דִּבֶּר speak
+    "6680",   # צִוָּה command
+    "6030",   # עָנָה answer
+    "7592",   # שָׁאַל ask
+    "560",    # Aramaic אֲמַר say
+    "6032",   # Aramaic עֲנָה answer
+    "4449",   # Aramaic מְלַל speak
+]
+
+[words.say]
+doc = "The verb say, Hebrew and Aramaic: messenger formulas, commands to say, quotations."
+strong = ["559", "560"]                  # אָמַר, Aramaic אֲמַר
+
+[words.say_infinitive]
+doc = "The verb whose infinitive with לְ is לֵאמֹר, and with another preposition introduces a quotation (בֶּאֱמָרְכֶם)."
+strong = ["559"]                         # אָמַר
+
+[words.answer]
+doc = "Verbs of answering: they open a speech only when a verb of saying follows in the verse (rule answer_needs_say)."
+strong = ["6030", "6032"]                # עָנָה, Aramaic עֲנָה
+
+[words.ask]
+doc = "שָׁאַל: with an object (\"מַיִם שָׁאַל\") or with לְשָׁלוֹם it quotes nothing and opens no speech."
+strong = ["7592"]
+
+[words.swear]
+doc = "Oath verbs: a 1st-person form opens an oath (נִשְׁבַּעְתִּי)."
+strong = ["7650"]                        # שָׁבַע
+
+[words.oath_formula_verbs]
+doc = "The verbs of the oath formula כֹּה יַעֲשֶׂה … וְכֹה יֹסִיף."
+strong = ["6213", "3254"]                # עָשָׂה, יָסַף
+
+[words.be]
+doc = "הָיָה: the word-event formula (וַיְהִי דְבַר־יְהוָה) and a dated or temporal וַיְהִי."
+strong = ["1961"]
+
+[words.word_event]
+doc = """With הָיָה, a word of the word-event formula: "וַיְהִי דְבַר־יְהוָה אֵלַי", "הַדָּבָר אֲשֶׁר הָיָה אֶל־יִרְמְיָהוּ מֵאֵת יְהוָה"."""
+strong = ["1697", "3068"]                # דָּבָר, יְהוָה
+
+[words.do]
+doc = "עָשָׂה: the compliance formula \"וַיַּעַשׂ כֵּן\", \"וַיַּעֲשׂוּ כֵן\"."
+strong = ["6213"]
+
+[words.hear]
+doc = "Imperatives of hearing count as one opening for stanza heads (Prov 8:10 קְחוּ → 8:6 שִׁמְעוּ)."
+strong = [
+    "8085",   # שָׁמַע
+    "238",    # הֶאֱזִין
+    "995",    # בִּין
+    "3947",   # לָקַח (קְחוּ מוּסָרִי)
+]
+
+[words.address]
+doc = "Prepositions that name the addressee of a verb of saying (וְאָמַרְתָּ אֲלֵיהֶם)."
+strong = ["413", "3807"]                 # אֶל, לְ
+
+[words.divine]
+doc = "Words that name God. A subject with one of them is \"divine\" (כֹּה אָמַר יְהוָה; \"וַתִּפֹּל עָלַי רוּחַ יְהוָה\")."
+strong = [
+    "3068",   # יְהוָה
+    "3069",   # יֱהֹוִה
+    "136",    # אֲדֹנָי
+    "430",    # אֱלֹהִים
+    "410",    # אֵל
+    "433",    # אֱלוֹהַּ
+    "6918",   # קָדוֹשׁ (קְדוֹשׁ יִשְׂרָאֵל)
+]
+
+[words.proclaim]
+doc = """Verbs of a command to the prophet to speak (Jer 7:27 "וְדִבַּרְתָּ אֲלֵיהֶם", Ezek "הִנָּבֵא"). Not קָרָא: Lev 25:10
+"וּקְרָאתֶם דְּרוֹר" is law, not a command to speak."""
+strong = ["559", "1696", "5012"]         # אָמַר, דִּבֶּר, נִבָּא
+
+[words.subordinators]
+doc = """Conjunctions that open a subordinate clause, and the relation they give. A כִּי before its main clause is conditional outside
+poetry and prophecy (rule ki_before_main_is_conditional)."""
+[words.subordinators.relation]
+"כִּי" = "causal"
+"יַעַן" = "causal"
+"עֵקֶב" = "causal"
+"תַּחַת" = "causal"
+"אִם" = "conditional"
+"לוּ" = "conditional"
+"לוּלֵא" = "conditional"
+"אִלּוּ" = "conditional"
+"לְמַעַן" = "purpose"
+"פֶּן" = "purpose"
+"עַד" = "temporal"
+"טֶרֶם" = "temporal"
+"בְּטֶרֶם" = "temporal"
+
+[words.subordinators_aramaic]
+doc = """Aramaic conjunctions that open a subordinate clause (Hebrew הֵן is "behold", Aramaic הֵן is "if"), and the relation of
+כָּל־קֳבֵל דִּי "because" (MACULA: כְּ + לְ + קֳבֵל + דִּי)."""
+relation = { "הֵן" = "conditional" }
+qabel_di = "causal"
+
+[words.relatives]
+doc = "Relative particles: a clause they open is relative; after a preposition (כַּאֲשֶׁר, מֵאֲשֶׁר) it is temporal."
+lemmas = ["אֲשֶׁר", "שֶׁ", "דִּי", "זוּ"]
+after_preposition = "temporal"
+
+[words.infinitive_preposition]
+doc = "The relation of an infinitive clause, by the preposition on the infinitive; without one it is a complement."
+relation = { "לְ" = "purpose", "בְּ" = "temporal", "כְּ" = "temporal" }
+default = "complement"
+
+[words.formula]
+doc = "Speaking formulas that are an inquit wherever they stand (נְאֻם יְהוָה)."
+lemmas = ["נְאֻם"]
+
+[words.time]
+doc = "Time words that make a וַיְהִי a dated narrative frame (\"וַיְהִי בַּשָּׁנָה הַשְּׁבִיעִית\")."
+lemmas = ["יוֹם", "שָׁנָה", "חֹדֶשׁ", "עֵת", "אַחַר", "בֹּקֶר", "עֶרֶב", "לַיְלָה"]
+
+[words.consequence]
+doc = "Openings of a consequence: \"therefore\"."
+sequences = [["לָכֵן"], ["עַל", "כֵּן"]]
+
+[words.oath_content]
+doc = "Conjunctions that open the content of an oath (חַי־אָנִי … אִם־לֹא)."
+lemmas = ["כִּי", "אִם"]
+
+[words.oath_reason]
+doc = "Conjunctions that open the reason for an oath."
+lemmas = ["יַעַן", "עֵקֶב"]
+
+[words.quoting_subordinators]
+doc = "A clause opened by one of these with a verb of saying introduces a quotation (Mal 1:4 \"כִּי־תֹאמַר אֱדוֹם\")."
+lemmas = ["כִּי", "אִם", "פֶּן"]
+
+[words.particle]
+doc = "Single words that the features and rules test for."
+waw = "וְ"                # and: coordination, וְ-clauses
+be = "בְּ"                # in
+ke = "כְּ"                # as
+le = "לְ"                 # to (לֵאמֹר)
+ki = "כִּי"               # for, that, if
+im = "אִם"                # if (כִּי אִם "but")
+di = "דִּי"               # Aramaic relative / "because"
+adayin = "אֱדַיִן"        # Aramaic "then": a narrative step
+qabel = "קֳבֵל"           # Aramaic כָּל־קֳבֵל: + דִּי "because", + דְּנָה "therefore"
+dena = "דְּנָה"           # Aramaic "this"
+ko = "כֹּה"               # thus: כֹּה אָמַר, כֹּה תֹאמַר, כֹּה יַעֲשֶׂה
+hay = "חַי"               # as … lives: an oath
+melek = "מֶלֶךְ"          # king: names an actor of an Aramaic narrative step
+selah = "סֶלָה"
+shalom = "שָׁלוֹם"        # שָׁאַל לְשָׁלוֹם: a greeting, no speech
+ken = "כֵּן"              # so: the compliance formula
+
+
+# ------------------------------------------------------------------------------------------------------------------------- forms
+
+[forms]
+doc = "Groups of verb forms (MACULA wtype)."
+finite = ["wayyiqtol", "weqatal", "qatal", "yiqtol", "imperative", "jussive", "cohortative"]
+chain = ["wayyiqtol", "weqatal"]                                         # continuation on any line
+chain_in_speech_with_waw = ["yiqtol", "qatal", "imperative", "jussive", "cohortative"]   # continuation in a speech, with וְ
+infinitive = ["infinitive construct", "infinitive absolute"]
+participle = ["participle active", "participle passive"]
+narrated = ["wayyiqtol", "qatal"]                                        # with the 3rd person: a narrated speaking clause
+quotation = ["weqatal", "yiqtol"]                                        # with the 2nd person and a verb of saying: a quotation
+
+
+# ------------------------------------------------------------------------------------------------------------------------- macula
+
+[macula]
+doc = "MACULA codes the rules test for."
+vocative_rule = "Np2CL"                          # clause rule of an address
+complement_roles = ["o", "o2", "s", "p"]         # roles of an embedded clause that is a complement
+
+
+[text]
+doc = "Marks in the text (MACULA's trailers) that the rules test for."
+paragraph_marks = ["ס", "פ"]                    # setuma, petuha
+
+
+# ------------------------------------------------------------------------------------------------------------------------- relations
+# adds_text_level: the link adds a level of indentation in text_depth (the flat view)
+# adds_tree_level: the link adds a level in tree_depth
+
+[relations.continuation]
+doc = """A wayyiqtol or weqatal on its line; in a speech also a yiqtol, qatal, imperative, jussive or cohortative with וְ."""
+adds_text_level = false
+adds_tree_level = true
+
+[relations.coordination]
+doc = "Any other clause with וְ, on the clause before it on its line."
+adds_text_level = false
+adds_tree_level = true
+
+[relations.asyndetic]
+doc = "A main clause without a conjunction (poetry, lists, a new address), on the head of the run before it."
+adds_text_level = false
+adds_tree_level = true
+
+[relations.speech]
+doc = "The first clause of a speech, on its speaking clause (or its לֵאמֹר)."
+adds_text_level = true
+adds_tree_level = true
+
+[relations.inquit]
+doc = "A speaking formula inside or after the words it quotes (\"נְאֻם יְהוָה\", Isa 40:1 \"יֹאמַר אֱלֹהֵיכֶם\")."
+adds_text_level = false
+adds_tree_level = true
+
+[relations.causal]
+doc = "A reason clause (כִּי after its main clause, יַעַן, עֵקֶב, Aramaic כָּל־קֳבֵל דִּי)."
+adds_text_level = true
+adds_tree_level = true
+
+[relations.purpose]
+doc = "A purpose clause (לְמַעַן, פֶּן, לְ + infinitive)."
+adds_text_level = true
+adds_tree_level = true
+
+[relations.temporal]
+doc = "A time clause (כַּאֲשֶׁר, עַד, טֶרֶם, בְּ/כְּ + infinitive)."
+adds_text_level = true
+adds_tree_level = true
+
+[relations.conditional]
+doc = "A protasis (אִם, לוּ, לוּלֵא, אִלּוּ, Aramaic הֵן, a כִּי before its main clause), under its apodosis."
+adds_text_level = true
+adds_tree_level = true
+
+[relations.relative]
+doc = "A relative clause (אֲשֶׁר, דִּי, שֶׁ); discourse_attach is the antecedent's first word."
+adds_text_level = true
+adds_tree_level = true
+
+[relations.circumstantial]
+doc = "A participle clause with וְ, or a verbless וְ-clause after a wayyiqtol in narrative."
+adds_text_level = false
+adds_tree_level = true
+
+[relations.complement]
+doc = "An embedded clause that is an object, subject or predicate (MACULA role), a לֵאמֹר, an infinitive without a preposition, or the content of an oath."
+adds_text_level = true
+adds_tree_level = true
+
+[relations.vocative]
+doc = "An address (\"בֶּן־אָדָם\"), on the clause it belongs to."
+adds_text_level = false
+adds_tree_level = true
+
+[relations.embedded]
+doc = "Any other embedded clause, on its MACULA parent."
+adds_text_level = true
+adds_tree_level = true
+
+[relations.parallel]
+doc = "The second and later clauses of a series (the same opener), a repeated turn, a stanza head: each on the one before."
+adds_text_level = false
+adds_tree_level = false
+
+[relations.adversative]
+doc = "\"כִּי אִם\" right after a negated clause: \"not … but\" (Jer 7:22-23)."
+adds_text_level = false
+adds_tree_level = true
+
+[relations.consequence]
+doc = "לָכֵן / עַל־כֵּן \"therefore\", on the main clause before it (one level deeper, BHSA's convention)."
+adds_text_level = true
+adds_tree_level = true
+
+
+[depth]
+doc = """tree_depth counts every link up the discourse_parent chain whose relation adds a tree level. text_depth (the flat view) counts
+the links whose relation adds a text level and whose discourse_rule is not in flat_rules: a chain stays on one level, an address and a
+circumstantial clause stay on the line of the clause they belong to (the relation still says what they are)."""
+flat_rules = ["embedded_flat"]           # see rules.embedded_keeps_macula_parent
+
+
+[conventions.conditional_inversion]
+doc = """A protasis hangs under its apodosis (relation conditional). To invert, for each conditional link whose protasis comes before
+the clause it hangs on (and that is the first of a series): the protasis takes the apodosis's parent and relation, and the apodosis
+hangs under the protasis with relation conditional. A protasis after its main clause is left as it is."""
+
+
+# ------------------------------------------------------------------------------------------------------------------------- features
+# What discourse_rules.features computes for each clause from its MACULA words (whole words, as segmented), the MACULA clause node
+# (rule, role, subject phrases) and the person of its verbs and pronouns (lexeme spine). No BHSA input.
+
+[features.verb]
+doc = "Strong's number of the clause's verb: the first finite verb, else the first verb."
+[features.form]
+doc = "The verb's form (MACULA wtype)."
+[features.person]
+doc = "The verb's person (first, second, third), from the lexeme spine."
+[features.aramaic]
+doc = "Most of the clause's words are Aramaic."
+[features.waw]
+doc = "The clause opens with וְ."
+[features.lead]
+doc = "Lemma of the clause's first word after וְ."
+[features.l1]
+doc = "Lemma of the second word after וְ."
+[features.sub_kind]
+doc = """The subordinate relation the clause's opening gives: a subordinator at the start (words.subordinators; Aramaic only for
+words.subordinators_aramaic), a relative (words.relatives) or a preposition + relative (words.relatives.after_preposition),
+Aramaic כָּל־קֳבֵל דִּי, an infinitive (words.infinitive_preposition), or a participle clause with וְ and without the article or a
+subject (circumstantial). Aramaic דִּי inside a clause is the genitive particle and opens nothing."""
+[features.di_first]
+doc = "The clause opens with Aramaic דִּי."
+[features.speak]
+doc = """The verb is a verb of speaking (words.speak), finite, or in Aramaic also a participle; not שָׁאַל with an object or with
+שָׁלוֹם (words.ask)."""
+[features.participle]
+doc = """A participle clause of its own: participle without finite verb, not a verb of speaking, without the article on the participle,
+without a subject. Without וְ it is a main clause (Dan 2:21-22, a hymn's predicates on God); with וְ it is circumstantial."""
+[features.lemor]
+doc = "The clause has לֵאמֹר: לְ + the infinitive construct of words.say_infinitive."
+[features.quote_say]
+doc = """The clause introduces a quotation: another preposition + that infinitive (בֶּאֱמָרְכֶם "in that you say"), or a 2nd-person verb
+of saying in forms.quotation without an object and not after כֹּה (Mal 1:5 "וְאַתֶּם תֹּאמְרוּ"; not "כֹּה תֹאמַר")."""
+[features.say_any]
+doc = "A finite verb of saying (words.say) without an object."
+[features.addressee]
+doc = "The clause names an addressee (words.address)."
+[features.inf_le]
+doc = "An infinitive clause with לְ (purpose)."
+[features.ptc_saying]
+doc = "A participle of saying without a finite verb (Ps 3:3 \"רַבִּים אֹמְרִים\")."
+[features.formula]
+doc = "The clause opens with a speaking formula (words.formula)."
+[features.selah]
+doc = "The clause has סֶלָה."
+[features.step]
+doc = """An Aramaic narrative step: אֱדַיִן (also בֵּאדַיִן) or כָּל־קֳבֵל דְּנָה, with an actor (a proper noun or מֶלֶךְ). Inside a retold
+dream there is no actor (Dan 2:35)."""
+[features.oath]
+doc = "An oath: a 1st-person oath verb (words.swear), חַי, or כֹּה + an oath formula verb (words.oath_formula_verbs)."
+[features.vocative]
+doc = "An address: MACULA rule macula.vocative_rule, headed by a noun or participle, without a finite verb."
+[features.imperative]
+doc = "The verb is an imperative."
+[features.second]
+doc = "The verb is an imperative or 2nd person."
+[features.pron12]
+doc = "The clause has a 1st- or 2nd-person pronoun (\"וַתִּפָּעֶם רוּחִי\": part of a speech, not the narrative)."
+[features.pron1]
+doc = "The clause has a 1st-person pronoun."
+[features.pron2]
+doc = "The clause has a 2nd-person pronoun."
+[features.pron3]
+doc = "The clause has a 3rd-person pronoun."
+[features.negated]
+doc = "The clause has a negative."
+[features.proper]
+doc = "The clause has a proper noun."
+[features.named_subject]
+doc = """An explicit subject (MACULA role s) headed by a proper noun ("רַב־שָׁקֵה"; not Ezek 23:11 "אֲחוֹתָהּ אָהֳלִיבָה" or 31:9
+"כָּל־עֲצֵי־עֵדֶן" in an allegory), or one that names God ("כְּבוֹד יְהוָה"). A definite noun is not enough: retold history names its
+actors the same way (Ezek 34:8 "וַיִּרְעוּ הָרֹעִים אוֹתָם")."""
+[features.def_subject]
+doc = "An explicit subject headed by a proper noun or a noun with the article."
+[features.divine]
+doc = "The subject names God (words.divine)."
+[features.compliance]
+doc = "The compliance formula: a wayyiqtol of words.do with כֵּן."
+[features.word_event]
+doc = "The word-event formula: words.be with a word of words.word_event."
+[features.time_wayehi]
+doc = "A dated וַיְהִי: a wayyiqtol of words.be with a time word (words.time)."
+[features.consequence]
+doc = "The clause opens with a consequence (words.consequence)."
+[features.messenger]
+doc = "The messenger formula: כֹּה + a qatal of words.say (כֹּה אָמַר יְהוָה)."
+[features.command_say]
+doc = """A command to say something, without an object of its own: an imperative of words.say (אֱמֹר; not Dan 2:4 "אֱמַר חֶלְמָא"),
+or כֹּה + a 2nd-person yiqtol (כֹּה תֹאמַר). A 2nd-person weqatal (וְאָמַרְתָּ) is decided in rule command_needs_addressee."""
+[features.say_weqatal]
+doc = "A 2nd-person weqatal of words.say without an object (וְאָמַרְתָּ, וַאֲמַרְתֶּם)."
+[features.proclaim]
+doc = "A command to the prophet to speak: an imperative of words.proclaim, or a 2nd-person weqatal of it with an addressee."
+[features.command]
+doc = "An imperative or a 2nd-person weqatal."
+[features.lead_verb]
+doc = "(Strong's number, form) of the first word after וְ when it is a verb: the opening of a turn."
+[features.subj]
+doc = "The clause names its subject (MACULA rule with S: V-S-O, S-V ...)."
+[features.opener]
+doc = """The clause's first word after וְ, as the lemmas of all its parts (בְּצֶדֶק and בְּרֹאשׁ differ, לָמָּה and לָמָּה agree), or
+"HEAR" for an imperative of hearing (words.hear)."""
+[features.plain_embedded]
+doc = """An embedded clause with no opener (conjunction, relative, preposition), no infinitive, and a participle or no verb (Deut 28:25
+"נִגָּף לִפְנֵי אֹיְבֶיךָ"): predicative participles, elliptic halves."""
+[features.role]
+doc = "The MACULA clause node's role."
+[features.circ]
+doc = "A verbless clause opened by וְ + a non-verb, not a verb of speaking."
+
+
+# ------------------------------------------------------------------------------------------------------------------------- rules
+# In the order discourse_rules.derive tries them for each clause (the two of build_clause_layout first).
+#
+# The model. Every clause gets a discourse_parent (an earlier clause, or for a protasis the later apodosis) and a relation, except the
+# first clause of a line. The narrative is one line; a speech opens a line of its own under its speaking clause, and lines nest. Main
+# clauses chain along their line; subordinate and embedded clauses hang on a main clause. The rules below decide when a line opens and
+# closes, which clause a clause hangs on, and with which relation.
+
+# ---- where the text starts afresh (build_clause_layout)
+
+[rules.each_psalm_starts_afresh]
+scope = ["PSA"]
+doc = "Each Psalm starts afresh: no speech or chain goes on from the Psalm before."
+
+[rules.chapter_after_mark_starts_afresh]
+scope = "poetic"
+doc = """In poetry and prophecy a chapter that starts after a paragraph mark (text.paragraph_marks) starts afresh: every speech
+closes. A speech opened by a narrative speaking clause (Amos 1:2 "וַיֹּאמַר", "וַיְהִי דְבַר־יְהוָה אֵלַי לֵאמֹר") otherwise stays
+open over paragraph marks until the narrative resumes."""
+
+# ---- where speeches end
+
+[rules.paragraph_mark_closes_commanded_speech]
+scope = "all"
+doc = """A paragraph mark (ס/פ) ends a speech opened by a messenger formula or a command to say, and what is nested in it, unless the
+command carries its speech (rule command_at_speech_start_carries)."""
+
+[rules.chapter_closes_prophetic_speech]
+scope = "all"
+doc = "A new chapter ends a prophetic speech (rule retold_history_in_prophetic_speech) and what is nested in it."
+
+[rules.chapter_restarts_chains]
+scope = "all"
+doc = "A new chapter starts each open line afresh: the speech goes on, but its chain of main clauses and its stanza heads restart."
+
+[rules.quotation_ends_with_verse]
+scope = "all"
+doc = "A quotation (a line marked as one by the rules that open it) ends with its verse."
+
+[rules.nested_speech_ends_after_next_verse]
+scope = "all"
+doc = "A speech nested in another speech ends after the verse following the one it opened in."
+verses_after = 1
+
+[rules.nested_speech_ends_at_3rd_person]
+scope = "all"
+doc = """A nested speech also ends at a 3rd-person וְ-clause (qatal or wayyiqtol, no 1st/2nd-person pronoun, not a verb of speaking)
+that opens the next verse: the speaker is talking about the people again."""
+examples = ["Jer 7:24 \"וְלֹא שָׁמְעוּ\" after the command quoted in 7:23", "Gen 42:23 \"וְהֵם לֹא יָדְעוּ\""]
+
+[rules.selah_ends_quotation]
+scope = "all"
+doc = "סֶלָה ends a quotation."
+
+[rules.proclaim_returns]
+scope = "all"
+doc = """A new command to the prophet to speak (features.proclaim) returns to the line that gave an earlier command to speak: the
+speeches opened since then close."""
+examples = ["Jer 7:27 \"וְדִבַּרְתָּ אֲלֵיהֶם\" goes back to the level of 7:2 \"וְאָמַרְתָּ\"", "Ezek 20:30 \"לָכֵן אֱמֹר\""]
+
+# ---- embedded clauses
+
+[rules.embedded_keeps_macula_parent]
+scope = "all"
+switchable = false
+doc = """An embedded clause keeps its MACULA parent. Relation: relative (a relative clause, or one in a noun phrase: discourse_attach
+is the antecedent's first word), complement (MACULA role in macula.complement_roles, or לֵאמֹר), the subordinate relation of its
+opening (purpose, temporal, causal, conditional, complement), or embedded. A plain embedded clause (features.plain_embedded) gets
+discourse_rule embedded_flat and stands next to its parent in the flat view (depth.flat_rules)."""
+
+[rules.lemor_opens_speech]
+scope = "all"
+doc = """A לֵאמֹר opens a speech, which hangs on the לֵאמֹר clause. When the speaking clause has just opened a speech, the speech moves
+to its לֵאמֹר. A speech under the word-event formula is prophetic."""
+
+[rules.commanded_lemor]
+scope = "not poetry"
+doc = """A לֵאמֹר under a command, inside a speech, opens a commanded speech, like וְאָמַרְתָּ אֲלֵהֶם: it lasts to the next paragraph
+mark (or carries its speech, rule command_at_speech_start_carries) and is prophetic."""
+examples = ["Jer 2:2 \"וְקָרָאתָ בְאָזְנֵי יְרוּשָׁלִַם לֵאמֹר\"", "Lev 4:2 \"דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל לֵאמֹר\""]
+
+[rules.quotation_lines]
+scope = "all"
+doc = """Quotations that end with their verse (rule quotation_ends_with_verse):
+- an infinitive of saying with a preposition other than לְ (בֶּאֱמָרְכֶם "in that you say");
+- a 2nd-person or future verb of saying without an object (features.quote_say), or a וְאָמַרְתָּ that is not a command (rule
+  command_needs_addressee), also inside a speech;
+- a subordinate clause opened by words.quoting_subordinators with a verb of saying ("כִּי־תֹאמַר אֱדוֹם": the words hang under it).
+A messenger formula ends an open quotation."""
+examples = ["Mal 1:5 \"וְאַתֶּם תֹּאמְרוּ\"", "Mal 1:6 \"וַאֲמַרְתֶּם בַּמֶּה בָזִינוּ\"", "Mal 1:12 \"בֶּאֱמָרְכֶם\"", "Mal 1:4 \"כִּי־תֹאמַר אֱדוֹם\""]
+
+# ---- when the narrative resumes (closing every speech)
+
+[rules.narrative_resumes]
+scope = "all"
+switchable = false
+doc = """The narrative resumes, closing all speeches, at a 3rd-person wayyiqtol. A wayyiqtol with a 1st- or 2nd-person pronoun
+("וַתִּפָּעֶם רוּחִי", Dan 2:3) stays in its speech."""
+
+[rules.narrator_says]
+scope = "all"
+doc = """The narrator's own "וָאֹמַר" (a 1st-person wayyiqtol of saying, without a 3rd-person pronoun and not followed only by an
+infinitive) resumes the narrative when the outermost speech is addressed to "me" (Jer 1:4 "וַיְהִי דְבַר־יְהוָה אֵלַי לֵאמֹר"). In a
+speech addressed to someone else it is a retelling (Gen 24:42), and "I said to pour out" (Ezek 20:8 "וָאֹמַר לִשְׁפֹּךְ") is a thought."""
+
+[rules.aramaic_narrative_steps]
+scope = "all"
+doc = """In Aramaic the narrative resumes at a 3rd-person speaking clause in qatal or participle ("the king answered and said", which
+opens the next speech; a yiqtol "let the king tell" is speech content; עֲנָה only with a following אֲמַר), or at a narrative step
+(features.step)."""
+
+[rules.retold_history_in_prophetic_speech]
+scope = "all"
+doc = """In a prophetic speech (opened by כֹּה אָמַר with God as the speaker, a command to say, or the word-event formula with its
+לֵאמֹר) a wayyiqtol is retold history, not the narrative resuming. The narrative resumes only with a narrative frame: the word-event
+formula, a dated וַיְהִי, a wayyiqtol of saying with a proper noun ("וַיֹּאמֶר יְהוָה אֵלַי"), a 3rd-person wayyiqtol with a named
+subject (features.named_subject) and no 1st/2nd-person pronoun, the narrator's "וָאֹמַר" (rule narrator_says), and the frames of rules
+narrative_frames and narrator_frames. A new chapter also ends it (rule chapter_closes_prophetic_speech)."""
+examples = ["Jer 2:5 \"וַיֵּלְכוּ אַחֲרֵי הַהֶבֶל וַיֶּהְבָּלוּ\" stays in the oracle", "Ezek 16, 20, 23", "Deut 26:5 \"וַיֵּרֶד מִצְרַיְמָה\"",
+            "Jonah 1:3 \"וַיָּקָם יוֹנָה\" resumes", "Isa 37:8 \"וַיָּשָׁב רַב־שָׁקֵה\" resumes"]
+
+[rules.narrative_frames]
+scope = "all"
+doc = """More narrative frames in a prophetic speech: a וַיְהִי followed in its verse by a temporal clause, the compliance formula, and a
+wayyiqtol of saying with a definite speaker (features.def_subject)."""
+examples = ["Ezek 11:13 \"וַיְהִי כְּהִנָּבְאִי\"", "Exod 8:13 \"וַיַּעֲשׂוּ־כֵן\"", "Hag 2:12 \"וַיַּעֲנוּ הַכֹּהֲנִים וַיֹּאמְרוּ\""]
+
+[rules.narrator_frames]
+scope = "first_person_narrator"
+doc = """When the outermost speech is addressed to "me", a 3rd-person wayyiqtol with a 1st-person pronoun and no 2nd-person pronoun is
+the narrative when it is a verb of saying ("וַיֹּאמֶר אֵלַי") or its subject names God (God's spirit or glory acting on "me"). Applies
+also outside prophetic speech."""
+examples = ["Ezek 11:5 \"וַתִּפֹּל עָלַי רוּחַ יְהוָה וַיֹּאמֶר אֵלַי\""]
+
+[rules.word_event_resumes]
+scope = "all"
+doc = "The word-event formula as a wayyiqtol always resumes the narrative, in any speech."
+examples = ["Ezek 21:6 after the prophet's \"וָאֹמַר\" of 21:5"]
+
+# ---- clauses that hang on their line without being main clauses
+
+[rules.inquit]
+scope = "all"
+doc = """A speaking formula (words.formula), or a 3rd-person speaking clause without וְ that is not the first clause of its verse, not
+a wayyiqtol and not a messenger formula, is an inquit: it hangs on the last main clause of its line, opens no speech, and the line goes
+on past it. Without rule inquit_after_subordinate, that main clause must be in the same verse."""
+examples = ["Isa 40:1 \"יֹאמַר אֱלֹהֵיכֶם\"", "\"נְאֻם יְהוָה\""]
+
+[rules.inquit_after_subordinate]
+scope = "all"
+doc = "An inquit may follow subordinate clauses in its verse, with no main clause of its line in that verse."
+examples = ["Mal 1:11 \"אָמַר יְהוָה צְבָאוֹת\" after two כִּי clauses"]
+
+[rules.vocative]
+scope = "all"
+doc = """An address (features.vocative) in a verse with an imperative or a 2nd-person verb hangs on the nearest main clause before it in
+the verse, else on the next main clause."""
+
+[rules.oath]
+scope = "all"
+doc = """While the speech goes on, a clause opened by words.oath_content that opens its verse or follows the oath directly is the oath's
+complement (its content), and a clause opened by words.oath_reason is causal on the oath. A וְ-clause right after the oath in its verse
+continues it (וְכֹה יֹסִיף)."""
+examples = ["נִשְׁבַּעְתִּי", "כֹּה יַעֲשֶׂה … וְכֹה יֹסִיף", "חַי־אָנִי … אִם־לֹא"]
+
+[rules.adversative]
+scope = "all"
+doc = "\"כִּי אִם\" right after a negated clause hangs on that clause: \"not … but\"."
+examples = ["Jer 7:22-23"]
+
+# ---- subordinate clauses
+
+[rules.subordinate_series]
+scope = "all"
+doc = """The second and later clauses of a series of subordinate clauses with the same opener hang on the one before, as parallel:
+right after it, or for conditionals anywhere in the same chapter. (A subordinate clause that opens a speech is the speech's first
+clause, Ruth 1:10.)"""
+examples = ["Isa 40:2 כִּי, כִּי, כִּי", "Lev 1:3, 1:10, 1:14 אִם"]
+
+[rules.ki_series_and_look_back]
+scope = "poetic"
+doc = """A כִּי series continues over a וְ-clause that continues the כִּי clause before it; a causal כִּי with no main clause before it
+in its verse looks back to the last main clause of its line; and a וְ-clause continues a clause that continues a subordinate clause
+(rule waw_continues_subordinate)."""
+examples = ["Mal 1:11", "Jer 2:5 \"וַיֶּהְבָּלוּ\""]
+
+[rules.subordinate_hangs_back]
+scope = "all"
+switchable = false
+doc = "A subordinate clause hangs on the nearest main clause of its line before it in the verse."
+
+[rules.subordinate_looks_back]
+scope = "all"
+doc = """A verse-initial Aramaic דִּי (causal) or a verse-initial participle clause looks back to the last main clause of its line: it
+explains what came before."""
+
+[rules.verse_initial_reason_looks_back]
+scope = "poetic"
+doc = "In poetry and prophecy a verse-initial reason clause (\"for\") looks back to the last main clause of its line."
+
+[rules.subordinate_hangs_forward]
+scope = "all"
+switchable = false
+doc = """Any other subordinate clause with no main clause before it in its verse waits for the next main clause and hangs on it (a
+fronted protasis or time clause). If that main clause lies inside it, it hangs on the clause before it."""
+
+[rules.ki_before_main_is_conditional]
+scope = "not poetic"
+doc = """A כִּי before its main clause is conditional (casuistic law: "if a man …"); elsewhere it keeps the relation of its opener."""
+examples = ["Exod 21:2 \"כִּי תִקְנֶה עֶבֶד עִבְרִי\""]
+
+[rules.fallback_to_clause_before]
+scope = "all"
+doc = """A clause waiting for the next main clause that finds none before a new chapter or the end of the book hangs on the clause before
+it."""
+
+# ---- other clause kinds
+
+[rules.circumstantial]
+scope = "not poetry"
+doc = """A verbless clause opened by וְ + a non-verb (features.circ) right after a wayyiqtol main clause of its verse, in the narrative
+line, is circumstantial on that clause. In the poetic books such a clause is the second half of a couplet (coordination)."""
+
+[rules.waw_continues_subordinate]
+scope = "poetic"
+doc = """In poetry and prophecy a וְ-clause right after a subordinate clause in the same verse (no main clause between) continues it:
+continuation for a wayyiqtol or weqatal, else coordination."""
+examples = ["Prov 8:7 \"וְתוֹעֲבַת שְׂפָתַי רֶשַׁע\" on \"כִּי־אֱמֶת יֶהְגֶּה חִכִּי\""]
+
+# ---- main clauses
+
+[rules.main_clause_chain]
+scope = "all"
+switchable = false
+doc = """A main clause hangs on the last main clause of its line: continuation (forms.chain; in a speech also
+forms.chain_in_speech_with_waw with וְ), coordination (other וְ), or asyndetic. The first main clause of a speech hangs on its speaking
+clause with relation speech; the first clause of the narrative line has no parent. A main clause takes the clauses waiting for it."""
+
+[rules.asyndetic_climbs_to_run_head]
+scope = "all"
+doc = """An asyndetic clause hangs on the head of the run before it: from the last main clause, up over continuation, coordination and
+parallel links within that clause's verse (not over an earlier asyndetic link)."""
+
+[rules.consequence]
+scope = "all"
+doc = "A clause opened by words.consequence hangs on the last main clause of its line with relation consequence."
+examples = ["Jer 2:9 \"לָכֵן עֹד אָרִיב אִתְּכֶם\""]
+
+[rules.subject_starts_new_step]
+scope = "all"
+doc = """A chain clause that names its subject starts a new step: it hangs on the nearest earlier chain clause that also names one
+(over continuation, coordination and parallel links), and the subjectless clauses after it fill that step in."""
+examples = ["Gen 22:5 \"וַיֹּאמֶר אַבְרָהָם\" on 22:4 \"וַיִּשָּׂא אַבְרָהָם\""]
+
+[rules.stanza_heads]
+scope = "poetry"
+doc = """A verse-initial asyndetic clause whose opening (features.opener) repeats the opening of an earlier verse-initial clause on its
+line hangs on that one as parallel: a stanza head."""
+examples = ["Job 3:20 לָמָּה on 3:11 לָמָּה", "Prov 8:10 קְחוּ on 8:6 שִׁמְעוּ"]
+
+[rules.repeated_turn_is_parallel]
+scope = "all"
+doc = """A turn that repeats the opening of an earlier turn on its line (the same speaking verb and form, without וְ, not a wayyiqtol)
+hangs on it as parallel."""
+examples = ["Dan 2:8 עָנֵה מַלְכָּא on 2:5"]
+
+# ---- speeches that open at a main clause
+
+[rules.messenger_formula_opens_speech]
+scope = "all"
+doc = """The messenger formula כֹּה אָמַר opens a speech that lasts to the next paragraph mark (rule
+paragraph_mark_closes_commanded_speech), nested if inside a speech."""
+
+[rules.command_to_say_opens_speech]
+scope = "all"
+doc = """Inside a speech, a command to say something (features.command_say, or a וְאָמַרְתָּ that rule command_needs_addressee counts as a
+command) opens a speech like a messenger formula, unless only a לְ + infinitive follows (rule indirect_speech_opens_none). The line
+that gave the command is remembered (rule proclaim_returns). A commanded speech is prophetic."""
+examples = ["אֱמֹר", "וְאָמַרְתָּ אֲלֵהֶם", "כֹּה תֹאמַר"]
+
+[rules.command_at_speech_start_carries]
+scope = "all"
+doc = """A command to say that comes at the start of a speech (in the speech's first verses) carries the rest of that speech: it lasts
+as long as the speech, over paragraph marks."""
+examples = ["Lev 1:2 \"דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל וְאָמַרְתָּ אֲלֵהֶם\""]
+within_verses = 1                        # the command comes in the verse the speech opened in, or the next one
+
+[rules.commanded_speech_in_poetry_ends_with_verse]
+scope = "poetry"
+doc = "In poetry a messenger formula or a command to say opens a quotation that ends with its verse or at סֶלָה, and carries nothing."
+
+[rules.prophetic_needs_god]
+scope = "all"
+doc = """A messenger formula opens a prophetic speech only when its subject names God (features.divine); a human messenger formula opens
+an ordinary speech. (A commanded speech is always prophetic.)"""
+examples = ["Isa 37:3 \"כֹּה אָמַר חִזְקִיָּהוּ\"", "Exod 5:10 \"כֹּה אָמַר פַּרְעֹה\""]
+
+[rules.command_needs_addressee]
+scope = "all"
+doc = """A 2nd-person weqatal of saying (וְאָמַרְתָּ) is a command to say only with an addressee (words.address) or right after a command
+on its line; otherwise it is a quotation (rule quotation_lines)."""
+examples = ["Mal 1:6 \"וַאֲמַרְתֶּם\" is a quotation", "Jer 7:28 \"וְאָמַרְתָּ אֲלֵיהֶם\" is a command", "Ezek 6:3 \"וְהִנָּבֵא … וְאָמַרְתָּ\""]
+
+[rules.speaking_clause_opens_speech]
+scope = "all"
+switchable = false
+doc = """A speaking clause (features.speak; not an imperative) opens a speech under it: in the narrative any speaking clause, inside a
+speech only a narrated one (forms.narrated in the 3rd person, or a participle). A לֵאמֹר clause does too."""
+
+[rules.answer_needs_say]
+scope = "all"
+doc = "A verb of answering (words.answer) opens a speech only when a speaking clause with words.say follows in its verse."
+examples = ["Ps 3:5 \"he answered me\" opens none"]
+
+[rules.indirect_speech_opens_none]
+scope = "all"
+doc = """A speaking clause whose only follow-up in its verse is a לְ + infinitive opens no speech: the infinitive is its complement
+(indirect speech)."""
+examples = ["Dan 2:12 \"and he commanded to destroy\""]
+
+[rules.future_saying_is_quotation]
+scope = "all"
+doc = """A speech opened by a speaking clause that is not narrated (not 3rd-person wayyiqtol/qatal, not a participle, not a 1st-person
+wayyiqtol/qatal) is a quotation: it ends with its verse ("יֹאמַר")."""
+
+[rules.participle_of_saying_quotes]
+scope = "poetry"
+doc = "A participle of saying opens a quotation that ends with its verse or at סֶלָה."
+examples = ["Ps 3:3 \"רַבִּים אֹמְרִים לְנַפְשִׁי\""]
+
+
+# ------------------------------------------------------------------------------------------------------------------------- versification
+# Hebrew verses that English numbering divides inside the verse (TVTMS MergedPrevVerse): from this word key on, the segment is in the
+# second English verse. The other split verses (NUM 25:19, 1SA 21:1, 1KI 22:44, 1CH 12:5) map whole through org-to-eng.multiverse.
+
+[versification.split_verses."PSA 13:6"]
+from_key = "190130060071"                # אָשִׁירָה לַיהוָה ...; before it English 13:5
+verse_ref_en = "PSA 13:6"
+
+[versification.split_verses."ISA 63:19"]
+from_key = "230630190101"                # לוּא־קָרַעְתָּ ...; before it English 63:19
+verse_ref_en = "ISA 64:1"

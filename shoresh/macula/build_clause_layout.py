@@ -44,14 +44,7 @@ UHB_URL = "https://git.door43.org/unfoldingWord/hbo_uhb/raw/tag/%s/{nn:02d}-{cod
 
 FORMAT_VERSION = 1
 LANG = {"H": "hbo", "A": "arc"}
-# poetry and prophecy: a paragraph mark (petuha/setuma) ends any speech in progress (narrative speeches run over them)
-POETRY = {"JOB", "PSA", "PRO", "SNG", "LAM"}
-RESET_AT_PARAGRAPH = {"JOB", "PSA", "PRO", "ECC", "SNG", "LAM", "ISA", "JER", "EZK", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB",
-                      "ZEP", "HAG", "ZEC", "MAL"}
-# Hebrew verses that English numbering divides inside the verse (TVTMS MergedPrevVerse): from this word key on, the segment is in the
-# second English verse. The other split verses (NUM 25:19, 1SA 21:1, 1KI 22:44, 1CH 12:5) map whole through org-to-eng.multiverse.
-SPLIT_VERSES = {("PSA", 13, 6): ("190130060071", "PSA 13:6"),       # אָשִׁירָה לַיהוָה ...; before it English 13:5
-                ("ISA", 63, 19): ("230630190101", "ISA 64:1")}      # לוּא־קָרַעְתָּ ...; before it English 63:19
+# Book groups, the rules, their scopes, the paragraph marks and the split verses are in macula/clause_layout.toml (discourse_rules).
 
 
 # ---------------------------------------------------------------- ketiv/qere from UHB (CC BY-SA 4.0)
@@ -253,7 +246,10 @@ def main() -> None:
     ap.add_argument("--books", help="comma-separated USFM codes (default: all Hebrew books)")
     ap.add_argument("--out", default=str(SHORESH / "macula" / "data" / "clause-layout"))
     ap.add_argument("--uhb-cache", default=str(SHORESH / "macula" / "data" / "uhb"), help="downloaded UHB USFM (cached per tag)")
+    ap.add_argument("--config", help="rules and settings file (default macula/clause_layout.toml)")
     a = ap.parse_args()
+    if a.config:
+        discourse_rules.configure(a.config)
     out = Path(a.out)
     tp = trees_macula.trees_path()
     con = sqlite3.connect(f"file:{tp}?mode=ro", uri=True)
@@ -266,7 +262,7 @@ def main() -> None:
     books = a.books.upper().split(",") if a.books else [r[0] for r in con.execute("SELECT book FROM words WHERE corpus='hbo' GROUP BY book ORDER BY MIN(seq)")]
     chapters_out: list[tuple[str, int, list[dict]]] = []
     resets: set[str] = set()               # first word key after which a speech cannot continue
-    paras: set[str] = set()                # first word key after a paragraph mark (ס/פ), any book
+    paras: set[str] = set()                # first word key after a paragraph mark, any book
     kq_stats: collections.Counter = collections.Counter()
     for book in books:
         kq = ketiv_qere(con, book, Path(a.uhb_cache), kq_stats)
@@ -276,16 +272,17 @@ def main() -> None:
             rows = con.execute("SELECT * FROM words w WHERE corpus='hbo' AND book=? AND chapter=? AND inserted=0 ORDER BY " + trees_macula.TEXT_ORDER,
                                (book, ch)).fetchall()
             segs = chapter_segments(rows, nodes, parents)
-            if rows and book == "PSA":
+            pm = discourse_rules.PARAGRAPH_MARKS
+            if rows and discourse_rules.active("each_psalm_starts_afresh", book):
                 resets.add(rows[0]["key"])
             if rows:
-                marks = {rows[i + 1]["key"] for i in range(len(rows) - 1) if any(m in (rows[i]["after"] or "") for m in "ספ")}
+                marks = {rows[i + 1]["key"] for i in range(len(rows) - 1) if any(m in (rows[i]["after"] or "") for m in pm)}
                 if mark_pending:                   # the previous chapter ended with a paragraph mark
                     marks.add(rows[0]["key"])
                 paras.update(marks)
-                if book in RESET_AT_PARAGRAPH and mark_pending:
-                    resets.add(rows[0]["key"])     # poetry and prophecy: a chapter that starts after ס/פ starts afresh
-                mark_pending = any(m in (rows[-1]["after"] or "") for m in "ספ")
+                if discourse_rules.active("chapter_after_mark_starts_afresh", book) and mark_pending:
+                    resets.add(rows[0]["key"])
+                mark_pending = any(m in (rows[-1]["after"] or "") for m in pm)
             for sg in segs:
                 sg["ketiv_qere"] = [kq[k] for k in sg["words"] if k in kq]
             eng: dict[int, str] = {}
@@ -294,7 +291,7 @@ def main() -> None:
                 v = s["verse"]
                 if v not in eng:
                     eng[v] = _eng(book, ch, v)
-                sp = SPLIT_VERSES.get((book, ch, v))
+                sp = discourse_rules.SPLIT_VERSES.get((book, ch, v))
                 if sp and s["first"] == sp[0]:
                     split_at = sp[1]
                 ref = split_at if (sp and split_at) else eng[v]
@@ -328,8 +325,7 @@ def main() -> None:
         by_book[book].append({"key": clause_key[cid], "verse": (book, ch, v), "parent_key": clause_key.get(parents.get(cid)) if parents.get(cid) else None,
                               "attach": attach_of.get(cid), "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
                                                              nodes[cid]["role"] if cid in nodes else None, subj_ranges.get(cid)),
-                              "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "poetry": book in POETRY,
-                              "poetic": book in RESET_AT_PARAGRAPH, "para": clause_key[cid] in paras})
+                              "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "para": clause_key[cid] in paras})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     seg_hash = hashlib.sha256()
@@ -374,10 +370,9 @@ def main() -> None:
                            "chain_forms": sorted(discourse_rules.CHAIN_FORMS), "chain_forms_in_speech_with_waw": sorted(discourse_rules.CHAIN_FORMS_SPEECH),
                            "text_depth": "number of links up the discourse_parent chain whose relation is not in flat and whose discourse_rule is not in flat_rules",
                            "tree_depth": "number of links up the discourse_parent chain whose relation is not in tree_flat",
-                           "conditional_inversion": "a protasis hangs under its apodosis (relation conditional). To invert, for each conditional link "
-                                                    "whose protasis comes before the clause it hangs on (and that is the first of a series): the "
-                                                    "protasis takes the apodosis's parent and relation, and the apodosis hangs under the protasis "
-                                                    "with relation conditional. A protasis after its main clause is left as it is."},
+                           "conditional_inversion": " ".join(discourse_rules.CFG["conventions"]["conditional_inversion"]["doc"].split())},
+             "rules_config": {"file": discourse_rules.CONFIG_FILE, "sha256": discourse_rules.CONFIG_SHA256,
+                              "limited_rules": {r: sc for r, sc in discourse_rules.SCOPE.items() if sc != "all"}},
              "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0)"}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"{n_ch} chapters, {n_seg} segments -> {out}")
