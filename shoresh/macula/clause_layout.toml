@@ -29,7 +29,7 @@
 # - build.json records this file's sha256, so every output says which settings made it. Raise `version` when a change alters the output.
 # - Try a changed copy without editing this one: python -m macula.build_clause_layout --config my.toml --out /tmp/x
 
-version = "0.15"
+version = "0.16"
 
 
 # ------------------------------------------------------------------------------------------------------------------------- sources
@@ -254,6 +254,14 @@ lemmas = ["יַעַן", "עֵקֶב"]
 doc = "Conjunctions that open a case of law after its topic (\"אִישׁ אִישׁ כִּי־תִשְׂטֶה אִשְׁתּוֹ\") (rule casus_pendens)."
 lemmas = ["כִּי", "אִם"]
 
+[words.apodosis_markers]
+doc = "Words that open an apodosis: \"then\" after a fronted protasis (Prov 2:5 \"אָז תָּבִין\") (rule then_clause_is_apodosis)."
+lemmas = ["אָז"]
+
+[words.word]
+doc = "The noun \"word\", whose content a quotation can be (rule word_quote_hangs_on_main)."
+strong = ["1697"]                        # דָּבָר
+
 [words.quoting_subordinators]
 doc = "A clause opened by one of these with a verb of saying introduces a quotation (Mal 1:4 \"כִּי־תֹאמַר אֱדוֹם\")."
 lemmas = ["כִּי", "אִם", "פֶּן"]
@@ -289,6 +297,7 @@ infinitive = ["infinitive construct", "infinitive absolute"]
 participle = ["participle active", "participle passive"]
 narrated = ["wayyiqtol", "qatal"]                                        # with the 3rd person: a narrated speaking clause
 quotation = ["weqatal", "yiqtol"]                                        # with the 2nd person and a verb of saying: a quotation
+extension = ["yiqtol", "weqatal"]                                        # the 2nd-person forms of the extension formula
 
 
 # ------------------------------------------------------------------------------------------------------------------------- macula
@@ -422,11 +431,11 @@ is left as a known case.
 Staircase (staircase): each later protasis of a series of conditionals (rule subordinate_series) counts one level, so every new case
 stands one level under the case before, as in BHSA (in text_depth the cases stay side by side). Measured against BHSA's per-chapter
 reference (379 chapters, law view): mean gap 0.410 -> 0.392; Job 31 -3.94 -> -1.44, Lev 27 -2.54 -> +0.26, Lev 3 -2.06 -> -1.67,
-Lev 26 -2.32 -> -1.90. Proposed for 0.16; off until decided."""
+Lev 26 -2.32 -> -1.90. On since 0.16."""
 relation = "conditional"
 laws_in_a_row_stand_level = true
 return_after_law = false
-staircase = false
+staircase = true
 
 
 [conventions.verse_division]
@@ -561,6 +570,11 @@ doc = """An embedded clause with no opener (conjunction, relative, preposition),
 doc = "A bare \"וְהָיָה\": a weqatal of words.be with nothing but וְ (the frame of a fronted condition or time)."
 [features.bare_np]
 doc = "A clause that is a bare noun phrase: no verb, no וְ, no opener, headed by a noun (\"אִישׁ אִישׁ\", \"נֶפֶשׁ\")."
+[features.extension]
+doc = """The legal extension formula: כֵּן in the first two words, a 2nd-person yiqtol or weqatal of words.do, and לְ with the further case
+("וְכֵן תַּעֲשֶׂה לַחֲמֹרוֹ", Deut 22:3)."""
+[features.then]
+doc = "The clause opens with an apodosis marker (words.apodosis_markers)."
 [features.role]
 doc = "The MACULA clause node's role."
 [features.circ]
@@ -656,7 +670,17 @@ switchable = false
 doc = """An embedded clause keeps its MACULA parent. Relation: relative (a relative clause, or one in a noun phrase: discourse_attach
 is the antecedent's first word), complement (MACULA role in macula.complement_roles, or לֵאמֹר), the subordinate relation of its
 opening (purpose, temporal, causal, conditional, complement), or embedded. A plain embedded clause (features.plain_embedded) gets
-discourse_rule embedded_flat and stands next to its parent in the flat view (depth.flat_rules)."""
+discourse_rule embedded_flat and stands next to its parent in the flat view (depth.flat_rules). One exception: rule
+word_quote_hangs_on_main."""
+
+[rules.word_quote_hangs_on_main]
+scope = "all"
+doc = """"The word which X spoke, saying …": a לֵאמֹר under a relative clause of speaking whose antecedent is a word (words.word) hangs on
+the main clause that names the word: the quotation is the content of that word, and the relative clause only says who spoke it. An
+exception to rule embedded_keeps_macula_parent (discourse_rule word_quote). A relative clause of the word-event ("הַדָּבָר אֲשֶׁר
+הָיָה … לֵאמֹר", Jer 7:1) is not one: its verb is not a verb of speaking. Found in Amos 3:1, where BHSA hangs the לֵאמֹר on the main
+clause; it also occurs in Gen 39:19, 1 Kgs 2:4 (twice), 2 Kgs 9:36 and 2 Kgs 15:12, not checked against BHSA."""
+examples = ["Amos 3:1 \"שִׁמְעוּ אֶת־הַדָּבָר הַזֶּה אֲשֶׁר דִּבֶּר יְהוָה עֲלֵיכֶם … לֵאמֹר\""]
 
 [rules.lemor_opens_speech]
 scope = "all"
@@ -781,6 +805,12 @@ the case before (in Exodus-Deuteronomy 54 such "וְאִם" clauses as condition
 case; that is most of the remaining depth gap in Leviticus (Lev 4:13, 4:22, 4:27; Lev 26:14-27) and in Exodus 21-22."""
 examples = ["Isa 40:2 כִּי, כִּי, כִּי", "Lev 1:3, 1:10, 1:14 אִם"]
 
+[rules.series_needs_same_relation]
+scope = "all"
+doc = """A subordinate clause joins a series only when it would have the same relation as the series's first clause, not only the same
+opener: a fronted "כִּי" (a case of law, conditional) is no series member of a "כִּי" reason clause before it."""
+examples = ["Deut 22:6 \"כִּי יִקָּרֵא קַן־צִפּוֹר\" after 22:5 \"כִּי תוֹעֲבַת יְהוָה\""]
+
 [rules.ki_series_and_look_back]
 scope = "poetic"
 doc = """A כִּי series continues over a וְ-clause that continues the כִּי clause before it; a causal כִּי with no main clause before it
@@ -831,6 +861,22 @@ the same verse (Lev 4:3 "וְהִקְרִיב"), so this rule is an approximatio
 to Leviticus, whose laws are long: in Deuteronomy's short laws the apodosis often stands in the protasis's verse (Deut 22:2, 22:8,
 22:22), and the rule was neutral for the steps over the law chapters (bsb-add-books, v0.14)."""
 examples = ["Lev 26:3 \"אִם־בְּחֻקֹּתַי תֵּלֵכוּ וְאֶת־מִצְוֺתַי תִּשְׁמְרוּ וַעֲשִׂיתֶם אֹתָם\" … 26:4 \"וְנָתַתִּי\""]
+
+[rules.then_clause_is_apodosis]
+scope = "all"
+doc = """A fronted protasis followed within a few verses by a main clause opened by an apodosis marker ("אָז", "then") waits for that
+clause: the main clauses between go on with the protasis, and the "then" clause is its apodosis. Found in Prov 2:1-5 (BHSA's
+per-chapter reference); it also applies in Gen 24:41, Job 9:31, Ps 119:92, Isa 58:14 and wherever a protasis is followed by "then"."""
+examples = ["Prov 2:1 \"בְּנִי אִם־תִּקַּח אֲמָרָי\" … 2:5 \"אָז תָּבִין יִרְאַת יְהוָה\""]
+within_verses = 4
+
+[rules.extension_formula_returns]
+scope = "all"
+doc = """The legal extension formula (features.extension) applies the law before it to a further case, so in the law view it goes back
+to the level the law stands on, with what follows it (it acts only after an apodosis; text_depth is unchanged). It occurs in Exod
+22:29, 23:11, 26:17, Deut 12:31, 20:15 and three times in Deut 22:3; BHSA returns in Deut 20:15 and 22:3, and Num 18:28 "כֵּן
+תָּרִימוּ", which stays, has another verb. Found in Deut 22 (BHSA's per-chapter reference)."""
+examples = ["Deut 22:3 \"וְכֵן תַּעֲשֶׂה לַחֲמֹרוֹ\""]
 
 [rules.ki_before_main_is_conditional]
 scope = "not poetic"

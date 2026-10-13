@@ -183,3 +183,29 @@ def test_text_depth_law():
            "05": {"parent": "06", "relation": "conditional", "rule": "sub_fwd"},
            "06": {"parent": "04", "relation": "continuation", "rule": "main"}}
     assert d._law_depths(row) == {"01": 0, "02": 1, "03": 1, "04": 1, "05": 1, "06": 1}
+
+
+def test_expression_rules_at_their_places(tmp_path, monkeypatch):
+    """v0.16 rules anchored on expressions, pinned to the places they were found (a MACULA or segmentation change must not silently
+    switch them off): word_quote_hangs_on_main (Amos 3:1), then_clause_is_apodosis (Prov 2:1-5), extension_formula_returns (Deut 22:3,
+    law view), series_needs_same_relation (Deut 22:6)."""
+    import json
+    from macula import build_clause_layout as b
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "AMO,DEU,PRO", "--out", str(out)])
+    b.main()
+
+    def rows(book, ch):
+        return [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
+    amo = [r for r in rows("AMO", 3) if r["verse"] == 1]
+    lemor = next(r for r in amo if r["discourse_rule"] == "word_quote")
+    assert lemor["discourse_parent"] == amo[0]["clause_key"]                                     # on "שִׁמְעוּ", not the relative clause
+    pro = rows("PRO", 2)
+    protasis = next(r for r in pro if r["verse"] == 1 and r["relation"] == "conditional")
+    then = next(r for r in pro if r["verse"] == 5)
+    assert protasis["discourse_parent"] == then["clause_key"]                                   # "אִם ..." on "אָז תָּבִין"
+    deu = rows("DEU", 22)
+    first, ext = deu[0], next(r for r in deu if r["verse"] == 3)
+    assert ext["text_depth_law"] == first["text_depth_law"]                                    # back at the law's level
+    case = next(r for r in deu if r["verse"] == 6)
+    assert case["relation"] != "parallel"                                                       # not a series member of 22:5's reason

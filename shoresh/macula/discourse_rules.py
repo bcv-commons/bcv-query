@@ -34,7 +34,7 @@ def configure(path: str | Path | None = None) -> None:
     global CFG, CONFIG_FILE, CONFIG_SHA256, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM
     global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE
-    global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS
+    global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
     global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE
@@ -62,7 +62,8 @@ def configure(path: str | Path | None = None) -> None:
     FORMULA, TIME_WORDS = lemmas("formula"), lemmas("time")
     CONSEQUENCE = [[_n(x) for x in seq] for seq in W["consequence"]["sequences"]]
     OATH_CONTENT, OATH_REASON, QUOTING_SUBS = lemmas("oath_content"), lemmas("oath_reason"), lemmas("quoting_subordinators")
-    CASE_OPENERS = lemmas("case_openers")
+    CASE_OPENERS, APODOSIS_MARKERS = lemmas("case_openers"), lemmas("apodosis_markers")
+    WORD_NOUN = strong("word")
     P = {k: _n(v) for k, v in W["particle"].items() if k != "doc"}
     WAW, BE, KE, LE, KI, IM, DI = P["waw"], P["be"], P["ke"], P["le"], P["ki"], P["im"], P["di"]
     ADAYIN, QABEL, DENA, KO, HAY, MELEK = P["adayin"], P["qabel"], P["dena"], P["ko"], P["hay"], P["melek"]
@@ -70,6 +71,7 @@ def configure(path: str | Path | None = None) -> None:
     F = CFG["forms"]
     FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH = set(F["finite"]), set(F["chain"]), set(F["chain_in_speech_with_waw"])
     INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS = set(F["infinitive"]), set(F["participle"]), set(F["narrated"]), set(F["quotation"])
+    EXTENSION_FORMS = set(F["extension"])
     VOCATIVE_RULE, COMPLEMENT_ROLES = CFG["macula"]["vocative_rule"], set(CFG["macula"]["complement_roles"])
     PARAGRAPH_MARKS = list(CFG["text"]["paragraph_marks"])
     RELATIONS = list(CFG["relations"])
@@ -226,6 +228,9 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
                               and not finite and (not verbs or verbs[0]["wtype"] in PARTICIPLE),
             "frame_be": bool(v) and _strong(v) in BE_VERB and v["wtype"] == "weqatal" and len(lead) == 1,
             "bare_np": not verbs and not waw and bool(lead) and lead[0]["class"] == "noun" and not sub_kind,
+            "extension": KEN in in_first_two and bool(v) and _strong(v) in DO and second and v["wtype"] in EXTENSION_FORMS
+                         and any(t["class"] == "prep" and _n(t["lemma"]) == LE for t in toks),
+            "then": l0 in APODOSIS_MARKERS,
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
 
@@ -267,6 +272,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     cmd_of: dict = {}                             # main clause key -> it is a command (imperative or 2nd-person weqatal)
     frame_be_of: dict = {}                        # main clause key -> it is a bare "and it shall be" (rule frame_be_protasis_hangs_forward)
     book_of = {c["key"]: c["verse"][0] for c in clauses}
+    rec_of = {c["key"]: c for c in clauses}
+    ext: set = set()                              # main clauses with the extension formula (rule extension_formula_returns)
+    # rule then_clause_is_apodosis: the main clauses opened by an apodosis marker, by position
+    then_at = [i for i, c in enumerate(clauses) if not c["parent_key"] and c["f"]["then"]]
+    then_within = param("then_clause_is_apodosis", "within_verses")
     verses_after = param("nested_speech_ends_after_next_verse", "verses_after")
     carry_within = param("command_at_speech_start_carries", "within_verses")
 
@@ -386,6 +396,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                    "complement" if f["lemor"] or f["role"] in COMPLEMENT_ROLES else
                    f["sub_kind"] if f["sub_kind"] in ("purpose", "temporal", "causal", "conditional", "complement") else "embedded")
             link(k, c["parent_key"], rel, "embedded_flat" if f["plain_embedded"] else "embedded", c["attach"])
+            pr = rec_of.get(c["parent_key"])
+            if f["lemor"] and on("word_quote_hangs_on_main") and pr and pr["parent_key"] and pr["f"]["sub_kind"] == "relative" \
+                    and pr["f"]["verb"] in SPEAK and pr.get("attach_strong") in WORD_NOUN:
+                # "the word which he spoke, saying": the quotation is the content of the word the main clause names
+                link(k, pr["parent_key"], "complement", "word_quote")
             if f["lemor"] and on("lemor_opens_speech"):
                 if len(lines) > 1 and lines[-1].spk == c["parent_key"]:
                     lines[-1].spk = k
@@ -472,11 +487,20 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             pt = prev_top_key
             while on("ki_series_and_look_back") and pt and out.get(pt, {}).get("rule") == "sub_continued":
                 pt = out[pt]["parent"]
-            if on("subordinate_series") and prev is not None and (pt == prev or (f["sub_kind"] == "conditional" and same_ch)):
+            # a series needs the same relation, not only the same opener: a fronted "if" is no series member of a "for" before it (Deut
+            # 22:6 after 22:5)
+            would_be = "conditional" if (f["sub_kind"] == "causal" and f["lead"] == KI and not line.verse_mains.get(vref)
+                                         and on("ki_before_main_is_conditional")) else f["sub_kind"]
+            head = prev
+            while head is not None and out.get(head, {}).get("relation") == "parallel":
+                head = out[head]["parent"]
+            same_rel = head is not None and (out.get(head, {}).get("relation") == would_be or not on("series_needs_same_relation"))
+            if on("subordinate_series") and prev is not None and same_rel and (pt == prev or (f["sub_kind"] == "conditional" and same_ch)):
                 link(k, prev, "parallel", "series")
                 if f["sub_kind"] == "conditional":
                     cond_series.add(k)
-                    prot = {"verse": vref, "last": k}     # a protasis in a series has its own continuation (Lev 26:14)
+                    until = prot.get("until") if prot else None
+                    prot = {"verse": vref, "last": k, "until": until, "key": prot.get("key") if prot else None}
             else:
                 mains = line.verse_mains.get(vref, [])
                 if mains and on("frame_be_protasis_hangs_forward") and frame_be_of.get(mains[-1]) and f["sub_kind"] in ("conditional", "temporal"):
@@ -493,7 +517,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                     link(k, None, None, "sub_fwd")
                     out[k]["relation"] = rel
                     if rel == "conditional":
-                        prot = {"verse": vref, "last": k}
+                        prot = {"verse": vref, "last": k, "until": None, "key": k}
+                        if on("then_clause_is_apodosis"):
+                            j = next((j for j in then_at if j > i), None)
+                            if j is not None and clauses[j]["verse"][:2] == vref[:2] and clauses[j]["verse"][2] - vref[2] <= then_within:
+                                prot["until"] = clauses[j]["key"]
                     pending.append(k)
                     pending_prev[k] = prev_top_key
             if f["lead"]:
@@ -519,6 +547,17 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 out.get(prev_top_key, {}).get("rule") in ("sub_back", "sub_fwd", "look_back", "series", "oath") + (
                     ("sub_continued",) if on("ki_series_and_look_back") else ()):
             link(k, prev_top_key, "continuation" if f["form"] in CHAIN_FORMS else "coordination", "sub_continued")
+            continue
+
+        # ---- rule then_clause_is_apodosis: until the "then" clause, main clauses go on with the protasis
+        if prot is not None and prot.get("until") and k != prot["until"] and on("then_clause_is_apodosis"):
+            for p in [p for p in pending if p != prot["key"]]:
+                if p not in chain(k):
+                    out[p]["parent"] = k
+            pending[:] = [p for p in pending if p == prot["key"]]
+            link(k, prot["last"], "continuation" if f["form"] in CHAIN_FORMS else "coordination" if f["waw"] else "asyndetic",
+                 "protasis_continued")
+            prot["last"] = k
             continue
 
         # ---- rule protasis_continued: an "and"-clause in the open protasis's verse goes on with the protasis
@@ -570,6 +609,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         frame_be_of[k] = f["frame_be"]
         if first_in_verse and not (f["waw"] and f["form"] == "weqatal"):
             back.add(k)
+        if f["extension"] and on("extension_formula_returns"):
+            ext.add(k)
         resolve_pending(k)
         line.last = k
         line.verse_mains.setdefault(vref, []).append(k)
@@ -615,12 +656,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k]["tree_depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in TREE_FLAT)
         out[k]["depth"] = sum(1 for x in ch[:-1] if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("subj", None)
-    for k, d in _law_depths(out, back, cond_series).items():
+    for k, d in _law_depths(out, back if LAW_RETURNS else set(), cond_series, ext).items():
         out[k]["depth_law"] = d
     return out
 
 
-def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series: set[str] = frozenset()) -> dict[str, int]:
+def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series: set[str] = frozenset(),
+                ext: set[str] = frozenset()) -> dict[str, int]:
     """text_depth_law ([depth.law]): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
     level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth. back: main clauses that open
     their verse other than with "and" + weqatal; after an apodosis they go back to the level the law stands on."""
@@ -647,16 +689,17 @@ def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series:
         par[a], w[a] = p, 0
         protases.add(p)
         apodoses[a] = p
-    if LAW_RETURNS:                               # after a law, a clause that opens its verse otherwise than "and" + weqatal goes back
-        for k in sorted(back):                    # to the level the law stands on (Deut 22:3)
-            if k in apodoses:
-                continue
-            x, seen = par.get(k), set()
-            while x is not None and x not in seen and x not in apodoses and w.get(x) == 0:
-                seen.add(x)
-                x = par[x]
-            if x in apodoses:
-                par[k] = par[apodoses[x]]
+    returned: set[str] = set()                    # after a law, these clauses go back to the level the law stands on: the extension
+    for k in sorted(set(back) | set(ext)):        # formula (rule extension_formula_returns), and with return_after_law the clauses in back
+        if k in apodoses:
+            continue
+        x, seen = par.get(k), set()
+        while x is not None and x not in seen and x not in apodoses and x not in returned and w.get(x) == 0:
+            seen.add(x)
+            x = par[x]
+        if x in apodoses:
+            par[k] = par[apodoses[x]]
+            returned.add(k)
     memo: dict[str, int] = {}
 
     def depth(k: str) -> int:
