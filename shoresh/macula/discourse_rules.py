@@ -349,6 +349,9 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "bare_np": not verbs and bool(np_lead) and np_lead[0]["class"] == "noun" and not sub_kind,
             "topic_np": (rule or "") in TOPIC_RULES and not finite and not sub_kind and bool(art_lead) and _n(art_lead[0]["lemma"]) not in TIME_WORDS
                         and (art_lead[0]["class"] == "noun" or (art_lead[0]["wtype"] in PARTICIPLE and art_lead is not lead)),
+            "topic_np_circ": (rule or "") in TOPIC_RULES and not finite and sub_kind == "circumstantial" and bool(art_lead)
+                             and art_lead[0]["class"] == "noun" and _n(art_lead[0]["lemma"]) not in TIME_WORDS,
+            "prohibition": bool(v) and second and v["wtype"] == "yiqtol" and any(t["wtype"] == "negative" for t in toks),
             "or_topic_np": (rule or "") in TOPIC_RULES and not finite and not sub_kind and bool(or_lead) and or_lead[0]["class"] == "noun"
                            and _n(or_lead[0]["lemma"]) not in TIME_WORDS,
             "only_cj": bool(toks) and all(t["class"] == "cj" for t in toks),
@@ -410,6 +413,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     cmd_of: dict = {}                             # main clause key -> it is a command (imperative or 2nd-person weqatal)
     frame_be_of: dict = {}                        # main clause key -> it is a bare "and it shall be" (rule frame_be_protasis_hangs_forward)
     book_of = {c["key"]: c["verse"][0] for c in clauses}
+    on_book = active                              # a rule's scope, before the walk
     kids: dict = {}                               # MACULA parent -> embedded clauses
     for c in clauses:
         if c["parent_key"]:
@@ -448,16 +452,28 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     closing_named = [c["f"]["closing"] and any(x["parent_key"] == c["key"] and x["f"]["names_lawgiver"]
                                                for x in clauses[i + 1:i + 8] if x["verse"] == c["verse"]) for i, c in enumerate(clauses)]
     cp_of: dict = {}                              # clause key -> it is a casus pendens
+    lone_nodes: list = []                         # conjunction-only nodes placed by rule lone_conjunction_takes_its_place
     # rule relative_law_head: a noun phrase standing alone, a relative clause on it next, and a main clause after that in its verse
     # (the relative clause may come after other segments under the noun phrase, or be a segment of its own: "and the soul | that eats")
-    rel_head, rel_main = [False] * n, [None] * n
+    # (when the noun phrase and its relative clauses fill the verse, the main clause opens the next verse: "any man … who slaughters"
+    # in Lev 17:3, its main clause in 17:4)
+    rel_head, rel_main, np_main = [False] * n, [None] * n, [None] * n
     for i, c in enumerate(clauses):
         rest = [x for x in clauses[i + 1:i + 12] if x["verse"] == c["verse"]]
-        j = next((j for j, x in enumerate(rest) if not x["parent_key"] and x["f"]["sub_kind"] != "relative"), None)
+        j = next((j for j, x in enumerate(rest) if not x["parent_key"] and x["f"]["sub_kind"] != "relative" and not x["f"]["only_cj"]), None)
+        nxt = clauses[i + 1 + len(rest)] if i + 1 + len(rest) < n else None
+        if j is None and nxt is not None and nxt["verse"][:2] == c["verse"][:2] and not nxt["parent_key"] and not nxt["f"]["sub_kind"] \
+                and all(x["parent_key"] or x["f"]["sub_kind"] == "relative" or x["f"]["only_cj"] for x in rest) \
+                and on_book("relative_law_head", c["verse"][0]):
+            rest, j = rest + [nxt], len(rest)
         if j is None:
             continue
         rel_head[i] = any(x["f"]["sub_kind"] == "relative" and x["parent_key"] in (c["key"], None) for x in rest[:j])
         rel_main[i] = rest[j]
+        # rule noun_phrase_law_head: only segments under the noun phrase before its main clause
+        if all(x["parent_key"] == c["key"] or x["parent_key"] in {y["key"] for y in rest[:j]} for x in rest[:j]) \
+                and not rest[j]["f"]["sub_kind"] and rest[j]["verse"] == c["verse"]:
+            np_main[i] = rest[j]
     prot: dict | None = None                      # the open protasis (rule protasis_continued): key, verse, last clause
     apod: set = set()                             # main clauses that took a fronted protasis (apodoses)
     subish_of: dict = {}                          # clause key -> it is subordinate or embedded (rule speech_in_subordinate_ends_with_verse)
@@ -688,6 +704,19 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 lines = lines[:j + 1]
                 line = lines[-1]
                 to_top = line.first
+        # rule lone_conjunction_takes_its_place: a segment that is only "or" / "and also", coordinating clauses, hangs in its own verse
+        # on the clause before it, or waits for the next main clause; it is no clause's parent (the clauses it coordinates are placed
+        # after the walk)
+        if on("lone_conjunction_takes_its_place") and f["only_cj"] and len(kids.get(k, [])) != 1 and not (line.spk and line.last is None):
+            if prev_top is not None and clauses_verse.get(prev_top) == vref:
+                link(k, prev_top, "coordination", "lone_conjunction")
+            else:
+                link(k, None, None, "lone_conjunction")
+                out[k]["relation"] = "coordination"
+                pending.append(k)
+                pending_prev[k] = prev_top
+            lone_nodes.append(k)
+            continue
         first_in_verse = prev_top is None or clauses_verse.get(prev_top) != vref
         clauses_verse[k] = vref
         prev_top_key, prev_top = prev_top, k
@@ -714,9 +743,18 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         or_head = f["or_topic_np"] and first_in_verse and line.law_head is not None and not line.summarised \
             and clauses_verse.get(line.law_head, (None, None))[:2] == vref[:2]
         if on("relative_law_head") and (f["topic_np"] or or_head) and rel_head[i] and not rel_main[i]["f"]["place_there"] \
-                and not you_open:
+                and not you_open and len(lines) > 1:
             line.law_case = line.law_thing = None     # "and the man who …": a new law
             law_heads.add(k)
+        # rule noun_phrase_law_head: a noun phrase at a verse start followed directly by its main clause, after a law head on its line
+        # in the chapter, or before a prohibition
+        in_law = line.law_head is not None and clauses_verse.get(line.law_head, (None, None))[:2] == vref[:2]
+        if on("noun_phrase_law_head") and k not in law_heads and not cp and first_in_verse and (f["topic_np"] or f["topic_np_circ"]) \
+                and np_main[i] is not None and (in_law or np_main[i]["f"]["prohibition"]) and not np_main[i]["f"]["place_there"] \
+                and not you_open and len(lines) > 1:
+            line.law_case = line.law_thing = None
+            law_heads.add(k)
+            f = dict(f, sub_kind=None)            # "and the vow of a widow or a divorced woman": a topic
         # rule summary_case_stands_with_the_law: "and it shall be, when he is guilty in one of these" is about all the cases before it
         if on("summary_case_stands_with_the_law") and f["frame_be"] and i + 1 < n and clauses[i + 1]["verse"] == vref \
                 and clauses[i + 1]["f"]["lead"] in CASE_OPENERS and clauses[i + 1]["f"]["back_reference"] and line.law_head is not None:
@@ -724,7 +762,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             law_heads.add(k)
 
         # ---- rule vocative
-        if not cp and on("vocative") and f["vocative"] and second_in_verse.get(vref):
+        if not cp and k not in law_heads and on("vocative") and f["vocative"] and second_in_verse.get(vref):
             mains = line.verse_mains.get(vref, [])
             if mains:
                 link(k, mains[-1], "vocative", "vocative")
@@ -745,6 +783,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         if on("adversative") and f["lead"] == KI and f["l1"] == IM and prev_top_key and neg_of.get(prev_top_key):
             link(k, prev_top_key, "adversative", "adversative")
             continue
+
+        # ---- rule ki_after_or_is_conditional: after a lone "or", a "ki" is "if", never "for"
+        if on("ki_after_or_is_conditional") and f["sub_kind"] == "causal" and f["lead"] == KI and i > 0 \
+                and clauses[i - 1]["verse"] == vref and clauses[i - 1]["f"]["only_cj"] and clauses[i - 1]["f"]["lead"] in ALTERNATIVE:
+            f = dict(f, sub_kind="conditional")
 
         # ---- rule ki_after_be_is_conditional: after "and it shall be", a "when/if" with yiqtol, never "for"
         if on("ki_after_be_is_conditional") and f["sub_kind"] == "causal" and f["lead"] == KI and f["form"] == "yiqtol" \
@@ -993,6 +1036,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         if line.first is None:
             line.first = k
         if k in law_heads:
+            if on("commanded_law_carries") and line.commanded and line.first == k:
+                line.carries = True               # "and to them you shall say: any man …": a speech of laws runs on past paragraph marks
             line.law_head = k
             line.you_case, line.summarised = None, False
         if f["law_summary"]:
@@ -1048,6 +1093,24 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             lines.append(_Line(k, vi, scoped=True))
 
     fallback_pending()
+    # rule lone_conjunction_takes_its_place: the first clause a lone conjunction coordinates takes the conjunction's place (a protasis
+    # with "ki / im" in law, rule ki_after_or_is_conditional); the others stand parallel to it
+    for nd in lone_nodes:
+        first = None
+        for x in kids.get(nd, []):
+            fx = rec_of[x]["f"]
+            if first is None:
+                if out[nd]["parent"] is None:
+                    break
+                rel = out[x]["relation"]
+                if fx["lead"] in CASE_OPENERS and rel in ("causal", "conditional") and active("ki_after_or_is_conditional", book_of[x]):
+                    rel = "conditional"
+                elif not fx["sub_kind"] or rel in ("embedded", "complement"):
+                    rel = "continuation" if fx["form"] in CHAIN_FORMS else "coordination"
+                link(x, out[nd]["parent"], rel, "lone_conjunction", out[x]["attach"])
+                first = x
+            else:
+                link(x, first, "parallel", "lone_conjunction", out[x]["attach"])
     chap_of = {c["key"]: c["verse"][:2] for c in clauses}
     for k in out:
         ch = chain(k)
@@ -1104,6 +1167,8 @@ def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series:
                 x = par[x]
             if x in protases or x in done:
                 par[h] = par[x]
+                if x in done:
+                    w[h] = w[x]                   # level with the law head before it, not one level above it
             elif x in cp_cases:
                 par[h] = par[cp_cases[x]]
             done.add(h)

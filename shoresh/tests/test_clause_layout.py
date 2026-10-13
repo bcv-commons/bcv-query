@@ -322,7 +322,8 @@ def test_v020_rules_at_their_places(tmp_path, monkeypatch):
     lev5 = by_key("LEV", 5)
     assert all(rows("LEV", 5, v)[0]["text_depth_law"] == 0 for v in (1, 2, 4, 5))         # the cases and the clause about them all
     assert rows("LEV", 5, 2)[0]["relation"] == "parallel"
-    assert all(r["discourse_rule"] == "embedded_flat" for r in rows("LEV", 5, 1) if lev5.get(r["discourse_parent"], {}).get("text") in ("א֥וֹ", "א֣וֹ"))
+    lone = [r for r in rows("LEV", 5, 1) if r["discourse_rule"] == "lone_conjunction"]
+    assert len(lone) >= 4 and all(r["text_depth"] == lone[0]["text_depth"] for r in lone)   # "אוֹ רָאָה אוֹ יָדָע", level
     poor = [next(r for r in rows("LEV", 5, v) if r["relation"] == "parallel") for v in (7, 11)]
     assert poor[0]["text_depth_law"] == poor[1]["text_depth_law"]                          # the two alternatives for the poor, level
     head11 = [r for r in rows("DEU", 12, 11) if r["discourse_rule"] == "main"][1]          # "הַמָּקוֹם", after "וְהָיָה"
@@ -331,6 +332,38 @@ def test_v020_rules_at_their_places(tmp_path, monkeypatch):
     lev20 = by_key("LEV", 20)
     assert all(r["text_depth"] > lev20[rows("LEV", 20, 2)[0]["clause_key"]]["text_depth"] for r in rows("LEV", 20, 10))   # inside Moses' speech
     assert any(r["relation"] == "causal" for r in rows("EXO", 23, 9))                    # "for you were strangers"
+
+
+def test_v021_rules_at_their_places(tmp_path, monkeypatch):
+    """v0.21 rules pinned to the places bsb-add-books named: lone_conjunction_takes_its_place (Exod 22:9, 22:13), relative_law_head
+    across the verse and commanded_law_carries (Lev 17:8-15), noun_phrase_law_head (Num 30:10, 30:14), a law head level with the law
+    head before it in the law view (Lev 13)."""
+    import json
+    from macula import build_clause_layout as b
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "EXO,LEV,NUM", "--out", str(out)])
+    b.main()
+
+    def rows(book, ch, v=None):
+        rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
+        return [r for r in rs if v is None or r["verse"] == v]
+    exo22 = {r["clause_key"]: r for r in rows("EXO", 22)}
+    case9 = rows("EXO", 22, 9)[0]
+    lone9 = [r for r in rows("EXO", 22, 9) if r["discourse_rule"] == "lone_conjunction"]
+    assert lone9 and all(exo22[r["discourse_parent"]]["verse"] == 9 for r in lone9)          # inside the case, never on 22:8
+    assert all(r["text_depth_law"] == case9["text_depth_law"] for r in lone9)
+    assert rows("EXO", 22, 13)[0]["relation"] == "conditional"                              # "וְכִי־יִשְׁאַל": if, not for
+    lev17 = {r["clause_key"]: r for r in rows("LEV", 17)}
+    head8 = next(r for r in rows("LEV", 17, 8) if r["discourse_rule"] == "main" and r["relation"] == "speech")
+    for v in (10, 13, 15):
+        h = rows("LEV", 17, v)[0]
+        assert h["relation"] == "parallel" and h["text_depth_law"] == head8["text_depth_law"], v   # with the head of 17:8
+    assert lev17
+    for v in (10, 14):
+        h = rows("NUM", 30, v)[0]
+        assert h["relation"] == "parallel", v                                              # back up to the law's level
+    heads = [rows("LEV", 13, v)[0] for v in (2, 9, 18, 24, 29)]
+    assert len({h["text_depth_law"] for h in heads}) == 1                                    # the laws of Lev 13 stand level
 
 
 def test_shipped_profiles(tmp_path, monkeypatch):

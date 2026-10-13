@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.20"
+version = "0.21"
 
 [profile]
 name = "default"
@@ -92,7 +92,7 @@ licence = "CC BY 4.0"
 
 [sources.versification.sha256]
 "org-to-eng.json" = "efed1a4ea7e4e4ac5bab19f78a759ba641d0f25af086863c1fb1ff5327b83c98"
-"org-to-eng.multiverse.json" = "814549a9d64256e36a44c59c1106e4b269156a8cf19accdd64a649690771985d"
+"org-to-eng.multiverse.json" = "63c5f9f4ee047769bbe65af21a3b2c6e1fc98f0873bc4402ba8307a8a934356b"
 "org.vrs" = "bf70cea4115322d4b286206f240e90d12cf16abeec39ba351df1ef8cf9174e23"
 "eng.vrs" = "743d88327cf2e0c6dd0cafb15f61cde0e67512a9ede03011520ffd660a9cb256"
 
@@ -767,6 +767,11 @@ doc = "The Strong's numbers of the clause's verbs (rule repeated_condition_stand
 doc = "The clause has a demonstrative that refers back (words.back_reference)."
 [features.or_topic_np]
 doc = """A noun phrase standing alone after "or" (words.alternative), as features.topic_np: "אוֹ נֶפֶשׁ" (Lev 5:2)."""
+[features.topic_np_circ]
+doc = """A noun phrase standing alone that MACULA's participle makes look circumstantial ("וְנֵדֶר אַלְמָנָה וּגְרוּשָׁה", Num 30:10): headed
+by a noun, not a time word; it can head a law (rule noun_phrase_law_head)."""
+[features.prohibition]
+doc = "A prohibition: a negated 2nd-person yiqtol (\"לֹא תְגַלֶּה\")."
 [features.only_cj]
 doc = """The clause's words are only conjunctions: a MACULA node that coordinates the clauses under it ("אוֹ רָאָה אוֹ יָדָע", Lev 5:1)
 (rule coordinated_clauses_stand_level)."""
@@ -832,6 +837,14 @@ open over paragraph marks until the narrative resumes."""
 scope = "not oracles_framed_by_word_event"
 doc = """A paragraph mark (ס/פ) ends a speech opened by a messenger formula or a command to say, and what is nested in it, unless the
 command carries its speech (rule command_at_speech_start_carries)."""
+
+[rules.commanded_law_carries]
+scope = "law"
+doc = """In the law books, a commanded speech whose first clause heads a law ("וַאֲלֵהֶם תֹּאמַר אִישׁ אִישׁ מִבֵּית יִשְׂרָאֵל … אֲשֶׁר־יַעֲלֶה",
+Lev 17:8) carries its speech like a command at a speech's start (rule command_at_speech_start_carries): a paragraph mark between two
+laws does not end it. Lev 17:10, 17:13 and 17:15 stand parallel to the head of 17:8 inside what Moses is to say, as in BHSA
+(bsb-add-books)."""
+examples = ["Lev 17:8-16"]
 
 [rules.closed_oracle_returns_to_frame]
 scope = "all"
@@ -1227,7 +1240,9 @@ to the law head before it in its chapter, not on the previous law's last apodosi
 before. The law's apodosis hangs on its own case: a subject climb never crosses a law head (rule subject_starts_new_step), and in the
 law view the apodosis stands beside the casus pendens case. In the law books BHSA's links have 46 laws headed by a noun phrase before
 כִּי: 20 parallel to the previous law head, 14 under the speech (the first law of a speech), 7 coordinated, 3 asyndetic, 2 roots; none
-under the previous case or its apodosis (bsb-add-books)."""
+under the previous case or its apodosis (bsb-add-books). In the law view a law head that stands where the law head
+before it stands also takes that head's level (v0.21): the second law of a speech is level with the first, not one level above it
+(Lev 13 law view 2.95 → 3.80, BHSA 3.80; Lev 17 3.81 → 4.36; Lev 27 4.29 → 4.90)."""
 examples = ["Lev 13: 13:18 → 13:24 → 13:29 → 13:38 → 13:40 → 13:47", "Lev 27: 27:2 → 27:14 → 27:26 → 27:28",
             "Lev 13:30 \"וְרָאָה הַכֹּהֵן\" on its case \"כִּי־יִהְיֶה בוֹ נָגַע\" (13:29), not on \"וְטִהֲרוֹ הַכֹּהֵן\" (13:28)"]
 
@@ -1261,6 +1276,36 @@ subordinator does (rule lone_subordinator_passes_relation). bsb-add-books found 
 chapters with their verb one level under them."""
 examples = ["Lev 5:1 \"אוֹ רָאָה אוֹ יָדָע\"", "Exod 21:31", "Num 30:3"]
 
+[rules.lone_conjunction_takes_its_place]
+scope = "all"
+doc = """A segment that is only a conjunction ("אוֹ", "וְגַם", "אוֹ … אוֹ") and coordinates none or two or more clauses hangs in its own
+verse, on the clause before it, or, at a verse start, waits for the next main clause; it is no clause's parent and does not count as
+the line's last clause. The first clause it coordinates takes its place: in Exod 22:9 "כִּי־יִתֵּן … וּמֵת אוֹ־נִשְׁבַּר אוֹ־נִשְׁבָּה"
+"וּמֵת" goes on from "כִּי־יִתֵּן" and the others stand parallel to it, inside the case, as in BHSA; in Exod 22:13 the "וְכִי־יִשְׁאַל"
+under such a node is the protasis of the verse's apodosis (rule ki_after_or_is_conditional). bsb-add-books found 16 of 32 lone
+conjunction segments in the delivered rows hanging on a clause of an earlier verse, and 9 protases, reasons or time clauses taking one
+as their parent. A conjunction that opens a speech, or wraps a single clause ("אַף …"), stays as rule coordinated_clauses_stand_level
+has it."""
+examples = ["Exod 22:9", "Exod 22:13", "Exod 21:37", "Lev 5:1 \"אוֹ רָאָה אוֹ יָדָע\"", "Num 30:3"]
+
+[rules.ki_after_or_is_conditional]
+scope = "law"
+doc = """In law, a "כִּי" right after a lone "אוֹ" (words.alternative), or a "כִּי / אִם" clause that a lone conjunction coordinates, is
+"or if": a protasis (conditional), never "for" ("אוֹ כִי יִגַּע", Lev 5:3; "וְכִי־יִשְׁאַל", Exod 22:13)."""
+examples = ["Lev 5:3", "Lev 15:25", "Exod 22:13"]
+
+[rules.noun_phrase_law_head]
+scope = "law"
+doc = """In the law books, a noun phrase standing alone at a verse start (features.topic_np, or features.topic_np_circ), followed
+directly by its main clause (only segments under it in between), heads a new law, standing level with the last law head (rule
+law_heads_stand_parallel): when a law head stands before it on its line in the chapter, or when its main clause is a prohibition
+(features.prohibition). In BHSA's law chapters such heads (72) stand level with the previous law head 41 times, above it 11 times and
+inside the previous case only 6 times; 14 are the chapter's first head (bsb-add-books). "וְנֵדֶר אַלְמָנָה וּגְרוּשָׁה … יָקוּם עָלֶיהָ"
+(Num 30:10) and "כָּל־נֵדֶר וְכָל־שְׁבֻעַת אִסָּר … אִישָׁהּ יְקִימֶנּוּ" (30:14) go back up to the law's level; "עֶרְוַת אֲחוֹתְךָ … לֹא
+תְגַלֶּה" (Lev 18:9-11) and "עַוֶּרֶת אוֹ שָׁבוּר … לֹא־תַקְרִיבוּ" (Lev 22:22) are each a new prohibition in a series. Not a place taken
+up with "there", not inside a law to "you", and only inside a speech (as rule relative_law_head)."""
+examples = ["Num 30:10", "Num 30:14", "Lev 18:9", "Lev 21:14", "Lev 22:22"]
+
 [rules.summary_case_stands_with_the_law]
 scope = "law"
 doc = """A bare "וְהָיָה" whose case refers back to the cases before it ("וְהָיָה כִּי־יֶאְשַׁם לְאַחַת מֵאֵלֶּה", Lev 5:5: "in one of
@@ -1278,8 +1323,12 @@ In the law books BHSA's links have as many law heads with אֲשֶׁר as with �
 13:40 "וְאִישׁ", not under 13:44.
 - The relative clause may come after other segments under the noun phrase ("וְאִישׁ אִישׁ … הַגָּר בְּתוֹכָם אֲשֶׁר יָצוּד", Lev
   17:13), or as a segment of its own that MACULA does not attach ("וְהַנֶּפֶשׁ | אֲשֶׁר־תֹּאכַל", Lev 7:20).
+- When the noun phrase and its relative clauses fill the verse, the main clause can open the next verse: "אִישׁ אִישׁ מִבֵּית יִשְׂרָאֵל
+  … אֲשֶׁר יִשְׁחַט" (Lev 17:3, main clause in 17:4), "אִישׁ אִישׁ … אֲשֶׁר־יַעֲלֶה" (17:8, in 17:9). Such a head is no address
+  (rule vocative). With 17:8 a head, 17:10, 17:13 and 17:15 stand parallel to it, as in BHSA (bsb-add-books).
 - After "or" (words.alternative) only at a verse start, when a law head stands before it in the chapter with no law summary since:
   "אוֹ נֶפֶשׁ אֲשֶׁר תִּגַּע" (Lev 5:2) is the next case beside 5:1; not "אוֹ אִישׁ" after "זֹאת תּוֹרַת הַקְּנָאֹת" (Num 5:30).
+- Only inside a speech: laws are spoken. Not "וְאֶשֶׁד הַנְּחָלִים אֲשֶׁר נָטָה" in the poem the narrator quotes (Num 21:15).
 - Not when the main clause takes the noun up with "there" (words.place_there): "הַמָּקוֹם אֲשֶׁר־יִבְחַר יְהוָה … שָׁמָּה תָבִיאוּ"
   (Deut 12:11) stays in the law of 12:5-12.
 - Not inside a law opened by a case that speaks to "you" (2nd person, or a 2nd-person pronoun) with no law head since:
