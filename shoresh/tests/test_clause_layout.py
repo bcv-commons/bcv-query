@@ -297,6 +297,42 @@ def test_v019_rules_at_their_places(tmp_path, monkeypatch):
     assert case58["text_depth_law"] == deu28[case58["discourse_parent"]]["text_depth_law"]   # the same condition again, level
 
 
+def test_v020_rules_at_their_places(tmp_path, monkeypatch):
+    """v0.20 rules pinned to the places bsb-add-books named: therefore_chain_ends (Amos 3:12, Amos 5:18), relative_law_head after "or"
+    (Lev 5:2), not with "there" (Deut 12:11) or inside a law to "you" (Deut 17:12), coordinated_clauses_stand_level (Lev 5:1),
+    summary_case_stands_with_the_law (Lev 5:5), repeated_condition_stands_level by subject (Lev 5:7, 5:11), the command to say after its
+    addressee (Lev 20:2), ki_after_perception_is_content not after "יָדַע" with an object (Exod 23:9)."""
+    import json
+    from macula import build_clause_layout as b
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "EXO,LEV,DEU,AMO", "--out", str(out)])
+    b.main()
+
+    def rows(book, ch, v=None):
+        rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
+        return [r for r in rs if v is None or r["verse"] == v]
+
+    def by_key(book, ch):
+        return {r["clause_key"]: r for r in rows(book, ch)}
+    amo3 = by_key("AMO", 3)
+    therefore = next(r for r in rows("AMO", 3, 11) if r["relation"] == "consequence")
+    assert rows("AMO", 3, 12)[0]["discourse_parent"] == therefore["discourse_parent"] and amo3   # a new "כֹּה אָמַר" ends the chain
+    therefore = next(r for r in rows("AMO", 5, 16) if r["relation"] == "consequence")
+    assert rows("AMO", 5, 18)[0]["text_depth"] < therefore["text_depth"]                 # "הוֹי" ends it
+    lev5 = by_key("LEV", 5)
+    assert all(rows("LEV", 5, v)[0]["text_depth_law"] == 0 for v in (1, 2, 4, 5))         # the cases and the clause about them all
+    assert rows("LEV", 5, 2)[0]["relation"] == "parallel"
+    assert all(r["discourse_rule"] == "embedded_flat" for r in rows("LEV", 5, 1) if lev5.get(r["discourse_parent"], {}).get("text") in ("א֥וֹ", "א֣וֹ"))
+    poor = [next(r for r in rows("LEV", 5, v) if r["relation"] == "parallel") for v in (7, 11)]
+    assert poor[0]["text_depth_law"] == poor[1]["text_depth_law"]                          # the two alternatives for the poor, level
+    head11 = [r for r in rows("DEU", 12, 11) if r["discourse_rule"] == "main"][1]          # "הַמָּקוֹם", after "וְהָיָה"
+    assert head11["text_depth_law"] > 0                                                   # the place stays in the law
+    assert rows("DEU", 17, 12)[0]["relation"] != "parallel"                              # no new law head inside 17:8's law
+    lev20 = by_key("LEV", 20)
+    assert all(r["text_depth"] > lev20[rows("LEV", 20, 2)[0]["clause_key"]]["text_depth"] for r in rows("LEV", 20, 10))   # inside Moses' speech
+    assert any(r["relation"] == "causal" for r in rows("EXO", 23, 9))                    # "for you were strangers"
+
+
 def test_shipped_profiles(tmp_path, monkeypatch):
     """Every profile in macula/profiles loads over what it extends, names itself after its file, passes the relation-model checks, and
     builds into its own folder with the profile recorded in build.json."""

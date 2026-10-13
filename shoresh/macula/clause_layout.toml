@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.19"
+version = "0.20"
 
 [profile]
 name = "default"
@@ -347,6 +347,21 @@ strong = [
     "2063",   # זֹאת
 ]
 
+[words.place_there]
+doc = """"There": a main clause that takes a place up with it ("הַמָּקוֹם אֲשֶׁר־יִבְחַר יְהוָה … שָׁמָּה תָבִיאוּ", Deut 12:11) goes on
+with that place; the place does not head a law (rule relative_law_head)."""
+strong = ["8033"]                        # שָׁם, שָׁמָּה
+
+[words.alternative]
+doc = """"Or": a noun phrase after it at a verse start can head the next case of a law ("אוֹ נֶפֶשׁ אֲשֶׁר תִּגַּע", Lev 5:2; rule
+relative_law_head)."""
+lemmas = ["אוֹ"]
+
+[words.chain_end]
+doc = """Openers that end a "therefore" chain (rule therefore_chain_ends): "הוֹי". In BHSA's links in the Latter Prophets a verse
+opened by הוֹי ends the chain of the לָכֵן before it 4 times out of 4 (bsb-add-books)."""
+lemmas = ["הוֹי"]
+
 [words.lawgiver]
 doc = """The one through whom the law was given, named in the third person in a closing formula (rule closing_formula_is_narrator)."""
 strong = ["4872"]                        # מֹשֶׁה
@@ -385,6 +400,9 @@ narrated = [
     "8085",   # שָׁמַע: only as a narrative wayyiqtol ("וַיִּשְׁמַע שָׁאוּל כִּי"); "וְשָׁמַעְתִּי כִּי־חַנּוּן אָנִי" (Exod 22:26) is a reason
 ]
 stems = ["qal"]                          # not "כִּי־נִרְאָה מוֹאָב" ("appears", niphal, Isa 16:12)
+reason_with_object = [
+    "3045",   # יָדַע with an object of its own: "וְאַתֶּם יְדַעְתֶּם אֶת־נֶפֶשׁ הַגֵּר כִּי־גֵרִים הֱיִיתֶם" (Exod 23:9), a reason
+]
 
 [words.word]
 doc = "The noun \"word\", whose content a quotation can be (rule word_quote_hangs_on_main)."
@@ -694,7 +712,8 @@ doc = """The messenger formula: כֹּה in the first or second word, with a qat
 אָמַר, וְעַתָּה כֹּה אָמַר)."""
 [features.command_say]
 doc = """A command to say something, without an object of its own: an imperative of words.say (אֱמֹר; not Dan 2:4 "אֱמַר חֶלְמָא"),
-or כֹּה + a 2nd-person yiqtol (כֹּה תֹאמַר). A 2nd-person weqatal (וְאָמַרְתָּ) is decided in rule command_needs_addressee."""
+or כֹּה + a 2nd-person yiqtol (כֹּה תֹאמַר), or a 2nd-person yiqtol after its addressee (words.address), not negated: "וְאֶל־בְּנֵי
+יִשְׂרָאֵל תֹּאמַר" (Lev 20:2). A 2nd-person weqatal (וְאָמַרְתָּ) is decided in rule command_needs_addressee."""
 [features.say_weqatal]
 doc = "A 2nd-person weqatal of words.say without an object (וְאָמַרְתָּ, וַאֲמַרְתֶּם)."
 [features.proclaim]
@@ -736,7 +755,7 @@ doc = """A clause that is a bare noun phrase: no verb, no opener, headed by a no
 "נֶפֶשׁ", "וְאִישׁ", "אוֹ בָשָׂר", "וְהַבֶּגֶד")."""
 [features.perceive]
 doc = """A verb of seeing or knowing (words.perceive), or a narrative wayyiqtol of hearing (words.perceive narrated), in the stems
-words.perceive stems, not negated:
+words.perceive stems, not negated, and not a verb of words.perceive reason_with_object that has an object of its own:
 "וַיַּרְא אֱלֹהִים", "וִידַעְתֶּם", "וְרָאָה הַכֹּהֵן", "וַיִּשְׁמַע דָּוִד"; not "וְלֹא תִרְאֶה אֶת־הָאָרֶץ כִּי־מוֹפֵת נְתַתִּיךָ" (Ezek 12:6)."""
 [features.thing_case]
 doc = """A case that names a thing: "אִם" followed (after any preposition, article or object marker) by a noun that is not a time word
@@ -746,6 +765,17 @@ doc = """A case that names a thing: "אִם" followed (after any preposition, ar
 doc = "The Strong's numbers of the clause's verbs (rule repeated_condition_stands_level)."
 [features.back_reference]
 doc = "The clause has a demonstrative that refers back (words.back_reference)."
+[features.or_topic_np]
+doc = """A noun phrase standing alone after "or" (words.alternative), as features.topic_np: "אוֹ נֶפֶשׁ" (Lev 5:2)."""
+[features.only_cj]
+doc = """The clause's words are only conjunctions: a MACULA node that coordinates the clauses under it ("אוֹ רָאָה אוֹ יָדָע", Lev 5:1)
+(rule coordinated_clauses_stand_level)."""
+[features.place_there]
+doc = "The clause has \"there\" (words.place_there)."
+[features.subj_nouns]
+doc = "The Strong's numbers of the nouns in the clause's subject (rule repeated_condition_stands_level)."
+[features.chain_end]
+doc = "The clause opens with an opener that ends a \"therefore\" chain (words.chain_end)."
 [features.closing]
 doc = """A closing formula: a clause without a finite verb opened (after any "and") by words.closing_this ("אֵלֶּה הַמִּצְוֹת",
 "אֵלֶּה דִבְרֵי הַבְּרִית"). With words.lawgiver named in a clause under it, it can close a block of speech (rule
@@ -1000,6 +1030,24 @@ step-out took 23 lines closer to BHSA's layout and 43 farther (Jer 7:21-34, Jer 
 examples = ["Ps 45:4 after \"עַל־כֵּן בֵּרַכְךָ אֱלֹהִים\" (45:3)", "Lam 3:22 after \"עַל־כֵּן אוֹחִיל\" (3:21)", "Amos 3:3",
             "not Ps 73:7 after \"לָכֵן עֲנָקַתְמוֹ גַאֲוָה\" (73:6)"]
 
+[rules.therefore_chain_ends]
+scope = "all"
+doc = """A verse opened by "הוֹי" (words.chain_end) or by a new messenger formula ("כֹּה אָמַר" without "לָכֵן") ends the "therefore"
+chain it stands in: it goes back to the line the nearest "therefore" clause above it hangs on. In BHSA's links in the Latter Prophets
+הוֹי ends such a chain 4 times out of 4, and a new "כֹּה אָמַר" ends it 18 times, stands level with the לָכֵן clause 14 times and stays
+deeper 13 times out of 45 (bsb-add-books). Weaker openers (an imperative, a vocative, "בַּיּוֹם הַהוּא", "הִנֵּה") don't end it here."""
+examples = ["Amos 5:18 \"הוֹי הַמִּתְאַוִּים\" after 5:16 \"לָכֵן כֹּה־אָמַר\"", "Amos 3:12 \"כֹּה אָמַר יְהוָה\" after 3:11 \"לָכֵן כֹּה אָמַר\"",
+            "Isa 5:18", "Isa 29:15"]
+
+[rules.named_quotation_in_poem_ends_with_verse]
+scope = "poems"
+doc = """In the books of poems, a speech whose frame names its speaker inside the poem (not a narrative wayyiqtol frame on the outermost
+line, which opens a whole poem: "וַיַּעַן אִיּוֹב וַיֹּאמַר"; not a song frame; not God speaking) is a quotation, like any other, and
+ends with its verse (rule poem_quotation_ends_with_verse). In BHSA's links such quotations end with their verse 33 times out of 37
+(bsb-add-books). God's words in a psalm run on: "וְלָרָשָׁע אָמַר אֱלֹהִים" (Ps 50:16-23), "אֱלֹהִים דִּבֶּר בְּקָדְשׁוֹ" (Ps 60:8-10,
+108:8-10), "אָמַר אֲדֹנָי מִבָּשָׁן אָשִׁיב" (Ps 68:23-24)."""
+examples = ["Job 28:22 \"אֲבַדּוֹן וָמָוֶת אָמְרוּ\", ending before 28:23"]
+
 [rules.poem_quotation_ends_with_verse]
 scope = "poems"
 doc = """In the books of poems a speech whose frame neither names its speaker nor sings (rule poem_wayyiqtol_continues) is a quotation
@@ -1190,7 +1238,10 @@ causal ("וַיַּרְא אֱלֹהִים … כִּי־טוֹב", "וִידַ�
 same verse, and not when the כִּי clause speaks ("כִּי כֹה אָמַר יְהוָה", Jer 22:11; "כִּי אָמַר אֵלַי", 1 Sam 23:22). It hangs on that
 clause, one level in, as before; a "וְכִי" after it goes on with it as a series ("כִּי־פָקַד … וְכִי רָאָה", Exod 4:31; Gen 3:6), while a
 כִּי without "and" after it gives a reason again ("כִּי־פְרָעֹה אַהֲרֹן", Exod 32:25; Deut 9:6). The same holds for a כִּי
-clause that MACULA embeds under such a clause."""
+clause that MACULA embeds under such a clause. Not after "יָדַע" with an object of its own (words.perceive reason_with_object): "וְאַתֶּם
+יְדַעְתֶּם אֶת־נֶפֶשׁ הַגֵּר כִּי־גֵרִים הֱיִיתֶם" (Exod 23:9) gives a reason; after "רָאָה" with an object ("וַיַּרְא … אֶת־הָאוֹר
+כִּי־טוֹב", Gen 1:4) it is still what is seen. In the delivered chapters BHSA has 28 of the 32 relabelled clauses as object clauses
+(bsb-add-books)."""
 examples = ["Gen 1:10 \"וַיַּרְא אֱלֹהִים כִּי־טוֹב\"", "Ezek 6:7 \"וִידַעְתֶּם כִּי־אֲנִי יְהוָה\"", "Lev 13:51", "1 Sam 25:39 \"וַיִּשְׁמַע דָּוִד כִּי מֵת נָבָל\""]
 
 [rules.thing_case_returns]
@@ -1202,6 +1253,21 @@ case just before it: the cases about when or how in between (a time, a redemptio
 In the law view it is the next step of the staircase after 27:16."""
 examples = ["Lev 27:22 on 27:16"]
 
+[rules.coordinated_clauses_stand_level]
+scope = "all"
+doc = """The clauses under a MACULA node whose words are only conjunctions ("אוֹ רָאָה אוֹ יָדָע", Lev 5:1; "וְגַם … וְגַם") are
+coordinated by it, not subordinate to it: they stand at its level (discourse_rule embedded_flat), as the clause after a lone
+subordinator does (rule lone_subordinator_passes_relation). bsb-add-books found 18 such lone "אוֹ" segments in the delivered law
+chapters with their verb one level under them."""
+examples = ["Lev 5:1 \"אוֹ רָאָה אוֹ יָדָע\"", "Exod 21:31", "Num 30:3"]
+
+[rules.summary_case_stands_with_the_law]
+scope = "law"
+doc = """A bare "וְהָיָה" whose case refers back to the cases before it ("וְהָיָה כִּי־יֶאְשַׁם לְאַחַת מֵאֵלֶּה", Lev 5:5: "in one of
+these", words.back_reference) is about all of them: it stands where the laws stand, parallel to the last law head (rule
+law_heads_stand_parallel), not under the last case. BHSA has it level with the case heads (bsb-add-books)."""
+examples = ["Lev 5:5"]
+
 [rules.relative_law_head]
 scope = "law"
 doc = """In law, a noun phrase standing alone (features.topic_np) whose next segment is a relative clause on it, with a main clause after
@@ -1209,7 +1275,16 @@ that in its verse, heads a new law, as a casus pendens before כִּי does: "ו
 head it stands parallel to the law head before it in its chapter (rule law_heads_stand_parallel), and the law's cases start afresh.
 In the law books BHSA's links have as many law heads with אֲשֶׁר as with כִּי, 64 against 46 (bsb-add-books), among them Lev 20:10-21,
 17:3, 17:8, 15:11, 13:58 and 11:9-33. "וְהַצָּרוּעַ אֲשֶׁר־בּוֹ הַנֶּגַע" (Lev 13:45) starts the law of how the leper lives: level with
-13:40 "וְאִישׁ", not under 13:44."""
+13:40 "וְאִישׁ", not under 13:44.
+- The relative clause may come after other segments under the noun phrase ("וְאִישׁ אִישׁ … הַגָּר בְּתוֹכָם אֲשֶׁר יָצוּד", Lev
+  17:13), or as a segment of its own that MACULA does not attach ("וְהַנֶּפֶשׁ | אֲשֶׁר־תֹּאכַל", Lev 7:20).
+- After "or" (words.alternative) only at a verse start, when a law head stands before it in the chapter with no law summary since:
+  "אוֹ נֶפֶשׁ אֲשֶׁר תִּגַּע" (Lev 5:2) is the next case beside 5:1; not "אוֹ אִישׁ" after "זֹאת תּוֹרַת הַקְּנָאֹת" (Num 5:30).
+- Not when the main clause takes the noun up with "there" (words.place_there): "הַמָּקוֹם אֲשֶׁר־יִבְחַר יְהוָה … שָׁמָּה תָבִיאוּ"
+  (Deut 12:11) stays in the law of 12:5-12.
+- Not inside a law opened by a case that speaks to "you" (2nd person, or a 2nd-person pronoun) with no law head since:
+  "וְהָאִישׁ אֲשֶׁר־יַעֲשֶׂה בְזָדוֹן" (Deut 17:12) is the last part of the law of 17:8 "כִּי יִפָּלֵא מִמְּךָ דָבָר"; BHSA coordinates it
+  with 17:11 (bsb-add-books)."""
 examples = ["Lev 13:45 \"וְהַצָּרוּעַ אֲשֶׁר־בּוֹ הַנֶּגַע\"", "Lev 20:10 \"וְאִישׁ אֲשֶׁר יִנְאַף\"", "Lev 11:9 \"כֹּל אֲשֶׁר־לוֹ סְנַפִּיר\"",
             "Lev 17:15 \"וְכָל־נֶפֶשׁ אֲשֶׁר תֹּאכַל נְבֵלָה\""]
 
@@ -1234,7 +1309,9 @@ doc = """In the law view's staircase, a negated condition that repeats the verb 
 the infinitives under it: "אִם־לֹא תִשְׁמַע … לִשְׁמֹר לַעֲשׂוֹת" → "אִם־לֹא תִשְׁמֹר לַעֲשׂוֹת") states the same condition again, to open a
 new round: it stands level with that case instead of stepping in. Deut 28:58 takes up 28:15 and stands beside it, as in BHSA
 (bsb-add-books). Not when it refers back with "these" or "this" (words.back_reference: "גַּם לִשְׁנֵי הָאֹתוֹת הָאֵלֶּה", Exod 4:9;
-"וְאִם־עַד־אֵלֶּה לֹא תִשְׁמְעוּ לִי", Lev 26:18): "if even after these …" goes on from what came before, one step in."""
+"וְאִם־עַד־אֵלֶּה לֹא תִשְׁמְעוּ לִי", Lev 26:18): "if even after these …" goes on from what came before, one step in. The same
+subject (features.subj_nouns) counts as a repeat too, with a verb of like meaning: "וְאִם־לֹא תַגִּיעַ יָדוֹ" (Lev 5:7) and "וְאִם־לֹא
+תַשִּׂיג יָדוֹ" (5:11), the two alternatives for the poor, stand level (BHSA 2 and 2)."""
 examples = ["Deut 28:58 \"אִם־לֹא תִשְׁמֹר לַעֲשׂוֹת\" level with 28:15"]
 
 [rules.ki_after_be_is_conditional]
