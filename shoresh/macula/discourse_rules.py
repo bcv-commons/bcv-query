@@ -87,12 +87,12 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     """Load the settings into the module's constants: clause_layout.toml (profile "default"), a profile by name, or a settings file."""
     global CFG, CONFIG_FILE, CONFIG_SHA256, CONFIG_FILES, PROFILE, PROFILE_CHANGED, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM, SING_PRAY, SONG, \
-        LEAD_ME, HAND, YOU, SON_OF_MAN, HAND_VERBS, OBJECT_MARKER, SUMMARY_THIS, SUMMARY_LAW
-    global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE
+        LEAD_ME, HAND, YOU, SON_OF_MAN, HAND_VERBS, OBJECT_MARKER, SUMMARY_THIS, SUMMARY_LAW, PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS, CLOSING_THIS, LAWGIVER, BACK_REFERENCE
+    global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE, CONCLUSION
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
-    global VOCATIVE_RULE, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE, CHAPTER_MARGIN
+    global VOCATIVE_RULE, TOPIC_RULES, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE, CHAPTER_MARGIN
     CFG, files, PROFILE_CHANGED = load_settings(path, profile)
     CONFIG_FILES = files
     CONFIG_FILE, PROFILE, RULES_VERSION = files[-1][0], CFG["profile"]["name"], CFG["version"]
@@ -112,6 +112,8 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     LEAD_ME, HAND, YOU, SON_OF_MAN = strong("lead_me"), strong("hand"), strong("you"), strong("son_of_man")
     HAND_VERBS, OBJECT_MARKER = strong("hand_verbs"), strong("object_marker")
     SUMMARY_THIS, SUMMARY_LAW = strong("summary_this"), strong("summary_law")
+    PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS = strong("perceive"), set(W["perceive"]["narrated"]), set(W["perceive"]["stems"])
+    CLOSING_THIS, LAWGIVER, BACK_REFERENCE = strong("closing_this"), strong("lawgiver"), strong("back_reference")
     SUB_KIND = {_n(k): v for k, v in W["subordinators"]["relation"].items()}
     SUB_CJ = set(SUB_KIND)
     SUB_ARC = {_n(k): v for k, v in W["subordinators_aramaic"]["relation"].items()}
@@ -121,6 +123,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     INF_DEFAULT = W["infinitive_preposition"]["default"]
     FORMULA, TIME_WORDS = lemmas("formula"), lemmas("time")
     CONSEQUENCE = [[_n(x) for x in seq] for seq in W["consequence"]["sequences"]]
+    CONCLUSION = [[_n(x) for x in seq] for seq in W["conclusion"]["sequences"]]
     OATH_CONTENT, OATH_REASON, QUOTING_SUBS = lemmas("oath_content"), lemmas("oath_reason"), lemmas("quoting_subordinators")
     CASE_OPENERS, APODOSIS_MARKERS, LAW_HEAD_WORDS = lemmas("case_openers"), lemmas("apodosis_markers"), lemmas("law_heads")
     WORD_NOUN = strong("word")
@@ -133,6 +136,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS = set(F["infinitive"]), set(F["participle"]), set(F["narrated"]), set(F["quotation"])
     EXTENSION_FORMS = set(F["extension"])
     VOCATIVE_RULE, COMPLEMENT_ROLES = CFG["macula"]["vocative_rule"], set(CFG["macula"]["complement_roles"])
+    TOPIC_RULES = set(CFG["macula"]["topic_rules"])
     PARAGRAPH_MARKS = list(CFG["text"]["paragraph_marks"])
     RELATIONS = list(CFG["relations"])
     FLAT = {r for r, v in CFG["relations"].items() if not v["adds_text_level"]}
@@ -237,6 +241,10 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
     np_lead = lead
     while np_lead and np_lead[0]["class"] in ("cj", "art"):    # "or flesh", "and the garment"
         np_lead = np_lead[1:]
+    art_lead = lead[1:] if lead and lead[0]["class"] == "art" else lead      # "and the leper", not "also all …", "or a man"
+    thing = lead[1:] if l0 == IM else []          # "if <a thing>": "if from the field …", "if the field that he bought …"
+    while thing and (thing[0]["class"] in ("prep", "art") or _strong(thing[0]) in OBJECT_MARKER) and _n(thing[0]["lemma"]) not in TIME_WORDS:
+        thing = thing[1:]
     speak = bool(v) and _strong(v) in SPEAK and (bool(finite) or (aramaic and v["wtype"] in PARTICIPLE)) and not (
         _strong(v) in ASK and (has_object or any(_n(t["lemma"]) == SHALOM for t in toks)))
     ptc_free = bool(v) and v["wtype"] in PARTICIPLE and not finite and not speak and not (
@@ -291,6 +299,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
                 _strong(v) in SPEAK and any(_strong(t) in SONG for t in toks))),
             "time_wayehi": bool(v) and _strong(v) in BE_VERB and v["wtype"] == "wayyiqtol" and any(_n(t["lemma"]) in TIME_WORDS for t in toks),
             "consequence": any(lead_l[:len(s)] == s for s in CONSEQUENCE),
+            "conclusion": any(lead_l[:len(s)] == s for s in CONCLUSION),
             "messenger": KO in in_first_two and bool(v) and _strong(v) in SAY and v["wtype"] == "qatal",
             "command_say": bool(v) and _strong(v) in SAY and not has_object and (v["wtype"] == "imperative" or (
                 second and l0 == KO and v["wtype"] == "yiqtol")),
@@ -306,6 +315,14 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
                     and any(t["class"] == "pron" and person.get(t["key"]) == "first" for t in toks),
             "you_lead": bool(lead) and _strong(lead[0]) in YOU,
             "word_noun": any(_strong(t) in WORD_NOUN for t in toks),
+            "thing_case": bool(thing) and thing[0]["class"] == "noun" and _n(thing[0]["lemma"]) not in TIME_WORDS,
+            "closing": bool(lead) and _strong(lead[0]) in CLOSING_THIS and not finite,
+            "names_lawgiver": any(_strong(t) in LAWGIVER for t in toks),
+            "back_reference": any(_strong(t) in BACK_REFERENCE for t in toks),
+            "verbs": sorted({_strong(t) for t in verbs}),
+            "lawgiver_subject": any(_strong(t) in LAWGIVER for t in subject),
+            "perceive": bool(v) and v["stem"] in PERCEIVE_STEMS and not any(t["wtype"] == "negative" for t in toks) and (
+                _strong(v) in PERCEIVE or (_strong(v) in PERCEIVE_NARRATED and v["wtype"] == "wayyiqtol")),
             "lone_sub": bool(sub_kind) and not verbs and all(t["class"] in ("prep", "rel", "cj") or t["wtype"] == "negative" for t in toks)
                         and any(t["class"] == "prep" for t in toks) and any(t["class"] == "rel" for t in toks),
             "son_of_man": SON_OF_MAN <= {_strong(t) for t in toks},
@@ -321,6 +338,8 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
                               and not finite and (not verbs or verbs[0]["wtype"] in PARTICIPLE),
             "frame_be": bool(v) and _strong(v) in BE_VERB and v["wtype"] == "weqatal" and len(lead) == 1,
             "bare_np": not verbs and bool(np_lead) and np_lead[0]["class"] == "noun" and not sub_kind,
+            "topic_np": (rule or "") in TOPIC_RULES and not finite and not sub_kind and bool(art_lead) and _n(art_lead[0]["lemma"]) not in TIME_WORDS
+                        and (art_lead[0]["class"] == "noun" or (art_lead[0]["wtype"] in PARTICIPLE and art_lead is not lead)),
             "extension": KEN in in_first_two and bool(v) and _strong(v) in DO and second and v["wtype"] in EXTENSION_FORMS
                          and any(t["class"] == "prep" and _n(t["lemma"]) == LE for t in toks),
             "then": l0 in APODOSIS_MARKERS,
@@ -344,6 +363,7 @@ class _Line:
         self.oracle = False                       # opened by the word-event formula's "saying" (rule son_of_man_returns_to_oracle_top)
         self.first: str | None = None             # first main clause on the line
         self.framed = False                       # opened by a frame that names its speaker or sings (rule poem_wayyiqtol_continues)
+        self.poem_quote = False                   # a quotation inside a poem (rule poem_quotation_ends_with_verse)
         self.last: str | None = None              # last main clause on the line
         self.verse_mains: dict = {}               # verse -> main clauses of the line in that verse
         self.oath: str | None = None
@@ -353,6 +373,7 @@ class _Line:
         self.turns: dict = {}                     # (speaking verb, form) -> last turn clause opened by it
         self.law_head: str | None = None          # the last law head on the line (rule law_heads_stand_parallel)
         self.law_case: str | None = None          # the last case of the current law (rule law_cases_continue_the_law)
+        self.law_thing: str | None = None         # the last case of the current law that names a thing (rule thing_case_returns)
 
 
 def derive(clauses: list[dict]) -> dict[str, dict]:
@@ -372,6 +393,16 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     cmd_of: dict = {}                             # main clause key -> it is a command (imperative or 2nd-person weqatal)
     frame_be_of: dict = {}                        # main clause key -> it is a bare "and it shall be" (rule frame_be_protasis_hangs_forward)
     book_of = {c["key"]: c["verse"][0] for c in clauses}
+    kids: dict = {}                               # MACULA parent -> embedded clauses
+    for c in clauses:
+        if c["parent_key"]:
+            kids.setdefault(c["parent_key"], []).append(c["key"])
+
+    def verbs_under(k, depth=0):                  # the verbs of a clause and of the clauses embedded under it
+        vs = set(rec_of[k]["f"]["verbs"]) if k in rec_of else set()
+        for x in kids.get(k, []) if depth < 3 else ():
+            vs |= verbs_under(x, depth + 1)
+        return vs
     rec_of = {c["key"]: c for c in clauses}
     ext: set = set()                              # main clauses with the extension formula (rule extension_formula_returns)
     # rule then_clause_is_apodosis: the main clauses opened by an apodosis marker, by position
@@ -396,7 +427,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     # rule casus_pendens: a bare noun phrase followed in its verse by a clause opened by words.case_openers
     next_case = [i + 1 < n and clauses[i + 1]["verse"] == c["verse"] and not clauses[i + 1]["parent_key"]
                  and clauses[i + 1]["f"]["lead"] in CASE_OPENERS for i, c in enumerate(clauses)]
+    # rule closing_formula_is_narrator: a closing formula with a clause under it in its verse that names the lawgiver
+    closing_named = [c["f"]["closing"] and any(x["parent_key"] == c["key"] and x["f"]["names_lawgiver"]
+                                               for x in clauses[i + 1:i + 8] if x["verse"] == c["verse"]) for i, c in enumerate(clauses)]
     cp_of: dict = {}                              # clause key -> it is a casus pendens
+    # rule relative_law_head: a noun phrase standing alone, a relative clause on it next, and a main clause after that in its verse
+    rel_head = [i + 1 < n and clauses[i + 1]["parent_key"] == c["key"] and clauses[i + 1]["f"]["sub_kind"] == "relative"
+                and any(not x["parent_key"] for x in clauses[i + 2:i + 12] if x["verse"] == c["verse"]) for i, c in enumerate(clauses)]
     prot: dict | None = None                      # the open protasis (rule protasis_continued): key, verse, last clause
     apod: set = set()                             # main clauses that took a fronted protasis (apodoses)
     subish_of: dict = {}                          # clause key -> it is subordinate or embedded (rule speech_in_subordinate_ends_with_verse)
@@ -412,6 +449,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     song_verses = {c["verse"] for c in clauses if c["f"]["song"]}
     waiting_chain: set = set()                    # wayyiqtols continuing a waiting protasis (rule wayyiqtol_continues_subordinate)
     song_of: dict = {}                            # main clause key -> it sings or prays (rule song_and_prayer_are_poems)
+    quote_closed = False                          # a quotation inside a poem ended with the verse before (rule poem_resumes_after_quotation)
+    conclusion_of: dict = {}                      # main clause key -> it opens with a conclusion (rule therefore_steps_out)
     wayehi_when = [c["f"]["verb"] in BE_VERB and c["f"]["form"] == "wayyiqtol" and i + 1 < n and clauses[i + 1]["verse"] == c["verse"]
                    and clauses[i + 1]["f"]["sub_kind"] == "temporal" for i, c in enumerate(clauses)]
     for i in range(n):
@@ -477,7 +516,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                     ln.openers = {}
         if vref != prev_v:
             vi, prev_v = vi + 1, vref
+            quote_closed = False
             while on("quotation_ends_with_verse") and len(lines) > 1 and lines[-1].scoped:
+                quote_closed = quote_closed or lines[-1].poem_quote
                 lines.pop()
             while on("nested_speech_ends_after_next_verse") and len(lines) > 2 and not lines[-1].long and lines[-1].opened < vi - verses_after:
                 lines.pop()
@@ -509,6 +550,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             rel = ("relative" if f["sub_kind"] == "relative" or c["attach"] else
                    "complement" if f["lemor"] or f["role"] in COMPLEMENT_ROLES else
                    f["sub_kind"] if f["sub_kind"] in ("purpose", "temporal", "causal", "conditional", "complement") else "embedded")
+            if rel == "causal" and f["lead"] == KI and on("ki_after_perception_is_content") \
+                    and rec_of.get(c["parent_key"], {}).get("f", {}).get("perceive"):
+                rel = "complement"                # "he saw that …"
             link(k, c["parent_key"], rel, "embedded_flat" if f["plain_embedded"] else "embedded", c["attach"])
             pr = rec_of.get(c["parent_key"])
             main = rec_of.get(pr["parent_key"]) if pr and pr["parent_key"] else None
@@ -536,7 +580,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                             rec_of[c["parent_key"]].get("attach_strong") in WORD_NOUN or (gp is not None and gp["f"]["word_noun"])):
                         ln.scoped = False
                     elif on("poem_quotation_ends_with_verse") and not ln.framed:
-                        ln.scoped = True
+                        ln.scoped = ln.poem_quote = True
                     elif on("quotation_in_oracle_ends_with_verse") and any(x.prophetic for x in lines[1:]) and not ln.oracle \
                             and not pf.get("divine") and not cmd_of.get(c["parent_key"]) and pf.get("person") != "first":
                         ln.scoped = True                  # what people say, quoted in an oracle: ends with its verse
@@ -592,6 +636,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 f["speak"] and f["form"] == "wayyiqtol" and (f["proper"] or (f["def_subject"] and on("narrative_frames")))
                 and not (f["person"] == "first" and on("first_person_wayyiqtol_continues_speech"))) or (
                 f["form"] == "wayyiqtol" and f["person"] == "third" and f["named_subject"] and not f["pron12"]) or narrator_says
+        # rule closing_formula_is_narrator: "these are the commandments which the LORD commanded Moses" closes the LORD's or Moses' speech
+        if on("closing_formula_is_narrator") and closing_named[i] and not c["parent_key"] and len(lines) > 1:
+            fr = rec_of.get(lines[1].spk)
+            if fr is not None and fr["parent_key"] and fr["f"]["lemor"]:
+                fr = rec_of.get(fr["parent_key"])
+            if fr is not None and (fr["f"]["divine"] or fr["f"]["lawgiver_subject"]):
+                resumes = True
         # in the books of poems a speech opened by a named or song frame is a poem: only a frame of speaking ("and Job answered and said")
         # resumes the narrative; any other wayyiqtol closes the quotations inside the poem, not the poem (rule poem_wayyiqtol_continues)
         framed = [x for x in range(1, len(lines)) if lines[x].framed]
@@ -625,11 +676,14 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             continue
 
         if f["law_head"] and on("law_cases_continue_the_law"):
-            line.law_case = None                  # a law-head word: a new law
+            line.law_case = line.law_thing = None     # a law-head word: a new law
             law_heads.add(k)
         cp = on("casus_pendens") and f["bare_np"] and next_case[i]
         cp_of[k] = cp
         if cp and on("law_cases_continue_the_law"):
+            law_heads.add(k)
+        if on("relative_law_head") and f["topic_np"] and rel_head[i] and not c["parent_key"]:
+            line.law_case = line.law_thing = None     # "and the man who …": a new law
             law_heads.add(k)
 
         # ---- rule vocative
@@ -668,8 +722,16 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             prot = {"verse": vref, "last": k, "until": None, "key": None, "pn": (f["person"], f["number"])}
             if on("law_cases_continue_the_law"):
                 line.law_case = k                 # a new law: its first case
+                line.law_thing = k if f["thing_case"] else None
             if on("law_heads_stand_parallel"):
                 case_waiting = k                  # the law's apodosis is the next main clause: it hangs on this case
+            continue
+        # ---- rule ki_after_perception_is_content: "and he saw that …", "and you shall know that …"
+        if on("ki_after_perception_is_content") and f["sub_kind"] == "causal" and f["lead"] == KI and i > 0 \
+                and clauses[i - 1]["key"] == prev_top_key and clauses[i - 1]["f"]["perceive"] and line.last is not None \
+                and clauses_verse.get(prev_top_key) == vref and not (f["speak"] or f["say_any"] or f["messenger"]):
+            link(k, prev_top_key, "complement", "sub_back")
+            line.subs[f["lead"]] = k
             continue
         if f["sub_kind"] and not (line.spk and line.last is None):
             prev = line.subs.get(f["lead"]) if f["lead"] else None
@@ -685,22 +747,31 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             if law_cases:                         # in law: an "if" continues the current law's cases, a fronted "for/if" law starts a new law
                 prev = line.law_case if f["lead"] == IM and line.law_case and clauses_verse.get(line.law_case, (None, None))[:2] == vref[:2] \
                     else None
+                if prev is not None and f["thing_case"] and line.law_thing and on("thing_case_returns"):
+                    prev = line.law_thing         # a case about another thing stands with the case about the first thing
                 same_ch = prev is not None
             head = prev
             while head is not None and out.get(head, {}).get("relation") == "parallel":
                 head = out[head]["parent"]
             same_rel = head is not None and (out.get(head, {}).get("relation") == would_be or not on("series_needs_same_relation")
-                                             or (law_cases and out.get(head, {}).get("relation") == "conditional"))
+                                             or (law_cases and out.get(head, {}).get("relation") == "conditional")
+                                             or (f["waw"] and out.get(head, {}).get("relation") == "complement"
+                                                 and on("ki_after_perception_is_content")))    # "that … and that …"
             if on("subordinate_series") and prev is not None and same_rel and (pt == prev or (f["sub_kind"] == "conditional" and same_ch)):
                 link(k, prev, "parallel", "series")
                 if on("be_case_stands_level") and prev_top_key and frame_be_of.get(prev_top_key) \
                         and clauses_verse.get(prev_top_key) == vref:
                     be_cases.add(k)               # "and it shall be, if ...": stands level with the case before
+                if on("repeated_condition_stands_level") and f["negated"] and rec_of[prev]["f"]["negated"] and f["verb"] \
+                        and f["verb"] in verbs_under(prev) and not f["back_reference"]:
+                    be_cases.add(k)               # "if you do not keep to do" again: the same condition, a new round
                 if (f["sub_kind"] == "conditional" or law_cases) and in_scope(LAW_STAIRCASE, vref[0]):
                     cond_series.add(k)
                     case_waiting = k              # its own apodosis is the next main clause
                     if law_cases:
                         line.law_case = k
+                        if f["thing_case"]:
+                            line.law_thing = k
                     until = prot.get("until") if prot else None
                     prot = {"verse": vref, "last": k, "until": until, "key": prot.get("key") if prot else None,
                             "pn": (f["person"], f["number"])}
@@ -727,6 +798,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                         prot = {"verse": vref, "last": k, "until": None, "key": k, "pn": (f["person"], f["number"])}
                         if on("law_cases_continue_the_law"):
                             line.law_case = k     # a new law (or the first case of one)
+                            line.law_thing = k if f["thing_case"] else None
                         # (then_clause_is_apodosis) only a protasis that opens its verse or follows an address; not "if not" after
                         # a negated clause or in an oath ("but rather", Gen 24:38)
                         waits = (first_in_verse or out.get(prev_top_key, {}).get("relation") == "vocative") and not (
@@ -804,15 +876,23 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 while out.get(parent, {}).get("relation") in ("continuation", "coordination", "parallel") and out[parent]["parent"] \
                         and clauses_verse.get(out[parent]["parent"]) == run_verse:
                     parent = out[parent]["parent"]
-            # rule therefore_steps_out: after a verse that ends with a "therefore" clause (and its chain), the next verse returns to
-            # the line the "therefore" clause hangs on
+            # rule therefore_steps_out: after a verse that ends with a conclusion ("that is why", and its chain), the next verse
+            # returns to the line the conclusion hangs on
             if on("therefore_steps_out") and first_in_verse and rel != "continuation":
                 last_v, x = clauses_verse.get(line.last), line.last
                 while out[x]["relation"] in ("continuation", "coordination", "asyndetic", "parallel") and out[x]["parent"] \
                         and clauses_verse.get(out[x]["parent"]) == last_v:
                     x = out[x]["parent"]
-                if out[x]["relation"] == "consequence" and out[x]["parent"]:
+                if out[x]["relation"] == "consequence" and conclusion_of.get(x) and out[x]["parent"]:
                     parent = out[x]["parent"]
+            # rule poem_resumes_after_quotation: after a quotation inside a poem, the poem goes on at its own level, not from the
+            # frame's chain: up to the clause above the line's highest link that adds a level
+            if on("poem_resumes_after_quotation") and quote_closed and first_in_verse and rel != "continuation" and line.first:
+                ch = chain(line.last)
+                ch = ch[:ch.index(line.first) + 1] if line.first in ch else []
+                top = max((j for j, x in enumerate(ch[:-1]) if out[x]["relation"] not in FLAT), default=None)
+                if top is not None:
+                    parent = ch[top + 1]
         if on("consequence") and f["consequence"] and line.last is not None:
             rel = "consequence"
             parent = line.last
@@ -839,6 +919,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             parent, rel = same_ch_head or line.first, "parallel"
         link(k, parent, rel, "main")
         out[k]["subj"] = f["subj"]
+        conclusion_of[k] = f["conclusion"]
         form_of[k] = f["form"]
         if on("stanza_heads") and first_in_verse and f["opener"]:
             line.openers[f["opener"]] = k
@@ -902,6 +983,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             ln.framed = framed_of[k]
             if on("poem_quotation_ends_with_verse") and not ln.framed:
                 ln.scoped = True                  # a quotation inside a poem ends with its verse
+                ln.poem_quote = f["verb"] in SAY or f["lemor"]
             if on("song_and_prayer_are_poems") and song_of.get(k):
                 ln.song = vref
             if on("negated_saying_is_quotation") and f["negated"] and f["verb"] in SAY and not f["lemor"]:

@@ -258,6 +258,45 @@ def test_v018_rules_at_their_places(tmp_path, monkeypatch):
     assert any(r["relation"] == "conditional" for r in rows("EXO", 12, 26))                   # "וְהָיָה כִּי־יֹאמְרוּ": when, not for
 
 
+def test_v019_rules_at_their_places(tmp_path, monkeypatch):
+    """v0.19 rules pinned to the places bsb-add-books named: therefore_steps_out only after "עַל־כֵּן" (Ps 73:7 stays level with the
+    "לָכֵן" clause, Ps 45:4 still steps out), poem_resumes_after_quotation (Ps 73:12), relative_law_head (Lev 13:45),
+    ki_after_perception_is_content (Lev 13:51, Gen 1:10), thing_case_returns (Lev 27:22), closing_formula_is_narrator (Lev 27:34,
+    Deut 28:69, Num 30:17), repeated_condition_stands_level (Deut 28:58)."""
+    import json
+    from macula import build_clause_layout as b
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "GEN,LEV,NUM,DEU,PSA", "--out", str(out)])
+    b.main()
+
+    def rows(book, ch, v=None):
+        rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
+        return [r for r in rs if v is None or r["verse"] == v]
+
+    def by_key(book, ch):
+        return {r["clause_key"]: r for r in rows(book, ch)}
+    ps73 = by_key("PSA", 73)
+    therefore = next(r for r in rows("PSA", 73, 6) if r["relation"] == "consequence")
+    assert rows("PSA", 73, 7)[0]["text_depth"] == therefore["text_depth"]                 # no step-out after "לָכֵן"
+    assert rows("PSA", 73, 12)[0]["text_depth"] == 0 and ps73                              # the psalmist again
+    assert rows("PSA", 45, 4)[0]["text_depth"] == 0                                        # back out after "עַל־כֵּן"
+    lev13 = by_key("LEV", 13)
+    head45 = rows("LEV", 13, 45)[0]
+    assert head45["relation"] == "parallel" and lev13[head45["discourse_parent"]]["verse"] == 40   # "וְהַצָּרוּעַ אֲשֶׁר־בּוֹ הַנֶּגַע"
+    assert any(r["relation"] == "complement" and r["discourse_rule"] == "sub_back" for r in rows("LEV", 13, 51))   # "that it has spread"
+    assert any(r["relation"] == "complement" for r in rows("GEN", 1, 10))                  # "וַיַּרְא אֱלֹהִים כִּי־טוֹב"
+    lev27 = by_key("LEV", 27)
+    case22 = rows("LEV", 27, 22)[0]
+    assert lev27[case22["discourse_parent"]]["verse"] == 16                                # the bought field beside the inherited one
+    for book, ch, v in (("LEV", 27, 34), ("DEU", 28, 69), ("NUM", 30, 17)):
+        first = rows(book, ch, v)[0]
+        assert first["text_depth"] == 0 and first["text_depth_law"] == 0, (book, ch, v)  # the narrator's closing
+    deu28 = by_key("DEU", 28)
+    case58 = rows("DEU", 28, 58)[0]
+    assert deu28[case58["discourse_parent"]]["verse"] == 15
+    assert case58["text_depth_law"] == deu28[case58["discourse_parent"]]["text_depth_law"]   # the same condition again, level
+
+
 def test_shipped_profiles(tmp_path, monkeypatch):
     """Every profile in macula/profiles loads over what it extends, names itself after its file, passes the relation-model checks, and
     builds into its own folder with the profile recorded in build.json."""
