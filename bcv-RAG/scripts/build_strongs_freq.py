@@ -3,8 +3,10 @@
 class, from the original-language biblical text.
 
 Sources (read-only, local):
-  ../../shoresh/spine/spine.db  spine_words  (OSHB Hebrew OT + Nestle1904 Greek NT)
-  ../../shoresh/lxx/lxx.db      lxx_words    (LXX Greek OT, incl. deuterocanon)
+  ../../shoresh/spine/spine.db         spine_words  (UHB Hebrew OT + UGNT Greek NT, CC BY-SA 4.0)
+  ../../shoresh/lxx/data/lxx-glaux.db  lxx_words    (GLAUx Septuagint, incl. deuterocanon, CC BY-SA 4.0)
+
+Licence of the output: CC BY-SA 4.0 (share-alike from its sources).
 
 IMPORTANT: spine_words.strong is a bare INTEGER with no H/G prefix, and the
 same int means a different word in Hebrew vs Greek (strong=3588 is H3588 כִּי
@@ -33,8 +35,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent.parent
 SPINE_DB = ROOT / "shoresh" / "spine" / "spine.db"
 LXX_DB = ROOT / "shoresh" / "lxx" / "data" / "lxx-glaux.db"
-if not LXX_DB.exists():
-    LXX_DB = ROOT / "shoresh" / "lxx" / "lxx.db"
 OUTPUT = ROOT / "resources" / "strongs_freq.tsv"
 
 # Canonical OT/NT book split — imported from shoresh's single source of truth

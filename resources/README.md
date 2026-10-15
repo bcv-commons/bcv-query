@@ -26,19 +26,20 @@ in Phase 0.
 | Path | What | Key |
 |---|---|---|
 | `llm_strongs_glosses/<lang>.tsv` | LLM gap-fill glosses, 7 gloss-thin langs (see its README) | `strong → gloss` |
-| `aligned_lex/<lang>.tsv` | surface→Strong's from word alignment, 10 langs | `surface, strong, count, share` |
+| `aligned_lex/<lang>.tsv` | surface→Strong's from word alignment, 10 langs; Clear-Bible/Alignments, CC BY 4.0 | `surface, strong, count, share` |
+| `aligned_lex_hf/<lang>.tsv` | surface→Strong's from the lexeme aligner, 924 langs; bcv-commons/lexeme-alignments, CC0 | `surface, strong, count, share, hi_conf, methods` |
 | `concept_surfaces/<lang>.tsv` | Strong's → surface family (inverse of aligned_lex), 10 langs — query-time recall expansion (R1) | `strong, surface, count, share` |
 | `stopwords/<lang>.tsv` | data-derived function-word stopwords, 10 langs (R2) — unioned into the analyzer | `surface, codes, max_share` |
 | `analyzer_lang/<lang>.json` | per-language analyzer intent configs, 10 langs | — |
 | `book_names.json` | localized Bible book names + aliases, 10 langs | USFM code → names |
 | `bible_editions.json` | edition registry (handles OT≠NT composites) | edition id → metadata |
 | `strongs_gloss.tsv` | authoritative UBS/English glosses | `strong → gloss` |
-| `strongs_freq.tsv` | Strong's frequency + `is_function` flag | `strong` |
+| `strongs_freq.tsv` | Strong's frequency + `is_function` flag; counted from UHB/UGNT and the GLAUx Septuagint, CC BY-SA 4.0 | `strong` |
 | `strongs_keyness.tsv` | per-Strong's biblical-salience weight (`bible − general` zipf), **content words only** (noun/verb/adj — matches the Greek scope; function words have no keyness). anchor `he` = spine OT − modern Hebrew (wordfreq) w/ `modern_he` (`0` = archaic); `grc` = NT1904 − pagan Koine (LAGT) w/ `koine_general` (`0` = scripture_only); `arc` = biblical Aramaic (no presence flag — modern Hebrew is the wrong denominator for it). At most one general column set per row | `strong, keyness, anchor, modern_he, koine_general` |
 | `word_freq/grc.tsv` (+ local-only `hbo.tsv`) | corpus-internal lemma frequency **rank** for the `/words` trainer (lex-keyed, NOT Strong's; OT BHSA / NT Nestle1904) — built by `shoresh/corpus_engine/build_freq.py` | `lex, count, rank` |
 | `word_freq/grc_strong.tsv` (+ local-only `hbo_strong.tsv`) | TF lexeme → Strong's bridge so `/words` can attach keyness (Gr from Nestle1904 `strong`; He via spine.db 3-tier resolver, ~96% freq-weighted) — built by `shoresh/corpus_engine/build_lex_strong.py` | `lex, strong` |
 | `strongs_tw.tsv` | Strong's → unfoldingWord Translation-Words article(s), ranked by occurrence | `strong, tw_article, category, is_kt, lemma, n` |
-| `topic_strongs.tsv` | Nave's-style topic → Strong's | `topic_id, strong, verse_count` |
+| `topic_strongs.tsv` | Nave's topic → Strong's; Nave's (public domain) × STEPBible TAHOT/TAGNT tags, CC BY 4.0 | `topic_id, strong, verse_count` |
 | `speaker_quotations/` | who speaks where — quotations → speaker, verse-range, red-letter flag (S1) | `speaker, …, start_bbcccvvv, end_bbcccvvv, divine` |
 | `lxx_bridge.tsv` | Hebrew→Greek LXX bridge (from MACULA `greekstrong`); concept expansion across the Testaments | `hebrew_strong, greek_strong, count` |
 | `semantic_domains/<lang>.tsv` | Strong's → semantic domain (SDBG Greek / SDBH Hebrew, from MACULA); broaden a lexeme to its domain (S2) — see its README | `strong, domain_type, domain, label, count, share` |

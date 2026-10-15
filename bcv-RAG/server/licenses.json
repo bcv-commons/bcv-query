@@ -39,7 +39,11 @@
     "strongs_keyness",
     "ubs_open_domains",
     "lxx_bridge",
-    "related_langs"
+    "related_langs",
+    "clear_alignments",
+    "lexeme_alignments",
+    "strongs_freq",
+    "topic_strongs"
    ]
   },
   "/api/ask": {
@@ -82,7 +86,11 @@
     "strongs_keyness",
     "lxx_bridge",
     "related_langs",
-    "llm_answer"
+    "llm_answer",
+    "clear_alignments",
+    "lexeme_alignments",
+    "strongs_freq",
+    "topic_strongs"
    ]
   },
   "/api/search/branched": {
@@ -121,7 +129,11 @@
     "llm_strongs_glosses",
     "strongs_keyness",
     "lxx_bridge",
-    "related_langs"
+    "related_langs",
+    "clear_alignments",
+    "lexeme_alignments",
+    "strongs_freq",
+    "topic_strongs"
    ]
   },
   "/api/ask/branched": {
@@ -161,7 +173,11 @@
     "strongs_keyness",
     "lxx_bridge",
     "related_langs",
-    "llm_answer"
+    "llm_answer",
+    "clear_alignments",
+    "lexeme_alignments",
+    "strongs_freq",
+    "topic_strongs"
    ]
   },
   "/api/study": {
@@ -203,7 +219,11 @@
     "llm_strongs_glosses",
     "strongs_keyness",
     "lxx_bridge",
-    "related_langs"
+    "related_langs",
+    "clear_alignments",
+    "lexeme_alignments",
+    "strongs_freq",
+    "topic_strongs"
    ]
   },
   "/api/trees": {
@@ -330,7 +350,11 @@
     "strongs_keyness",
     "lxx_bridge",
     "related_langs",
-    "english_concordance_bsb"
+    "english_concordance_bsb",
+    "clear_alignments",
+    "lexeme_alignments",
+    "strongs_freq",
+    "topic_strongs"
    ]
   },
   "/api/licenses": {

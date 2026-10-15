@@ -21,8 +21,9 @@ To re-derive the chunks (e.g. when BibleProject publishes new content):
     python ingest/_tools/bibleproject/step1_extract.py      # PDF → metadata JSON
     python ingest/_tools/bibleproject/step2_chunk.py        # metadata → chunks JSON
 
-License: BibleProject content is generally CC BY-SA on transcripts;
-verify per-asset before redistributing the derived index publicly.
+License: not open. BibleProject's Terms of Use allow personal, non-commercial use only
+and forbid scraping and derivative works (see resources/licenses/sources.json,
+bibleproject_transcripts).
 """
 from __future__ import annotations
 
