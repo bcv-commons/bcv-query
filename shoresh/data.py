@@ -972,6 +972,31 @@ def tw_articles(strong: str) -> dict:
 
 # ---------- S1: speaker / red-letter index ----------
 
+SPEAKER_SOURCE = {
+    "name": "MACULA Quotation and Speaker Data",
+    "attribution": "MACULA Quotation and Speaker Data, © 2023 by Clear Bible, Inc, available at "
+                   "https://github.com/Clear-Bible/speaker-quotations/",
+    "license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "includes": "FCBH character data via SIL Glyssen (MIT)",
+    "method": "quotation spans projected from quotation marks in aligned English translations onto the Hebrew/Greek "
+              "words (Clear's consensus projection); speakers from FCBH character data",
+    "granularity": "word span (MACULA word ids word_start/word_end); verse range in English numbering; "
+                   "start_partial/end_partial: the span covers only part of its first/last verse (MACULA verse)",
+}
+
+
+def _yn(v: str) -> bool | None:
+    """'Y' → True, 'N' → False, '' (not known) → None."""
+    return {"Y": True, "N": False}.get(v)
+
+
+def _span(r: dict) -> dict:
+    return {"start": decode(r["start"]), "end": decode(r["end"]),
+            "start_bbcccvvv": r["start"], "end_bbcccvvv": r["end"],
+            "word_start": r["word_start"], "word_end": r["word_end"],
+            "start_partial": r["start_partial"], "end_partial": r["end_partial"]}
+
 @lru_cache(maxsize=1)
 def _speakers() -> list[dict]:
     """All quotation ranges: [{speaker, alt_speaker, start, end, quote_type,
@@ -989,11 +1014,16 @@ def _speakers() -> list[dict]:
                 cols = {c: i for i, c in enumerate(parts)}
                 continue
             try:
+                opt = lambda c: parts[cols[c]] if c in cols and len(parts) > cols[c] else ""  # noqa: E731
                 out.append({
                     "speaker": parts[cols["speaker"]],
                     "alt_speaker": parts[cols["alt_speaker"]],
                     "start": int(parts[cols["start_bbcccvvv"]]),
                     "end": int(parts[cols["end_bbcccvvv"]]),
+                    "word_start": opt("word_start") or None,
+                    "word_end": opt("word_end") or None,
+                    "start_partial": _yn(opt("start_partial")),
+                    "end_partial": _yn(opt("end_partial")),
                     "quote_type": parts[cols["quote_type"]],
                     "delivery": parts[cols["delivery"]],
                     "divine": parts[cols["divine"]] == "Y",
@@ -1019,12 +1049,8 @@ def speaker_ranges(name: str, *, limit: int = 1000) -> dict:
         "speaker": name,
         "count": len(ranges),
         "divine": bool(ranges) and ranges[0]["divine"],
-        "ranges": [
-            {"start": decode(r["start"]), "end": decode(r["end"]),
-             "start_bbcccvvv": r["start"], "end_bbcccvvv": r["end"],
-             "quote_type": r["quote_type"]}
-            for r in ranges[:limit]
-        ],
+        "ranges": [{**_span(r), "quote_type": r["quote_type"]} for r in ranges[:limit]],
+        "source": SPEAKER_SOURCE,
     }
 
 
@@ -1034,11 +1060,15 @@ def speakers_at(book: str, chapter: int, vrs: int) -> dict:
     try:
         ref = encode(book, chapter, vrs)
     except (ValueError, KeyError):
-        return {"book": book, "chapter": chapter, "verse": vrs, "speakers": []}
-    hits = [{"speaker": r["speaker"], "divine": r["divine"],
-             "start_bbcccvvv": r["start"], "end_bbcccvvv": r["end"]}
-            for r in _speakers() if r["start"] <= ref <= r["end"]]
-    return {"book": book.upper(), "chapter": chapter, "verse": vrs, "speakers": hits}
+        return {"book": book, "chapter": chapter, "verse": vrs, "speakers": [], "source": SPEAKER_SOURCE}
+    hits = []
+    for r in _speakers():
+        if r["start"] <= ref <= r["end"]:
+            # `partial`: the quotation covers only part of this verse (True), all of it (False), or not known (None).
+            ends = [p for at, p in ((r["start"], r["start_partial"]), (r["end"], r["end_partial"])) if at == ref]
+            partial = (True if True in ends else None if None in ends else False) if ends else False
+            hits.append({"speaker": r["speaker"], "divine": r["divine"], "partial": partial, **_span(r)})
+    return {"book": book.upper(), "chapter": chapter, "verse": vrs, "speakers": hits, "source": SPEAKER_SOURCE}
 
 
 def speakers_list() -> dict:
@@ -1049,7 +1079,7 @@ def speakers_list() -> dict:
                                              "divine": r["divine"], "count": 0})
         c["count"] += 1
     ordered = sorted(counts.values(), key=lambda c: -c["count"])
-    return {"count": len(ordered), "speakers": ordered}
+    return {"count": len(ordered), "speakers": ordered, "source": SPEAKER_SOURCE}
 
 
 def databases_status() -> dict:

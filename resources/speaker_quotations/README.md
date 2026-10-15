@@ -8,26 +8,34 @@ Powers speaker-scoped retrieval — "what did **Jesus** say about X" (red-letter
 with the passage scheme the index already uses (`passage_refs`, BBCCCVVV).
 
 ## File
-`speaker_quotations.tsv` — one row per (speaker, verse-range) quotation span.
+`speaker_quotations.tsv` — one row per quotation span (one word span of the source).
 
 ## Schema
 | column | meaning |
 |---|---|
 | `speaker` | FCBH character (e.g. `God`, `Jesus`, `Moses`, `Paul`) |
 | `alt_speaker` | secondary speaker when ambiguous (often empty) |
-| `start_bbcccvvv` / `end_bbcccvvv` | the quotation's verse range, BBCCCVVV (= `passage_refs` scheme) |
+| `start_bbcccvvv` / `end_bbcccvvv` | the verses of the quoted words, BBCCCVVV in English numbering (= `passage_refs` scheme) |
+| `word_start` / `word_end` | first and last quoted word, MACULA word ids (`o…` Hebrew/Aramaic, `n…` Greek) |
+| `start_partial` / `end_partial` | `Y` if the span covers only part of its first / last verse (e.g. "And God said" before the quote), `N` if the whole verse, empty if not known |
 | `quote_type` | FCBH quote type (`Normal`, …) |
 | `delivery` | FCBH delivery (often empty) |
 | `divine` | `Y` if the speaker is divine (God / Jesus / Holy Spirit) — the **red-letter** flag |
 
-Sorted by `start_bbcccvvv`, then `speaker`. **5,938 ranges, 959 speakers, 2,173
-divine.** Top speakers: God, Jesus, Moses, David, Jeremiah.
+Sorted by `start_bbcccvvv`, then `word_start`, then `speaker`. **7,305 spans, 959 speakers, 2,913 divine;
+5,807 spans cover only part of their first or last verse.** Top speakers: God, Jesus, Moses, David, Jeremiah.
 
 ## Anchor & granularity
-Verse-range (the projection's `START VS`/`END VS` → BBCCCVVV). Robust and
-join-ready — no dependence on aligning the source's MACULA word ids to our spine
-word indices. The source's word-level spans (`CLEAR START`/`END`) are a possible
-future refinement for word-precise red-lettering.
+Word span: the source's `CLEAR START`/`CLEAR END` (MACULA word ids). Its verses are mapped from MACULA's numbering
+(Hebrew numbering in the OT) to English with bibles' `org-to-eng` map (via `shoresh/vrsmap.py`); a Psalm title counts
+as verse 1. `start_partial`/`end_partial` compare the span with its verse's first and last word in shoresh's MACULA
+word table (on the MACULA verse). 25 NT rows without word ids keep the FCBH quote block's verse range.
+
+Served by shoresh at `/speakers`, `/speaker/{name}` and `/speakers/at/{book}/{chapter}/{verse}` (each hit with
+`partial` for the asked verse), each response with a `source` block (attribution, licence, method).
+
+**Method caveat:** the spans come from quotation marks in aligned English translations, projected onto the
+Hebrew/Greek words. They are not derived from the original-language text itself.
 
 ## Source / license
 Built from **[Clear-Bible/speaker-quotations](https://github.com/Clear-Bible/speaker-quotations)**
@@ -37,3 +45,6 @@ Built from **[Clear-Bible/speaker-quotations](https://github.com/Clear-Bible/spe
 
 > MACULA Quotation and Speaker Data, © 2023 by Clear Bible, Inc — **CC-BY-4.0** —
 > https://github.com/Clear-Bible/speaker-quotations/
+
+It includes FCBH character data from SIL Glyssen (MIT). The source's `sources.md` states that every input was
+CC BY or CC BY-SA at the time of use.

@@ -549,8 +549,8 @@ def get_speakers() -> dict:
 
 @app.get("/speaker/{name}")
 def get_speaker(name: str, limit: int = 1000) -> dict:
-    """Every verse range a speaker speaks — "what did Jesus say". `divine` marks
-    red-letter speakers (God / Jesus / Holy Spirit)."""
+    """Every quotation span a speaker speaks — "what did Jesus say": verse range, word span (MACULA word ids) and
+    whether it covers its first/last verse only in part. `divine` marks red-letter speakers (God / Jesus / Holy Spirit)."""
     result = data.speaker_ranges(name, limit=min(limit, 5000))
     if not result["ranges"]:
         raise HTTPException(404, f"no quotations found for speaker '{name}'")
@@ -559,7 +559,8 @@ def get_speaker(name: str, limit: int = 1000) -> dict:
 
 @app.get("/speakers/at/{book}/{chapter}/{verse}")
 def get_speakers_at(book: str, chapter: int, verse: int) -> dict:
-    """Who speaks at a verse — the speaker(s) whose quotation covers it."""
+    """Who speaks at a verse — the speaker(s) whose quotation covers it. Each hit has its word span (MACULA word
+    ids) and `partial`: True when the quotation covers only part of the verse (e.g. "And God said" before it)."""
     return data.speakers_at(book, chapter, verse)
 
 
