@@ -8,7 +8,8 @@ SOURCE (2026-06-26): the per-occurrence **`greekstrong`** column of MACULA Hebre
 (`Clear-Bible/macula-hebrew`, WLC TSV). This is a *curated* Hebrew→Greek alignment
 and is dramatically cleaner than the positional `/bridge` computation it replaces
 (e.g. H2617 chesed → G1656 eleos ×142, no G2962/Lord or G4160/do noise). CC BY 4.0
-(Biblica) + UBS MARBLE attribution. No shoresh dependency anymore.
+(Biblica): MACULA lists the Greek equivalents and their Strong's numbers among Clear's own datasets; the UBS
+permission in MACULA covers only the SDBH columns, which this bridge does not read. No shoresh dependency anymore.
 
 Output TSV columns: hebrew_strong<TAB>greek_strong<TAB>count
 (zero-padded codes, e.g. H0430 / G1656; top GREEK_PER_HEBREW greek per hebrew,

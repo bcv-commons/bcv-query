@@ -498,7 +498,7 @@ class PassageStrategy(CardStrategy):
         il = verse_interlinear(code, ch, v, _gloss_lang(lang), num["scheme"])   # localized per-word sense
         if not il:
             return None
-        # BHSA/Context-Fabric syntax is addressed in Hebrew numbering: use the verse shoresh actually served
+        # The MACULA Hebrew syntax trees are addressed in Hebrew numbering: use the verse shoresh actually served
         scode, sch, sv = code, ch, v
         served = ((il.get("versification") or {}).get("hebrew") or [])
         if il["lang"] == "hbo" and served:

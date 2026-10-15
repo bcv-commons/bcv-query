@@ -48,6 +48,7 @@ RAW = "https://raw.githubusercontent.com/Clear-Bible/speaker-quotations/main/tsv
 PROJECTIONS = "Clear-Aligned-Projections.tsv"
 CHARACTERS = "character_detail.semantic_data.tsv"
 OUT = resource_path("speaker_quotations") / "speaker_quotations.tsv"
+CORRECTIONS = resource_path("speaker_quotations") / "corrections.tsv"
 MACULA_DB = ROOT / "shoresh" / "macula" / "macula-spine.db"
 _ID = re.compile(r"^[on]\d{11,12}$")
 _BOOK_BY_NUM = {i: b for i, b in enumerate(OT_BOOKS + NT_BOOKS, 1)}  # MACULA numbers books 1-66
@@ -216,6 +217,14 @@ def _macula_words() -> dict[str, tuple[str, str]]:
         con.close()
 
 
+def _corrections() -> dict[str, str]:
+    """{word_start: speaker} from corrections.tsv (hand corrections where the text settles who speaks)."""
+    if not CORRECTIONS.exists():
+        return {}
+    lines = [l for l in CORRECTIONS.read_text(encoding="utf-8").splitlines() if l and not l.startswith("#")]
+    return {p[0]: p[1] for p in (l.split("\t") for l in lines[1:]) if len(p) >= 2}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -231,6 +240,7 @@ def main() -> int:
     characters = _character_verses(_load(CHARACTER_VERSE, args.data_dir, GLYSSEN_RAW))
     extents = _verse_extents()
     words = _macula_words()
+    corrections = _corrections()
 
     header = proj[0].split("\t")
     col = {h: i for i, h in enumerate(header)}
@@ -277,6 +287,8 @@ def main() -> int:
             b0, c0, v0 = eng[0] if eng else a[:3]
             ref_name = _referent_name(p[col["SPEAKER REFERENT (CLEAR)"]], w0, words)
             speaker, basis = _who(block, ref_name, characters.get((b0, c0, max(v0, 1)), []))
+            if w0 in corrections:
+                speaker, basis = corrections[w0], "correction"
         else:
             basis = "block"
         divine = "Y" if divinity.get(speaker) else ""
@@ -284,7 +296,11 @@ def main() -> int:
                      p[col["QUOTE TYPE"]].strip(), p[col["QUOTE DELIVERY"]].strip(), divine))
 
     rows = sorted(set(rows), key=lambda r: (r[0], r[2], r[6]))
-    basis_n = {b: sum(1 for r in rows if r[8] == b) for b in ("referent", "character")}
+    basis_n = {b: sum(1 for r in rows if r[8] == b) for b in ("referent", "character", "correction")}
+    unused = set(corrections) - {r[2] for r in rows if r[8] == "correction"}
+    if unused:
+        print(f"corrections.tsv: no span starts at {sorted(unused)}", file=sys.stderr)
+        return 3
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", encoding="utf-8") as fh:
@@ -304,7 +320,8 @@ def main() -> int:
     print(f"  wrote {len(rows)} quotation spans, {len(speakers)} distinct speakers "
           f"({divine_n} divine-speaker spans, {part_n} covering part of a verse, "
           f"{by_block} without word ids; speaker from Clear's referent {basis_n['referent']}, "
-          f"character for a casting voice {basis_n['character']}), {skipped} skipped → {OUT}")
+          f"character for a casting voice {basis_n['character']}, corrections {basis_n['correction']}), "
+          f"{skipped} skipped → {OUT}")
     return 0
 
 

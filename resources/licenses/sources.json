@@ -180,7 +180,8 @@
    "license": "CC-BY-4.0",
    "license_url": "https://creativecommons.org/licenses/by/4.0/",
    "attribution": "MACULA Hebrew, Biblica / Clear Bible (CC BY 4.0)",
-   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/lxx_bridge.tsv"
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/lxx_bridge.tsv",
+   "note": "MACULA lists the Greek equivalents (greek, greekstrong) among Clear's own CC BY 4.0 datasets; the UBS permission in MACULA covers only the SDBH columns."
   },
   "lxx_orphan_lexemes": {
    "name": "Septuagint-only Greek lexemes (from GLAUx)",

@@ -57,7 +57,7 @@ def shoresh_get(path: str, params: dict | None = None, timeout: float = 4.0) -> 
 
 
 def _compact_words(words: list[dict]) -> list[dict]:
-    # Keep `lemma` (BHSA lex, present for Hebrew; "" for Greek): it distinguishes the
+    # Keep `lemma` (the MACULA lexeme for Hebrew; "" for Greek): it distinguishes the
     # homographs a shared Strong's number conflates, and is the key into per-stem glosses.
     return [
         {"surface": w["surface"], "strong": w.get("strong", ""),
@@ -123,8 +123,7 @@ def verse_malbim(book: str, ch: int, v: int) -> dict | None:
 
 def verse_syntax(book: str, ch: int, v: int) -> dict | None:
     """The verse's clause→phrase syntax tree (who-did-what) via shoresh /structure/…/syntax, or None.
-    Hebrew (BHSA) + Greek (Nestle1904). Best-effort; the Context-Fabric graph is loaded lazily so the
-    first call may miss."""
+    Hebrew (MACULA Hebrew, WLC) + Greek (MACULA Greek, Nestle1904). Best-effort."""
     if not SHORESH_URL:
         return None
     try:

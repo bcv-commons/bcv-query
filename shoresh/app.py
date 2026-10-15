@@ -811,7 +811,7 @@ def get_scaffold(book: str, chapter: int, gloss_lang: str | None = None) -> dict
 
 @app.get("/structure/{book}/{chapter}/{verse}/word/{idx}")
 def get_word_structure(book: str, chapter: int, verse: int, idx: int) -> dict:
-    """Clause/phrase/sentence hierarchy for one word, from bcv-corpus (private)."""
+    """Clause/phrase/sentence hierarchy for one word, from the MACULA syntax trees."""
     result = corpus.context(book, chapter, verse, word_index=idx)
     if "error" in result:
         raise HTTPException(503 if "CORPUS_URL" in result["error"] else 404,

@@ -936,7 +936,7 @@ def _verse_commentary(args: dict, db: sqlite3.Connection) -> dict:
     name="verse_syntax",
     description=(
         "Clause→phrase syntax tree for a verse (who-did-what): clauses with type/relation, "
-        "phrases with grammatical function and their words. Hebrew (BHSA) / Greek (Nestle1904). $0."
+        "phrases with grammatical function and their words. Hebrew (MACULA Hebrew, WLC) / Greek (MACULA Greek, Nestle1904). $0."
     ),
     input_schema={
         "type": "object",
@@ -953,14 +953,14 @@ def _verse_syntax(args: dict, db: sqlite3.Connection) -> dict:
 @register_tool(
     name="lexeme_profile",
     description=(
-        "Profile of a BHSA/Nestle1904 lexeme (the granular original anchor): stems × senses × "
+        "Profile of a Hebrew MACULA lexeme (the granular original anchor): stems × senses × "
         "counts × sample references × gloss. Deeper than a Strong's number (Strong's conflates "
-        "homographs). $0. Localized via `lang`."
+        "homographs). Hebrew only. $0. Localized via `lang`."
     ),
     input_schema={
         "type": "object",
         "properties": {
-            "lex": {"type": "string", "description": "BHSA lex (Hebrew, e.g. 'QDC[') or Nestle1904 lemma (Greek)."},
+            "lex": {"type": "string", "description": "MACULA Hebrew lexeme id (e.g. 'hbo:6942', homographs 'hbo:0871a') or a Hebrew Strong's code (H6942)."},
             "lang": {"type": "string", "default": "en"},
         },
         "required": ["lex"],

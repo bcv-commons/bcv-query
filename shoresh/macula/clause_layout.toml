@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.22"
+version = "0.23"
 
 [profile]
 name = "default"
@@ -256,6 +256,10 @@ strong = [
 doc = """The object marker: "אֹתִי" ("me") as the verb's object (features.lead_me)."""
 strong = ["853"]                         # אֵת
 
+[words.every]
+doc = """"All, every": a participle with the article right after it is the head a law is about ("וְכָל־הַנֹּגֵעַ", rule participle_head_steps_in)."""
+strong = ["3605"]                        # כֹּל
+
 [words.hand]
 doc = """The hand of the formula "וְיַד־יְהוָה הָיְתָה אֵלַי", "וַתִּפֹּל עָלַי שָׁם יַד אֲדֹנָי יְהוִה" (rule hand_of_the_lord_resumes)."""
 strong = ["3027"]                        # יָד
@@ -358,9 +362,13 @@ relative_law_head)."""
 lemmas = ["אוֹ"]
 
 [words.chain_end]
-doc = """Openers that end a "therefore" chain (rule therefore_chain_ends): "הוֹי". In BHSA's links in the Latter Prophets a verse
-opened by הוֹי ends the chain of the לָכֵן before it 4 times out of 4 (bsb-add-books)."""
+doc = """Openers that end a "therefore" chain (rule therefore_chain_ends): "הוֹי", and the phrase "בַּיּוֹם הַהוּא" (Strong's numbers in
+order, the article left out). In BHSA's links in the Latter Prophets a verse opened by הוֹי ends the chain of the לָכֵן before it 4 times
+out of 4 (bsb-add-books). "בַּיּוֹם הַהוּא" (v0.23): a new oracle "in that day"; over the whole OT it brings the chapters closer to
+BHSA's (mean gap per chapter 0.3639 → 0.3625, law view 0.3099 → 0.3086, by book 0.2073 → 0.2020; Zeph 3 1.70 → 1.17 against 0.94,
+Zeph 3:11)."""
 lemmas = ["הוֹי"]
+phrases = [["871", "3117", "1931"]]      # בְּ יוֹם (הַ) הוּא
 
 [words.lawgiver]
 doc = """The one through whom the law was given, named in the third person in a closing formula (rule closing_formula_is_narrator)."""
@@ -749,6 +757,12 @@ doc = """The clause's first word after וְ, as the lemmas of all its parts (ב�
 [features.plain_embedded]
 doc = """An embedded clause with no opener (conjunction, relative, preposition), no infinitive, and a participle or no verb (Deut 28:25
 "נִגָּף לִפְנֵי אֹיְבֶיךָ"): predicative participles, elliptic halves."""
+[features.art_participle]
+doc = """The clause opens with a participle with the article ("הַמַּקְרִיב", "הַנֹּגֵעַ"): a participle phrase that names someone."""
+[features.every_lead]
+doc = """The run of conjunctions and words.every a clause opens with, when it holds words.every: (its last token, the next token)."""
+[features.first_key]
+doc = "The key of the clause's first token."
 [features.frame_be]
 doc = "A bare \"וְהָיָה\": a weqatal of words.be with nothing but וְ (the frame of a fronted condition or time)."
 [features.bare_np]
@@ -916,6 +930,15 @@ opening (purpose, temporal, causal, conditional, complement), or embedded. A pla
 discourse_rule embedded_flat and stands next to its parent in the flat view (depth.flat_rules). One exception: rule
 word_quote_hangs_on_main."""
 
+[rules.participle_head_steps_in]
+scope = "all"
+doc = """A participle phrase with the article that is the head its clause is about steps one level in, instead of standing flat next
+to the clause (features.plain_embedded, rule embedded_keeps_macula_parent): when it comes before its clause ("הַמַּקְרִיב אֶת־זֶבַח
+שְׁלָמָיו לַיהוָה יָבִיא אֶת־קָרְבָּנוֹ", Lev 7:29, 7:33) or right after the clause's opening "every" ("וְכָל־הַנֹּגֵעַ בְּכֹל … יִטְמָא",
+Lev 15:10; words.every). BHSA puts these one level in (bsb-add-books, v0.22). A participle after a noun ("הַכֹּהֵן הַמְחַטֵּא",
+Lev 6:19) describes the noun and stays flat."""
+examples = ["Lev 7:29 \"הַמַּקְרִיב אֶת־זֶבַח שְׁלָמָיו\"", "Lev 15:10 \"וְכָל־הַנֹּגֵעַ בְּכֹל\"", "Lev 11:24", "Jer 21:9 \"הַיֹּשֵׁב בָּעִיר הַזֹּאת\""]
+
 [rules.word_quote_hangs_on_main]
 scope = "all"
 doc = """"The word which X spoke, saying …": a לֵאמֹר under a relative clause of speaking whose antecedent is a word (words.word) hangs on
@@ -1049,12 +1072,13 @@ examples = ["Ps 45:4 after \"עַל־כֵּן בֵּרַכְךָ אֱלֹהִי�
 
 [rules.therefore_chain_ends]
 scope = "all"
-doc = """A verse opened by "הוֹי" (words.chain_end) or by a new messenger formula ("כֹּה אָמַר" without "לָכֵן") ends the "therefore"
+doc = """A verse opened by "הוֹי" or "בַּיּוֹם הַהוּא" (words.chain_end) or by a new messenger formula ("כֹּה אָמַר" without "לָכֵן") ends the "therefore"
 chain it stands in: it goes back to the line the nearest "therefore" clause above it hangs on. In BHSA's links in the Latter Prophets
 הוֹי ends such a chain 4 times out of 4, and a new "כֹּה אָמַר" ends it 18 times, stands level with the לָכֵן clause 14 times and stays
-deeper 13 times out of 45 (bsb-add-books). Weaker openers (an imperative, a vocative, "בַּיּוֹם הַהוּא", "הִנֵּה") don't end it here."""
+deeper 13 times out of 45 (bsb-add-books). Weaker openers (an imperative, a vocative, "הִנֵּה") don't end it here; "בַּיּוֹם הַהוּא"
+does since v0.23 (words.chain_end: Zeph 3:11)."""
 examples = ["Amos 5:18 \"הוֹי הַמִּתְאַוִּים\" after 5:16 \"לָכֵן כֹּה־אָמַר\"", "Amos 3:12 \"כֹּה אָמַר יְהוָה\" after 3:11 \"לָכֵן כֹּה אָמַר\"",
-            "Isa 5:18", "Isa 29:15"]
+            "Isa 5:18", "Isa 29:15", "Zeph 3:11 \"בַּיּוֹם הַהוּא\" after 3:8 \"לָכֵן\""]
 
 [rules.named_quotation_in_poem_ends_with_verse]
 scope = "poems"
@@ -1409,6 +1433,25 @@ to Leviticus, whose laws are long: in Deuteronomy's short laws the apodosis ofte
 22:22), and the rule was neutral for the steps over the law chapters (bsb-add-books, v0.14)."""
 examples = ["Lev 26:3 \"אִם־בְּחֻקֹּתַי תֵּלֵכוּ וְאֶת־מִצְוֺתַי תִּשְׁמְרוּ וַעֲשִׂיתֶם אֹתָם\" … 26:4 \"וְנָתַתִּי\""]
 
+[rules.case_after_series_stands_level]
+scope = "law"
+doc = """A case opened by "כִּי" / "וְכִי" with a finite verb at the start of its verse, right after a series of law heads (the verse
+before goes back, by level links, to a noun phrase with a relative clause, "וְכָל־הַמֶּרְכָּב אֲשֶׁר … יִטְמָא", rule relative_law_head),
+stands level with the series, and its apodosis with it: in the flat view the protasis adds no level under its apodosis, in the law
+view it takes no step. A verbless "כִּי" clause is a reason, not a case (Lev 17:11 "כִּי נֶפֶשׁ הַבָּשָׂר בַּדָּם הִוא"), and is left out. Lev 15:13 "וְכִי־יִטְהַר הַזָּב מִזּוֹבוֹ" after
+15:9–12, one level too deep before (bsb-add-books, v0.22)."""
+examples = ["Lev 15:13 \"וְכִי־יִטְהַר הַזָּב מִזּוֹבוֹ\" level with 15:12 \"וּכְלִי־חֶרֶשׂ\"", "Lev 5:3 after 5:2", "Lev 22:29", "Num 9:14"]
+
+[rules.new_law_closes_protasis]
+scope = "law"
+doc = """A new law's head is never the apodosis of the case before it. When a protasis is still open (rule protasis_continued) and
+the next verse opens with a law's head (a fronted noun phrase, a law-head word, or a subject that comes first), the case's apodosis
+is in its own verse: its first weqatal clause after the protasis that names a subject of its own (Lev 25:25 "וּמָכַר מֵאֲחֻזָּתוֹ" goes on
+with the case, "וּבָא גֹאֲלוֹ" is the apodosis), else its first weqatal; it continues the law from the clause before the protasis;
+the clauses after it go on in the apodosis. Lev 15:24 "וְאִם שָׁכֹב יִשְׁכַּב … וּתְהִי נִדָּתָהּ עָלָיו" — "וְטָמֵא שִׁבְעַת יָמִים" is the apodosis,
+not 15:25 "וְאִשָּׁה" (bsb-add-books, v0.22). Without a weqatal in the verse the protasis keeps its old behaviour."""
+examples = ["Lev 15:24 \"וְטָמֵא שִׁבְעַת יָמִים\" apodosis of \"וְאִם שָׁכֹב יִשְׁכַּב\"", "Lev 15:8 \"וְכִבֶּס\"", "Lev 23:29 \"וְנִכְרְתָה\"", "Lev 25:25 \"וּבָא גֹאֲלוֹ\"", "Lev 27:27 \"וּפָדָה\""]
+
 [rules.then_clause_is_apodosis]
 scope = "all"
 doc = """A fronted protasis followed within a few verses by a main clause opened by an apodosis marker ("אָז", "then") waits for that
@@ -1469,6 +1512,13 @@ scope = "poetic"
 doc = """In poetry and prophecy a וְ-clause right after a subordinate clause in the same verse (no main clause between) continues it:
 continuation for a wayyiqtol or weqatal, else coordination."""
 examples = ["Prov 8:7 \"וְתוֹעֲבַת שְׂפָתַי רֶשַׁע\" on \"כִּי־אֱמֶת יֶהְגֶּה חִכִּי\""]
+
+[rules.be_goes_on_from_case]
+scope = "law"
+doc = """In law, a bare "וְהָיָה" right after a case that hangs back on the clause before it, in the same verse, goes on from that case
+(continuation), as its apodosis: Lev 27:33 "וְאִם־הָמֵר יְמִירֶנּוּ וְהָיָה־הוּא וּתְמוּרָתוֹ יִהְיֶה־קֹּדֶשׁ" stays on the case's level, as in
+BHSA and in v0.21 (bsb-add-books, v0.22: it had moved up one level)."""
+examples = ["Lev 27:33 \"וְהָיָה\" after \"וְאִם־הָמֵר יְמִירֶנּוּ\""]
 
 # ---- main clauses
 

@@ -74,3 +74,10 @@ def test_group_speaker_with_slash_is_reachable():
         r = client.get(f"/speaker/{name}")
         assert r.status_code == 200 and r.json()["count"] > 0, name
     assert client.get("/speaker/priests%2FLevites").status_code == 200
+
+
+def test_hand_correction_gen_16_8():
+    # The angel's question to Hagar (2nd person feminine) was under the source's Hagar block; corrections.tsv fixes it.
+    hits = {h["word_start"]: h for h in _hits("GEN", 16, 8)}
+    assert (hits["o010160080021"]["speaker"], hits["o010160080021"]["speaker_basis"]) == ("Yahweh's angel", "correction")
+    assert hits["o010160080111"]["speaker"] == "Hagar, Sarai's maid"

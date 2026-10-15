@@ -20,10 +20,9 @@ offline-resumable.
 
 Upstream license
 ----------------
-github.com/robertrouse/theographic-bible-metadata. Verify the upstream
-LICENSE file before redistributing the derived index. As of writing,
-content is generally available under permissive terms but the project
-README is the source of truth.
+github.com/robertrouse/theographic-bible-metadata, CC BY-SA 4.0 (the repository's
+licence, checked 2026-10-15). The derived index tables stay CC BY-SA 4.0; credit
+Robert Rouse, Theographic Bible Metadata.
 
 Output
 ------

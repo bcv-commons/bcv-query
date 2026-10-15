@@ -1,0 +1,4 @@
+# Hand corrections to the speaker of single quotations, applied by bcv-RAG/scripts/build_speaker_quotations.py
+# (speaker_basis = correction). Only where the Hebrew/Greek text itself settles who speaks; the reason says how.
+word_start	speaker	reason
+o010160080021	Yahweh's angel	GEN 16:8 "הָגָר שִׁפְחַת שָׂרַי אֵי־מִזֶּה בָאת וְאָנָה תֵלֵכִי" addresses Hagar by name in the 2nd person feminine; the source's block names Hagar

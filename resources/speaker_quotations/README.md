@@ -22,7 +22,7 @@ with the passage scheme the index already uses (`passage_refs`, BBCCCVVV).
 | `delivery` | FCBH delivery (often empty) |
 | `divine` | `Y` if the speaker is divine (God / Jesus / Holy Spirit) — the **red-letter** flag |
 | `block_speaker` | FCBH's speaker for the whole quote block (the source's `SPEAKER (FCBH)`) |
-| `speaker_basis` | how `speaker` was chosen: `block` (= `block_speaker`), `referent`, or `character` (see below) |
+| `speaker_basis` | how `speaker` was chosen: `block` (= `block_speaker`), `referent`, `character` or `correction` (see below) |
 
 Sorted by `start_bbcccvvv`, then `word_start`, then `speaker`. **7,305 spans, 965 speakers, 2,945 divine;
 5,807 spans cover only part of their first or last verse; 217 speakers from the referent, 39 from the character.**
@@ -36,8 +36,8 @@ angel's; 1 Sam 3:6 Samuel's answer was God's). Each span now gets its own speake
   there the referent is often the person addressed (Jer 15:20, 20:10).
 - `character`: the block speaker is only FCBH's casting voice for one character in the verse (Glyssen's default character),
   e.g. `Jesus` for `Yahweh's angel` (17 spans; the angel is not flagged divine) or `Good Priest` for `expert in religious law`.
-- Known left-over: where the source's block itself names the wrong side and the referent is a common noun (Gen 16:8, the
-  angel's question under Hagar), the block speaker stays. Top speakers: God, Jesus, Moses, David, Jeremiah.
+- `correction`: a hand correction from `corrections.tsv`, only where the Hebrew/Greek text itself settles who speaks; each
+  row gives its reason (1 so far: Gen 16:8, the angel's question to Hagar, which the source's block gave to Hagar). Top speakers: God, Jesus, Moses, David, Jeremiah.
 
 ## Anchor & granularity
 Word span: the source's `CLEAR START`/`CLEAR END` (MACULA word ids). Its verses are mapped from MACULA's numbering

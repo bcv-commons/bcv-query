@@ -986,7 +986,8 @@ SPEAKER_SOURCE = {
     "speaker": "per quotation: block_speaker is FCBH's speaker for the whole quote block; speaker_basis 'referent' = "
                "the other party of a dialogue, named by Clear's speaker referent and listed as speaking in the verse by "
                "Glyssen CharacterVerse.txt; 'character' = Glyssen's character where FCBH gives a casting voice "
-               "(e.g. Yahweh's angel, voiced by Jesus); 'block' = FCBH's speaker",
+               "(e.g. Yahweh's angel, voiced by Jesus); 'correction' = a hand correction where the text settles who "
+               "speaks (resources/speaker_quotations/corrections.tsv); 'block' = FCBH's speaker",
     "also": [{"name": "Glyssen CharacterVerse.txt", "attribution": "Copyright (c) 2014-2020 SIL LSDev and Faith Comes By Hearing",
               "license": "MIT", "url": "https://github.com/sillsdev/Glyssen"}],
 }

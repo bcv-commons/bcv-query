@@ -74,9 +74,9 @@ here reuse shoresh's single existing book-name source rather than a second hardc
 one title differs from the original data-api's output.
 
 **`lexiconMeanings` is NOT sourced from SDBH/SDBG** (`sdbh.db`/`sdbg.db`), unlike the original
-data-api. It's built from `resources/senses/{grc,hbo_lex}.tsv` — the same UBS-derived sense/gloss
-data, already in-house, already correctly licensed and caveated, already used by `/senses` and
-`/lexeme` (see `data.lexicon_meanings_for_strongs`). Shape-compatible with the contract
+data-api. Hebrew meanings come from the MACULA lexemes and their per-stem senses (`lexeme_macula`, the
+same data as `/senses` and `/lexeme`); Greek meanings from `resources/senses/grc.tsv` (UBS open release,
+CC BY-SA 4.0). See `data.lexicon_meanings_for_strongs`. Shape-compatible with the contract
 (`lexId`/`lemma`/`grammar`/`definitionShort`/`comments`/`glosses`), but `lexId` is a locally-
 synthesized int (not SDBH's own numbering — we don't carry that identifier space), and
 `grammar`/`comments` are always null (not available at this granularity in our resources; Hebrew

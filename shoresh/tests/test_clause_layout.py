@@ -387,6 +387,40 @@ def test_v022_rules_at_their_places(tmp_path, monkeypatch):
     assert frame["discourse_parent"] is None and frame["text_depth_law"] == 0               # the narrative frame after a law
 
 
+def test_v023_rules_at_their_places(tmp_path, monkeypatch):
+    """v0.23: a case right after a series of heads stands level (Lev 15:13), a new law's head is no apodosis (Lev 15:24, 25:25),
+    participle heads step in (Lev 7:29, 15:10), "and it shall be" after a hanging case (Lev 27:33), "in that day" ends a therefore
+    chain (Zeph 3:11)."""
+    import json
+    from macula import build_clause_layout as b
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "LEV,ZEP", "--out", str(out)])
+    b.main()
+
+    def plain(text):                      # the consonants only
+        return "".join(c for c in text if not "\u0591" <= c <= "\u05c7")
+
+    def rows(book, ch, v):
+        rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
+        return [r for r in rs if r["verse"] == v]
+    case, before = rows("LEV", 15, 13)[0], rows("LEV", 15, 12)[-1]
+    assert case["relation"] == "conditional" and case["text_depth"] == before["text_depth"]
+    assert case["text_depth_law"] == before["text_depth_law"]
+    for ch, vv, word in ((15, 24, "וטמ"), (25, 25, "וב")):
+        rs = rows("LEV", ch, vv)
+        apo = next(r for r in rs if plain(r["text"]).startswith(word))
+        assert apo["discourse_rule"] == "new_law_closes_protasis", (ch, vv)
+        assert rs[0]["discourse_parent"] == apo["clause_key"] and rs[0]["text_depth"] == apo["text_depth"] + 1, (ch, vv)
+    head, main = rows("LEV", 7, 29)[2], rows("LEV", 7, 29)[3]
+    assert plain(head["text"]).startswith("המקר") and head["text_depth"] == main["text_depth"] + 1
+    every, ptc = rows("LEV", 15, 10)[:2]
+    assert plain(ptc["text"]).startswith("הנג") and ptc["text_depth"] == every["text_depth"] + 1
+    r33 = rows("LEV", 27, 33)
+    be = next(r for r in r33 if plain(r["text"]).startswith("והיה"))
+    assert be["discourse_parent"] == r33[2]["clause_key"] and be["text_depth"] == r33[2]["text_depth"]
+    assert rows("ZEP", 3, 11)[0]["text_depth"] < rows("ZEP", 3, 8)[0]["text_depth"]
+
+
 def test_release_packaging(tmp_path, monkeypatch):
     """The release packaging: version stamp per book matching build.json, the card filled in, checksums, and a reproducible archive."""
     import json
