@@ -61,3 +61,16 @@ def test_casting_voice_gives_way_to_the_character():
     # GEN 16:9: FCBH voices "Yahweh's angel" with Jesus; the speaker is the angel, the block speaker stays recorded.
     (h,) = _hits("GEN", 16, 9)
     assert (h["speaker"], h["block_speaker"], h["speaker_basis"]) == ("Yahweh's angel", "Jesus", "character")
+
+
+def test_group_speaker_with_slash_is_reachable():
+    # /speakers lists group speakers such as "priests/Levites"; /speaker/{name:path} takes the rest of the path as the name.
+    from fastapi.testclient import TestClient
+    import app as shoresh_app
+    names = [s["speaker"] for s in data.speakers_list()["speakers"] if "/" in s["speaker"]]
+    assert names
+    client = TestClient(shoresh_app.app)
+    for name in names:
+        r = client.get(f"/speaker/{name}")
+        assert r.status_code == 200 and r.json()["count"] > 0, name
+    assert client.get("/speaker/priests%2FLevites").status_code == 200

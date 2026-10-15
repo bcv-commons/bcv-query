@@ -18,6 +18,7 @@ from server.routes import concordance as concordance_route
 from server.routes import cross_references as xref_route
 from server.routes import entities as entities_route
 from server.routes import health as health_route
+from server.routes import licenses as licenses_route
 from server.routes import search as search_route
 from server.routes import topics as topics_route
 from server.routes import trees as trees_route
@@ -39,7 +40,13 @@ async def lifespan(app: FastAPI):
         yield
 
 
-app = FastAPI(title="bcv-query API", version="2.0.0", lifespan=lifespan)
+app = FastAPI(
+    title="bcv-query API", version="2.0.0", lifespan=lifespan,
+    description="**Licences:** the data comes from several open sources under different licences. `GET /api/licenses` lists "
+                "them with their attribution, and `GET /api/licenses?path=/api/search` (any route path) the ones a route draws "
+                "on. Every response carries a `Link: <…/api/licenses?path=…>; rel=\"license\"` header pointing there.",
+    license_info={"name": "MIT", "url": "https://opensource.org/license/mit"},
+)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -57,9 +64,13 @@ app.add_middleware(
 # streaming /mcp mount. Outermost (added last) → runs before routing.
 from server.gate import Gate  # noqa: E402
 app.add_middleware(Gate)
+# Licence pointer on every response, including the gate's own 401/429 replies (added after Gate → outermost).
+from server.licenses import LicenseLink  # noqa: E402
+app.add_middleware(LicenseLink)
 
 # REST surface
 app.include_router(health_route.router, prefix="/api")
+app.include_router(licenses_route.router, prefix="/api")
 app.include_router(chunks_route.router, prefix="/api")
 app.include_router(search_route.router, prefix="/api")
 app.include_router(ask_route.router, prefix="/api")
@@ -84,6 +95,7 @@ def root() -> dict:
         "endpoints": {
             "rest": [
                 "/api/health",
+                "/api/licenses?path=",
                 "/api/search",
                 "/api/ask",
                 "/api/study",
@@ -97,4 +109,5 @@ def root() -> dict:
             "mcp": "/mcp",
         },
         "docs": {"openapi": "/docs", "redoc": "/redoc"},
+        "licenses": "/api/licenses",
     }

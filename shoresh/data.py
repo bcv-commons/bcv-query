@@ -1723,7 +1723,7 @@ def _genre_context_map() -> dict:
 
 def genre_context(strong: str, limit: int = 12) -> dict:
     """Words sharing this Strong's per-book occurrence PROFILE (register/setting), not its meaning.
-    CC0 + data-derived from public-domain WLC occurrence counts (build_genre_context_pairs.py).
+    CC BY 4.0, derived from MACULA Hebrew occurrence counts (build_genre_context_pairs.py).
 
     This is NOT a synonym list — see /field for that. Two words can share a setting (e.g. both
     concentrated in Leviticus) without being remotely synonymous; conversely two genuine synonyms in

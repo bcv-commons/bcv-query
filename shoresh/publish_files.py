@@ -12,6 +12,13 @@ the BHSA-bearing spines (lexeme-spine.db and its baseline copy; BHSA is CC BY-NC
 
   cd shoresh && .venv/bin/python3 publish_files.py              # the default set below
   cd shoresh && .venv/bin/python3 publish_files.py macula/rp2018-spine.db
+
+A versioned set of other files (e.g. the source-structure cache built for bsb-add-books) is added with --set: every file
+named in <dir>/set.json is published as <set>-<file> (flat names: /files/{name} serves no paths), next to the files already
+in the manifest. A published name is never given new content: build a new version (v2, ...) instead.
+
+  cd shoresh && .venv/bin/python3 publish_files.py --set source-structure-v1 /path/to/dir
+  set.json: {"files": {"heb-open.sqlite.gz": {"license": "...", "source": "...", "description": "..."}, ...}}
 """
 from __future__ import annotations
 
@@ -66,10 +73,46 @@ def entry(path: Path) -> dict:
                         .isoformat(timespec="seconds")}
 
 
+def publish_set(name: str, folder: Path) -> int:
+    """Add the files of <folder>/set.json as <name>-<file> to the existing manifest (kept as it is otherwise)."""
+    spec = json.loads((folder / "set.json").read_text(encoding="utf-8"))["files"]
+    current = json.loads((STAGE / "manifest.json").read_text(encoding="utf-8"))
+    published = {f["name"]: f for f in current["files"]}
+    added = []
+    for file, meta in spec.items():
+        path = folder / file
+        if not path.exists():
+            sys.exit(f"missing: {path}")
+        if not meta.get("license"):
+            sys.exit(f"{file}: no licence in set.json")
+        e = {"name": f"{name}-{file}", "bytes": path.stat().st_size, "sha256": sha256(path), "license": meta["license"],
+             "source": meta.get("source", ""), "description": meta.get("description", ""), "set": name,
+             "modified": datetime.datetime.fromtimestamp(path.stat().st_mtime, datetime.timezone.utc)
+                         .isoformat(timespec="seconds")}
+        old = published.get(e["name"])
+        if old and old["sha256"] != e["sha256"]:
+            sys.exit(f"refusing {e['name']}: already published with other content; publish a new version instead")
+        published[e["name"]] = e
+        added.append((path, e))
+    manifest = {"updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+                "files": list(published.values())}
+    (STAGE / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    for path, e in added:
+        print(f"{e['name']:40s} {e['bytes'] / 1e6:7.1f} MB  {e['sha256'][:16]}…  {e['license'][:50]}", file=sys.stderr)
+    print(f"\nmanifest -> {STAGE / 'manifest.json'}\n\nship (files first, manifest last):", file=sys.stderr)
+    for path, e in added:
+        print(f"deploy/deploy-data.sh {path} {e['name']} {REMOTE_DIR}")
+    print(f"deploy/deploy-data.sh shoresh/{(STAGE / 'manifest.json').relative_to(HERE)} manifest.json {REMOTE_DIR}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("files", nargs="*", default=DEFAULT, help="paths relative to shoresh/")
+    ap.add_argument("--set", nargs=2, metavar=("NAME", "DIR"), help="add a versioned set of files (see above)")
     a = ap.parse_args()
+    if a.set:
+        return publish_set(a.set[0], Path(a.set[1]).resolve())
     paths = [HERE / f for f in a.files]
     for p in paths:
         if p.name in REFUSE:
@@ -83,8 +126,14 @@ def main() -> int:
     for f in files:
         if not f["license"]:
             sys.exit(f"{f['name']}: no licence in its spine_meta; add one before publishing")
+    names = {f["name"] for f in files}
+    try:                                  # keep the published sets (--set) when the spines are republished
+        kept = [f for f in json.loads((STAGE / "manifest.json").read_text(encoding="utf-8"))["files"]
+                if f.get("set") and f["name"] not in names]
+    except (OSError, ValueError, KeyError):
+        kept = []
     manifest = {"updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-                "files": files}
+                "files": files + kept}
     STAGE.mkdir(parents=True, exist_ok=True)
     (STAGE / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n",
                                          encoding="utf-8")

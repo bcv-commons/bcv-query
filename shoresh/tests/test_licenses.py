@@ -1,4 +1,4 @@
-"""Licence register (licenses.json, served at /licenses): every route of the app says which sources it serves, every source
+"""Licence register (resources/licenses/sources.json + shoresh/licenses.json, served at /licenses): every route of the app says which sources it serves, every source
 has a licence, and every response points to the register with a `Link: <...>; rel="license"` header.
   bcv-RAG/.venv/bin/python -m pytest shoresh/tests/test_licenses.py -q"""
 import sys

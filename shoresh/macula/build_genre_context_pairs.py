@@ -91,7 +91,7 @@ def main() -> int:
         fh.write("# Hebrew Strong's pairs with highly similar per-book occurrence profiles — a free\n"
                   "# approximation of SDBH's `ctx` (contextual/situational) domain axis, NOT the `core`\n"
                   "# (concept/synonymy) axis every other signal in this pipeline targets. Derived entirely\n"
-                  "# from MACULA occurrence counts. Validated 2026-08 at 45.6% SDBH ctx-agreement\n"
+                  "# from MACULA occurrence counts (CC BY 4.0; attribute MACULA Hebrew, Biblica / Clear Bible). Validated 2026-08 at 45.6% SDBH ctx-agreement\n"
                   "# vs. 13.81% random baseline. NOT wired into build_semantic_neighbors.py — see\n"
                   "# build_genre_context_pairs.py's docstring for why.\n")
         fh.write("strong_a\tstrong_b\tcosine\n")

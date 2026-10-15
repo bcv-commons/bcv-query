@@ -93,7 +93,7 @@ def build():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with (OUT_DIR / "parallels.tsv").open("w", encoding="utf-8") as fh:
         fh.write("# Synoptic Gospel parallels via shared content Greek Strong's (IDF-cosine); "
-                 "shoresh macula.build_synoptic. Cross-Gospel, symmetric-deduped.\n")
+                 "shoresh macula.build_synoptic. Cross-Gospel, symmetric-deduped. CC BY 4.0, from MACULA Greek (Clear Bible).\n")
         fh.write("ref_a\tref_b\tconfidence\tn_shared\tscore\tshared_strongs\n")
         for a, b, n, score, sh in rows:
             conf = "high" if score >= STRONG_SCORE else "med"

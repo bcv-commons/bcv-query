@@ -164,7 +164,7 @@ def root() -> dict:
             "/genre/{strong}",
             "/wordstudy/{strong}",
             "/speakers",
-            "/speaker/{name}",
+            "/speaker/{name}  (the rest of the path is the name: /speaker/priests/Levites)",
             "/speakers/at/{book}/{chapter}/{verse}",
             "/coref/{book}/{chapter}/{verse}/word/{idx}",
             "/frame/{book}/{chapter}/{verse}/word/{idx}",
@@ -588,7 +588,7 @@ def get_speakers() -> dict:
     return data.speakers_list()
 
 
-@app.get("/speaker/{name}")
+@app.get("/speaker/{name:path}")
 def get_speaker(name: str, limit: int = 1000) -> dict:
     """Every quotation span a speaker speaks — "what did Jesus say": verse range, word span (MACULA word ids) and
     whether it covers its first/last verse only in part. `divine` marks red-letter speakers (God / Jesus / Holy Spirit)."""
@@ -645,7 +645,7 @@ def get_field(strong: str, limit: int = 12) -> dict:
 @app.get("/genre/{strong}")
 def get_genre_context(strong: str, limit: int = 12) -> dict:
     """Words sharing a Strong's per-book occurrence PROFILE — register/setting (Priesthood, Warfare,
-    Sanctuary, ...), CC0 + data-derived from public-domain WLC occurrence counts. NOT a synonym list
+    Sanctuary, ...), CC BY 4.0, derived from MACULA Hebrew occurrence counts. NOT a synonym list
     (see /field for that) — two words can share a setting without meaning the same thing, and vice
     versa. Hebrew/OT only."""
     return data.genre_context(strong, limit=min(limit, 30))

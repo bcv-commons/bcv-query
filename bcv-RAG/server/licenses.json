@@ -1,0 +1,340 @@
+{
+ "routes": {
+  "/": {
+   "sources": [],
+   "note": "no Bible data"
+  },
+  "/api/health": {
+   "sources": [],
+   "note": "no Bible data"
+  },
+  "/api/chunk/{chunk_id}": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts"
+   ]
+  },
+  "/api/search": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "macula_hebrew",
+    "macula_greek",
+    "query_expansion_resources",
+    "llm_strongs_glosses",
+    "strongs_keyness",
+    "ubs_open_domains",
+    "lxx_bridge",
+    "related_langs"
+   ]
+  },
+  "/api/ask": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "naves_topical",
+    "theographic",
+    "tipnr",
+    "openbible_geocoding",
+    "macula_hebrew",
+    "macula_greek",
+    "hebrew_word_senses",
+    "uhb",
+    "ugnt",
+    "glaux_lxx",
+    "clause_vectors",
+    "stepbible_tbesh_tbesg",
+    "ubs_open_domains",
+    "ubs_open_relations",
+    "ubs_open_senses",
+    "semantic_groups",
+    "hebrew_settings",
+    "sefaria_malbim",
+    "sefaria_metzudat_zion",
+    "sefaria_mahberet_menahem",
+    "bibleol_glosses",
+    "aligned_glosses",
+    "speaker_quotations",
+    "bibles_vrs_maps",
+    "query_expansion_resources",
+    "llm_strongs_glosses",
+    "strongs_keyness",
+    "lxx_bridge",
+    "related_langs",
+    "llm_answer"
+   ]
+  },
+  "/api/search/branched": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "theographic",
+    "tipnr",
+    "openbible_geocoding",
+    "macula_hebrew",
+    "macula_greek",
+    "hebrew_word_senses",
+    "ugnt",
+    "glaux_lxx",
+    "stepbible_tbesh_tbesg",
+    "ubs_open_domains",
+    "ubs_open_relations",
+    "ubs_open_senses",
+    "semantic_groups",
+    "hebrew_settings",
+    "sefaria_malbim",
+    "sefaria_metzudat_zion",
+    "sefaria_mahberet_menahem",
+    "bibleol_glosses",
+    "aligned_glosses",
+    "speaker_quotations",
+    "bibles_vrs_maps",
+    "query_expansion_resources",
+    "llm_strongs_glosses",
+    "strongs_keyness",
+    "lxx_bridge",
+    "related_langs"
+   ]
+  },
+  "/api/ask/branched": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "theographic",
+    "tipnr",
+    "openbible_geocoding",
+    "macula_hebrew",
+    "macula_greek",
+    "hebrew_word_senses",
+    "ugnt",
+    "glaux_lxx",
+    "stepbible_tbesh_tbesg",
+    "ubs_open_domains",
+    "ubs_open_relations",
+    "ubs_open_senses",
+    "semantic_groups",
+    "hebrew_settings",
+    "sefaria_malbim",
+    "sefaria_metzudat_zion",
+    "sefaria_mahberet_menahem",
+    "bibleol_glosses",
+    "aligned_glosses",
+    "speaker_quotations",
+    "bibles_vrs_maps",
+    "query_expansion_resources",
+    "llm_strongs_glosses",
+    "strongs_keyness",
+    "lxx_bridge",
+    "related_langs",
+    "llm_answer"
+   ]
+  },
+  "/api/study": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "naves_topical",
+    "theographic",
+    "tipnr",
+    "openbible_geocoding",
+    "macula_hebrew",
+    "macula_greek",
+    "hebrew_word_senses",
+    "uhb",
+    "ugnt",
+    "glaux_lxx",
+    "clause_vectors",
+    "stepbible_tbesh_tbesg",
+    "ubs_open_domains",
+    "ubs_open_relations",
+    "ubs_open_senses",
+    "semantic_groups",
+    "hebrew_settings",
+    "sefaria_malbim",
+    "sefaria_metzudat_zion",
+    "sefaria_mahberet_menahem",
+    "bibleol_glosses",
+    "aligned_glosses",
+    "speaker_quotations",
+    "bibles_vrs_maps",
+    "query_expansion_resources",
+    "llm_strongs_glosses",
+    "strongs_keyness",
+    "lxx_bridge",
+    "related_langs"
+   ]
+  },
+  "/api/trees": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "naves_topical",
+    "theographic",
+    "tipnr",
+    "openbible_geocoding"
+   ]
+  },
+  "/api/tree/{tree_name}": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "naves_topical",
+    "theographic",
+    "tipnr",
+    "openbible_geocoding"
+   ]
+  },
+  "/api/tree/{tree_name}/{path:path}": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "naves_topical",
+    "theographic",
+    "tipnr",
+    "openbible_geocoding"
+   ]
+  },
+  "/api/topic/{topic_id}": {
+   "sources": [
+    "naves_topical"
+   ]
+  },
+  "/api/topics": {
+   "sources": [
+    "naves_topical"
+   ]
+  },
+  "/api/entity/{entity_id:path}": {
+   "sources": [
+    "theographic",
+    "tipnr",
+    "openbible_geocoding"
+   ]
+  },
+  "/api/entities": {
+   "sources": [
+    "theographic",
+    "tipnr",
+    "openbible_geocoding"
+   ]
+  },
+  "/api/cross-references/{bbcccvvv}": {
+   "sources": [
+    "bsb_index"
+   ]
+  },
+  "/api/concordance/{word}": {
+   "sources": [
+    "english_concordance_bsb"
+   ]
+  },
+  "/mcp": {
+   "sources": [
+    "unfoldingword_door43",
+    "unfoldingword_tw",
+    "aquifer",
+    "bsb_index",
+    "bible_editions",
+    "stepbible_tagged",
+    "stepbible_tflsj",
+    "bdb_abbott_smith",
+    "bibleproject_transcripts",
+    "naves_topical",
+    "theographic",
+    "tipnr",
+    "openbible_geocoding",
+    "kline_torah",
+    "macula_hebrew",
+    "macula_greek",
+    "hebrew_word_senses",
+    "uhb",
+    "ugnt",
+    "glaux_lxx",
+    "clause_vectors",
+    "stepbible_tbesh_tbesg",
+    "ubs_open_domains",
+    "ubs_open_relations",
+    "ubs_open_senses",
+    "semantic_groups",
+    "hebrew_settings",
+    "sefaria_malbim",
+    "sefaria_metzudat_zion",
+    "sefaria_mahberet_menahem",
+    "bibleol_glosses",
+    "aligned_glosses",
+    "speaker_quotations",
+    "bibles_vrs_maps",
+    "query_expansion_resources",
+    "llm_strongs_glosses",
+    "strongs_keyness",
+    "lxx_bridge",
+    "related_langs",
+    "english_concordance_bsb"
+   ]
+  },
+  "/api/licenses": {
+   "sources": []
+  }
+ }
+}

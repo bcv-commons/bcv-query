@@ -100,10 +100,10 @@ and normalized internally (see `bcv-RAG/lang.py`).
 | Source | Content | License |
 |---|---|---|
 | Door43 / unfoldingWord | ULT, UST, translationNotes/Questions/Words, Academy | CC BY-SA 4.0 |
-| BibleAquifer | Study notes + ACAI entity tags | per-repo |
-| BSB | Bible text, cross-references, section headings | CC BY-SA 4.0 |
+| BibleAquifer | Study notes + ACAI entity tags | CC BY-SA 4.0 per collection (Louis Segond 1910: CC0) |
+| BSB | Bible text, cross-references, section headings | CC BY 4.0 index file (OSHB morphology); BSB text CC0, TSK public domain |
 | STEPBible | Strong's, morphology (TAHOT / TAGNT) | CC BY 4.0 |
-| Theographic (viz.bible) | Entity graph (persons, places, events) | MIT |
+| Theographic (viz.bible) | Entity graph (persons, places, events) | CC BY-SA 4.0 |
 | Nave's Topical | Topical index | public domain |
 
 Source corpora and the built `index.db` are **re-derivable** and not committed;

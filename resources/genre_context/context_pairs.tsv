@@ -1,7 +1,7 @@
 # Hebrew Strong's pairs with highly similar per-book occurrence profiles — a free
 # approximation of SDBH's `ctx` (contextual/situational) domain axis, NOT the `core`
 # (concept/synonymy) axis every other signal in this pipeline targets. Derived entirely
-# from MACULA occurrence counts. Validated 2026-08 at 45.6% SDBH ctx-agreement
+# from MACULA occurrence counts (CC BY 4.0; attribute MACULA Hebrew, Biblica / Clear Bible). Validated 2026-08 at 45.6% SDBH ctx-agreement
 # vs. 13.81% random baseline. NOT wired into build_semantic_neighbors.py — see
 # build_genre_context_pairs.py's docstring for why.
 strong_a	strong_b	cosine

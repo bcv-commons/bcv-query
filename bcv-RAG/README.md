@@ -10,11 +10,14 @@ Retrieval-augmented Q&A over Bible translation resources.
 | Source | Content | License |
 |--------|---------|---------|
 | Door43/unfoldingWord | ULT, UST, TN, TQ, TWL, TW, TA | CC BY-SA 4.0 |
-| BibleAquifer | Study notes + ACAI entity tags | Per-repo |
-| BSB | Bible text, cross-refs, headings | CC BY-SA 4.0 |
+| BibleAquifer | Study notes, dictionary, translators notes, reference texts + ACAI entity tags | CC BY-SA 4.0 per collection (Louis Segond 1910: CC0) |
+| BSB | Bible text, TSK cross-refs, headings (BSB-publishing/bsb-data-output `base/index-cc-by/bible-index.jsonl`, `base/headings.jsonl`) | CC BY 4.0 for the index file (its OSHB morphology); BSB text CC0, TSK public domain |
 | STEPBible | Strong's, morphology (TAHOT/TAGNT) | CC BY 4.0 |
-| Theographic | Entity graph (persons, places, events) | MIT |
+| Theographic | Entity graph (persons, places, events) | CC BY-SA 4.0 |
 | Nave's Topical | Topical index | Public domain |
+
+The full list, with attribution and the sources of each route, is served at `GET /api/licenses`
+(`resources/licenses/sources.json`).
 
 ## Interfaces
 

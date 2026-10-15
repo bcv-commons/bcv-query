@@ -4,7 +4,7 @@ Ports `example/aleph/data-api`'s full `API_CONTRACT.md` into shoresh (Python/Fas
 same portable SQLite files — no `better-sqlite3`/Node dependency). Three pinned sources:
 **globalbibletools/data** (CC0-1.0) for per-occurrence words/glosses; a small pinned text-file fetch
 from **globalbibletools/study-app** for Strong's-code→root-word lookup; **BSB-publishing/bsb-data-output**
-(CC0/CC-BY-4.0) for English translation text + headings. Lexicon meanings do NOT come from an
+(CC0: we use `base/display/` and `base/headings.jsonl`, not the CC BY `index-cc-by/` morphology) for English translation text + headings. Lexicon meanings do NOT come from an
 externally-fetched `.db` — see the deviation note below.
 
 ## What this is, concretely

@@ -1,0 +1,386 @@
+{
+ "about": "Each route lists the data sources its responses draw on. Reuse of the data is governed by each source's licence: keep its attribution, and keep share-alike (CC BY-SA) material under the same licence. \"unknown\" means no licence statement has been found yet.",
+ "code_license": {
+  "name": "MIT",
+  "url": "https://opensource.org/license/mit",
+  "note": "The service code; the data it serves is under the licences of its sources."
+ },
+ "sources": {
+  "aligned_glosses": {
+   "name": "Aligned glosses (most frequent translation rendering per language)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/aligned_glosses"
+  },
+  "aquifer": {
+   "name": "BibleAquifer: study notes, Bible dictionary, translators notes, translation guide, reference Bible texts",
+   "license": "CC-BY-SA-4.0 (Louis Segond 1910: CC0)",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "Aquifer Open Study Notes and Aquifer Open Bible Dictionary © Mission Mutual; Open Translator's Notes © SIL International; Biblica Study Notes and Hindi Contemporary Version © Biblica, Inc.; Fia © Word Collective; PSLE © MVH Solutions; Gateway Texts (Hindi) © unfoldingWord; Aquifer reference texts © Mission Mutual",
+   "url": "https://github.com/BibleAquifer",
+   "note": "Licence and holder per collection from each repository's metadata.json (license_info), checked 2026-10-15."
+  },
+  "bdb_abbott_smith": {
+   "name": "Brown-Driver-Briggs (1906) and Abbott-Smith (1922) lexicons",
+   "license": "Public Domain",
+   "url": "https://github.com/eliranwong/unabridged-BDB-Hebrew-lexicon",
+   "attribution": "Digital editions: eliranwong/unabridged-BDB-Hebrew-lexicon; translatable-exegetical-tools/Abbott-Smith"
+  },
+  "berean_rp2018": {
+   "name": "Robinson-Pierpont 2018 Byzantine Textform (Berean Bible group)",
+   "license": "LicenseRef-PublicDomain",
+   "url": "https://majoritybible.com"
+  },
+  "bible_editions": {
+   "name": "Bible editions in the search index",
+   "license": "per edition",
+   "attribution": "See each edition's licence: BSB CC-BY/CC0; RV09 PD; AVD PD; SYN PD; IRV CC-BY-SA; OHCB CC-BY-SA; LSG PD; JFA PD; IRV CC-BY-SA; IRV CC-BY-SA; LSG PD; ALM PD; IRV CC-BY-SA; IRV CC-BY-SA",
+   "url": "https://github.com/bcv-commons/bcv-query/blob/main/resources/bible_editions.json"
+  },
+  "bibleol_glosses": {
+   "name": "BibleOL lexeme glosses",
+   "license": "MIT",
+   "license_url": "https://opensource.org/license/mit",
+   "attribution": "© 2015 Ezer IT Consulting",
+   "url": "https://github.com/EzerIT/BibleOL"
+  },
+  "bibleproject_transcripts": {
+   "name": "BibleProject video transcripts",
+   "license": "unknown",
+   "url": "https://bibleproject.com",
+   "note": "No licence statement recorded for the transcripts; BibleProject content is copyrighted by BibleProject."
+  },
+  "bibles_vrs_maps": {
+   "name": "bcv-commons/bibles versification maps",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "url": "https://cdn.bibel.wiki/_vrs/"
+  },
+  "bsb_index": {
+   "name": "Berean Standard Bible index (verses, Strong's, TSK cross-references, parallel-passage headings)",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Hebrew morphology data from Open Scriptures Hebrew Bible (OSHB), CC BY 4.0; BSB text CC0; Treasury of Scripture Knowledge public domain",
+   "url": "https://github.com/BSB-publishing/bsb-data-output",
+   "note": "From base/index-cc-by/bible-index.jsonl: the file is CC BY 4.0 because of its OSHB morphology; the BSB text and the TSK cross-references in it are public domain."
+  },
+  "bsb_text": {
+   "name": "Berean Standard Bible text and headings (base/display, headings)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/BSB-publishing/bsb-data-output"
+  },
+  "byztxt_tr": {
+   "name": "Textus Receptus (Robinson) with Strong's and parsing",
+   "license": "LicenseRef-PublicDomain",
+   "url": "https://github.com/byztxt/greektext-textus-receptus"
+  },
+  "clause_vectors": {
+   "name": "Clause embeddings for /search (MACULA clauses)",
+   "license": "CC-BY-4.0",
+   "attribution": "Built by bcv-commons from MACULA Hebrew and Greek clauses (CC BY 4.0) with the BEREL 3.0 and SPhilBerta models (Apache-2.0)",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "compact_alignments": {
+   "name": "bcv-commons/compact-alignments (_index numbering)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://huggingface.co/datasets/bcv-commons/compact-alignments"
+  },
+  "english_concordance_bsb": {
+   "name": "BSB English concordance",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://bereanbible.com"
+  },
+  "full_alignments_manual": {
+   "name": "bcv-commons/full-alignments-manual (BSB Translation Tables layer)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://huggingface.co/datasets/bcv-commons/full-alignments-manual"
+  },
+  "gbt_data": {
+   "name": "Global Bible Tools data (words and contextual glosses)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/globalbibletools/data"
+  },
+  "gbt_study_app_strongs": {
+   "name": "Global Bible Tools study-app Strong's root words",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/globalbibletools/study-app"
+  },
+  "genre_context": {
+   "name": "Genre context pairs (per-book occurrence profiles)",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/genre_context",
+   "attribution": "Built by bcv-commons from MACULA Hebrew occurrence counts (MACULA Hebrew: Biblica / Clear Bible, CC BY 4.0)"
+  },
+  "glaux_lxx": {
+   "name": "GLAUx Septuagint",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "Alek Keersmaekers, KU Leuven (GLAUx); Septuagint texts from el.wikisource (CC BY-SA 3.0); Genesis annotation Pedalion Trees (CC BY-SA 4.0)",
+   "url": "https://github.com/alekkeersmaekers/glaux"
+  },
+  "glyssen_character_verse": {
+   "name": "Glyssen CharacterVerse.txt",
+   "license": "MIT",
+   "license_url": "https://opensource.org/license/mit",
+   "attribution": "Copyright (c) 2014-2020 SIL LSDev and Faith Comes By Hearing",
+   "url": "https://github.com/sillsdev/Glyssen"
+  },
+  "hebrew_clause_layout": {
+   "name": "bcv-commons/hebrew-clause-layout",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "bcv-commons hebrew-clause-layout (built from MACULA Hebrew, CC BY 4.0, and UHB, CC BY-SA 4.0)",
+   "url": "https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout"
+  },
+  "hebrew_settings": {
+   "name": "Hebrew topical settings",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "derived from MACULA Hebrew (Clear Bible, CC BY 4.0) and the Open Scriptures Hebrew Bible paragraph marks (CC BY 4.0)",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/settings"
+  },
+  "hebrew_word_senses": {
+   "name": "bcv-commons/hebrew-word-senses",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "url": "https://huggingface.co/datasets/bcv-commons/hebrew-word-senses"
+  },
+  "kline_torah": {
+   "name": "Moshe Kline, Woven Torah literary units",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Moshe Kline, \"Before Chapter and Verse: Reading the Woven Torah\" (2022)",
+   "url": "https://chaver.com"
+  },
+  "llm_answer": {
+   "name": "Answer generated by an LLM at request time",
+   "license": "n/a",
+   "attribution": "Generated per request from the retrieved passages; it may paraphrase CC BY-SA material, so treat the answer as CC BY-SA 4.0."
+  },
+  "llm_query_translation": {
+   "name": "Query translation by an LLM at request time",
+   "license": "n/a",
+   "attribution": "Generated at request time from the query (translate=llm); not stored data."
+  },
+  "llm_strongs_glosses": {
+   "name": "LLM-generated Strong's glosses",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/llm_strongs_glosses"
+  },
+  "lxx_bridge": {
+   "name": "Hebrew-Greek Strong's bridge (from MACULA Hebrew greekstrong)",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "MACULA Hebrew, Biblica / Clear Bible (CC BY 4.0)",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/lxx_bridge.tsv"
+  },
+  "lxx_orphan_lexemes": {
+   "name": "Septuagint-only Greek lexemes (from GLAUx)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "GLAUx, Alek Keersmaekers, KU Leuven; el.wikisource",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/lxx_orphan_lexemes"
+  },
+  "macula_greek": {
+   "name": "MACULA Greek",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Clear Bible (Nestle 1904 text: public domain)",
+   "url": "https://github.com/Clear-Bible/macula-greek"
+  },
+  "macula_hebrew": {
+   "name": "MACULA Hebrew",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Biblica, Inc. / Clear Bible; Westminster Hebrew Syntax © Groves Center (CC BY 4.0); OpenScriptures Hebrew Bible morphology (CC BY 4.0); Westminster Leningrad Codex text (public domain)",
+   "url": "https://github.com/Clear-Bible/macula-hebrew"
+  },
+  "naves_topical": {
+   "name": "Nave's Topical Bible",
+   "license": "Public Domain",
+   "url": "https://www.ccel.org/ccel/nave/bible.xml"
+  },
+  "openbible_geocoding": {
+   "name": "OpenBible.info Bible geocoding",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "OpenBible.info",
+   "url": "https://www.openbible.info/geo/"
+  },
+  "ot_nt_quotations": {
+   "name": "OT quotations in the NT (via the Septuagint)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/ot_nt_quotations"
+  },
+  "query_expansion_resources": {
+   "name": "Query-expansion tables (glosses, frequencies, aligned lexemes, proper nouns, multiword expressions, stopwords)",
+   "license": "mixed",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources",
+   "note": "Used to steer retrieval; not returned verbatim. Each table records its own source and licence in resources/."
+  },
+  "related_langs": {
+   "name": "Language registry (Glottolog, ISO 639-3, CLDR)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "Glottolog (CC BY-SA); ISO 639-3 (SIL); CLDR (Unicode licence)",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/related_langs"
+  },
+  "sefaria_mahberet_menahem": {
+   "name": "Mahberet Menahem sense divisions",
+   "license": "LicenseRef-PublicDomain",
+   "attribution": "London 1854 edition, via Sefaria (anchoring CC0)",
+   "url": "https://www.sefaria.org"
+  },
+  "sefaria_malbim": {
+   "name": "Malbim (Beur HaMilot; commentary), via Sefaria",
+   "license": "Public Domain (some rows: edition licence unknown)",
+   "url": "https://www.sefaria.org",
+   "note": "Malbim (d. 1879) wrote the text, so the work is in the public domain. Each row's `license` field is Sefaria's label for the digital edition: 'Public Domain' for most; 'unknown' for the 'On Your Way - new' edition (Beur HaMilot on Psalms, the commentary on 1 Samuel and part of Isaiah), a transcription from the same source (mobile.tora.ws) as the 'On Your Way' editions Sefaria labels Public Domain."
+  },
+  "sefaria_metzudat_zion": {
+   "name": "Metzudat Zion word explanations",
+   "license": "LicenseRef-PublicDomain",
+   "attribution": "'On Your Way' edition, via Sefaria (anchoring CC0)",
+   "url": "https://www.sefaria.org"
+  },
+  "semantic_groups": {
+   "name": "Hebrew semantic groups",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/semantic_groups"
+  },
+  "semantic_neighbors": {
+   "name": "Semantic neighbours (synonyms and antonyms)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/semantic_neighbors"
+  },
+  "speaker_quotations": {
+   "name": "MACULA Quotation and Speaker Data",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "MACULA Quotation and Speaker Data, © 2023 by Clear Bible, Inc, available at https://github.com/Clear-Bible/speaker-quotations/",
+   "url": "https://github.com/Clear-Bible/speaker-quotations/",
+   "note": "Includes FCBH character data via SIL Glyssen (MIT); the per-quotation speaker also reads Glyssen CharacterVerse.txt."
+  },
+  "stepbible_tagged": {
+   "name": "STEPBible TAHOT/TAGNT tagged Hebrew and Greek",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Tyndale House, STEPBible.org",
+   "url": "https://github.com/STEPBible/STEPBible-Data"
+  },
+  "stepbible_tbesh_tbesg": {
+   "name": "STEPBible Translators Brief lexicons (TBESH, TBESG)",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Tyndale House, STEPBible.org",
+   "url": "https://github.com/STEPBible/STEPBible-Data"
+  },
+  "stepbible_tflsj": {
+   "name": "STEPBible TFLSJ Greek lexicon",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Tyndale House, STEPBible.org",
+   "url": "https://github.com/STEPBible/STEPBible-Data"
+  },
+  "strongs_keyness": {
+   "name": "Strong's keyness (biblical salience score)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/strongs_keyness.tsv"
+  },
+  "synoptic_parallels": {
+   "name": "Gospel parallels (shared Greek words)",
+   "license": "CC-BY-4.0",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/synoptic_parallels",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Built by bcv-commons from MACULA Greek (Clear Bible, CC BY 4.0)"
+  },
+  "theographic": {
+   "name": "Theographic Bible metadata (persons, places, events)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "Robert Rouse, Theographic Bible Metadata",
+   "url": "https://github.com/robertrouse/theographic-bible-metadata"
+  },
+  "tipnr": {
+   "name": "STEPBible TIPNR proper names",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Tyndale House, STEPBible.org",
+   "url": "https://github.com/STEPBible/STEPBible-Data"
+  },
+  "tvtms_versification": {
+   "name": "STEPBible TVTMS versification",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Tyndale House, STEPBible.org (TVTMS)",
+   "url": "https://github.com/STEPBible/STEPBible-Data"
+  },
+  "ubs_open_domain_labels": {
+   "name": "Semantic domain labels in other languages (from the UBS open release)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/semantic_domains"
+  },
+  "ubs_open_domains": {
+   "name": "UBS open release: semantic domains",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "© United Bible Societies 2023",
+   "url": "https://github.com/ubsicap/ubs-open-license (@33dcc8c)"
+  },
+  "ubs_open_relations": {
+   "name": "UBS open release: synonym and antonym links",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "UBS Dictionary of Biblical Hebrew / UBS Dictionary of the Greek New Testament, © United Bible Societies 2023",
+   "url": "https://github.com/ubsicap/ubs-open-license (@33dcc8c67151)"
+  },
+  "ubs_open_senses": {
+   "name": "UBS open release: senses per Strong's number",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "UBS Dictionary of Biblical Hebrew / UBS Dictionary of the Greek New Testament, © United Bible Societies 2023",
+   "url": "https://github.com/ubsicap/ubs-open-license (@33dcc8c)"
+  },
+  "ugnt": {
+   "name": "unfoldingWord Greek New Testament (UGNT)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "unfoldingWord®",
+   "url": "https://git.door43.org/unfoldingWord/el-x-koine_ugnt"
+  },
+  "uhb": {
+   "name": "unfoldingWord Hebrew Bible (UHB)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "unfoldingWord®",
+   "url": "https://git.door43.org/unfoldingWord/hbo_uhb"
+  },
+  "unfoldingword_door43": {
+   "name": "unfoldingWord ULT, UST, Translation Notes, Questions and Academy",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "unfoldingWord® (Door43)",
+   "url": "https://git.door43.org/unfoldingWord"
+  },
+  "unfoldingword_tw": {
+   "name": "unfoldingWord Translation Words",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "unfoldingWord® (Door43)",
+   "url": "https://git.door43.org/unfoldingWord/en_tw"
+  }
+ }
+}

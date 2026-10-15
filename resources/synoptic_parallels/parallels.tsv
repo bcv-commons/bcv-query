@@ -1,4 +1,4 @@
-# Synoptic Gospel parallels via shared content Greek Strong's (IDF-cosine); shoresh macula.build_synoptic. Cross-Gospel, symmetric-deduped.
+# Synoptic Gospel parallels via shared content Greek Strong's (IDF-cosine); shoresh macula.build_synoptic. Cross-Gospel, symmetric-deduped. CC BY 4.0, from MACULA Greek (Clear Bible).
 ref_a	ref_b	confidence	n_shared	score	shared_strongs
 MAT 1:1	LUK 20:41	med	3	0.443	G1138,5207,5547
 MAT 1:1	MRK 12:35	med	4	0.337	G1138,2424,5207,5547

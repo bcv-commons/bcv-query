@@ -29,6 +29,20 @@ DEST_ARG="${3:-}"                     # optional: override the remote dir (e.g. 
 
 [ -f "$SRC" ] || { echo "no such file: $SRC" >&2; exit 2; }
 
+# Non-commercial data must not reach the server (resources/LICENSES.md). Refuse a SQLite file that still holds a
+# BHSA-derived table (e.g. the old clause_dependencies in a locally rebuilt index.db); drop it locally first.
+case "$SRC" in
+  *.db)
+    NC_TABLES="$(python3 - "$SRC" <<'PY'
+import re, sqlite3, sys
+con = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True)
+names = [n for (n,) in con.execute("SELECT name FROM sqlite_master WHERE type IN ('table', 'view')")]
+print(" ".join(n for n in names if re.search(r"bhsa|etcbc|clause_dependencies|catss|openhebrewbible", n, re.I)))
+PY
+)"
+    [ -z "$NC_TABLES" ] || { echo "refusing $SRC: BHSA/NC tables present ($NC_TABLES); drop them first" >&2; exit 3; } ;;
+esac
+
 CFG="${DEPLOY_ENV:-$REPO/deploy/deploy.local.env}"      # DEPLOY_ENV=<file> overrides (testing another target)
 [ -f "$CFG" ] || { echo "missing $CFG — copy deploy/deploy.local.env.example and edit it" >&2; exit 2; }
 # shellcheck disable=SC1090

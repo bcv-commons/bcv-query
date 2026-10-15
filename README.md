@@ -153,13 +153,14 @@ Issues, ideas, and pull requests are welcome.
 
 ## License
 
-Code: **MIT.** Content and data retain their source licenses — Door43/unfoldingWord
+Code: **MIT** (`LICENSE`). Content and data retain their source licenses — Door43/unfoldingWord
 CC BY-SA 4.0, STEPBible CC BY 4.0, MACULA CC BY 4.0, GLAUx CC BY-SA 4.0, and others per source (each
 `resources/` subfolder and data table records its own `source` / `license`).
 Since 2026-10-10 the deployed service reads no non-commercial data (the earlier BHSA / ETCBC, Open Hebrew Bible and CATSS sources remain only in the git history under their
 own terms). Attribute, and keep share-alike-derived data under a compatible license (`shoresh/spine/ATTRIBUTION.md`, `resources/LICENSES.md`).
 
-**For API clients:** shoresh serves the register at `GET /licenses` (every source with its licence and required
-attribution, and the sources of each route); `GET /licenses?path=/speakers/at/GEN/1/3` gives those of one route. Every
-shoresh response carries `Link: <…/licenses?path=…>; rel="license"`. The register is `shoresh/licenses.json`; a test
-fails when a route has no entry.
+**For API clients:** shoresh serves the register at `GET /licenses`, bcv-rag at `GET /api/licenses`: every source
+with its licence and required attribution, and the sources of each route (`?path=/speakers/at/GEN/1/3` for one route).
+Every response of both carries `Link: <…licenses?path=…>; rel="license"`. The sources are in
+`resources/licenses/sources.json`, the routes in `shoresh/licenses.json` and `bcv-RAG/server/licenses.json`; a test fails
+when a route has no entry.

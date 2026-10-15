@@ -1,21 +1,29 @@
 """Licence register: where each route's data comes from and under which licence (served at /licenses).
 
-The facts live in licenses.json next to this file (sources with licence and attribution, routes -> source ids, the code's
-licence); this module only reads and matches them. tests/test_licenses.py fails when a route has no entry, so a new
+The facts are data: the sources with licence and attribution, and the code's licence, in resources/licenses/sources.json
+(shared with bcv-rag); this service's routes -> source ids in licenses.json next to this file. This module only reads and
+matches them. tests/test_licenses.py fails when a route has no entry, so a new
 endpoint cannot ship without saying what it serves."""
 from __future__ import annotations
 
 import json
+import os
 import re
 from functools import lru_cache
 from pathlib import Path
 
-REGISTER = Path(__file__).resolve().parent / "licenses.json"
+HERE = Path(__file__).resolve().parent
+ROUTES = HERE / "licenses.json"
+
+
+def _sources_path() -> Path:
+    env = os.environ.get("BCV_RESOURCES_DIR")
+    return (Path(env) if env else HERE.parent / "resources") / "licenses" / "sources.json"
 
 
 @lru_cache(maxsize=1)
 def _load() -> dict:
-    return json.loads(REGISTER.read_text(encoding="utf-8"))
+    return {**json.loads(_sources_path().read_text(encoding="utf-8")), **json.loads(ROUTES.read_text(encoding="utf-8"))}
 
 
 def code_license_info() -> dict:
@@ -27,12 +35,16 @@ def code_license_info() -> dict:
 def register() -> dict:
     """The whole register."""
     r = _load()
-    return {"about": r["about"], "code_license": r["code_license"], "sources": r["sources"], "routes": r["routes"]}
+    used = {s for e in r["routes"].values() for s in e["sources"]}
+    return {"about": r["about"], "code_license": r["code_license"],
+            "sources": {k: v for k, v in r["sources"].items() if k in used}, "routes": r["routes"]}
 
 
 def _matches(template: str, path: str) -> bool:
-    pattern = "^" + re.sub(r"\\\{[^/]+?\\\}", "[^/]+", re.escape(template)) + "$"
-    return re.match(pattern, path) is not None
+    """`/lexeme/{lex:path}` style template against a URL path (a `:path` parameter spans slashes)."""
+    pattern = re.sub(r"\\\{[^/]+?:path\\\}", ".+", re.escape(template))
+    pattern = re.sub(r"\\\{[^/]+?\\\}", "[^/]+", pattern)
+    return re.match(f"^{pattern}$", path) is not None
 
 
 def for_path(path: str, templates: list[str]) -> dict | None:
