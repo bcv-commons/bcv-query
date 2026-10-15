@@ -12,6 +12,10 @@ language word stores (lxx.db + spine.db):
   GET /scaffold/{book}/{ch}         original-language tokens of a chapter, keyed for alignment joins
   GET /search?q=&lang=hbo           clause-level original-language semantic search
   GET /words?language=&pos=&...     filtered corpus word sampler (vocab-trainer feed)
+  GET /licenses?path=               where the data of each route comes from, and its licence
+
+Every response carries `Link: <.../licenses?path=<route>>; rel="license"` (RFC 8288 link, the registered "license"
+relation), pointing to the sources and licences of the route that answered.
 
 The service is reachable from the open internet (Caddy → uvicorn): CORS is open
 for the read-only word data, and every route carries a per-IP rate limit
@@ -23,6 +27,7 @@ from __future__ import annotations
 import logging
 import math
 import os
+from urllib.parse import quote
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -33,6 +38,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 import corpus
 import data
+import licenses
 import vrsmap
 from interlinear import normalization
 from interlinear import serve as interlinear
@@ -68,9 +74,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="shoresh",
-    description="Original-language anchoring service (Hebrew/Greek structure).",
+    description="Original-language anchoring service (Hebrew/Greek structure).\n\n"
+                "**Licences:** the data comes from several open sources under different licences. `GET /licenses` lists "
+                "them with their attribution, and `GET /licenses?path=/speakers` (any route path) the ones a route draws on. "
+                "Every response carries a `Link: <…/licenses?path=…>; rel=\"license\"` header pointing there.",
     version="0.2.0",
     lifespan=lifespan,
+    license_info=licenses.code_license_info(),
 )
 
 # Per-IP rate limiting (blanket default from ratelimit.py) — shoresh is public.
@@ -91,6 +101,37 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def license_link(request: Request, call_next):
+    """Point every response at the sources and licences of the route that answered (RFC 8288 `rel="license"`)."""
+    response = await call_next(request)
+    route = request.scope.get("route")
+    path = getattr(route, "path", None)
+    if path:
+        response.headers.append("Link", f'<{_public_base(request)}/licenses?path={quote(path, safe="/")}>; rel="license"')
+    return response
+
+
+def _public_base(request: Request) -> str:
+    """The service's base URL as the client saw it (behind Caddy the app sees http on the Docker network)."""
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc
+    return f"{proto}://{host}"
+
+
+@app.get("/licenses")
+def get_licenses(path: str | None = None) -> dict:
+    """Where the data comes from and under which licence: every source with its licence and required attribution, and for
+    each route the sources it draws on. `path` (a route as listed here, e.g. /speakers/at/{book}/{chapter}/{verse}, or a
+    concrete URL path like /speakers/at/GEN/1/3) narrows it to that route."""
+    if path is None:
+        return licenses.register()
+    out = licenses.for_path(path, [r.path for r in app.routes])
+    if out is None:
+        raise HTTPException(404, f"no route matches '{path}'")
+    return out
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "service": "shoresh"}
@@ -101,10 +142,12 @@ def root() -> dict:
     return {
         "service": "shoresh",
         "purpose": "anchor biblical study on original-language structure (not BCV)",
+        "licenses": "/licenses",
         "corpus_url_configured": bool(CORPUS_URL),
         "data": data.databases_status(),
         "search": {lang: store.count for lang, store in SEARCH.items()},
         "endpoints": [
+            "/licenses?path=",
             "/verse/{book}/{chapter}/{verse}",
             "/word/{strong}",
             "/gloss/{word}",
@@ -202,9 +245,7 @@ def list_files(request: Request) -> dict:
     # is built as the client saw it (behind Caddy the app sees http on the Docker network).
     base = (os.environ.get("SHORESH_FILES_BASE") or "").rstrip("/")
     if not base:
-        proto = request.headers.get("x-forwarded-proto") or request.url.scheme
-        host = request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc
-        base = f"{proto}://{host}"
+        base = _public_base(request)
     return {"updated": m.get("updated"),
             "files": [{**f, "url": f"{base}/files/{f['name']}"} for f in m.get("files", [])]}
 

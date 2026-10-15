@@ -1,0 +1,570 @@
+{
+ "about": "Each route lists the data sources its responses draw on. Reuse of the data is governed by each source's licence: keep its attribution, and keep share-alike (CC BY-SA) material under the same licence. \"unknown\" means no licence statement has been found yet.",
+ "code_license": {
+  "name": "MIT",
+  "url": "https://opensource.org/license/mit",
+  "note": "The service code; the data it serves is under the licences of its sources."
+ },
+ "sources": {
+  "aligned_glosses": {
+   "name": "Aligned glosses (most frequent translation rendering per language)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/aligned_glosses"
+  },
+  "berean_rp2018": {
+   "name": "Robinson-Pierpont 2018 Byzantine Textform (Berean Bible group)",
+   "license": "LicenseRef-PublicDomain",
+   "url": "https://majoritybible.com"
+  },
+  "bibleol_glosses": {
+   "name": "BibleOL lexeme glosses",
+   "license": "MIT",
+   "license_url": "https://opensource.org/license/mit",
+   "attribution": "© 2015 Ezer IT Consulting",
+   "url": "https://github.com/EzerIT/BibleOL"
+  },
+  "bibles_vrs_maps": {
+   "name": "bcv-commons/bibles versification maps",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "url": "https://cdn.bibel.wiki/_vrs/"
+  },
+  "bsb_text": {
+   "name": "Berean Standard Bible text and headings",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/BSB-publishing/bsb-data-output"
+  },
+  "byztxt_tr": {
+   "name": "Textus Receptus (Robinson) with Strong's and parsing",
+   "license": "LicenseRef-PublicDomain",
+   "url": "https://github.com/byztxt/greektext-textus-receptus"
+  },
+  "clause_vectors": {
+   "name": "Clause embeddings for /search (MACULA clauses)",
+   "license": "unknown",
+   "note": "Embeddings of MACULA clauses (MACULA: CC BY 4.0); the licence of the vector store is not yet declared.",
+   "attribution": "Built by bcv-commons from MACULA Hebrew and Greek clauses (CC BY 4.0)"
+  },
+  "gbt_data": {
+   "name": "Global Bible Tools data (words and contextual glosses)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/globalbibletools/data"
+  },
+  "gbt_study_app_strongs": {
+   "name": "Global Bible Tools study-app Strong's root words",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/globalbibletools/study-app"
+  },
+  "genre_context": {
+   "name": "Genre context pairs (per-book occurrence profiles)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/genre_context"
+  },
+  "glaux_lxx": {
+   "name": "GLAUx Septuagint",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "Alek Keersmaekers, KU Leuven (GLAUx); Septuagint texts from el.wikisource (CC BY-SA 3.0); Genesis annotation Pedalion Trees (CC BY-SA 4.0)",
+   "url": "https://github.com/alekkeersmaekers/glaux"
+  },
+  "glyssen_character_verse": {
+   "name": "Glyssen CharacterVerse.txt",
+   "license": "MIT",
+   "license_url": "https://opensource.org/license/mit",
+   "attribution": "Copyright (c) 2014-2020 SIL LSDev and Faith Comes By Hearing",
+   "url": "https://github.com/sillsdev/Glyssen"
+  },
+  "hebrew_settings": {
+   "name": "Hebrew topical settings",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "derived from MACULA Hebrew (Clear Bible, CC BY 4.0) and the Open Scriptures Hebrew Bible paragraph marks (CC BY 4.0)",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/settings"
+  },
+  "hebrew_word_senses": {
+   "name": "bcv-commons/hebrew-word-senses",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "url": "https://huggingface.co/datasets/bcv-commons/hebrew-word-senses"
+  },
+  "llm_query_translation": {
+   "name": "Query translation by an LLM at request time",
+   "license": "n/a",
+   "attribution": "Generated at request time from the query (translate=llm); not stored data."
+  },
+  "lxx_bridge": {
+   "name": "Hebrew-Greek Strong's bridge (from MACULA Hebrew greekstrong)",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "MACULA Hebrew, Biblica / Clear Bible (CC BY 4.0)",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/lxx_bridge.tsv"
+  },
+  "lxx_orphan_lexemes": {
+   "name": "Septuagint-only Greek lexemes (from GLAUx)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "GLAUx, Alek Keersmaekers, KU Leuven; el.wikisource",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/lxx_orphan_lexemes"
+  },
+  "macula_greek": {
+   "name": "MACULA Greek",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Clear Bible (Nestle 1904 text: public domain)",
+   "url": "https://github.com/Clear-Bible/macula-greek"
+  },
+  "macula_hebrew": {
+   "name": "MACULA Hebrew",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Biblica, Inc. / Clear Bible; Westminster Hebrew Syntax © Groves Center (CC BY 4.0); OpenScriptures Hebrew Bible morphology (CC BY 4.0); Westminster Leningrad Codex text (public domain)",
+   "url": "https://github.com/Clear-Bible/macula-hebrew"
+  },
+  "ot_nt_quotations": {
+   "name": "OT quotations in the NT (via the Septuagint)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/ot_nt_quotations"
+  },
+  "related_langs": {
+   "name": "Language registry (Glottolog, ISO 639-3, CLDR)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "Glottolog (CC BY-SA); ISO 639-3 (SIL); CLDR (Unicode licence)",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/related_langs"
+  },
+  "sefaria_mahberet_menahem": {
+   "name": "Mahberet Menahem sense divisions",
+   "license": "LicenseRef-PublicDomain",
+   "attribution": "London 1854 edition, via Sefaria (anchoring CC0)",
+   "url": "https://www.sefaria.org"
+  },
+  "sefaria_malbim": {
+   "name": "Malbim (Beur HaMilot; commentary), via Sefaria",
+   "license": "Public Domain (some rows: unknown)",
+   "url": "https://www.sefaria.org",
+   "note": "Each row carries Sefaria's own licence label in its `license` field; rows labelled 'unknown' have no licence statement from Sefaria."
+  },
+  "sefaria_metzudat_zion": {
+   "name": "Metzudat Zion word explanations",
+   "license": "LicenseRef-PublicDomain",
+   "attribution": "'On Your Way' edition, via Sefaria (anchoring CC0)",
+   "url": "https://www.sefaria.org"
+  },
+  "semantic_groups": {
+   "name": "Hebrew semantic groups",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/semantic_groups"
+  },
+  "semantic_neighbors": {
+   "name": "Semantic neighbours (synonyms and antonyms)",
+   "license": "CC0-1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/semantic_neighbors"
+  },
+  "speaker_quotations": {
+   "name": "MACULA Quotation and Speaker Data",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "MACULA Quotation and Speaker Data, © 2023 by Clear Bible, Inc, available at https://github.com/Clear-Bible/speaker-quotations/",
+   "url": "https://github.com/Clear-Bible/speaker-quotations/",
+   "note": "Includes FCBH character data via SIL Glyssen (MIT); the per-quotation speaker also reads Glyssen CharacterVerse.txt."
+  },
+  "stepbible_tbesh_tbesg": {
+   "name": "STEPBible Translators Brief lexicons (TBESH, TBESG)",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Tyndale House, STEPBible.org",
+   "url": "https://github.com/STEPBible/STEPBible-Data"
+  },
+  "strongs_keyness": {
+   "name": "Strong's keyness (biblical salience score)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/strongs_keyness.tsv"
+  },
+  "synoptic_parallels": {
+   "name": "Gospel parallels (shared Greek words)",
+   "license": "unknown",
+   "note": "Built from MACULA Greek (CC BY 4.0); the licence of the derived table is not yet declared.",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/synoptic_parallels"
+  },
+  "tvtms_versification": {
+   "name": "STEPBible TVTMS versification",
+   "license": "CC-BY-4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "Tyndale House, STEPBible.org (TVTMS)",
+   "url": "https://github.com/STEPBible/STEPBible-Data"
+  },
+  "ubs_open_domain_labels": {
+   "name": "Semantic domain labels in other languages (from the UBS open release)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "url": "https://github.com/bcv-commons/bcv-query/tree/main/resources/semantic_domains"
+  },
+  "ubs_open_domains": {
+   "name": "UBS open release: semantic domains",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "© United Bible Societies 2023",
+   "url": "https://github.com/ubsicap/ubs-open-license (@33dcc8c)"
+  },
+  "ubs_open_relations": {
+   "name": "UBS open release: synonym and antonym links",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "UBS Dictionary of Biblical Hebrew / UBS Dictionary of the Greek New Testament, © United Bible Societies 2023",
+   "url": "https://github.com/ubsicap/ubs-open-license (@33dcc8c67151)"
+  },
+  "ubs_open_senses": {
+   "name": "UBS open release: senses per Strong's number",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "UBS Dictionary of Biblical Hebrew / UBS Dictionary of the Greek New Testament, © United Bible Societies 2023",
+   "url": "https://github.com/ubsicap/ubs-open-license (@33dcc8c)"
+  },
+  "ugnt": {
+   "name": "unfoldingWord Greek New Testament (UGNT)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "unfoldingWord®",
+   "url": "https://git.door43.org/unfoldingWord/el-x-koine_ugnt"
+  },
+  "uhb": {
+   "name": "unfoldingWord Hebrew Bible (UHB)",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "unfoldingWord®",
+   "url": "https://git.door43.org/unfoldingWord/hbo_uhb"
+  },
+  "unfoldingword_tw": {
+   "name": "unfoldingWord Translation Words",
+   "license": "CC-BY-SA-4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "attribution": "unfoldingWord® (Door43)",
+   "url": "https://git.door43.org/unfoldingWord/en_tw"
+  }
+ },
+ "routes": {
+  "/health": {
+   "sources": [],
+   "note": "no Bible data"
+  },
+  "/": {
+   "sources": [],
+   "note": "no Bible data"
+  },
+  "/verse/{book}/{chapter}/{verse}": {
+   "sources": [
+    "macula_hebrew",
+    "hebrew_word_senses",
+    "glaux_lxx",
+    "ugnt",
+    "stepbible_tbesh_tbesg",
+    "semantic_groups",
+    "hebrew_settings",
+    "bibleol_glosses",
+    "aligned_glosses",
+    "sefaria_metzudat_zion",
+    "sefaria_malbim",
+    "sefaria_mahberet_menahem",
+    "ubs_open_domains",
+    "ubs_open_domain_labels",
+    "bibles_vrs_maps",
+    "related_langs"
+   ]
+  },
+  "/verse/{book}/{chapter}/{verse}/malbim": {
+   "sources": [
+    "sefaria_malbim"
+   ]
+  },
+  "/files": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek",
+    "berean_rp2018",
+    "byztxt_tr"
+   ]
+  },
+  "/files/{name}": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek",
+    "berean_rp2018",
+    "byztxt_tr"
+   ]
+  },
+  "/word/{strong}": {
+   "sources": [
+    "glaux_lxx",
+    "ugnt",
+    "macula_hebrew",
+    "hebrew_word_senses",
+    "stepbible_tbesh_tbesg"
+   ]
+  },
+  "/senses/{strong}": {
+   "sources": [
+    "macula_hebrew",
+    "hebrew_word_senses",
+    "stepbible_tbesh_tbesg"
+   ]
+  },
+  "/lexeme/{lex:path}": {
+   "sources": [
+    "macula_hebrew",
+    "hebrew_word_senses"
+   ]
+  },
+  "/gloss/{word}": {
+   "sources": [
+    "stepbible_tbesh_tbesg",
+    "uhb",
+    "ugnt",
+    "glaux_lxx"
+   ]
+  },
+  "/tw/{strong}": {
+   "sources": [
+    "unfoldingword_tw"
+   ]
+  },
+  "/domain/{code}": {
+   "sources": [
+    "ubs_open_domains",
+    "semantic_groups",
+    "hebrew_settings",
+    "stepbible_tbesh_tbesg",
+    "bibleol_glosses",
+    "aligned_glosses",
+    "macula_hebrew",
+    "related_langs"
+   ]
+  },
+  "/wordstudy/{strong}": {
+   "sources": [
+    "stepbible_tbesh_tbesg",
+    "strongs_keyness",
+    "unfoldingword_tw",
+    "ubs_open_domains",
+    "semantic_groups",
+    "hebrew_settings",
+    "ubs_open_relations",
+    "sefaria_malbim",
+    "sefaria_mahberet_menahem",
+    "ubs_open_senses",
+    "lxx_bridge",
+    "macula_hebrew",
+    "hebrew_word_senses",
+    "bibleol_glosses",
+    "aligned_glosses",
+    "related_langs"
+   ]
+  },
+  "/gloss-languages": {
+   "sources": [
+    "bibleol_glosses"
+   ]
+  },
+  "/words": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek",
+    "bibleol_glosses",
+    "stepbible_tbesh_tbesg",
+    "strongs_keyness"
+   ]
+  },
+  "/coref/{book}/{chapter}/{verse}/word/{idx}": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/frame/{book}/{chapter}/{verse}/word/{idx}": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/framesearch": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/participants/{book}/{chapter}/{verse}": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/speakers": {
+   "sources": [
+    "speaker_quotations",
+    "glyssen_character_verse"
+   ]
+  },
+  "/speaker/{name}": {
+   "sources": [
+    "speaker_quotations",
+    "glyssen_character_verse"
+   ]
+  },
+  "/speakers/at/{book}/{chapter}/{verse}": {
+   "sources": [
+    "speaker_quotations",
+    "glyssen_character_verse"
+   ]
+  },
+  "/concept/{word}": {
+   "sources": [
+    "stepbible_tbesh_tbesg",
+    "uhb",
+    "ugnt",
+    "glaux_lxx",
+    "macula_hebrew",
+    "hebrew_word_senses",
+    "semantic_neighbors"
+   ]
+  },
+  "/field/{strong}": {
+   "sources": [
+    "semantic_neighbors"
+   ]
+  },
+  "/genre/{strong}": {
+   "sources": [
+    "genre_context",
+    "stepbible_tbesh_tbesg"
+   ]
+  },
+  "/quotations/{book}/{chapter}/{verse}": {
+   "sources": [
+    "ot_nt_quotations"
+   ]
+  },
+  "/parallels/{book}/{chapter}/{verse}": {
+   "sources": [
+    "synoptic_parallels"
+   ]
+  },
+  "/versify/{scheme}/{book}/{chapter}/{verse}": {
+   "sources": [
+    "tvtms_versification"
+   ]
+  },
+  "/morph": {
+   "sources": [
+    "uhb",
+    "ugnt",
+    "stepbible_tbesh_tbesg"
+   ]
+  },
+  "/bridge/{strong}": {
+   "sources": [
+    "lxx_bridge",
+    "stepbible_tbesh_tbesg"
+   ]
+  },
+  "/lxx-lexeme/{wordid}": {
+   "sources": [
+    "lxx_orphan_lexemes",
+    "glaux_lxx"
+   ]
+  },
+  "/structure/context/batch": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/structure/{book}/{chapter}/{verse}": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/structure/{book}/{chapter}/{verse}/syntax": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/syntax/search": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/verse/{book}/{chapter}/{verse}/tree": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/scaffold/{book}/{chapter}": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek",
+    "bibleol_glosses"
+   ]
+  },
+  "/structure/{book}/{chapter}/{verse}/word/{idx}": {
+   "sources": [
+    "macula_hebrew",
+    "macula_greek"
+   ]
+  },
+  "/search": {
+   "sources": [
+    "clause_vectors",
+    "macula_hebrew",
+    "macula_greek",
+    "stepbible_tbesh_tbesg",
+    "ugnt",
+    "llm_query_translation"
+   ]
+  },
+  "/interlinear/chapter/{book}/{chapter}": {
+   "sources": [
+    "gbt_data",
+    "bsb_text"
+   ]
+  },
+  "/interlinear/word/{word_id}": {
+   "sources": [
+    "gbt_data",
+    "gbt_study_app_strongs",
+    "ubs_open_senses",
+    "macula_hebrew",
+    "hebrew_word_senses"
+   ]
+  },
+  "/interlinear/languages": {
+   "sources": [
+    "gbt_data"
+   ]
+  },
+  "/interlinear/similar/{strong}": {
+   "sources": [
+    "gbt_data",
+    "gbt_study_app_strongs"
+   ]
+  },
+  "/upload/{filename}": {
+   "sources": [],
+   "note": "no Bible data"
+  },
+  "/licenses": {
+   "sources": []
+  }
+ }
+}

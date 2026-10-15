@@ -983,6 +983,12 @@ SPEAKER_SOURCE = {
               "words (Clear's consensus projection); speakers from FCBH character data",
     "granularity": "word span (MACULA word ids word_start/word_end); verse range in English numbering; "
                    "start_partial/end_partial: the span covers only part of its first/last verse (MACULA verse)",
+    "speaker": "per quotation: block_speaker is FCBH's speaker for the whole quote block; speaker_basis 'referent' = "
+               "the other party of a dialogue, named by Clear's speaker referent and listed as speaking in the verse by "
+               "Glyssen CharacterVerse.txt; 'character' = Glyssen's character where FCBH gives a casting voice "
+               "(e.g. Yahweh's angel, voiced by Jesus); 'block' = FCBH's speaker",
+    "also": [{"name": "Glyssen CharacterVerse.txt", "attribution": "Copyright (c) 2014-2020 SIL LSDev and Faith Comes By Hearing",
+              "license": "MIT", "url": "https://github.com/sillsdev/Glyssen"}],
 }
 
 
@@ -995,7 +1001,8 @@ def _span(r: dict) -> dict:
     return {"start": decode(r["start"]), "end": decode(r["end"]),
             "start_bbcccvvv": r["start"], "end_bbcccvvv": r["end"],
             "word_start": r["word_start"], "word_end": r["word_end"],
-            "start_partial": r["start_partial"], "end_partial": r["end_partial"]}
+            "start_partial": r["start_partial"], "end_partial": r["end_partial"],
+            "block_speaker": r["block_speaker"], "speaker_basis": r["speaker_basis"]}
 
 @lru_cache(maxsize=1)
 def _speakers() -> list[dict]:
@@ -1027,6 +1034,8 @@ def _speakers() -> list[dict]:
                     "quote_type": parts[cols["quote_type"]],
                     "delivery": parts[cols["delivery"]],
                     "divine": parts[cols["divine"]] == "Y",
+                    "block_speaker": opt("block_speaker") or parts[cols["speaker"]],
+                    "speaker_basis": opt("speaker_basis") or "block",
                 })
             except (KeyError, ValueError, IndexError):
                 continue

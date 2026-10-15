@@ -43,3 +43,21 @@ def test_source_and_licence_on_every_endpoint():
                 data.speakers_at("GEN", 1, 1)):
         assert out["source"]["license"] == "CC-BY-4.0"
         assert "Clear Bible" in out["source"]["attribution"]
+
+
+def test_dialogue_reply_takes_its_own_speaker():
+    # 1 SAM 3:6: one FCBH block is God's call and Samuel's answer; each quotation gets its own speaker.
+    hits = {h["word_start"]: h for h in _hits("1SA", 3, 6)}
+    assert hits["o090030060051"]["speaker"] == "God" and hits["o090030060051"]["speaker_basis"] == "referent"
+    assert hits["o090030060121"]["speaker"] == "Samuel (boy)" and not hits["o090030060121"]["divine"]
+
+
+def test_addressee_is_not_taken_as_speaker():
+    # JER 15:20: Clear's referent is Jeremiah, the one addressed; Glyssen lists him only as a possible speaker.
+    assert {h["speaker"] for h in _hits("JER", 15, 20)} == {"God"}
+
+
+def test_casting_voice_gives_way_to_the_character():
+    # GEN 16:9: FCBH voices "Yahweh's angel" with Jesus; the speaker is the angel, the block speaker stays recorded.
+    (h,) = _hits("GEN", 16, 9)
+    assert (h["speaker"], h["block_speaker"], h["speaker_basis"]) == ("Yahweh's angel", "Jesus", "character")
