@@ -388,13 +388,13 @@ def test_v022_rules_at_their_places(tmp_path, monkeypatch):
 
 
 def test_v023_rules_at_their_places(tmp_path, monkeypatch):
-    """v0.23: a case right after a series of heads stands level (Lev 15:13), a new law's head is no apodosis (Lev 15:24, 25:25),
-    participle heads step in (Lev 7:29, 15:10), "and it shall be" after a hanging case (Lev 27:33), "in that day" ends a therefore
-    chain (Zeph 3:11)."""
+    """v0.23: a new law's head is no apodosis, the case stays in its verse at its level (Lev 15:24, 25:25); participle heads step in
+    in the ordinary view only (Lev 7:29, 15:10, 15:19); "and it shall be" after a hanging case (Lev 27:33); the alternatives of a
+    law of forbidding stand level in the law view (Num 30:6-9); "in that day" ends a therefore chain (Zeph 3:11)."""
     import json
     from macula import build_clause_layout as b
     out = tmp_path / "out"
-    monkeypatch.setattr("sys.argv", ["x", "--books", "LEV,ZEP", "--out", str(out)])
+    monkeypatch.setattr("sys.argv", ["x", "--books", "LEV,NUM,ZEP", "--out", str(out)])
     b.main()
 
     def plain(text):                      # the consonants only
@@ -403,21 +403,22 @@ def test_v023_rules_at_their_places(tmp_path, monkeypatch):
     def rows(book, ch, v):
         rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
         return [r for r in rs if r["verse"] == v]
-    case, before = rows("LEV", 15, 13)[0], rows("LEV", 15, 12)[-1]
-    assert case["relation"] == "conditional" and case["text_depth"] == before["text_depth"]
-    assert case["text_depth_law"] == before["text_depth_law"]
-    for ch, vv, word in ((15, 24, "וטמ"), (25, 25, "וב")):
-        rs = rows("LEV", ch, vv)
-        apo = next(r for r in rs if plain(r["text"]).startswith(word))
-        assert apo["discourse_rule"] == "new_law_closes_protasis", (ch, vv)
-        assert rs[0]["discourse_parent"] == apo["clause_key"] and rs[0]["text_depth"] == apo["text_depth"] + 1, (ch, vv)
+    for ch, vv in ((15, 24), (25, 25)):
+        case, before = rows("LEV", ch, vv)[0], rows("LEV", ch, vv - 1)[-1]
+        assert case["discourse_rule"] == "new_law_closes_protasis" and case["discourse_parent"] == before["clause_key"], (ch, vv)
+        assert all(r["text_depth"] == case["text_depth"] for r in rows("LEV", ch, vv) if r["relation"] in ("continuation",)), (ch, vv)
     head, main = rows("LEV", 7, 29)[2], rows("LEV", 7, 29)[3]
     assert plain(head["text"]).startswith("המקר") and head["text_depth"] == main["text_depth"] + 1
     every, ptc = rows("LEV", 15, 10)[:2]
     assert plain(ptc["text"]).startswith("הנג") and ptc["text_depth"] == every["text_depth"] + 1
+    ev19 = next(r for r in rows("LEV", 15, 19) if plain(r["text"]).startswith("וכל"))
+    p19 = next(r for r in rows("LEV", 15, 19) if plain(r["text"]).startswith("הנג"))
+    assert p19["text_depth"] == ev19["text_depth"] + 1 and p19["text_depth_law"] == ev19["text_depth_law"]   # law view: level
     r33 = rows("LEV", 27, 33)
     be = next(r for r in r33 if plain(r["text"]).startswith("והיה"))
     assert be["discourse_parent"] == r33[2]["clause_key"] and be["text_depth"] == r33[2]["text_depth"]
+    c6, c7, c9 = rows("NUM", 30, 6)[0], rows("NUM", 30, 7)[0], rows("NUM", 30, 9)[0]
+    assert c6["text_depth_law"] == c7["text_depth_law"] == c9["text_depth_law"]
     assert rows("ZEP", 3, 11)[0]["text_depth"] < rows("ZEP", 3, 8)[0]["text_depth"]
 
 

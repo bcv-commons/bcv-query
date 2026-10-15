@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.23"
+version = "0.24"
 
 [profile]
 name = "default"
@@ -259,6 +259,10 @@ strong = ["853"]                         # אֵת
 [words.every]
 doc = """"All, every": a participle with the article right after it is the head a law is about ("וְכָל־הַנֹּגֵעַ", rule participle_head_steps_in)."""
 strong = ["3605"]                        # כֹּל
+
+[words.forbid]
+doc = """"To forbid, annul" (הֵנִיא): a case of forbidding marks a series of alternatives (rule alternatives_of_forbidding_stand_level)."""
+strong = ["5106"]                        # נוּא
 
 [words.hand]
 doc = """The hand of the formula "וְיַד־יְהוָה הָיְתָה אֵלַי", "וַתִּפֹּל עָלַי שָׁם יַד אֲדֹנָי יְהוִה" (rule hand_of_the_lord_resumes)."""
@@ -599,6 +603,8 @@ relation = "conditional"
 laws_in_a_row_stand_level = true
 return_after_law = false
 staircase = "law"
+# links that add a level in text_depth but none in text_depth_law (rule participle_head_steps_in: ordinary view only)
+flat_rules = ["embedded_head"]
 
 
 [conventions.verse_division]
@@ -932,11 +938,13 @@ word_quote_hangs_on_main."""
 
 [rules.participle_head_steps_in]
 scope = "all"
-doc = """A participle phrase with the article that is the head its clause is about steps one level in, instead of standing flat next
+doc = """In the ordinary view (text_depth), a participle phrase with the article that is the head its clause is about steps one level in,
+instead of standing flat next
 to the clause (features.plain_embedded, rule embedded_keeps_macula_parent): when it comes before its clause ("הַמַּקְרִיב אֶת־זֶבַח
 שְׁלָמָיו לַיהוָה יָבִיא אֶת־קָרְבָּנוֹ", Lev 7:29, 7:33) or right after the clause's opening "every" ("וְכָל־הַנֹּגֵעַ בְּכֹל … יִטְמָא",
 Lev 15:10; words.every). BHSA puts these one level in (bsb-add-books, v0.22). A participle after a noun ("הַכֹּהֵן הַמְחַטֵּא",
-Lev 6:19) describes the noun and stays flat."""
+Lev 6:19) describes the noun and stays flat. Its link has discourse_rule embedded_head, which the law view counts as flat
+(depth.law.flat_rules): there the "כָּל־הַנֹּגֵעַ" heads of a series of laws stay level (Lev 15:19-27, bsb-add-books, v0.23)."""
 examples = ["Lev 7:29 \"הַמַּקְרִיב אֶת־זֶבַח שְׁלָמָיו\"", "Lev 15:10 \"וְכָל־הַנֹּגֵעַ בְּכֹל\"", "Lev 11:24", "Jer 21:9 \"הַיֹּשֵׁב בָּעִיר הַזֹּאת\""]
 
 [rules.word_quote_hangs_on_main]
@@ -1433,24 +1441,23 @@ to Leviticus, whose laws are long: in Deuteronomy's short laws the apodosis ofte
 22:22), and the rule was neutral for the steps over the law chapters (bsb-add-books, v0.14)."""
 examples = ["Lev 26:3 \"אִם־בְּחֻקֹּתַי תֵּלֵכוּ וְאֶת־מִצְוֺתַי תִּשְׁמְרוּ וַעֲשִׂיתֶם אֹתָם\" … 26:4 \"וְנָתַתִּי\""]
 
-[rules.case_after_series_stands_level]
+[rules.alternatives_of_forbidding_stand_level]
 scope = "law"
-doc = """A case opened by "כִּי" / "וְכִי" with a finite verb at the start of its verse, right after a series of law heads (the verse
-before goes back, by level links, to a noun phrase with a relative clause, "וְכָל־הַמֶּרְכָּב אֲשֶׁר … יִטְמָא", rule relative_law_head),
-stands level with the series, and its apodosis with it: in the flat view the protasis adds no level under its apodosis, in the law
-view it takes no step. A verbless "כִּי" clause is a reason, not a case (Lev 17:11 "כִּי נֶפֶשׁ הַבָּשָׂר בַּדָּם הִוא"), and is left out. Lev 15:13 "וְכִי־יִטְהַר הַזָּב מִזּוֹבוֹ" after
-15:9–12, one level too deep before (bsb-add-books, v0.22)."""
-examples = ["Lev 15:13 \"וְכִי־יִטְהַר הַזָּב מִזּוֹבוֹ\" level with 15:12 \"וּכְלִי־חֶרֶשׂ\"", "Lev 5:3 after 5:2", "Lev 22:29", "Num 9:14"]
+doc = """In the law view's staircase ([depth.law] staircase), a series of later cases that holds a case of forbidding (words.forbid,
+"וְאִם־הֵנִיא אָבִיהָ אֹתָהּ") lays out alternatives of one law (who hears or forbids the vow), not cases inside cases: its first later
+case steps in once, as before, and the next ones stand level with it instead of each stepping one more level in. Num 30:6, 30:7,
+30:9 (bsb-add-books, v0.23: the reference keeps them level). Anchored on the verb: the cases of Lev 4, which also differ by party,
+are nested in BHSA and keep the staircase."""
+examples = ["Num 30:6 \"וְאִם־הֵנִיא אָבִיהָ\", 30:7 \"וְאִם־הָיוֹ תִהְיֶה לְאִישׁ\", 30:9 \"וְאִם בְּיוֹם שְׁמֹעַ אִישָׁהּ יָנִיא\""]
 
 [rules.new_law_closes_protasis]
 scope = "law"
 doc = """A new law's head is never the apodosis of the case before it. When a protasis is still open (rule protasis_continued) and
-the next verse opens with a law's head (a fronted noun phrase, a law-head word, or a subject that comes first), the case's apodosis
-is in its own verse: its first weqatal clause after the protasis that names a subject of its own (Lev 25:25 "וּמָכַר מֵאֲחֻזָּתוֹ" goes on
-with the case, "וּבָא גֹאֲלוֹ" is the apodosis), else its first weqatal; it continues the law from the clause before the protasis;
-the clauses after it go on in the apodosis. Lev 15:24 "וְאִם שָׁכֹב יִשְׁכַּב … וּתְהִי נִדָּתָהּ עָלָיו" — "וְטָמֵא שִׁבְעַת יָמִים" is the apodosis,
-not 15:25 "וְאִשָּׁה" (bsb-add-books, v0.22). Without a weqatal in the verse the protasis keeps its old behaviour."""
-examples = ["Lev 15:24 \"וְטָמֵא שִׁבְעַת יָמִים\" apodosis of \"וְאִם שָׁכֹב יִשְׁכַּב\"", "Lev 15:8 \"וְכִבֶּס\"", "Lev 23:29 \"וְנִכְרְתָה\"", "Lev 25:25 \"וּבָא גֹאֲלוֹ\"", "Lev 27:27 \"וּפָדָה\""]
+the next verse opens with a law's head (a fronted noun phrase, a law-head word, or a subject that comes first), the case stays in its
+own verse: it hangs on the clause before it (the clause it would fall back to), and its lines keep their level. Lev 15:24 "וְאִם שָׁכֹב
+יִשְׁכַּב" no longer takes 15:25 "וְאִשָּׁה" as its apodosis. In v0.23's first form the apodosis was moved out to the law's level; BHSA
+keeps it at the case's level or deeper (bsb-add-books), so only the verse boundary is kept."""
+examples = ["Lev 15:24", "Lev 15:8", "Lev 23:29", "Lev 25:25", "Lev 27:27"]
 
 [rules.then_clause_is_apodosis]
 scope = "all"
