@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.24"
+version = "0.25"
 
 [profile]
 name = "default"
@@ -263,6 +263,20 @@ strong = ["3605"]                        # כֹּל
 [words.forbid]
 doc = """"To forbid, annul" (הֵנִיא): a case of forbidding marks a series of alternatives (rule alternatives_of_forbidding_stand_level)."""
 strong = ["5106"]                        # נוּא
+
+[words.keep]
+doc = """"To keep" (שָׁמַר) in a closing exhortation: "וּשְׁמַרְתֶּם מִצְוֺתַי" (rule closing_exhortation_returns)."""
+strong = ["8104"]                        # שָׁמַר
+
+[words.commandments]
+doc = """What a closing exhortation tells to keep (rule closing_exhortation_returns)."""
+strong = [
+    "4687",   # מִצְוָה
+    "2708",   # חֻקָּה
+    "2706",   # חֹק
+    "4941",   # מִשְׁפָּט
+    "4931",   # מִשְׁמֶרֶת
+]
 
 [words.hand]
 doc = """The hand of the formula "וְיַד־יְהוָה הָיְתָה אֵלַי", "וַתִּפֹּל עָלַי שָׁם יַד אֲדֹנָי יְהוִה" (rule hand_of_the_lord_resumes)."""
@@ -603,8 +617,8 @@ relation = "conditional"
 laws_in_a_row_stand_level = true
 return_after_law = false
 staircase = "law"
-# links that add a level in text_depth but none in text_depth_law (rule participle_head_steps_in: ordinary view only)
-flat_rules = ["embedded_head"]
+# links that add a level in text_depth but none in text_depth_law (none since 0.25: rule participle_head_steps_in holds in both views)
+flat_rules = []
 
 
 [conventions.verse_division]
@@ -821,6 +835,8 @@ law (rule relative_law_head)."""
 [features.extension]
 doc = """The legal extension formula: כֵּן in the first two words, a 2nd-person yiqtol or weqatal of words.do, and לְ with the further case
 ("וְכֵן תַּעֲשֶׂה לַחֲמֹרוֹ", Deut 22:3)."""
+[features.exhortation]
+doc = """A closing exhortation: a 2nd-person verb of words.keep with words.commandments in the clause ("וּשְׁמַרְתֶּם מִצְוֺתַי", Lev 22:31)."""
 [features.then]
 doc = "The clause opens with an apodosis marker (words.apodosis_markers)."
 [features.number]
@@ -938,13 +954,13 @@ word_quote_hangs_on_main."""
 
 [rules.participle_head_steps_in]
 scope = "all"
-doc = """In the ordinary view (text_depth), a participle phrase with the article that is the head its clause is about steps one level in,
-instead of standing flat next
+doc = """A participle phrase with the article that is the head its clause is about steps one level in, instead of standing flat next
 to the clause (features.plain_embedded, rule embedded_keeps_macula_parent): when it comes before its clause ("הַמַּקְרִיב אֶת־זֶבַח
 שְׁלָמָיו לַיהוָה יָבִיא אֶת־קָרְבָּנוֹ", Lev 7:29, 7:33) or right after the clause's opening "every" ("וְכָל־הַנֹּגֵעַ בְּכֹל … יִטְמָא",
 Lev 15:10; words.every). BHSA puts these one level in (bsb-add-books, v0.22). A participle after a noun ("הַכֹּהֵן הַמְחַטֵּא",
-Lev 6:19) describes the noun and stays flat. Its link has discourse_rule embedded_head, which the law view counts as flat
-(depth.law.flat_rules): there the "כָּל־הַנֹּגֵעַ" heads of a series of laws stay level (Lev 15:19-27, bsb-add-books, v0.23)."""
+Lev 6:19) describes the noun and stays flat. Its link has discourse_rule embedded_head. In both views: v0.24 counted it flat in the
+law view (depth.law.flat_rules), which moved Lev 11:24-27, 7:29, 7:33, 15:10 and Exod 35:2 away from BHSA; what was off in Lev
+15:19-27 was the block's base level (rule casus_pendens_apodosis_level_with_head; bsb-add-books, v0.24)."""
 examples = ["Lev 7:29 \"הַמַּקְרִיב אֶת־זֶבַח שְׁלָמָיו\"", "Lev 15:10 \"וְכָל־הַנֹּגֵעַ בְּכֹל\"", "Lev 11:24", "Jer 21:9 \"הַיֹּשֵׁב בָּעִיר הַזֹּאת\""]
 
 [rules.word_quote_hangs_on_main]
@@ -1430,6 +1446,14 @@ law (casus pendens), not an address: it stands on its line as a main clause, the
 the apodosis comes back to it on the line, level with it."""
 examples = ["Num 5:12 \"אִישׁ אִישׁ כִּי־תִשְׂטֶה אִשְׁתּוֹ\" … 5:15 \"וְהֵבִיא הָאִישׁ\"", "Lev 4:2 \"נֶפֶשׁ כִּי־תֶחֱטָא\""]
 
+[rules.casus_pendens_apodosis_level_with_head]
+scope = "law"
+doc = """In the law view, the apodosis of a case under its topic (rule casus_pendens) stands level with the topic, not with the case,
+and what goes on from it stays there: "וְאִשָּׁה / כִּי־תִהְיֶה זָבָה / … / שִׁבְעַת יָמִים תִּהְיֶה בְנִדָּתָהּ" (Lev 15:19), the rest of the
+woman's law (15:19b-27) at the level of "וְאִשָּׁה". As in the ordinary view (rule casus_pendens). Before 0.25 the apodosis stood beside
+its case, one level too deep (bsb-add-books, v0.24)."""
+examples = ["Lev 15:19 \"שִׁבְעַת יָמִים תִּהְיֶה בְנִדָּתָהּ\" level with \"וְאִשָּׁה\"", "Lev 15:2 \"טָמֵא הוּא\" level with \"אִישׁ אִישׁ\""]
+
 [rules.protasis_continued]
 scope = ["LEV"]
 doc = """While a protasis waits for its apodosis (a fronted conditional, or a case under its topic), a וְ-clause in the protasis's own
@@ -1454,10 +1478,21 @@ examples = ["Num 30:6 \"וְאִם־הֵנִיא אָבִיהָ\", 30:7 \"וְא
 scope = "law"
 doc = """A new law's head is never the apodosis of the case before it. When a protasis is still open (rule protasis_continued) and
 the next verse opens with a law's head (a fronted noun phrase, a law-head word, or a subject that comes first), the case stays in its
-own verse: it hangs on the clause before it (the clause it would fall back to), and its lines keep their level. Lev 15:24 "וְאִם שָׁכֹב
-יִשְׁכַּב" no longer takes 15:25 "וְאִשָּׁה" as its apodosis. In v0.23's first form the apodosis was moved out to the law's level; BHSA
-keeps it at the case's level or deeper (bsb-add-books), so only the verse boundary is kept."""
+own verse. In the ordinary view it hangs on the clause before it (the clause it would fall back to), and its lines keep their
+level. In the law view the case keeps its own apodosis in its verse: the first weqatal after the protasis that names a subject of its
+own (Lev 25:25 "וּמָכַר מֵאֲחֻזָּתוֹ" goes on with the case, "וּבָא גֹאֲלוֹ" is the apodosis), else its first weqatal; the apodosis goes on
+from the clause the line had reached and the case stands in its place, one level in. Lev 15:24 "וְאִם שָׁכֹב יִשְׁכַּב" no longer takes
+15:25 "וְאִשָּׁה" as its apodosis. v0.23 laid out both views the law view's way, which moved the ordinary view's apodosis out; v0.24 laid
+out both the ordinary view's way, which put Lev 15:24, 25:25 and 27:27 one level too deep in the law view (bsb-add-books)."""
 examples = ["Lev 15:24", "Lev 15:8", "Lev 23:29", "Lev 25:25", "Lev 27:27"]
+
+[rules.case_under_alternatives]
+scope = "law"
+doc = """In the law view, a case closed by rule new_law_closes_protasis that opens with "אִם" right after a verse of bare "אִם X אִם Y"
+alternatives is a case of those alternatives: its apodosis hangs on the last of them, so the case stands one level under them, and a
+later case of its own steps in once more. Lev 27:27 "וְאִם בַּבְּהֵמָה הַטְּמֵאָה" under 27:26 "אִם־שׁוֹר אִם־שֶׂה", "וְאִם־לֹא יִגָּאֵל" one
+deeper again (bsb-add-books, v0.24)."""
+examples = ["Lev 27:27 \"וְאִם בַּבְּהֵמָה הַטְּמֵאָה\" under 27:26 \"אִם־שׁוֹר אִם־שֶׂה\""]
 
 [rules.then_clause_is_apodosis]
 scope = "all"
@@ -1470,6 +1505,15 @@ within_verses = 4
 # protasis that opens its verse or follows an address waits; not "אִם־לֹא" after a negated clause or in an oath ("but rather", Gen
 # 24:38); waiting stops at a wayyiqtol, a new speaker (1 Kgs 3:15, Gen 24:39), or a main clause in the protasis's own verse whose finite
 # verb differs in person or number (the apodosis is already there: 1 Kgs 3:14, Josh 20:5).
+
+[rules.closing_exhortation_returns]
+scope = ["LEV"]
+doc = """A closing exhortation after the laws, a verse-initial clause in the second person whose verb is "to keep" (words.keep) with
+the commandments as its object (words.commandments), "וּשְׁמַרְתֶּם מִצְוֺתַי וַעֲשִׂיתֶם אֹתָם אֲנִי יְהוָה" (Lev 22:31), goes back in the law
+view to the level the law stands on, with what follows it, as the extension formula does (rule extension_formula_returns; it acts
+only after an apodosis; text_depth is unchanged). Lev 22:31-33 one level too deep before (bsb-add-books, v0.24). Limited to
+Leviticus: in Deut 4 and 6, exhortation chapters, it moved lines away from BHSA's per-chapter reference."""
+examples = ["Lev 22:31 \"וּשְׁמַרְתֶּם מִצְוֺתַי\"", "Lev 18:26", "Lev 19:37"]
 
 [rules.extension_formula_returns]
 scope = "all"

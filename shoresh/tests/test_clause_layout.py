@@ -388,9 +388,11 @@ def test_v022_rules_at_their_places(tmp_path, monkeypatch):
 
 
 def test_v023_rules_at_their_places(tmp_path, monkeypatch):
-    """v0.23: a new law's head is no apodosis, the case stays in its verse at its level (Lev 15:24, 25:25); participle heads step in
-    in the ordinary view only (Lev 7:29, 15:10, 15:19); "and it shall be" after a hanging case (Lev 27:33); the alternatives of a
-    law of forbidding stand level in the law view (Num 30:6-9); "in that day" ends a therefore chain (Zeph 3:11)."""
+    """v0.23-v0.25: a new law's head is no apodosis, the case stays in its verse at its level (Lev 15:24, 25:25); participle heads step
+    in, in both views (Lev 7:29, 15:10, 15:19); "and it shall be" after a hanging case (Lev 27:33); the alternatives of a law of
+    forbidding stand level in the law view (Num 30:6-9); "in that day" ends a therefore chain (Zeph 3:11). v0.25, law view: the
+    apodosis of a casus pendens stands level with its topic (Lev 15:19); Lev 27:27 under 27:26's alternatives; the closing
+    exhortation goes back to the speech's level (Lev 22:31)."""
     import json
     from macula import build_clause_layout as b
     out = tmp_path / "out"
@@ -413,7 +415,15 @@ def test_v023_rules_at_their_places(tmp_path, monkeypatch):
     assert plain(ptc["text"]).startswith("הנג") and ptc["text_depth"] == every["text_depth"] + 1
     ev19 = next(r for r in rows("LEV", 15, 19) if plain(r["text"]).startswith("וכל"))
     p19 = next(r for r in rows("LEV", 15, 19) if plain(r["text"]).startswith("הנג"))
-    assert p19["text_depth"] == ev19["text_depth"] + 1 and p19["text_depth_law"] == ev19["text_depth_law"]   # law view: level
+    assert p19["text_depth"] == ev19["text_depth"] + 1 and p19["text_depth_law"] == ev19["text_depth_law"] + 1
+    v19 = rows("LEV", 15, 19)
+    woman = next(r for r in v19 if plain(r["text"]).startswith("ואשה"))
+    days = next(r for r in v19 if plain(r["text"]).startswith("שבעת"))
+    assert days["text_depth_law"] == woman["text_depth_law"]                    # the apodosis level with its topic
+    alts, c27 = [r for r in rows("LEV", 27, 26) if plain(r["text"]).startswith("אם")], rows("LEV", 27, 27)
+    assert c27[0]["text_depth_law"] == alts[-1]["text_depth_law"] + 1 and c27[3]["text_depth_law"] == c27[0]["text_depth_law"] + 1
+    keep, law = rows("LEV", 22, 31)[0], rows("LEV", 22, 29)[0]
+    assert keep["text_depth_law"] == law["text_depth_law"] - 1                  # back to the speech's level
     r33 = rows("LEV", 27, 33)
     be = next(r for r in r33 if plain(r["text"]).startswith("והיה"))
     assert be["discourse_parent"] == r33[2]["clause_key"] and be["text_depth"] == r33[2]["text_depth"]

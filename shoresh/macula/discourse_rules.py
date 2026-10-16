@@ -88,7 +88,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     global CFG, CONFIG_FILE, CONFIG_SHA256, CONFIG_FILES, PROFILE, PROFILE_CHANGED, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM, SING_PRAY, SONG, \
         LEAD_ME, HAND, YOU, SON_OF_MAN, HAND_VERBS, OBJECT_MARKER, SUMMARY_THIS, SUMMARY_LAW, PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS, CLOSING_THIS, LAWGIVER, BACK_REFERENCE, \
-        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID
+        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS
     global LAW_FLAT_RULES
     global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE, CONCLUSION
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
@@ -114,6 +114,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     LEAD_ME, HAND, YOU, SON_OF_MAN = strong("lead_me"), strong("hand"), strong("you"), strong("son_of_man")
     HAND_VERBS, OBJECT_MARKER = strong("hand_verbs"), strong("object_marker")
     EVERY, FORBID = strong("every"), strong("forbid")
+    KEEP, COMMANDMENTS = strong("keep"), strong("commandments")
     SUMMARY_THIS, SUMMARY_LAW = strong("summary_this"), strong("summary_law")
     PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS = strong("perceive"), set(W["perceive"]["narrated"]), set(W["perceive"]["stems"])
     CLOSING_THIS, LAWGIVER, BACK_REFERENCE = strong("closing_this"), strong("lawgiver"), strong("back_reference")
@@ -382,6 +383,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "extension": KEN in in_first_two and bool(v) and _strong(v) in DO and second and v["wtype"] in EXTENSION_FORMS
                          and any(t["class"] == "prep" and _n(t["lemma"]) == LE for t in toks),
             "then": l0 in APODOSIS_MARKERS,
+            "exhortation": second and bool(v) and _strong(v) in KEEP and any(_strong(t) in COMMANDMENTS for t in toks),
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
 
@@ -508,6 +510,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     case_waiting: str | None = None               # a later protasis whose apodosis is the next main clause
     be_cases: set = set()                         # protases right after "and it shall be" (rule be_case_stands_level)
     law_heads: set = set()                        # clauses that start a new law: a casus pendens, a law-head word ([depth.law])
+    law_par: dict = {}                            # the law view's own parent (and weight) of a clause (rule new_law_closes_protasis)
     cp_cases: dict = {}                           # the case under a casus pendens -> the casus pendens
     framed_of: dict = {}                          # main clause key -> a frame that names its speaker or sings (rule poem_wayyiqtol_continues)
     named_of: dict = {}                           # main clause key -> features.named_subject
@@ -1009,6 +1012,19 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         # verse, on the clause before it, at the level it had
         if prot is not None and prot.get("key") in pending and vref != prot["verse"] and on("new_law_closes_protasis") \
                 and (f["topic_np"] or f["law_head"] or f["subject_first"]) and pending_prev.get(prot["key"]):
+            # the law view keeps the case's own apodosis in its verse: its first weqatal after the protasis that names a subject
+            # of its own (Lev 25:25: the second clause goes on with the case, the third is the apodosis), else its first weqatal; it goes
+            # on from the clause the line had reached, and the case hangs on it
+            own = [x for x in clauses[:i] if x["verse"] == prot["verse"] and out.get(x["key"], {}).get("rule") == "protasis_continued"]
+            weqatal = [x for x in own if x["f"]["form"] == "weqatal"]
+            apo = next((x["key"] for x in weqatal if x["f"]["subj"]), weqatal[0]["key"] if weqatal else None)
+            if apo is not None and line.last is not None:
+                # rule case_under_alternatives: right after a verse of bare "if X, if Y" alternatives, a case opened by "if" is a
+                # case of them (Lev 27:27 after 27:26)
+                alts = [x for x in clauses[:i] if x["verse"][:2] == prot["verse"][:2] and x["verse"][2] == prot["verse"][2] - 1
+                        and x["f"]["lead"] == IM and out.get(x["key"], {}).get("relation") == "conditional" and x["key"] < prot["key"]]
+                on_ = alts[-1]["key"] if alts and rec_of[prot["key"]]["f"]["lead"] == IM and on("case_under_alternatives") else line.last
+                law_par[apo], law_par[prot["key"]] = (on_, 0), (apo, None)
             out[prot["key"]]["parent"] = pending_prev[prot["key"]]
             out[prot["key"]]["rule"] = "new_law_closes_protasis"
             pending.remove(prot["key"])
@@ -1104,6 +1120,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             back.add(k)
         if f["extension"] and on("extension_formula_returns"):
             ext.add(k)
+        if f["exhortation"] and first_in_verse and on("closing_exhortation_returns"):
+            ext.add(k)                            # "and you shall keep my commandments": back to the level the law stands on
         resolve_pending(k)
         line.last = k
         if line.first is None:
@@ -1202,7 +1220,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k]["depth"] = sum(1 for x in counted if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("subj", None)
     for k, d in _law_depths(out, back if LAW_RETURNS else set(), cond_series, ext, case_apod, law_heads, cp_cases,
-                            chap_of if CHAPTER_MARGIN else None, be_cases, inner_heads, forbid_cases).items():
+                            chap_of if CHAPTER_MARGIN else None, be_cases, inner_heads, forbid_cases, law_par).items():
         out[k]["depth_law"] = d
     return out
 
@@ -1210,16 +1228,21 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
 def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series: set[str] = frozenset(),
                 ext: set[str] = frozenset(), case_apod: dict | None = None, law_heads: set[str] = frozenset(),
                 cp_cases: dict | None = None, chap_of: dict | None = None, be_cases: set[str] = frozenset(),
-                inner_heads: set[str] = frozenset(), forbid_cases: set[str] = frozenset()) -> dict[str, int]:
+                inner_heads: set[str] = frozenset(), forbid_cases: set[str] = frozenset(),
+                law_par: dict | None = None) -> dict[str, int]:
     """text_depth_law ([depth.law]): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
     level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth. back: main clauses that open
     their verse other than with "and" + weqatal; after an apodosis they go back to the level the law stands on."""
     par = {k: v["parent"] for k, v in out.items()}
     w = {k: int(v["relation"] not in FLAT and v["rule"] not in FLAT_RULES and v["rule"] not in LAW_FLAT_RULES) for k, v in out.items()}
+    for k, (p, wk) in (law_par or {}).items():
+        par[k] = p
+        if wk is not None:
+            w[k] = wk
     protases: set[str] = set()
     apodoses: dict[str, str] = {}                 # apodosis -> its protasis
-    for p in sorted(k for k, v in out.items() if v["relation"] == LAW_RELATION and v["parent"] and k < v["parent"]):
-        a = out[p]["parent"]
+    for p in sorted(k for k, v in out.items() if v["relation"] == LAW_RELATION and par[k] and k < par[k]):
+        a = par[p]
         if par[p] != a or par.get(a) == p:
             continue
         new_parent = par[a]
@@ -1262,6 +1285,9 @@ def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series:
             if a in apodoses or par.get(a) == p or (p not in cond_series and p not in (cp_cases or {})):
                 continue
             par[a], w[a] = p, 0
+            if p in (cp_cases or {}) and p not in cond_series and chap_of \
+                    and active("casus_pendens_apodosis_level_with_head", chap_of.get(a, ("",))[0]):
+                par[a] = cp_cases[p]              # the apodosis comes back to the topic's level, beside its case
             apodoses[a] = p
         # each later case one level under the case before, when that case had its own apodosis (alternatives without one stand level)
         cased = set(apodoses.values())
