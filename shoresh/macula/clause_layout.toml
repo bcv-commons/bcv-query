@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.25"
+version = "0.26"
 
 [profile]
 name = "default"
@@ -277,6 +277,17 @@ strong = [
     "4941",   # מִשְׁפָּט
     "4931",   # מִשְׁמֶרֶת
 ]
+
+[words.verdict]
+doc = """The verdict of a purity case, as the first word of a verbless clause: "טָמֵא הוּא לָכֶם" (Lev 11:4; rule verdict_closes_reason)."""
+strong = [
+    "2931",   # טָמֵא (adjective)
+    "2889",   # טָהוֹר
+]
+
+[words.turn]
+doc = """"Now", "you" after "and" at a verse start: the speaker turns to the conclusion or to the addressee (rule turn_closes_quotation)."""
+lemmas = ["עַתָּה", "אַתָּה"]
 
 [words.hand]
 doc = """The hand of the formula "וְיַד־יְהוָה הָיְתָה אֵלַי", "וַתִּפֹּל עָלַי שָׁם יַד אֲדֹנָי יְהוִה" (rule hand_of_the_lord_resumes)."""
@@ -837,6 +848,10 @@ doc = """The legal extension formula: כֵּן in the first two words, a 2nd-per
 ("וְכֵן תַּעֲשֶׂה לַחֲמֹרוֹ", Deut 22:3)."""
 [features.exhortation]
 doc = """A closing exhortation: a 2nd-person verb of words.keep with words.commandments in the clause ("וּשְׁמַרְתֶּם מִצְוֺתַי", Lev 22:31)."""
+[features.verdict]
+doc = """A verbless clause opened by a verdict word (words.verdict): "טָמֵא הוּא לָכֶם"."""
+[features.turn]
+doc = """The clause opens with "and" and has a words.turn word in its first two words ("וְעַתָּה", "וְאַתָּה", "וְגַם אַתָּה")."""
 [features.then]
 doc = "The clause opens with an apodosis marker (words.apodosis_markers)."
 [features.number]
@@ -951,6 +966,38 @@ is the antecedent's first word), complement (MACULA role in macula.complement_ro
 opening (purpose, temporal, causal, conditional, complement), or embedded. A plain embedded clause (features.plain_embedded) gets
 discourse_rule embedded_flat and stands next to its parent in the flat view (depth.flat_rules). One exception: rule
 word_quote_hangs_on_main."""
+
+[rules.verdict_closes_reason]
+scope = "law"
+doc = """In a verse that ends in a verdict (features.verdict, "טָמֵא הוּא לָכֶם"), the "and" main clauses between the reason (a "כִּי"
+clause, rule sub_back) and the verdict go on with the reason, so the verdict closes it and stands one level out: Lev 11:4 "אֶת־הַגָּמָל
+/ כִּי־מַעֲלֵה גֵרָה הוּא / וּפַרְסָה אֵינֶנּוּ מַפְרִיס / טָמֵא הוּא לָכֶם". bsb-add-books, moving out: the verdict moves out one level (law 64%,
+41 of 42 steps out by one level); "staying in too long" in Lev 11:4-7 (21 pairs)."""
+examples = ["Lev 11:4 \"וּפַרְסָה אֵינֶנּוּ מַפְרִיס\" with \"כִּי־מַעֲלֵה גֵרָה הוּא\"", "Lev 11:5", "Lev 11:6", "Lev 11:7"]
+
+[rules.turn_closes_quotation]
+scope = "all"
+doc = """A verse-initial "וְעַתָּה" or "וְאַתָּה" (words.turn, in the first two words after "and") goes back to the speech's own line: a
+quotation opened inside the speech in an earlier verse ends there (not a messenger, commanded, prophetic or sung speech, which have
+their own ends). 1 Kgs 2:5 "וְגַם אַתָּה יָדַעְתָּ" after the promise David quotes in 2:4. bsb-add-books, moving out: "וְעַתָּה" stays in
+the speech in 166 of 175 steps out and lands on its main line in 96%; "וְאַתָּה" 86%."""
+examples = ["1 Kgs 2:5 \"וְגַם אַתָּה יָדַעְתָּ\""]
+
+[rules.participle_describes_the_lord]
+scope = "law"
+doc = """A clause opened by a participle with the article (features.art_participle), without "and", right after a verbless or participle
+clause of "I" with a proper name ("אֲנִי יְהוָה מְקַדִּשְׁכֶם"), describes him: it hangs on that clause as a relative and stands one level in, with what hangs under it.
+Lev 22:33 "אֲנִי יְהוָה מְקַדִּשְׁכֶם / הַמּוֹצִיא אֶתְכֶם מֵאֶרֶץ מִצְרַיִם / לִהְיוֹת לָכֶם לֵאלֹהִים" (bsb-add-books, v0.25). Law only:
+in the hymn of Ps 113 the participles go on the praise and moved away from BHSA."""
+examples = ["Lev 22:33 \"הַמּוֹצִיא אֶתְכֶם מֵאֶרֶץ מִצְרַיִם\""]
+
+[rules.parallel_takes_partners_level]
+scope = "poetic"
+doc = """A main clause right after a subordinate clause (rules sub_back, sub_continue) in the same verse, with the same verb form,
+person and number and no opener of its own, is the second half of a parallel pair: it goes on with its partner instead of going back
+to the main line. 1 Sam 2:5 "עַד־עֲקָרָה יָלְדָה שִׁבְעָה / וְרַבַּת בָּנִים אֻמְלָלָה" (bsb-add-books, moving out, part 2: "leaving too early",
+parallel lines take their partner's level)."""
+examples = ["1 Sam 2:5 \"וְרַבַּת בָּנִים אֻמְלָלָה\""]
 
 [rules.participle_head_steps_in]
 scope = "all"
@@ -1451,7 +1498,11 @@ scope = "law"
 doc = """In the law view, the apodosis of a case under its topic (rule casus_pendens) stands level with the topic, not with the case,
 and what goes on from it stays there: "וְאִשָּׁה / כִּי־תִהְיֶה זָבָה / … / שִׁבְעַת יָמִים תִּהְיֶה בְנִדָּתָהּ" (Lev 15:19), the rest of the
 woman's law (15:19b-27) at the level of "וְאִשָּׁה". As in the ordinary view (rule casus_pendens). Before 0.25 the apodosis stood beside
-its case, one level too deep (bsb-add-books, v0.24)."""
+its case, one level too deep (bsb-add-books, v0.24). Since 0.26 only when the apodosis does not open with a weqatal: a verdict or a
+statement ("טָמֵא הוּא", "שִׁבְעַת יָמִים תִּהְיֶה") goes back to the topic, a procedure in a weqatal chain stays at the case's level (the
+priest's examination in Lev 13 "וְרָאָה הַכֹּהֵן", the offering in Lev 5:15-19 "וְהֵבִיא", Num 5:7 "וְהִתְוַדּוּ"), also when the weqatal chain
+already began inside the case (rule protasis_continued: Lev 5:15 "וְהֵבִיא אֶת־אֲשָׁמוֹ"). bsb-add-books, v0.25: of the
+runs the rule moved out, those opening with a weqatal were 31 lines closer and 116 farther, the others 140 closer and 74 farther."""
 examples = ["Lev 15:19 \"שִׁבְעַת יָמִים תִּהְיֶה בְנִדָּתָהּ\" level with \"וְאִשָּׁה\"", "Lev 15:2 \"טָמֵא הוּא\" level with \"אִישׁ אִישׁ\""]
 
 [rules.protasis_continued]

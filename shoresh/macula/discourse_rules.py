@@ -88,7 +88,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     global CFG, CONFIG_FILE, CONFIG_SHA256, CONFIG_FILES, PROFILE, PROFILE_CHANGED, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM, SING_PRAY, SONG, \
         LEAD_ME, HAND, YOU, SON_OF_MAN, HAND_VERBS, OBJECT_MARKER, SUMMARY_THIS, SUMMARY_LAW, PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS, CLOSING_THIS, LAWGIVER, BACK_REFERENCE, \
-        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS
+        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS, VERDICT, TURN
     global LAW_FLAT_RULES
     global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE, CONCLUSION
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
@@ -114,12 +114,13 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     LEAD_ME, HAND, YOU, SON_OF_MAN = strong("lead_me"), strong("hand"), strong("you"), strong("son_of_man")
     HAND_VERBS, OBJECT_MARKER = strong("hand_verbs"), strong("object_marker")
     EVERY, FORBID = strong("every"), strong("forbid")
-    KEEP, COMMANDMENTS = strong("keep"), strong("commandments")
+    KEEP, COMMANDMENTS, VERDICT = strong("keep"), strong("commandments"), strong("verdict")
     SUMMARY_THIS, SUMMARY_LAW = strong("summary_this"), strong("summary_law")
     PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS = strong("perceive"), set(W["perceive"]["narrated"]), set(W["perceive"]["stems"])
     CLOSING_THIS, LAWGIVER, BACK_REFERENCE = strong("closing_this"), strong("lawgiver"), strong("back_reference")
     PERCEIVE_REASON, PLACE_THERE = set(W["perceive"]["reason_with_object"]), strong("place_there")
     ALTERNATIVE, CHAIN_END = lemmas("alternative"), lemmas("chain_end")
+    TURN = lemmas("turn")
     CHAIN_END_PHRASES = [list(x) for x in W["chain_end"].get("phrases", [])]
     SUB_KIND = {_n(k): v for k, v in W["subordinators"]["relation"].items()}
     SUB_CJ = set(SUB_KIND)
@@ -383,6 +384,8 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "extension": KEN in in_first_two and bool(v) and _strong(v) in DO and second and v["wtype"] in EXTENSION_FORMS
                          and any(t["class"] == "prep" and _n(t["lemma"]) == LE for t in toks),
             "then": l0 in APODOSIS_MARKERS,
+            "turn": waw and bool(TURN & in_first_two),
+            "verdict": bool(lead) and _strong(lead[0]) in VERDICT and not finite,
             "exhortation": second and bool(v) and _strong(v) in KEEP and any(_strong(t) in COMMANDMENTS for t in toks),
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
 
@@ -594,6 +597,12 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             if on("nested_speech_ends_at_3rd_person") and len(lines) > 2 and not lines[-1].long and not c["parent_key"] and f["waw"] \
                     and f["person"] == "third" and not f["sub_kind"] and f["form"] in NARRATED and not f["pron12"] and not f["speak"]:
                 lines.pop()
+            # rule turn_closes_quotation: "and now", "and you" at a verse start go back to the speech's own line: a quotation
+            # opened inside the speech in an earlier verse ends
+            if on("turn_closes_quotation") and f["turn"] and not c["parent_key"]:
+                while len(lines) > 2 and lines[-1].opened < vi and not (lines[-1].long or lines[-1].prophetic or lines[-1].messenger
+                                                                          or lines[-1].oracle or lines[-1].song is not None):
+                    lines.pop()
         if (f["selah"] and on("selah_ends_quotation")) or (f["messenger"] and on("quotation_lines")):
             while len(lines) > 1 and lines[-1].scoped:
                 lines.pop()
@@ -1208,6 +1217,52 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 first = x
             else:
                 link(x, first, "parallel", "lone_conjunction", out[x]["attach"])
+    # rule verdict_closes_reason: in a verse that ends in a verdict ("unclean it is"), the "and" clauses between the reason ("for
+    # it chews the cud") and the verdict go on with the reason; the verdict closes it
+    for i, c in enumerate(clauses):
+        if not (c["f"]["verdict"] and active("verdict_closes_reason", book_of[c["key"]])):
+            continue
+        same = [j for j in range(i) if clauses[j]["verse"] == c["verse"]]
+        reason = next((j for j in reversed(same) if out[clauses[j]["key"]]["rule"] == "sub_back"
+                       and out[clauses[j]["key"]]["relation"] == "causal"), None)
+        if reason is None:
+            continue
+        moved: dict = {}                          # relinked clause -> its old parent
+        for j in range(reason + 1, i):
+            x, fx = clauses[j]["key"], clauses[j]["f"]
+            if fx["waw"] and not fx["speak"] and (out[x]["rule"] == "main" and not fx["sub_kind"] or out[x]["rule"] == "sub_back"
+                                                  and fx["lead"] not in SUB_KIND):
+                old = out[x]["parent"]
+                moved[x] = moved.get(old, old)
+                link(x, clauses[reason]["key"], "continuation" if fx["form"] in CHAIN_FORMS else "coordination", "verdict_closes_reason")
+        for c2 in clauses[i:]:                    # the verdict and what goes on from it stay where they were
+            if out[c2["key"]]["parent"] in moved:
+                out[c2["key"]]["parent"] = moved[out[c2["key"]]["parent"]]
+    # rule participle_describes_the_lord: "who brought you out", a clause opened by a participle with the article right after
+    # "I am the LORD", describes him and stands one level in under it
+    for i in range(1, len(clauses)):
+        c, pc = clauses[i], clauses[i - 1]
+        if c["f"]["art_participle"] and out[c["key"]]["rule"] == "main" and not c["f"]["waw"] and pc["f"]["pron1"] and pc["f"]["proper"] \
+                and (not pc["f"]["form"] or pc["f"]["form"] in PARTICIPLE) and active("participle_describes_the_lord", book_of[c["key"]]):
+            old = out[c["key"]]["parent"]
+            link(c["key"], pc["key"], "relative", "participle_describes_the_lord")
+            for j in clauses[i + 1:]:             # the main clauses after it stay on the line
+                if out[j["key"]]["parent"] == c["key"] and out[j["key"]]["rule"] == "main":
+                    out[j["key"]]["parent"] = old
+    # rule parallel_takes_partners_level: a main clause right after a subordinate one, in its verse, with the same verb form, person
+    # and number and no opener of its own, is the second half of a parallel pair: it goes on with its partner, not with the main line
+    for i in range(1, len(clauses)):
+        c, pc = clauses[i], clauses[i - 1]
+        k, p, f, pf = c["key"], pc["key"], c["f"], pc["f"]
+        if out[k]["rule"] == "main" and out[p]["rule"] in ("sub_back", "sub_continue") and c["verse"] == pc["verse"] \
+                and f["form"] and f["form"] == pf["form"] and (f["person"], f["number"]) == (pf["person"], pf["number"]) \
+                and not f["sub_kind"] and not f["speak"] and out[k]["parent"] != p and active("parallel_takes_partners_level", book_of[k]) \
+                and (i + 1 == len(clauses) or clauses[i + 1]["verse"] != c["verse"]):     # it closes the verse
+            old = out[k]["parent"]
+            link(k, p, "continuation" if f["form"] in CHAIN_FORMS else "coordination", "parallel_takes_partners_level")
+            for j in clauses[i + 1:]:             # what goes on from it in later verses stays on the main line
+                if out[j["key"]]["parent"] == k and j["verse"] != c["verse"]:
+                    out[j["key"]]["parent"] = old
     chap_of = {c["key"]: c["verse"][:2] for c in clauses}
     for k in out:
         ch = chain(k)
@@ -1220,7 +1275,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k]["depth"] = sum(1 for x in counted if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("subj", None)
     for k, d in _law_depths(out, back if LAW_RETURNS else set(), cond_series, ext, case_apod, law_heads, cp_cases,
-                            chap_of if CHAPTER_MARGIN else None, be_cases, inner_heads, forbid_cases, law_par).items():
+                            chap_of if CHAPTER_MARGIN else None, be_cases, inner_heads, forbid_cases, law_par,
+                            {c["key"] for c in clauses if c["f"]["form"] == "weqatal"}).items():
         out[k]["depth_law"] = d
     return out
 
@@ -1229,7 +1285,7 @@ def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series:
                 ext: set[str] = frozenset(), case_apod: dict | None = None, law_heads: set[str] = frozenset(),
                 cp_cases: dict | None = None, chap_of: dict | None = None, be_cases: set[str] = frozenset(),
                 inner_heads: set[str] = frozenset(), forbid_cases: set[str] = frozenset(),
-                law_par: dict | None = None) -> dict[str, int]:
+                law_par: dict | None = None, weqatal: set[str] = frozenset()) -> dict[str, int]:
     """text_depth_law ([depth.law]): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
     level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth. back: main clauses that open
     their verse other than with "and" + weqatal; after an apodosis they go back to the level the law stands on."""
@@ -1285,7 +1341,8 @@ def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series:
             if a in apodoses or par.get(a) == p or (p not in cond_series and p not in (cp_cases or {})):
                 continue
             par[a], w[a] = p, 0
-            if p in (cp_cases or {}) and p not in cond_series and chap_of \
+            if p in (cp_cases or {}) and p not in cond_series and chap_of and a not in weqatal \
+                    and not any(p < x < a and out[x]["rule"] == "protasis_continued" for x in weqatal) \
                     and active("casus_pendens_apodosis_level_with_head", chap_of.get(a, ("",))[0]):
                 par[a] = cp_cases[p]              # the apodosis comes back to the topic's level, beside its case
             apodoses[a] = p

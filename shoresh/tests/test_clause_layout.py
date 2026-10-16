@@ -432,6 +432,34 @@ def test_v023_rules_at_their_places(tmp_path, monkeypatch):
     assert rows("ZEP", 3, 11)[0]["text_depth"] < rows("ZEP", 3, 8)[0]["text_depth"]
 
 
+def test_v026_moving_out(tmp_path, monkeypatch):
+    """v0.26, after bsb-add-books' answer on moving out: the reason goes on to the verdict, which closes it (Lev 11:4); "and you"
+    goes back to the speech's own line (1 Kgs 2:5); the second half of a parallel pair takes its partner's level (Ps 3:8); "who
+    brought you out" one level under "I am the LORD" (Lev 22:33)."""
+    import json
+    from macula import build_clause_layout as b
+    out = tmp_path / "out"
+    monkeypatch.setattr("sys.argv", ["x", "--books", "LEV,1KI,PSA", "--out", str(out)])
+    b.main()
+
+    def plain(text):
+        return "".join(c for c in text if not "\u0591" <= c <= "\u05c7")
+
+    def rows(book, ch, v):
+        rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
+        return [r for r in rs if r["verse"] == v]
+    v4 = rows("LEV", 11, 4)
+    ki = next(r for r in v4 if plain(r["text"]).startswith("כי"))
+    hoof = next(r for r in v4 if plain(r["text"]).startswith("ופרסה"))
+    verdict = next(r for r in v4 if plain(r["text"]).startswith("טמא"))
+    assert hoof["text_depth"] == ki["text_depth"] and verdict["text_depth"] == ki["text_depth"] - 1
+    assert rows("1KI", 2, 5)[0]["text_depth"] == rows("1KI", 2, 2)[0]["text_depth"]
+    v8 = rows("PSA", 3, 8)
+    assert v8[-1]["text_depth"] == next(r for r in v8 if plain(r["text"]).startswith("כי"))["text_depth"]
+    v32, v33 = rows("LEV", 22, 32), rows("LEV", 22, 33)
+    assert v33[0]["text_depth_law"] == v32[-1]["text_depth_law"] + 1 and v33[-1]["text_depth_law"] == v32[-1]["text_depth_law"]
+
+
 def test_release_packaging(tmp_path, monkeypatch):
     """The release packaging: version stamp per book matching build.json, the card filled in, checksums, and a reproducible archive."""
     import json
