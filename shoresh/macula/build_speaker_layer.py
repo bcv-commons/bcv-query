@@ -244,11 +244,16 @@ def main() -> None:
     # corrections (resources/speaker_layer/corrections.tsv): hand corrections with their reasons, applied to the outer quotations
     corr_path = SHORESH.parent / "resources" / "speaker_layer" / "corrections.tsv"
     applied = 0
+    frame_fixed: dict = {}                        # (book number, chapter) -> the frame a correction sets ("" for none)
     if corr_path.exists():
         with open(corr_path, encoding="utf-8") as fh:
             corr = list(csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t"))
         by_first = {sp["first"]: sp for sp in spans}
         for c in corr:
+            if c["field"] == "frame" and c.get("reason"):
+                frame_fixed[(c["first"][:2], int(c["first"][2:5]))] = c["value"]   # the chapter that starts with this word
+                applied += 1
+                continue
             sp = by_first.get(c["first"])
             if sp is None or not c.get("reason"):
                 continue
@@ -458,6 +463,12 @@ def main() -> None:
                 innermost[x] = q
             break
 
+    def turn_seg(sg: dict) -> bool:                # opens with "and now" / "and you"
+        ws = [tok[w] for w in sg["words"] if w in tok]
+        while ws and D._n(ws[0]["lemma"]) == D.WAW:
+            ws = ws[1:]
+        return bool(ws) and D._n(ws[0]["lemma"]) in D.TURN and sg["words"][0] in tok and D._n(tok[sg["words"][0]]["lemma"]) == D.WAW
+
     def is_messenger(sg: dict) -> bool:
         return any(D._n(tok[w]["lemma"]) == D.KO for w in sg["words"][:3] if w in tok) and any(
             w in tok and tok[w]["class"] == "verb" and D._strong(tok[w]) in D.SAY and tok[w]["wtype"] == "qatal" for w in sg["words"])
@@ -513,14 +524,23 @@ def main() -> None:
         last, x = f + 1, f + 1
         while x + 1 < len(segs) and seg_q[x + 1][0] is not None and (segs[x + 1]["book"], segs[x + 1]["chapter"]) == (segs[f]["book"], segs[f]["chapter"]):
             x += 1
+        # a verse-initial "וְעַתָּה" / "וְאַתָּה" ends the sender's words: the messenger turns to his own appeal, at level 1 (Josh 24:14)
+        stop = next((y for y in range(f + 2, x + 1) if segs[y]["verse"] != segs[y - 1]["verse"] and turn_seg(segs[y])), None)
+        if stop is not None:
+            for y in range(stop, x + 1):
+                seg_q[y] = (None, 0.0)
+            for q in {id(seg_q[y][0]): seg_q[y][0] for y in range(f + 1, stop) if seg_q[y][0]}.values():
+                if q["last"] >= segs[stop]["first"]:
+                    q["last"], q["to"] = segs[stop - 1]["last"], f"{segs[stop - 1]['book']} {segs[stop - 1]['chapter']}:{segs[stop - 1]['verse']}"
+            spans[:] = [q for q in spans if q["first"] < segs[stop]["first"] or q["first"] > segs[x]["last"]]
         last = x
-        pieces = {id(seg_q[y][0]): seg_q[y][0] for y in range(f + 1, last + 1)}
+        pieces = {id(seg_q[y][0]): seg_q[y][0] for y in range(f + 1, last + 1) if seg_q[y][0] is not None}
         for q in pieces.values():
             if sender:
                 q["speaker"] = sender             # the sender's words, whatever voice FCBH cast for them
         if not who and frame_seg and (v := verb(frame_seg)):
             who = "(they)" if v.get("number") == "plural" else "(he/she)"
-        wrap(f, last, who, frame_seg, "relayed message")
+        wrap(f, x, who, frame_seg, "relayed message")
         relayed += 1
 
     # a psalm whose title ends with an inquit ("וַיֹּאמַר" in its title or opening its first line after it, Ps 18:1-2) is a quotation
@@ -546,10 +566,30 @@ def main() -> None:
             i += 1
 
     # the frame: a psalm is its psalmist's speech from its first line; per segment, the speaker of the frame (not a level)
+    # a first-person account (the memoirs of Ezra and Nehemiah, Daniel's visions): a chapter outside the poetic books, in a book whose
+    # narrator speaks in the first person, where most wayyiqtols outside quotations are in the first person: its frame is the narrator
+    # ("אֲנִי דָנִיֵּאל" names him; else "narrator (I)"); a prayer or speech inside it then stands one level in from the frame
+    narr = collections.defaultdict(collections.Counter)
+    named: dict = {}
+    for i, sg in enumerate(segs):
+        if sg["book"] in D.GROUPS["first_person_narrator"] and sg["book"] not in D.GROUPS["poetic"] and seg_q[i][0] is None:
+            v = verb(sg)
+            if v and v["form"] == "wayyiqtol":
+                narr[(sg["book"], sg["chapter"])][v["person"]] += 1
+            ws = [w for w in sg["words"] if w in tok]
+            for a, b in zip(ws, ws[1:]):
+                if tok[a]["class"] == "pron" and person.get(a) == "first" and tok[b]["wtype"] == "proper" and D._strong(tok[b]).isdigit():
+                    named.setdefault(sg["book"], names.get(f"H{int(D._strong(tok[b])):04d}"))
+    memoir_frame = {k: (named.get(k[0]) or "narrator (I)") for k, c in narr.items() if c["first"] > c["third"]}
     frame = [""] * len(segs)
     for i, sg in enumerate(segs):
         if sg["book"] in D.GROUPS["frame_poems"] and (sg["book"], sg["chapter"]) not in titled_chapters:
             frame[i] = frame_of.get((sg["book"], sg["chapter"]), "Psalmist")
+        if not frame[i] and memoir_frame.get((sg["book"], sg["chapter"])):
+            frame[i] = memoir_frame[(sg["book"], sg["chapter"])]
+        fixed = frame_fixed.get((sg["first"][:2], sg["chapter"]))
+        if fixed is not None:
+            frame[i] = fixed
 
     # the work lists
     no_inquit, frames_agree, frames_disagree, voiced_outside, inner_inquits = [], [], [], [], []
@@ -648,8 +688,9 @@ def main() -> None:
              f" inside a quotation: {messenger}",
              f"- relayed messages (a messenger formula before a quotation: the formula level 1, the sender's words level 2): {relayed};"
              f" psalms opened by an inquit in their title: {titled}",
-             f"- frame (a psalm is its psalmist's speech, a field, not a level): {sum(1 for f in frame if f)} segments;"
-             f" titles naming a person: {len(frame_of)}",
+             f"- frame (a psalm is its psalmist's speech, a first-person account its narrator's; a field, not a level): {sum(1 for f in frame if f)} segments;"
+             f" titles naming a person: {len(frame_of)}; first-person accounts: {len(memoir_frame)} chapters ("
+             + ", ".join(f"{b} {c}" for b, c in sorted(memoir_frame)) + ")",
              f"- segments, Clear quotation / layout speech: both {agree[(True, True)]}, neither {agree[(False, False)]}, Clear only"
              f" {agree[(True, False)]}, layout only {agree[(False, True)]}; agreement"
              f" {100 * (agree[(True, True)] + agree[(False, False)]) / max(1, len(segs)):.1f}%",
