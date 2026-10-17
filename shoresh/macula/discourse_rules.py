@@ -524,6 +524,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
     case_waiting: str | None = None               # a later protasis whose apodosis is the next main clause
     be_cases: set = set()                         # protases right after "and it shall be" (rule be_case_stands_level)
     law_heads: set = set()                        # clauses that start a new law: a casus pendens, a law-head word ([depth.law])
+    in_speech_keys: set = set()                   # main clauses placed inside a speech (rule retold_i_said_stays)
     law_par: dict = {}                            # the law view's own parent (and weight) of a clause (rule new_law_closes_protasis)
     cp_cases: dict = {}                           # the case under a casus pendens -> the casus pendens
     framed_of: dict = {}                          # main clause key -> a frame that names its speaker or sings (rule poem_wayyiqtol_continues)
@@ -727,7 +728,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             on("hand_of_the_lord_resumes") and f["hand"] and not f["pron2"] and not c["parent_key"])
         narrator_says = on("narrator_says") and f["form"] == "wayyiqtol" and f["person"] == "first" and f["verb"] in SAY and not f["pron3"] \
             and not f["pron2"] \
-            and not only_inf_after[i] and to_me
+            and not only_inf_after[i] and to_me \
+            and not (on("retold_i_said_stays") and i and clauses[i - 1]["f"]["form"] == "wayyiqtol"
+                     and clauses[i - 1]["f"]["person"] != "first" and clauses[i - 1]["key"] in in_speech_keys)
         resumes = (f["form"] == "wayyiqtol" and f["person"] == "third" and not f["pron12"]) or narrator or narrator_says or (
             on("aramaic_narrative_steps") and f["aramaic"] and (f["step"] or (
                 f["speak"] and f["person"] in ("third", None) and (f["form"] == "qatal" or f["form"] in PARTICIPLE)
@@ -758,6 +761,14 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             lines = lines[:framed[-1] + 1]
             line = lines[-1]
             resumes = False
+        # rules span_keeps_speech, span_end_resumes: the speaker spans (Clear's quotations projected onto the Hebrew words) say whether a
+        # quotation is still running: inside one span the narrative does not resume; right after a span a third-person wayyiqtol does
+        sp, psp = c.get("span"), (clauses[i - 1].get("span") if i else None)
+        if resumes and on("span_keeps_speech") and sp is not None and sp == psp and len(lines) > 1:
+            resumes = False
+        elif not resumes and on("span_end_resumes") and psp is not None and sp != psp and f["form"] == "wayyiqtol" \
+                and f["person"] == "third" and not f["pron12"] and not c["parent_key"] and len(lines) > 1:
+            resumes = True
         if len(lines) > 1 and (resumes or (f["word_event"] and f["form"] == "wayyiqtol" and on("word_event_resumes"))):
             lines = lines[:1]
             line = lines[0]
@@ -1154,6 +1165,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             ext.add(k)                            # "and you shall keep my commandments": back to the level the law stands on
         resolve_pending(k)
         line.last = k
+        if len(lines) > 1:
+            in_speech_keys.add(k)
         if line.first is None:
             line.first = k
         if k in inner_heads:
@@ -1400,8 +1413,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             c = vs[j]
             if not active("tree_level_inside_verse", book_of[c["key"]]):
                 continue
-            if c["f"]["lemor"] or c["f"]["form"] == "infinitive construct" or c["f"]["sub_kind"] == "conditional":
-                continue                          # an infinitive, "saying" above all, and a conditional keep their level
+            if c["f"]["lemor"] or (c["f"]["verb"] in SAY_INF and c["f"]["form"] == "infinitive construct") \
+                    or c["f"]["sub_kind"] == "conditional":
+                continue                          # "saying" opens a speech, a conditional keeps its level (Josh 22:24, Deut 15:5)
             ca = [n for n, _ in c["tree"]]
             pos = {n: i for i, n in enumerate(ca)}
             best = None

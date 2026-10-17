@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import csv
 import datetime
 import difflib
 import hashlib
@@ -140,6 +141,22 @@ def _clause_parents(con: sqlite3.Connection) -> dict[int, int | None]:
             p = nodes.get(p, (None, None))[0]
         out[nid] = p
     return out
+
+
+def _speaker_spans() -> dict[str, int]:
+    """Hebrew word key -> the number of the speaker span it stands in (resources/speaker_quotations: Clear's quotations projected onto
+    MACULA words, CC BY 4.0), for rules span_keeps_speech and span_end_resumes. Spans are flat (never nested)."""
+    path = SHORESH.parent / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
+    if not path.exists():
+        return {}
+    spans = []
+    with open(path, encoding="utf-8") as fh:
+        rows = csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t")
+        for r in rows:
+            if r["word_start"].startswith("o") and r["word_end"].startswith("o"):
+                spans.append((r["word_start"][1:], r["word_end"][1:]))
+    spans.sort()
+    return {"_spans": spans}
 
 
 class _Tree:
@@ -377,6 +394,13 @@ def main() -> None:
     toks_of: dict[int, list] = collections.defaultdict(list)
     first_seen: dict[int, tuple] = {}
     tree = _Tree(con)
+    span_list = _speaker_spans().get("_spans", [])
+    span_starts = [a for a, _ in span_list]
+
+    def span_of(key: str) -> int | None:                   # the speaker span a word key stands in
+        import bisect
+        i = bisect.bisect_right(span_starts, key) - 1
+        return i if i >= 0 and span_list[i][0] <= key <= span_list[i][1] else None
     tree_of: dict[int, list] = {}                 # clause id -> the tree path of its first segment (rule tree_level_inside_verse)
     chapter_first: set[int] = set()
     for book, ch, segs in chapters_out:
@@ -399,7 +423,7 @@ def main() -> None:
                               "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
                                                              nodes[cid]["role"] if cid in nodes else None, subj_ranges.get(cid), number),
                               "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "para": clause_key[cid] in paras,
-                              "tree": tree_of.get(cid, [])})
+                              "tree": tree_of.get(cid, []), "span": span_of(clause_key[cid])})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     # every external input this build used, against its pin in clause_layout.toml; nothing is written when one differs
