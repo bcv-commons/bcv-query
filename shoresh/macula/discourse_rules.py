@@ -324,6 +324,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
                 _strong(v) in SPEAK and any(_strong(t) in SONG for t in toks))),
             "time_wayehi": bool(v) and _strong(v) in BE_VERB and v["wtype"] == "wayyiqtol" and any(_n(t["lemma"]) in TIME_WORDS for t in toks),
             "consequence": any(lead_l[:len(s)] == s for s in CONSEQUENCE),
+            "therefore_near": any(lead_l[k:k + len(s)] == s for k in (0, 1) for s in CONSEQUENCE),
             "conclusion": any(lead_l[:len(s)] == s for s in CONCLUSION),
             "messenger": KO in in_first_two and bool(v) and _strong(v) in SAY and v["wtype"] == "qatal",
             "command_say": bool(v) and _strong(v) in SAY and not has_object and (v["wtype"] == "imperative" or (
@@ -600,7 +601,12 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 lines.pop()
             # rule turn_closes_quotation: "and now", "and you" at a verse start go back to the speech's own line: a quotation
             # opened inside the speech in an earlier verse ends
-            if on("turn_closes_quotation") and f["turn"] and not c["parent_key"]:
+            # rule turn_with_speech_formula_leaves: "and now" with a verb of saying in the qatal ("and now says the LORD", Isa 49:5,
+            # Hag 1:5) is a new speech formula: it leaves the speech it stands in, one speech level out
+            if on("turn_with_speech_formula_leaves") and f["turn"] and not c["parent_key"] and f["verb"] in SAY and f["form"] == "qatal" \
+                    and f["person"] == "third" and not f["therefore_near"] and len(lines) > 1:
+                lines.pop()
+            elif on("turn_closes_quotation") and f["turn"] and not c["parent_key"]:
                 while len(lines) > 2 and lines[-1].opened < vi and not (lines[-1].long or lines[-1].prophetic or lines[-1].messenger
                                                                           or lines[-1].oracle or lines[-1].song is not None):
                     lines.pop()
@@ -1267,13 +1273,26 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         return None
     for i, c in enumerate(clauses):
         f = c["f"]
-        if not (f["person"] == "second" and f["waw"] and f["form"] in FINITE and not c["parent_key"] and out[c["key"]]["rule"] == "main"
-                and i > 0 and clauses[i - 1]["verse"] != c["verse"] and active("second_person_brings_run_back", book_of[c["key"]])):
+        you = f["person"] == "second" and f["waw"] and f["form"] in FINITE and active("second_person_brings_run_back", book_of[c["key"]])
+        # rule first_person_brings_run_back: a first-person wayyiqtol, where the narrator never says "I"
+        me = f["form"] == "wayyiqtol" and f["person"] == "first" and active("first_person_brings_run_back", book_of[c["key"]]) \
+            and book_of[c["key"]] not in GROUPS["first_person_narrator"]
+        if not ((you or me) and not c["parent_key"] and out[c["key"]]["rule"] == "main" and i > 0 and clauses[i - 1]["verse"] != c["verse"]):
             continue
+        if speech_top(c["key"]) is not None:      # the line already stands in a speech (a new message, Judg 9:32): nothing to repair
+            continue
+        def quoted_by_run(x):                     # a line quoted inside the speech of a third-person wayyiqtol (an oath in the run)
+            t = speech_top(x)
+            y = out[t]["parent"] if t else None
+            while y is not None and out[y]["rule"] != "main":
+                y = out[y]["parent"]
+            fy = rec_of[y]["f"] if y in rec_of else None
+            return fy is not None and fy["form"] == "wayyiqtol" and fy["person"] == "third" and not fy["speak"] and speech_top(y) is None
         j = i - 1                                 # back over the run: wayyiqtols of the third person and what hangs under them
         run = []
         while j >= 0 and (clauses[j]["parent_key"] or (clauses[j]["f"]["form"] == "wayyiqtol" and clauses[j]["f"]["person"] == "third"
-                                                         and not clauses[j]["f"]["speak"] and out[clauses[j]["key"]]["rule"] == "main")):
+                                                         and not clauses[j]["f"]["speak"] and out[clauses[j]["key"]]["rule"] == "main")
+                          or quoted_by_run(clauses[j]["key"])):
             run.append(clauses[j])
             j -= 1
         heads = [x for x in run if not x["parent_key"]]
@@ -1286,8 +1305,13 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         if top is None:
             continue
         link(heads[-1]["key"], clauses[j]["key"], "continuation", "second_person_brings_run_back")
+        inrun = {x["key"] for x in run}
+        for h0, h in zip(heads[::-1], heads[::-1][1:]):  # later run verbs the narrative took go on with the run
+            if out[h["key"]]["parent"] not in inrun and speech_top(h["key"]) is None and not h["f"]["speak"]:
+                link(h["key"], h0["key"], "continuation", "second_person_brings_run_back")
         link(c["key"], top, "continuation", "second_person_brings_run_back")
-        # the speech now lasts until a verse-initial third-person wayyiqtol with a named subject: the narrative resumes there, on the
+        # the speech now lasts until a verse-initial third-person wayyiqtol with a subject of its own or a verb of saying: the narrative
+        # resumes there, on the
         # frame line the speech hung on (1 Kgs 2:10); before it, a verse-initial "and now" inside a quotation
         # of the speech goes back to the speech's main line (2:9)
         frame = out[top]["parent"]
@@ -1308,7 +1332,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 y = out[y]["parent"]
             if not inside:
                 break
-            if fx["form"] == "wayyiqtol" and fx["person"] == "third" and not fx["pron12"] and fx["named_subject"]:
+            if fx["form"] == "wayyiqtol" and fx["person"] == "third" and not fx["pron12"] and (fx["named_subject"] or fx["subj"] or fx["speak"]):
                 if frame is not None:
                     link(x, frame, "continuation", "second_person_brings_run_back")
                 break
