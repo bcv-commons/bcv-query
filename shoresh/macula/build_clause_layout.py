@@ -142,6 +142,52 @@ def _clause_parents(con: sqlite3.Connection) -> dict[int, int | None]:
     return out
 
 
+class _Tree:
+    """MACULA's syntax tree of a verse, for rule tree_level_inside_verse: a segment's path from the lowest node holding its words up
+    to the verse's word group, each node with its attachment kind "parent rule | child index (2 = third or later) | class | role |
+    opening word of a clause". The verse's word group has no parent (the sentence node above it is left out) and is "ROOT" as a
+    parent; a node without a class is "wg"."""
+    OPENERS = ("cj", "ptcl", "rel", "prep", "ij", "intj", "adv")
+
+    def __init__(self, con: sqlite3.Connection):
+        rows = con.execute("SELECT id, parent, kind, cls, rule, role, lo FROM nodes WHERE corpus='hbo'").fetchall()
+        sentence = {r[0] for r in rows if r[2] == "sentence"}
+        self.node = {r[0]: (None if r[1] in sentence else r[1], r[3], r[4], r[5]) for r in rows if r[0] not in sentence}
+        kids = collections.defaultdict(list)
+        for r in sorted(rows, key=lambda r: (r[6] if r[6] is not None else -1, r[0])):
+            if r[0] in self.node and self.node[r[0]][0] is not None:
+                kids[self.node[r[0]][0]].append(r[0])
+        self.index = {n: i for ks in kids.values() for i, n in enumerate(ks)}
+        lo_of = {r[0]: r[6] for r in rows if r[3] == "cl" and r[0] in self.node}
+        word = {r[0]: (r[1], r[2]) for r in con.execute("SELECT seq, lemma, class FROM words WHERE corpus='hbo' AND seq IN (SELECT lo FROM nodes "
+                                                         "WHERE corpus='hbo' AND cls='cl')")}
+        self.first_word = {n: word[lo][0] for n, lo in lo_of.items() if lo in word and word[lo][1] in self.OPENERS
+                           and discourse_rules._n(word[lo][0]) != discourse_rules.WAW}
+
+    def chain(self, n):
+        out = []
+        while n is not None and n in self.node:
+            out.append(n)
+            n = self.node[n][0]
+        return out
+
+    def att(self, n) -> str:
+        par = self.node[n][0]
+        prule = (self.node[par][2] or ("ROOT" if self.node[par][0] is None else "-")) if par is not None else "-"
+        key = f"{prule}|{min(self.index.get(n, 0), 2)}|{self.node[n][1] or 'wg'}|{self.node[n][3] or '-'}"
+        return key + (f"|{self.first_word[n]}" if n in self.first_word else "")
+
+    def path(self, toks: list) -> list[list]:
+        ns = [t["parent"] for t in toks if t["parent"] in self.node]
+        inner = [n for n in ns if self.node[n][0] is not None]
+        ns = inner or ns
+        common = None
+        for n in ns:
+            c = self.chain(n)
+            common = c if common is None else [x for x in common if x in set(c)]
+        return [[x, self.att(x)] for x in self.chain(common[0])] if common else []
+
+
 def _verb_person(con: sqlite3.Connection, keys: set[str]) -> tuple[dict[str, str], dict[str, str]]:
     """(person, number) of verbs and pronouns, from the lexeme spine."""
     import lexeme_macula
@@ -330,12 +376,16 @@ def main() -> None:
     # text-level hierarchy (phase 2): one record per clause, in order of first appearance
     toks_of: dict[int, list] = collections.defaultdict(list)
     first_seen: dict[int, tuple] = {}
+    tree = _Tree(con)
+    tree_of: dict[int, list] = {}                 # clause id -> the tree path of its first segment (rule tree_level_inside_verse)
     chapter_first: set[int] = set()
     for book, ch, segs in chapters_out:
         for s in segs:
             if s["clause"] is not None:
                 toks_of[s["clause"]] += s["_toks"]
                 first_seen.setdefault(s["clause"], (book, ch, s["verse"]))
+                if s["clause"] not in tree_of:
+                    tree_of[s["clause"]] = tree.path(s["_toks"])
         if segs and segs[0]["clause"] is not None:
             chapter_first.add(segs[0]["clause"])
     person, number = _verb_person(con, set(t["key"] for ts in toks_of.values() for t in ts if t["class"] in ("verb", "pron")))
@@ -348,7 +398,8 @@ def main() -> None:
                               "attach": attach_of.get(cid), "attach_strong": strong_of_key.get(attach_of.get(cid)),
                               "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
                                                              nodes[cid]["role"] if cid in nodes else None, subj_ranges.get(cid), number),
-                              "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "para": clause_key[cid] in paras})
+                              "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "para": clause_key[cid] in paras,
+                              "tree": tree_of.get(cid, [])})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     # every external input this build used, against its pin in clause_layout.toml; nothing is written when one differs

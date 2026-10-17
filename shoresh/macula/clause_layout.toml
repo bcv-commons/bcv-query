@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.29"
+version = "0.30"
 
 [profile]
 name = "default"
@@ -600,12 +600,27 @@ adds_tree_level = true
 doc = """tree_depth counts every link up the discourse_parent chain whose relation adds a tree level. text_depth (the flat view) counts
 the links whose relation adds a text level and whose discourse_rule is not in flat_rules: a chain stays on one level, an address and a
 circumstantial clause stay on the line of the clause they belong to (the relation still says what they are)."""
-flat_rules = ["embedded_flat"]           # see rules.embedded_keeps_macula_parent
+flat_rules = ["embedded_flat", "tree_level_flat"]   # see rules.embedded_keeps_macula_parent, rules.tree_level_inside_verse
 # Each chapter starts at the margin: text_depth and text_depth_law count only the links inside the clause's chapter; a link into another
 # chapter (a speech carried over the chapter break, Lev 7:1 in God's speech of Lev 6) stays in the tree (discourse_parent) but adds no
 # level, so a reader who opens a chapter sees it start at the left. BHSA starts 925 of its 929 chapters with a root. tree_depth is not
 # affected. Profile "continuous" sets this to false and counts across the break.
 chapter_starts_at_margin = true
+# a subordinate clause before its main clause (a fronted protasis, rule sub_fwd) is indented one level in text_depth; profile
+# "fronted_level" sets this true: it then stands level with its main clause, as in MACULA's tree and BHSA (bsb-add-books, v0.28)
+fronted_subordinate_stands_level = false
+
+[tree]
+doc = """MACULA's syntax tree inside a verse (rule tree_level_inside_verse). table: MACULA attachment kinds ("parent rule | child index
+(2 = third or later) | class | role | opening word of a clause", ROOT = the verse's word group) and whether a line entering one
+carries a level; 404 kinds, 198 carrying. From bsb-add-books (2026-10-17, CC0; MD5 7ae2c91cd847bea45699d72f68aa85ea): figures only,
+the share of lines entering each kind that step in, measured against their private reference; no values, codes or text of it.
+trusted: the kinds (prefixes) where the tree's level is used, the ones where it was right more often than our rules in their
+comparison on the delivered sets (v0.27): relatives (relCL: 26 against 17), phrases (PrepNp: 15 against 4), clauses under cjpCLx (26
+against 5), a כִּי clause under ClCl (12 against 1). Not the fronted protasis (ClCl2, a convention: profile fronted_level), not
+infinitives after a preposition (PrepCL: our rules 25 against 14), not segments at the shared node itself (even)."""
+table = "tree_attachments.json"
+trusted = ["relCL|", "PrepNp|", "cjpCLx|", "ClCl|1|cl|-|כִּי"]
 
 [depth.law]
 doc = """text_depth_law: the flat view with conditionals laid out as in BHSA. Where a protasis comes before its apodosis (a link with
@@ -1016,7 +1031,8 @@ doc = """A run of third-person wayyiqtols that left a speech (they took it for t
 verse-initial "and" + second-person finite verb, belonged to the speech: the run continues the line it followed, and the second-person
 line goes back to the speech's main line, with what goes on from it. The speech then lasts until the next verse-initial third-person wayyiqtol with
 a subject of its own or a verb of saying, which goes back to the frame the speech hung on (1 Kgs 2:10 "וַיִּשְׁכַּב דָּוִד", Judg 20:8
-"וַיָּקָם כָּל־הָעָם"); before it, a verse-initial "וְעַתָּה" inside a quotation of the speech goes back to the speech's main line (1 Kgs 2:9). 1 Kgs 2:5 "וַיַּהַרְגֵם / וַיָּשֶׂם / וַיִּתֵּן" after "אֲשֶׁר עָשָׂה
+"וַיָּקָם כָּל־הָעָם"); before it, a verse-initial "וְעַתָּה" or wayyiqtol of saying inside a quotation of the speech goes back to the speech's main line
+(1 Kgs 2:9; Gen 24:40 "וַיֹּאמֶר אֵלָי" after the question the servant quoted in 24:39, bsb-add-books, v0.29). 1 Kgs 2:5 "וַיַּהַרְגֵם / וַיָּשֶׂם / וַיִּתֵּן" after "אֲשֶׁר עָשָׂה
 לִשְׁנֵי־שָׂרֵי צִבְאוֹת", then 2:6 "וְעָשִׂיתָ כְּחָכְמָתֶךָ" on David's line. bsb-add-books, v0.26: in the narrative books at least 88% of
 lines with a second-person verb stand inside a speech (4,181 of 4,766)."""
 examples = ["1 Kgs 2:5 \"וַיַּהַרְגֵם\"", "1 Kgs 2:6 \"וְעָשִׂיתָ כְּחָכְמָתֶךָ\""]
@@ -1037,6 +1053,19 @@ Only in the third person ("וְאַתָּה אָמַרְתָּ בִלְבָבְ�
 Jer 32:36; bsb-add-books: "לָכֵן" never goes to the margin, 0 of 200).
 bsb-add-books, moving out: "וְעַתָּה" leaves the speech only when a speech formula follows it."""
 examples = ["Isa 49:5 \"וְעַתָּה אָמַר יְהוָה\"", "Hag 1:5 \"וְעַתָּה כֹּה אָמַר\""]
+
+[rules.tree_level_inside_verse]
+scope = "none"
+doc = """Inside a verse, a clause whose path in MACULA's tree enters one of the trusted attachment kinds (tree.trusted) takes the level the
+tree gives it. Its anchor is the earlier clause of the verse that shares the deepest tree node with it (then the one standing closest
+to that node, then the latest); its level is the anchor's, plus the level-carrying attachments (tree.table) on its own path below the
+shared node, minus those on the anchor's path. Only steps of 0 or +1 from the anchor are taken, and never onto a clause that hangs on
+it, and only for a clause that no other line goes on from (other than its own MACULA children): moving a clause moves what hangs on
+it, and in 1 Kgs 11:2 that carried the narrative of 11:2-12 into a quotation. The rule follows bsb-add-books' tree predictor
+(2026-10-17), without its speaker-span rules (English-derived). Off by default (scope "none"); profile "tree" turns it on. It moves
+536 lines; by mean depth per chapter it moves 37 chapters closer to BHSA and 65 farther, because it flattens and the layout is already
+a little shallow on average. Mean depth can't judge a step; bsb-add-books' step agreement decides whether it becomes the default."""
+examples = ["Deut 28:21 \"לְרִשְׁתָּהּ\" level with \"אֲשֶׁר־אַתָּה בָא־שָׁמָּה\"", "Ruth 1:16 \"אֲשֶׁר תֵּלְכִי\""]
 
 [rules.parallel_takes_partners_level]
 scope = "poetic"

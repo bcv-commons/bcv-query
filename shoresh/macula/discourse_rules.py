@@ -20,6 +20,7 @@ the external sources, the versification data or the rules version, and may only 
 """
 from __future__ import annotations
 
+import collections
 import copy
 import hashlib
 import json
@@ -94,7 +95,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
-    global VOCATIVE_RULE, TOPIC_RULES, SUBJECT_FIRST, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE, CHAPTER_MARGIN
+    global VOCATIVE_RULE, TOPIC_RULES, SUBJECT_FIRST, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE, CHAPTER_MARGIN, FRONTED_LEVEL, TREE_TRUSTED, TREE_CARRY
     CFG, files, PROFILE_CHANGED = load_settings(path, profile)
     CONFIG_FILES = files
     CONFIG_FILE, PROFILE, RULES_VERSION = files[-1][0], CFG["profile"]["name"], CFG["version"]
@@ -152,11 +153,15 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     FLAT = {r for r, v in CFG["relations"].items() if not v["adds_text_level"]}
     TREE_FLAT = {r for r, v in CFG["relations"].items() if not v["adds_tree_level"]}
     FLAT_RULES = set(CFG["depth"]["flat_rules"])
+    TREE_TRUSTED = list(CFG["tree"]["trusted"])
+    TREE_CARRY = {k["attachment"] for k in json.loads((CONFIG_PATH.parent / CFG["tree"]["table"]).read_text(encoding="utf-8"))["kinds"]
+                  if k["carries_a_level"]}
     LAW_RELATION, LAW_SIBLINGS = CFG["depth"]["law"]["relation"], CFG["depth"]["law"]["laws_in_a_row_stand_level"]
     LAW_RETURNS = CFG["depth"]["law"]["return_after_law"]
     LAW_STAIRCASE = CFG["depth"]["law"]["staircase"]
     LAW_FLAT_RULES = set(CFG["depth"]["law"].get("flat_rules", []))
     CHAPTER_MARGIN = CFG["depth"]["chapter_starts_at_margin"]
+    FRONTED_LEVEL = CFG["depth"].get("fronted_subordinate_stands_level", False)
     SPLIT_VERSES = {}
     for ref, v in CFG.get("versification", {}).get("split_verses", {}).items():
         book, cv = ref.split()
@@ -1336,8 +1341,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 if frame is not None:
                     link(x, frame, "continuation", "second_person_brings_run_back")
                 break
-            if fx["turn"] and under is not None and under != top:
-                link(x, top, "continuation", "second_person_brings_run_back")
+            if (fx["turn"] or (fx["form"] == "wayyiqtol" and fx["speak"])) and under is not None and under != top:
+                link(x, top, "continuation", "second_person_brings_run_back")   # "and he said to me" closes the inner quotation
     # rule participle_describes_the_lord: "who brought you out", a clause opened by a participle with the article right after
     # "I am the LORD", describes him and stands one level in under it
     for i in range(1, len(clauses)):
@@ -1363,6 +1368,59 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             for j in clauses[i + 1:]:             # what goes on from it in later verses stays on the main line
                 if out[j["key"]]["parent"] == k and j["verse"] != c["verse"]:
                     out[j["key"]]["parent"] = old
+    # rule tree_level_inside_verse: inside a verse, a clause entering one of the trusted MACULA attachments (tree.trusted) takes the
+    # level MACULA's tree gives it: its anchor is the earlier clause of the verse sharing the deepest tree node with it (then the one
+    # closest to that node, then the latest); the level is the anchor's plus the level-carrying attachments (tree.table) on the clause's
+    # own path below the shared node, minus those on the anchor's path
+    def ancestor(x, y):                           # x is on y's chain of parents
+        seen = set()
+        while y is not None and y not in seen:
+            if y == x:
+                return True
+            seen.add(y)
+            y = out[y]["parent"]
+        return False
+    verse_clauses: dict = collections.defaultdict(list)
+    tree_moved: dict = {}                         # clause the tree moved -> its parent before
+    for c in clauses:
+        if c.get("tree"):
+            verse_clauses[c["verse"]].append(c)
+    for vs in verse_clauses.values():
+        for j in range(1, len(vs)):
+            c = vs[j]
+            if not active("tree_level_inside_verse", book_of[c["key"]]):
+                continue
+            ca = [n for n, _ in c["tree"]]
+            pos = {n: i for i, n in enumerate(ca)}
+            best = None
+            for m, e in enumerate(vs[:j]):
+                ce = [n for n, _ in e["tree"]]
+                meet = next((n for n in ce if n in pos), None)
+                if meet is None:
+                    continue
+                be, ba = ce.index(meet), pos[meet]
+                score = (len(ca) - ba, -be, m)
+                if best is None or score > best[0]:
+                    best = (score, e, be, ba)
+            if best is None or best[3] == 0:
+                continue
+            _, e, be, ba = best
+            if not any(c["tree"][ba - 1][1].startswith(t) for t in TREE_TRUSTED):
+                continue
+            delta = sum(a in TREE_CARRY for _, a in c["tree"][:ba]) - sum(a in TREE_CARRY for _, a in e["tree"][:be])
+            k, a = c["key"], e["key"]
+            if delta not in (0, 1) or ancestor(k, a):
+                continue
+            if any(v["parent"] == k and rec_of[x]["parent_key"] != k for x, v in out.items() if x in rec_of):
+                continue                          # other lines go on from it: moving it would move them (1 Kgs 11:2)
+            rel = out[k]["relation"] if not (delta and out[k]["relation"] in FLAT) else "embedded"
+            old = out[k]["parent"]
+            link(k, a, rel, "tree_level" if delta else "tree_level_flat", out[k]["attach"])
+            tree_moved[k] = old
+    for x, v in out.items():                      # the main line that went on from a clause the tree moved stays where it was
+        if v["parent"] in tree_moved and v["rule"] not in ("tree_level", "tree_level_flat") and v["relation"] in FLAT \
+                and clauses_verse.get(x) != clauses_verse.get(v["parent"]):
+            v["parent"] = tree_moved[v["parent"]]
     chap_of = {c["key"]: c["verse"][:2] for c in clauses}
     for k in out:
         ch = chain(k)
@@ -1372,7 +1430,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             cut = next((i for i in range(len(ch) - 1) if chap_of.get(ch[i + 1]) != chap_of.get(ch[i])), None)
             if cut is not None:
                 counted = ch[:cut]
-        out[k]["depth"] = sum(1 for x in counted if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
+        out[k]["depth"] = sum(1 for x in counted if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES
+                              and not (FRONTED_LEVEL and out[x]["rule"] == "sub_fwd"))
         out[k].pop("subj", None)
     for k, d in _law_depths(out, back if LAW_RETURNS else set(), cond_series, ext, case_apod, law_heads, cp_cases,
                             chap_of if CHAPTER_MARGIN else None, be_cases, inner_heads, forbid_cases, law_par,

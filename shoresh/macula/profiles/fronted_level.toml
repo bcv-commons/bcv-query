@@ -1,0 +1,11 @@
+# A profile: it extends the default settings (macula/clause_layout.toml) and overrides only what it changes. See the header there.
+
+[profile]
+name = "fronted_level"
+extends = "default"
+doc = """A subordinate clause that comes before its main clause (a fronted protasis, "אִם־עֹלָה קָרְבָּנוֹ מִן־הַבָּקָר / זָכָר תָּמִים
+יַקְרִיבֶנּוּ", Lev 1:3) stands level with the main clause in text_depth, as in MACULA's syntax tree (a ClCl2 node with both clauses as
+children) and in BHSA. The default indents it one level, so that the main clause stands on the line. The law view is unchanged."""
+
+[depth]
+fronted_subordinate_stands_level = true
