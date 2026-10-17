@@ -127,6 +127,11 @@ books = ["GEN", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI", "2KI", "1CH", "2CH", "
 doc = "The books of poems: Job, Psalms, Proverbs, Song of Songs, Lamentations, Ecclesiastes."
 books = ["JOB", "PSA", "PRO", "SNG", "LAM", "ECC"]
 
+[books.memoirs]
+doc = """Books with a first-person memoir, where "I" is the narrator (Ezra 7:27-9:15, Nehemiah): the speaker layer adds no quotation there
+from a first- or second-person verb alone (shoresh/macula/build_speaker_layer.py; bsb-add-books, speaker layer v0.2)."""
+books = ["EZR", "NEH"]
+
 [books.first_person_narrator]
 doc = """Books (or parts of books) whose narrator speaks in the first person: "וַיֹּאמֶר אֵלַי", "וָאֵרֶא". Elsewhere "אֵלַי" in a speech
 is a character retelling (Deut 2:9 "וַיֹּאמֶר יְהוָה אֵלַי" in Moses' speech)."""

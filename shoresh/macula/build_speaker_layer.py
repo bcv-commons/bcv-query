@@ -305,7 +305,8 @@ def main() -> None:
     added = 0
     i = 0
     while i < len(segs):
-        if seg_q[i][0] is None and sdepth(segs[i]["clause_key"]) > 0 and segs[i]["book"] not in D.GROUPS["poetic"]:
+        if seg_q[i][0] is None and sdepth(segs[i]["clause_key"]) > 0 and segs[i]["book"] not in D.GROUPS["poetic"] \
+                and segs[i]["book"] not in D.GROUPS["memoirs"]:
             j = i
             while j + 1 < len(segs) and seg_q[j + 1][0] is None and sdepth(segs[j + 1]["clause_key"]) > 0 \
                     and (segs[j + 1]["book"], segs[j + 1]["chapter"]) == (segs[i]["book"], segs[i]["chapter"]):
@@ -324,6 +325,42 @@ def main() -> None:
                       "end_fit": "segment end", "pieces": 1, "inquit": iq["text"] if iq else ""}
                 spans.append(sp)
                 for x in range(i, j + 1):
+                    seg_q[x] = (sp, 1.0)
+            i = j + 1
+        else:
+            i += 1
+
+    def voiced(sg: dict) -> bool:                  # a finite verb in the first or second person
+        return any(w in tok and tok[w]["class"] == "verb" and tok[w]["wtype"] in D.FINITE and person.get(w) in ("first", "second")
+                   for w in sg["words"])
+    narrative_book = lambda b: b not in D.GROUPS["poetic"] and b not in D.GROUPS["first_person_narrator"]  # noqa: E731
+
+    # refinement 5: in the narrative books, a run outside quotations in which at least three verses speak in the first or second
+    # person is a song or speech (1 Chr 16:8-35, David's psalm); speaker from the nearest frame before it with a named subject
+    songs = 0
+    i = 0
+    while i < len(segs):
+        if seg_q[i][0] is None and narrative_book(segs[i]["book"]):
+            j = i
+            while j + 1 < len(segs) and seg_q[j + 1][0] is None and (segs[j + 1]["book"], segs[j + 1]["chapter"]) == (segs[i]["book"], segs[i]["chapter"]):
+                j += 1
+            vx = [x for x in range(i, j + 1) if voiced(segs[x])]
+            if len({segs[x]["verse"] for x in vx}) >= 3:
+                a, b = vx[0], vx[-1]
+                while a > i and segs[a - 1]["verse"] == segs[a]["verse"] and not saying(segs[a - 1]):
+                    a -= 1
+                while b < j and segs[b + 1]["verse"] == segs[b]["verse"]:
+                    b += 1
+                frame = next((segs[x] for x in range(a - 1, max(-1, a - 40), -1) if english_speaker(segs[x])), None)
+                who = english_speaker(frame) if frame else ""
+                songs += 1
+                sp = {"id": f"S{songs:05d}", "speaker": who, "speaker_hebrew": subject_words(frame) if frame else "", "alt_speaker": "",
+                      "divine": "Y" if who == "God" else "", "quote_type": "song or speech", "basis": "voice", "first": segs[a]["first"],
+                      "last": segs[b]["last"], "from": f"{segs[a]['book']} {segs[a]['chapter']}:{segs[a]['verse']}",
+                      "to": f"{segs[b]['book']} {segs[b]['chapter']}:{segs[b]['verse']}", "start_fit": "segment start",
+                      "end_fit": "segment end", "pieces": 1, "inquit": frame["text"] if frame else ""}
+                spans.append(sp)
+                for x in range(a, b + 1):
                     seg_q[x] = (sp, 1.0)
             i = j + 1
         else:
@@ -459,6 +496,7 @@ def main() -> None:
              "- refinement 2, edges inside a segment: " + ", ".join(f"{k} {v}" for k, v in snapped.items()),
              f"- refinement 3, pieces of one speech joined (same speaker, nothing between but a speaking formula): {merged}",
              f"- refinement 4, quotations from the layout where Clear has none (narrative books, with a first- or second-person verb): {added}",
+             f"- refinement 5, songs or speeches without any quotation (three or more verses in the first or second person): {songs}",
              f"- corrections applied (resources/speaker_layer/corrections.tsv): {applied}",
              f"- quotations without a verb of saying, 'saying' or a speaking formula in the three segments before: {len(no_inquit)}",
              f"- third-person wayyiqtols of saying inside a quotation (an inner quotation, or the quotation runs too far): {len(inner_inquits)}",
@@ -483,7 +521,7 @@ def main() -> None:
                         ("Speakers Glyssen doesn't list for the verse", gmiss)):
         lines += [f"## {title} ({len(rows)})", ""] + [f"- {a} [{b}] {c}" for a, b, c in rows[:60]] + [""]
     (OUT / "report.md").write_text("\n".join(lines), encoding="utf-8")
-    print("\n".join(lines[:18]))
+    print("\n".join(lines[:20]))
 
 
 if __name__ == "__main__":

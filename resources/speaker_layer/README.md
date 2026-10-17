@@ -37,7 +37,11 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
      inquit in the same segment moves to the next segment;
    - pieces of one speech are joined: the next span of the same speaker, with nothing between them but a speaking formula;
    - in the narrative books, a stretch the clause layout has as speech, with no Clear quotation and a first- or second-person verb, is
-     added as a quotation (`basis` `layout`), its speaker read from its inquit.
+     added as a quotation (`basis` `layout`), its speaker read from its inquit; not in the first-person memoirs of Ezra and Nehemiah
+     (`books.memoirs`), where "I" is the narrator;
+   - in the narrative books (not those whose narrator speaks in the first person), a run outside quotations in which at least three
+     verses speak in the first or second person is a song or speech (`basis` `voice`; 1 Chr 16:8-35, David's psalm), its speaker from the
+     nearest frame before it with a named subject.
 3. Nesting: inside a quotation, a stretch where the clause layout stands a speech level deeper than at the quotation's start is a
    quotation inside it. Its speaker: the outer speaker for an inquit in the first person; God for a divine name in the inquit's
    subject; a person's name (matched to Glyssen's characters for the verse) for a proper noun; "the one addressed" for a second-person
@@ -51,7 +55,9 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
 - The work lists in the report: third-person wayyiqtols inside quotations (a story told, or a quotation running too long),
   quotations without an inquit, first- and second-person verbs outside quotations, speakers Glyssen doesn't list.
 - bsb-add-books checks the layer against BHSA's clause text types (narrative / quotation / discourse, with nesting), in figures and
-  failures in words only (BHSA is non-commercial and is not used as input).
+  failures in words only (BHSA is non-commercial and is not used as input). v0.2: in narrative 97.5% of segments agree; quotation starts
+  fall where BHSA has one 96% of the time and ends 94%; of the layer's nested quotations, 82% are nested in BHSA too. BHSA treats a text
+  that is speech from its start (a psalm, most oracles) as a quotation at its top level; the layer, like Clear, doesn't (yet).
 
 ## Correcting it
 
