@@ -39,6 +39,34 @@ LAYOUT = SHORESH / "macula" / "data" / "clause-layout" / "clauses"
 OUT = SHORESH / "macula" / "data" / "speaker-layer"
 
 
+GLYSSEN_URL = "https://raw.githubusercontent.com/sillsdev/Glyssen/master/GlyssenCharacters/Resources/CharacterVerse.txt"
+
+
+def glyssen() -> tuple[dict, str]:
+    """Glyssen's characters per verse (SIL / FCBH, MIT), English numbering: (book, chapter, verse) -> character names; and the file's
+    sha256. Cached in the output folder."""
+    import hashlib
+    import urllib.request
+    cache = OUT / "_cache" / "CharacterVerse.txt"
+    if not cache.exists():
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        with urllib.request.urlopen(GLYSSEN_URL, timeout=120) as r:
+            cache.write_bytes(r.read())
+    raw = cache.read_bytes()
+    chars: dict = collections.defaultdict(set)
+    for line in raw.decode("utf-8").splitlines():
+        p = line.split("\t")
+        if line.startswith("#") or len(p) < 4 or not p[1].isdigit():
+            continue
+        try:
+            lo, hi = (int(x) for x in (p[2].split("-")[0], p[2].split("-")[-1]))
+        except ValueError:
+            continue
+        for v in range(lo, hi + 1):
+            chars[(p[0], int(p[1]), v)].add(p[3])
+    return chars, hashlib.sha256(raw).hexdigest()
+
+
 def load_spans() -> list[dict]:
     with open(SPANS, encoding="utf-8") as fh:
         rows = list(csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t"))
@@ -75,13 +103,43 @@ def main() -> None:
         subj_of[r["parent"]].append((r["lo"], r["hi"]))
     by_seq = {r["seq"]: r for r in tok.values()}
 
-    def subject_words(sg: dict) -> str:            # the Hebrew subject of a segment's clause, its nouns and names as lemmas
+    def subject_tokens(sg: dict) -> list:          # the subject of a segment's clause: its nouns, names and pronouns
         cls = {tok[w]["cl"] for w in sg["words"] if w in tok and tok[w]["cl"] is not None}
-        out = [tok[w]["lemma"] for w in sg["words"] if w in tok and tok[w]["role"] == "s" and tok[w]["class"] in ("noun", "pron")]
+        out = [tok[w] for w in sg["words"] if w in tok and tok[w]["role"] == "s" and tok[w]["class"] in ("noun", "pron")]
         for c in cls:
             for lo, hi in subj_of.get(c, []):
-                out += [by_seq[q]["lemma"] for q in range(lo, hi + 1) if q in by_seq and by_seq[q]["class"] in ("noun", "pron")]
-        return " ".join(dict.fromkeys(out))
+                out += [by_seq[q] for q in range(lo, hi + 1) if q in by_seq and by_seq[q]["class"] in ("noun", "pron")]
+        return list({t["key"]: t for t in out}.values())
+
+    def subject_words(sg: dict) -> str:
+        return " ".join(dict.fromkeys(t["lemma"] for t in subject_tokens(sg)))
+
+    names = {}                                     # Strong's -> English name (resources/proper_nouns/eng.tsv, gloss rows)
+    pn = SHORESH.parent / "resources" / "proper_nouns" / "eng.tsv"
+    if pn.exists():
+        for line in open(pn, encoding="utf-8"):
+            p = line.rstrip("\n").split("\t")
+            if len(p) >= 5 and p[4] == "gloss" and p[2] == "person":
+                names.setdefault(p[0], p[3])
+    import vrsmap
+    chars, glyssen_sha = glyssen()
+
+    def english_speaker(sg: dict) -> str:          # the subject as one of Glyssen's characters for the verse, or its English name
+        cands = set()
+        for r in vrsmap.to_eng((sg["book"], sg["chapter"], sg["verse"]), "org") or [(sg["book"], sg["chapter"], sg["verse"])]:
+            cands |= chars.get(tuple(r)[:3], set())
+        toks = subject_tokens(sg)
+        if any(D._strong(t) in D.DIVINE for t in toks):
+            return "God"
+        for t in toks:
+            if t["wtype"] != "proper":                 # names only from proper nouns ("אָב" is no one's name)
+                continue
+            st = D._strong(t)
+            name = names.get(f"H{int(st):04d}") if st and st.isdigit() else None
+            if name:
+                hit = next((c for c in sorted(cands) if c == name or c.startswith(name + " ") or name in c.split("/")), None)
+                return hit or name
+        return ""
     person, number = _verb_person(con, {k for k, r in tok.items() if r["class"] in ("verb", "pron")})
 
     def snap(key: str, end: bool) -> tuple[str | None, str]:
@@ -130,7 +188,32 @@ def main() -> None:
             sp["first"], sp["start_fit"] = segs[i + 1]["first"], "after its inquit"
             fixed_start += 1
             i += 1
-    # refinement 2: pieces of one speech: the next span of the same speaker with nothing between them but a speaking formula
+    # refinement 2: an edge inside a clause segment that only leaves out a prefix, particle or suffix of the segment (the English word
+    # order put the quotation mark there: "הֲ", "וְ", the article, "כִּי", "הִנֵּה", the object marker, a pronoun suffix) moves to the
+    # segment's edge; a start after an inquit in the same segment moves to the next segment
+    FUNCTION = {"cj", "ptcl", "art", "prep", "pron", "intj", "ij", "om", "rel"}
+    LEAD_IN = {D._n(x) for x in ("הִנֵּה", "הֵן")}
+
+    def functional(ws: list[str]) -> bool:
+        return all(w not in tok or tok[w]["class"] in FUNCTION or D._n(tok[w]["lemma"]) in LEAD_IN or not tok[w]["lemma"] for w in ws)
+    snapped = collections.Counter()
+    for sp in spans:
+        sg = segs[order[sp["first"]]]
+        pre = sg["words"][:sg["words"].index(sp["first"])]
+        if pre:
+            if saying({"words": pre}) and order[sp["first"]] + 1 < len(segs) and segs[order[sp["first"]] + 1]["first"] <= sp["last"]:
+                sp["first"], sp["start_fit"] = segs[order[sp["first"]] + 1]["first"], "after its inquit"
+                snapped["start after an inquit in its segment"] += 1
+            elif functional(pre):
+                sp["first"], sp["start_fit"] = sg["first"], "snapped to segment start"
+                snapped["start snapped back over a prefix or particle"] += 1
+        sg = segs[order[sp["last"]]]
+        post = sg["words"][sg["words"].index(sp["last"]) + 1:]
+        if post and functional(post):
+            sp["last"], sp["end_fit"] = sg["last"], "snapped to segment end"
+            snapped["end snapped over a suffix or particle"] += 1
+
+    # refinement 3: pieces of one speech: the next span of the same speaker with nothing between them but a speaking formula
     merged, out_spans = 0, []
     for sp in spans:
         prev = out_spans[-1] if out_spans else None
@@ -158,7 +241,31 @@ def main() -> None:
         sp = next((x for x in spans if x["id"] == q), None) if q else None
         seg_q.append((sp, n / len(s["words"])))
 
-    # the work lists
+    # corrections (resources/speaker_layer/corrections.tsv): hand corrections with their reasons, applied to the outer quotations
+    corr_path = SHORESH.parent / "resources" / "speaker_layer" / "corrections.tsv"
+    applied = 0
+    if corr_path.exists():
+        with open(corr_path, encoding="utf-8") as fh:
+            corr = list(csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t"))
+        by_first = {sp["first"]: sp for sp in spans}
+        for c in corr:
+            sp = by_first.get(c["first"])
+            if sp is None or not c.get("reason"):
+                continue
+            if c["field"] == "drop":
+                spans.remove(sp)
+            elif c["field"] in ("speaker", "first", "last") and c["value"]:
+                sp[c["field"]] = c["value"]
+                sp["basis"] = "correction"
+            applied += 1
+        spans.sort(key=lambda q: q["first"])
+        starts[:] = [q["first"] for q in spans]
+        seg_q[:] = []
+        for sg in segs:
+            hits = collections.Counter(q["id"] if (q := span_at(w)) else None for w in sg["words"])
+            q, n = hits.most_common(1)[0]
+            seg_q.append((next((x for x in spans if x["id"] == q), None) if q else None, n / len(sg["words"])))
+
     # the layout's speech structure, a second source: how many speeches a segment's clause stands in (relation "speech" links up its
     # discourse_parent chain in macula/data/clause-layout)
     par, rel = {}, {}
@@ -180,6 +287,47 @@ def main() -> None:
     first_seg = {}
     for i, sg in enumerate(segs):
         first_seg.setdefault(sg["clause_key"], i)
+
+    def inquit_of(k: str) -> dict | None:          # the segment of the clause a speech hangs on (through "saying" to its clause)
+        x, seen = k, set()
+        while x is not None and rel.get(x) != "speech" and x not in seen:
+            seen.add(x)
+            x = par.get(x)
+        q = par.get(x) if x is not None else None
+        iq = segs[first_seg[q]] if q in first_seg else None
+        if iq and len(iq["words"]) <= 3 and any(D._strong(tok[w]) in D.SAY_INF and tok[w]["wtype"] == "infinitive construct"
+                                                 for w in iq["words"] if w in tok) and par.get(q) in first_seg:
+            iq = segs[first_seg[par[q]]]
+        return iq
+
+    # refinement 4: in the narrative books, a stretch the layout has as speech, with no Clear quotation and with a first- or second-person
+    # verb in it, is a quotation Clear lacks (1 Chr 16:8-35, 1 Sam 3:6); speaker from its inquit
+    added = 0
+    i = 0
+    while i < len(segs):
+        if seg_q[i][0] is None and sdepth(segs[i]["clause_key"]) > 0 and segs[i]["book"] not in D.GROUPS["poetic"]:
+            j = i
+            while j + 1 < len(segs) and seg_q[j + 1][0] is None and sdepth(segs[j + 1]["clause_key"]) > 0 \
+                    and (segs[j + 1]["book"], segs[j + 1]["chapter"]) == (segs[i]["book"], segs[i]["chapter"]):
+                j += 1
+            if any((v := verb(segs[x])) and v["person"] in ("first", "second") for x in range(i, j + 1)):
+                iq = inquit_of(segs[i]["clause_key"])
+                v = verb(iq) if iq else None
+                who = english_speaker(iq) if iq else ""
+                if not who and v:
+                    who = {"second": "(the one addressed)"}.get(v["person"], "(they)" if v.get("number") == "plural" else "(he/she)")
+                added += 1
+                sp = {"id": f"L{added:05d}", "speaker": who, "speaker_hebrew": subject_words(iq) if iq else "", "alt_speaker": "",
+                      "divine": "Y" if who == "God" else "", "quote_type": "layout only", "basis": "layout", "first": segs[i]["first"],
+                      "last": segs[j]["last"], "from": f"{segs[i]['book']} {segs[i]['chapter']}:{segs[i]['verse']}",
+                      "to": f"{segs[j]['book']} {segs[j]['chapter']}:{segs[j]['verse']}", "start_fit": "segment start",
+                      "end_fit": "segment end", "pieces": 1, "inquit": iq["text"] if iq else ""}
+                spans.append(sp)
+                for x in range(i, j + 1):
+                    seg_q[x] = (sp, 1.0)
+            i = j + 1
+        else:
+            i += 1
 
     # nesting: inside a quotation, a stretch where the layout stands a speech level deeper than at the quotation's start is a quotation
     # inside it, opened by the clause its first line hangs on as speech (the inquit)
@@ -213,6 +361,8 @@ def main() -> None:
                 v = verb(iq) if iq else None
                 who = outer["speaker"] if v and v["person"] == "first" else ""
                 who_he = subject_words(iq) if iq else ""
+                if not who and iq:
+                    who = english_speaker(iq)
                 if not who and not who_he and v and v["person"] == "second":
                     who = "(the one addressed)"
                 elif not who and not who_he and v and v["person"] == "third":
@@ -280,36 +430,60 @@ def main() -> None:
                          f"{q['speaker'] if q else ''}\t{share:.2f}\n")
     frames_inside = frames_agree + frames_disagree
 
+    # check: the outer speakers against Glyssen's characters for the quotation's first verse (Hebrew numbering -> English)
+    gcheck, gmiss = collections.Counter(), []
+    for sp in spans:
+        b, cv = sp["from"].split(" ")
+        c, v = (int(x) for x in cv.split(":"))
+        names = set()
+        for r in vrsmap.to_eng((b, c, v), "org") or [(b, c, v)]:
+            names |= chars.get(tuple(r)[:3], set())
+        if not names:
+            gcheck["verse not in Glyssen"] += 1
+        elif sp["speaker"] in names:
+            gcheck["listed"] += 1
+        elif any(sp["speaker"] in n.split("/") or n in sp["speaker"].split("/") for n in names):
+            gcheck["listed in a group"] += 1
+        else:
+            gcheck["not listed"] += 1
+            gmiss.append((sp["from"], sp["speaker"], "Glyssen: " + "; ".join(sorted(n for n in names if not n.startswith("narrator"))[:4])))
+
     fit = collections.Counter((sp["start_fit"], sp["end_fit"]) for sp in spans)
     in_q = sum(1 for sp, _ in seg_q if sp)
     split = sum(1 for sp, share in seg_q if sp and share < 1)
-    lines = ["# Hebrew speaker layer: baseline report", "",
+    lines = ["# Hebrew speaker layer: report", "",
              f"- quotations: {len(spans)}; clause segments: {len(segs)}, of them in a quotation: {in_q} ({100 * in_q / max(1, len(segs)):.1f}%),"
              f" partly: {split}",
              "- edges: " + ", ".join(f"start {a} / end {b}: {n}" for (a, b), n in fit.most_common()),
              f"- refinement 1, quotations moved to start after their own inquit: {fixed_start}",
-             f"- refinement 2, pieces of one speech joined (same speaker, nothing between but a speaking formula): {merged}",
+             "- refinement 2, edges inside a segment: " + ", ".join(f"{k} {v}" for k, v in snapped.items()),
+             f"- refinement 3, pieces of one speech joined (same speaker, nothing between but a speaking formula): {merged}",
+             f"- refinement 4, quotations from the layout where Clear has none (narrative books, with a first- or second-person verb): {added}",
+             f"- corrections applied (resources/speaker_layer/corrections.tsv): {applied}",
              f"- quotations without a verb of saying, 'saying' or a speaking formula in the three segments before: {len(no_inquit)}",
              f"- third-person wayyiqtols of saying inside a quotation (an inner quotation, or the quotation runs too far): {len(inner_inquits)}",
              f"- other third-person wayyiqtols inside a quotation, outside the books of poems: {len(frames_inside)}; the layout also has them in a"
              f" speech (a story the speaker tells): {len(frames_agree)}; not (the sources disagree): {len(frames_disagree)}",
              f"- nested quotations from the layout: {len(inner)} (level 2: {sum(q['level'] == 2 for q in inner)}, deeper:"
              f" {sum(q['level'] > 2 for q in inner)}); with a speaker: {sum(bool(q['speaker'] or q['speaker_hebrew']) for q in inner)}"
-             f" ('I': {sum(q['speaker'] not in ('', '(the one addressed)', '(they)', '(he/she)') for q in inner)}, the inquit's subject: "
-             f"{sum(bool(q['speaker_hebrew']) for q in inner)}, 'you': {sum(q['speaker'] == '(the one addressed)' for q in inner)},"
+             f" (named: {sum(q['speaker'] not in ('', '(the one addressed)', '(they)', '(he/she)') for q in inner)}, a Hebrew subject only: "
+             f"{sum(bool(q['speaker_hebrew']) and q['speaker'] in ('', '(they)', '(he/she)', '(the one addressed)') for q in inner)}, 'you': {sum(q['speaker'] == '(the one addressed)' for q in inner)},"
              f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)})",
              f"- segments, Clear quotation / layout speech: both {agree[(True, True)]}, neither {agree[(False, False)]}, Clear only"
              f" {agree[(True, False)]}, layout only {agree[(False, True)]}; agreement"
              f" {100 * (agree[(True, True)] + agree[(False, False)]) / max(1, len(segs)):.1f}%",
+             f"- speakers against Glyssen's characters of the quotation's first verse (sha256 {glyssen_sha[:12]}): "
+             + ", ".join(f"{k} {v}" for k, v in gcheck.most_common()),
              "- layout speech without a Clear quotation, by book: " + ", ".join(f"{b} {n}" for b, n in layout_only.most_common(10)),
              f"- first- or second-person finite verbs outside any quotation, in the narrative books: {len(voiced_outside)}", ""]
     for title, rows in (("Quotations without an inquit before them", no_inquit), ("Wayyiqtols of saying inside a quotation", inner_inquits),
                         ("Third-person wayyiqtols inside a quotation where the layout has no speech (sources disagree)", frames_disagree),
                         ("Third-person wayyiqtols inside a quotation that the layout has in a speech too", frames_agree),
-                        ("First/second person outside quotations (narrative books)", voiced_outside)):
+                        ("First/second person outside quotations (narrative books)", voiced_outside),
+                        ("Speakers Glyssen doesn't list for the verse", gmiss)):
         lines += [f"## {title} ({len(rows)})", ""] + [f"- {a} [{b}] {c}" for a, b, c in rows[:60]] + [""]
     (OUT / "report.md").write_text("\n".join(lines), encoding="utf-8")
-    print("\n".join(lines[:14]))
+    print("\n".join(lines[:18]))
 
 
 if __name__ == "__main__":

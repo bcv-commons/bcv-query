@@ -1,0 +1,6 @@
+# Corrections to the Hebrew speaker layer (shoresh/macula/build_speaker_layer.py applies them last).
+# One row per change, keyed on a quotation's first word (MACULA key, 12 digits, as in quotations.tsv `first`).
+# field: speaker | first | last | drop   (drop: the quotation is not a quotation; value empty)
+# value: the new speaker name, or the new first / last word key
+# reason: how the Hebrew text settles it (required)
+first	field	value	reason
