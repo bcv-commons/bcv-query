@@ -24,7 +24,8 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
   possible), `speaker_hebrew` (the inquit's subject as MACULA lemmas, nested quotations), `divine`, `quote_type`, `basis` (`block`,
   `referent`, `character`, `correction`: from the speaker data; `layout`: from the clause layout), `first` / `last` (MACULA word keys),
   `from` / `to` (verses, Hebrew numbering), `start_fit` / `end_fit` (how the edges fit the clause segments), `pieces`, `inquit`.
-- `segments/<BOOK>.tsv`: per clause segment: its innermost quotation, its level, speaker, and the share of its words in the quotation.
+- `segments/<BOOK>.tsv`: per clause segment: its innermost quotation, its level, speaker, the share of its words in the quotation, and
+  its `frame` (the speaker of a text that is speech from its start, the psalms).
 - `report.md`: the figures and the work lists of doubtful places.
 
 ## How it is made
@@ -42,11 +43,15 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
    - in the narrative books (not those whose narrator speaks in the first person), a run outside quotations in which at least three
      verses speak in the first or second person is a song or speech (`basis` `voice`; 1 Chr 16:8-35, David's psalm), its speaker from the
      nearest frame before it with a named subject.
+   - a quotation that ends on an inquit ("וַיֹּאמֶר …" as its last line) ends before it (the mirror of the first refinement).
 3. Nesting: inside a quotation, a stretch where the clause layout stands a speech level deeper than at the quotation's start is a
-   quotation inside it. Its speaker: the outer speaker for an inquit in the first person; God for a divine name in the inquit's
+   quotation inside it; and a messenger formula inside a quotation ("כֹּה אָמַר X", 2 Kgs 19:20, Josh 24:2, Judg 11:15) opens X's words,
+   one level deeper, to the end of the quotation (`basis` `messenger formula`). Its speaker: the outer speaker for an inquit in the first person; God for a divine name in the inquit's
    subject; a person's name (matched to Glyssen's characters for the verse) for a proper noun; "the one addressed" for a second-person
    inquit; "he/she" / "they" when the subject is only in the verb.
-4. Corrections (`corrections.tsv`) last.
+4. The frame: a psalm is its psalmist's speech from its first line (`books.frame_poems`). This is recorded per segment as `frame` (the
+   name in the title's "לְ" + name, else "Psalmist"), not as a level, so the levels stay comparable with Clear's.
+5. Corrections (`corrections.tsv`) last.
 
 ## Checks
 

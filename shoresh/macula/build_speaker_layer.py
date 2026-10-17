@@ -366,6 +366,21 @@ def main() -> None:
         else:
             i += 1
 
+    # refinement 6: a quotation that ends on an inquit ("וַיֹּאמֶר …" as its last line: the English quotation mark closed after it)
+    # ends before it; the inquit introduces the next speech (the mirror of refinement 1). A quotation that goes on after a
+    # "וַיֹּאמֶר" is left as it is: that can be a story the speaker tells (Micaiah's vision, 1 Kgs 22:19-23; Jotham's fable)
+    split = 0
+    for i in range(1, len(segs)):
+        q = seg_q[i][0]
+        if q is None or seg_q[i - 1][0] is not q or (i + 1 < len(segs) and seg_q[i + 1][0] is q):
+            continue
+        v = verb(segs[i])
+        if v and v["form"] == "wayyiqtol" and saying(segs[i]):
+            q["last"], q["to"] = segs[i - 1]["last"], f"{segs[i - 1]['book']} {segs[i - 1]['chapter']}:{segs[i - 1]['verse']}"
+            q["end_fit"] = "before its closing inquit"
+            seg_q[i] = (None, 0.0)
+            split += 1
+
     # nesting: inside a quotation, a stretch where the layout stands a speech level deeper than at the quotation's start is a quotation
     # inside it, opened by the clause its first line hangs on as speech (the inquit)
     level = [0] * len(segs)
@@ -414,6 +429,51 @@ def main() -> None:
                 q["last"], q["to"] = segs[i]["last"], f"{segs[i]['book']} {segs[i]['chapter']}:{segs[i]['verse']}"
             innermost[i] = stack[-1]
 
+    # nesting by the messenger formula: inside a quotation, "כֹּה אָמַר X" opens X's words, one level deeper, to the end of the
+    # quotation, where the layout hasn't nested them already (2 Kgs 19:20-34, Josh 24:2-13, Judg 11:15-27)
+    messenger = 0
+    for sp in spans:
+        idx = [i for i in range(order[sp["first"]], order[sp["last"]] + 1) if seg_q[i][0] is sp]
+        for pos, m in enumerate(idx[:-1]):
+            sg = segs[m]
+            if not (any(D._n(tok[w]["lemma"]) == D.KO for w in sg["words"][:3] if w in tok)
+                    and any(w in tok and tok[w]["class"] == "verb" and D._strong(tok[w]) in D.SAY and tok[w]["wtype"] == "qatal"
+                            for w in sg["words"])):
+                continue
+            rest = [x for x in idx[pos + 1:] if level[x] <= level[m]]
+            if not rest or rest != idx[pos + 1:pos + 1 + len(rest)]:
+                continue
+            messenger += 1
+            outer = innermost[m] or sp
+            who = english_speaker(sg) or ""
+            q = {"id": f"{sp['id']}.m{messenger}", "speaker": who, "speaker_hebrew": subject_words(sg), "level": level[m] + 1,
+                 "parent": outer["id"], "first": segs[rest[0]]["first"], "last": segs[rest[-1]]["last"],
+                 "from": f"{segs[rest[0]]['book']} {segs[rest[0]]['chapter']}:{segs[rest[0]]['verse']}",
+                 "to": f"{segs[rest[-1]]['book']} {segs[rest[-1]]['chapter']}:{segs[rest[-1]]['verse']}", "inquit": sg["text"],
+                 "alt_speaker": "", "divine": "Y" if who == "God" else "", "quote_type": "nested", "basis": "messenger formula",
+                 "start_fit": "segment start", "end_fit": "segment end", "pieces": 1}
+            inner.append(q)
+            for x in rest:
+                level[x] += 1
+                innermost[x] = q
+            break
+
+    # the frame: a psalm is its psalmist's speech from its first line; per segment, the speaker of the frame (not a level)
+    frame_of: dict = {}                           # (book, chapter) -> the person its title names with "לְ" (לְדָוִד, לְאָסָף, לִבְנֵי־קֹרַח)
+    for sg in segs:
+        if sg["book"] in D.GROUPS["frame_poems"] and sg["verse"] == 1 and (sg["book"], sg["chapter"]) not in frame_of:
+            ws = [w for w in sg["words"] if w in tok]
+            for a, b in zip(ws, ws[1:]):
+                if D._n(tok[a]["lemma"]) == D.LE and tok[b]["wtype"] == "proper" and D._strong(tok[b]).isdigit():
+                    name = names.get(f"H{int(D._strong(tok[b])):04d}")
+                    if name:
+                        frame_of[(sg["book"], sg["chapter"])] = name
+                        break
+    frame = [""] * len(segs)
+    for i, sg in enumerate(segs):
+        if sg["book"] in D.GROUPS["frame_poems"]:
+            frame[i] = frame_of.get((sg["book"], sg["chapter"]), "Psalmist")
+
     # the work lists
     no_inquit, frames_agree, frames_disagree, voiced_outside, inner_inquits = [], [], [], [], []
     agree = collections.Counter()
@@ -458,13 +518,13 @@ def main() -> None:
     (OUT / "segments").mkdir(exist_ok=True)
     by_book = collections.defaultdict(list)
     for i, s in enumerate(segs):
-        by_book[s["book"]].append((s, innermost[i], seg_q[i][1], level[i] if seg_q[i][0] else 0))
+        by_book[s["book"]].append((s, innermost[i], seg_q[i][1], level[i] if seg_q[i][0] else 0, frame[i]))
     for book, rows in by_book.items():
         with open(OUT / "segments" / f"{book}.tsv", "w", encoding="utf-8") as fh:
-            fh.write("chapter\tverse\tseg\tclause_key\tquotation\tlevel\tspeaker\tshare\n")
-            for s, q, share, lv in rows:
+            fh.write("chapter\tverse\tseg\tclause_key\tquotation\tlevel\tspeaker\tshare\tframe\n")
+            for s, q, share, lv, fr in rows:
                 fh.write(f"{s['chapter']}\t{s['verse']}\t{s['seg']}\t{s['clause_key']}\t{q['id'] if q else ''}\t{lv}\t"
-                         f"{q['speaker'] if q else ''}\t{share:.2f}\n")
+                         f"{q['speaker'] if q else ''}\t{share:.2f}\t{fr}\n")
     frames_inside = frames_agree + frames_disagree
 
     # check: the outer speakers against Glyssen's characters for the quotation's first verse (Hebrew numbering -> English)
@@ -497,6 +557,7 @@ def main() -> None:
              f"- refinement 3, pieces of one speech joined (same speaker, nothing between but a speaking formula): {merged}",
              f"- refinement 4, quotations from the layout where Clear has none (narrative books, with a first- or second-person verb): {added}",
              f"- refinement 5, songs or speeches without any quotation (three or more verses in the first or second person): {songs}",
+             f"- refinement 6, quotations that ended on an inquit end before it: {split}",
              f"- corrections applied (resources/speaker_layer/corrections.tsv): {applied}",
              f"- quotations without a verb of saying, 'saying' or a speaking formula in the three segments before: {len(no_inquit)}",
              f"- third-person wayyiqtols of saying inside a quotation (an inner quotation, or the quotation runs too far): {len(inner_inquits)}",
@@ -506,7 +567,10 @@ def main() -> None:
              f" {sum(q['level'] > 2 for q in inner)}); with a speaker: {sum(bool(q['speaker'] or q['speaker_hebrew']) for q in inner)}"
              f" (named: {sum(q['speaker'] not in ('', '(the one addressed)', '(they)', '(he/she)') for q in inner)}, a Hebrew subject only: "
              f"{sum(bool(q['speaker_hebrew']) and q['speaker'] in ('', '(they)', '(he/she)', '(the one addressed)') for q in inner)}, 'you': {sum(q['speaker'] == '(the one addressed)' for q in inner)},"
-             f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)})",
+             f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)}); of them opened by a messenger formula"
+             f" inside a quotation: {messenger}",
+             f"- frame (a psalm is its psalmist's speech, a field, not a level): {sum(1 for f in frame if f)} segments;"
+             f" titles naming a person: {len(frame_of)}",
              f"- segments, Clear quotation / layout speech: both {agree[(True, True)]}, neither {agree[(False, False)]}, Clear only"
              f" {agree[(True, False)]}, layout only {agree[(False, True)]}; agreement"
              f" {100 * (agree[(True, True)] + agree[(False, False)]) / max(1, len(segs)):.1f}%",
@@ -521,7 +585,7 @@ def main() -> None:
                         ("Speakers Glyssen doesn't list for the verse", gmiss)):
         lines += [f"## {title} ({len(rows)})", ""] + [f"- {a} [{b}] {c}" for a, b, c in rows[:60]] + [""]
     (OUT / "report.md").write_text("\n".join(lines), encoding="utf-8")
-    print("\n".join(lines[:20]))
+    print("\n".join(lines[:22]))
 
 
 if __name__ == "__main__":

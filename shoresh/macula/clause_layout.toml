@@ -127,6 +127,12 @@ books = ["GEN", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI", "2KI", "1CH", "2CH", "
 doc = "The books of poems: Job, Psalms, Proverbs, Song of Songs, Lamentations, Ecclesiastes."
 books = ["JOB", "PSA", "PRO", "SNG", "LAM", "ECC"]
 
+[books.frame_poems]
+doc = """Books whose every chapter is one speaker's poem from its first line (the psalms): the speaker layer records that speaker as the
+segment's frame, from the title's "לְ" + name (לְדָוִד), else "Psalmist" (shoresh/macula/build_speaker_layer.py; bsb-add-books, speaker
+layer v0.2: BHSA counts a psalm as a quotation at its top level)."""
+books = ["PSA"]
+
 [books.memoirs]
 doc = """Books with a first-person memoir, where "I" is the narrator (Ezra 7:27-9:15, Nehemiah): the speaker layer adds no quotation there
 from a first- or second-person verb alone (shoresh/macula/build_speaker_layer.py; bsb-add-books, speaker layer v0.2)."""
