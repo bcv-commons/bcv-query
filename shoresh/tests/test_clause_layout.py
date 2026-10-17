@@ -463,6 +463,19 @@ def test_v026_moving_out(tmp_path, monkeypatch):
     assert v33[0]["text_depth_law"] == v32[-1]["text_depth_law"] + 1 and v33[-1]["text_depth_law"] == v32[-1]["text_depth_law"]
 
 
+def test_moving_out_test_set(tmp_path, monkeypatch):
+    """bsb-add-books' moving-out test set (98 lines: verse, opening, the direction from the line before) keeps its score: v0.28 gets
+    63 right. A rule change that loses lines here has to say why."""
+    from macula import build_clause_layout as b, moving_out_score as m
+    out = tmp_path / "out"
+    books = sorted({t["book"] for t in m.tests()})
+    monkeypatch.setattr("sys.argv", ["x", "--books", ",".join(books), "--out", str(out)])
+    b.main()
+    res = m.score(out / "clauses")
+    assert all(r["found"] for r in res)
+    assert sum(r["right"] for r in res) >= 63, [r["verse"] for r in res if not r["right"]]
+
+
 def test_release_packaging(tmp_path, monkeypatch):
     """The release packaging: version stamp per book matching build.json, the card filled in, checksums, and a reproducible archive."""
     import json

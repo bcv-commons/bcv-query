@@ -1239,6 +1239,21 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         for c2 in clauses[i:]:                    # the verdict and what goes on from it stay where they were
             if out[c2["key"]]["parent"] in moved:
                 out[c2["key"]]["parent"] = moved[out[c2["key"]]["parent"]]
+    # rule weqatal_continues_subordinate: "and" + weqatal right after a subordinate clause after its main clause (rule sub_back) in the
+    # same verse, with that clause's person and number and a yiqtol or weqatal verb, goes on with it (Lev 18:5); what goes on from
+    # it on the main line stays there
+    for i in range(1, len(clauses)):
+        c, pc = clauses[i], clauses[i - 1]
+        f, pf = c["f"], pc["f"]
+        if f["waw"] and f["form"] == "weqatal" and out[c["key"]]["rule"] == "main" and out[pc["key"]]["rule"] == "sub_back" \
+                and c["verse"] == pc["verse"] and pf["form"] in ("yiqtol", "weqatal") and f["person"] and f["number"] \
+                and (f["person"], f["number"]) == (pf["person"], pf["number"]) and not f["speak"] \
+                and active("weqatal_continues_subordinate", book_of[c["key"]]):
+            old = out[c["key"]]["parent"]
+            link(c["key"], pc["key"], "continuation", "weqatal_continues_subordinate")
+            for j in clauses[i + 1:]:
+                if out[j["key"]]["parent"] == c["key"] and out[j["key"]]["rule"] == "main":
+                    out[j["key"]]["parent"] = old
     # rule second_person_brings_run_back: a run of third-person wayyiqtols that left a speech, followed (with no new inquit) by a
     # verse-initial second-person line, belonged to the speech: the run continues the line it followed, the second-person line goes
     # back to the speech's main line
@@ -1272,6 +1287,33 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             continue
         link(heads[-1]["key"], clauses[j]["key"], "continuation", "second_person_brings_run_back")
         link(c["key"], top, "continuation", "second_person_brings_run_back")
+        # the speech now lasts until a verse-initial third-person wayyiqtol with a named subject: the narrative resumes there, on the
+        # frame line the speech hung on (1 Kgs 2:10); before it, a verse-initial "and now" inside a quotation
+        # of the speech goes back to the speech's main line (2:9)
+        frame = out[top]["parent"]
+        while frame is not None and (speech_top(frame) is not None or out[frame]["rule"] != "main"):
+            frame = out[frame]["parent"]
+        for m in range(i + 1, len(clauses)):
+            x, fx = clauses[m]["key"], clauses[m]["f"]
+            if clauses[m]["verse"] == clauses[m - 1]["verse"] or clauses[m]["parent_key"]:
+                continue
+            under = speech_top(x)
+            inside = False
+            y, seen = x, set()
+            while y is not None and y not in seen:
+                seen.add(y)
+                if y == top:
+                    inside = True
+                    break
+                y = out[y]["parent"]
+            if not inside:
+                break
+            if fx["form"] == "wayyiqtol" and fx["person"] == "third" and not fx["pron12"] and fx["named_subject"]:
+                if frame is not None:
+                    link(x, frame, "continuation", "second_person_brings_run_back")
+                break
+            if fx["turn"] and under is not None and under != top:
+                link(x, top, "continuation", "second_person_brings_run_back")
     # rule participle_describes_the_lord: "who brought you out", a clause opened by a participle with the article right after
     # "I am the LORD", describes him and stands one level in under it
     for i in range(1, len(clauses)):

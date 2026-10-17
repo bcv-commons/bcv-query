@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.27"
+version = "0.28"
 
 [profile]
 name = "default"
@@ -990,6 +990,14 @@ quotation opened inside the speech in an earlier verse ends there (not a messeng
 their own ends). 1 Kgs 2:5 "וְגַם אַתָּה יָדַעְתָּ" after the promise David quotes in 2:4. bsb-add-books, moving out: "וְעַתָּה" stays in
 the speech in 166 of 175 steps out and lands on its main line in 96%; "וְאַתָּה" 86%."""
 examples = ["1 Kgs 2:5 \"וְגַם אַתָּה יָדַעְתָּ\""]
+
+[rules.weqatal_continues_subordinate]
+scope = "all"
+doc = """"And" + weqatal right after a subordinate clause that follows its main clause (rule sub_back), in the same verse, with that
+clause's person and number and a yiqtol or weqatal verb, goes on with the subordinate clause, not with the main line (the weqatal
+continues the yiqtol): Lev 18:5 "אֲשֶׁר יַעֲשֶׂה אֹתָם הָאָדָם / וָחַי בָּהֶם", so "אֲנִי יְהוָה" after it steps out to the speech's main line
+(bsb-add-books' test set). The main clauses after it stay on the line. The weqatal counterpart of rule wayyiqtol_continues_subordinate."""
+examples = ["Lev 18:5 \"וָחַי בָּהֶם\""]
 
 [rules.second_person_brings_run_back]
 scope = "not poetic"
