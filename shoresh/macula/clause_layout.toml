@@ -1071,17 +1071,18 @@ times. After a first-person wayyiqtol it would catch a narrator's own chain (Ezr
 examples = ["Jer 3:7 \"וָאֹמַר\""]
 
 [rules.span_keeps_speech]
-scope = "all"
+scope = "none"
 doc = """Inside one speaker span (resources/speaker_quotations: Clear's quotations, CC BY 4.0, projected from English quotation marks onto
 MACULA's Hebrew words through the alignment), a clause that would resume the narrative does not: the quotation is still running.
-Jer 3:7 "וַתֵּרֶא בָּגוֹדָה אֲחוֹתָהּ יְהוּדָה" inside God's span of 3:6-10."""
+Jer 3:7 "וַתֵּרֶא בָּגוֹדָה אֲחוֹתָהּ יְהוּדָה" inside God's span of 3:6-10. Off by default; profile "speakers" turns it on (a trial)."""
 examples = ["Jer 3:7 \"וַתֵּרֶא בָּגוֹדָה\""]
 
 [rules.span_end_resumes]
-scope = "all"
+scope = "none"
 doc = """Right after a speaker span ends, a third-person wayyiqtol (no first- or second-person pronoun, no MACULA parent) is the
 narrative going on. bsb-add-books: at the end of a speaker span such a line is at the margin in the narrative books 98% of the time
-(2,156 of 2,206), elsewhere 87%. 1 Kgs 2:10 "וַיִּשְׁכַּב דָּוִד" after David's span of 2:2-9."""
+(2,156 of 2,206), elsewhere 87%. 1 Kgs 2:10 "וַיִּשְׁכַּב דָּוִד" after David's span of 2:2-9. Off by default; profile "speakers" turns it
+on in the narrative books (a trial: in all books it moved Ezekiel's oracles, where spans end at every formula)."""
 examples = ["1 Kgs 2:10 \"וַיִּשְׁכַּב דָּוִד\""]
 
 [rules.quoted_speaker_goes_on]

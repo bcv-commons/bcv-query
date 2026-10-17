@@ -1,0 +1,14 @@
+# A profile: it extends the default settings (macula/clause_layout.toml) and overrides only what it changes. See the header there.
+
+[profile]
+name = "speakers"
+extends = "default"
+doc = """A trial: the speaker spans (resources/speaker_quotations, Clear's quotations projected onto MACULA's Hebrew words, CC BY 4.0)
+decide whether a quotation is still running: inside one span the narrative does not resume (Jer 3:7), and right after a span a
+third-person wayyiqtol in the narrative books does (1 Kgs 2:10). Spans are flat, so a quotation inside a quotation is not seen."""
+
+[rules.span_keeps_speech]
+scope = "all"
+
+[rules.span_end_resumes]
+scope = "not poetic"
