@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.31"
+version = "0.32"
 
 [profile]
 name = "default"
@@ -611,8 +611,9 @@ flat_rules = ["embedded_flat", "tree_level_flat"]   # see rules.embedded_keeps_m
 # affected. Profile "continuous" sets this to false and counts across the break.
 chapter_starts_at_margin = true
 # a fronted protasis is indented one level in text_depth and its apodosis comes back to the line; profile "fronted_level" sets this
-# true: text_depth then lays out conditionals as the law view does ([depth.law]: the protasis one level in, the apodosis level with
-# it), as BHSA does (bsb-add-books, v0.30)
+# true: text_depth then lays out conditionals as BHSA does (the protasis one level in, the apodosis level with it, as in the law view),
+# but without the law view's carried depth: a line that goes on from the apodosis in a later verse goes back to the level the protasis
+# started from (bsb-add-books, v0.30, v0.31)
 conditionals_as_in_law_view = false
 
 [tree]
@@ -1069,7 +1070,9 @@ scope = "all"
 doc = """Inside a verse, a clause whose path in MACULA's tree enters one of the trusted attachment kinds (tree.trusted) takes the level the
 tree gives it. Its anchor is the earlier clause of the verse that shares the deepest tree node with it (then the one standing closest
 to that node, then the latest); its level is the anchor's, plus the level-carrying attachments (tree.table) on its own path below the
-shared node, minus those on the anchor's path. Only steps of 0 or +1 from the anchor are taken, and never onto a clause that hangs on
+shared node, minus those on the anchor's path. Not for an infinitive of saying (words.say_infinitive; it opens a speech the tree
+can't see: Josh 22:24 "לֵאמֹר" inside a phrase) nor for a conditional (it keeps its own level: Deut 15:5 "רַק אִם־שָׁמוֹעַ תִּשְׁמַע";
+bsb-add-books, v0.31). Only steps of 0 or +1 from the anchor are taken, and never onto a clause that hangs on
 it, and only for a clause that no other line goes on from (other than its own MACULA children): moving a clause moves what hangs on
 it, and in 1 Kgs 11:2 that carried the narrative of 11:2-12 into a quotation. The rule follows bsb-add-books' tree predictor
 (2026-10-17), without its speaker-span rules (English-derived). On since 0.31: as the trial profile "tree" in v0.30 it changed 125

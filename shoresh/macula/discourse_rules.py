@@ -1393,6 +1393,9 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             c = vs[j]
             if not active("tree_level_inside_verse", book_of[c["key"]]):
                 continue
+            if c["f"]["lemor"] or (c["f"]["verb"] in SAY_INF and c["f"]["form"] == "infinitive construct") \
+                    or c["f"]["sub_kind"] == "conditional":
+                continue                          # "saying" opens a speech, a conditional keeps its level (Josh 22:24, Deut 15:5)
             ca = [n for n, _ in c["tree"]]
             pos = {n: i for i, n in enumerate(ca)}
             best = None
@@ -1440,9 +1443,66 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                             {c["key"] for c in clauses if c["f"]["form"] == "weqatal"},
                             {c["key"] for c in clauses if c["f"]["form"] == "weqatal" and c["f"]["verb"] in PROCEDURE}).items():
         out[k]["depth_law"] = d
-        if FRONTED_LEVEL:                         # [depth] conditionals_as_in_law_view (profile fronted_level)
+    if FRONTED_LEVEL:                             # [depth] conditionals_as_in_law_view (profile fronted_level)
+        for k, d in _fronted_depths(out, clauses_verse, chap_of if CHAPTER_MARGIN else None,
+                                    {c["key"] for c in clauses if c["f"]["sub_kind"] == "conditional"}).items():
             out[k]["depth"] = d
     return out
+
+
+def _fronted_depths(out: dict[str, dict], verse_of: dict, chap_of: dict | None, conditional: set[str] = frozenset()) -> dict[str, int]:
+    """text_depth with conditionals laid out as in BHSA ([depth] conditionals_as_in_law_view): a protasis before its apodosis takes the
+    apodosis's place one level in, and the apodosis stands level with it, with what hangs on it in its verse; a line that goes on from
+    the apodosis in a later verse goes back to the level the protasis started from (the conditional sentence has ended)."""
+    par = {k: v["parent"] for k, v in out.items()}
+    w = {k: int(v["relation"] not in FLAT and v["rule"] not in FLAT_RULES) for k, v in out.items()}
+    keys = sorted(out)
+
+    def under(x, p):                              # x hangs on p, directly or further down
+        seen = set()
+        while x is not None and x not in seen:
+            if x == p:
+                return True
+            seen.add(x)
+            x = par.get(x)
+        return False
+    for p in sorted(k for k, v in out.items() if v["parent"] and (v["relation"] == LAW_RELATION or (v["rule"] == "series" and k in conditional))):
+        if p < out[p]["parent"]:                  # a protasis before its apodosis
+            a = out[p]["parent"]
+            if par[p] != a or par.get(a) == p:
+                continue
+            before = par[a]
+            par[p], w[p] = before, 1
+        elif out[p]["rule"] == "series":          # a later case of a series: its apodosis is the next clause of the verse outside it
+            i = keys.index(p)
+            a = next((x for x in keys[i + 1:] if verse_of.get(x) == verse_of.get(p) and not under(x, p)), None)
+            if a is None or out[a]["relation"] not in FLAT:
+                continue
+            before = par[a]
+        else:
+            continue
+        par[a], w[a] = p, 0
+        sentence = {a}                            # the apodosis and what goes on from it in its verse
+        for x in sorted(out):
+            if x > a and par.get(x) in sentence and verse_of.get(x) == verse_of.get(a):
+                sentence.add(x)
+        for x, v in out.items():                  # the next verse goes back to where the protasis started
+            if par.get(x) in sentence and verse_of.get(x) != verse_of.get(a) and v["relation"] in FLAT:
+                par[x] = before
+    memo: dict[str, int] = {}
+
+    def depth(k: str) -> int:
+        seen, x = [], k
+        while x is not None and x not in memo and x not in seen and par.get(x) is not None \
+                and (chap_of is None or chap_of.get(par[x]) == chap_of.get(x)):
+            seen.append(x)
+            x = par[x]
+        base = memo.get(x, 0)
+        for y in reversed(seen):
+            base += w[y]
+            memo[y] = base
+        return memo.get(k, 0)
+    return {k: depth(k) for k in out}
 
 
 def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series: set[str] = frozenset(),
