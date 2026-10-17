@@ -179,24 +179,29 @@ files.
 
 ## How the text-level hierarchy was checked
 
-The hierarchy is derived by rules from MACULA Hebrew alone. No BHSA values, codes, links or files went into the rules' logic or into
-the rows of this dataset. The documentation of some rules in `clause_layout.toml` cites, in words, figures and examples from the
-comparison below.
-
-The comparison with the ETCBC's BHSA (CC BY-NC 4.0) was made privately by **bcv-commons/bsb-add-books**, as a reference for
-evaluation only. Only figures and failure cases in words were exchanged. No BHSA data is in this release.
+The hierarchy is derived by rules from MACULA Hebrew alone. The rules were developed and tuned with the help of a comparison with
+the ETCBC's BHSA (CC BY-NC 4.0), made privately by **bcv-commons/bsb-add-books** as a reference for evaluation only: only figures
+and failure cases in words were exchanged, and the choice of the attachments in `tree_attachments.json` rests on such figures. No
+BHSA values, codes, links or files are in the rules, the code or the rows of this dataset. The documentation of some rules in
+`clause_layout.toml` cites, in words, figures and examples from the comparison.
 
 Step agreement with BHSA's own clause links, laid out the same way: the share of line pairs where the step from one line to the
 next (deeper, level, shallower) is the same. Rules @VERSION@, measured by bsb-add-books (the law chapters in `text_depth_law`):
 
 @STEP_TABLE@
 
+These are test sets: chapters chosen because they are hard (speeches, law, prophecy, poetry), not a sample of the whole Old
+Testament. A chapter in two sets counts in each set once and in "all" once. Over the whole Old Testament, v0.22 had 86.1%.
+
+On the 351 steps where the two layouts of conditionals differ, the default matches BHSA in 65%, the profile `indented_protasis` in
+32% (over all delivered chapters: 85.7% against 85.0%).
+
 A test set of 98 lines from bsb-add-books' study of where a line moves out of a level (verse, opening words, the expected step: to the
 margin, to the speech's main line, out one level, level, in): @VERSION@ gets 67 right. The test is part of the code's test suite.
 
-Mean depth per chapter against BHSA's, over the 379 chapters of the Torah, the Latter Prophets and the Poetry for which a reference
-was available: a mean absolute gap of 0.356 levels (`text_depth_law` 0.302). Per book, over all 39 books: 0.149. (v0.22: 0.364,
-0.311, 0.208.)
+Mean depth per chapter against BHSA's, over the 379 chapters for which a reference was available (Leviticus and Deuteronomy, Ezekiel
+and four of the Twelve, and the poetic books with Lamentations): a mean absolute gap of 0.356 levels (`text_depth_law` 0.302).
+Per book, over all 39 books: 0.149. (v0.22: 0.364, 0.311, 0.208.)
 
 Where the layout follows a convention, the convention is chosen for readers, documented in `clause_layout.toml`, and sometimes
 differs from BHSA on purpose. For example, a chapter starts at the margin. Where the layout is deeper than BHSA and the extra

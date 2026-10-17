@@ -86,26 +86,28 @@ The code is `shoresh/macula/build_speaker_layer.py` in [bcv-commons/bcv-query](h
 
 ## How it was checked
 
-Against the ETCBC's BHSA (CC BY-NC 4.0), compared privately by **bcv-commons/bsb-add-books**, as a reference for evaluation only.
-Only figures and failure cases in words were exchanged; no BHSA data is in this release. BHSA marks each clause as narrative,
-quotation or discourse, with nesting.
+The refinements were developed and tuned with the help of a comparison with the ETCBC's BHSA (CC BY-NC 4.0), made privately by
+**bcv-commons/bsb-add-books** as a reference for evaluation only: only figures and failure cases in words were exchanged, and no
+BHSA values, codes or files are in the code or in this release. BHSA marks each clause as narrative, quotation or discourse, with
+nesting, and leaves many clauses undetermined (most of Ps 19, 107, 125, 127 and 133, for example).
 
 BHSA counts a text that is speech from its start (a psalm, most oracles, the laws of Exodus and Deuteronomy) as a quotation at its
 top level; this layer, like Clear, records that as the `frame` field instead. So the figures are given both ways: **A** with BHSA's
 top level counted, **B** without it.
 
-In or out of a quotation, per clause segment (v0.4; v0.5–v0.7 changed nesting, not these):
+In or out of a quotation, per clause segment:
 
 | Genre | A | B |
 |---|---|---|
-| Narrative | **97.7%** | 93.4% |
+| All | 80.2% | **87.7%** |
+| Narrative | **97.7%** | 93.5% |
 | Law | **87.2%** | 63.8% |
 | Prophecy | 69.8% | **79.3%** |
-| Poetry | 13.3% | **95.3%** |
+| Poetry | 15.0% | **96.9%** |
 | Wisdom | 66.6% | **84.8%** |
 
 Quotation edges: of the layer's starts, the share at a start in BHSA, and in brackets the share of BHSA's starts the layer has;
-the same for ends (v0.4):
+the same for ends:
 
 | Genre | Starts | Ends |
 |---|---|---|
@@ -115,9 +117,9 @@ the same for ends (v0.4):
 | Poetry | 91% (41%) | 75% (64%) |
 | Wisdom | 89% (58%) | 78% (53%) |
 
-Nesting (v0.5): of the layer's nested segments, 83% are nested in BHSA too; of BHSA's, the layer has 41% (narrative 50%, law 87%,
-prophecy 30%). Relayed messages (v0.6): 81% of their segments at BHSA's exact level. The psalm frame: 145 of 150 psalms agree; the
-five that differ are left undetermined by BHSA.
+Nesting: of the layer's nested segments, 83% are nested in BHSA too (narrative 78%); of BHSA's, the layer has 41% (narrative 50%,
+law 87%, prophecy 30%). Relayed messages: 86% of their segments at BHSA's exact level, 25 of 35 right throughout. The psalm frame:
+145 of 150 psalms agree; the five that differ are left undetermined by BHSA. All measured on v0.7.
 
 **Known gaps (open work):**
 - the prophets: where an oracle starts and ends, nesting (30%) and ends (63%);
