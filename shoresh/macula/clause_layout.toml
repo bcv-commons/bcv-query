@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.26"
+version = "0.27"
 
 [profile]
 name = "default"
@@ -288,6 +288,14 @@ strong = [
 [words.turn]
 doc = """"Now", "you" after "and" at a verse start: the speaker turns to the conclusion or to the addressee (rule turn_closes_quotation)."""
 lemmas = ["עַתָּה", "אַתָּה"]
+
+[words.procedure]
+doc = """The verbs of a law's procedure ("וְהֵבִיא אֶת־אֲשָׁמוֹ", Lev 5:15): a weqatal of them that rule protasis_continued took into a case is the
+start of the apodosis, not a further condition (rule casus_pendens_apodosis_level_with_head)."""
+strong = [
+    "935",    # בּוֹא (hiphil: bring)
+    "7126",   # קָרַב (hiphil: offer)
+]
 
 [words.hand]
 doc = """The hand of the formula "וְיַד־יְהוָה הָיְתָה אֵלַי", "וַתִּפֹּל עָלַי שָׁם יַד אֲדֹנָי יְהוִה" (rule hand_of_the_lord_resumes)."""
@@ -983,6 +991,15 @@ their own ends). 1 Kgs 2:5 "וְגַם אַתָּה יָדַעְתָּ" after th
 the speech in 166 of 175 steps out and lands on its main line in 96%; "וְאַתָּה" 86%."""
 examples = ["1 Kgs 2:5 \"וְגַם אַתָּה יָדַעְתָּ\""]
 
+[rules.second_person_brings_run_back]
+scope = "not poetic"
+doc = """A run of third-person wayyiqtols that left a speech (they took it for the narrative going on), followed with no new inquit by a
+verse-initial "and" + second-person finite verb, belonged to the speech: the run continues the line it followed, and the second-person
+line goes back to the speech's main line, with what goes on from it. 1 Kgs 2:5 "וַיַּהַרְגֵם / וַיָּשֶׂם / וַיִּתֵּן" after "אֲשֶׁר עָשָׂה
+לִשְׁנֵי־שָׂרֵי צִבְאוֹת", then 2:6 "וְעָשִׂיתָ כְּחָכְמָתֶךָ" on David's line. bsb-add-books, v0.26: in the narrative books at least 88% of
+lines with a second-person verb stand inside a speech (4,181 of 4,766)."""
+examples = ["1 Kgs 2:5 \"וַיַּהַרְגֵם\"", "1 Kgs 2:6 \"וְעָשִׂיתָ כְּחָכְמָתֶךָ\""]
+
 [rules.participle_describes_the_lord]
 scope = "law"
 doc = """A clause opened by a participle with the article (features.art_participle), without "and", right after a verbless or participle
@@ -1500,9 +1517,11 @@ and what goes on from it stays there: "וְאִשָּׁה / כִּי־תִהְי
 woman's law (15:19b-27) at the level of "וְאִשָּׁה". As in the ordinary view (rule casus_pendens). Before 0.25 the apodosis stood beside
 its case, one level too deep (bsb-add-books, v0.24). Since 0.26 only when the apodosis does not open with a weqatal: a verdict or a
 statement ("טָמֵא הוּא", "שִׁבְעַת יָמִים תִּהְיֶה") goes back to the topic, a procedure in a weqatal chain stays at the case's level (the
-priest's examination in Lev 13 "וְרָאָה הַכֹּהֵן", the offering in Lev 5:15-19 "וְהֵבִיא", Num 5:7 "וְהִתְוַדּוּ"), also when the weqatal chain
-already began inside the case (rule protasis_continued: Lev 5:15 "וְהֵבִיא אֶת־אֲשָׁמוֹ"). bsb-add-books, v0.25: of the
-runs the rule moved out, those opening with a weqatal were 31 lines closer and 116 farther, the others 140 closer and 74 farther."""
+priest's examination in Lev 13 "וְרָאָה הַכֹּהֵן", the offering in Lev 5:15-19 "וְהֵבִיא", Num 5:7 "וְהִתְוַדּוּ"), also when the procedure
+already began inside the case (rule protasis_continued took a weqatal of words.procedure into the case: Lev 5:15 "וְהֵבִיא אֶת־אֲשָׁמוֹ").
+A weqatal that is a further condition of the case ("וּמָעֲלָה בוֹ מָעַל", Num 5:12; Lev 5:22; Lev 22:13) doesn't count (bsb-add-books, v0.26).
+bsb-add-books, v0.25: of the runs the rule moved out, those opening with a weqatal were 31 lines closer and 116 farther, the others
+140 closer and 74 farther."""
 examples = ["Lev 15:19 \"שִׁבְעַת יָמִים תִּהְיֶה בְנִדָּתָהּ\" level with \"וְאִשָּׁה\"", "Lev 15:2 \"טָמֵא הוּא\" level with \"אִישׁ אִישׁ\""]
 
 [rules.protasis_continued]

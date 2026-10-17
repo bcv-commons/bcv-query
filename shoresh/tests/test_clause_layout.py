@@ -454,6 +454,9 @@ def test_v026_moving_out(tmp_path, monkeypatch):
     verdict = next(r for r in v4 if plain(r["text"]).startswith("טמא"))
     assert hoof["text_depth"] == ki["text_depth"] and verdict["text_depth"] == ki["text_depth"] - 1
     assert rows("1KI", 2, 5)[0]["text_depth"] == rows("1KI", 2, 2)[0]["text_depth"]
+    v5 = rows("1KI", 2, 5)                                                      # v0.27: the run back in the speech
+    killed = next(r for r in v5 if plain(r["text"]).startswith("ויהרג"))
+    assert killed["text_depth"] == v5[2]["text_depth"] and rows("1KI", 2, 6)[0]["text_depth"] == rows("1KI", 2, 2)[0]["text_depth"]
     v8 = rows("PSA", 3, 8)
     assert v8[-1]["text_depth"] == next(r for r in v8 if plain(r["text"]).startswith("כי"))["text_depth"]
     v32, v33 = rows("LEV", 22, 32), rows("LEV", 22, 33)

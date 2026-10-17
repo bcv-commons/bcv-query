@@ -88,7 +88,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     global CFG, CONFIG_FILE, CONFIG_SHA256, CONFIG_FILES, PROFILE, PROFILE_CHANGED, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM, SING_PRAY, SONG, \
         LEAD_ME, HAND, YOU, SON_OF_MAN, HAND_VERBS, OBJECT_MARKER, SUMMARY_THIS, SUMMARY_LAW, PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS, CLOSING_THIS, LAWGIVER, BACK_REFERENCE, \
-        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS, VERDICT, TURN
+        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS, VERDICT, TURN, PROCEDURE
     global LAW_FLAT_RULES
     global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE, CONCLUSION
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
@@ -115,6 +115,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     HAND_VERBS, OBJECT_MARKER = strong("hand_verbs"), strong("object_marker")
     EVERY, FORBID = strong("every"), strong("forbid")
     KEEP, COMMANDMENTS, VERDICT = strong("keep"), strong("commandments"), strong("verdict")
+    PROCEDURE = strong("procedure")
     SUMMARY_THIS, SUMMARY_LAW = strong("summary_this"), strong("summary_law")
     PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS = strong("perceive"), set(W["perceive"]["narrated"]), set(W["perceive"]["stems"])
     CLOSING_THIS, LAWGIVER, BACK_REFERENCE = strong("closing_this"), strong("lawgiver"), strong("back_reference")
@@ -1238,6 +1239,39 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         for c2 in clauses[i:]:                    # the verdict and what goes on from it stay where they were
             if out[c2["key"]]["parent"] in moved:
                 out[c2["key"]]["parent"] = moved[out[c2["key"]]["parent"]]
+    # rule second_person_brings_run_back: a run of third-person wayyiqtols that left a speech, followed (with no new inquit) by a
+    # verse-initial second-person line, belonged to the speech: the run continues the line it followed, the second-person line goes
+    # back to the speech's main line
+    def speech_top(x):                            # the first clause of the speech x stands in, or None
+        seen = set()
+        while x is not None and x not in seen:
+            seen.add(x)
+            if out[x]["relation"] == "speech":
+                return x
+            x = out[x]["parent"]
+        return None
+    for i, c in enumerate(clauses):
+        f = c["f"]
+        if not (f["person"] == "second" and f["waw"] and f["form"] in FINITE and not c["parent_key"] and out[c["key"]]["rule"] == "main"
+                and i > 0 and clauses[i - 1]["verse"] != c["verse"] and active("second_person_brings_run_back", book_of[c["key"]])):
+            continue
+        j = i - 1                                 # back over the run: wayyiqtols of the third person and what hangs under them
+        run = []
+        while j >= 0 and (clauses[j]["parent_key"] or (clauses[j]["f"]["form"] == "wayyiqtol" and clauses[j]["f"]["person"] == "third"
+                                                         and not clauses[j]["f"]["speak"] and out[clauses[j]["key"]]["rule"] == "main")):
+            run.append(clauses[j])
+            j -= 1
+        heads = [x for x in run if not x["parent_key"]]
+        if not heads:
+            continue
+        j = next(n_ for n_ in range(i) if clauses[n_]["key"] == heads[-1]["key"]) - 1   # the line right before the run's first head
+        if j < 0 or speech_top(heads[-1]["key"]) is not None:
+            continue
+        top = speech_top(clauses[j]["key"])
+        if top is None:
+            continue
+        link(heads[-1]["key"], clauses[j]["key"], "continuation", "second_person_brings_run_back")
+        link(c["key"], top, "continuation", "second_person_brings_run_back")
     # rule participle_describes_the_lord: "who brought you out", a clause opened by a participle with the article right after
     # "I am the LORD", describes him and stands one level in under it
     for i in range(1, len(clauses)):
@@ -1276,7 +1310,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         out[k].pop("subj", None)
     for k, d in _law_depths(out, back if LAW_RETURNS else set(), cond_series, ext, case_apod, law_heads, cp_cases,
                             chap_of if CHAPTER_MARGIN else None, be_cases, inner_heads, forbid_cases, law_par,
-                            {c["key"] for c in clauses if c["f"]["form"] == "weqatal"}).items():
+                            {c["key"] for c in clauses if c["f"]["form"] == "weqatal"},
+                            {c["key"] for c in clauses if c["f"]["form"] == "weqatal" and c["f"]["verb"] in PROCEDURE}).items():
         out[k]["depth_law"] = d
     return out
 
@@ -1285,7 +1320,7 @@ def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series:
                 ext: set[str] = frozenset(), case_apod: dict | None = None, law_heads: set[str] = frozenset(),
                 cp_cases: dict | None = None, chap_of: dict | None = None, be_cases: set[str] = frozenset(),
                 inner_heads: set[str] = frozenset(), forbid_cases: set[str] = frozenset(),
-                law_par: dict | None = None, weqatal: set[str] = frozenset()) -> dict[str, int]:
+                law_par: dict | None = None, weqatal: set[str] = frozenset(), procedure: set[str] = frozenset()) -> dict[str, int]:
     """text_depth_law ([depth.law]): where a protasis comes before its apodosis, the protasis takes the apodosis's parent and counts one
     level; the apodosis hangs on the protasis and counts none. Every other link counts as for text_depth. back: main clauses that open
     their verse other than with "and" + weqatal; after an apodosis they go back to the level the law stands on."""
@@ -1342,7 +1377,7 @@ def _law_depths(out: dict[str, dict], back: set[str] = frozenset(), cond_series:
                 continue
             par[a], w[a] = p, 0
             if p in (cp_cases or {}) and p not in cond_series and chap_of and a not in weqatal \
-                    and not any(p < x < a and out[x]["rule"] == "protasis_continued" for x in weqatal) \
+                    and not any(p < x < a and out[x]["rule"] == "protasis_continued" for x in procedure) \
                     and active("casus_pendens_apodosis_level_with_head", chap_of.get(a, ("",))[0]):
                 par[a] = cp_cases[p]              # the apodosis comes back to the topic's level, beside its case
             apodoses[a] = p
