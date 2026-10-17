@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.32"
+version = "0.33"
 
 [profile]
 name = "default"
@@ -300,6 +300,10 @@ strong = [
 [words.i]
 doc = """"I" as the first word of a clause: the speaker narrating ("אֲנִי טֶרֶם אֲכַלֶּה", Gen 24:45; rule second_person_brings_run_back)."""
 lemmas = ["אֲנִי", "אָנֹכִי"]
+
+[words.restrict]
+doc = """"Only": a restriction that goes back to the speech's main line ("רַק", "אַךְ"; rule closer_lands_on_speech_main)."""
+lemmas = ["רַק", "אַךְ"]
 
 [words.hand]
 doc = """The hand of the formula "וְיַד־יְהוָה הָיְתָה אֵלַי", "וַתִּפֹּל עָלַי שָׁם יַד אֲדֹנָי יְהוִה" (rule hand_of_the_lord_resumes)."""
@@ -611,9 +615,9 @@ flat_rules = ["embedded_flat", "tree_level_flat"]   # see rules.embedded_keeps_m
 # affected. Profile "continuous" sets this to false and counts across the break.
 chapter_starts_at_margin = true
 # a fronted protasis is indented one level in text_depth and its apodosis comes back to the line; profile "fronted_level" sets this
-# true: text_depth then lays out conditionals as BHSA does (the protasis one level in, the apodosis level with it, as in the law view),
-# but without the law view's carried depth: a line that goes on from the apodosis in a later verse goes back to the level the protasis
-# started from (bsb-add-books, v0.30, v0.31)
+# true: text_depth then lays out conditionals as BHSA does (the protasis one level in, the apodosis level with it, and what goes on
+# from the apodosis stays there; a later case of a series steps back to where the first protasis started and in again), without the
+# law view's other rules (bsb-add-books, v0.30-v0.32)
 conditionals_as_in_law_view = false
 
 [tree]
@@ -886,6 +890,8 @@ doc = """The clause opens with "and" and has a words.turn word in its first two 
 doc = """A words.consequence opening in the first or second place after "and" ("וְעַתָּה לָכֵן")."""
 [features.i_lead]
 doc = """The clause opens with "I" (words.i)."""
+[features.restrict]
+doc = """The clause opens with "only" (words.restrict)."""
 [features.then]
 doc = "The clause opens with an apodosis marker (words.apodosis_markers)."
 [features.number]
@@ -1056,6 +1062,24 @@ Lev 22:33 "אֲנִי יְהוָה מְקַדִּשְׁכֶם / הַמּוֹצִ
 in the hymn of Ps 113 the participles go on the praise and moved away from BHSA."""
 examples = ["Lev 22:33 \"הַמּוֹצִיא אֶתְכֶם מֵאֶרֶץ מִצְרַיִם\""]
 
+[rules.quoted_speaker_goes_on]
+scope = "all"
+doc = """A quotation that would end with its verse (rule quotation_ends_with_verse) goes on when the next verse opens with a wayyiqtol
+that has a first-person pronoun and is no verb of saying: the quoted speaker goes on telling ("כִּי אָמַר … וַתִּמְצָא כַקֵּן יָדִי", Isa
+10:13-14, Assyria speaking; bsb-add-books' test set)."""
+examples = ["Isa 10:14 \"וַתִּמְצָא כַקֵּן יָדִי\""]
+
+[rules.closer_lands_on_speech_main]
+scope = "all"
+doc = """The landing level "the speech's main line" for more closers than "וְעַתָּה" / "וְאַתָּה" (rule turn_closes_quotation, the same
+landing): at a verse start, "only" (words.restrict: רַק, אַךְ), "I am the LORD" (a verbless clause opened by words.i with a proper name)
+and a messenger formula ("כֹּה אָמַר") with no command to say right before it (no "לֵאמֹר", no "וְאָמַרְתָּ") and no "לָכֵן" (which lands
+on the speech's main line only 16% of the time; Jer 14:15) end the quotations opened inside
+the speech in an earlier verse (not a messenger, commanded, prophetic or sung speech). bsb-add-books, moving out: when they step out,
+these land on the speech's main line: אַךְ 94%, רַק 82%, אֲנִי יְהוָה 76%, כֹּה אָמַר without a commission 84%. Exod 7:17 "כֹּה אָמַר" after the
+quotation "שַׁלַּח אֶת־עַמִּי" of 7:16."""
+examples = ["Exod 7:17 \"כֹּה אָמַר יְהוָה\"", "Gen 24:8 \"רַק\"", "Lev 18:5 \"אֲנִי יְהוָה\""]
+
 [rules.turn_with_speech_formula_leaves]
 scope = "all"
 doc = """A verse-initial "וְעַתָּה" whose verb is a qatal of saying ("וְעַתָּה אָמַר יְהוָה", Isa 49:5; "וְעַתָּה כֹּה אָמַר", Hag 1:5) is a new speech
@@ -1070,9 +1094,10 @@ scope = "all"
 doc = """Inside a verse, a clause whose path in MACULA's tree enters one of the trusted attachment kinds (tree.trusted) takes the level the
 tree gives it. Its anchor is the earlier clause of the verse that shares the deepest tree node with it (then the one standing closest
 to that node, then the latest); its level is the anchor's, plus the level-carrying attachments (tree.table) on its own path below the
-shared node, minus those on the anchor's path. Not for an infinitive of saying (words.say_infinitive; it opens a speech the tree
-can't see: Josh 22:24 "לֵאמֹר" inside a phrase) nor for a conditional (it keeps its own level: Deut 15:5 "רַק אִם־שָׁמוֹעַ תִּשְׁמַע";
-bsb-add-books, v0.31). Only steps of 0 or +1 from the anchor are taken, and never onto a clause that hangs on
+shared node, minus those on the anchor's path. Not for an infinitive-construct clause (it keeps its own level; an infinitive of
+saying opens a speech the tree can't see, Josh 22:24 "לֵאמֹר", and the others, Lev 20:4 "בְּתִתּוֹ", Num 30:13 "שָׁמְעוֹ", 1 Kgs 18:18
+"בַּעֲזָבְכֶם", are indented in BHSA; bsb-add-books, v0.31, v0.32) nor for a conditional (it keeps its own level: Deut 15:5 "רַק אִם־שָׁמוֹעַ
+תִּשְׁמַע"). Only steps of 0 or +1 from the anchor are taken, and never onto a clause that hangs on
 it, and only for a clause that no other line goes on from (other than its own MACULA children): moving a clause moves what hangs on
 it, and in 1 Kgs 11:2 that carried the narrative of 11:2-12 into a quotation. The rule follows bsb-add-books' tree predictor
 (2026-10-17), without its speaker-span rules (English-derived). On since 0.31: as the trial profile "tree" in v0.30 it changed 125

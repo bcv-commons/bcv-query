@@ -89,7 +89,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     global CFG, CONFIG_FILE, CONFIG_SHA256, CONFIG_FILES, PROFILE, PROFILE_CHANGED, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM, SING_PRAY, SONG, \
         LEAD_ME, HAND, YOU, SON_OF_MAN, HAND_VERBS, OBJECT_MARKER, SUMMARY_THIS, SUMMARY_LAW, PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS, CLOSING_THIS, LAWGIVER, BACK_REFERENCE, \
-        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS, VERDICT, TURN, PROCEDURE, I_WORDS
+        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS, VERDICT, TURN, PROCEDURE, I_WORDS, RESTRICT
     global LAW_FLAT_RULES
     global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE, CONCLUSION
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
@@ -124,6 +124,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     ALTERNATIVE, CHAIN_END = lemmas("alternative"), lemmas("chain_end")
     TURN = lemmas("turn")
     I_WORDS = lemmas("i")
+    RESTRICT = lemmas("restrict")
     CHAIN_END_PHRASES = [list(x) for x in W["chain_end"].get("phrases", [])]
     SUB_KIND = {_n(k): v for k, v in W["subordinators"]["relation"].items()}
     SUB_CJ = set(SUB_KIND)
@@ -394,6 +395,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
             "then": l0 in APODOSIS_MARKERS,
             "turn": waw and bool(TURN & in_first_two),
             "i_lead": l0 in I_WORDS,
+            "restrict": l0 in RESTRICT,
             "verdict": bool(lead) and _strong(lead[0]) in VERDICT and not finite,
             "exhortation": second and bool(v) and _strong(v) in KEEP and any(_strong(t) in COMMANDMENTS for t in toks),
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
@@ -598,7 +600,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         if vref != prev_v:
             vi, prev_v = vi + 1, vref
             quote_closed = False
-            while on("quotation_ends_with_verse") and len(lines) > 1 and lines[-1].scoped:
+            while on("quotation_ends_with_verse") and len(lines) > 1 and lines[-1].scoped and not (
+                    on("quoted_speaker_goes_on") and f["form"] == "wayyiqtol" and f["pron1"] and not f["speak"] and not c["parent_key"]):
                 quote_closed = quote_closed or lines[-1].poem_quote
                 lines.pop()
             while on("nested_speech_ends_after_next_verse") and len(lines) > 2 and not lines[-1].long and lines[-1].opened < vi - verses_after:
@@ -613,7 +616,11 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             if on("turn_with_speech_formula_leaves") and f["turn"] and not c["parent_key"] and f["verb"] in SAY and f["form"] == "qatal" \
                     and f["person"] == "third" and not f["therefore_near"] and len(lines) > 1:
                 lines.pop()
-            elif on("turn_closes_quotation") and f["turn"] and not c["parent_key"]:
+            elif not c["parent_key"] and ((on("turn_closes_quotation") and f["turn"]) or (on("closer_lands_on_speech_main") and (
+                    f["restrict"] or (f["i_lead"] and f["proper"] and not f["form"])
+                    or (f["messenger"] and not f["therefore_near"] and not f["consequence"] and not (i and (clauses[i - 1]["f"]["lemor"] or clauses[i - 1]["f"]["quote_say"]
+                                                       or (clauses[i - 1]["f"]["verb"] in SAY and clauses[i - 1]["f"]["person"] == "second"))))))):
+                # rule closer_lands_on_speech_main: "only", "I am the LORD", a messenger formula without a command to say before it
                 while len(lines) > 2 and lines[-1].opened < vi and not (lines[-1].long or lines[-1].prophetic or lines[-1].messenger
                                                                           or lines[-1].oracle or lines[-1].song is not None):
                     lines.pop()
@@ -1393,9 +1400,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             c = vs[j]
             if not active("tree_level_inside_verse", book_of[c["key"]]):
                 continue
-            if c["f"]["lemor"] or (c["f"]["verb"] in SAY_INF and c["f"]["form"] == "infinitive construct") \
-                    or c["f"]["sub_kind"] == "conditional":
-                continue                          # "saying" opens a speech, a conditional keeps its level (Josh 22:24, Deut 15:5)
+            if c["f"]["lemor"] or c["f"]["form"] == "infinitive construct" or c["f"]["sub_kind"] == "conditional":
+                continue                          # an infinitive, "saying" above all, and a conditional keep their level
             ca = [n for n, _ in c["tree"]]
             pos = {n: i for i, n in enumerate(ca)}
             best = None
@@ -1452,8 +1458,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
 
 def _fronted_depths(out: dict[str, dict], verse_of: dict, chap_of: dict | None, conditional: set[str] = frozenset()) -> dict[str, int]:
     """text_depth with conditionals laid out as in BHSA ([depth] conditionals_as_in_law_view): a protasis before its apodosis takes the
-    apodosis's place one level in, and the apodosis stands level with it, with what hangs on it in its verse; a line that goes on from
-    the apodosis in a later verse goes back to the level the protasis started from (the conditional sentence has ended)."""
+    apodosis's place one level in, and the apodosis stands level with it, with what goes on from it (the procedure, the blessings);
+    a later case of a series stands level with the first protasis, so it steps back to where that one started and in again."""
     par = {k: v["parent"] for k, v in out.items()}
     w = {k: int(v["relation"] not in FLAT and v["rule"] not in FLAT_RULES) for k, v in out.items()}
     keys = sorted(out)
@@ -1471,24 +1477,15 @@ def _fronted_depths(out: dict[str, dict], verse_of: dict, chap_of: dict | None, 
             a = out[p]["parent"]
             if par[p] != a or par.get(a) == p:
                 continue
-            before = par[a]
-            par[p], w[p] = before, 1
+            par[p], w[p] = par[a], 1
         elif out[p]["rule"] == "series":          # a later case of a series: its apodosis is the next clause of the verse outside it
             i = keys.index(p)
             a = next((x for x in keys[i + 1:] if verse_of.get(x) == verse_of.get(p) and not under(x, p)), None)
             if a is None or out[a]["relation"] not in FLAT:
                 continue
-            before = par[a]
         else:
             continue
         par[a], w[a] = p, 0
-        sentence = {a}                            # the apodosis and what goes on from it in its verse
-        for x in sorted(out):
-            if x > a and par.get(x) in sentence and verse_of.get(x) == verse_of.get(a):
-                sentence.add(x)
-        for x, v in out.items():                  # the next verse goes back to where the protasis started
-            if par.get(x) in sentence and verse_of.get(x) != verse_of.get(a) and v["relation"] in FLAT:
-                par[x] = before
     memo: dict[str, int] = {}
 
     def depth(k: str) -> int:
