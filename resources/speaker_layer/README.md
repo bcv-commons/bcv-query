@@ -54,11 +54,15 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
    `basis` `relayed message`), and the quotations that follow without a break are the sender's words inside it (level 2, their speaker
    the sender, whatever voice FCBH cast). A psalm whose title ends with an inquit ("וַיֹּאמַר", Ps 18:2) is a quotation opened by it
    (`basis` `titled psalm`), as in 2 Sam 22.
-   In a relayed message, a verse-initial "וְעַתָּה" / "וְאַתָּה" ends the sender's words: the messenger turns to his own appeal, back at
-   level 1 (Josh 24:14).
-4. The frame: a psalm is its psalmist's speech from its first line (`books.frame_poems`); a first-person account (a chapter of
-   Ezra, Nehemiah or Daniel whose own narration is mostly in the first person) is its narrator's. This is recorded per segment as `frame` (the
-   name in the title's "לְ" + name, else "Psalmist"), not as a level, so the levels stay comparable with Clear's.
+   Inside a relayed message, a repeated messenger formula ("כִּי־כֹה אָמַר יְהוָה", 2 Kgs 3:17) is the messenger's own line again, at
+   level 1, and the sender's words go on after it at level 2. Where the sender's words end before the quoted stretch does, a hand
+   correction says so (`sender_last`: Josh 24:14-15 is Joshua's own appeal); "וְעַתָּה" alone is no signal, the sender's words go on
+   after it in Judg 11:23, 2 Chr 21:15 and 32:15.
+4. The frame: a psalm is its psalmist's speech from its first line (`books.frame_poems`; the name in the title's "לְ" + name, else
+   "Psalmist"); a first-person account (a chapter of Ezra or Nehemiah whose own narration is mostly in the first person) is its
+   narrator's ("narrator (I)"): Ezra 9 and Neh 13, where the account leads into the narrator's prayer and speech; Ezra 8 and Neh 1-2
+   are first-person narrative and have none, by correction. Recorded per segment as `frame`, not as a level, so the levels stay
+   comparable with Clear's.
 5. Corrections (`corrections.tsv`) last.
 
 ## Checks
@@ -70,10 +74,18 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
 - bsb-add-books checks the layer against BHSA's clause text types (narrative / quotation / discourse, with nesting), in figures and
   failures in words only (BHSA is non-commercial and is not used as input). v0.2: in narrative 97.5% of segments agree; quotation starts
   fall where BHSA has one 96% of the time and ends 94%; of the layer's nested quotations, 82% are nested in BHSA too. BHSA treats a text
-  that is speech from its start (a psalm, most oracles) as a quotation at its top level; the layer, like Clear, doesn't (yet).
+  that is speech from its start (a psalm, most oracles) as a quotation at its top level; the layer, like Clear, records it as the
+  `frame` field. The latest figures, by genre, are in the dataset card (`shoresh/macula/speaker_layer_card.md`).
 
 ## Correcting it
 
 Add a row to `corrections.tsv`: the quotation's first word key, the field (`speaker`, `first`, `last` or `drop`), the new value, and
 the reason the Hebrew text gives. Every correction needs a reason. A `frame` row, keyed on a chapter's first word, sets that chapter's
-frame (empty for none: Ps 1 and 2, a teaching and a discourse with no single speaker from the start).
+frame (empty for none: Ps 1 and 2, a teaching and a discourse with no single speaker from the start). A `sender_last` row, keyed on a
+relayed message's formula, gives the last word of the sender's words.
+
+## Releases
+
+`python -m macula.release_speaker_layer --tag vX --out DIR` (in `shoresh/`) packages a build for the dataset
+bcv-commons/hebrew-speaker-layer: the card (`shoresh/macula/speaker_layer_card.md`), the files, a reproducible archive and SHA256SUMS.
+Nothing is uploaded.

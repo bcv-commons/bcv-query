@@ -1,7 +1,7 @@
 """Package a built Hebrew clause layout as a release of the dataset bcv-commons/hebrew-clause-layout. Nothing is uploaded: the files
 are written to a folder for review, and published by hand.
 
-    python -m macula.release_clause_layout --out DIR [--src macula/data/clause-layout] [--reach rule-reach.txt]
+    python -m macula.release_clause_layout --out DIR --steps STEPS.md [--src macula/data/clause-layout] [--reach rule-reach.txt]
 
 DIR gets:
   README.md                         the dataset card (macula/clause_layout_card.md with the version fields filled in)
@@ -153,14 +153,14 @@ def _archive(src: Path, out: Path, tag: str, extra: list[Path], mtime: int) -> P
     return path
 
 
-def _card(stamp: dict, build: dict, tag: str) -> str:
+def _card(stamp: dict, build: dict, tag: str, steps: str) -> str:
     fields = {"@TAG@": tag, "@VERSION@": stamp["rules_version"], "@BUILT@": stamp["built"], "@SEGMENTATION@": stamp["segmentation"],
               "@LEVELS@": stamp["levels"], "@BOOKS@": str(len(stamp["books"])),
               "@CHAPTERS@": str(sum(b["chapters"] for b in stamp["books"].values())),
               "@VERSES@": f'{sum(b["verses"] for b in stamp["books"].values()):,}',
               "@SEGMENTS@": f'{sum(b["segments"] for b in stamp["books"].values()):,}',
               "@MACULA_COMMIT@": stamp["macula_hebrew"]["commit"][:12], "@UHB_TAG@": stamp["uhb"]["tag"],
-              "@TVTMS_REV@": stamp["versification"]["tvtms_rev"][:12]}
+              "@TVTMS_REV@": stamp["versification"]["tvtms_rev"][:12], "@STEP_TABLE@": steps.strip()}
     text = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         text = text.replace(k, v)
@@ -196,6 +196,7 @@ def main() -> None:
     ap.add_argument("--src", default=str(HERE / "data" / "clause-layout"), help="the built layout (default macula/data/clause-layout)")
     ap.add_argument("--out", required=True, help="folder to write the release into (must not exist)")
     ap.add_argument("--reach", help="a rule-reach table, for the release notes")
+    ap.add_argument("--steps", required=True, help="a Markdown table of bsb-add-books' step agreement for this build, for the card")
     ap.add_argument("--allow-dirty", action="store_true", help="package even if macula/ has uncommitted changes")
     args = ap.parse_args()
     src, out = Path(args.src), Path(args.out)
@@ -221,7 +222,7 @@ def main() -> None:
     shutil.copy(src / "build.json", out / "build.json")
     shutil.copy(discourse_rules.CONFIG_PATH, out / "clause_layout.toml")
     (out / "_clauses_source.json").write_text(json.dumps(stamp, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    (out / "README.md").write_text(_card(stamp, build, tag), encoding="utf-8")
+    (out / "README.md").write_text(_card(stamp, build, tag, Path(args.steps).read_text(encoding="utf-8")), encoding="utf-8")
     mtime = int(time.mktime(time.strptime(build["built"], "%Y-%m-%d")))
     extra = [out / n for n in ("README.md", "_clauses_source.json", "build.json", "clause_layout.toml")] + [out / "schema" / SCHEMA.name]
     archive = _archive(src, out, tag, extra, mtime)

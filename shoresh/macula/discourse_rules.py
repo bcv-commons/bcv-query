@@ -1463,7 +1463,7 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                             {c["key"] for c in clauses if c["f"]["form"] == "weqatal"},
                             {c["key"] for c in clauses if c["f"]["form"] == "weqatal" and c["f"]["verb"] in PROCEDURE}).items():
         out[k]["depth_law"] = d
-    if FRONTED_LEVEL:                             # [depth] conditionals_as_in_law_view (profile fronted_level)
+    if FRONTED_LEVEL:                             # [depth] conditionals_as_in_law_view (the default since 0.35)
         for k, d in _fronted_depths(out, clauses_verse, chap_of if CHAPTER_MARGIN else None,
                                     {c["key"] for c in clauses if c["f"]["sub_kind"] == "conditional"}).items():
             out[k]["depth"] = d

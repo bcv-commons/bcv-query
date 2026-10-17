@@ -78,10 +78,12 @@ siblings. The text-level hierarchy is therefore **derived by rules** from MACULA
 verbs of saying, subordinators, person, and the MACULA tree. Every clause gets a `discourse_parent` and a `relation`.
 - **`text_depth`**: the indentation shown in `layout/`. It counts the links up the `discourse_parent` chain that add a level: a
   speech, a subordinate clause, an embedded clause. Chain links (`continuation`, `coordination`, `asyndetic`, `parallel`, …; the set
-  is `build.json` `relations.flat`) stay on the same level. 0 is the main line. Each chapter starts at the margin.
-- **`text_depth_law`**: the same, with conditionals laid out as in BHSA's law. A protasis stands one level in, and its apodosis
-  stands beside it. The later cases of a law step in one level each, and a new law stands where the law before it stands. It
-  matters in the law books and casuistic prophecy; elsewhere it equals `text_depth`.
+  is `build.json` `relations.flat`) stay on the same level. 0 is the main line. Each chapter starts at the margin. Conditionals are
+  laid out as BHSA lays them out: a protasis before its apodosis stands one level in, the apodosis stands level with it, and what
+  goes on from the apodosis stays there; a later case of a series steps back and in again. (Before 0.35 the apodosis came back to the
+  line; that layout is the profile `indented_protasis`.)
+- **`text_depth_law`**: the same, with the conventions of BHSA's law on top: the later cases of a law step in one level each, and a
+  new law stands where the law before it stands. It matters in the law books and casuistic prophecy.
 - **`tree_depth`**: every link counted except `parallel`, chain links included, so each clause of a chain nests under the one
   before it, as in BHSA's tree.
 - **`depth`**: the number of clause ancestors in the MACULA tree, within the verse.
@@ -89,10 +91,12 @@ verbs of saying, subordinators, person, and the MACULA tree. Every clause gets a
 The tree keeps a protasis under its apodosis. A client that wants BHSA's direction for conditionals in the tree inverts those links
 as `build.json` `relations.conditional_inversion` describes. For a flat view, use `text_depth_law`.
 
-The rules (100, each with its scope and examples) are in `clause_layout.toml`, and the code in
+The rules (121, each with its scope and examples; a few are trials, switched off) are in `clause_layout.toml`, and the code in
 [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query) (`shoresh/macula/discourse_rules.py`). Settings files called
 profiles can change the conventions. This release is built with the default profile: chapters start at the margin, and a speech
-carried over a chapter break starts again at the margin.
+carried over a chapter break starts again at the margin. Inside a verse, the levels of phrases and of clauses joined in MACULA's
+tree as `cjpCLx` or as a "כִּי" clause under `ClCl` follow MACULA's syntax tree (`tree_attachments.json`: which MACULA attachments
+carry a level, figures from the comparison below).
 
 ## layout/: plain text
 
@@ -183,28 +187,26 @@ The comparison with the ETCBC's BHSA (CC BY-NC 4.0) was made privately by **bcv-
 evaluation only. Only figures and failure cases in words were exchanged. No BHSA data is in this release.
 
 Step agreement with BHSA's own clause links, laid out the same way: the share of line pairs where the step from one line to the
-next (deeper, level, shallower) is the same. Rules @VERSION@, measured by bsb-add-books:
+next (deeper, level, shallower) is the same. Rules @VERSION@, measured by bsb-add-books (the law chapters in `text_depth_law`):
 
-| Chapters | `text_depth` | `text_depth_law` |
-|---|---|---|
-| tuned (8 chapters the rules were developed on) | 88% | 89% |
-| held-out (5 chapters never used for tuning) | 88% | 88% |
-| prophets (9) | 83% | 83% |
-| law (26) | 82% | 85% |
-| expressions (39) | 85% | 86% |
-| all delivered chapters | 84% | 85% |
+@STEP_TABLE@
+
+A test set of 98 lines from bsb-add-books' study of where a line moves out of a level (verse, opening words, the expected step: to the
+margin, to the speech's main line, out one level, level, in): @VERSION@ gets 67 right. The test is part of the code's test suite.
 
 Mean depth per chapter against BHSA's, over the 379 chapters of the Torah, the Latter Prophets and the Poetry for which a reference
-was available: a mean absolute gap of 0.364 levels (`text_depth_law` 0.311). Per book, over all 39 books: 0.208.
+was available: a mean absolute gap of 0.356 levels (`text_depth_law` 0.302). Per book, over all 39 books: 0.149. (v0.22: 0.364,
+0.311, 0.208.)
 
 Where the layout follows a convention, the convention is chosen for readers, documented in `clause_layout.toml`, and sometimes
 differs from BHSA on purpose. For example, a chapter starts at the margin. Where the layout is deeper than BHSA and the extra
 level reflects the text (a real subordination, a speech inside a speech), it is kept.
 
 Known differences (see `RELEASE_NOTES.md`):
-- The poetry is, on average, a little shallower than BHSA.
-- In Micah 2 and Zephaniah 3 a chain after "לָכֵן" runs on longer than in BHSA.
-- In a few law chapters (Num 30, Lev 15:13–15) the law view is one level deeper.
+- The prophets are the weakest part: where an oracle or a speech opens and closes (Isa 5, Isa 43, Jer 3), and a narrative-looking
+  verb inside an oracle (Isa 3:16, 10:14). A speaker layer, built and checked on its own first, is meant to help here in a later release.
+- A main clause with no opening word: neither the rules nor MACULA's tree have a reliable signal for when it steps in or out.
+- The poetry is, on average, a little shallower than BHSA; Micah 2 still has a messenger speech that doesn't close.
 
 BHSA: Eep Talstra Centre for Bible and Computer, VU Amsterdam; DOI 10.17026/dans-z6y-skyh.
 

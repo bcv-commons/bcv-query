@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.34"
+version = "0.35"
 
 [profile]
 name = "default"
@@ -625,11 +625,12 @@ flat_rules = ["embedded_flat", "tree_level_flat"]   # see rules.embedded_keeps_m
 # level, so a reader who opens a chapter sees it start at the left. BHSA starts 925 of its 929 chapters with a root. tree_depth is not
 # affected. Profile "continuous" sets this to false and counts across the break.
 chapter_starts_at_margin = true
-# a fronted protasis is indented one level in text_depth and its apodosis comes back to the line; profile "fronted_level" sets this
-# true: text_depth then lays out conditionals as BHSA does (the protasis one level in, the apodosis level with it, and what goes on
-# from the apodosis stays there; a later case of a series steps back to where the first protasis started and in again), without the
-# law view's other rules (bsb-add-books, v0.30-v0.32)
-conditionals_as_in_law_view = false
+# conditionals in text_depth as BHSA lays them out: the protasis one level in, the apodosis level with it, and what goes on from the
+# apodosis stays there; a later case of a series steps back to where the first protasis started and in again (the law view's
+# layout of conditionals, without its other rules). Default since 0.35: in bsb-add-books' checks it beat the indented protasis in
+# every round since 0.31 (0.33: 62.8% against 32.2% of the steps where the two differ). Profile "indented_protasis" sets it false:
+# the protasis one level in and the apodosis back on the line.
+conditionals_as_in_law_view = true
 
 [tree]
 doc = """MACULA's syntax tree inside a verse (rule tree_level_inside_verse). table: MACULA attachment kinds ("parent rule | child index
@@ -639,7 +640,7 @@ the share of lines entering each kind that step in, measured against their priva
 trusted: the kinds (prefixes) where the tree's level is used, the ones where it was right more often than our rules in their
 comparison on the delivered sets (v0.27): phrases (PrepNp: 15 against 4), clauses under cjpCLx (26 against 5), a כִּי clause under
 ClCl (12 against 1). Relatives (relCL) were taken out in 0.31: in the trial (v0.30, profile tree) they were right 12 times and our
-rules 15 (Deut 28:21, 28:63 "לְרִשְׁתָּהּ"). Not the fronted protasis (ClCl2, a convention: profile fronted_level), not
+rules 15 (Deut 28:21, 28:63 "לְרִשְׁתָּהּ"). Not the fronted protasis (ClCl2: [depth] conditionals_as_in_law_view), not
 infinitives after a preposition (PrepCL: our rules 25 against 14), not segments at the shared node itself (even)."""
 table = "tree_attachments.json"
 trusted = ["PrepNp|", "cjpCLx|", "ClCl|1|cl|-|כִּי"]

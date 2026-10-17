@@ -9,3 +9,6 @@ first	field	value	reason
 190010010011	frame		Ps 1 has no title and no speaker or addressee of its own: a teaching about the two ways ("אַשְׁרֵי הָאִישׁ"), in the third person throughout
 190020010011	frame		Ps 2 has no title and no single speaker from its start: it quotes the nations (2:3), God (2:6) and the king (2:7-9) and then turns to the kings (2:10-12)
 060240020061	sender_last	060240130201	Josh 24:14-15 is Joshua's own appeal: "וְעַתָּה יְראוּ אֶת־יְהוָה" turns to the people with an imperative and speaks of the LORD in the third person, after God's first-person history of 24:2-13 ("וָאֶקַּח", "וָאֶתֵּן")
+150080010011	frame		Ezra 8 is a first-person account of the journey ("וָאֶקְבְּצֵם", "וַנַּחֲנֶה", "וָאָבִינָה"), told as narrative, not speech from its start; the frame stays on Ezra 9, where the account leads into Ezra's prayer
+160010010011	frame		Neh 1 is a first-person account told as narrative ("וָאֶשְׁאָלֵם", "וָאֵשְׁבָה"); Nehemiah's prayer in it (1:5-11) is a quotation of its own
+160020010011	frame		Neh 2 is a first-person account told as narrative ("וָאֶשָּׂא", "וָאָבוֹא", "וָאָקוּם"), with the speeches in it quoted

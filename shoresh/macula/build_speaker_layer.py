@@ -584,19 +584,14 @@ def main() -> None:
     # the frame: a psalm is its psalmist's speech from its first line; per segment, the speaker of the frame (not a level)
     # a first-person account (the memoirs of Ezra and Nehemiah, Daniel's visions): a chapter outside the poetic books, in a book whose
     # narrator speaks in the first person, where most wayyiqtols outside quotations are in the first person: its frame is the narrator
-    # ("אֲנִי דָנִיֵּאל" names him; else "narrator (I)"); a prayer or speech inside it then stands one level in from the frame
+    # ("narrator (I)"); a prayer or speech inside it then stands one level in from the frame
     narr = collections.defaultdict(collections.Counter)
-    named: dict = {}
     for i, sg in enumerate(segs):
         if sg["book"] in D.GROUPS["first_person_narrator"] and sg["book"] not in D.GROUPS["poetic"] and seg_q[i][0] is None:
             v = verb(sg)
             if v and v["form"] == "wayyiqtol":
                 narr[(sg["book"], sg["chapter"])][v["person"]] += 1
-            ws = [w for w in sg["words"] if w in tok]
-            for a, b in zip(ws, ws[1:]):
-                if tok[a]["class"] == "pron" and person.get(a) == "first" and tok[b]["wtype"] == "proper" and D._strong(tok[b]).isdigit():
-                    named.setdefault(sg["book"], names.get(f"H{int(D._strong(tok[b])):04d}"))
-    memoir_frame = {k: (named.get(k[0]) or "narrator (I)") for k, c in narr.items() if c["first"] > c["third"]}
+    memoir_frame = {k: "narrator (I)" for k, c in narr.items() if c["first"] > c["third"]}
     frame = [""] * len(segs)
     for i, sg in enumerate(segs):
         if sg["book"] in D.GROUPS["frame_poems"] and (sg["book"], sg["chapter"]) not in titled_chapters:
