@@ -1,9 +1,11 @@
 # Corrections to the Hebrew speaker layer (shoresh/macula/build_speaker_layer.py applies them last).
 # One row per change, keyed on a quotation's first word (MACULA key, 12 digits, as in quotations.tsv `first`).
-# field: speaker | first | last | drop | frame   (drop: the quotation is not a quotation, value empty; frame: the frame of the chapter
-#   that starts with this word, empty for none)
+# field: speaker | first | last | drop | frame | sender_last   (drop: the quotation is not a quotation, value empty; frame: the frame of
+#   the chapter that starts with this word, empty for none; sender_last: keyed on a relayed message's formula, the last word of the
+#   sender's words, after which the messenger speaks in his own name)
 # value: the new speaker name, or the new first / last word key
 # reason: how the Hebrew text settles it (required)
 first	field	value	reason
 190010010011	frame		Ps 1 has no title and no speaker or addressee of its own: a teaching about the two ways ("אַשְׁרֵי הָאִישׁ"), in the third person throughout
 190020010011	frame		Ps 2 has no title and no single speaker from its start: it quotes the nations (2:3), God (2:6) and the king (2:7-9) and then turns to the kings (2:10-12)
+060240020061	sender_last	060240130201	Josh 24:14-15 is Joshua's own appeal: "וְעַתָּה יְראוּ אֶת־יְהוָה" turns to the people with an imperative and speaks of the LORD in the third person, after God's first-person history of 24:2-13 ("וָאֶקַּח", "וָאֶתֵּן")

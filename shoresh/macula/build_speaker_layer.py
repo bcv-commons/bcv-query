@@ -245,11 +245,16 @@ def main() -> None:
     corr_path = SHORESH.parent / "resources" / "speaker_layer" / "corrections.tsv"
     applied = 0
     frame_fixed: dict = {}                        # (book number, chapter) -> the frame a correction sets ("" for none)
+    sender_last: dict = {}                        # a relayed message's formula (first word) -> the last word of the sender's words
     if corr_path.exists():
         with open(corr_path, encoding="utf-8") as fh:
             corr = list(csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t"))
         by_first = {sp["first"]: sp for sp in spans}
         for c in corr:
+            if c["field"] == "sender_last" and c.get("reason"):
+                sender_last[c["first"]] = c["value"]
+                applied += 1
+                continue
             if c["field"] == "frame" and c.get("reason"):
                 frame_fixed[(c["first"][:2], int(c["first"][2:5]))] = c["value"]   # the chapter that starts with this word
                 applied += 1
@@ -463,12 +468,6 @@ def main() -> None:
                 innermost[x] = q
             break
 
-    def turn_seg(sg: dict) -> bool:                # opens with "and now" / "and you"
-        ws = [tok[w] for w in sg["words"] if w in tok]
-        while ws and D._n(ws[0]["lemma"]) == D.WAW:
-            ws = ws[1:]
-        return bool(ws) and D._n(ws[0]["lemma"]) in D.TURN and sg["words"][0] in tok and D._n(tok[sg["words"][0]]["lemma"]) == D.WAW
-
     def is_messenger(sg: dict) -> bool:
         return any(D._n(tok[w]["lemma"]) == D.KO for w in sg["words"][:3] if w in tok) and any(
             w in tok and tok[w]["class"] == "verb" and D._strong(tok[w]) in D.SAY and tok[w]["wtype"] == "qatal" for w in sg["words"])
@@ -512,7 +511,7 @@ def main() -> None:
     # מַלְאָכִים … כֹּה אָמַר אָחִיךָ יִשְׂרָאֵל", Num 20:14) right before a quotation: the formula line is the messenger's speech (level 1),
     # and the quotations that follow without a break are the sender's words inside it (level 2) (bsb-add-books: the reference's layout
     # in Josh 24, Judg 11, Exod 10, Num 20, Josh 22)
-    relayed = 0
+    relayed = repeated = 0
     for f in range(1, len(segs) - 1):
         if seg_q[f][0] is not None or seg_q[f + 1][0] is None or not is_messenger(segs[f]) or not narrative_book(segs[f]["book"]):
             continue
@@ -524,8 +523,13 @@ def main() -> None:
         last, x = f + 1, f + 1
         while x + 1 < len(segs) and seg_q[x + 1][0] is not None and (segs[x + 1]["book"], segs[x + 1]["chapter"]) == (segs[f]["book"], segs[f]["chapter"]):
             x += 1
-        # a verse-initial "וְעַתָּה" / "וְאַתָּה" ends the sender's words: the messenger turns to his own appeal, at level 1 (Josh 24:14)
-        stop = next((y for y in range(f + 2, x + 1) if segs[y]["verse"] != segs[y - 1]["verse"] and turn_seg(segs[y])), None)
+        # where the sender's words end before the quoted stretch does, a hand correction says so (field sender_last, keyed on the
+        # formula's first word: Josh 24:14-15 is Joshua's own appeal). A verse-initial "וְעַתָּה" is no signal: in Judg 11:23, 2 Chr
+        # 21:15 and 32:15 the sender's words go on after it (bsb-add-books, speaker layer v0.6)
+        end_key = sender_last.get(segs[f]["first"])
+        stop = next((y + 1 for y in range(f + 1, x + 1) if end_key in segs[y]["words"]), None) if end_key else None
+        if stop is not None and stop > x:
+            stop = None
         if stop is not None:
             for y in range(stop, x + 1):
                 seg_q[y] = (None, 0.0)
@@ -540,7 +544,19 @@ def main() -> None:
                 q["speaker"] = sender             # the sender's words, whatever voice FCBH cast for them
         if not who and frame_seg and (v := verb(frame_seg)):
             who = "(they)" if v.get("number") == "plural" else "(he/she)"
-        wrap(f, x, who, frame_seg, "relayed message")
+        w = wrap(f, x, who, frame_seg, "relayed message")
+        # a messenger formula again inside the message ("כִּי־כֹה אָמַר יְהוָה", 2 Kgs 3:17) is the messenger's own line, at level 1; the
+        # sender's words go on after it at level 2
+        for y in range(f + 2, x + 1):
+            if is_messenger(segs[y]) and level[y] >= 2:
+                base = level[y]
+                level[y], innermost[y] = 1, w
+                repeated += 1
+                for z in range(y + 1, x + 1):      # the layout's own speech level under this formula is the message's level 2 already
+                    if level[z] > base:
+                        level[z] -= 1
+                        if innermost[z] is not None and innermost[z] is not w:
+                            innermost[z]["level"] = level[z]
         relayed += 1
 
     # a psalm whose title ends with an inquit ("וַיֹּאמַר" in its title or opening its first line after it, Ps 18:1-2) is a quotation
@@ -687,7 +703,7 @@ def main() -> None:
              f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)}); of them opened by a messenger formula"
              f" inside a quotation: {messenger}",
              f"- relayed messages (a messenger formula before a quotation: the formula level 1, the sender's words level 2): {relayed};"
-             f" psalms opened by an inquit in their title: {titled}",
+             f" repeated formulas inside them back at level 1: {repeated}; psalms opened by an inquit in their title: {titled}",
              f"- frame (a psalm is its psalmist's speech, a first-person account its narrator's; a field, not a level): {sum(1 for f in frame if f)} segments;"
              f" titles naming a person: {len(frame_of)}; first-person accounts: {len(memoir_frame)} chapters ("
              + ", ".join(f"{b} {c}" for b, c in sorted(memoir_frame)) + ")",
