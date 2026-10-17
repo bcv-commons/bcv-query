@@ -49,6 +49,11 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
    one level deeper, to the end of the quotation (`basis` `messenger formula`). Its speaker: the outer speaker for an inquit in the first person; God for a divine name in the inquit's
    subject; a person's name (matched to Glyssen's characters for the verse) for a proper noun; "the one addressed" for a second-person
    inquit; "he/she" / "they" when the subject is only in the verb.
+   Relayed messages: a messenger formula outside any quotation right before one ("וַיֹּאמֶר יְהוֹשֻׁעַ … כֹּה־אָמַר יְהוָה", Josh 24:2; "וַיִּשְׁלַח
+   מֹשֶׁה מַלְאָכִים … כֹּה אָמַר אָחִיךָ יִשְׂרָאֵל", Num 20:14), in the narrative books: the formula line is the messenger's speech (level 1,
+   `basis` `relayed message`), and the quotations that follow without a break are the sender's words inside it (level 2, their speaker
+   the sender, whatever voice FCBH cast). A psalm whose title ends with an inquit ("וַיֹּאמַר", Ps 18:2) is a quotation opened by it
+   (`basis` `titled psalm`), as in 2 Sam 22.
 4. The frame: a psalm is its psalmist's speech from its first line (`books.frame_poems`). This is recorded per segment as `frame` (the
    name in the title's "לְ" + name, else "Psalmist"), not as a level, so the levels stay comparable with Clear's.
 5. Corrections (`corrections.tsv`) last.

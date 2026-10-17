@@ -458,7 +458,35 @@ def main() -> None:
                 innermost[x] = q
             break
 
-    # the frame: a psalm is its psalmist's speech from its first line; per segment, the speaker of the frame (not a level)
+    def is_messenger(sg: dict) -> bool:
+        return any(D._n(tok[w]["lemma"]) == D.KO for w in sg["words"][:3] if w in tok) and any(
+            w in tok and tok[w]["class"] == "verb" and D._strong(tok[w]) in D.SAY and tok[w]["wtype"] == "qatal" for w in sg["words"])
+
+    def wrap(first: int, last: int, who: str, iq: dict | None, kind: str) -> dict:
+        """a new outer quotation over segments first..last: what stood in quotations there moves one level in, under it"""
+        global_id = f"W{len(wrapped) + 1:05d}"
+        w = {"id": global_id, "speaker": who, "speaker_hebrew": subject_words(iq) if iq else "", "level": 1, "parent": "",
+             "alt_speaker": "", "divine": "Y" if who == "God" else "", "quote_type": kind, "basis": kind, "first": segs[first]["first"],
+             "last": segs[last]["last"], "from": f"{segs[first]['book']} {segs[first]['chapter']}:{segs[first]['verse']}",
+             "to": f"{segs[last]['book']} {segs[last]['chapter']}:{segs[last]['verse']}", "start_fit": "segment start",
+             "end_fit": "segment end", "pieces": 1, "inquit": iq["text"] if iq else ""}
+        wrapped.append(w)
+        moved = set()
+        for x in range(first, last + 1):
+            if seg_q[x][0] is None:
+                seg_q[x], level[x], innermost[x] = (w, 1.0), 1, w
+            else:
+                level[x] += 1
+                for q in {id(seg_q[x][0]): seg_q[x][0], id(innermost[x]): innermost[x]}.values():
+                    if q is not None and id(q) not in moved:
+                        q["level"] = q.get("level", 1) + 1
+                        if q.get("level") == 2:
+                            q["parent"] = global_id
+                        moved.add(id(q))
+                seg_q[x] = (w, 1.0) if False else seg_q[x]
+        return w
+    wrapped: list[dict] = []
+
     frame_of: dict = {}                           # (book, chapter) -> the person its title names with "לְ" (לְדָוִד, לְאָסָף, לִבְנֵי־קֹרַח)
     for sg in segs:
         if sg["book"] in D.GROUPS["frame_poems"] and sg["verse"] == 1 and (sg["book"], sg["chapter"]) not in frame_of:
@@ -469,9 +497,58 @@ def main() -> None:
                     if name:
                         frame_of[(sg["book"], sg["chapter"])] = name
                         break
+    # relayed messages: a messenger formula outside any quotation ("וַיֹּאמֶר יְהוֹשֻׁעַ … כֹּה־אָמַר יְהוָה", Josh 24:2; "וַיִּשְׁלַח מֹשֶׁה
+    # מַלְאָכִים … כֹּה אָמַר אָחִיךָ יִשְׂרָאֵל", Num 20:14) right before a quotation: the formula line is the messenger's speech (level 1),
+    # and the quotations that follow without a break are the sender's words inside it (level 2) (bsb-add-books: the reference's layout
+    # in Josh 24, Judg 11, Exod 10, Num 20, Josh 22)
+    relayed = 0
+    for f in range(1, len(segs) - 1):
+        if seg_q[f][0] is not None or seg_q[f + 1][0] is None or not is_messenger(segs[f]) or not narrative_book(segs[f]["book"]):
+            continue
+        frame_seg = next((segs[x] for x in range(f - 1, max(-1, f - 4), -1) if english_speaker(segs[x]) or verb(segs[x])), None)
+        who = english_speaker(frame_seg) if frame_seg else ""
+        sender = english_speaker(segs[f]) or ""
+        # the sender's words run on through the quotations that follow without a break (a stop at the sender named in the third
+        # person failed: God names himself in the third person in his own speech, Josh 24:7)
+        last, x = f + 1, f + 1
+        while x + 1 < len(segs) and seg_q[x + 1][0] is not None and (segs[x + 1]["book"], segs[x + 1]["chapter"]) == (segs[f]["book"], segs[f]["chapter"]):
+            x += 1
+        last = x
+        pieces = {id(seg_q[y][0]): seg_q[y][0] for y in range(f + 1, last + 1)}
+        for q in pieces.values():
+            if sender:
+                q["speaker"] = sender             # the sender's words, whatever voice FCBH cast for them
+        if not who and frame_seg and (v := verb(frame_seg)):
+            who = "(they)" if v.get("number") == "plural" else "(he/she)"
+        wrap(f, last, who, frame_seg, "relayed message")
+        relayed += 1
+
+    # a psalm whose title ends with an inquit ("וַיֹּאמַר" in its title or opening its first line after it, Ps 18:1-2) is a quotation
+    # opened by it, not speech from its start
+    titled = 0
+    titled_chapters: set = set()
+    i = 0
+    while i < len(segs):
+        sg = segs[i]
+        first_line_after_title = sg["verse"] == 2 and i > 0 and segs[i - 1]["verse"] == 1 and (segs[i - 1]["chapter"] == sg["chapter"])
+        if sg["book"] in D.GROUPS["frame_poems"] and (sg["verse"] == 1 or first_line_after_title) and (v := verb(sg)) \
+                and v["form"] == "wayyiqtol" and saying(sg):
+            j = i + 1
+            while j < len(segs) and (segs[j]["book"], segs[j]["chapter"]) == (sg["book"], sg["chapter"]):
+                j += 1
+            if j - 1 > i:
+                head = next((x for x in segs if (x["book"], x["chapter"], x["verse"]) == (sg["book"], sg["chapter"], 1)), sg)
+                wrap(i + 1, j - 1, frame_of.get((sg["book"], sg["chapter"]), "Psalmist"), head, "titled psalm")
+                titled += 1
+                titled_chapters.add((sg["book"], sg["chapter"]))
+            i = j
+        else:
+            i += 1
+
+    # the frame: a psalm is its psalmist's speech from its first line; per segment, the speaker of the frame (not a level)
     frame = [""] * len(segs)
     for i, sg in enumerate(segs):
-        if sg["book"] in D.GROUPS["frame_poems"]:
+        if sg["book"] in D.GROUPS["frame_poems"] and (sg["book"], sg["chapter"]) not in titled_chapters:
             frame[i] = frame_of.get((sg["book"], sg["chapter"]), "Psalmist")
 
     # the work lists
@@ -505,7 +582,7 @@ def main() -> None:
     for sp in spans:
         sp.setdefault("pieces", 1)
         sp.setdefault("inquit", "")
-    allq = sorted(spans + inner, key=lambda q: (q["first"], q["level"]))
+    allq = sorted(spans + inner + wrapped, key=lambda q: (q["first"], q["level"]))
     cols = ["id", "level", "parent", "speaker", "speaker_hebrew", "alt_speaker", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
             "end_fit", "pieces", "inquit"]
     with open(OUT / "quotations.tsv", "w", encoding="utf-8") as fh:
@@ -569,6 +646,8 @@ def main() -> None:
              f"{sum(bool(q['speaker_hebrew']) and q['speaker'] in ('', '(they)', '(he/she)', '(the one addressed)') for q in inner)}, 'you': {sum(q['speaker'] == '(the one addressed)' for q in inner)},"
              f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)}); of them opened by a messenger formula"
              f" inside a quotation: {messenger}",
+             f"- relayed messages (a messenger formula before a quotation: the formula level 1, the sender's words level 2): {relayed};"
+             f" psalms opened by an inquit in their title: {titled}",
              f"- frame (a psalm is its psalmist's speech, a field, not a level): {sum(1 for f in frame if f)} segments;"
              f" titles naming a person: {len(frame_of)}",
              f"- segments, Clear quotation / layout speech: both {agree[(True, True)]}, neither {agree[(False, False)]}, Clear only"
@@ -585,7 +664,7 @@ def main() -> None:
                         ("Speakers Glyssen doesn't list for the verse", gmiss)):
         lines += [f"## {title} ({len(rows)})", ""] + [f"- {a} [{b}] {c}" for a, b, c in rows[:60]] + [""]
     (OUT / "report.md").write_text("\n".join(lines), encoding="utf-8")
-    print("\n".join(lines[:22]))
+    print("\n".join(lines[:23]))
 
 
 if __name__ == "__main__":
