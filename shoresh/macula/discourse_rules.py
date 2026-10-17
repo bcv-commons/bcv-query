@@ -89,7 +89,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     global CFG, CONFIG_FILE, CONFIG_SHA256, CONFIG_FILES, PROFILE, PROFILE_CHANGED, RULES_VERSION, GROUPS, RULES, SCOPE, SPLIT_VERSES
     global SPEAK, SAY, SAY_INF, ANSWER, ASK, SWEAR, OATH_FORMULA_VERBS, BE_VERB, WORD_EVENT, DO, HEAR, ADDRESS, DIVINE, PROCLAIM, SING_PRAY, SONG, \
         LEAD_ME, HAND, YOU, SON_OF_MAN, HAND_VERBS, OBJECT_MARKER, SUMMARY_THIS, SUMMARY_LAW, PERCEIVE, PERCEIVE_NARRATED, PERCEIVE_STEMS, CLOSING_THIS, LAWGIVER, BACK_REFERENCE, \
-        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS, VERDICT, TURN, PROCEDURE
+        PERCEIVE_REASON, PLACE_THERE, ALTERNATIVE, CHAIN_END, CHAIN_END_PHRASES, EVERY, FORBID, KEEP, COMMANDMENTS, VERDICT, TURN, PROCEDURE, I_WORDS
     global LAW_FLAT_RULES
     global SUB_KIND, SUB_CJ, SUB_ARC, QABEL_DI, REL, REL_AFTER_PREP, INF_PREP, INF_DEFAULT, FORMULA, TIME_WORDS, CONSEQUENCE, CONCLUSION
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
@@ -123,6 +123,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     PERCEIVE_REASON, PLACE_THERE = set(W["perceive"]["reason_with_object"]), strong("place_there")
     ALTERNATIVE, CHAIN_END = lemmas("alternative"), lemmas("chain_end")
     TURN = lemmas("turn")
+    I_WORDS = lemmas("i")
     CHAIN_END_PHRASES = [list(x) for x in W["chain_end"].get("phrases", [])]
     SUB_KIND = {_n(k): v for k, v in W["subordinators"]["relation"].items()}
     SUB_CJ = set(SUB_KIND)
@@ -161,7 +162,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     LAW_STAIRCASE = CFG["depth"]["law"]["staircase"]
     LAW_FLAT_RULES = set(CFG["depth"]["law"].get("flat_rules", []))
     CHAPTER_MARGIN = CFG["depth"]["chapter_starts_at_margin"]
-    FRONTED_LEVEL = CFG["depth"].get("fronted_subordinate_stands_level", False)
+    FRONTED_LEVEL = CFG["depth"].get("conditionals_as_in_law_view", False)
     SPLIT_VERSES = {}
     for ref, v in CFG.get("versification", {}).get("split_verses", {}).items():
         book, cv = ref.split()
@@ -392,6 +393,7 @@ def features(toks: list, person: dict[str, str], rule: str | None = None, role: 
                          and any(t["class"] == "prep" and _n(t["lemma"]) == LE for t in toks),
             "then": l0 in APODOSIS_MARKERS,
             "turn": waw and bool(TURN & in_first_two),
+            "i_lead": l0 in I_WORDS,
             "verdict": bool(lead) and _strong(lead[0]) in VERDICT and not finite,
             "exhortation": second and bool(v) and _strong(v) in KEEP and any(_strong(t) in COMMANDMENTS for t in toks),
             "role": role, "circ": waw and len(toks) > 1 and toks[1]["class"] != "verb" and not finite and not speak}
@@ -1341,7 +1343,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
                 if frame is not None:
                     link(x, frame, "continuation", "second_person_brings_run_back")
                 break
-            if (fx["turn"] or (fx["form"] == "wayyiqtol" and fx["speak"])) and under is not None and under != top:
+            if (fx["turn"] or (fx["form"] == "wayyiqtol" and (fx["speak"] or fx["person"] == "first")) or fx["i_lead"]) \
+                    and under is not None and under != top:
                 link(x, top, "continuation", "second_person_brings_run_back")   # "and he said to me" closes the inner quotation
     # rule participle_describes_the_lord: "who brought you out", a clause opened by a participle with the article right after
     # "I am the LORD", describes him and stands one level in under it
@@ -1430,14 +1433,15 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             cut = next((i for i in range(len(ch) - 1) if chap_of.get(ch[i + 1]) != chap_of.get(ch[i])), None)
             if cut is not None:
                 counted = ch[:cut]
-        out[k]["depth"] = sum(1 for x in counted if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES
-                              and not (FRONTED_LEVEL and out[x]["rule"] == "sub_fwd"))
+        out[k]["depth"] = sum(1 for x in counted if out[x]["relation"] not in FLAT and out[x]["rule"] not in FLAT_RULES)
         out[k].pop("subj", None)
     for k, d in _law_depths(out, back if LAW_RETURNS else set(), cond_series, ext, case_apod, law_heads, cp_cases,
                             chap_of if CHAPTER_MARGIN else None, be_cases, inner_heads, forbid_cases, law_par,
                             {c["key"] for c in clauses if c["f"]["form"] == "weqatal"},
                             {c["key"] for c in clauses if c["f"]["form"] == "weqatal" and c["f"]["verb"] in PROCEDURE}).items():
         out[k]["depth_law"] = d
+        if FRONTED_LEVEL:                         # [depth] conditionals_as_in_law_view (profile fronted_level)
+            out[k]["depth"] = d
     return out
 
 

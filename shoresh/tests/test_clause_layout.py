@@ -464,8 +464,8 @@ def test_v026_moving_out(tmp_path, monkeypatch):
 
 
 def test_moving_out_test_set(tmp_path, monkeypatch):
-    """bsb-add-books' moving-out test set (98 lines: verse, opening, the direction from the line before) keeps its score: v0.29 gets
-    65 right (v0.28: 63). A rule change that loses lines here has to say why."""
+    """bsb-add-books' moving-out test set (98 lines: verse, opening, the direction from the line before) keeps its score: v0.31 gets
+    66 right (v0.28: 63, v0.29: 65). A rule change that loses lines here has to say why."""
     from macula import build_clause_layout as b, moving_out_score as m
     out = tmp_path / "out"
     books = sorted({t["book"] for t in m.tests()})
@@ -473,7 +473,7 @@ def test_moving_out_test_set(tmp_path, monkeypatch):
     b.main()
     res = m.score(out / "clauses")
     assert all(r["found"] for r in res)
-    assert sum(r["right"] for r in res) >= 65, [r["verse"] for r in res if not r["right"]]
+    assert sum(r["right"] for r in res) >= 66, [r["verse"] for r in res if not r["right"]]
 
 
 def test_release_packaging(tmp_path, monkeypatch):

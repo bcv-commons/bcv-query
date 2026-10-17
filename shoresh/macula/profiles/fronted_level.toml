@@ -3,9 +3,11 @@
 [profile]
 name = "fronted_level"
 extends = "default"
-doc = """A subordinate clause that comes before its main clause (a fronted protasis, "אִם־עֹלָה קָרְבָּנוֹ מִן־הַבָּקָר / זָכָר תָּמִים
-יַקְרִיבֶנּוּ", Lev 1:3) stands level with the main clause in text_depth, as in MACULA's syntax tree (a ClCl2 node with both clauses as
-children) and in BHSA. The default indents it one level, so that the main clause stands on the line. The law view is unchanged."""
+doc = """Conditionals in text_depth laid out as in the law view ([depth.law]) and in BHSA: a protasis before its apodosis ("אִם־עֹלָה
+קָרְבָּנוֹ מִן־הַבָּקָר / זָכָר תָּמִים יַקְרִיבֶנּוּ", Lev 1:3) is one level in, and the apodosis stays on the protasis's level instead of coming
+back to the line; what follows goes on from there. Only conditionals (other fronted clauses keep the default). The default indents the
+protasis and brings the apodosis back, so that the main clause stands on the line. Until 0.30 this profile put the protasis level
+with the apodosis instead, which is neither layout (bsb-add-books, v0.30)."""
 
 [depth]
-fronted_subordinate_stands_level = true
+conditionals_as_in_law_view = true
