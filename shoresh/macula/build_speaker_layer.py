@@ -77,8 +77,10 @@ def load_spans() -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--books", help="comma-separated USFM codes (default: all)")
+    ap.add_argument("--no-review", action="store_true", help="leave out the review rows (resources/speaker_layer/review.tsv)")
     a = ap.parse_args()
     only = set(a.books.upper().split(",")) if a.books else None
+    no_review = a.no_review
 
     # the clause segments, in text order
     segs: list[dict] = []
@@ -997,8 +999,17 @@ def main() -> None:
         if fixed is not None:
             frame[i] = fixed
 
-    # the prophets: an oracle is God's speech from the line after a divine messenger formula ("כֹּה אָמַר יְהוָה") or the word-event
-    # formula ("הָיָה דְבַר־יְהוָה אֵלַי") to the next one; its frame is the speaker, as a field, so the levels stay as Clear has them
+    # the prophets: a prophetic book is its prophet's speech from its first line, so the frame is the prophet (resources/speaker_layer/
+    # prophets.tsv, as the book's heading names him), and God's words in it are always a quotation, at level 1 and deeper. A reader who
+    # takes the levels alone has the book as text with God's words quoted (as BHSA lays it out); one who counts the frame as a level
+    # has the book as the prophet's speech with God's words quoted in it (as unfoldingWord's notes read it).
+    # Regions: an oracle from its formula (the divine messenger formula "כֹּה אָמַר יְהוָה", the word-event formula "הָיָה דְבַר־יְהוָה
+    # אֵלַי") to the next, or speech with no formula from its first line in the first or second person outside quotations (Hosea, Isa
+    # 1:2); prose narrative (a third-person wayyiqtol the layout has outside speech: Jer 36:4, Isa 37:36) ends a region. Who speaks
+    # each verse in a region: God where "I" is God, or an "I" MACULA doesn't resolve, or the verse is partly God's own quotation; the
+    # prophet where "I" is someone else (Jeremiah's laments, 15:10-18) or God is named in the third person with no "I" (Isa 11, 19);
+    # a verse with neither keeps the one before (at a region's start: God after a divine formula, else the prophet). A run of God's
+    # verses that is not already a quotation by God (Clear's) becomes one (basis "oracle"); others' quotations in it move one level in
     def opener(sg: dict) -> str:
         toks = [tok[w] for w in sg["words"] if w in tok]
         if not any(D._strong(t) in D.DIVINE for t in toks):
@@ -1010,73 +1021,102 @@ def main() -> None:
             return "word-event formula"
         return ""
     prophets = D.GROUPS["poetic"] - D.GROUPS["poems"]
-    oracle_breaks, opener_of = [], {}
-    opened_without_formula = 0
-    open_i, fresh = None, False
-    for i, sg in enumerate(segs):
-        if open_i is not None and segs[open_i]["book"] != sg["book"]:
-            open_i = None
-        if sg["book"] not in prophets:
-            continue
-        if kind := opener(sg):
-            open_i, opener_of[i], fresh = i, kind, True
-            continue
-        if open_i is None and seg_q[i][0] is None and sg["book"] not in D.GROUPS["narrative"] and not (sg["chapter"] == 1 and sg["verse"] == 1) \
-                and any(person.get(w) in ("first", "second") for w in sg["words"]):
-            open_i, fresh = i, False                            # speech with no formula (Hosea, Joel, Isa 1:2-20): the frame opens here
-            opened_without_formula += 1
-        if open_i is None or (fresh and is_inquit(sg)):          # "saying" right after the formula belongs to the formula
-            continue
-        fresh = False
-        v = verb(sg)
-        if seg_q[i][0] is None and v and v["form"] == "wayyiqtol" and v["person"] == "third" and sdepth(sg["clause_key"]) == 0:
-            oracle_breaks.append((open_i, i))                       # prose narrative the layout does not have in a speech: the oracle ends
-            open_i = None
-            continue
-        if not frame[i]:
-            frame[i] = "God"
-    # Who speaks the oracle, per verse (bsb-add-books, v0.8): no frame over a quotation by the frame's own speaker (Clear's quotations by
-    # God in Ezekiel and Jeremiah: the frame would count God's words twice); otherwise "I" through MACULA's references settles it: God
-    # where "I" is God, the prophet where "I" is the prophet (Jeremiah's laments, 15:10-18, 20:7-18; his prayer, 32:16-25), the
-    # book's prophet where God is named in the third person with no divine "I" (Isa 11, 19, 32: the prophet speaks of the LORD); a
-    # verse with neither keeps the verse before it
     prophet_of: dict = {}
-    pt = SHORESH.parent / "resources" / "speaker_layer" / "prophets.tsv"   # the prophet each book's heading names
+    pt = SHORESH.parent / "resources" / "speaker_layer" / "prophets.tsv"
     for line in open(pt, encoding="utf-8"):
         p_ = line.rstrip("\n").split("\t")
         if len(p_) >= 2 and not line.startswith("#") and p_[0] != "book":
             prophet_of[p_[0]] = p_[1]
-    reframed = collections.Counter()
-    cur, cur_verse = None, None
-    for i, f in enumerate(frame):
-        if f != "God":
-            cur = None
+    oracle_breaks, opener_of = [], {}
+    opened_without_formula = 0
+    region: list = [None] * len(segs)
+    open_i = None
+    for i, sg in enumerate(segs):
+        if open_i is not None and segs[open_i]["book"] != sg["book"]:
+            open_i = None
+        if sg["book"] not in prophets or sg["book"] not in prophet_of:
             continue
+        if kind := opener(sg):
+            open_i, opener_of[i] = i, kind
+            region[i] = i
+            continue
+        if open_i is None and seg_q[i][0] is None and not (sg["chapter"] == 1 and sg["verse"] == 1) \
+                and any(person.get(w) in ("first", "second") for w in sg["words"]):
+            open_i = i                                          # speech with no formula: the region opens here
+            opened_without_formula += 1
+        if open_i is None:
+            continue
+        v = verb(sg)
+        if seg_q[i][0] is None and v and v["form"] == "wayyiqtol" and v["person"] == "third" and sdepth(sg["clause_key"]) == 0:
+            oracle_breaks.append((open_i, i))
+            open_i = None
+            continue
+        region[i] = open_i
+
+    def god_quoted(i: int) -> bool:                    # in a quotation by God at some level
         q = innermost[i] or seg_q[i][0]
-        if q is not None and q.get("speaker") == "God" and level[i] == 1:
-            frame[i] = ""
-            reframed["no frame over God's own quotation"] += 1
+        seen = 0
+        while q is not None and seen < 8:
+            if q.get("speaker") == "God":
+                return True
+            q = next((p for p in inner + wrapped + spans if p["id"] == q.get("parent")), None) if q.get("parent") else None
+            seen += 1
+        return bool(seg_q[i][0] and seg_q[i][0].get("speaker") == "God")
+    reframed = collections.Counter()
+    gods = [False] * len(segs)
+    cur, cur_verse, prev_region = None, None, None
+    for i in range(len(segs)):
+        r = region[i]
+        if r is None:
+            cur, prev_region = None, None
             continue
+        if r != prev_region:
+            cur, prev_region = ("God" if r in opener_of else "prophet"), r
         vkey = (segs[i]["book"], segs[i]["chapter"], segs[i]["verse"])
         if vkey != cur_verse:
             cur_verse = vkey
-            vv = [x for x in range(max(0, i - 30), min(len(segs), i + 30)) if (segs[x]["book"], segs[x]["chapter"], segs[x]["verse"]) == vkey]
-            in_gods = any((innermost[x] or seg_q[x][0] or {}).get("speaker") == "God" for x in vv)
-            me = set().union(set(), *(ents(x, "first") for x in vv))
-            named_god = any(w in tok and tok[w]["class"] == "noun" and D._strong(tok[w]) in D.DIVINE for x in vv for w in segs[x]["words"]
-                            if not is_inquit(segs[x]) and not is_messenger(segs[x]))    # not "אָמַר יְהוָה צְבָאוֹת", "נְאֻם־יְהוָה"
-            has_first = any(person.get(w) == "first" for x in vv for w in segs[x]["words"])
+            vv = [x for x in range(max(0, i - 30), min(len(segs), i + 30))
+                  if (segs[x]["book"], segs[x]["chapter"], segs[x]["verse"]) == vkey and region[x] is not None]
+            me = set().union(set(), *(ents(x, "first") for x in vv if level[x] == 0))
+            named_god = any(w in tok and tok[w]["class"] == "noun" and D._strong(tok[w]) in D.DIVINE for x in vv if level[x] == 0
+                            for w in segs[x]["words"] if not is_inquit(segs[x]) and not is_messenger(segs[x]))
+            has_first = any(person.get(w) == "first" for x in vv if level[x] == 0 for w in segs[x]["words"])
+            in_gods = any(god_quoted(x) for x in vv)
             if "GOD" in me or (has_first and not me) or in_gods:
-                cur = "God"                                     # an "I" MACULA doesn't resolve, in God's oracle: God
-            elif me:
-                cur = prophet_of.get(segs[i]["book"]) or cur or "God"
-            elif named_god and prophet_of.get(segs[i]["book"]):
-                cur = prophet_of[segs[i]["book"]]
-            elif cur is None:
                 cur = "God"
-        if cur and cur != "God":
-            frame[i] = cur
-            reframed["the prophet speaks"] += 1
+            elif me or named_god:
+                cur = "prophet"
+        if i in opener_of or is_inquit(segs[i]) and level[i] == 0:
+            continue                                            # the formula line is the prophet's
+        gods[i] = cur == "God"
+        reframed["God speaks" if gods[i] else "the prophet speaks"] += 1
+    oracles_made = 0
+    i = 0
+    while i < len(segs):
+        if not gods[i] or god_quoted(i):
+            i += 1
+            continue
+        j = i
+        while j + 1 < len(segs) and gods[j + 1] and not god_quoted(j + 1) and region[j + 1] == region[i]:
+            j += 1
+        iq = segs[region[i]] if region[i] in opener_of else None
+        wrap(i, j, "God", iq, "oracle")
+        oracles_made += 1
+        i = j + 1
+    for i, r in enumerate(region):
+        if r is not None:
+            frame[i] = prophet_of[segs[i]["book"]]
+    # what God tells the prophet to say ("וְאָמַרְתָּ … הָרֵי יִשְׂרָאֵל", Ezek 6:3) is the prophet's words
+    told_prophet = 0
+    for q in inner:
+        a = order.get(q["first"])
+        if a is None or a == 0 or segs[a]["book"] not in prophet_of or q.get("speaker") not in ("", "(the one addressed)"):
+            continue
+        par_q = next((p for p in inner + wrapped + spans if p["id"] == q.get("parent")), None)
+        v = verb(segs[a - 1])
+        if par_q is not None and par_q.get("speaker") == "God" and v and v["person"] == "second" and (saying(segs[a - 1]) or is_inquit(segs[a - 1])):
+            q["speaker"] = prophet_of[segs[a]["book"]]
+            told_prophet += 1
 
     # the work lists
     no_inquit, frames_agree, frames_disagree, voiced_outside, inner_inquits = [], [], [], [], []
@@ -1109,6 +1149,93 @@ def main() -> None:
     for sp in spans:
         sp.setdefault("pieces", 1)
         sp.setdefault("inquit", "")
+    # review rows (resources/speaker_layer/review.tsv): changes from the review pass over doubtful passages (macula/speaker_review.py),
+    # each with its source (the agent and prompt version) and its reason, applied last, on the finished structure: speaker, drop,
+    # first, last (of any quotation, found by its first word), add (a new quotation inside the one named as parent), level (of a
+    # stretch of segments), frame (of the chapter that starts with the word)
+    review_path = SHORESH.parent / "resources" / "speaker_layer" / "review.tsv"
+    reviewed = collections.Counter()
+    by_id_all = {q["id"]: q for q in spans + inner + wrapped}
+
+    def parent_of(q: dict) -> dict | None:
+        return by_id_all.get(q.get("parent") or "")
+
+    def find_q(k: str) -> dict | None:
+        cands = [q for q in spans + inner + wrapped if q["first"] == k]
+        return max(cands, key=lambda q: q.get("level", 1)) if cands else None
+
+    def unnest(x: int, q: dict) -> None:            # segment x leaves quotation q: it and what is inside q there go one level out
+        for y in [x]:
+            if level[y] >= q.get("level", 1):
+                level[y] -= 1
+            if innermost[y] is q:
+                innermost[y] = parent_of(q)
+            if q in spans and seg_q[y][0] is q:
+                seg_q[y] = (None, 0.0)
+
+    def nest(x: int, q: dict) -> None:              # segment x joins quotation q, one level in from q's parent
+        lv = q.get("level", 1)
+        if level[x] >= lv:
+            level[x] += 1
+        else:
+            level[x] = lv
+            innermost[x] = q
+        if q in spans and seg_q[x][0] is None:
+            seg_q[x] = (q, 1.0)
+    if review_path.exists() and not no_review:
+        with open(review_path, encoding="utf-8") as fh:
+            rows = list(csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t"))
+        for r in rows:
+            f, k, val = r.get("field"), r.get("first", ""), r.get("value") or ""
+            if not r.get("reason") or k not in order and f != "frame":
+                reviewed["not applied (no reason or unknown word)"] += 1
+                continue
+            if f == "frame":
+                for i, sg in enumerate(segs):
+                    if sg["first"][:2] == k[:2] and sg["chapter"] == int(k[2:5]):
+                        frame[i] = val
+            elif f == "level" and (r.get("last") or "") in order:
+                for x in range(order[k], order[r["last"]] + 1):
+                    level[x] = int(val)
+            elif f == "add" and (r.get("last") or "") in order:
+                par = by_id_all.get(r.get("parent") or "")
+                q = {"id": f"{(par or {}).get('id', 'R')}.r{reviewed['add'] + 1}", "speaker": val, "speaker_hebrew": "", "alt_speaker": "",
+                     "divine": "Y" if val == "God" else "", "quote_type": "nested" if par else "review", "basis": "review",
+                     "level": (par.get("level", 1) + 1) if par else 1, "parent": par["id"] if par else "", "first": k, "last": r["last"],
+                     "from": f"{segs[order[k]]['book']} {segs[order[k]]['chapter']}:{segs[order[k]]['verse']}",
+                     "to": f"{segs[order[r['last']]]['book']} {segs[order[r['last']]]['chapter']}:{segs[order[r['last']]]['verse']}",
+                     "start_fit": "segment start", "end_fit": "segment end", "pieces": 1, "inquit": ""}
+                (inner if par else spans).append(q)
+                by_id_all[q["id"]] = q
+                for x in range(order[k], order[r["last"]] + 1):
+                    nest(x, q)
+            else:
+                q = find_q(k)
+                if q is None:
+                    reviewed["not applied (no quotation starts there)"] += 1
+                    continue
+                a0, b0 = order[q["first"]], order[q["last"]]
+                if f == "speaker":
+                    q["speaker"], q["divine"] = val, "Y" if val == "God" else ""
+                elif f == "drop":
+                    for x in range(a0, b0 + 1):
+                        unnest(x, q)
+                    for lst in (spans, inner, wrapped):
+                        if q in lst:
+                            lst.remove(q)
+                elif f in ("first", "last") and val in order:
+                    a1, b1 = (order[val], b0) if f == "first" else (a0, order[val])
+                    for x in set(range(a0, b0 + 1)) - set(range(a1, b1 + 1)):
+                        unnest(x, q)
+                    for x in sorted(set(range(a1, b1 + 1)) - set(range(a0, b0 + 1))):
+                        nest(x, q)
+                    q[f] = segs[a1]["first"] if f == "first" else segs[b1]["last"]
+                else:
+                    reviewed["not applied (field)"] += 1
+                    continue
+            reviewed[f] += 1
+            reviewed["applied"] += 1
+
     allq = sorted(spans + inner + wrapped, key=lambda q: (q["first"], q["level"]))
     cols = ["id", "level", "parent", "speaker", "speaker_hebrew", "alt_speaker", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
             "end_fit", "pieces", "inquit"]
@@ -1130,6 +1257,27 @@ def main() -> None:
                 fh.write(f"{s['chapter']}\t{s['verse']}\t{s['seg']}\t{s['clause_key']}\t{q['id'] if q else ''}\t{lv}\t"
                          f"{q['speaker'] if q else ''}\t{share:.2f}\t{fr}\n")
     frames_inside = frames_agree + frames_disagree
+
+    # the evidence per segment, for a review pass over doubtful passages (macula/speaker_review.py): the translations' votes, the verb,
+    # the subject, who "I" is, the markers of speech, Glyssen's characters (data/speaker-layer/_work/evidence.jsonl, not released)
+    (OUT / "_work").mkdir(exist_ok=True)
+    with open(OUT / "_work" / "evidence.jsonl", "w", encoding="utf-8") as fh:
+        for i, sg in enumerate(segs):
+            outer = seg_q[i][0]
+            deep = ((outer or {}).get("_votes") or {}).get("deep", {}).get(i)
+            v = verb(sg)
+            q = innermost[i] if seg_q[i][0] else None
+            cands = set()
+            for r in vrsmap.to_eng((sg["book"], sg["chapter"], sg["verse"]), "org") or [(sg["book"], sg["chapter"], sg["verse"])]:
+                cands |= chars.get(tuple(r)[:3], set())
+            fh.write(json.dumps({
+                "i": i, "book": sg["book"], "chapter": sg["chapter"], "verse": sg["verse"], "seg": sg["seg"], "first": sg["first"],
+                "text": sg["text"], "quotation": q["id"] if q else "", "level": level[i] if seg_q[i][0] else 0,
+                "speaker": q["speaker"] if q else "", "basis": q.get("basis", "") if q else "", "frame": frame[i],
+                "votes": [round(x, 2) for x in deep] if deep else None,
+                "verb": f"{v['form']} {v['person'] or ''} {v['number'] or ''}".strip() if v else "", "subject": subject_words(sg),
+                "i_is": referent_speaker(i, i), "inquit": is_inquit(sg), "messenger": is_messenger(sg), "opener": opener(sg),
+                "glyssen": sorted(cands)}, ensure_ascii=False) + "\n")
 
     # check: the outer speakers against Glyssen's characters for the quotation's first verse (Hebrew numbering -> English)
     gcheck, gmiss = collections.Counter(), []
@@ -1174,6 +1322,7 @@ def main() -> None:
              f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)}); of them opened by a messenger formula"
              f" inside a quotation: {messenger}",
              f"- refinement 7, touching pieces of a voice implied in the outer speech (Glyssen's Implicit) joined into one speech: {implicit}",
+             f"- review rows applied (resources/speaker_layer/review.tsv{', left out' if no_review else ''}): " + ", ".join(f"{k} {v}" for k, v in reviewed.most_common()),
              f"- quotations inside a quotation ended where their speaker is named in the third person: {named_end}",
              f"- quotations opened by an inquit inside a quotation (a wayyiqtol of saying followed by direct speech): {inner_inquit}",
              f"- refinement 8, songs announced by their inquit made one quotation of the singer: {songs_joined}",
@@ -1185,12 +1334,13 @@ def main() -> None:
              f"- frame (a psalm is its psalmist's speech, a first-person account its narrator's; a field, not a level): {sum(1 for f in frame if f)} segments;"
              f" titles naming a person: {len(frame_of)}; first-person accounts: {len(memoir_frame)} chapters ("
              + ", ".join(f"{b} {c}" for b, c in sorted(memoir_frame)) + ")",
-             f"- oracles in the prophets (frame God from the line after a divine formula to the next one): {len(opener_of)}, of them"
-             f" {sum(k == 'messenger formula' for k in opener_of.values())} messenger formulas; {sum(1 for i, f in enumerate(frame) if f == 'God')}"
-             f" segments in an oracle; third-person wayyiqtols outside quotations inside an oracle: {len(oracle_breaks)}",
-             f"- prophetic speech framed without a formula (opened by a line in the first or second person outside quotations): {opened_without_formula}",
-             f"- the oracle frame's speaker: " + ", ".join(f"{k} {v}" for k, v in reframed.most_common())
-             + "; prophets: " + ", ".join(f"{b} {p}" for b, p in sorted(prophet_of.items())),
+             f"- the prophets (the frame is the prophet; God's words are quotations): {len(opener_of)} oracles opened by a formula, of them"
+             f" {sum(k == 'messenger formula' for k in opener_of.values())} messenger formulas; {sum(1 for r in region if r is not None)}"
+             f" segments in an oracle or prophetic speech; regions ended by prose narrative: {len(oracle_breaks)}; God's words made a"
+             f" quotation where the source has none: {oracles_made}",
+             f"- prophetic speech without a formula (opened by a line in the first or second person outside quotations): {opened_without_formula};"
+             f" messages God tells the prophet to deliver, spoken by the prophet: {told_prophet};"
+             f" segments by who speaks them: " + ", ".join(f"{k} {v}" for k, v in reframed.most_common()),
              f"- segments, Clear quotation / layout speech: both {agree[(True, True)]}, neither {agree[(False, False)]}, Clear only"
              f" {agree[(True, False)]}, layout only {agree[(False, True)]}; agreement"
              f" {100 * (agree[(True, True)] + agree[(False, False)]) / max(1, len(segs)):.1f}%",
