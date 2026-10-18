@@ -1,4 +1,4 @@
-"""Build the Hebrew speaker layer (proposed dataset bcv-commons/hebrew-speaker-layer): the baseline and its nesting.
+"""Build the Hebrew speaker layer (dataset bcv-commons/hebrew-speaker-layer): the baseline and its nesting.
 
 Who speaks where in the Hebrew Bible, on MACULA's Hebrew words and on the clause segments of the clause layout
 (macula/data/clause-layout). The baseline is Clear's quotation spans (resources/speaker_quotations: "MACULA Quotation and Speaker
@@ -33,6 +33,7 @@ sys.path.insert(0, str(SHORESH))
 import trees_macula  # noqa: E402
 from macula import discourse_rules as D  # noqa: E402
 from macula.build_clause_layout import _verb_person  # noqa: E402
+from macula import speaker_votes  # noqa: E402
 
 SPANS = SHORESH.parent / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
 LAYOUT = SHORESH / "macula" / "data" / "clause-layout" / "clauses"
@@ -138,6 +139,8 @@ def main() -> None:
             name = names.get(f"H{int(st):04d}") if st and st.isdigit() else None
             if name:
                 hit = next((c for c in sorted(cands) if c == name or c.startswith(name + " ") or name in c.split("/")), None)
+                if hit is None and any(D._n(x["lemma"]) == D.MELEK for x in toks):     # "מֶלֶךְ אַשּׁוּר": Glyssen's "…, king of Assyria"
+                    hit = next((c for c in sorted(cands) if f"king of {name}" in c), f"king of {name}")
                 return hit or name
         return ""
     person, number = _verb_person(con, {k for k, r in tok.items() if r["class"] in ("verb", "pron")})
@@ -391,8 +394,77 @@ def main() -> None:
             seg_q[i] = (None, 0.0)
             split += 1
 
+    # refinement 7: Glyssen's "Implicit" pieces are one speech: where a quotation touches the one before it (no segment between them, no
+    # inquit) and carries a voice implied in that speech (quote type "Implicit"; or one added from the layout after an Implicit piece),
+    # it is part of the earlier one, whose speaker keeps the speech.
+    # Moses' speeches in Deuteronomy alternate between Moses and God verse by verse in the source (the Decalogue, Deut 5:6-21; God's
+    # words in 3:26 and in the Song, 32:41); as one speech of Moses, the words of God in it are nested by the translations' votes below
+    implicit = 0
+    for i in range(1, len(segs)):
+        a, b = seg_q[i - 1][0], seg_q[i][0]
+        if a is None or b is None or a is b or segs[i]["book"] != segs[i - 1]["book"]:
+            continue
+        if b["quote_type"] not in ("Implicit", "layout only") or (b["quote_type"] == "layout only" and a["quote_type"] != "Implicit"
+                                                                   and not a.get("_implicit")) \
+                or a["quote_type"] not in ("Normal", "Implicit", "layout only") or is_inquit(segs[i]):
+            continue
+        j = i
+        while j < len(segs) and seg_q[j][0] is b:
+            seg_q[j] = (a, seg_q[j][1])
+            j += 1
+        a["last"], a["to"], a["end_fit"] = b["last"], b["to"], b["end_fit"]
+        a["pieces"], a["_implicit"] = a.get("pieces", 1) + b.get("pieces", 1), True
+        spans.remove(b)
+        implicit += 1
+
+    # the translations' votes (macula/speaker_votes.py): within a quotation, a word is nested in a translation when its quotation depth
+    # there is greater than the translation's usual depth over the quotation's first three segments (the absolute depth is the
+    # translation's convention); a segment's vote is the share of translations that nest its words, where five or more have them
+    votes, vote_shas = speaker_votes.depths(con)
+
+    def seg_votes(idx: list[int]) -> dict[int, float]:
+        base = {}
+        for t, d in votes.items():
+            ds = [d[w] for i in idx[:3] for w in segs[i]["words"] if w in d]
+            if ds:
+                c = collections.Counter(ds)
+                base[t] = min(c, key=lambda x: (-c[x], x))
+        out = {}
+        for i in idx:
+            fr = []
+            for w in segs[i]["words"]:
+                vs = [votes[t][w] > b for t, b in base.items() if w in votes[t]]
+                if len(vs) >= 5:
+                    fr.append(sum(vs) / len(vs))
+            if fr:
+                out[i] = sum(fr) / len(fr)
+        return out
+
+    def opens_speech(iq: dict | None) -> bool:     # the line a nested stretch hangs on introduces speech
+        return bool(iq) and (saying(iq) or is_inquit(iq) or is_messenger(iq))
+
+    def is_messenger(sg: dict) -> bool:
+        return any(D._n(tok[w]["lemma"]) == D.KO for w in sg["words"][:3] if w in tok) and any(
+            w in tok and tok[w]["class"] == "verb" and D._strong(tok[w]) in D.SAY and tok[w]["wtype"] == "qatal" for w in sg["words"])
+
     # nesting: inside a quotation, a stretch where the layout stands a speech level deeper than at the quotation's start is a quotation
-    # inside it, opened by the clause its first line hangs on as speech (the inquit)
+    # inside it, opened by the clause its first line hangs on as speech (the inquit). A stretch is kept when that line introduces
+    # speech (a verb of saying, "לֵאמֹר", a messenger formula) or when most translations nest it too; otherwise it is the layout's
+    # depth inside one speech (a vocative "בֶּן־אָדָם", a "כִּי" clause of the same saying: Ezek 33:10, 2 Sam 5:6) and is not a
+    # quotation. Where the translations nest its start and then, for two segments or more, clearly not, it ends there (1 Kgs 2:43,
+    # 2 Kgs 9:3, Neh 6:7: the quoted words end and the speaker goes on)
+    def iq_of(i: int) -> dict | None:
+        k = segs[i]["clause_key"]
+        inquit = par.get(k) if rel.get(k) == "speech" else None
+        if inquit is None:
+            iq = inquit_of(k)
+        else:
+            iq = segs[first_seg[inquit]] if inquit in first_seg else None
+            if iq and len(iq["words"]) <= 3 and any(D._strong(tok[w]) in D.SAY_INF and tok[w]["wtype"] == "infinitive construct"
+                                                     for w in iq["words"] if w in tok) and par.get(inquit) in first_seg:
+                iq = segs[first_seg[par[inquit]]]
+        return iq
+    kept_layout = collections.Counter()
     level = [0] * len(segs)
     inner: list[dict] = []
     innermost: list[dict | None] = [sp for sp, _ in seg_q]
@@ -405,6 +477,34 @@ def main() -> None:
         base = sdepth(segs[idx[0]]["clause_key"])
         for i in idx:
             level[i] = 1 + max(0, sdepth(segs[i]["clause_key"]) - base)
+        sv = seg_votes(idx)
+        sp["_votes"] = sv
+        p = 0
+        while p < len(idx):
+            prev = level[idx[p - 1]] if p else 1
+            if level[idx[p]] <= prev:
+                p += 1
+                continue
+            delta, run = level[idx[p]] - prev, [p]
+            while run[-1] + 1 < len(idx) and level[idx[run[-1] + 1]] >= level[idx[p]]:
+                run.append(run[-1] + 1)
+            got = [sv[idx[x]] for x in run if idx[x] in sv]
+            supported = bool(got) and sum(got) / len(got) >= 0.5
+            opener = opens_speech(iq_of(idx[p])) or (idx[p] > 0 and opens_speech(segs[idx[p] - 1]))
+            if not supported and not opener:
+                for x in run:
+                    level[idx[x]] -= delta
+                kept_layout["dropped (no speech opener, no translation support)"] += 1
+                continue
+            kept_layout["kept: " + ("speech opener and translations" if supported and opener else "speech opener" if opener else "translations")] += 1
+            if sv.get(idx[p], 0) >= 0.5:
+                last = max(x for x in run if sv.get(idx[x], 0) >= 0.5)
+                tail = [x for x in run if x > last]
+                if len(tail) >= 2 and all(idx[x] in sv and sv[idx[x]] < 0.2 for x in tail[:2]):
+                    for x in tail:
+                        level[idx[x]] -= delta
+                    kept_layout["ended where the translations end it"] += 1
+            p = run[-1] + 1
         stack: list[dict] = [sp]
         n = 0
         for i in idx:
@@ -468,9 +568,77 @@ def main() -> None:
                 innermost[x] = q
             break
 
-    def is_messenger(sg: dict) -> bool:
-        return any(D._n(tok[w]["lemma"]) == D.KO for w in sg["words"][:3] if w in tok) and any(
-            w in tok and tok[w]["class"] == "verb" and D._strong(tok[w]) in D.SAY and tok[w]["wtype"] == "qatal" for w in sg["words"])
+    # nesting the translations see and the Hebrew structure doesn't mark: inside a quotation, a stretch at the quotation's own level that
+    # most translations nest is a quotation inside it (a saying quoted in a speech, "אַתָּה אָמַרְתָּ אֲדֹנִיָּהוּ יִמְלֹךְ", 1 Kgs 1:24;
+    # God's words in Moses' speeches, Deut 1:35, 5:6-21; a letter, Ezra 5:7-17; the vision's voice, Job 4:17-21). Speaker: from an
+    # inquit line right before it, else the one character other than the outer speaker that Glyssen gives for its first verse
+    def glyssen_other(i: int, outer: str) -> str:
+        cands = set()
+        for r in vrsmap.to_eng((segs[i]["book"], segs[i]["chapter"], segs[i]["verse"]), "org") or [(segs[i]["book"], segs[i]["chapter"], segs[i]["verse"])]:
+            cands |= chars.get(tuple(r)[:3], set())
+        other = {c for c in cands if c != outer and not c.startswith("narrator")}
+        return next(iter(other)) if len(other) == 1 else ""
+    spine = SHORESH / "macula" / "macula-spine.db"            # MACULA's participant references (built by the spine; optional here)
+    sref = sqlite3.connect(f"file:{spine}?mode=ro", uri=True) if spine.exists() else None
+
+    def referent_speaker(a: int, b: int) -> str:   # "I" in the quotation, through MACULA's reference chain to a name or the divine name
+        if sref is None:
+            return ""
+        for w in (w for x in range(a, b + 1) for w in segs[x]["words"]):
+            if person.get(w) != "first":
+                continue
+            k, seen = w, set()
+            while k not in seen:
+                seen.add(k)
+                r = sref.execute("SELECT tgt_key FROM refs WHERE src_key=? AND kind IN ('participantref','subjref')", (k,)).fetchone()
+                if r is None:
+                    break
+                k = r[0]
+            t = tok.get(k)
+            if k == w or t is None:
+                continue
+            if D._strong(t) in D.DIVINE:
+                return "God"
+            st = D._strong(t)
+            if t["wtype"] == "proper" and st.isdigit() and names.get(f"H{int(st):04d}"):
+                return names[f"H{int(st):04d}"]
+        return ""
+    voted = 0
+    for sp in spans:
+        sv = sp.get("_votes") or {}
+        idx = [i for i in range(order[sp["first"]], order[sp["last"]] + 1) if seg_q[i][0] is sp]
+        p = 1
+        while p < len(idx):
+            if level[idx[p]] != 1 or sv.get(idx[p], 0) < 0.5:
+                p += 1
+                continue
+            run = [p]
+            while run[-1] + 1 < len(idx) and level[idx[run[-1] + 1]] == 1 and sv.get(idx[run[-1] + 1], 0) >= 0.5:
+                run.append(run[-1] + 1)
+            a, b = idx[run[0]], idx[run[-1]]
+            iq = segs[a - 1] if level[a - 1] >= 1 and (saying(segs[a - 1]) or is_inquit(segs[a - 1])) else None
+            if iq and not verb(iq) and a >= 2 and level[a - 2] >= 1:
+                iq = segs[a - 2]                                # "לֵאמֹר": the speaker is in the line it belongs to
+            v = verb(iq) if iq else None
+            who = sp["speaker"] if v and v["person"] == "first" else (english_speaker(iq) if iq else "")
+            if not who and v and v["person"] == "second":
+                who = "(the one addressed)"
+            if not who:
+                who = glyssen_other(a, sp["speaker"])
+            if not who:
+                who = referent_speaker(a, b)
+            if not who and v and v["person"] == "third" and not subject_words(iq):
+                who = "(they)" if v.get("number") == "plural" else "(he/she)"   # the subject is only in the verb
+            voted += 1
+            q = {"id": f"{sp['id']}.t{voted}", "speaker": who, "speaker_hebrew": subject_words(iq) if iq else "", "level": 2, "parent": sp["id"],
+                 "first": segs[a]["first"], "last": segs[b]["last"], "from": f"{segs[a]['book']} {segs[a]['chapter']}:{segs[a]['verse']}",
+                 "to": f"{segs[b]['book']} {segs[b]['chapter']}:{segs[b]['verse']}", "inquit": iq["text"] if iq else "", "alt_speaker": "",
+                 "divine": "Y" if who == "God" else "", "quote_type": "nested", "basis": "translations", "start_fit": "segment start",
+                 "end_fit": "segment end", "pieces": 1}
+            inner.append(q)
+            for x in run:
+                level[idx[x]], innermost[idx[x]] = 2, q
+            p = run[-1] + 1
 
     def wrap(first: int, last: int, who: str, iq: dict | None, kind: str) -> dict:
         """a new outer quotation over segments first..last: what stood in quotations there moves one level in, under it"""
@@ -511,11 +679,29 @@ def main() -> None:
     # מַלְאָכִים … כֹּה אָמַר אָחִיךָ יִשְׂרָאֵל", Num 20:14) right before a quotation: the formula line is the messenger's speech (level 1),
     # and the quotations that follow without a break are the sender's words inside it (level 2) (bsb-add-books: the reference's layout
     # in Josh 24, Judg 11, Exod 10, Num 20, Josh 22)
-    relayed = repeated = 0
+    # A speaker who tells messengers what to say ("אִמְרוּ־נָא אֶל־חִזְקִיָּהוּ כֹּה־אָמַר הַמֶּלֶךְ הַגָּדוֹל", Isa 36:4, 2 Kgs 18:19) speaks
+    # the command line at level 1, the formula is what is to be said (level 2), and the sender's words are inside that (level 3). In
+    # the prophets the rule applies to a sender who is not God (the ordinary "כֹּה אָמַר יְהוָה" opens an oracle there).
+    prophet_books = D.GROUPS["poetic"] - D.GROUPS["poems"]
+    relayed = repeated = commanded = 0
     for f in range(1, len(segs) - 1):
-        if seg_q[f][0] is not None or seg_q[f + 1][0] is None or not is_messenger(segs[f]) or not narrative_book(segs[f]["book"]):
+        if not is_messenger(segs[f]) or seg_q[f + 1][0] is None:
             continue
-        frame_seg = next((segs[x] for x in range(f - 1, max(-1, f - 4), -1) if english_speaker(segs[x]) or verb(segs[x])), None)
+        if not (narrative_book(segs[f]["book"]) or (segs[f]["book"] in prophet_books and english_speaker(segs[f]) != "God")):
+            continue
+        lq = seg_q[f][0]
+        if lq is not None:                         # a quotation the layout added that only carries the command and the formula
+            if lq["basis"] != "layout" or lq["last"] != segs[f]["last"] or seg_q[f + 1][0] is lq:
+                continue
+            for y in range(order[lq["first"]], f + 1):
+                seg_q[y], level[y], innermost[y] = (None, 0.0), 0, None
+            spans.remove(lq)
+            inner[:] = [q for q in inner if not q["id"].startswith(lq["id"] + ".")]
+        c0 = f
+        while c0 > 0 and seg_q[c0 - 1][0] is None and segs[c0 - 1]["verse"] == segs[f]["verse"] and (v0 := verb(segs[c0 - 1])) \
+                and v0["form"] == "imperative" and saying(segs[c0 - 1]):
+            c0 -= 1                                # the command to say it, in the same verse
+        frame_seg = next((segs[x] for x in range(c0 - 1, max(-1, c0 - 4), -1) if english_speaker(segs[x]) or verb(segs[x])), None)
         who = english_speaker(frame_seg) if frame_seg else ""
         sender = english_speaker(segs[f]) or ""
         # the sender's words run on through the quotations that follow without a break (a stop at the sender named in the third
@@ -544,7 +730,12 @@ def main() -> None:
                 q["speaker"] = sender             # the sender's words, whatever voice FCBH cast for them
         if not who and frame_seg and (v := verb(frame_seg)):
             who = "(they)" if v.get("number") == "plural" else "(he/she)"
-        w = wrap(f, x, who, frame_seg, "relayed message")
+        if c0 < f:
+            w = wrap(f, x, "(the one addressed)", segs[c0], "relayed message")
+            wrap(c0, x, who, frame_seg, "commanded message")
+            commanded += 1
+        else:
+            w = wrap(f, x, who, frame_seg, "relayed message")
         # a messenger formula again inside the message ("כִּי־כֹה אָמַר יְהוָה", 2 Kgs 3:17) is the messenger's own line, at level 1; the
         # sender's words go on after it at level 2
         for y in range(f + 2, x + 1):
@@ -601,6 +792,40 @@ def main() -> None:
         fixed = frame_fixed.get((sg["first"][:2], sg["chapter"]))
         if fixed is not None:
             frame[i] = fixed
+
+    # the prophets: an oracle is God's speech from the line after a divine messenger formula ("כֹּה אָמַר יְהוָה") or the word-event
+    # formula ("הָיָה דְבַר־יְהוָה אֵלַי") to the next one; its frame is the speaker, as a field, so the levels stay as Clear has them
+    def opener(sg: dict) -> str:
+        toks = [tok[w] for w in sg["words"] if w in tok]
+        if not any(D._strong(t) in D.DIVINE for t in toks):
+            return ""
+        if is_messenger(sg):
+            return "messenger formula"
+        if any(t["class"] == "verb" and t["wtype"] in D.FINITE and D._strong(t) in D.BE_VERB for t in toks) \
+                and any(D._strong(t) in D.WORD_NOUN for t in toks):
+            return "word-event formula"
+        return ""
+    prophets = D.GROUPS["poetic"] - D.GROUPS["poems"]
+    oracle_breaks, opener_of = [], {}
+    open_i, fresh = None, False
+    for i, sg in enumerate(segs):
+        if open_i is not None and segs[open_i]["book"] != sg["book"]:
+            open_i = None
+        if sg["book"] not in prophets:
+            continue
+        if kind := opener(sg):
+            open_i, opener_of[i], fresh = i, kind, True
+            continue
+        if open_i is None or (fresh and is_inquit(sg)):          # "saying" right after the formula belongs to the formula
+            continue
+        fresh = False
+        v = verb(sg)
+        if seg_q[i][0] is None and v and v["form"] == "wayyiqtol" and v["person"] == "third" and sdepth(sg["clause_key"]) == 0:
+            oracle_breaks.append((open_i, i))                       # prose narrative the layout does not have in a speech: the oracle ends
+            open_i = None
+            continue
+        if not frame[i]:
+            frame[i] = "God"
 
     # the work lists
     no_inquit, frames_agree, frames_disagree, voiced_outside, inner_inquits = [], [], [], [], []
@@ -691,17 +916,24 @@ def main() -> None:
              f"- third-person wayyiqtols of saying inside a quotation (an inner quotation, or the quotation runs too far): {len(inner_inquits)}",
              f"- other third-person wayyiqtols inside a quotation, outside the books of poems: {len(frames_inside)}; the layout also has them in a"
              f" speech (a story the speaker tells): {len(frames_agree)}; not (the sources disagree): {len(frames_disagree)}",
-             f"- nested quotations from the layout: {len(inner)} (level 2: {sum(q['level'] == 2 for q in inner)}, deeper:"
+             f"- nested quotations (from the layout, a messenger formula or the translations' votes): {len(inner)} (level 2: {sum(q['level'] == 2 for q in inner)}, deeper:"
              f" {sum(q['level'] > 2 for q in inner)}); with a speaker: {sum(bool(q['speaker'] or q['speaker_hebrew']) for q in inner)}"
              f" (named: {sum(q['speaker'] not in ('', '(the one addressed)', '(they)', '(he/she)') for q in inner)}, a Hebrew subject only: "
              f"{sum(bool(q['speaker_hebrew']) and q['speaker'] in ('', '(they)', '(he/she)', '(the one addressed)') for q in inner)}, 'you': {sum(q['speaker'] == '(the one addressed)' for q in inner)},"
              f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)}); of them opened by a messenger formula"
              f" inside a quotation: {messenger}",
+             f"- refinement 7, touching pieces of a voice implied in the outer speech (Glyssen's Implicit) joined into one speech: {implicit}",
+             f"- translations' votes (macula/speaker_votes.py; Clear's alignment-quotations at {speaker_votes.CLEAR_COMMIT[:12]}, BSB tables"
+             f" sha256 {vote_shas.get('bsb', '')[:12]}): layout-nested stretches " + ", ".join(f"{k} {v}" for k, v in kept_layout.most_common())
+             + f"; quotations nested by the translations alone: {voted}",
              f"- relayed messages (a messenger formula before a quotation: the formula level 1, the sender's words level 2): {relayed};"
-             f" repeated formulas inside them back at level 1: {repeated}; psalms opened by an inquit in their title: {titled}",
+             f" repeated formulas inside them back at level 1: {repeated}; of them told to messengers by a speaker (three levels): {commanded}; psalms opened by an inquit in their title: {titled}",
              f"- frame (a psalm is its psalmist's speech, a first-person account its narrator's; a field, not a level): {sum(1 for f in frame if f)} segments;"
              f" titles naming a person: {len(frame_of)}; first-person accounts: {len(memoir_frame)} chapters ("
              + ", ".join(f"{b} {c}" for b, c in sorted(memoir_frame)) + ")",
+             f"- oracles in the prophets (frame God from the line after a divine formula to the next one): {len(opener_of)}, of them"
+             f" {sum(k == 'messenger formula' for k in opener_of.values())} messenger formulas; {sum(1 for i, f in enumerate(frame) if f == 'God')}"
+             f" segments in an oracle; third-person wayyiqtols outside quotations inside an oracle: {len(oracle_breaks)}",
              f"- segments, Clear quotation / layout speech: both {agree[(True, True)]}, neither {agree[(False, False)]}, Clear only"
              f" {agree[(True, False)]}, layout only {agree[(False, True)]}; agreement"
              f" {100 * (agree[(True, True)] + agree[(False, False)]) / max(1, len(segs)):.1f}%",
@@ -709,7 +941,9 @@ def main() -> None:
              + ", ".join(f"{k} {v}" for k, v in gcheck.most_common()),
              "- layout speech without a Clear quotation, by book: " + ", ".join(f"{b} {n}" for b, n in layout_only.most_common(10)),
              f"- first- or second-person finite verbs outside any quotation, in the narrative books: {len(voiced_outside)}", ""]
-    for title, rows in (("Quotations without an inquit before them", no_inquit), ("Wayyiqtols of saying inside a quotation", inner_inquits),
+    breaks = [(f"{segs[i]['book']} {segs[i]['chapter']}:{segs[i]['verse']}", "", segs[i]["text"]) for _, i in oracle_breaks]
+    for title, rows in (("Third-person wayyiqtols outside quotations inside an oracle (the prophet narrates, or the oracle ends)", breaks),
+                        ("Quotations without an inquit before them", no_inquit), ("Wayyiqtols of saying inside a quotation", inner_inquits),
                         ("Third-person wayyiqtols inside a quotation where the layout has no speech (sources disagree)", frames_disagree),
                         ("Third-person wayyiqtols inside a quotation that the layout has in a speech too", frames_agree),
                         ("First/second person outside quotations (narrative books)", voiced_outside),

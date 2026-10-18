@@ -191,7 +191,18 @@ next (deeper, level, shallower) is the same. Rules @VERSION@, measured by bsb-ad
 @STEP_TABLE@
 
 These are test sets: chapters chosen because they are hard (speeches, law, prophecy, poetry), not a sample of the whole Old
-Testament. A chapter in two sets counts in each set once and in "all" once. Over the whole Old Testament, v0.22 had 86.1%.
+Testament. A chapter in two sets counts in each set once and in "all" once.
+
+Over the whole Old Testament (all 929 chapters, 88,634 line pairs; measured by bsb-add-books on v0.35):
+
+| Genre | Line pairs | v0.22 | v0.35 |
+|---|---|---|---|
+| All | 88,634 | 86.1% | 86.8% |
+| Narrative | 47,148 | 88.3% | 88.9% |
+| Law | 4,939 | 83.2% | 86.4% |
+| Prophecy | 22,102 | 83.5% | 83.9% |
+| Poetry (Psalms, Lamentations, Song) | 8,135 | 85.7% | 86.4% |
+| Wisdom (Job, Proverbs, Ecclesiastes) | 6,310 | 80.9% | 81.5% |
 
 On the 351 steps where the two layouts of conditionals differ, the default matches BHSA in 65%, the profile `indented_protasis` in
 32% (over all delivered chapters: 85.7% against 85.0%).

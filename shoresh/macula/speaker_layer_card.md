@@ -46,7 +46,7 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 | `speaker` | in English, Glyssen's character names where possible ("God", "Moses", "Abraham's chief servant"); "(the one addressed)", "(he/she)", "(they)" where the Hebrew gives no name |
 | `speaker_hebrew` | for nested quotations: the subject of the inquit, as MACULA lemmas |
 | `divine` | `Y` when the speaker is God |
-| `quote_type`, `basis` | where the quotation comes from: Clear's data (`block`, `referent`, `character`), the clause layout (`layout`), a song (`voice`), a messenger formula (`messenger formula`, `relayed message`), a psalm title (`titled psalm`), a hand correction (`correction`) |
+| `quote_type`, `basis` | where the quotation comes from: Clear's data (`block`, `referent`, `character`), the clause layout (`layout`), the translations' votes (`translations`), a song (`voice`), a messenger formula (`messenger formula`, `relayed message`, `commanded message`), a psalm title (`titled psalm`), a hand correction (`correction`) |
 | `first`, `last` | the first and last word, MACULA word keys (12 digits: book, chapter, verse, word, part) |
 | `from`, `to` | the verses, Hebrew numbering |
 | `start_fit`, `end_fit` | how the edges fit the clause segments |
@@ -59,7 +59,7 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 | `chapter`, `verse`, `seg`, `clause_key` | the clause segment, as in the clause layout |
 | `quotation`, `level`, `speaker` | the innermost quotation the segment stands in, its level (0: none), its speaker |
 | `share` | the share of the segment's words in that quotation |
-| `frame` | the speaker of a text that is speech from its first line, as a field rather than a level: a psalm's psalmist (the name in its title, "לְדָוִד", else "Psalmist"), a first-person account's narrator |
+| `frame` | the speaker of a text that is speech from its first line, as a field rather than a level: a psalm's psalmist (the name in its title, "לְדָוִד", else "Psalmist"), a first-person account's narrator, in the prophets God from the line after a divine messenger formula or word-event formula to the next one |
 
 ## How it is made
 
@@ -74,12 +74,20 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
    - quotations Clear lacks are added where the clause layout has speech with a first- or second-person verb (not in the first-person
      memoirs of Ezra and Nehemiah), and a run of three or more verses in the first or second person outside any quotation is a song
      or speech (1 Chr 16:8–35).
-3. **Quotations inside quotations:** where the clause layout opens a speech inside a speech; where a messenger formula "כֹּה אָמַר X"
-   stands inside a quotation; and the relayed message, where "כֹּה אָמַר X" comes before a quotation (Josh 24:2, Judg 11:15): the
-   formula line is the messenger's speech, the sender's words are one level deeper. A psalm whose title ends with an inquit (Ps 18)
-   is a quotation opened by it.
+3. **Quotations inside quotations**, from three kinds of evidence:
+   - the Hebrew structure: a speech the clause layout opens inside a speech when the line it hangs on introduces speech (a verb of
+     saying, "לֵאמֹר", a messenger formula); a messenger formula "כֹּה אָמַר X" inside a quotation; the relayed message, where "כֹּה
+     אָמַר X" comes before a quotation (Josh 24:2, Judg 11:15: the formula line is the messenger's speech, the sender's words one
+     level deeper), and a speaker's command to say it (Isa 36:4: three levels); a psalm whose title ends with an inquit (Ps 18);
+   - the quotation marks of nine translations, as votes on the Hebrew words: Clear's per-word depth for eight translations and the
+     BSB's own marks, compared within each quotation (whether a translation quotes a whole speech is its convention). Most of them
+     nesting a stretch makes it a quotation inside the speech (a saying quoted in a speech, God's words in Moses' speeches, a letter,
+     a vision's voice); a nested stretch of the layout that has neither a speech opener nor their support is dropped (a vocative, a
+     "כִּי" clause of the same saying), and one that runs on past their support ends there;
+   - Glyssen's "Implicit" pieces joined into one speech (Moses and God alternating verse by verse in Deuteronomy's source).
 4. **Speakers** are checked against Glyssen's characters for each verse; nested speakers are read from the Hebrew inquit (God for a
-   divine name, a person's name matched to Glyssen's characters, the outer speaker for "I").
+   divine name, a person's name matched to Glyssen's characters, the outer speaker for "I"), else from Glyssen's other character for
+   the verse, else from "I" through MACULA's participant references.
 5. **Hand corrections** (`corrections.tsv`) come last, each with its reason.
 
 The code is `shoresh/macula/build_speaker_layer.py` in [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query).
@@ -122,11 +130,12 @@ law 87%, prophecy 30%). Relayed messages: 86% of their segments at BHSA's exact 
 145 of 150 psalms agree; the five that differ are left undetermined by BHSA. All measured on v0.7.
 
 **Known gaps (open work):**
-- the prophets: where an oracle starts and ends, nesting (30%) and ends (63%);
-- quotations inside quotations not yet built: letters and decrees and what they quote (Ezra 5–6, Dan 4, Dan 7), quotations inside
-  Moses' speeches (the Decalogue, Deut 5; God's words in the Song, Deut 32), the prayers inside Daniel's account (Dan 8–9), a further
-  quotation inside a relayed message (2 Kgs 19:21–28);
-- the frame for the prophets.
+- the prophets: where an oracle starts and ends, and quotation ends (63%);
+- quotations inside quotations not yet built: a decree quoted in a letter (Ezra 6:3–12), most of Nebuchadnezzar's letter (Dan 4),
+  God's words in the Song of Moses (Deut 32:20–42), the prayers inside Daniel's account (Dan 8–9);
+- a nested speaker named through "I" can be the outer speaker where the reference chain does not reach the quoted person (Jer 22:18);
+- the frame for the prophets covers the oracles opened by a formula (about 70% of Jeremiah and Ezekiel, under half of Isaiah); oracles
+  with no formula (Hosea, Joel, Habakkuk, Zephaniah) have none, and where an oracle ends is not checked yet.
 
 ## Sources and licence
 
@@ -137,6 +146,9 @@ law 87%, prophecy 30%). Relayed messages: 86% of their segments at BHSA's exact 
 | Hebrew words, syntax | MACULA Hebrew (Clear Bible / Biblica) | CC BY 4.0 |
 | Clause segments | Hebrew Bible Clause Layout (bcv-commons) | CC BY-SA 4.0 (the segments are referenced by key) |
 | Names of persons | STEPBible TIPNR (Tyndale House) | CC BY 4.0 |
+| Quotation depth per word in eight translations (numbers only) | Clear's alignment-quotations, Clear-Bible/speaker-quotations @ b09e308a3a1a | CC BY 4.0 |
+| The BSB's quotation marks per Hebrew word | Berean Standard Bible Translation Tables | public domain |
+| Participant references | MACULA Hebrew (Clear Bible / Biblica) | CC BY 4.0 |
 | This layer | bcv-commons | **CC BY 4.0** |
 
 **Attribution** when you use this dataset:
