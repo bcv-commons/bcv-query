@@ -714,6 +714,48 @@ def main() -> None:
             cands |= chars.get(tuple(r)[:3], set())
         other = {c for c in cands if c != outer and not c.startswith("narrator")}
         return next(iter(other)) if len(other) == 1 else ""
+    # a message God commands someone to deliver ("דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל לֵאמֹר", "וְאָמַרְתָּ אֲלֵהֶם", Lev 1:2, 4:2, 25:2) runs to the end of
+    # God's speech, over chapter breaks (the clause layout starts each chapter at the margin: Lev 4:2-5:13, 25:2-26:45); its speaker is
+    # the one God speaks to in the narrative inquit ("וַיְדַבֵּר יְהוָה אֶל־מֹשֶׁה")
+    def addressee(sg: dict) -> str:
+        ws = [tok[w] for w in sg["words"] if w in tok]
+        for k, t in enumerate(ws[1:], 1):
+            st = D._strong(t)
+            if D._strong(ws[k - 1]) in D.ADDRESS and t["wtype"] == "proper" and st.isdigit() and names.get(f"H{int(st):04d}"):
+                return names[f"H{int(st):04d}"]
+        return ""
+
+    def command_to_speak(sg: dict) -> bool:
+        return any(w in tok and tok[w]["class"] == "verb" and D._strong(tok[w]) in D.SPEAK and (person.get(w) == "second"
+                   or tok[w]["wtype"] == "imperative") for w in sg["words"])
+    law_messages = 0
+    for q in list(inner):
+        a = order.get(q["first"])
+        par_q = next((p for p in spans if p["id"] == q.get("parent")), None)
+        if a is None or a < 2 or par_q is None or par_q.get("speaker") != "God" or q.get("level") != 2:
+            continue
+        if not (command_to_speak(segs[a - 1]) or (is_inquit(segs[a - 1]) and command_to_speak(segs[a - 2]))):
+            continue
+        p0, p1 = order[par_q["first"]], order[par_q["last"]]
+        b = order[q["last"]]
+        if b < p1:
+            for x in range(b + 1, p1 + 1):
+                if seg_q[x][0] is not par_q:
+                    continue
+                if level[x] == 1:
+                    level[x], innermost[x] = 2, q
+                elif level[x] >= 2:
+                    level[x] += 1
+                    c = innermost[x]
+                    if c is not None and c.get("parent") == par_q["id"] and c is not q:
+                        c["parent"], c["level"] = q["id"], c.get("level", 2) + 1
+            q["last"], q["to"] = par_q["last"], par_q["to"]
+        if q.get("speaker") in ("", "(the one addressed)") and p0 > 0:
+            who = next((addressee(segs[x]) for x in range(p0 - 1, max(-1, p0 - 4), -1) if addressee(segs[x])), "")
+            if who:
+                q["speaker"] = who
+        law_messages += 1
+
     # nesting by an inner inquit: inside a quotation, a wayyiqtol of saying ("וָאֹמַר אֲדֹנָי יְהוִה אַל־תַּשְׁחֵת", Deut 9:26; "וַתֹּאמְרִי
     # נוֹאָשׁ", Jer 2:25; "וַיֹּאמֶר אַסְתִּירָה פָנַי מֵהֶם", Deut 32:20) followed at the same level by direct speech (not only an
     # infinitive: "וָאֹמַר לִשְׁפֹּךְ חֲמָתִי", Ezek 20:21, is indirect) opens a quotation inside it, to the end of its verse; it goes on
@@ -1103,6 +1145,48 @@ def main() -> None:
         wrap(i, j, "God", iq, "oracle")
         oracles_made += 1
         i = j + 1
+    # a formula inside God's words ("נְאֻם־יְהוָה", "אָמַר יְהוָה צְבָאוֹת", "לָכֵן כֹּה אָמַר יְהוָה" between two stretches of them) is part
+    # of them: two quotations by God with only formula lines between them are one (bsb-add-books, v0.9: the reference and the
+    # translations keep these inside the quotation)
+    def outer_q(i: int) -> dict | None:
+        q = seg_q[i][0]
+        return q if q is not None and q.get("speaker") == "God" and level[i] >= 1 else None
+    joined_formula = 0
+    i = 0
+    while i < len(segs):
+        q = outer_q(i)
+        if q is None:
+            i += 1
+            continue
+        j = i
+        while j + 1 < len(segs) and seg_q[j + 1][0] is q:
+            j += 1
+        k = j + 1
+        while k < len(segs) and seg_q[k][0] is None and region[k] is not None and (is_inquit(segs[k]) or is_messenger(segs[k])
+                                                                                   or any(D._n(tok[w]["lemma"]) in D.FORMULA for w in segs[k]["words"] if w in tok)):
+            k += 1
+        q2 = outer_q(k) if k < len(segs) else None
+        if q2 is None or q2 is q or segs[k]["book"] != segs[i]["book"]:
+            i = j + 1
+            continue
+        for x in range(j + 1, k):                    # the formula lines join
+            seg_q[x], level[x], innermost[x] = (q, 1.0), 1, q
+        x = k
+        while x < len(segs) and seg_q[x][0] is q2:
+            seg_q[x] = (q, seg_q[x][1])
+            if innermost[x] is q2:
+                innermost[x] = q
+            x += 1
+        for c in inner:
+            if c.get("parent") == q2["id"]:
+                c["parent"] = q["id"]
+        q["last"], q["to"], q["end_fit"] = q2["last"], q2["to"], q2.get("end_fit", "segment end")
+        for lst in (spans, wrapped):
+            if q2 in lst:
+                lst.remove(q2)
+        joined_formula += 1
+        # stay on q: it may join the next one too
+
     for i, r in enumerate(region):
         if r is not None:
             frame[i] = prophet_of[segs[i]["book"]]
@@ -1151,7 +1235,7 @@ def main() -> None:
         sp.setdefault("inquit", "")
     # review rows (resources/speaker_layer/review.tsv): changes from the review pass over doubtful passages (macula/speaker_review.py),
     # each with its source (the agent and prompt version) and its reason, applied last, on the finished structure: speaker, drop,
-    # first, last (of any quotation, found by its first word), add (a new quotation inside the one named as parent), level (of a
+    # first, last (of any quotation, found by its id in the column quotation, else by its first word), add (a new quotation inside the one named as parent), level (of a
     # stretch of segments), frame (of the chapter that starts with the word)
     review_path = SHORESH.parent / "resources" / "speaker_layer" / "review.tsv"
     reviewed = collections.Counter()
@@ -1166,12 +1250,14 @@ def main() -> None:
 
     def unnest(x: int, q: dict) -> None:            # segment x leaves quotation q: it and what is inside q there go one level out
         for y in [x]:
+            if innermost[y] is not q and level[y] <= q.get("level", 1):
+                continue                                # another quotation at q's level (2 Kgs 19:32-34): not inside q
             if level[y] >= q.get("level", 1):
                 level[y] -= 1
             if innermost[y] is q:
                 innermost[y] = parent_of(q)
             if q in spans and seg_q[y][0] is q:
-                seg_q[y] = (None, 0.0)
+                seg_q[y] = (parent_of(q), 1.0) if parent_of(q) else (None, 0.0)   # inside a relayed message: back to the message
 
     def nest(x: int, q: dict) -> None:              # segment x joins quotation q, one level in from q's parent
         lv = q.get("level", 1)
@@ -1210,7 +1296,7 @@ def main() -> None:
                 for x in range(order[k], order[r["last"]] + 1):
                     nest(x, q)
             else:
-                q = find_q(k)
+                q = by_id_all.get(r.get("quotation") or "") or find_q(k)
                 if q is None:
                     reviewed["not applied (no quotation starts there)"] += 1
                     continue
@@ -1230,6 +1316,9 @@ def main() -> None:
                     for x in sorted(set(range(a1, b1 + 1)) - set(range(a0, b0 + 1))):
                         nest(x, q)
                     q[f] = segs[a1]["first"] if f == "first" else segs[b1]["last"]
+                    for c in inner:                     # quotations now outside it stand in its parent
+                        if c.get("parent") == q["id"] and (c["first"] > q["last"] or c["last"] < q["first"]):
+                            c["parent"] = q.get("parent", "")
                 else:
                     reviewed["not applied (field)"] += 1
                     continue
@@ -1324,6 +1413,7 @@ def main() -> None:
              f"- refinement 7, touching pieces of a voice implied in the outer speech (Glyssen's Implicit) joined into one speech: {implicit}",
              f"- review rows applied (resources/speaker_layer/review.tsv{', left out' if no_review else ''}): " + ", ".join(f"{k} {v}" for k, v in reviewed.most_common()),
              f"- quotations inside a quotation ended where their speaker is named in the third person: {named_end}",
+             f"- messages God commands to be delivered, run to the end of his speech and spoken by the one he addresses: {law_messages}",
              f"- quotations opened by an inquit inside a quotation (a wayyiqtol of saying followed by direct speech): {inner_inquit}",
              f"- refinement 8, songs announced by their inquit made one quotation of the singer: {songs_joined}",
              f"- translations' votes (macula/speaker_votes.py; Clear's alignment-quotations at {speaker_votes.CLEAR_COMMIT[:12]}, BSB tables"
@@ -1339,7 +1429,8 @@ def main() -> None:
              f" segments in an oracle or prophetic speech; regions ended by prose narrative: {len(oracle_breaks)}; God's words made a"
              f" quotation where the source has none: {oracles_made}",
              f"- prophetic speech without a formula (opened by a line in the first or second person outside quotations): {opened_without_formula};"
-             f" messages God tells the prophet to deliver, spoken by the prophet: {told_prophet};"
+             f" messages God tells the prophet to deliver, spoken by the prophet: {told_prophet}; quotations of God joined over a formula"
+             f" inside his words: {joined_formula};"
              f" segments by who speaks them: " + ", ".join(f"{k} {v}" for k, v in reframed.most_common()),
              f"- segments, Clear quotation / layout speech: both {agree[(True, True)]}, neither {agree[(False, False)]}, Clear only"
              f" {agree[(True, False)]}, layout only {agree[(False, True)]}; agreement"

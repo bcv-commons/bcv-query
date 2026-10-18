@@ -69,7 +69,18 @@ CONVENTIONS = """# Conventions for the speaker layer (decided by the project; fo
 9. Parallel texts take the same levels and speakers unless the Hebrew differs.
 10. Speakers: a name where the Hebrew gives one (the inquit's subject; who "I" is); otherwise "(he/she)", "(they)", "(the one
     addressed)". Use the names already used in the passage where they fit.
-11. Evidence: decide from the Hebrew. The translations' votes are only a hint (how many of nine translations put the words in
+11. A formula inside God's words ("נְאֻם־יְהוָה", "אָמַר יְהוָה צְבָאוֹת", "לָכֵן כֹּה אָמַר יְהוָה" between stretches of them) stays inside God's
+    quotation; it doesn't end or restart it.
+12. Law given as a message ("דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל לֵאמֹר", "וְאָמַרְתָּ אֲלֵהֶם") is the message Moses is to deliver: a quotation inside
+    God's speech, with Moses as its speaker, throughout the law that follows.
+13. An address inside a poem with no inquit (an apostrophe: imperatives or vocatives to the hearers, to a city, to oneself) is not a
+    quotation.
+14. God quoting his own earlier words ("וְאָמַרְתִּי …", "וָאֹמַר …") is a quotation one level deeper, speaker God.
+15. A group speaking as "we" with no name in the inquit: "(they)".
+16. A poem quoted in a narrative (1 Chr 16, 2 Sam 22, Isa 38) is a quotation there and a frame in the Psalter; that is not a
+    disagreement between the parallel texts.
+17. When two quotations start on the same word, name the one you mean by its id (field "quotation").
+18. Evidence: decide from the Hebrew. The translations' votes are only a hint (how many of nine translations put the words in
     deeper quotation marks); never use an English translation's text. Do not use BHSA/ETCBC data.
 """
 
@@ -111,8 +122,19 @@ def merge(source: str) -> int:
                 r = json.loads(line)
                 ans[side].setdefault(r["id"], r)
     ids = [l.split("\t")[0] for l in open(OUT / "worklist.tsv", encoding="utf-8").read().splitlines()[1:]]
+    third = {}
+    fc = OUT / "answers-C.jsonl"
+    for line in open(fc, encoding="utf-8") if fc.exists() else []:
+        if line.strip():
+            r = json.loads(line)
+            third.setdefault(r["id"], r)
     agreed, differ, st = [], [], collections.Counter()
     for pid in ids:
+        if pid in third:                                     # the third reviewer's final answer replaces both
+            st["decided by the third reviewer"] += 1
+            for c in third[pid]["changes"]:
+                agreed.append((pid, dict(c, _src="adjudicated"), c))
+            continue
         a, b = ans["A"].get(pid), ans["B"].get(pid)
         if not a or not b:
             st["missing"] += 1
@@ -129,14 +151,15 @@ def merge(source: str) -> int:
             differ.append((pid, a, b, set(ka) - set(kb), set(kb) - set(ka)))
     path = HERE.parents[1] / "resources" / "speaker_layer" / "review.tsv"
     head = [l for l in open(path, encoding="utf-8").read().splitlines() if l.startswith("#") or l.startswith("first\t")]
-    keep = [l for l in open(path, encoding="utf-8").read().splitlines()[len(head):] if l and l.split("\t")[6:7] != [source]]
+    keep = [l for l in open(path, encoding="utf-8").read().splitlines()[len(head):] if l and not (l.split("\t")[6:7] or [""])[0].startswith(source)]
     with open(path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(head + keep) + "\n")
         for pid, c, c2 in agreed:
             reason = c["reason"].replace("\t", " ").replace("\n", " ")
             conf = c["confidence"] if c["confidence"] == c2["confidence"] else "medium"
+            src = source + ("+adjudicated" if c.get("_src") == "adjudicated" else "")
             fh.write("\t".join([c["first"], c["field"], c.get("value") or "", f"{reason} [{pid}]", c.get("last") or "",
-                                 c.get("parent") or "", source, conf]) + "\n")
+                                 c.get("parent") or "", src, conf, c.get("quotation") or ""]) + "\n")
     lines = ["# Review pilot: where the two reviewers differ", ""]
     for pid, a, b, only_a, only_b in differ:
         lines += [f"## {pid}", ""]
@@ -154,14 +177,76 @@ def merge(source: str) -> int:
     return 0
 
 
+def ref(e: dict) -> str:
+    return f"{e['book']} {e['chapter']}:{e['verse']}"
+
+
+def window(i: int, j: int, ev: list) -> tuple:
+    lo = i
+    while lo > 0 and i - lo < 15 and not (ev[lo]["level"] == 0 and ev[lo]["inquit"]) and ev[lo - 1]["book"] == ev[i]["book"]:
+        lo -= 1
+    hi = j
+    while hi + 1 < len(ev) and hi - lo < MAX_SEGS - 1 and ev[hi + 1]["book"] == ev[i]["book"] and (
+            ev[hi + 1]["level"] >= max(1, ev[i]["level"] - 1) or hi - j < 3):
+        hi += 1
+    return lo, hi
+
+
+def write_passage(pid: str, kind: str, i: int, j: int, extra: str, ev: list, quotes: dict, last_word: dict) -> tuple:
+    lo = i
+    while lo > 0 and i - lo < 15 and not (ev[lo]["level"] == 0 and ev[lo]["inquit"]) and ev[lo - 1]["book"] == ev[i]["book"]:
+        lo -= 1
+    hi = j
+    while hi + 1 < len(ev) and hi - lo < MAX_SEGS - 1 and ev[hi + 1]["book"] == ev[i]["book"] and (
+            ev[hi + 1]["level"] >= max(1, ev[i]["level"] - 1) or hi - j < 3):
+        hi += 1
+    lines = [f"# Passage {pid}: {ref(ev[lo])} to {ref(ev[hi])}", "", f"Kind: {kind}. {QUESTIONS[kind]}", ""]
+    if extra:
+        lines += [f"Marked: {extra}", ""]
+    lines += [f"The marked segments are {ref(ev[i])} (segment {ev[i]['i']}) to {ref(ev[j])} (segment {ev[j]['i']}).", "",
+              "Columns: segment, verse, first word key, last word key, level, quotation, speaker, frame, basis, votes (share of",
+              "the translations nesting it at least 1/2/3 levels deeper than the quotation's start), main verb, subject, who",
+              "'I' is (MACULA's references), marks (inquit, messenger formula, word-event/oracle opener), Glyssen's characters",
+              "for the verse, Hebrew.", "",
+              "| seg | verse | first | last | lvl | quotation | speaker | frame | basis | votes | verb | subject | I= | marks | glyssen | Hebrew |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for x in range(lo, hi + 1):
+        e = ev[x]
+        mark = ">>" if i <= x <= j else ""
+        marks = ",".join(k for k in ("inquit", "messenger", "opener") if e[k])
+        lines.append(f"| {mark}{x} | {ref(e)} | {e['first']} | {last_word.get(e['first'], '')} | {e['level']} | {e['quotation']} | "
+                     f"{e['speaker']} | {e['frame']} | {e['basis']} | {'/'.join(map(str, e['votes'])) if e['votes'] else ''} | "
+                     f"{e['verb']} | {e['subject']} | {e['i_is']} | {marks} | {'; '.join(e['glyssen'])} | {e['text']} |")
+    qs = sorted({ev[x]["quotation"] for x in range(lo, hi + 1) if ev[x]["quotation"]})
+    if qs:
+        lines += ["", "Quotations in the passage:", "", "| id | level | parent | speaker | basis | first | last | from | to |", "|---|---|---|---|---|---|---|---|---|"]
+        for qid in qs:
+            q = quotes.get(qid, {})
+            lines.append(f"| {qid} | {q.get('level', '')} | {q.get('parent', '')} | {q.get('speaker', '')} | {q.get('basis', '')} | "
+                         f"{q.get('first', '')} | {q.get('last', '')} | {q.get('from', '')} | {q.get('to', '')} |")
+    if kind == "parallel":
+        pb = extra.split(" // ")[1]
+        b, cv = pb.split(" ")
+        c, v = map(int, cv.split(":"))
+        pe = [e for e in ev if e["book"] == b and e["chapter"] == c and abs(e["verse"] - v) <= 2]
+        lines += ["", f"The parallel text ({b} {c}:{v - 2}-{v + 2}):", "", "| seg | verse | first | lvl | quotation | speaker | Hebrew |", "|---|---|---|---|---|---|---|"]
+        for e in pe:
+            lines.append(f"| {e['i']} | {ref(e)} | {e['first']} | {e['level']} | {e['quotation']} | {e['speaker']} | {e['text']} |")
+    (OUT / "passages" / f"{pid}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return (pid, kind, ref(ev[i]), ref(ev[lo]), ref(ev[hi]), extra)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--per-kind", type=int, default=8)
     ap.add_argument("--merge", action="store_true")
+    ap.add_argument("--refresh", action="store_true", help="rewrite the existing passages from the current build")
+    ap.add_argument("--count", action="store_true", help="only count the full work list, grouped into passages")
     ap.add_argument("--source", default="agent:claude-opus-5-5:review-v1")
     a = ap.parse_args()
     if a.merge:
         return merge(a.source)
+    refresh, per_kind, count = a.refresh, a.per_kind, a.count
     ev = load_evidence()
     quotes = {r["id"]: r for r in csv.DictReader((l for l in open(LAYER / "quotations.tsv", encoding="utf-8") if not l.startswith("#")),
                                                   delimiter="\t")}
@@ -232,50 +317,31 @@ def main() -> int:
     (OUT / "passages").mkdir(exist_ok=True)
     (OUT / "conventions.md").write_text(CONVENTIONS, encoding="utf-8")
     work = []
-    for kind in QUESTIONS:
-        for n, (i, j, extra) in enumerate(spread(cand[kind], a.per_kind), 1):
-            lo = i
-            while lo > 0 and i - lo < 15 and not (ev[lo]["level"] == 0 and ev[lo]["inquit"]) and ev[lo - 1]["book"] == ev[i]["book"]:
-                lo -= 1
-            hi = j
-            while hi + 1 < len(ev) and hi - lo < MAX_SEGS - 1 and ev[hi + 1]["book"] == ev[i]["book"] and (
-                    ev[hi + 1]["level"] >= max(1, ev[i]["level"] - 1) or hi - j < 3):
-                hi += 1
-            pid = f"{kind}-{n:02d}"
-            lines = [f"# Passage {pid}: {ref(ev[lo])} to {ref(ev[hi])}", "", f"Kind: {kind}. {QUESTIONS[kind]}", ""]
-            if extra:
-                lines += [f"Marked: {extra}", ""]
-            lines += [f"The marked segments are {ref(ev[i])} (segment {ev[i]['i']}) to {ref(ev[j])} (segment {ev[j]['i']}).", "",
-                      "Columns: segment, verse, first word key, last word key, level, quotation, speaker, frame, basis, votes (share of",
-                      "the translations nesting it at least 1/2/3 levels deeper than the quotation's start), main verb, subject, who",
-                      "'I' is (MACULA's references), marks (inquit, messenger formula, word-event/oracle opener), Glyssen's characters",
-                      "for the verse, Hebrew.", "",
-                      "| seg | verse | first | last | lvl | quotation | speaker | frame | basis | votes | verb | subject | I= | marks | glyssen | Hebrew |",
-                      "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
-            for x in range(lo, hi + 1):
-                e = ev[x]
-                mark = ">>" if i <= x <= j else ""
-                marks = ",".join(k for k in ("inquit", "messenger", "opener") if e[k])
-                lines.append(f"| {mark}{x} | {ref(e)} | {e['first']} | {last_word.get(e['first'], '')} | {e['level']} | {e['quotation']} | "
-                             f"{e['speaker']} | {e['frame']} | {e['basis']} | {'/'.join(map(str, e['votes'])) if e['votes'] else ''} | "
-                             f"{e['verb']} | {e['subject']} | {e['i_is']} | {marks} | {'; '.join(e['glyssen'])} | {e['text']} |")
-            qs = sorted({ev[x]["quotation"] for x in range(lo, hi + 1) if ev[x]["quotation"]})
-            if qs:
-                lines += ["", "Quotations in the passage:", "", "| id | level | parent | speaker | basis | first | last | from | to |", "|---|---|---|---|---|---|---|---|---|"]
-                for qid in qs:
-                    q = quotes.get(qid, {})
-                    lines.append(f"| {qid} | {q.get('level', '')} | {q.get('parent', '')} | {q.get('speaker', '')} | {q.get('basis', '')} | "
-                                 f"{q.get('first', '')} | {q.get('last', '')} | {q.get('from', '')} | {q.get('to', '')} |")
-            if kind == "parallel":
-                pb = extra.split(" // ")[1]
-                b, cv = pb.split(" ")
-                c, v = map(int, cv.split(":"))
-                pe = [e for e in ev if e["book"] == b and e["chapter"] == c and abs(e["verse"] - v) <= 2]
-                lines += ["", f"The parallel text ({b} {c}:{v - 2}-{v + 2}):", "", "| seg | verse | first | lvl | quotation | speaker | Hebrew |", "|---|---|---|---|---|---|---|"]
-                for e in pe:
-                    lines.append(f"| {e['i']} | {ref(e)} | {e['first']} | {e['level']} | {e['quotation']} | {e['speaker']} | {e['text']} |")
-            (OUT / "passages" / f"{pid}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-            work.append((pid, kind, ref(ev[i]), ref(ev[lo]), ref(ev[hi]), extra))
+    if count:                                          # the full work list, overlapping windows merged into passages
+        wins = sorted((window(i, j, ev), kind) for kind, xs in cand.items() for i, j, _ in xs)
+        merged = []
+        for (lo, hi), kind in wins:
+            if merged and lo <= merged[-1][1] and hi - merged[-1][0] < 2 * MAX_SEGS:
+                merged[-1][1] = max(merged[-1][1], hi)
+                merged[-1][2].add(kind)
+            else:
+                merged.append([lo, hi, {kind}])
+        segs_ = sum(h - l + 1 for l, h, _ in merged)
+        print(f"{sum(len(v) for v in cand.values())} candidates -> {len(merged)} passages, {segs_} segments;",
+              collections.Counter(len(k) for _, _, k in merged))
+        return 0
+    if refresh:                                        # the same marked segments, from the current build
+        for f in sorted((OUT / "passages").glob("*.md")):
+            t = f.read_text(encoding="utf-8")
+            m = re.search(r"\(segment (\d+)\) to .*?\(segment (\d+)\)", t)
+            mk = re.search(r"^Marked: (.*)$", t, re.M)
+            if m:
+                work.append(write_passage(f.stem, f.stem.split("-")[0], int(m.group(1)), int(m.group(2)), mk.group(1) if mk else "",
+                                          ev, quotes, last_word))
+    else:
+        for kind in QUESTIONS:
+            for n, (i, j, extra) in enumerate(spread(cand[kind], per_kind), 1):
+                work.append(write_passage(f"{kind}-{n:02d}", kind, i, j, extra, ev, quotes, last_word))
     with open(OUT / "worklist.tsv", "w", encoding="utf-8") as fh:
         fh.write("id\tkind\tanchor\tfrom\tto\tnote\n")
         for w in work:
