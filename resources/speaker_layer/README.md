@@ -81,17 +81,37 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
    level 1, and the sender's words go on after it at level 2. Where the sender's words end before the quoted stretch does, a hand
    correction says so (`sender_last`: Josh 24:14-15 is Joshua's own appeal); "וְעַתָּה" alone is no signal, the sender's words go on
    after it in Judg 11:23, 2 Chr 21:15 and 32:15.
+   More nesting rules: a song announced by its inquit ("אֶת־דִּבְרֵי הַשִּׁירָה הַזֹּאת", Deut 31:30) is one quotation of its singer, to the
+   narrative where the singer acts again (Deut 32:1-43), with the voices in it nested; a wayyiqtol of saying inside a quotation
+   followed by direct speech ("וָאֹמַר", "וַיֹּאמֶר אַסְתִּירָה פָנַי", Deut 32:20) opens a quotation inside it, to the end of its verse
+   and on while "I" or "you" in the next verses are the inner speaker or addressee (MACULA's participant references); in a story the
+   speaker tells about himself, his next wayyiqtol ends it; the translations' votes also nest a stretch deeper than our level where
+   most of them are deeper still (the enemies' words inside God's words inside the Song, Deut 32:27); a nested stretch of the
+   layout ends where the outer speaker narrates again in the first person ("וָאֲדַבֵּר אֲלֵיכֶם", Deut 1:43); a quotation inside a
+   quotation by a named person ends where that person is named in the third person ("אַל־תִּשְׁמְעוּ אֶל־חִזְקִיָּהוּ", 2 Kgs 18:31). A
+   quotation the layout adds goes on through following verses that still speak in the first or second person (Daniel's prayer,
+   Dan 9:4-19), and is named through "I" when its inquit names no one.
 4. The frame: a psalm is its psalmist's speech from its first line (`books.frame_poems`; the name in the title's "לְ" + name, else
    "Psalmist"); a first-person account (a chapter of Ezra or Nehemiah whose own narration is mostly in the first person) is its
    narrator's ("narrator (I)"): Ezra 9 and Neh 13, where the account leads into the narrator's prayer and speech; Ezra 8 and Neh 1-2
    are first-person narrative and have none, by correction. In the prophets, an oracle is God's speech (frame "God") from the line
    after a divine messenger formula ("כֹּה אָמַר יְהוָה") or the word-event formula ("הָיָה דְבַר־יְהוָה אֵלַי") to the next one; it ends
-   earlier at prose narrative that the clause layout has outside any speech (Jer 36:4, Isa 37:36). Oracles with no formula (Hosea,
-   Joel, Habakkuk, Zephaniah, much of Isaiah) have none. Recorded per segment as `frame`, not as a level, so the levels stay
+   earlier at prose narrative that the clause layout has outside any speech (Jer 36:4, Isa 37:36). Speech with no formula in a
+   prophetic book (Hosea, Joel, Isa 1:2-20) opens the frame at its first line in the first or second person outside quotations.
+   There is no frame over a quotation by the frame's own speaker (Clear's quotations by God in Ezekiel and Jeremiah: God's words
+   would count twice). The frame's speaker is decided per verse: God where "I" is God (or an "I" MACULA doesn't resolve, or the
+   verse is partly God's own quotation), the prophet where "I" is someone else (Jeremiah's laments) or God is named in the third
+   person with no "I" (Isa 11, 19); a verse with neither keeps the one before. The prophet of each book is in `prophets.tsv`, as
+   its heading names him. Recorded per segment as `frame`, not as a level, so the levels stay
    comparable with Clear's.
 5. Corrections (`corrections.tsv`) last.
 
 ## Checks
+
+- The parallel texts (`python -m macula.speaker_parallels`, in `shoresh/`): Samuel-Kings and Chronicles, Isa 36-39 and 2 Kgs
+  18-20, Ps 18 and 2 Sam 22 and the others the BSB's section references pair, aligned word by word; the share of matched words at
+  the same level and with the same speaker, and the stretches that differ (`parallels.tsv`). Some differences are by design (the
+  tabernacle commanded in Exod 25-31 and built in 35-39; the Decalogue in Exod 20 and in Moses' speech, Deut 5).
 
 - Clear's spans against the clause layout's speech structure, per segment (agreement in the report).
 - Speakers against Glyssen's characters of the quotation's first verse (English numbering through the bibles verse map).
@@ -110,7 +130,8 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
 
 Add a row to `corrections.tsv`: the quotation's first word key, the field (`speaker`, `first`, `last` or `drop`), the new value, and
 the reason the Hebrew text gives. Every correction needs a reason. A `frame` row, keyed on a chapter's first word, sets that chapter's
-frame (empty for none: Ps 1 and 2, a teaching and a discourse with no single speaker from the start). A `sender_last` row, keyed on a
+frame (empty for none: Ps 1 and 2, a teaching and a discourse with no single speaker from the start; Daniel for Dan 8-10, his own
+account; Nebuchadnezzar for Dan 4, his letter). A `sender_last` row, keyed on a
 relayed message's formula, gives the last word of the sender's words.
 
 ## Releases
