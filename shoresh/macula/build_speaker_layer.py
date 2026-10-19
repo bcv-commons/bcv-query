@@ -568,6 +568,7 @@ def main() -> None:
     level = [0] * len(segs)
     inner: list[dict] = []
     innermost: list[dict | None] = [sp for sp, _ in seg_q]
+    absorbed: dict = {}                            # id of a quotation a rule removed -> the quotation that took it in (None: none)
     by_id = {sp["id"]: sp for sp in spans}
     for sp in spans:
         sp["level"], sp["parent"] = 1, ""
@@ -1142,8 +1143,21 @@ def main() -> None:
         while j + 1 < len(segs) and gods[j + 1] and not god_quoted(j + 1) and region[j + 1] == region[i]:
             j += 1
         iq = segs[region[i]] if region[i] in opener_of else None
-        wrap(i, j, "God", iq, "oracle")
-        oracles_made += 1
+        # God's words inside a larger speech (Jeremiah's to the people, Jer 44:24-29) stay in it: the oracle goes only around
+        # whole quotations, never inside one that reaches beyond the run
+        ok = [seg_q[x][0] is None or (seg_q[x][0]["first"] >= segs[i]["first"] and seg_q[x][0]["last"] <= segs[j]["last"])
+              for x in range(i, j + 1)]
+        x = i
+        while x <= j:
+            if not ok[x - i]:
+                x += 1
+                continue
+            y = x
+            while y + 1 <= j and ok[y + 1 - i]:
+                y += 1
+            wrap(x, y, "God", iq, "oracle")
+            oracles_made += 1
+            x = y + 1
         i = j + 1
     # a formula inside God's words ("נְאֻם־יְהוָה", "אָמַר יְהוָה צְבָאוֹת", "לָכֵן כֹּה אָמַר יְהוָה" between two stretches of them) is part
     # of them: two quotations by God with only formula lines between them are one (bsb-add-books, v0.9: the reference and the
@@ -1171,9 +1185,10 @@ def main() -> None:
             continue
         for x in range(j + 1, k):                    # the formula lines join
             seg_q[x], level[x], innermost[x] = (q, 1.0), 1, q
-        x = k
-        while x < len(segs) and seg_q[x][0] is q2:
-            seg_q[x] = (q, seg_q[x][1])
+        x = k                                        # all of q2's segments, not only the run after the formula (Isa 56:9-57:13)
+        while x < len(segs) and segs[x]["first"] <= q2["last"]:
+            if seg_q[x][0] is q2:
+                seg_q[x] = (q, seg_q[x][1])
             if innermost[x] is q2:
                 innermost[x] = q
             x += 1
@@ -1184,6 +1199,7 @@ def main() -> None:
         for lst in (spans, wrapped):
             if q2 in lst:
                 lst.remove(q2)
+        absorbed[q2["id"]] = q
         joined_formula += 1
         # stay on q: it may join the next one too
 
@@ -1268,6 +1284,12 @@ def main() -> None:
             innermost[x] = q
         if q in spans and seg_q[x][0] is None:
             seg_q[x] = (q, 1.0)
+    unapplied: list = []                            # review rows whose word or quotation the build no longer has
+    def adopt(q: dict) -> None:                     # quotations that now lie inside q, beside it before, go under it (Ezra 1:2-4)
+        for c in spans + inner + wrapped:
+            if c is not q and (c.get("parent") or "") == (q.get("parent") or "") and q["first"] <= c["first"] and c["last"] <= q["last"] \
+                    and not (c["first"] == q["first"] and c["last"] == q["last"] and c.get("basis") == "review"):
+                c["parent"] = q["id"]
     if review_path.exists() and not no_review:
         with open(review_path, encoding="utf-8") as fh:
             rows = list(csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t"))
@@ -1275,6 +1297,7 @@ def main() -> None:
             f, k, val = r.get("field"), r.get("first", ""), r.get("value") or ""
             if not r.get("reason") or k not in order and f != "frame":
                 reviewed["not applied (no reason or unknown word)"] += 1
+                unapplied.append(r)
                 continue
             if f == "frame":
                 for i, sg in enumerate(segs):
@@ -1285,6 +1308,9 @@ def main() -> None:
                     level[x] = int(val)
             elif f == "add" and (r.get("last") or "") in order:
                 par = by_id_all.get(r.get("parent") or "")
+                if par is None and r.get("parent"):     # a parent the rules no longer make: the closest quotation around the stretch
+                    around = [c for c in spans + inner + wrapped if c["first"] <= k and r["last"] <= c["last"]]
+                    par = max(around, key=lambda c: (c["first"], -int(c["last"]), c.get("level", 1))) if around else None
                 q = {"id": f"{(par or {}).get('id', 'R')}.r{reviewed['add'] + 1}", "speaker": val, "speaker_hebrew": "", "alt_speaker": "",
                      "divine": "Y" if val == "God" else "", "quote_type": "nested" if par else "review", "basis": "review",
                      "level": (par.get("level", 1) + 1) if par else 1, "parent": par["id"] if par else "", "first": k, "last": r["last"],
@@ -1295,10 +1321,15 @@ def main() -> None:
                 by_id_all[q["id"]] = q
                 for x in range(order[k], order[r["last"]] + 1):
                     nest(x, q)
+                adopt(q)
             else:
-                q = by_id_all.get(r.get("quotation") or "") or find_q(k)
+                q = by_id_all.get(r.get("quotation") or "")
+                if q is not None and not (q["first"] <= segs[order[k]]["last"] and k <= q["last"] or k == q.get("_first0")):
+                    q = None                            # a built id (W00327) that now names another stretch: go by the word
+                q = q or find_q(k)
                 if q is None:
                     reviewed["not applied (no quotation starts there)"] += 1
+                    unapplied.append(r)
                     continue
                 a0, b0 = order[q["first"]], order[q["last"]]
                 if f == "speaker":
@@ -1309,23 +1340,116 @@ def main() -> None:
                     for lst in (spans, inner, wrapped):
                         if q in lst:
                             lst.remove(q)
+                    absorbed[q["id"]] = parent_of(q)
                 elif f in ("first", "last") and val in order:
                     a1, b1 = (order[val], b0) if f == "first" else (a0, order[val])
                     for x in set(range(a0, b0 + 1)) - set(range(a1, b1 + 1)):
                         unnest(x, q)
                     for x in sorted(set(range(a1, b1 + 1)) - set(range(a0, b0 + 1))):
                         nest(x, q)
+                    q.setdefault("_first0", q["first"])
                     q[f] = segs[a1]["first"] if f == "first" else segs[b1]["last"]
+                    sx = segs[a1] if f == "first" else segs[b1]
+                    q["from" if f == "first" else "to"] = f"{sx['book']} {sx['chapter']}:{sx['verse']}"
                     for c in inner:                     # quotations now outside it stand in its parent
                         if c.get("parent") == q["id"] and (c["first"] > q["last"] or c["last"] < q["first"]):
                             c["parent"] = q.get("parent", "")
+                    adopt(q)
                 else:
                     reviewed["not applied (field)"] += 1
+                    unapplied.append(r)
                     continue
             reviewed[f] += 1
             reviewed["applied"] += 1
 
-    allq = sorted(spans + inner + wrapped, key=lambda q: (q["first"], q["level"]))
+    # one structure out of the rules' three records (the quotations, each segment's level, each segment's innermost quotation), which
+    # the rules keep apart and do not always change together: a quotation that was joined into another or dropped stands for the one
+    # that took it in; a quotation's level is its depth among its parents; a segment names a quotation that holds it at its level,
+    # else takes the level of the one it names
+    final = spans + inner + wrapped
+    fin_id = {q["id"]: q for q in final}
+    consistent = collections.Counter()
+
+    def alive(qid: str) -> dict | None:
+        for _ in range(64):
+            if qid in fin_id:
+                return fin_id[qid]
+            nxt = absorbed.get(qid)
+            if nxt is None:
+                return None
+            qid = nxt["id"]
+        return None
+
+    def holding(k: str, lo: str | None = None, hi: str | None = None) -> list:
+        return [q for q in final if q["first"] <= k <= q["last"] and (lo is None or (q["first"] <= lo and hi <= q["last"]))]
+
+    def overlaps(q: dict, sg: dict) -> bool:        # a quotation may open inside a segment, after its inquit (Judg 4:6)
+        return q["first"] <= sg["last"] and sg["first"] <= q["last"]
+    for q in final:
+        p = q.get("parent") or ""
+        r0 = alive(p) if p else None
+        if p and (p not in fin_id or r0 is None or r0["last"] < q["first"] or q["last"] < r0["first"]):
+            r = r0 if r0 is not None and not (r0["last"] < q["first"] or q["last"] < r0["first"]) else None
+            if r is None:               # gone, or a parent it lies wholly outside of (2 Kgs 18:31-35 under 18:30): the closest one around it
+                around = [c for c in holding(q["first"], q["first"], q["last"]) if c is not q and not c["id"].startswith(q["id"] + ".")]
+                r = max(around, key=lambda c: (c["first"], -int(c["last"]), c.get("level", 1))) if around else None
+            q["parent"] = r["id"] if r else ""
+            consistent["parents re-pointed"] += 1
+    depth: dict = {}
+
+    def depth_of(q: dict) -> int:
+        chain, x = [], q
+        while x is not None and x["id"] not in depth and x["id"] not in {c["id"] for c in chain}:
+            chain.append(x)
+            x = fin_id.get(x.get("parent") or "")
+        d = depth.get(x["id"], 0) if x is not None else 0
+        for c in reversed(chain):
+            d += 1
+            depth[c["id"]] = d
+        return depth[q["id"]]
+    for q in final:
+        if depth_of(q) != q.get("level", 1):
+            consistent["quotation levels set from their parents"] += 1
+        q["level"] = depth_of(q)
+    for i, sg in enumerate(segs):
+        if seg_q[i][0] is None:
+            if innermost[i] is not None or level[i]:
+                innermost[i], level[i] = None, 0
+                consistent["segments outside quotations cleared"] += 1
+            continue
+        if fin_id.get(seg_q[i][0]["id"]) is not seg_q[i][0]:
+            top = alive(seg_q[i][0]["id"])
+            seg_q[i] = (top, seg_q[i][1]) if top else (None, 0.0)
+        q = innermost[i] if innermost[i] is not None else seg_q[i][0]
+        q = alive(q["id"]) if q is not None else None
+        if q is None or not overlaps(q, sg):
+            around = [c for c in final if overlaps(c, sg)]
+            q = max(around, key=lambda c: (c["level"], c["first"])) if around else None
+        if q is None:
+            seg_q[i], innermost[i], level[i] = (None, 0.0), None, 0
+            consistent["segments outside quotations cleared"] += 1
+            continue
+        if q["level"] != level[i]:
+            same = [c for c in final if overlaps(c, sg) and c["level"] == level[i]]
+            kin = [c for c in same if c["id"].startswith(q["id"] + ".") or q["id"].startswith(c["id"] + ".")]
+            below = [c for c in final if overlaps(c, sg) and c["id"].startswith(q["id"] + ".") and c["level"] < level[i]]
+            if same:
+                q = max(kin or same, key=lambda c: c["first"])
+                consistent["segments re-pointed to a quotation at their level"] += 1
+            elif below:                             # the deepest quotation inside the one it names (1 Sam 21:3, Saul's words)
+                q = max(below, key=lambda c: (c["level"], c["first"]))
+                level[i] = q["level"]
+                consistent["segment levels set from their quotation"] += 1
+            else:
+                level[i] = q["level"]
+                consistent["segment levels set from their quotation"] += 1
+        elif innermost[i] is not q:
+            consistent["segments re-pointed to a quotation at their level"] += 1
+        innermost[i] = q
+        if seg_q[i][0] is None or id(seg_q[i][0]) not in {id(c) for c in final}:
+            seg_q[i] = (q, seg_q[i][1] or 1.0)
+
+    allq = sorted(final, key=lambda q: (q["first"], q["level"]))
     cols = ["id", "level", "parent", "speaker", "speaker_hebrew", "alt_speaker", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
             "end_fit", "pieces", "inquit"]
     with open(OUT / "quotations.tsv", "w", encoding="utf-8") as fh:
@@ -1350,6 +1474,9 @@ def main() -> None:
     # the evidence per segment, for a review pass over doubtful passages (macula/speaker_review.py): the translations' votes, the verb,
     # the subject, who "I" is, the markers of speech, Glyssen's characters (data/speaker-layer/_work/evidence.jsonl, not released)
     (OUT / "_work").mkdir(exist_ok=True)
+    with open(OUT / "_work" / "review_unapplied.tsv", "w", encoding="utf-8") as fh:
+        cols_r = ["first", "field", "value", "last", "parent", "quotation", "reason"]
+        fh.write("\t".join(cols_r) + "\n" + "".join("\t".join(r.get(c) or "" for c in cols_r) + "\n" for r in unapplied))
     with open(OUT / "_work" / "evidence.jsonl", "w", encoding="utf-8") as fh:
         for i, sg in enumerate(segs):
             outer = seg_q[i][0]
@@ -1411,6 +1538,8 @@ def main() -> None:
              f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)}); of them opened by a messenger formula"
              f" inside a quotation: {messenger}",
              f"- refinement 7, touching pieces of a voice implied in the outer speech (Glyssen's Implicit) joined into one speech: {implicit}",
+             "- one structure (quotations, segment levels and innermost quotations made to agree): "
+             + (", ".join(f"{k} {v}" for k, v in consistent.most_common()) or "nothing to change"),
              f"- review rows applied (resources/speaker_layer/review.tsv{', left out' if no_review else ''}): " + ", ".join(f"{k} {v}" for k, v in reviewed.most_common()),
              f"- quotations inside a quotation ended where their speaker is named in the third person: {named_end}",
              f"- messages God commands to be delivered, run to the end of his speech and spoken by the one he addresses: {law_messages}",

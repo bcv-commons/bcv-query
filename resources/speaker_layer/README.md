@@ -3,7 +3,8 @@
 Who speaks where in the Hebrew Bible, on MACULA Hebrew's words and on the clause segments of the clause layout
 (`shoresh/macula/data/clause-layout`). A layer of its own: it is refined and checked here first, and goes into the clause layout only
 after that. Built by `shoresh/macula/build_speaker_layer.py` into `shoresh/macula/data/speaker-layer/` (not tracked); this folder holds
-what is tracked: the corrections and this description.
+what is tracked: the hand corrections (`corrections.tsv`), the review rows (`review.tsv`), the prophet of each prophetic book
+(`prophets.tsv`) and this description.
 
 ## Sources and licence
 
@@ -32,8 +33,11 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
   `referent`, `character`, `correction`: from the speaker data; `layout`: from the clause layout), `first` / `last` (MACULA word keys),
   `from` / `to` (verses, Hebrew numbering), `start_fit` / `end_fit` (how the edges fit the clause segments), `pieces`, `inquit`.
 - `segments/<BOOK>.tsv`: per clause segment: its innermost quotation, its level, speaker, the share of its words in the quotation, and
-  its `frame` (the speaker of a text that is speech from its start, the psalms).
+  its `frame` (the speaker of a text that is speech from its start: a psalm's psalmist, a prophetic book's prophet).
 - `report.md`: the figures and the work lists of doubtful places.
+- `parallels.tsv` (from `macula.speaker_parallels`): where parallel texts differ.
+- `_work/` (not released): `evidence.jsonl`, the evidence per segment for the review; `review_unapplied.tsv`, review rows the build
+  could not apply (empty when all apply); `review/`, the review's passages and answers.
 
 ## How it is made
 
@@ -91,20 +95,31 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
    quotation by a named person ends where that person is named in the third person ("אַל־תִּשְׁמְעוּ אֶל־חִזְקִיָּהוּ", 2 Kgs 18:31). A
    quotation the layout adds goes on through following verses that still speak in the first or second person (Daniel's prayer,
    Dan 9:4-19), and is named through "I" when its inquit names no one.
+   Law as a message: a command inside God's speech to say something ("דַּבֵּר אֶל־בְּנֵי יִשְׂרָאֵל … וְאָמַרְתָּ אֲלֵהֶם") opens the
+   message, spoken by the one God addresses in the narrative inquit (Moses, Aaron), to the end of God's speech, over chapter breaks
+   (Lev 4:2-5:13, Lev 25:2-26:45), where the clause layout restarts each chapter at the margin.
 4. The frame: a psalm is its psalmist's speech from its first line (`books.frame_poems`; the name in the title's "לְ" + name, else
    "Psalmist"); a first-person account (a chapter of Ezra or Nehemiah whose own narration is mostly in the first person) is its
    narrator's ("narrator (I)"): Ezra 9 and Neh 13, where the account leads into the narrator's prayer and speech; Ezra 8 and Neh 1-2
-   are first-person narrative and have none, by correction. In the prophets, an oracle is God's speech (frame "God") from the line
-   after a divine messenger formula ("כֹּה אָמַר יְהוָה") or the word-event formula ("הָיָה דְבַר־יְהוָה אֵלַי") to the next one; it ends
-   earlier at prose narrative that the clause layout has outside any speech (Jer 36:4, Isa 37:36). Speech with no formula in a
-   prophetic book (Hosea, Joel, Isa 1:2-20) opens the frame at its first line in the first or second person outside quotations.
-   There is no frame over a quotation by the frame's own speaker (Clear's quotations by God in Ezekiel and Jeremiah: God's words
-   would count twice). The frame's speaker is decided per verse: God where "I" is God (or an "I" MACULA doesn't resolve, or the
-   verse is partly God's own quotation), the prophet where "I" is someone else (Jeremiah's laments) or God is named in the third
-   person with no "I" (Isa 11, 19); a verse with neither keeps the one before. The prophet of each book is in `prophets.tsv`, as
-   its heading names him. Recorded per segment as `frame`, not as a level, so the levels stay
-   comparable with Clear's.
-5. Corrections (`corrections.tsv`) last.
+   are first-person narrative and have none, by correction. Recorded per segment as `frame`, not as a level.
+   The prophets: the frame of a prophetic book is its prophet (`prophets.tsv`, as its heading names him), and God's words are always
+   a quotation. A stretch of the book starts after a divine messenger formula ("כֹּה אָמַר יְהוָה") or the word-event formula
+   ("הָיָה דְבַר־יְהוָה אֵלַי"), or at a line in the first or second person outside quotations (Hosea, Joel, Isa 1:2-20), and ends at
+   prose narrative the clause layout has outside any speech (Jer 36:4, Isa 37:36). Within it, verse by verse, God speaks where "I" is
+   God (or an "I" MACULA doesn't resolve, or the verse is partly God's own quotation), the prophet where "I" is someone else
+   (Jeremiah's laments) or God is named in the third person with no "I" (Isa 11, 19); a verse with neither keeps the one before;
+   the formula lines are the prophet's. God's verses that no quotation of God holds yet become one (`basis` `oracle`), around
+   whole quotations only: God's words inside a larger speech (Jeremiah's to the people, Jer 44:24-29) stay in it. God's quotations
+   with only a formula line between them are one ("נְאֻם־יְהוָה", "אָמַר יְהוָה", "לָכֵן כֹּה אָמַר יְהוָה" inside God's words, as the
+   translations have them). A message God tells the prophet to deliver ("וְאָמַרְתָּ … הָרֵי יִשְׂרָאֵל", Ezek 6:3) is the
+   prophet's. So the levels read two ways: levels alone (the book as a text with God's words quoted) or the frame counted as a
+   level (the prophet's speech with God's words quoted in it, as unfoldingWord's notes read it).
+5. Corrections (`corrections.tsv`), then the review rows (`review.tsv`, below; `--no-review` leaves them out).
+6. One structure: the rules keep three records (the quotations, each segment's level, each segment's innermost quotation), and a
+   last pass makes them agree. A quotation a rule joined into another or dropped stands for the one that took it in; a quotation
+   lying wholly outside its parent goes under the closest one around it; a quotation's level is its depth among its parents; a
+   segment names a quotation that holds it at its level, else the deepest one inside the quotation it named, else takes that
+   quotation's level. Counted in the report.
 
 ## Checks
 
@@ -117,14 +132,18 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
 - Speakers against Glyssen's characters of the quotation's first verse (English numbering through the bibles verse map).
 - The work lists in the report: third-person wayyiqtols inside quotations (a story told, or a quotation running too long),
   quotations without an inquit, first- and second-person verbs outside quotations, speakers Glyssen doesn't list.
-- Our own yardstick: unfoldingWord's translationNotes on quotations inside quotations (`figs-quotesinquotes`, CC BY-SA 4.0; 647 OT
-  verses; used to measure, not as input): the share of those verses where the layer nests (a frame counted as a level). v0.7: 54%;
-  v0.8: 82% (narrative 88%, law 72%, prophecy 74%, wisdom 88%).
+- Our own yardstick: unfoldingWord's translationNotes on quotations inside quotations (`figs-quotesinquotes`, CC BY-SA 4.0; 647
+  notes on OT verses; used to measure, not as input): the share of those notes where the layer nests somewhere in the verses
+  noted (a frame counted as a level). v0.7: 54%; v0.8: 82%; v0.10: 87.0% (narrative 87.5%, law 85.5%, prophecy 87.4%, wisdom
+  89.7%), 84.9% without the review rows.
+- The parallel texts, v0.10: 77.4% of matched words at the same level, 93.4% with the same speaker.
 - bsb-add-books checks the layer against BHSA's clause text types (narrative / quotation / discourse, with nesting), in figures and
   failures in words only (BHSA is non-commercial and is not used as input). v0.2: in narrative 97.5% of segments agree; quotation starts
   fall where BHSA has one 96% of the time and ends 94%; of the layer's nested quotations, 82% are nested in BHSA too. BHSA treats a text
   that is speech from its start (a psalm, most oracles) as a quotation at its top level; the layer, like Clear, records it as the
-  `frame` field. The latest figures, by genre, are in the dataset card (`shoresh/macula/speaker_layer_card.md`).
+  `frame` field. v0.9: the prophets at BHSA's exact level in 83% of segments when each is read the way that fits it (levels alone
+  or the frame counted), 45% in v0.8; the review rows moved 163 segments closer and 39 farther. The latest figures, by genre, are
+  in the dataset card (`shoresh/macula/speaker_layer_card.md`).
 
 ## Correcting it
 
@@ -133,6 +152,23 @@ the reason the Hebrew text gives. Every correction needs a reason. A `frame` row
 frame (empty for none: Ps 1 and 2, a teaching and a discourse with no single speaker from the start; Daniel for Dan 8-10, his own
 account; Nebuchadnezzar for Dan 4, his letter). A `sender_last` row, keyed on a
 relayed message's formula, gives the last word of the sender's words.
+
+## The review
+
+`shoresh/macula/speaker_review.py` picks doubtful passages from the build (the translations split; nesting from the layout alone;
+God's words the layer made a quotation; parallel texts that differ; unfoldingWord's notes where the layer doesn't nest; unnamed
+speakers), writes each as a passage file (the Hebrew per segment with the evidence as numbers: the translations' votes, the
+verb, the subject, who "I" is, the markers of speech, Glyssen's characters; no English text, no BHSA) with the conventions the
+layer follows (`conventions.md`), and merges the reviewers' answers into `review.tsv` (`--merge`). Reviewers so far: two AI
+agents (Claude Opus 5.5) working independently on the same 48 passages, and a third deciding where they differed.
+
+`review.tsv`: one row per change: `first` (the word key it is keyed on), `field` (`speaker`, `first`, `last`, `drop`: the quotation
+named in `quotation`, else the one starting at `first`; `add`: a new quotation from `first` to `last` inside `parent`, its speaker
+in `value`; `level`: the level of the segments from `first` to `last`; `frame`), `value`, `reason` (from the Hebrew; required),
+`last`, `parent`, `source` (`agent:claude-opus-5-5:review-v1`, `+adjudicated` where the third agent decided, `+rekeyed` where a
+row was moved to the quotations the build makes now), `confidence`, `quotation`. A `quotation` id that now names another stretch
+is not used; an `add` row whose `parent` the rules no longer make goes under the closest quotation around it. The rows the build
+can't apply are listed in `_work/review_unapplied.tsv`.
 
 ## Releases
 

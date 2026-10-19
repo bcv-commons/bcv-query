@@ -5,12 +5,12 @@ are written to a folder for review, and published by hand.
 
 DIR gets:
   README.md                          the dataset card (macula/speaker_layer_card.md with the version fields filled in)
-  quotations.tsv, segments/, report.md, corrections.tsv
+  quotations.tsv, segments/, report.md, corrections.tsv, review.tsv, prophets.tsv, parallels.tsv
   hebrew-speaker-layer-<tag>.tar.gz  the pinned download: the files above (reproducible: sorted entries, fixed times and owners)
   SHA256SUMS                         SHA-256 of the archive and the files
 
-The build must come from committed code and corrections (`git status` clean for macula/ and resources/speaker_layer/), unless
---allow-dirty.
+The build must come from committed code, corrections and review rows (`git status` clean for macula/ and resources/speaker_layer/),
+unless --allow-dirty. The build must be the default one (with the review rows) and parallels.tsv from `python -m macula.speaker_parallels`.
 """
 from __future__ import annotations
 
@@ -29,6 +29,8 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 CARD = HERE / "speaker_layer_card.md"
 CORRECTIONS = ROOT / "resources" / "speaker_layer" / "corrections.tsv"
+REVIEW = ROOT / "resources" / "speaker_layer" / "review.tsv"
+PROPHETS = ROOT / "resources" / "speaker_layer" / "prophets.tsv"
 
 
 def _rows(path: Path) -> list[dict]:
@@ -64,6 +66,8 @@ def main() -> None:
                                capture_output=True, text=True).stdout.strip()
         if dirty:
             raise SystemExit("uncommitted changes in macula/ or resources/speaker_layer/; commit first (or --allow-dirty):\n" + dirty)
+    if "review.tsv, left out" in (src / "report.md").read_text(encoding="utf-8"):
+        raise SystemExit("this build left the review rows out (--no-review); rebuild with them")
     if out.exists():
         shutil.rmtree(out)
     (out / "segments").mkdir(parents=True)
@@ -71,8 +75,11 @@ def main() -> None:
     for name in ("quotations.tsv", "report.md"):
         shutil.copy(src / name, out / name)
         files.append(out / name)
-    shutil.copy(CORRECTIONS, out / "corrections.tsv")
-    files.append(out / "corrections.tsv")
+    for f in (CORRECTIONS, REVIEW, PROPHETS):
+        shutil.copy(f, out / f.name)
+        files.append(out / f.name)
+    shutil.copy(src / "parallels.tsv", out / "parallels.tsv")
+    files.append(out / "parallels.tsv")
     for f in sorted((src / "segments").glob("*.tsv")):
         shutil.copy(f, out / "segments" / f.name)
         files.append(out / "segments" / f.name)
@@ -82,7 +89,8 @@ def main() -> None:
     fields = {"@TAG@": a.tag, "@BUILT@": datetime.date.today().isoformat(),
               "@QUOTATIONS@": f'{sum(q["level"] == "1" for q in quotes):,}',
               "@NESTED@": f'{sum(q["level"] not in ("", "1") for q in quotes):,}',
-              "@IN_QUOTE@": f'{sum(r["quotation"] != "" for r in segs):,}', "@SEGMENTS@": f"{len(segs):,}"}
+              "@IN_QUOTE@": f'{sum(r["quotation"] != "" for r in segs):,}', "@SEGMENTS@": f"{len(segs):,}",
+              "@REVIEW_ROWS@": f'{len(_rows(out / "review.tsv")):,}'}
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         card = card.replace(k, v)
