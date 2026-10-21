@@ -90,7 +90,7 @@ macula/data/speaker-layer-release/<tag>/."""
 repository = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer"
 tag = "v0.11"
 url = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer/resolve/{tag}/hebrew-speaker-layer-{tag}.tar.gz"
-archive_sha256 = "ccc1f5eb5eb5c33c9042ec509dbb66113f380c352e721e4ba293f716cd6e047b"
+archive_sha256 = "68ec601e456d535ca56bbada485153aa645da67947055c73b8bf372978843b16"
 licence = "CC BY 4.0"
 
 [sources.versification]
