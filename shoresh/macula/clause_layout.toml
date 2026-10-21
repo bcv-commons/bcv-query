@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.35"
+version = "0.36"
 
 [profile]
 name = "default"
@@ -81,6 +81,17 @@ repository = "https://git.door43.org/unfoldingWord/hbo_uhb"
 tag = "v3.0.0"
 url = "https://git.door43.org/unfoldingWord/hbo_uhb/raw/tag/{tag}/{nn:02d}-{code}.usfm"
 licence = "CC BY-SA 4.0"
+
+[sources.speaker_layer]
+doc = """Our Hebrew speaker layer (bcv-commons/hebrew-speaker-layer), for rule speech_levels: which quotation each clause segment stands
+in, and the quotation it stands inside. The published release is read, never a build from the same run (the speaker layer was itself
+built on the clause layout's segments, v0.35; the segmentation is unchanged). Downloaded once and cached in
+macula/data/speaker-layer-release/<tag>/."""
+repository = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer"
+tag = "v0.10"
+url = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer/resolve/{tag}/hebrew-speaker-layer-{tag}.tar.gz"
+archive_sha256 = "92e360cb4c395f37936d4c1766936f81c8f806f9b1136db49c59f7f84506bb2a"
+licence = "CC BY 4.0"
 
 [sources.versification]
 doc = """bcv-commons/bibles' verse map from Hebrew (org) to English numbering, derived from STEPBible TVTMS, for verse_ref_en. Read
@@ -641,9 +652,20 @@ trusted: the kinds (prefixes) where the tree's level is used, the ones where it 
 comparison on the delivered sets (v0.27): phrases (PrepNp: 15 against 4), clauses under cjpCLx (26 against 5), a כִּי clause under
 ClCl (12 against 1). Relatives (relCL) were taken out in 0.31: in the trial (v0.30, profile tree) they were right 12 times and our
 rules 15 (Deut 28:21, 28:63 "לְרִשְׁתָּהּ"). Not the fronted protasis (ClCl2: [depth] conditionals_as_in_law_view), not
-infinitives after a preposition (PrepCL: our rules 25 against 14), not segments at the shared node itself (even)."""
+infinitives after a preposition (PrepCL: our rules 25 against 14), not segments at the shared node itself (even).
+Added in 0.36, after bsb-add-books scored the trial "tree everywhere" (2026-10-21; their note 54: the trial lost 3.9 points
+overall, 82.9% against 86.8%, but 43 kinds won): the winning kinds with at least twice as many steps right as wrong, in their
+counts trial right / v0.35 right: NpCL| (41/0, 21/2, 15/2), PtclCL|0|cl|- (60/22), S-P|0|np|p (44/17), ppCL| (32/14, 29/12, 17/1),
+ROOT|2|cl|-|עַד (41/10), V-O|0|cl|o (33/8, 13/1), ADV-V-O|0|cl|o (40/13), ClCl2|1|cl|- (36/12), P-S|1|np|s (31/11),
+ROOT|1|cl|-|תַּחַת (17/1), PPandPP|1|pp|- (16/3), V-S-O|0|np|s (16/2), V-S-PP|0|pp|pp (15/3), NpaNp|1|np|- (38/19). The tree is
+right where a line finishes what the line before began: a fronted noun and its verb ("דָּבָר | צִוָּה", 1 Chr 16:15), אוּלַי and its
+clause (1 Kgs 20:31), a subject and its participle ("אֲנִי הָאִשָּׁה | הַנִּצֶּבֶת", 1 Sam 1:26), an עַד phrase (1 Chr 11:21). It stays
+off at ROOT otherwise (a causal כִּי on the verse's own group: our rules indent it), at a quotation's start and after an inquit.
+In their counts these kinds were right 595 times and v0.35 153 (an upper bound of about +0.5 points); 978 steps change."""
 table = "tree_attachments.json"
-trusted = ["PrepNp|", "cjpCLx|", "ClCl|1|cl|-|כִּי"]
+trusted = ["PrepNp|", "cjpCLx|", "ClCl|1|cl|-|כִּי", "NpCL|", "PtclCL|0|cl|-", "S-P|0|np|p", "ppCL|", "ROOT|2|cl|-|עַד", "V-O|0|cl|o",
+           "ADV-V-O|0|cl|o", "ClCl2|1|cl|-", "P-S|1|np|s", "ROOT|1|cl|-|תַּחַת", "PPandPP|1|pp|-", "V-S-O|0|np|s", "V-S-PP|0|pp|pp",
+           "NpaNp|1|np|-"]
 
 [depth.law]
 doc = """text_depth_law: the flat view with conditionals laid out as in BHSA. Where a protasis comes before its apodosis (a link with
@@ -1139,6 +1161,23 @@ it, and in 1 Kgs 11:2 that carried the narrative of 11:2-12 into a quotation. Th
 steps in the delivered sets, the tree right on 74 and the rules on 48, step agreement 85.8% -> 86.0%; without relCL 59 against 30
 (bsb-add-books). Mean depth per chapter can't judge it (it flattens, and the layout is a little shallow on average)."""
 examples = ["Deut 28:21 \"לְרִשְׁתָּהּ\" level with \"אֲשֶׁר־אַתָּה בָא־שָׁמָּה\"", "Ruth 1:16 \"אֲשֶׁר תֵּלְכִי\""]
+
+[rules.speech_levels]
+scope = "all"
+doc = """Every quotation of the speaker layer ([sources.speaker_layer]) is a level. Applied last, to text_depth and text_depth_law.
+A quotation's lines stand at least one level in from the line that introduces it (the line just before it: after "וַיְדַבֵּר …
+לֵאמֹר" one level in from "לֵאמֹר", as the other rules have it), and as long as the quotation lasts none of its lines goes back further out than that: a line may go
+deeper (a subordinate clause) and come back to the speech's own level, never above it. A quotation inside a quotation gets its own
+level one further in. Inside a quotation, the other rules' levels are kept relative to its lines. A line that the other rules hung
+on a line of a quotation the speaker layer says it is not in (a speech that ended, or a speech inside it that ended) goes back to
+its own speech's main line, or one level in when its link adds a level; a narrative line after a speech goes back to the narrative.
+A speech carried over a chapter break keeps its level (the chapter's first lines stand at the speech's level, not at the margin).
+A quotation that follows another quotation of the same depth directly (no introducing line between: another speaker's words
+carried on in the same speech) stands where that one stands; one with no line before it at all stands one level in from the
+quotation around it, or at level 1. The prophets' frame (the prophet who reports God's words) is not a quotation and adds no
+level. discourse_parent, relation and tree_depth are not changed: text_depth is no longer the count of links where a speech sets it."""
+examples = ["Gen 1:3 \"יְהִי אוֹר\" one level in from \"וַיֹּאמֶר אֱלֹהִים\"",
+            "Lev 5:1 God's speech of Lev 4:1 goes on at level 1 after the chapter break"]
 
 [rules.parallel_takes_partners_level]
 scope = "poetic"

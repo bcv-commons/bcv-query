@@ -28,11 +28,19 @@ def _meta(db: Path, table: str) -> dict[str, str]:
 
 
 def check(src: dict, *, trees_db: Path, spine_db: Path, uhb_dir: Path, uhb_files: list[str], vrs_files: dict[str, Path | None],
-          tvtms_rev: str | None) -> tuple[dict, list[str]]:
+          tvtms_rev: str | None, speaker_archive: Path | None = None) -> tuple[dict, list[str]]:
     """src: the [sources] table. uhb_files: the UHB files the build read; vrs_files: name -> cached path of the versification files;
-    tvtms_rev: the TVTMS revision the versification map states."""
+    tvtms_rev: the TVTMS revision the versification map states; speaker_archive: the speaker-layer release archive the build read."""
     problems: list[str] = []
     record: dict = {}
+
+    if speaker_archive is not None:
+        s = src["speaker_layer"]
+        found = sha256_file(speaker_archive)
+        record["speaker_layer"] = {"repository": s["repository"], "tag": s["tag"], "licence": s["licence"], "archive_sha256": found}
+        if found != s["archive_sha256"]:
+            problems.append(f"speaker_layer: {speaker_archive.name} has sha256 {found}, the TOML pins {s['archive_sha256']}. If the new "
+                            f"release is intended, set [sources.speaker_layer] tag and archive_sha256 = \"{found}\"")
 
     m = src["macula_hebrew"]
     found = sha256_file(trees_db)

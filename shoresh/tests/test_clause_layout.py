@@ -234,7 +234,8 @@ def test_v018_rules_at_their_places(tmp_path, monkeypatch):
         rs = [json.loads(l) for l in open(out / "clauses" / book / f"{book}_{ch:03d}.jsonl", encoding="utf-8")]
         return [r for r in rs if v is None or r["verse"] == v]
     lev7 = rows("LEV", 7)
-    assert lev7[0]["text_depth"] == 0 and lev7[0]["tree_depth"] > 0                    # at the margin; the speech link stays in the tree
+    # since 0.36 (rule speech_levels) a speech carried over a chapter break keeps its level: the message to Aaron of Lev 6:18 goes on
+    assert lev7[0]["text_depth"] == rows("LEV", 6)[-1]["text_depth"] > 0 and lev7[0]["tree_depth"] > 0
     psa18 = rows("PSA", 18)
     assert rows("PSA", 18, 8)[0]["text_depth"] > next(r for r in psa18 if r["verse"] == 2)["text_depth"]   # "וַתִּגְעַשׁ" in the song
     assert all(r["text_depth"] > 0 for v in (14, 15, 16) for r in rows("LEV", 17, v))   # "וָאֹמַר" stays in the LORD's speech
@@ -320,7 +321,8 @@ def test_v020_rules_at_their_places(tmp_path, monkeypatch):
     therefore = next(r for r in rows("AMO", 5, 16) if r["relation"] == "consequence")
     assert rows("AMO", 5, 18)[0]["text_depth"] < therefore["text_depth"]                 # "הוֹי" ends it
     lev5 = by_key("LEV", 5)
-    assert all(rows("LEV", 5, v)[0]["text_depth_law"] == 0 for v in (1, 2, 4, 5))         # the cases and the clause about them all
+    case1 = rows("LEV", 5, 1)[0]["text_depth_law"]                                         # the cases and the clause about them all
+    assert case1 > 0 and all(rows("LEV", 5, v)[0]["text_depth_law"] == case1 for v in (2, 4, 5))   # level, at the message's level (0.36)
     assert rows("LEV", 5, 2)[0]["relation"] == "parallel"
     lone = [r for r in rows("LEV", 5, 1) if r["discourse_rule"] == "lone_conjunction"]
     assert len(lone) >= 4 and all(r["text_depth"] == lone[0]["text_depth"] for r in lone)   # "אוֹ רָאָה אוֹ יָדָע", level
@@ -355,7 +357,7 @@ def test_v021_rules_at_their_places(tmp_path, monkeypatch):
     assert rows("EXO", 22, 13)[0]["relation"] == "conditional"                              # "וְכִי־יִשְׁאַל": if, not for
     lev17 = {r["clause_key"]: r for r in rows("LEV", 17)}
     head8 = next(r for r in rows("LEV", 17, 8) if r["discourse_rule"] == "main" and r["relation"] == "speech")
-    for v in (10, 13, 15):
+    for v in (10, 13):          # 17:15: the speaker layer v0.10 ends the message of 17:8 at 17:14 ("וָאֹמַר"), so 17:15 stands a level out
         h = rows("LEV", 17, v)[0]
         assert h["relation"] == "parallel" and h["text_depth_law"] == head8["text_depth_law"], v   # with the head of 17:8
     assert lev17
@@ -466,7 +468,10 @@ def test_v026_moving_out(tmp_path, monkeypatch):
 def test_moving_out_test_set(tmp_path, monkeypatch):
     """bsb-add-books' moving-out test set (98 lines: verse, opening, the direction from the line before) keeps its score: v0.35 gets
     67 right (v0.28: 63, v0.29: 65, v0.31: 66, v0.33: 67, v0.34: 68; v0.35 lays out conditionals as BHSA does, and Deut 28:15
-    "וְהָיָה" then steps out from the blessings' level, not to the margin). A rule change that loses lines here has to say why."""
+    "וְהָיָה" then steps out from the blessings' level, not to the margin). v0.36 also 67: the tree's winning kinds gain one (68), and
+    rule speech_levels loses one net: 7 gained, 8 lost, of which 5 are "to the margin" lines inside a speech (Deut 4:9, 20:16; Isa
+    43:16, 44:6; Amos 9:11) that now step out to the speech's own level, and 3 in Jer 1-2 where the speaker layer ends God's words
+    early. A rule change that loses lines here has to say why."""
     from macula import build_clause_layout as b, moving_out_score as m
     out = tmp_path / "out"
     books = sorted({t["book"] for t in m.tests()})

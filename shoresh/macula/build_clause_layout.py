@@ -27,6 +27,7 @@ import csv
 import datetime
 import difflib
 import hashlib
+import io
 import json
 import re
 import sqlite3
@@ -157,6 +158,37 @@ def _speaker_spans() -> dict[str, int]:
                 spans.append((r["word_start"][1:], r["word_end"][1:]))
     spans.sort()
     return {"_spans": spans}
+
+
+def _speaker_layer(cache: Path) -> tuple[Path | None, dict, dict]:
+    """The pinned speaker-layer release ([sources.speaker_layer]), for rule speech_levels: (the archive, (book, chapter, verse, seg) ->
+    (clause key, quotation id or None), quotation id -> the quotation it stands inside or None). Downloaded once into the cache."""
+    import tarfile
+    s = discourse_rules.CFG["sources"].get("speaker_layer")
+    if not s:
+        return None, {}, {}
+    f = cache / s["tag"] / f"hebrew-speaker-layer-{s['tag']}.tar.gz"
+    if not f.exists():
+        import httpx
+        r = httpx.get(s["url"].format(tag=s["tag"]), timeout=300, follow_redirects=True)
+        r.raise_for_status()
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_bytes(r.content)
+    seg_q: dict = {}
+    parent: dict = {}
+
+    def rows(fh):
+        return csv.DictReader((line for line in io.TextIOWrapper(fh, encoding="utf-8") if not line.startswith("#")), delimiter="\t")
+    with tarfile.open(f) as tar:
+        for m in tar.getmembers():
+            name = m.name.split("/")[-1]
+            if m.name.endswith("quotations.tsv"):
+                parent.update({r["id"]: r["parent"] or None for r in rows(tar.extractfile(m))})
+            elif "/segments/" in "/" + m.name and name.endswith(".tsv"):
+                book = name[:-4]
+                for r in rows(tar.extractfile(m)):
+                    seg_q[(book, int(r["chapter"]), int(r["verse"]), int(r["seg"]))] = (r["clause_key"], r["quotation"] or None)
+    return f, seg_q, parent
 
 
 class _Tree:
@@ -403,6 +435,9 @@ def main() -> None:
         return i if i >= 0 and span_list[i][0] <= key <= span_list[i][1] else None
     tree_of: dict[int, list] = {}                 # clause id -> the tree path of its first segment (rule tree_level_inside_verse)
     chapter_first: set[int] = set()
+    speaker_archive, seg_quote, quote_parent = _speaker_layer(data / "speaker-layer-release")
+    speech_of: dict[int, tuple] = {}              # clause id -> the quotations its first segment stands in, outermost first (rule speech_levels)
+    mismatched = 0
     for book, ch, segs in chapters_out:
         for s in segs:
             if s["clause"] is not None:
@@ -410,8 +445,19 @@ def main() -> None:
                 first_seen.setdefault(s["clause"], (book, ch, s["verse"]))
                 if s["clause"] not in tree_of:
                     tree_of[s["clause"]] = tree.path(s["_toks"])
+                if seg_quote and s["clause"] not in speech_of:
+                    key, q = seg_quote.get((book, ch, s["verse"], s["seg"]), (None, None))
+                    mismatched += key != clause_key.get(s["clause"])
+                    chain = []
+                    while q:
+                        chain.append(q)
+                        q = quote_parent.get(q)
+                    speech_of[s["clause"]] = tuple(reversed(chain))
         if segs and segs[0]["clause"] is not None:
             chapter_first.add(segs[0]["clause"])
+    if mismatched:
+        raise SystemExit(f"the speaker layer's segments differ from this build's in {mismatched} clauses: it was built on another "
+                         "segmentation; pin a speaker-layer release built on this one ([sources.speaker_layer])")
     person, number = _verb_person(con, set(t["key"] for ts in toks_of.values() for t in ts if t["class"] in ("verb", "pron")))
     attach_of = _attachments(con, parents, clause_key)
     strong_of_key = {t["key"]: discourse_rules._strong(t) for ts in toks_of.values() for t in ts}
@@ -423,7 +469,8 @@ def main() -> None:
                               "f": discourse_rules.features(toks_of[cid], person, nodes[cid]["rule"] if cid in nodes else None,
                                                              nodes[cid]["role"] if cid in nodes else None, subj_ranges.get(cid), number),
                               "reset": clause_key[cid] in resets, "chapter_start": cid in chapter_first, "para": clause_key[cid] in paras,
-                              "tree": tree_of.get(cid, []), "span": span_of(clause_key[cid])})
+                              "tree": tree_of.get(cid, []), "span": span_of(clause_key[cid]),
+                              "speech": speech_of.get(cid, ())})
     for book, cl in by_book.items():
         disc.update(discourse_rules.derive(cl))
     # every external input this build used, against its pin in clause_layout.toml; nothing is written when one differs
@@ -432,7 +479,7 @@ def main() -> None:
     src_record, problems = sources.check(
         discourse_rules.CFG["sources"], trees_db=Path(tp), spine_db=Path(lexeme_macula.spine_path()), uhb_dir=Path(a.uhb_cache),
         uhb_files=sorted(_uhb_read), vrs_files={name: vrsmap._path(name) for name in discourse_rules.CFG["sources"]["versification"]["sha256"]},
-        tvtms_rev=vrsmap.revision("org"))
+        tvtms_rev=vrsmap.revision("org"), speaker_archive=speaker_archive)
     if problems:
         raise SystemExit("A source differs from its pin in " + discourse_rules.CONFIG_FILE + "; nothing written.\n- " + "\n- ".join(problems))
     seg_hash = hashlib.sha256()
@@ -477,7 +524,8 @@ def main() -> None:
              "relations": {"all": discourse_rules.RELATIONS, "flat": sorted(discourse_rules.FLAT), "flat_rules": sorted(discourse_rules.FLAT_RULES),
                            "tree_flat": sorted(discourse_rules.TREE_FLAT),
                            "chain_forms": sorted(discourse_rules.CHAIN_FORMS), "chain_forms_in_speech_with_waw": sorted(discourse_rules.CHAIN_FORMS_SPEECH),
-                           "text_depth": "number of links up the discourse_parent chain whose relation is not in flat and whose discourse_rule is not in flat_rules",
+                           "text_depth": "number of links up the discourse_parent chain whose relation is not in flat and whose discourse_rule is not in flat_rules; "
+                                         "then rule speech_levels: every quotation of the speaker layer is a level, and no line of a speech stands further out than it",
                            "tree_depth": "number of links up the discourse_parent chain whose relation is not in tree_flat",
                            "text_depth_law": " ".join(discourse_rules.CFG["depth"]["law"]["doc"].split()),
                            "conditional_inversion": " ".join(discourse_rules.CFG["conventions"]["conditional_inversion"]["doc"].split())},
@@ -485,7 +533,8 @@ def main() -> None:
                               "files": [{"file": f, "sha256": h} for f, h in discourse_rules.CONFIG_FILES],
                               "sha256": discourse_rules.CONFIG_SHA256, "changed_by_profile": discourse_rules.PROFILE_CHANGED,
                               "limited_rules": {r: sc for r, sc in discourse_rules.SCOPE.items() if sc != "all"}},
-             "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0)"}
+             "licence": "CC BY-SA 4.0; MACULA Hebrew (CC BY 4.0), UHB ketiv (CC BY-SA 4.0), versification TVTMS (CC BY 4.0), "
+                        "speaker layer (bcv-commons, CC BY 4.0)"}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"{n_ch} chapters, {n_seg} segments -> {out}")
 

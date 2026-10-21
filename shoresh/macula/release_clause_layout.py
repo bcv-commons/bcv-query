@@ -97,6 +97,7 @@ def _stamp(build: dict, books: dict, tag: str, commit: str | None) -> dict:
                                "commit": src["macula_hebrew"]["commit"]},
              "uhb": {"repository": src["uhb"]["repository"], "tag": src["uhb"]["tag"]},
              "versification": {"tvtms_rev": src["versification"]["tvtms_rev"], "sha256": src["versification"]["sha256"]},
+             "speaker_layer": src.get("speaker_layer"),
              "built": build["built"], "code": {"repository": "https://github.com/bcv-commons/bcv-query", "commit": commit},
              "books": {}}
     for book, chapters in books.items():
@@ -160,7 +161,8 @@ def _card(stamp: dict, build: dict, tag: str, steps: str) -> str:
               "@VERSES@": f'{sum(b["verses"] for b in stamp["books"].values()):,}',
               "@SEGMENTS@": f'{sum(b["segments"] for b in stamp["books"].values()):,}',
               "@MACULA_COMMIT@": stamp["macula_hebrew"]["commit"][:12], "@UHB_TAG@": stamp["uhb"]["tag"],
-              "@TVTMS_REV@": stamp["versification"]["tvtms_rev"][:12], "@STEP_TABLE@": steps.strip()}
+              "@TVTMS_REV@": stamp["versification"]["tvtms_rev"][:12], "@STEP_TABLE@": steps.strip(),
+              "@SPEAKER_TAG@": (stamp["speaker_layer"] or {}).get("tag", "-")}
     text = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         text = text.replace(k, v)

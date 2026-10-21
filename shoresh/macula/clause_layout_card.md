@@ -78,7 +78,8 @@ siblings. The text-level hierarchy is therefore **derived by rules** from MACULA
 verbs of saying, subordinators, person, and the MACULA tree. Every clause gets a `discourse_parent` and a `relation`.
 - **`text_depth`**: the indentation shown in `layout/`. It counts the links up the `discourse_parent` chain that add a level: a
   speech, a subordinate clause, an embedded clause. Chain links (`continuation`, `coordination`, `asyndetic`, `parallel`, …; the set
-  is `build.json` `relations.flat`) stay on the same level. 0 is the main line. Each chapter starts at the margin. Conditionals are
+  is `build.json` `relations.flat`) stay on the same level. 0 is the main line. Each chapter starts at the margin, unless a speech
+  goes on over the chapter break (see speeches below). Conditionals are
   laid out as BHSA lays them out: a protasis before its apodosis stands one level in, the apodosis stands level with it, and what
   goes on from the apodosis stays there; a later case of a series steps back and in again. (Before 0.35 the apodosis came back to the
   line; that layout is the profile `indented_protasis`.)
@@ -88,15 +89,29 @@ verbs of saying, subordinators, person, and the MACULA tree. Every clause gets a
   before it, as in BHSA's tree.
 - **`depth`**: the number of clause ancestors in the MACULA tree, within the verse.
 
+**Speeches** (since 0.36; rule `speech_levels`). Every quotation of the
+[Hebrew Bible Speaker Layer](https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer) (release pinned in
+`clause_layout.toml` and `build.json`) is a level, in `text_depth` and `text_depth_law`. A speech stands one level in from the line
+that introduces it, and while it lasts none of its lines goes further out than that: a line may go deeper and come back to the
+speech's level, never above it. A speech inside a speech gets a level of its own one further in. When a speech ends, the next line
+goes back to the level of the speech (or the narrative) around it. A speech that goes on over a chapter break keeps its level, so a
+chapter inside a speech does not start at the margin (Lev 7:1 goes on God's message to Aaron of Lev 6:18). Where the speaker layer
+starts or ends a speech, the layout follows it, its mistakes included. Because the speech levels are applied last, `text_depth` is
+no longer the count of links up the `discourse_parent` chain inside a speech; `discourse_parent`, `relation` and `tree_depth` are
+as the rules give them.
+
 The tree keeps a protasis under its apodosis. A client that wants BHSA's direction for conditionals in the tree inverts those links
 as `build.json` `relations.conditional_inversion` describes. For a flat view, use `text_depth_law`.
 
 The rules (121, each with its scope and examples; a few are trials, switched off) are in `clause_layout.toml`, and the code in
 [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query) (`shoresh/macula/discourse_rules.py`). Settings files called
-profiles can change the conventions. This release is built with the default profile: chapters start at the margin, and a speech
-carried over a chapter break starts again at the margin. Inside a verse, the levels of phrases and of clauses joined in MACULA's
-tree as `cjpCLx` or as a "כִּי" clause under `ClCl` follow MACULA's syntax tree (`tree_attachments.json`: which MACULA attachments
-carry a level, figures from the comparison below).
+profiles can change the conventions. This release is built with the default profile: chapters start at the margin, except inside a
+speech, which keeps its level over a chapter break. Inside a verse, MACULA's syntax tree sets the level for 17 kinds of attachment
+(`clause_layout.toml` `[tree] trusted`; `tree_attachments.json`: which MACULA attachments carry a level, figures from the comparison
+below): phrases, clauses under `cjpCLx`, a "כִּי" clause under `ClCl`, and since 0.36 the kinds where the tree was right at least
+twice as often as the rules in bsb-add-books' scoring of a trial that used the tree everywhere (a fronted noun and its verb, אוּלַי
+and its clause, a subject and its participle, an עַד phrase). It stays off for clauses on the verse's own group, at a speech's
+start and after an inquit.
 
 ## layout/: plain text
 
@@ -220,7 +235,10 @@ level reflects the text (a real subordination, a speech inside a speech), it is 
 
 Known differences (see `RELEASE_NOTES.md`):
 - The prophets are the weakest part: where an oracle or a speech opens and closes (Isa 5, Isa 43, Jer 3), and a narrative-looking
-  verb inside an oracle (Isa 3:16, 10:14). A speaker layer, built and checked on its own first, is meant to help here in a later release.
+  verb inside an oracle (Isa 3:16, 10:14). Since 0.36 the speaker layer sets where speeches open and close, so its mistakes show
+  here too (Jer 24:5 runs on to 25:2; Lev 17:15 falls out of the message of 17:8).
+- Inside a speech nothing reaches the margin (Deut 4:9 "רַק", Isa 43:16 "כֹּה אָמַר" step out to the speech's level), where BHSA
+  starts the speech's main line at the margin.
 - A main clause with no opening word: neither the rules nor MACULA's tree have a reliable signal for when it steps in or out.
 - The poetry is, on average, a little shallower than BHSA; Micah 2 still has a messenger speech that doesn't close.
 
@@ -233,13 +251,15 @@ BHSA: Eep Talstra Centre for Bible and Computer, VU Amsterdam; DOI 10.17026/dans
 | Hebrew/Aramaic text, ketiv/qere | unfoldingWord Hebrew Bible (UHB) @UHB_TAG@, based on the Westminster Leningrad Codex | CC BY-SA 4.0 |
 | Clauses, words, clause kinds and rules | MACULA Hebrew (Clear Bible / Biblica), `WLC/lowfat`, commit `@MACULA_COMMIT@` | CC BY 4.0 |
 | English verse numbers | bcv-commons/bibles `org-to-eng`, from STEPBible TVTMS (rev. `@TVTMS_REV@`) | CC BY 4.0 |
+| Speech levels | Hebrew Bible Speaker Layer @SPEAKER_TAG@, bcv-commons (`hebrew-speaker-layer`) | CC BY 4.0 |
 | The text-level hierarchy, this compilation | bcv-commons | **CC BY-SA 4.0** |
 | The rules and code (`clause_layout.toml`, bcv-query) | bcv-commons | MIT |
 
 **Attribution** when you use this dataset:
 
 > Hebrew Bible Clause Layout (@TAG@), bcv-commons, CC BY-SA 4.0. Text: unfoldingWord Hebrew Bible (CC BY-SA 4.0). Syntax: MACULA
-> Hebrew, Clear Bible / Biblica (CC BY 4.0). Versification: STEPBible TVTMS (CC BY 4.0).
+> Hebrew, Clear Bible / Biblica (CC BY 4.0). Versification: STEPBible TVTMS (CC BY 4.0). Speeches: Hebrew Bible Speaker Layer,
+> bcv-commons (CC BY 4.0).
 
 ## Feedback
 

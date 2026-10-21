@@ -24,6 +24,7 @@ import collections
 import copy
 import hashlib
 import json
+import sys
 import tomllib
 import unicodedata
 from pathlib import Path
@@ -1467,7 +1468,76 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
         for k, d in _fronted_depths(out, clauses_verse, chap_of if CHAPTER_MARGIN else None,
                                     {c["key"] for c in clauses if c["f"]["sub_kind"] == "conditional"}).items():
             out[k]["depth"] = d
+    # rule speech_levels: the speaker layer's quotations set the levels of the lines they hold
+    speech = [c for c in clauses if active("speech_levels", book_of[c["key"]])]
+    if any(c.get("speech") for c in speech):
+        for field in ("depth", "depth_law"):
+            for k, d in _speech_depths(speech, out, field, chap_of if CHAPTER_MARGIN else {}).items():
+                out[k][field] = d
     return out
+
+
+def _speech_depths(clauses: list[dict], out: dict[str, dict], field: str, chap_of: dict) -> dict[str, int]:
+    """Rule speech_levels: every quotation of the speaker layer is a level. A quotation's lines stand at least one level in from the
+    line that introduces it (its floor), and while it lasts no line of it goes back further out than that; a quotation inside it
+    gets a floor of its own one level further in. Inside a quotation the rules' levels are kept relative to its own lines. A line
+    the rules hung on a line of another quotation that the speaker layer says it is not in starts again at its own speech's main
+    line (or one level in, when its link adds a level). Lines outside every quotation keep their levels."""
+    sys.setrecursionlimit(max(sys.getrecursionlimit(), 20000))     # a forward link (protasis -> apodosis) is resolved first
+    keys = [c["key"] for c in clauses]
+    ctx = {c["key"]: tuple(c.get("speech") or ()) for c in clauses}
+    first_of: dict = {}                           # quotation -> index of the first clause standing in it
+    for i, k in enumerate(keys):
+        for q in ctx[k]:
+            first_of.setdefault(q, i)
+    old = {k: out[k][field] for k in keys}
+    new: dict = {}
+    floors: dict = {}
+    busy: set = set()
+
+    def inside(a, b):                             # context a lies outside context b (b is inside a)
+        return len(a) < len(b) and b[:len(a)] == a
+
+    def floor(C):
+        if not C:
+            return 0
+        if C not in floors:
+            i = first_of[C[-1]]
+            j = i - 1
+            if j >= 0 and (inside(ctx[keys[j]], C)):
+                # one level in from the line that introduces it, never level with the quotation around it (both open on one line)
+                floors[C] = max(val(keys[j]), floor(C[:-1])) + 1
+            elif j >= 0 and len(ctx[keys[j]]) >= len(C) and ctx[keys[j]][:len(C) - 1] == C[:-1]:
+                floors[C] = floor(ctx[keys[j]][:len(C)])     # it follows a quotation at its own depth directly: it stands where that one stands
+            else:
+                floors[C] = floor(C[:-1]) + 1
+        return floors[C]
+
+    def val(k):
+        if k in new:
+            return new[k]
+        C = ctx[k]
+        if k in busy:
+            return floor(C) + max(0, old[k])
+        busy.add(k)
+        F, o, p = floor(C), old[k], out[k]["parent"]
+        if p is None or p not in old:
+            v = F + max(0, o)
+        elif chap_of.get(p) != chap_of.get(k):  # the rules count a chapter from its margin
+            v = F + max(0, o) if (ctx[p] == C or inside(ctx[p], C)) else F + (out[k]["relation"] not in FLAT)
+        elif ctx[p] == C:
+            v = max(F, val(p) + o - old[p])
+        elif inside(ctx[p], C):                   # the rules hung the quotation's line on the line that introduces it
+            v = F + max(0, o - old[p] - 1)
+        else:
+            v = F + (out[k]["relation"] not in FLAT)
+        busy.discard(k)
+        new[k] = v
+        return v
+
+    for k in keys:
+        val(k)
+    return new
 
 
 def _fronted_depths(out: dict[str, dict], verse_of: dict, chap_of: dict | None, conditional: set[str] = frozenset()) -> dict[str, int]:
