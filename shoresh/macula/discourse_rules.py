@@ -96,7 +96,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     global OATH_CONTENT, OATH_REASON, QUOTING_SUBS, CASE_OPENERS, APODOSIS_MARKERS, WORD_NOUN, EXTENSION_FORMS, LAW_HEAD_WORDS
     global WAW, BE, KE, LE, KI, IM, DI, ADAYIN, QABEL, DENA, KO, HAY, MELEK, SELAH, SHALOM, KEN
     global FINITE, CHAIN_FORMS, CHAIN_FORMS_SPEECH, INFINITIVE, PARTICIPLE, NARRATED, QUOTE_FORMS
-    global VOCATIVE_RULE, TOPIC_RULES, SUBJECT_FIRST, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE, CHAPTER_MARGIN, FRONTED_LEVEL, TREE_TRUSTED, TREE_CARRY
+    global VOCATIVE_RULE, TOPIC_RULES, SUBJECT_FIRST, COMPLEMENT_ROLES, PARAGRAPH_MARKS, RELATIONS, FLAT, TREE_FLAT, FLAT_RULES, LAW_RELATION, LAW_SIBLINGS, LAW_RETURNS, LAW_STAIRCASE, CHAPTER_MARGIN, FRONTED_LEVEL, TREE_TRUSTED, TREE_UNTRUSTED, TREE_CARRY
     CFG, files, PROFILE_CHANGED = load_settings(path, profile)
     CONFIG_FILES = files
     CONFIG_FILE, PROFILE, RULES_VERSION = files[-1][0], CFG["profile"]["name"], CFG["version"]
@@ -157,6 +157,7 @@ def configure(path: str | Path | None = None, profile: str | None = None) -> Non
     TREE_FLAT = {r for r, v in CFG["relations"].items() if not v["adds_tree_level"]}
     FLAT_RULES = set(CFG["depth"]["flat_rules"])
     TREE_TRUSTED = list(CFG["tree"]["trusted"])
+    TREE_UNTRUSTED = list(CFG["tree"].get("untrusted", []))
     TREE_CARRY = {k["attachment"] for k in json.loads((CONFIG_PATH.parent / CFG["tree"]["table"]).read_text(encoding="utf-8"))["kinds"]
                   if k["carries_a_level"]}
     LAW_RELATION, LAW_SIBLINGS = CFG["depth"]["law"]["relation"], CFG["depth"]["law"]["laws_in_a_row_stand_level"]
@@ -1432,7 +1433,8 @@ def derive(clauses: list[dict]) -> dict[str, dict]:
             if best is None or best[3] == 0:
                 continue
             _, e, be, ba = best
-            if not any(c["tree"][ba - 1][1].startswith(t) for t in TREE_TRUSTED):
+            kind = c["tree"][ba - 1][1]
+            if not any(kind.startswith(t) for t in TREE_TRUSTED) or any(kind.startswith(t) for t in TREE_UNTRUSTED):
                 continue
             delta = sum(a in TREE_CARRY for _, a in c["tree"][:ba]) - sum(a in TREE_CARRY for _, a in e["tree"][:be])
             k, a = c["key"], e["key"]

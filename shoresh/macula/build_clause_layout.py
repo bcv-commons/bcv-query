@@ -160,13 +160,14 @@ def _speaker_spans() -> dict[str, int]:
     return {"_spans": spans}
 
 
-def _speaker_layer(cache: Path) -> tuple[Path | None, dict, dict]:
+def _speaker_layer(cache: Path) -> tuple[Path | None, dict, dict, dict]:
     """The pinned speaker-layer release ([sources.speaker_layer]), for rule speech_levels: (the archive, (book, chapter, verse, seg) ->
-    (clause key, quotation id or None), quotation id -> the quotation it stands inside or None). Downloaded once into the cache."""
+    (clause key, quotation id or None), quotation id -> the quotation it stands inside or None, quotation id -> speaker). Downloaded
+    once into the cache."""
     import tarfile
     s = discourse_rules.CFG["sources"].get("speaker_layer")
     if not s:
-        return None, {}, {}
+        return None, {}, {}, {}
     f = cache / s["tag"] / f"hebrew-speaker-layer-{s['tag']}.tar.gz"
     if not f.exists():
         import httpx
@@ -176,6 +177,7 @@ def _speaker_layer(cache: Path) -> tuple[Path | None, dict, dict]:
         f.write_bytes(r.content)
     seg_q: dict = {}
     parent: dict = {}
+    speaker: dict = {}
 
     def rows(fh):
         return csv.DictReader((line for line in io.TextIOWrapper(fh, encoding="utf-8") if not line.startswith("#")), delimiter="\t")
@@ -183,12 +185,13 @@ def _speaker_layer(cache: Path) -> tuple[Path | None, dict, dict]:
         for m in tar.getmembers():
             name = m.name.split("/")[-1]
             if m.name.endswith("quotations.tsv"):
-                parent.update({r["id"]: r["parent"] or None for r in rows(tar.extractfile(m))})
+                for r in rows(tar.extractfile(m)):
+                    parent[r["id"]], speaker[r["id"]] = r["parent"] or None, r["speaker"]
             elif "/segments/" in "/" + m.name and name.endswith(".tsv"):
                 book = name[:-4]
                 for r in rows(tar.extractfile(m)):
                     seg_q[(book, int(r["chapter"]), int(r["verse"]), int(r["seg"]))] = (r["clause_key"], r["quotation"] or None)
-    return f, seg_q, parent
+    return f, seg_q, parent, speaker
 
 
 class _Tree:
@@ -435,7 +438,8 @@ def main() -> None:
         return i if i >= 0 and span_list[i][0] <= key <= span_list[i][1] else None
     tree_of: dict[int, list] = {}                 # clause id -> the tree path of its first segment (rule tree_level_inside_verse)
     chapter_first: set[int] = set()
-    speaker_archive, seg_quote, quote_parent = _speaker_layer(data / "speaker-layer-release")
+    speaker_archive, seg_quote, quote_parent, quote_speaker = _speaker_layer(data / "speaker-layer-release")
+    frames = {(fr["book"], fr["speaker"]) for fr in discourse_rules.CFG["speech"]["frames"]}
     speech_of: dict[int, tuple] = {}              # clause id -> the quotations its first segment stands in, outermost first (rule speech_levels)
     mismatched = 0
     for book, ch, segs in chapters_out:
@@ -452,7 +456,10 @@ def main() -> None:
                     while q:
                         chain.append(q)
                         q = quote_parent.get(q)
-                    speech_of[s["clause"]] = tuple(reversed(chain))
+                    chain.reverse()
+                    if chain and (book, quote_speaker.get(chain[0])) in frames:
+                        chain = chain[1:]                  # [speech] frames: a book-long speaker's speech is the frame, not a level
+                    speech_of[s["clause"]] = tuple(chain)
         if segs and segs[0]["clause"] is not None:
             chapter_first.add(segs[0]["clause"])
     if mismatched:

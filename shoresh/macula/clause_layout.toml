@@ -44,7 +44,7 @@
 # - A profile may not change [sources], [versification] or version, and may only set keys this file has (new book groups excepted).
 #   Every shipped profile is loaded and checked by the tests.
 
-version = "0.36"
+version = "0.37"
 
 [profile]
 name = "default"
@@ -90,7 +90,7 @@ macula/data/speaker-layer-release/<tag>/."""
 repository = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer"
 tag = "v0.11"
 url = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer/resolve/{tag}/hebrew-speaker-layer-{tag}.tar.gz"
-archive_sha256 = "54b5f53655b203469069f0622b647311baadc52876b73e5ec7a10f0fec1a0bbc"
+archive_sha256 = "ccc1f5eb5eb5c33c9042ec509dbb66113f380c352e721e4ba293f716cd6e047b"
 licence = "CC BY 4.0"
 
 [sources.versification]
@@ -661,11 +661,17 @@ ROOT|1|cl|-|תַּחַת (17/1), PPandPP|1|pp|- (16/3), V-S-O|0|np|s (16/2), V-S
 right where a line finishes what the line before began: a fronted noun and its verb ("דָּבָר | צִוָּה", 1 Chr 16:15), אוּלַי and its
 clause (1 Kgs 20:31), a subject and its participle ("אֲנִי הָאִשָּׁה | הַנִּצֶּבֶת", 1 Sam 1:26), an עַד phrase (1 Chr 11:21). It stays
 off at ROOT otherwise (a causal כִּי on the verse's own group: our rules indent it), at a quotation's start and after an inquit.
-In their counts these kinds were right 595 times and v0.35 153 (an upper bound of about +0.5 points); 978 steps change."""
+In their counts these kinds were right 595 times and v0.35 153 (an upper bound of about +0.5 points); 978 steps change.
+Scored as trial v2 (bsb-add-books, 2026-10-21, their note 55): 86.8% -> 87.2%, no genre loses; the trial right 661 times, v0.35
+291. untrusted (0.37): the opener variants of trusted kinds that lost there: "PtclCL|0|cl|-|לֹא" (17/31: mostly the question הֲלֹא,
+whose content the reference indents: 1 Kgs 22:18, 1 Sam 10:1), "ClCl2|1|cl|-|" with any opener (32/57: a fronted circumstantial
+clause, "וְהַבַּיִת | בְּהִבָּנֹתוֹ" 1 Kgs 6:7, "וְהִנֵּה | כַּאֲשֶׁר גָּדְלָה" 1 Sam 26:24, which the reference indents under the fronted
+word; without an opener ClCl2 wins 20/10), "ppCL|0|cl|-|דִּי" (3/7, the Aramaic relative); about +55 steps by their estimate."""
 table = "tree_attachments.json"
 trusted = ["PrepNp|", "cjpCLx|", "ClCl|1|cl|-|כִּי", "NpCL|", "PtclCL|0|cl|-", "S-P|0|np|p", "ppCL|", "ROOT|2|cl|-|עַד", "V-O|0|cl|o",
            "ADV-V-O|0|cl|o", "ClCl2|1|cl|-", "P-S|1|np|s", "ROOT|1|cl|-|תַּחַת", "PPandPP|1|pp|-", "V-S-O|0|np|s", "V-S-PP|0|pp|pp",
            "NpaNp|1|np|-"]
+untrusted = ["PtclCL|0|cl|-|לֹא", "ClCl2|1|cl|-|", "ppCL|0|cl|-|דִּי"]
 
 [depth.law]
 doc = """text_depth_law: the flat view with conditionals laid out as in BHSA. Where a protasis comes before its apodosis (a link with
@@ -1161,6 +1167,15 @@ it, and in 1 Kgs 11:2 that carried the narrative of 11:2-12 into a quotation. Th
 steps in the delivered sets, the tree right on 74 and the rules on 48, step agreement 85.8% -> 86.0%; without relCL 59 against 30
 (bsb-add-books). Mean depth per chapter can't judge it (it flattens, and the layout is a little shallow on average)."""
 examples = ["Deut 28:21 \"לְרִשְׁתָּהּ\" level with \"אֲשֶׁר־אַתָּה בָא־שָׁמָּה\"", "Ruth 1:16 \"אֲשֶׁר תֵּלְכִי\""]
+
+[speech]
+doc = """Rule speech_levels. frames: a speaker whose speeches make up a book are its frame, as the psalmist is a psalm's and the
+prophet a prophetic book's in the speaker layer: their top-level speeches in that book add no level, and the quotations inside
+them count from the margin. Deuteronomy, Moses (0.37): in bsb-add-books' reference (their note 55) the speech lines after an inquit
+of Moses stand at or out of the inquit in 39% of cases (584 of 1,491), against 11% in all other books, and the new sections of his
+speeches start at the margin (Deut 4:9 "רַק", 20:16). Job is not a frame: the reference steps in at 42 of 47 inquits, and 94% of
+the speech lines stay in from the inquit."""
+frames = [{book = "DEU", speaker = "Moses"}]
 
 [rules.speech_levels]
 scope = "all"

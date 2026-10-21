@@ -130,7 +130,8 @@ a confidence. The layer is also built without them (`--no-review`). A review of 
 
 Since v0.11 the clause layout takes its speech levels from this layer, and mistakes found there are fixed here as more rows
 (source `agent:claude-opus-5-5:layout-check-v1`, each with its reason from the Hebrew): in v0.11, Lev 17:14-16 (the message of 17:8
-runs to 17:16; "וָאֹמַר" is God's), Jer 1:7-8 and 2:2-3 ("נְאֻם־יְהוָה" closes God's words), Jer 24:5-10 (God's words end with the
+runs to 17:16; "וָאֹמַר" is God's), Deuteronomy (Moses' first speech is one quotation, 1:6-4:40, and his second
+one, 5:1-26:19, with God's words inside them; 5:28-31, 9:13-14 and 18:17-20 are God's, not Moses'), Jer 1:7-8 and 2:2-3 ("נְאֻם־יְהוָה" closes God's words), Jer 24:5-10 (God's words end with the
 chapter) and Jer 25 (Jeremiah's speech of 25:3-38, with God's words inside it).
 
 ## How it was checked

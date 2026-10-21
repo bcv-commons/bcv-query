@@ -470,8 +470,9 @@ def test_moving_out_test_set(tmp_path, monkeypatch):
     67 right (v0.28: 63, v0.29: 65, v0.31: 66, v0.33: 67, v0.34: 68; v0.35 lays out conditionals as BHSA does, and Deut 28:15
     "וְהָיָה" then steps out from the blessings' level, not to the margin). v0.36 gets 69: 8 gained (the tree kinds and rule
     speech_levels), 6 lost: 5 "to the margin" lines inside a speech (Deut 4:9, 20:16; Isa 43:16, 44:6; Amos 9:11) that now step out
-    to the speech's own level, and Jer 2:4, which the speaker layer starts as a new section. A rule change that loses lines here has
-    to say why."""
+    to the speech's own level, and Jer 2:4, which the speaker layer starts as a new section. v0.37 gets 71: Moses is Deuteronomy's
+    frame (Deut 4:9 and 20:16 back at the margin); the 4 still lost are Isa 43:16, 44:6, Amos 9:11 (new sections of an oracle) and
+    Jer 2:4. A rule change that loses lines here has to say why."""
     from macula import build_clause_layout as b, moving_out_score as m
     out = tmp_path / "out"
     books = sorted({t["book"] for t in m.tests()})
@@ -479,7 +480,7 @@ def test_moving_out_test_set(tmp_path, monkeypatch):
     b.main()
     res = m.score(out / "clauses")
     assert all(r["found"] for r in res)
-    assert sum(r["right"] for r in res) >= 69, [r["verse"] for r in res if not r["right"]]
+    assert sum(r["right"] for r in res) >= 71, [r["verse"] for r in res if not r["right"]]
 
 
 def test_release_packaging(tmp_path, monkeypatch):

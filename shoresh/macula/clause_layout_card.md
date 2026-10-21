@@ -96,7 +96,11 @@ that introduces it, and while it lasts none of its lines goes further out than t
 speech's level, never above it. A speech inside a speech gets a level of its own one further in. When a speech ends, the next line
 goes back to the level of the speech (or the narrative) around it. A speech that goes on over a chapter break keeps its level, so a
 chapter inside a speech does not start at the margin (Lev 7:1 goes on God's message to Aaron of Lev 6:18). Where the speaker layer
-starts or ends a speech, the layout follows it, its mistakes included. Because the speech levels are applied last, `text_depth` is
+starts or ends a speech, the layout follows it, its mistakes included. One exception (since 0.37; `[speech] frames`): in
+Deuteronomy, Moses' speeches are the book's frame, as the psalmist is a psalm's and the prophet a prophetic book's, so they add no
+level; the main line of his speeches stands at the margin and the quotations inside them (God's words) count from there. In
+bsb-add-books' scoring 39% of the lines of Moses' speeches stand at or out of their inquit in BHSA, against 11% in other books;
+Job's speeches are levels (94% stay in from the inquit). Because the speech levels are applied last, `text_depth` is
 no longer the count of links up the `discourse_parent` chain inside a speech; `discourse_parent`, `relation` and `tree_depth` are
 as the rules give them.
 
@@ -110,7 +114,8 @@ speech, which keeps its level over a chapter break. Inside a verse, MACULA's syn
 (`clause_layout.toml` `[tree] trusted`; `tree_attachments.json`: which MACULA attachments carry a level, figures from the comparison
 below): phrases, clauses under `cjpCLx`, a "כִּי" clause under `ClCl`, and since 0.36 the kinds where the tree was right at least
 twice as often as the rules in bsb-add-books' scoring of a trial that used the tree everywhere (a fronted noun and its verb, אוּלַי
-and its clause, a subject and its participle, an עַד phrase). It stays off for clauses on the verse's own group, at a speech's
+and its clause, a subject and its participle, an עַד phrase); since 0.37 not where such a kind opens with a word that lost in their
+scoring of those kinds (`[tree] untrusted`: the question "הֲלֹא", a fronted circumstantial clause, the Aramaic "דִּי"). It stays off for clauses on the verse's own group, at a speech's
 start and after an inquit.
 
 ## layout/: plain text
@@ -236,9 +241,10 @@ level reflects the text (a real subordination, a speech inside a speech), it is 
 Known differences (see `RELEASE_NOTES.md`):
 - The prophets are the weakest part: where an oracle or a speech opens and closes (Isa 5, Isa 43, Jer 3), and a narrative-looking
   verb inside an oracle (Isa 3:16, 10:14). Since 0.36 the speaker layer sets where speeches open and close, so its mistakes show
-  here too; those found are fixed in the speaker layer (v0.11: Lev 17, Jer 1, 2, 24, 25).
-- Inside a speech nothing reaches the margin (Deut 4:9 "רַק", Isa 43:16 "כֹּה אָמַר" step out to the speech's level), where BHSA
-  starts the speech's main line at the margin.
+  here too; those found are fixed in the speaker layer (v0.11: Lev 17; Deuteronomy, where Moses' two long speeches were in
+  pieces and some of God's words inside them were given to Moses; Jer 1, 2, 24, 25).
+- Inside a speech nothing reaches the margin (Isa 43:16 and 44:6 "כֹּה אָמַר", Amos 9:11 "בַּיּוֹם הַהוּא" step out to God's
+  words' level), where BHSA starts a new section of the oracle at the margin. Deuteronomy is not affected: Moses is its frame.
 - A main clause with no opening word: neither the rules nor MACULA's tree have a reliable signal for when it steps in or out.
 - The poetry is, on average, a little shallower than BHSA; Micah 2 still has a messenger speech that doesn't close.
 

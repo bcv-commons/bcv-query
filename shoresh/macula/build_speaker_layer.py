@@ -1385,13 +1385,22 @@ def main() -> None:
 
     def overlaps(q: dict, sg: dict) -> bool:        # a quotation may open inside a segment, after its inquit (Judg 4:6)
         return q["first"] <= sg["last"] and sg["first"] <= q["last"]
+    def under(c: dict, q: dict) -> bool:            # q is among c's parents
+        for _ in range(64):
+            c = fin_id.get(c.get("parent") or "")
+            if c is None:
+                return False
+            if c is q:
+                return True
+        return False
     for q in final:
         p = q.get("parent") or ""
         r0 = alive(p) if p else None
         if p and (p not in fin_id or r0 is None or r0["last"] < q["first"] or q["last"] < r0["first"]):
             r = r0 if r0 is not None and not (r0["last"] < q["first"] or q["last"] < r0["first"]) else None
             if r is None:               # gone, or a parent it lies wholly outside of (2 Kgs 18:31-35 under 18:30): the closest one around it
-                around = [c for c in holding(q["first"], q["first"], q["last"]) if c is not q and not c["id"].startswith(q["id"] + ".")]
+                around = [c for c in holding(q["first"], q["first"], q["last"]) if c is not q and not c["id"].startswith(q["id"] + ".")
+                          and not under(c, q)]     # not one inside it (Deut 1:28: two quotations of one stretch, one under the other)
                 r = max(around, key=lambda c: (c["first"], -int(c["last"]), c.get("level", 1))) if around else None
             q["parent"] = r["id"] if r else ""
             consistent["parents re-pointed"] += 1
