@@ -40,6 +40,11 @@ non-commercial licence.
 | Levels | `@LEVELS@`: the rules version and the hash of the settings the levels were computed with |
 | Size | @BOOKS@ books, @CHAPTERS@ chapters, @VERSES@ verses, @SEGMENTS@ clause segments |
 
+Since v0.35 (levels only; the segmentation and every book's `sha256` are unchanged): every speech is a level, from the
+[Hebrew Bible Speaker Layer](https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer), with Moses as Deuteronomy's frame
+(see *Speeches*); MACULA's tree sets the level for more kinds of attachment inside a verse. Not yet scored against BHSA (see *How
+the text-level hierarchy was checked*).
+
 ## Files
 
 ```
