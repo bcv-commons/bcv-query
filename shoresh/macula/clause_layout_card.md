@@ -206,31 +206,36 @@ BHSA values, codes, links or files are in the rules, the code or the rows of thi
 `clause_layout.toml` cites, in words, figures and examples from the comparison.
 
 Step agreement with BHSA's own clause links, laid out the same way: the share of line pairs where the step from one line to the
-next (deeper, level, shallower) is the same. Rules @VERSION@, measured by bsb-add-books (the law chapters in `text_depth_law`):
+next (deeper, level, shallower) is the same. **Rules @VERSION@ have not been scored yet**: it was released without waiting for
+bsb-add-books' scoring. The figures below are for v0.35 and for a trial with @VERSION@'s tree kinds (and three openers that
+@VERSION@ leaves out); the speech levels and the Deuteronomy frame are not in them. On the delivered test chapters, v0.35, measured
+by bsb-add-books (the law chapters in `text_depth_law`):
 
 @STEP_TABLE@
 
 These are test sets: chapters chosen because they are hard (speeches, law, prophecy, poetry), not a sample of the whole Old
 Testament. A chapter in two sets counts in each set once and in "all" once.
 
-Over the whole Old Testament (all 929 chapters, 88,634 line pairs; measured by bsb-add-books on v0.35):
+Over the whole Old Testament (all 929 chapters, 88,634 line pairs; measured by bsb-add-books; "tree kinds" is the trial of v0.35
+with the tree kinds, before the three openers were left out, which by their estimate adds about 0.1 point):
 
-| Genre | Line pairs | v0.22 | v0.35 |
-|---|---|---|---|
-| All | 88,634 | 86.1% | 86.8% |
-| Narrative | 47,148 | 88.3% | 88.9% |
-| Law | 4,939 | 83.2% | 86.4% |
-| Prophecy | 22,102 | 83.5% | 83.9% |
-| Poetry (Psalms, Lamentations, Song) | 8,135 | 85.7% | 86.4% |
-| Wisdom (Job, Proverbs, Ecclesiastes) | 6,310 | 80.9% | 81.5% |
+| Genre | Line pairs | v0.22 | v0.35 | v0.35 + tree kinds |
+|---|---|---|---|---|
+| All | 88,634 | 86.1% | 86.8% | 87.2% |
+| Narrative | 47,148 | 88.3% | 88.9% | 89.3% |
+| Law | 4,939 | 83.2% | 86.4% | 86.5% |
+| Prophecy | 22,102 | 83.5% | 83.9% | 84.3% |
+| Poetry (Psalms, Lamentations, Song) | 8,135 | 85.7% | 86.4% | 86.8% |
+| Wisdom (Job, Proverbs, Ecclesiastes) | 6,310 | 80.9% | 81.5% | 82.3% |
 
 On the 351 steps where the two layouts of conditionals differ, the default matches BHSA in 65%, the profile `indented_protasis` in
 32% (over all delivered chapters: 85.7% against 85.0%).
 
 A test set of 98 lines from bsb-add-books' study of where a line moves out of a level (verse, opening words, the expected step: to the
-margin, to the speech's main line, out one level, level, in): @VERSION@ gets 67 right. The test is part of the code's test suite.
+margin, to the speech's main line, out one level, level, in): @VERSION@ gets 71 right (v0.35: 67). The test is part of the code's
+test suite.
 
-Mean depth per chapter against BHSA's, over the 379 chapters for which a reference was available (Leviticus and Deuteronomy, Ezekiel
+Mean depth per chapter against BHSA's (v0.35), over the 379 chapters for which a reference was available (Leviticus and Deuteronomy, Ezekiel
 and four of the Twelve, and the poetic books with Lamentations): a mean absolute gap of 0.356 levels (`text_depth_law` 0.302).
 Per book, over all 39 books: 0.149. (v0.22: 0.364, 0.311, 0.208.)
 
