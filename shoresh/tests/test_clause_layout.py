@@ -357,7 +357,7 @@ def test_v021_rules_at_their_places(tmp_path, monkeypatch):
     assert rows("EXO", 22, 13)[0]["relation"] == "conditional"                              # "וְכִי־יִשְׁאַל": if, not for
     lev17 = {r["clause_key"]: r for r in rows("LEV", 17)}
     head8 = next(r for r in rows("LEV", 17, 8) if r["discourse_rule"] == "main" and r["relation"] == "speech")
-    for v in (10, 13):          # 17:15: the speaker layer v0.10 ends the message of 17:8 at 17:14 ("וָאֹמַר"), so 17:15 stands a level out
+    for v in (10, 13, 15):      # 17:15: in the message of 17:8 since speaker layer v0.11 (v0.10 ended it at 17:14 "וָאֹמַר")
         h = rows("LEV", 17, v)[0]
         assert h["relation"] == "parallel" and h["text_depth_law"] == head8["text_depth_law"], v   # with the head of 17:8
     assert lev17
@@ -468,10 +468,10 @@ def test_v026_moving_out(tmp_path, monkeypatch):
 def test_moving_out_test_set(tmp_path, monkeypatch):
     """bsb-add-books' moving-out test set (98 lines: verse, opening, the direction from the line before) keeps its score: v0.35 gets
     67 right (v0.28: 63, v0.29: 65, v0.31: 66, v0.33: 67, v0.34: 68; v0.35 lays out conditionals as BHSA does, and Deut 28:15
-    "וְהָיָה" then steps out from the blessings' level, not to the margin). v0.36 also 67: the tree's winning kinds gain one (68), and
-    rule speech_levels loses one net: 7 gained, 8 lost, of which 5 are "to the margin" lines inside a speech (Deut 4:9, 20:16; Isa
-    43:16, 44:6; Amos 9:11) that now step out to the speech's own level, and 3 in Jer 1-2 where the speaker layer ends God's words
-    early. A rule change that loses lines here has to say why."""
+    "וְהָיָה" then steps out from the blessings' level, not to the margin). v0.36 gets 69: 8 gained (the tree kinds and rule
+    speech_levels), 6 lost: 5 "to the margin" lines inside a speech (Deut 4:9, 20:16; Isa 43:16, 44:6; Amos 9:11) that now step out
+    to the speech's own level, and Jer 2:4, which the speaker layer starts as a new section. A rule change that loses lines here has
+    to say why."""
     from macula import build_clause_layout as b, moving_out_score as m
     out = tmp_path / "out"
     books = sorted({t["book"] for t in m.tests()})
@@ -479,7 +479,7 @@ def test_moving_out_test_set(tmp_path, monkeypatch):
     b.main()
     res = m.score(out / "clauses")
     assert all(r["found"] for r in res)
-    assert sum(r["right"] for r in res) >= 67, [r["verse"] for r in res if not r["right"]]
+    assert sum(r["right"] for r in res) >= 69, [r["verse"] for r in res if not r["right"]]
 
 
 def test_release_packaging(tmp_path, monkeypatch):

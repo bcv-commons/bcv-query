@@ -128,6 +128,11 @@ layer follows. Where the two agreed, their rows were taken; where they differed,
 source (`agent:claude-opus-5-5:review-v1`, `+adjudicated`, `+rekeyed` where a row was moved to the build's current quotations) and
 a confidence. The layer is also built without them (`--no-review`). A review of all doubtful passages (about 700) is planned.
 
+Since v0.11 the clause layout takes its speech levels from this layer, and mistakes found there are fixed here as more rows
+(source `agent:claude-opus-5-5:layout-check-v1`, each with its reason from the Hebrew): in v0.11, Lev 17:14-16 (the message of 17:8
+runs to 17:16; "וָאֹמַר" is God's), Jer 1:7-8 and 2:2-3 ("נְאֻם־יְהוָה" closes God's words), Jer 24:5-10 (God's words end with the
+chapter) and Jer 25 (Jeremiah's speech of 25:3-38, with God's words inside it).
+
 ## How it was checked
 
 **Against BHSA, privately.** The rules were developed and tuned with the help of a comparison with the ETCBC's BHSA

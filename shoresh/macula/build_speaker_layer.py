@@ -1308,7 +1308,7 @@ def main() -> None:
                     level[x] = int(val)
             elif f == "add" and (r.get("last") or "") in order:
                 par = by_id_all.get(r.get("parent") or "")
-                if par is None and r.get("parent"):     # a parent the rules no longer make: the closest quotation around the stretch
+                if par is None and r.get("parent"):     # "*", or a parent the rules no longer make: the closest quotation around the stretch
                     around = [c for c in spans + inner + wrapped if c["first"] <= k and r["last"] <= c["last"]]
                     par = max(around, key=lambda c: (c["first"], -int(c["last"]), c.get("level", 1))) if around else None
                 q = {"id": f"{(par or {}).get('id', 'R')}.r{reviewed['add'] + 1}", "speaker": val, "speaker_hebrew": "", "alt_speaker": "",

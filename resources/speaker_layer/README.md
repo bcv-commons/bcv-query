@@ -160,11 +160,13 @@ God's words the layer made a quotation; parallel texts that differ; unfoldingWor
 speakers), writes each as a passage file (the Hebrew per segment with the evidence as numbers: the translations' votes, the
 verb, the subject, who "I" is, the markers of speech, Glyssen's characters; no English text, no BHSA) with the conventions the
 layer follows (`conventions.md`), and merges the reviewers' answers into `review.tsv` (`--merge`). Reviewers so far: two AI
-agents (Claude Opus 5.5) working independently on the same 48 passages, and a third deciding where they differed.
+agents (Claude Opus 5.5) working independently on the same 48 passages, and a third deciding where they differed. Since the
+clause layout takes its speech levels from this layer (v0.36), a mistake found while checking the layout is fixed here at once as
+a row with source `agent:claude-opus-5-5:layout-check-v1`.
 
 `review.tsv`: one row per change: `first` (the word key it is keyed on), `field` (`speaker`, `first`, `last`, `drop`: the quotation
 named in `quotation`, else the one starting at `first`; `add`: a new quotation from `first` to `last` inside `parent`, its speaker
-in `value`; `level`: the level of the segments from `first` to `last`; `frame`), `value`, `reason` (from the Hebrew; required),
+in `value` (`parent` `*`: the closest quotation around the stretch, for one an earlier row adds); `level`: the level of the segments from `first` to `last`; `frame`), `value`, `reason` (from the Hebrew; required),
 `last`, `parent`, `source` (`agent:claude-opus-5-5:review-v1`, `+adjudicated` where the third agent decided, `+rekeyed` where a
 row was moved to the quotations the build makes now), `confidence`, `quotation`. A `quotation` id that now names another stretch
 is not used; an `add` row whose `parent` the rules no longer make goes under the closest quotation around it. The rows the build

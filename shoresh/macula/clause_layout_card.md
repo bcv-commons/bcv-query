@@ -236,7 +236,7 @@ level reflects the text (a real subordination, a speech inside a speech), it is 
 Known differences (see `RELEASE_NOTES.md`):
 - The prophets are the weakest part: where an oracle or a speech opens and closes (Isa 5, Isa 43, Jer 3), and a narrative-looking
   verb inside an oracle (Isa 3:16, 10:14). Since 0.36 the speaker layer sets where speeches open and close, so its mistakes show
-  here too (Jer 24:5 runs on to 25:2; Lev 17:15 falls out of the message of 17:8).
+  here too; those found are fixed in the speaker layer (v0.11: Lev 17, Jer 1, 2, 24, 25).
 - Inside a speech nothing reaches the margin (Deut 4:9 "רַק", Isa 43:16 "כֹּה אָמַר" step out to the speech's level), where BHSA
   starts the speech's main line at the margin.
 - A main clause with no opening word: neither the rules nor MACULA's tree have a reliable signal for when it steps in or out.
