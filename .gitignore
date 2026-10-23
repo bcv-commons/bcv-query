@@ -180,6 +180,7 @@ shoresh/macula/data/speaker-layer/
 shoresh/macula/data/clause-layout-profiles/
 # clause tagger trained on MACULA Hebrew (macula.clause_tagger): training data, checkpoints, predictions
 shoresh/macula/data/clause-tagger/
+shoresh/macula/data/nt-clause-layout/
 shoresh/macula/data/uhb/
 shoresh/macula/data/bhsa_free/
 shoresh/macula/data/hf_cards/
