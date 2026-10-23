@@ -738,7 +738,7 @@ def clause_rows(book: str, pred: list[dict], rows: list[dict]) -> list[dict]:
 
 WORD_SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("i", "int16"), ("part", "int8"), ("token", "string"),
                ("word", "string"), ("text", "string"), ("class", "string"), ("lemma", "string"), ("lexeme", "string"), ("strong", "string"),
-               ("role", "string"), ("source", "string"), ("p_split", "float32"), ("form", "string"), ("person", "string"), ("seg", "int16")]
+               ("role", "string"), ("source", "string"), ("p_split", "float64"), ("form", "string"), ("person", "string"), ("seg", "int16")]
 CLAUSE_SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("seg", "int16"), ("first_i", "int16"), ("last_i", "int16"),
                  ("depth", "int8"), ("parent", "string"), ("kind", "string"), ("rule", "string"), ("att", "string")]
 
