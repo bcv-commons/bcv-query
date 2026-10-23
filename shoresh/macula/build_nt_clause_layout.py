@@ -22,8 +22,15 @@ Rule: a preposition, a conjunction that is not postpositive, the adverb καί "
 goes with that clause, which it governs or introduces (εἰς || τὸ φαγεῖν, καὶ || οἱ κατοικοῦντες). MACULA puts it in the higher clause.
 Rule: no line of function words alone (conjunctions, prepositions, articles, particles, οὐ, μή, καί) where the tree leaves one
 (ἀλλὰ || τῇ κακίᾳ νηπιάζετε): such a segment goes with the next segment of the verse, which it introduces, or, when it opens with a
-postpositive (δέ, γάρ, μέν, οὖν, τε: ἐγὼ || μὲν || γάρ), with the one before; the line takes that segment's clause. ἰδού and
+postpositive (δέ, γάρ, μέν, οὖν, τε: ἐγὼ || μὲν || γάρ), with the one before; a question (τί γάρ;) stays a line; the line takes that segment's clause. ἰδού and
 ἴδε ("look", which MACULA makes a clause of its own, lemma ὁράω) count as such words here: καὶ ἰδοὺ goes with what it points to.
+So does a relative pronoun, and an interrogative one that does not end its question, which MACULA puts in a clause below the one
+it opens (ὧν || ἤρξατο ὁ Ἰησοῦς ποιεῖν, ὃν || δεῖ οὐρανὸν δέξασθαι, Τί || θέλει τοῦτο εἶναι).
+Rule: a line breaks where a quotation starts or ends inside it (ὁ δὲ ἔφη || Ἄνδρες ἀδελφοὶ … ἀκούσατε, Acts 7:2); both parts keep
+the clause, and the record of the second says `split_at_quotation`.
+Rule: a line steps in one level at a time. Where the tree has a level with no line of its own (λέγοντες, then the speech two levels
+in), the deeper lines move out to one level in from the line above, and lines of the same depth that follow stay with them; the
+order of the levels is kept. `text_depth` is after this step; `depth` is the tree's.
 Rule: a participle clause inside a noun phrase goes on the line of its noun when that line holds nothing but the noun phrase
 (φωνὴ || βοῶντος ἐν τῇ ἐρήμῳ): a noun alone is not a line. A longer line keeps the participle on a line of its own (τοῖς ἁγίοις ||
 τοῖς οὖσιν ἐν Ἐφέσῳ).
@@ -137,9 +144,12 @@ def word_clauses(rows: list[sqlite3.Row], tree: Tree) -> list[int | None]:
     res = [r["cl"] for r in rows]
     post = [r["lemma"] in POSTPOSITIVE and r["class"] == "conj" for r in rows]
     for i in range(len(rows) - 2, -1, -1):
-        r, nxt = rows[i], rows[i + 1]
-        if movable(r) and not post[i] and nxt["sent"] == r["sent"] and res[i + 1] != r["cl"] and tree.under(res[i + 1], r["cl"]):
-            res[i] = res[i + 1]
+        r = rows[i]
+        j = i + 1
+        while j + 1 < len(rows) and post[j] and rows[j + 1]["sent"] == r["sent"]:
+            j += 1                                   # look past a postpositive: ὁμοίως δὲ || καὶ ὁ ἀνήρ
+        if movable(r) and not post[i] and rows[j]["sent"] == r["sent"] and res[j] != r["cl"] and tree.under(res[j], r["cl"]):
+            res[i] = res[j]
     for i in range(len(rows)):
         r = rows[i]
         if not movable(r) or res[i] != r["cl"]:
@@ -147,7 +157,8 @@ def word_clauses(rows: list[sqlite3.Row], tree: Tree) -> list[int | None]:
         prev_in = i > 0 and rows[i - 1]["sent"] == r["sent"] and res[i - 1] != r["cl"] and tree.under(res[i - 1], r["cl"])
         nxt_in = (i + 1 < len(rows) and rows[i + 1]["sent"] == r["sent"] and res[i + 1] != r["cl"]
                   and tree.under(res[i + 1], r["cl"]))
-        if prev_in and (post[i] or not nxt_in):
+        nxt_any = i + 1 < len(rows) and rows[i + 1]["sent"] == r["sent"] and tree.under(res[i + 1], r["cl"])
+        if prev_in and (post[i] or not nxt_any):
             res[i] = res[i - 1]                  # a postpositive stays after the clause's first word (Προσέχετε δὲ)
         elif nxt_in:
             res[i] = res[i + 1]
@@ -267,9 +278,15 @@ def _plain(w: str) -> str:
 
 
 def _function_word(r: sqlite3.Row) -> bool:
+    if r["class"] == "pron" and (r["wtype"] == "relative" or (r["wtype"] == "interrogative" and ";" not in (r["after"] or ""))):
+        return True
     if r["lemma"] == "ὁράω" and _plain(r["surface"]) in {_plain(x) for x in LOOK}:
         return True
     return r["class"] in ("conj", "prep", "det", "ptcl") or (r["class"] == "adv" and r["lemma"] in WRAPPER_ADVERBS)
+
+
+def _question(s_: dict) -> bool:
+    return ";" in (s_["_rows"][-1]["after"] or "")                    # τί γάρ; / Τί οὖν; is a line of its own
 
 
 def no_function_lines(segs: list[dict]) -> list[dict]:
@@ -277,7 +294,7 @@ def no_function_lines(segs: list[dict]) -> list[dict]:
     i = len(segs) - 1
     while i >= 0:
         s_ = segs[i]
-        if all(_function_word(r) for r in s_["_rows"]):
+        if all(_function_word(r) for r in s_["_rows"]) and not _question(s_):
             prev_ok = i > 0 and segs[i - 1]["verse"] == s_["verse"]
             next_ok = i + 1 < len(segs) and segs[i + 1]["verse"] == s_["verse"]
             if prev_ok and (s_["_rows"][0]["lemma"] in POSTPOSITIVE or not next_ok):
@@ -288,7 +305,7 @@ def no_function_lines(segs: list[dict]) -> list[dict]:
                 del segs[i]
         i -= 1
     # a postpositive merged backwards can leave the line before it of function words only: one more pass
-    if any(all(_function_word(r) for r in s_["_rows"]) and j + 1 < len(segs) and segs[j + 1]["verse"] == s_["verse"]
+    if any(all(_function_word(r) for r in s_["_rows"]) and not _question(s_) and j + 1 < len(segs) and segs[j + 1]["verse"] == s_["verse"]
            and s_["_rows"][0]["lemma"] not in POSTPOSITIVE for j, s_ in enumerate(segs)):
         return no_function_lines(segs)
     return segs
@@ -377,6 +394,58 @@ def speech_levels(segs: list[dict], quotes: dict[str, list[dict]], tree_depth: l
     return td, chains
 
 
+def split_at_quotations(segs: list[dict], quotes: dict[str, list[dict]], tree: Tree) -> list[dict]:
+    """Rule: a line breaks where a quotation of the speaker data starts or ends inside it (MACULA has ὁ δὲ ἔφη Ἄνδρες ἀδελφοὶ …
+    ἀκούσατε as one clause), unless a part would be function words alone. A break inside a phrase moves back to the phrase's
+    start (the speaker data starts Stephen's words at ἀδελφοί, inside Ἄνδρες ἀδελφοί)."""
+    def phrase_top(r: sqlite3.Row) -> int | None:
+        top, p_ = None, r["parent"]
+        while p_ is not None and tree.node[p_]["cls"] != "cl":
+            top, p_ = p_, tree.node[p_]["parent"]
+        return top
+    out = []
+    for s_ in segs:
+        parts = [[s_["_rows"][0]]]
+        for a, b in zip(s_["_rows"], s_["_rows"][1:]):
+            if chain_of(a["key"], quotes) != chain_of(b["key"], quotes):
+                top = phrase_top(b)
+                moved = []
+                while top is not None and len(parts[-1]) > 1 and tree.under(parts[-1][-1]["parent"], top):
+                    moved.insert(0, parts[-1].pop())
+                parts.append(moved)
+            parts[-1].append(b)
+        merged = [parts[0]]
+        for part in parts[1:]:
+            if all(_function_word(r) for r in part) or all(_function_word(r) for r in merged[-1]):
+                merged[-1] += part
+            else:
+                merged.append(part)
+        for k, part in enumerate(merged):
+            out.append({**s_, "_rows": part, "_inline": s_["_inline"] if k == 0 else [], "_split": k > 0})
+    for n, s_ in enumerate(out, 1):
+        s_["seg"] = n
+    return out
+
+
+def one_step(levels: list[int]) -> list[int]:
+    """Rule: a line steps in one level at a time, keeping the order of the levels."""
+    stack: list[tuple[int, int]] = []                     # (level before, level shown)
+    out = []
+    for d in levels:
+        while stack and stack[-1][0] > d:
+            stack.pop()
+        if not stack:
+            shown = d
+        elif stack[-1][0] == d:
+            shown = stack[-1][1]
+        else:
+            shown = stack[-1][1] + 1
+        if not stack or stack[-1][0] != d:
+            stack.append((d, shown))
+        out.append(shown)
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--books", help="comma-separated USFM codes (default: all NT books)")
@@ -391,6 +460,9 @@ def main() -> None:
                             "AND w.class='verb'").fetchall())
     books = a.books.upper().split(",") if a.books else [r[0] for r in con.execute(
         "SELECT book FROM words WHERE corpus='grc' GROUP BY book ORDER BY MIN(seq)")]
+    quotes = load_quotations()
+    lemma = dict(con.execute("SELECT key, lemma FROM words WHERE corpus='grc'").fetchall())
+    joined = close_gaps(quotes, sorted(lemma), lemma, mood)
     chapters: list[tuple[str, int, list[dict]]] = []
     for book in books:
         for (ch,) in con.execute("SELECT DISTINCT chapter FROM words WHERE corpus='grc' AND book=? ORDER BY chapter", (book,)).fetchall():
@@ -398,21 +470,20 @@ def main() -> None:
                                (book, ch)).fetchall()
             segs = chapter_segments(rows, tree)
             whole = collections.Counter(s_["_cl"] for s_ in segs for _ in s_["_rows"])
-            chapters.append((book, ch, carry_forward(noun_line_participles(inline_participles(segs, whole, mood), tree, mood), tree)))
+            segs = carry_forward(noun_line_participles(inline_participles(segs, whole, mood), tree, mood), tree)
+            chapters.append((book, ch, split_at_quotations(segs, quotes, tree)))
     key_of: dict[int, str] = {}                            # stable clause ids: the key of the clause's first word
     for _, _, segs in chapters:
         for s in segs:
             if s["_cl"] is not None:
                 key_of.setdefault(s["_cl"], s["_rows"][0]["key"])
-    quotes = load_quotations()
-    lemma = dict(con.execute("SELECT key, lemma FROM words WHERE corpus='grc'").fetchall())
-    joined = close_gaps(quotes, sorted(lemma), lemma, mood)
     speaker_of = {q["id"]: q["speaker"] for qs in quotes.values() for q in qs}
     by_book: dict[str, list[dict]] = collections.defaultdict(list)
     for book, ch, segs in chapters:
         by_book[book] += segs
     for book, segs in by_book.items():
         tds, chains = speech_levels(segs, quotes, [tree.depth(s_["_cl"]) if s_["_cl"] is not None else 0 for s_ in segs])
+        tds = one_step(tds)
         for s_, t, c in zip(segs, tds, chains):
             s_["_td"], s_["_q"] = t, (c[-1] if c else None)
     stats = collections.Counter()
@@ -429,12 +500,13 @@ def main() -> None:
                    "rule": tree.node[cid]["rule"] if cid is not None else None, "role": tree.role.get(cid),
                    "via": tree.via.get(cid, []), "junction": tree.node[cid]["junction"] if cid is not None else None,
                    "sentence": rows[0]["sent"], "first": rows[0]["key"], "last": rows[-1]["key"],
-                   "inline": [k for _, k in s["_inline"]], "words": [r["key"] for r in rows], "text": text}
+                   "inline": [k for _, k in s["_inline"]], "split_at_quotation": s.get("_split", False), "words": [r["key"] for r in rows], "text": text}
             recs.append(rec)
             lines.append(f"{ch}:{s['verse']}\t{'    ' * s['_td']}{text}")
             stats["segments"] += 1
             stats["words"] += len(rows)
             stats["no_clause"] += cid is None
+            stats["split_at_quotation"] += s.get("_split", False)
             stats["inline_participles"] += len(s["_inline"])
             depths[s["_td"]] += 1
             stats["in_quotation"] += s["_q"] is not None
