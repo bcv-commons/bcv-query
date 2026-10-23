@@ -35,8 +35,14 @@ chapters of the Parsan comparison (Gen 37-45, Ruth, Jonah, 1 Sam 1-10, Deut 5-11
   python -m macula.clause_tagger export --helloao DIR --edition heb_scg   # a Hebrew NT, word by word as lexeme-aligner counts words
 
 export reads helloAO chapter JSON (DIR/<BOOK>_<chapter>.json), takes each verse's text and its words by bcv-commons/bibles' rule and
-tokenizer (macula/vendor_bibles, as lexeme-aligner does), so word i of a verse is the aligner's token i, and writes
-data/clause-tagger/export/<edition>/<BOOK>.jsonl with a manifest (the text fingerprint of each book, the model's sha256).
+tokenizer (macula/vendor_bibles, as lexeme-aligner does), so word i of a verse is the aligner's token i, and writes to
+data/clause-tagger/export/<edition>/:
+  - words.parquet: one row per word part (book, chapter, verse, i = the aligner's token, part, token, word, text, class, lemma,
+    lexeme, strong, role, source, p_split, form, person, seg); the Hebrew verse number some texts carry is a row of class
+    "verse-number";
+  - clauses.parquet: one row per clause segment (book, chapter, verse, seg, first_i, last_i, depth, parent, kind, rule, att);
+  - <BOOK>.jsonl: the same, one line per verse (the format lexeme-aligner read first);
+  - manifest.json: the text fingerprint of each book, the model's sha256, the tokenizer and verse-text versions.
 """
 from __future__ import annotations
 
@@ -651,6 +657,7 @@ def export(path: Path, helloao: Path, edition: str, books: list[str] | None) -> 
                 "bibles_verse_text": (HERE / "vendor_bibles" / "VERSION").read_text().strip(),
                 "model": {"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "encoder": ck["encoder"], "epoch": ck["epoch"]},
                 "books": {}}
+    tables: dict[str, list[dict]] = {"words": [], "clauses": []}
     for b, chs in sorted(by_book.items()):
         chs.sort(key=lambda d: d["chapter"]["number"])
         vt = verse_text.extract_usj(helloao_to_usj.merge_book_usj(b, chs))
@@ -679,11 +686,71 @@ def export(path: Path, helloao: Path, edition: str, books: list[str] | None) -> 
                     ws.append({"i": i, "token": r["tokens"][i], "text": w["text"], "source": w["source"], "parts": w["parts"],
                                "clause": {k: w[k] for k in ("start", "depth", "form", "person", "seg") if k in w}})
                 out.write(json.dumps({"ref": r["ref"], "words": ws}, ensure_ascii=False) + "\n")
+        tables["words"].extend(word_rows(b, pred, rows))
+        tables["clauses"].extend(clause_rows(b, pred, rows))
         manifest["books"][b] = {"file": f"{b}.jsonl", "text_fingerprint": book_fp, "file_hash": bcv_tokenize.file_hash(book_fp),
                                 "verses": len(rows), "words": sum(n.values()), "macula": n["macula"], "model": n["model"]}
         print(f"[clause_tagger] {b}: {len(rows)} verses, {sum(n.values())} words ({n['macula']} looked up in MACULA, {n['model']} from the model)")
+    write_parquet(out_dir, tables)
     (out_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n")
     print(f"[clause_tagger] -> {out_dir}")
+
+
+def _ref(ref: str) -> tuple[int, int]:
+    c, v = ref.split()[1].split(":")
+    return int(c), int(v)
+
+
+def word_rows(book: str, pred: list[dict], rows: list[dict]) -> list[dict]:
+    out = []
+    for r, p_ in zip(rows, pred):
+        c, v = _ref(r["ref"])
+        base = {"book": book, "chapter": c, "verse": v}
+        if r["label"]:
+            out.append({**base, "i": 0, "part": 0, "token": r["tokens"][0], "word": r["tokens"][0], "text": r["tokens"][0],
+                        "class": "verse-number", "seg": 0})
+        seg = 0
+        for i, w in enumerate(p_["words"], start=int(r["label"])):
+            seg += w["start"]
+            verb = next((k for k, x in enumerate(w["parts"]) if x["class"] == "verb"), None)
+            for k, x in enumerate(w["parts"]):
+                out.append({**base, "i": i, "part": k, "token": r["tokens"][i], "word": w["text"], "text": x["text"], "class": x["class"],
+                            "lemma": x["lemma"], "lexeme": x["lexeme"] or None, "strong": x["strong"] or None,
+                            "role": None if x["role"] == "-" else x["role"], "source": w["source"],
+                            "p_split": x.get("p_split") if w["source"] == "model" else None,
+                            "form": None if k != verb or w["form"] == "-" else w["form"],
+                            "person": None if k != verb or w["person"] == "-" else w["person"], "seg": seg})
+    return out
+
+
+def clause_rows(book: str, pred: list[dict], rows: list[dict]) -> list[dict]:
+    out = []
+    for r, p_ in zip(rows, pred):
+        c, v = _ref(r["ref"])
+        ws = p_["words"]
+        off = int(r["label"])
+        for n, (a, z) in enumerate(segments([w["start"] for w in ws]), start=1):
+            sg = ws[a].get("seg", {})
+            out.append({"book": book, "chapter": c, "verse": v, "seg": n, "first_i": a + off, "last_i": z - 1 + off, "depth": ws[a]["depth"],
+                        "parent": sg.get("parent"), "kind": sg.get("kind"), "rule": sg.get("rule"), "att": sg.get("att")})
+    return out
+
+
+WORD_SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("i", "int16"), ("part", "int8"), ("token", "string"),
+               ("word", "string"), ("text", "string"), ("class", "string"), ("lemma", "string"), ("lexeme", "string"), ("strong", "string"),
+               ("role", "string"), ("source", "string"), ("p_split", "float32"), ("form", "string"), ("person", "string"), ("seg", "int16")]
+CLAUSE_SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("seg", "int16"), ("first_i", "int16"), ("last_i", "int16"),
+                 ("depth", "int8"), ("parent", "string"), ("kind", "string"), ("rule", "string"), ("att", "string")]
+
+
+def write_parquet(out_dir: Path, tables: dict[str, list[dict]]) -> None:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    for name, schema in (("words", WORD_SCHEMA), ("clauses", CLAUSE_SCHEMA)):
+        sch = pa.schema([(c, getattr(pa, t)()) for c, t in schema])
+        t = pa.Table.from_pylist(tables[name], schema=sch)
+        pq.write_table(t, out_dir / f"{name}.parquet", compression="zstd")
+        print(f"[clause_tagger] {name}.parquet: {t.num_rows} rows")
 
 
 def main() -> None:
