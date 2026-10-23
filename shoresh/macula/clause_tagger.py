@@ -5,7 +5,14 @@ For each word of a verse it predicts what the clause layout reads from MACULA:
   - `start`: the word opens a new clause segment (as the layout segments the verse);
   - `depth`: the layout's `depth` of the word's segment (clause ancestors in the MACULA tree, within the verse; 0-4);
   - `form`: the verb form of a verb in the word (MACULA lowfat `type`: qatal, wayyiqtol, ... participle, infinitive), or none;
-  - `person`: the person of that verb (1, 2, 3), or none.
+  - `person`: the person of that verb (1, 2, 3), or none;
+and for the word that opens a segment, what the layout's rules read of the segment's clause:
+  - `parent`: where its parent clause stands in the verse, in segments from this one (-1 the one before, +1 the one after; "none"
+    for a clause on the verse's own group);
+  - `kind`: VC or NC (MACULA clause class: with or without a verb);
+  - `rule`: the MACULA clause rule (constituent order, such as V-S-PP; the 60 most common, others "other");
+  - `att`: the MACULA attachment kind where the segment meets an earlier segment of the verse in the tree, the kind rule
+    tree_level_inside_verse checks against [tree] trusted ("cjpCLx|1|cl|-", ...; the 300 most common, 95% of the trusted kinds; others "other"; "-" none).
 A word is a space- or maqaf-separated unit, prefixes and suffixes included, as the bibles verse-text tokenizer gives it.
 
 Model: a Hebrew BERT encoder (dicta-il/dictabert or dicta-il/BEREL_3.0; their tokenizers drop the vowel points) reads the
@@ -44,6 +51,9 @@ FORMS = ["-", "qatal", "wayyiqtol", "yiqtol", "weqatal", "imperative", "jussive"
 FINITE = {"qatal", "wayyiqtol", "yiqtol", "weqatal", "imperative", "jussive", "cohortative"}
 PERSONS = ["-", "first", "second", "third"]
 MAX_DEPTH = 4
+PARENTS = ["none", "-1", "-2", "-3", "-4+", "+1", "+2+"]
+N_RULES, N_ATTS = 60, 300
+SEG_HEADS = ("parent", "kind", "rule", "att")
 MAX_CHARS = 24
 CANTILLATION = re.compile(r"[֑-ֽ֯׀׃׆]")   # accents, meteg, paseq, sof pasuq, nun hafukha
 POINTS = re.compile(r"[ְ-ׇ]")
@@ -68,12 +78,24 @@ def split_of(book: str, chapter: int) -> str:
 # ---------------------------------------------------------------- data
 def prep() -> None:
     """one JSON line per verse: words (pointed) with their gold labels"""
+    from macula.build_clause_layout import _Tree
+    con = sqlite3.connect(HERE / "trees-macula.db")
+    word_parent = dict(con.execute("select key, parent from words where corpus = 'hbo'"))
+    tree = _Tree(con)
     seg = {}
+    seg_info = {}
     for f in sorted(LAYOUT.glob("*/*.jsonl")):
+        by_verse = collections.defaultdict(list)
         for line in f.open():
             r = json.loads(line)
+            by_verse[(r["book"], r["chapter"], r["verse"])].append(r)
             for k in r["words"]:
-                seg[k[:11]] = (r["seg"], r["depth"])                   # word key: BBCCCVVVWWW (the part digit dropped)
+                seg[k[:11]] = ((r["book"], r["chapter"], r["verse"], r["seg"]), r["depth"])   # word key: BBCCCVVVWWW (part digit dropped)
+        for vk, segs in by_verse.items():
+            paths = [tree.path([{"parent": word_parent.get(k)} for k in r["words"]]) for r in segs]
+            for j, r in enumerate(segs):
+                seg_info[vk + (r["seg"],)] = {"parent": _parent_offset(segs, j), "kind": r["kind"] or "-", "rule": r["rule"] or "-",
+                                              "att": _meet_kind(paths, j)}
     form = dict(sqlite3.connect(HERE / "lowfat-hbo.db").execute("select key, type from lowfat_words where class = 'verb'"))
     person = dict(sqlite3.connect(HERE / "lexeme-spine-macula.db").execute("select key, person from spine_words where person != ''"))
     verses: dict = collections.OrderedDict()
@@ -97,13 +119,44 @@ def prep() -> None:
             words = []
             for i, w in enumerate(ws):
                 sg, depth = seg.get(w["key"], prev or (None, 0))      # a word the layout leaves out (35 in the test set) goes with the one before
-                words.append({"text": pointed(w["text"]), "start": int(i == 0 or sg != (prev or (None,))[0]),
-                              "depth": min(depth, MAX_DEPTH), "form": w["form"], "person": w["person"]})
+                start = int(i == 0 or sg != (prev or (None,))[0])
+                words.append({"text": pointed(w["text"]), "start": start, "depth": min(depth, MAX_DEPTH), "form": w["form"],
+                              "person": w["person"], **({"seg": seg_info[sg]} if start and sg in seg_info else {})})
                 prev = (sg, depth)
             split = split_of(b, ch)
             n[split] += 1
             out.write(json.dumps({"ref": f"{b} {ch}:{v}", "split": split, "words": words}, ensure_ascii=False) + "\n")
     print(f"[clause_tagger] {dict(n)} verses -> {OUT / 'verses.jsonl'}")
+
+
+def _parent_offset(segs: list[dict], j: int) -> str:
+    """where segment j's parent clause stands in the verse, in segments from j (the nearest segment of it before, else after)"""
+    pk = segs[j]["parent_key"]
+    idx = [i for i, r in enumerate(segs) if pk is not None and r["clause_key"] == pk]
+    back, fwd = [i for i in idx if i < j], [i for i in idx if i > j]
+    if not idx:
+        return "none"
+    if back:
+        o = j - back[-1]
+        return f"-{o}" if o < 4 else "-4+"
+    return "+1" if fwd[0] - j == 1 else "+2+"
+
+
+def _meet_kind(paths: list[list], j: int) -> str:
+    """the attachment kind rule tree_level_inside_verse reads for segment j: where it meets the best earlier segment of the verse"""
+    ca = [n for n, _ in paths[j]]
+    pos = {n: i for i, n in enumerate(ca)}
+    best = None
+    for m in range(j):
+        ce = [n for n, _ in paths[m]]
+        meet = next((n for n in ce if n in pos), None)
+        if meet is None:
+            continue
+        be, ba = ce.index(meet), pos[meet]
+        score = (len(ca) - ba, -be, m)
+        if best is None or score > best[0]:
+            best = (score, ba)
+    return paths[j][best[1] - 1][1] if best and best[1] > 0 else "-"
 
 
 def load(split: str | None = None) -> list[dict]:
@@ -112,7 +165,18 @@ def load(split: str | None = None) -> list[dict]:
 
 
 # ---------------------------------------------------------------- model
-def build_model(encoder: str, chars: list[str]):
+def seg_vocab(train_rows: list[dict]) -> dict[str, list[str]]:
+    c = {h: collections.Counter() for h in ("rule", "att")}
+    for v in train_rows:
+        for w in v["words"]:
+            if "seg" in w:
+                for h in c:
+                    c[h][w["seg"][h]] += 1
+    return {"parent": PARENTS, "kind": ["VC", "NC", "-"], "rule": [x for x, _ in c["rule"].most_common(N_RULES)] + ["other"],
+            "att": ["-"] + [x for x, _ in c["att"].most_common(N_ATTS + 1) if x != "-"][:N_ATTS] + ["other"]}
+
+
+def build_model(encoder: str, chars: list[str], vocab: dict[str, list[str]]):
     import torch
     from torch import nn
     from transformers import AutoModel
@@ -127,7 +191,8 @@ def build_model(encoder: str, chars: list[str]):
             self.mix = nn.LSTM(h, 256, batch_first=True, bidirectional=True)
             self.drop = nn.Dropout(0.2)
             self.heads = nn.ModuleDict({"start": nn.Linear(512, 2), "depth": nn.Linear(512, MAX_DEPTH + 1),
-                                        "form": nn.Linear(512, len(FORMS)), "person": nn.Linear(512, len(PERSONS))})
+                                        "form": nn.Linear(512, len(FORMS)), "person": nn.Linear(512, len(PERSONS)),
+                                        **{h: nn.Linear(512, len(vocab[h])) for h in SEG_HEADS}})
 
         def forward(self, input_ids, attention_mask, first, char_ids):
             enc = self.encoder(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state   # B x T x H
@@ -144,8 +209,9 @@ def build_model(encoder: str, chars: list[str]):
 
 
 class Batcher:
-    def __init__(self, tokenizer, chars: list[str]):
+    def __init__(self, tokenizer, chars: list[str], vocab: dict[str, list[str]]):
         self.tok = tokenizer
+        self.vocab = vocab
         self.cid = {c: i + 2 for i, c in enumerate(chars)}               # 0 pad, 1 unknown
 
     def __call__(self, verses: list[dict], device):
@@ -174,6 +240,15 @@ class Batcher:
                         if mask[b, i]:
                             g[b, i] = vocab.index(w[k]) if vocab else w[k]
                 gold[k] = g.to(device)
+            for h in SEG_HEADS:                                       # segment heads: only at the word that opens a segment
+                voc = self.vocab[h]
+                g = torch.full((len(verses), W), -100, dtype=torch.long)
+                for b, v in enumerate(verses):
+                    for i, w in enumerate(v["words"]):
+                        if mask[b, i] and "seg" in w:
+                            x = w["seg"][h]
+                            g[b, i] = voc.index(x) if x in voc else voc.index("other")
+                gold[h] = g.to(device)
         return ({"input_ids": enc["input_ids"].to(device), "attention_mask": enc["attention_mask"].to(device),
                  "first": first.to(device), "char_ids": chars.to(device)}, mask, gold)
 
@@ -186,8 +261,9 @@ def train(encoder: str, epochs: int, batch: int, seed: int) -> None:
     chars = sorted({c for v in tr for w in v["words"] for c in w["text"]})
     tok = AutoTokenizer.from_pretrained(encoder)
     dev_ice = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = build_model(encoder, chars).to(dev_ice)
-    bat = Batcher(tok, chars)
+    vocab = seg_vocab(tr)
+    model = build_model(encoder, chars, vocab).to(dev_ice)
+    bat = Batcher(tok, chars, vocab)
     enc_params = list(model.encoder.parameters())
     rest = [p for n, p in model.named_parameters() if not n.startswith("encoder.")]
     opt = torch.optim.AdamW([{"params": enc_params, "lr": 3e-5}, {"params": rest, "lr": 1e-3}], weight_decay=0.01)
@@ -215,12 +291,13 @@ def train(encoder: str, epochs: int, batch: int, seed: int) -> None:
             total += loss.item()
             if k % 200 == 0:
                 print(f"[clause_tagger] epoch {ep + 1} batch {k}/{len(order)} loss {total / (k + 1):.3f}", flush=True)
+        VOCAB_SEEN.update(vocab)
         m = metrics(dev, predict(model, bat, dev, dev_ice))
         print(f"[clause_tagger] epoch {ep + 1} dev: boundary F1 {m['boundary_f1']:.1%}, exact segments {m['segments_exact']:.1%}, "
-              f"depth {m['depth']:.1%}, form {m['form']:.1%}", flush=True)
+              f"depth {m['depth']:.1%}, form {m['form']:.1%}, parent {m['parent']:.1%}, rule {m['rule']:.1%}, att {m['att']:.1%}", flush=True)
         if m["boundary_f1"] + m["segments_exact"] > best:
             best = m["boundary_f1"] + m["segments_exact"]
-            torch.save({"state": model.state_dict(), "encoder": encoder, "chars": chars, "epoch": ep + 1, "dev": m, "seed": seed},
+            torch.save({"state": model.state_dict(), "encoder": encoder, "chars": chars, "vocab": vocab, "epoch": ep + 1, "dev": m, "seed": seed},
                        OUT / f"model-{tag}.pt")
     print(f"[clause_tagger] best dev checkpoint -> {OUT / f'model-{tag}.pt'}")
 
@@ -240,8 +317,10 @@ def predict(model, bat, verses: list[dict], device, batch: int = 32) -> list[dic
             for b, v in enumerate(chunk):
                 ws = []
                 for j, w in enumerate(v["words"]):
-                    ws.append({"text": w["text"], "start": int(am["start"][b, j]) if j else 1, "p_start": round(float(prob[b, j]), 3),
-                               "depth": int(am["depth"][b, j]), "form": FORMS[am["form"][b, j]], "person": PERSONS[am["person"][b, j]]})
+                    st = int(am["start"][b, j]) if j else 1
+                    ws.append({"text": w["text"], "start": st, "p_start": round(float(prob[b, j]), 3),
+                               "depth": int(am["depth"][b, j]), "form": FORMS[am["form"][b, j]], "person": PERSONS[am["person"][b, j]],
+                               **({"seg": {h: bat.vocab[h][am[h][b, j]] for h in SEG_HEADS}} if st else {})})
                 out.append({"ref": v.get("ref"), "words": ws})
     return out
 
@@ -251,12 +330,15 @@ def load_model(path: Path):
     from transformers import AutoTokenizer
     ck = torch.load(path, map_location="cpu", weights_only=False)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = build_model(ck["encoder"], ck["chars"])
+    model = build_model(ck["encoder"], ck["chars"], ck["vocab"])
     model.load_state_dict(ck["state"])
-    return model.to(device), Batcher(AutoTokenizer.from_pretrained(ck["encoder"]), ck["chars"]), device, ck
+    return model.to(device), Batcher(AutoTokenizer.from_pretrained(ck["encoder"]), ck["chars"], ck["vocab"]), device, ck
 
 
 # ---------------------------------------------------------------- scoring (the measures of the Parsan comparison)
+VOCAB_SEEN: dict[str, list[str]] = {}            # the model's vocabularies: a gold value outside them counts as right when "other"
+
+
 def segments(starts: list[int]) -> list[tuple[int, int]]:
     cut = [i for i, s in enumerate(starts) if s or i == 0] + [len(starts)]
     return list(zip(cut, cut[1:]))
@@ -264,7 +346,10 @@ def segments(starts: list[int]) -> list[tuple[int, int]]:
 
 def metrics(gold: list[dict], pred: list[dict]) -> dict:
     B = collections.Counter(); seg_n = seg_hit = 0; dep = collections.Counter(); V = collections.Counter(); F = collections.Counter()
-    P = collections.Counter()
+    P = collections.Counter(); S = {h: collections.Counter() for h in SEG_HEADS + ("tree_decision",)}
+    from macula import discourse_rules as dr
+    def uses_tree(k):
+        return any(k.startswith(t) for t in dr.TREE_TRUSTED) and not any(k.startswith(t) for t in dr.TREE_UNTRUSTED)
     for g, p in zip(gold, pred):
         gw, pw = g["words"], p["words"]
         for i in range(1, len(gw)):
@@ -274,6 +359,11 @@ def metrics(gold: list[dict], pred: list[dict]) -> dict:
         for a, _ in gs:
             if (a, _) in ps:
                 dep[min(gw[a]["depth"] - gw[0]["depth"], 3) == min(pw[a]["depth"] - pw[0]["depth"], 3)] += 1
+                if "seg" in gw[a] and "seg" in pw[a]:
+                    for h in SEG_HEADS:
+                        gx = gw[a]["seg"][h]
+                        S[h][pw[a]["seg"][h] in (gx, "other" if h in ("rule", "att") and gx not in VOCAB_SEEN.get(h, (gx,)) else gx)] += 1
+                    S["tree_decision"][uses_tree(gw[a]["seg"]["att"]) == uses_tree(pw[a]["seg"]["att"])] += 1
         for x, y in zip(gw, pw):
             V[(x["form"] in FINITE, y["form"] in FINITE)] += 1
             if x["form"] in FINITE and y["form"] in FINITE:
@@ -286,11 +376,13 @@ def metrics(gold: list[dict], pred: list[dict]) -> dict:
     bp, br, bf = prf(B); vp, vr, vf = prf(V)
     return {"boundary_p": bp, "boundary_r": br, "boundary_f1": bf, "segments_exact": seg_hit / max(seg_n, 1), "segments": seg_n,
             "depth": dep[True] / max(sum(dep.values()), 1), "verb_p": vp, "verb_r": vr, "form": F[True] / max(sum(F.values()), 1),
-            "form_n": sum(F.values()), "person": P[True] / max(sum(P.values()), 1)}
+            "form_n": sum(F.values()), "person": P[True] / max(sum(P.values()), 1),
+            **{h: S[h][True] / max(sum(S[h].values()), 1) for h in S}}
 
 
 def score(path: Path, split: str) -> None:
     model, bat, device, ck = load_model(path)
+    VOCAB_SEEN.update(ck["vocab"])
     gold = load(split)
     pred = predict(model, bat, gold, device)
     m = metrics(gold, pred)
@@ -300,6 +392,8 @@ def score(path: Path, split: str) -> None:
     print(f"  layout segments reproduced exactly: {m['segments_exact']:.1%} of {m['segments']}")
     print(f"  depth in the verse (exactly matched segments): {m['depth']:.1%}")
     print(f"  finite verb: P {m['verb_p']:.1%}  R {m['verb_r']:.1%};  verb form {m['form']:.1%} of {m['form_n']};  person {m['person']:.1%}")
+    print(f"  on exactly matched segments: parent {m['parent']:.1%}, kind {m['kind']:.1%}, rule {m['rule']:.1%}, attachment kind {m['att']:.1%}, "
+          f"tree trusted or not {m['tree_decision']:.1%}")
 
 
 def tag(path: Path, text_file: Path) -> None:
