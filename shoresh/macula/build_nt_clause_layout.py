@@ -11,6 +11,7 @@ A clause segment is a maximal run of words, inside one verse, that belongs to on
 - A coordination node (CLaCL, Conj3CL, aCLaCL, EitherOr4CL, ...) is not a level either: its clauses are siblings. MACULA puts a short
   member straight into the node (ἀλλὰ ὁ ἀνήρ, καὶ διώξωσιν), so the node's own words are a segment of their own at the members'
   depth; a coordinating conjunction goes with the member it opens.
+- A clause of a vocative alone (Κύριε, / Ἀδελφοί,) keeps its line but is not a level either: the speech under it stays at its level.
 - A clause interrupted by an embedded clause gives two segments; a clause that crosses a verse boundary gives one per verse
   (a MACULA Greek sentence can run over several verses).
 Rule (an expression, not a place): a bare articular participle, the article and the participle alone (οἱ πενθοῦντες, τῷ Ἠγαπημένῳ,
@@ -21,7 +22,21 @@ Rule: a preposition, a conjunction that is not postpositive, the adverb καί "
 goes with that clause, which it governs or introduces (εἰς || τὸ φαγεῖν, καὶ || οἱ κατοικοῦντες). MACULA puts it in the higher clause.
 Rule: no line of function words alone (conjunctions, prepositions, articles, particles, οὐ, μή, καί) where the tree leaves one
 (ἀλλὰ || τῇ κακίᾳ νηπιάζετε): such a segment goes with the next segment of the verse, which it introduces, or, when it opens with a
-postpositive (δέ, γάρ, μέν, οὖν, τε: ἐγὼ || μὲν || γάρ), with the one before; the line takes that segment's clause.
+postpositive (δέ, γάρ, μέν, οὖν, τε: ἐγὼ || μὲν || γάρ), with the one before; the line takes that segment's clause. ἰδού and
+ἴδε ("look", which MACULA makes a clause of its own, lemma ὁράω) count as such words here: καὶ ἰδοὺ goes with what it points to.
+Rule: a participle clause inside a noun phrase goes on the line of its noun when that line holds nothing but the noun phrase
+(φωνὴ || βοῶντος ἐν τῇ ἐρήμῳ): a noun alone is not a line. A longer line keeps the participle on a line of its own (τοῖς ἁγίοις ||
+τοῖς οὖσιν ἐν Ἐφέσῳ).
+Phase 2, speech levels (rule speech_levels, as in the Hebrew layout): every quotation of Clear's speaker data
+(resources/speaker_quotations, MACULA Nestle 1904 word ids, CC BY 4.0) is a level. MACULA's tree already puts a speech one level in
+under its λέγων inside one sentence, but a speech that goes on in further sentences (Matt 5:3 after 5:2 "λέγων") starts each of them
+at the margin. `text_depth`: a quotation's lines stand at least one level in from the line that introduces it (the line before its
+first line), never further out while it lasts, and keep the tree's levels relative to the speech's lowest line in each sentence;
+a quotation inside a quotation is one further in; one that directly follows another of the same depth (no introducing line) stands
+where that one stands, one with no line before it at level 1 (or one in from the quotation around it). Lines outside every
+quotation keep their tree depth. `quotation` is the innermost quotation (its first word id), `speaker` its speaker. Two
+quotations of one speaker are one when what stands between them is short (at most 12 words) and has no finite verb (the speaker
+data leaves Luke 1:74 out of Zechariah's song, and Mark 7:21's list of vices out of Jesus' words); the words between belong to it.
 `depth` is the number of clause ancestors in the sentence, wrappers not counted. `parent` is the parent clause's id; a clause is named
 by the key of its first word. Verse numbers are Nestle 1904's.
 
@@ -39,6 +54,7 @@ import json
 import re
 import sqlite3
 import sys
+import unicodedata
 from pathlib import Path
 
 SHORESH = Path(__file__).resolve().parents[1]
@@ -68,8 +84,12 @@ class Tree:
                 while p is not None:
                     has_clause_below.add(p)
                     p = self.node[p]["parent"]
+        case = dict(con.execute("SELECT w.cl, MIN(CASE WHEN s.case_='vocative' OR w.class IN ('det','conj','ptcl','intj') OR w.lemma IN ('οὐ','μή','καί') "
+                                "THEN 1 ELSE 0 END) * MAX(CASE WHEN s.case_='vocative' THEN 1 ELSE 0 END) FROM words w "
+                                "LEFT JOIN sp.spine_words s ON s.key=w.key WHERE w.corpus='grc' AND w.cl IS NOT NULL GROUP BY w.cl").fetchall())
+        self.vocative = {nid for nid, v in case.items() if v and nid in has_clause_below}
         self.coord = {nid for nid, r in self.node.items() if r["cls"] == "cl" and nid in has_clause_below
-                      and COORDINATION.match(r["rule"] or "")}
+                      and COORDINATION.match(r["rule"] or "")} | self.vocative
         self.wrapper = {nid for nid, r in self.node.items() if r["cls"] == "cl" and nid in has_clause_below and nid not in self.coord
                         and all(c in WRAPPER_CLASSES or (c == "adv" and (r["rule"] in ADVERB_WRAPPERS or lm in WRAPPER_ADVERBS))
                                 for c, lm in own[nid])}
@@ -115,16 +135,22 @@ def word_clauses(rows: list[sqlite3.Row], tree: Tree) -> list[int | None]:
     def movable(r: sqlite3.Row) -> bool:
         return r["cl"] in tree.wrapper or (r["cl"] in tree.coord and r["class"] == "conj")
     res = [r["cl"] for r in rows]
+    post = [r["lemma"] in POSTPOSITIVE and r["class"] == "conj" for r in rows]
     for i in range(len(rows) - 2, -1, -1):
         r, nxt = rows[i], rows[i + 1]
-        if movable(r) and nxt["sent"] == r["sent"] and res[i + 1] != r["cl"] and tree.under(res[i + 1], r["cl"]):
+        if movable(r) and not post[i] and nxt["sent"] == r["sent"] and res[i + 1] != r["cl"] and tree.under(res[i + 1], r["cl"]):
             res[i] = res[i + 1]
-    for i in range(1, len(rows)):
+    for i in range(len(rows)):
         r = rows[i]
-        nxt_in = i + 1 < len(rows) and rows[i + 1]["sent"] == r["sent"] and tree.under(res[i + 1], r["cl"])
-        if movable(r) and res[i] == r["cl"] and not nxt_in and rows[i - 1]["sent"] == r["sent"] and res[i - 1] != r["cl"] \
-                and tree.under(res[i - 1], r["cl"]):
-            res[i] = res[i - 1]
+        if not movable(r) or res[i] != r["cl"]:
+            continue
+        prev_in = i > 0 and rows[i - 1]["sent"] == r["sent"] and res[i - 1] != r["cl"] and tree.under(res[i - 1], r["cl"])
+        nxt_in = (i + 1 < len(rows) and rows[i + 1]["sent"] == r["sent"] and res[i + 1] != r["cl"]
+                  and tree.under(res[i + 1], r["cl"]))
+        if prev_in and (post[i] or not nxt_in):
+            res[i] = res[i - 1]                  # a postpositive stays after the clause's first word (Προσέχετε δὲ)
+        elif nxt_in:
+            res[i] = res[i + 1]
     return [tree.real(c) for c in res]
 
 
@@ -181,6 +207,38 @@ def inline_participles(segs: list[dict], whole: dict[int, int], mood: dict[str, 
     return out
 
 
+def noun_line_participles(segs: list[dict], tree: Tree, mood: dict[str, str]) -> list[dict]:
+    """Rule: a participle clause in a noun phrase joins a line that is only that noun phrase."""
+    def np_of(cid: int) -> int | None:
+        p = tree.node[cid]["parent"]
+        while p is not None and (tree.node[p]["cls"] != "cl" or p in tree.wrapper):
+            if tree.node[p]["cls"] == "np":
+                return p
+            p = tree.node[p]["parent"]
+        return None
+    out: list[dict] = []
+    i = 0
+    while i < len(segs):
+        s_ = segs[i]
+        cid = s_["_cl"]
+        verbs = [r for r in s_["_rows"] if r["class"] == "verb" and r["cl"] == cid]
+        np_ = np_of(cid) if cid is not None and len(verbs) == 1 and mood.get(verbs[0]["key"]) == "participle" else None
+        host = out[-1] if out else None
+        if (np_ is not None and host and host["verse"] == s_["verse"] and host["_cl"] is not None and tree.under(cid, host["_cl"])
+                and all(tree.under(r["parent"], np_) for r in host["_rows"] if not _function_word(r))):
+            host["_rows"] += s_["_rows"]
+            host["_inline"].append((cid, s_["_rows"][0]["key"]))
+            nxt = segs[i + 1] if i + 1 < len(segs) else None
+            if nxt and nxt["verse"] == host["verse"] and nxt["_cl"] == host["_cl"]:
+                host["_rows"] += nxt["_rows"]
+                host["_inline"] += nxt["_inline"]
+                i += 1
+        else:
+            out.append(s_)
+        i += 1
+    return out
+
+
 def carried(r: sqlite3.Row) -> bool:
     return (r["class"] == "prep" or (r["class"] == "adv" and (r["lemma"] in WRAPPER_ADVERBS or r["lemma"] == "ὅτι"))
             or (r["class"] == "conj" and r["lemma"] not in POSTPOSITIVE))
@@ -201,7 +259,16 @@ def carry_forward(segs: list[dict], tree: Tree) -> list[dict]:
 POSTPOSITIVE = {"δέ", "γάρ", "μέν", "οὖν", "τε"}
 
 
+LOOK = {"ἰδού", "ἴδε"}
+
+
+def _plain(w: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", w.lower()) if not unicodedata.combining(c))
+
+
 def _function_word(r: sqlite3.Row) -> bool:
+    if r["lemma"] == "ὁράω" and _plain(r["surface"]) in {_plain(x) for x in LOOK}:
+        return True
     return r["class"] in ("conj", "prep", "det", "ptcl") or (r["class"] == "adv" and r["lemma"] in WRAPPER_ADVERBS)
 
 
@@ -227,6 +294,89 @@ def no_function_lines(segs: list[dict]) -> list[dict]:
     return segs
 
 
+SPEAKERS = SHORESH.parent / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
+
+
+def load_quotations() -> dict[str, list[dict]]:
+    """NT quotations per book code number (the first two digits of a word id), outermost first where they share a start."""
+    import csv
+    with open(SPEAKERS, encoding="utf-8") as fh:
+        rows = list(csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t"))
+    out: dict[str, list[dict]] = collections.defaultdict(list)
+    for r in rows:
+        if r["word_start"].startswith("n"):
+            q = {"id": r["word_start"][1:], "start": r["word_start"][1:], "end": r["word_end"][1:], "speaker": r["speaker"]}
+            out[q["start"][:2]].append(q)
+    for qs in out.values():
+        qs.sort(key=lambda q: (q["start"], -int(q["end"])))
+    return out
+
+
+SAYING = {"λέγω", "εἶπον", "φημί", "ἀποκρίνομαι", "λαλέω", "κράζω", "γράφω", "ἐρωτάω", "βοάω", "φωνέω"}
+
+
+FINITE = {"indicative", "subjunctive", "optative", "imperative"}
+
+
+def close_gaps(quotes: dict[str, list[dict]], keys: list[str], lemma: dict[str, str], mood: dict[str, str]) -> int:
+    import bisect
+    joined = 0
+    for book, qs in quotes.items():
+        i = 0
+        while i + 1 < len(qs):
+            a, b = qs[i], qs[i + 1]
+            gap = keys[bisect.bisect_right(keys, a["end"]):bisect.bisect_left(keys, b["start"])]
+            if (a["speaker"] == b["speaker"] and b["start"] > a["end"] and len(gap) <= 12
+                    and not any(lemma[k] in SAYING or mood.get(k) in FINITE for k in gap)):
+                a["end"] = max(a["end"], b["end"])
+                del qs[i + 1]
+                joined += 1
+            else:
+                i += 1
+    return joined
+
+
+def chain_of(key: str, quotes: dict[str, list[dict]]) -> tuple:
+    """The quotations a word stands in, outermost first."""
+    return tuple(q["id"] for q in quotes.get(key[:2], []) if q["start"] <= key <= q["end"])
+
+
+def speech_levels(segs: list[dict], quotes: dict[str, list[dict]], tree_depth: list[int]) -> list[int]:
+    """Rule speech_levels over one book's segments, in text order. Returns text_depth per segment."""
+    chains = []
+    for s_ in segs:
+        votes = collections.Counter(chain_of(r["key"], quotes) for r in s_["_rows"])
+        chains.append(votes.most_common(1)[0][0])
+    td = list(tree_depth)
+    base: dict[str, int] = {}
+    low: dict[tuple, int] = {}                      # (quotation, sentence) -> lowest tree depth of its lines there
+    for s_, ch, d in zip(segs, chains, tree_depth):
+        if ch:
+            k = (ch[-1], s_["_rows"][0]["sent"])
+            low[k] = min(low.get(k, d), d)
+    for i, (s_, ch) in enumerate(zip(segs, chains)):
+        if not ch:
+            continue
+        for depth_in, q in enumerate(ch):
+            if q in base:
+                continue
+            prev = i - 1
+            outer = ch[:depth_in]
+            if prev >= 0 and chains[prev][:depth_in + 1] == outer + (q,):
+                continue
+            if prev < 0:
+                base[q] = (base[outer[-1]] + 1) if outer else 1
+            elif len(chains[prev]) > depth_in and chains[prev][:depth_in] == outer and chains[prev][depth_in] != q:
+                base[q] = base.get(chains[prev][depth_in], td[prev])           # another speaker's words carried on, no inquit
+            else:
+                base[q] = td[prev] + 1
+                if outer:
+                    base[q] = max(base[q], base[outer[-1]] + 1)
+        q = ch[-1]
+        td[i] = base[q] + tree_depth[i] - low[(q, s_["_rows"][0]["sent"])]
+    return td, chains
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--books", help="comma-separated USFM codes (default: all NT books)")
@@ -248,12 +398,23 @@ def main() -> None:
                                (book, ch)).fetchall()
             segs = chapter_segments(rows, tree)
             whole = collections.Counter(s_["_cl"] for s_ in segs for _ in s_["_rows"])
-            chapters.append((book, ch, carry_forward(inline_participles(segs, whole, mood), tree)))
+            chapters.append((book, ch, carry_forward(noun_line_participles(inline_participles(segs, whole, mood), tree, mood), tree)))
     key_of: dict[int, str] = {}                            # stable clause ids: the key of the clause's first word
     for _, _, segs in chapters:
         for s in segs:
             if s["_cl"] is not None:
                 key_of.setdefault(s["_cl"], s["_rows"][0]["key"])
+    quotes = load_quotations()
+    lemma = dict(con.execute("SELECT key, lemma FROM words WHERE corpus='grc'").fetchall())
+    joined = close_gaps(quotes, sorted(lemma), lemma, mood)
+    speaker_of = {q["id"]: q["speaker"] for qs in quotes.values() for q in qs}
+    by_book: dict[str, list[dict]] = collections.defaultdict(list)
+    for book, ch, segs in chapters:
+        by_book[book] += segs
+    for book, segs in by_book.items():
+        tds, chains = speech_levels(segs, quotes, [tree.depth(s_["_cl"]) if s_["_cl"] is not None else 0 for s_ in segs])
+        for s_, t, c in zip(segs, tds, chains):
+            s_["_td"], s_["_q"] = t, (c[-1] if c else None)
     stats = collections.Counter()
     depths = collections.Counter()
     for book, ch, segs in chapters:
@@ -264,18 +425,19 @@ def main() -> None:
             depth = tree.depth(cid) if cid is not None else 0
             text = " ".join(r["surface"] + (r["after"] or "").strip() for r in rows)
             rec = {"verse": s["verse"], "seg": s["seg"], "clause": key_of.get(cid), "parent": key_of.get(tree.parent.get(cid)),
-                   "depth": depth, "kind": trees_macula._clause_kind(own or rows) if cid is not None else None,
+                   "depth": depth, "text_depth": s["_td"], "quotation": s["_q"], "speaker": speaker_of.get(s["_q"]), "kind": trees_macula._clause_kind(own or rows) if cid is not None else None,
                    "rule": tree.node[cid]["rule"] if cid is not None else None, "role": tree.role.get(cid),
                    "via": tree.via.get(cid, []), "junction": tree.node[cid]["junction"] if cid is not None else None,
                    "sentence": rows[0]["sent"], "first": rows[0]["key"], "last": rows[-1]["key"],
                    "inline": [k for _, k in s["_inline"]], "words": [r["key"] for r in rows], "text": text}
             recs.append(rec)
-            lines.append(f"{ch}:{s['verse']}\t{'    ' * depth}{text}")
+            lines.append(f"{ch}:{s['verse']}\t{'    ' * s['_td']}{text}")
             stats["segments"] += 1
             stats["words"] += len(rows)
             stats["no_clause"] += cid is None
             stats["inline_participles"] += len(s["_inline"])
-            depths[depth] += 1
+            depths[s["_td"]] += 1
+            stats["in_quotation"] += s["_q"] is not None
         d = out / "clauses" / book
         d.mkdir(parents=True, exist_ok=True)
         (d / f"{book}_{ch:03d}.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in recs), encoding="utf-8")
@@ -287,7 +449,8 @@ def main() -> None:
              "trees_db_built": meta.get("built"), "trees_db_sha256": hashlib.sha256(Path(tp).read_bytes()).hexdigest(),
              "books": len(books), "chapters": len(chapters), "clauses": len(key_of), "wrappers": len(tree.wrapper),
              "coordinations": len(tree.coord), **stats,
-             "depth": dict(sorted(depths.items()))}
+             "text_depth": dict(sorted(depths.items())), "quotations": sum(len(q) for q in quotes.values()),
+             "quotations_joined_over_a_gap": joined}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in build.items() if k != "trees_db_sha256"}, ensure_ascii=False))
 
