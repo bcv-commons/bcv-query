@@ -20,6 +20,8 @@ with μή at most), is a noun phrase in the line, not a line: MACULA makes every
 it interrupted is joined up again; the record lists it in `inline`. A participle with words of its own keeps its line.
 Rule: a preposition, a conjunction that is not postpositive, the adverb καί "also, even" or a negation (οὐ, μή) that ends a segment, where the next segment in the verse is a clause below it,
 goes with that clause, which it governs or introduces (εἰς || τὸ φαγεῖν, καὶ || οἱ κατοικοῦντες). MACULA puts it in the higher clause.
+Such a word (and the question particles οὐχί, μήτι) never ends a line inside a verse: it goes with the next line whatever the tree
+says (ἵνα || ἀγαπῶμεν ἀλλήλους; Κύριε, οὐχὶ || σπέρμα: found by the Hebrew cross-check).
 Rule: no line of function words alone (conjunctions, prepositions, articles, particles, οὐ, μή, καί) where the tree leaves one
 (ἀλλὰ || τῇ κακίᾳ νηπιάζετε): such a segment goes with the next segment of the verse, which it introduces, or, when it opens with a
 postpositive (δέ, γάρ, μέν, οὖν, τε: ἐγὼ || μὲν || γάρ), with the one before; a question (τί γάρ;) stays a line; the line takes that segment's clause. ἰδού and
@@ -250,8 +252,12 @@ def noun_line_participles(segs: list[dict], tree: Tree, mood: dict[str, str]) ->
     return out
 
 
+QUESTION_PARTICLES = {"οὐχί", "μήτι"}
+
+
 def carried(r: sqlite3.Row) -> bool:
-    return (r["class"] == "prep" or (r["class"] == "adv" and (r["lemma"] in WRAPPER_ADVERBS or r["lemma"] == "ὅτι"))
+    return (r["class"] == "prep" or (r["class"] == "adv" and (r["lemma"] in WRAPPER_ADVERBS or r["lemma"] in ("ὅτι", "οὐχί")))
+            or (r["class"] == "ptcl" and r["lemma"] in QUESTION_PARTICLES)
             or (r["class"] == "conj" and r["lemma"] not in POSTPOSITIVE))
 
 
@@ -260,6 +266,10 @@ def carry_forward(segs: list[dict], tree: Tree) -> list[dict]:
         while (a["_rows"] and a["verse"] == b["verse"] and b["_cl"] is not None and a["_cl"] is not None and b["_cl"] != a["_cl"]
                and tree.under(b["_cl"], a["_cl"])
                and carried(a["_rows"][-1])):
+            b["_rows"].insert(0, a["_rows"].pop())
+    # and wherever the next line is: such a word never ends a line inside a verse (ἵνα || ἀγαπῶμεν, Κύριε, οὐχὶ || σπέρμα)
+    for a, b in zip(segs, segs[1:]):
+        while len(a["_rows"]) > 1 and a["verse"] == b["verse"] and carried(a["_rows"][-1]):
             b["_rows"].insert(0, a["_rows"].pop())
     out = no_function_lines([s_ for s_ in segs if s_["_rows"]])
     for n, s_ in enumerate(out, 1):
