@@ -8,6 +8,7 @@ DIR gets:
   data/clauses.parquet   one row per line (clause segment), in text order
   layout/<BOOK>.txt      the indented reading text, one line per segment ("chapter:verse<TAB>indent text"; four spaces a level)
   build.json             the build record (copied), with the speaker data's SHA-256 added
+  crosscheck/            crosscheck.json and crosscheck-disagreements.tsv from `python -m macula.nt_layout_crosscheck` (required)
   SHA256SUMS             SHA-256 of every file
 
 The build must come from committed code (`git status` clean for macula/build_nt_clause_layout.py and the speaker data), unless
@@ -91,6 +92,19 @@ def main() -> None:
     build["code_commit"] = commit
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
+    cc = json.loads((src / "crosscheck.json").read_text(encoding="utf-8"))
+    if (src / "crosscheck.json").stat().st_mtime < (src / "build.json").stat().st_mtime:
+        raise SystemExit("crosscheck.json is older than the build: rerun python -m macula.nt_layout_crosscheck")
+    (out / "crosscheck").mkdir()
+    for name in ("crosscheck.json", "crosscheck-disagreements.tsv"):
+        shutil.copy(src / name, out / "crosscheck" / name)
+    names = {"MAT": "Matthew", "MRK": "Mark", "LUK": "Luke", "JHN": "John", "ACT": "Acts", "ROM": "Romans", "1CO": "1 Corinthians",
+             "2CO": "2 Corinthians", "GAL": "Galatians", "EPH": "Ephesians", "PHP": "Philippians", "COL": "Colossians",
+             "1TH": "1 Thessalonians", "2TH": "2 Thessalonians", "1TI": "1 Timothy", "2TI": "2 Timothy", "TIT": "Titus",
+             "PHM": "Philemon", "HEB": "Hebrews", "JAS": "James", "1PE": "1 Peter", "2PE": "2 Peter", "1JN": "1 John",
+             "2JN": "2 John", "3JN": "3 John", "JUD": "Jude", "REV": "Revelation"}
+    book_rows = "\n".join(f"| {names.get(b, b)} | {f['pairs']:,} | {f['agree']:.1%} | {f['boundary_f1']:.1%} |"
+                          for b, f in sorted(cc["books"].items(), key=lambda x: books.index(x[0])))
     depth = collections.Counter(r["text_depth"] for r in rows)
     fields = {"@TAG@": a.tag, "@BUILT@": datetime.date.today().isoformat(), "@COMMIT@": commit, "@LINES@": f"{len(rows):,}",
               "@CLAUSES@": f"{build['clauses']:,}", "@WORDS@": f"{build['words']:,}", "@BOOKS@": str(len(books)),
@@ -98,7 +112,11 @@ def main() -> None:
               "@JOINED@": str(build["quotations_joined_over_a_gap"]), "@INLINE@": str(build["inline_participles"]),
               "@SPLIT@": str(build["split_at_quotation"]), "@NO_CLAUSE@": str(build["no_clause"]),
               "@DEPTHS@": ", ".join(f"{k}: {v:,}" for k, v in sorted(depth.items())),
-              "@TREES_SHA@": build["trees_db_sha256"][:12], "@SPEAKERS_SHA@": build["speaker_data_sha256"][:12]}
+              "@TREES_SHA@": build["trees_db_sha256"][:12], "@SPEAKERS_SHA@": build["speaker_data_sha256"][:12],
+              "@CC_ALIGNMENTS@": cc["alignments"], "@CC_PAIRS@": f"{cc['pairs']:,}", "@CC_AGREE@": f"{cc['agree']:.1%}",
+              "@CC_P@": f"{cc['hebrew_boundary_also_greek']:.1%}", "@CC_R@": f"{cc['greek_boundary_also_hebrew']:.1%}",
+              "@CC_F1@": f"{cc['boundary_f1']:.1%}", "@CC_ANALYSIS@": cc["analysis"], "@CC_BOOKS@": book_rows,
+              "@CC_DISAGREE@": f"{cc['pairs'] - round(cc['agree'] * cc['pairs']):,}"}
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         card = card.replace(k, v)

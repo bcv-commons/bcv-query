@@ -2,7 +2,7 @@
 tagger (trained on the Old Testament only) gives Salkinson–Ginsburg's Hebrew New Testament, joined to the Greek through
 lexeme-aligner's alignment by Greek word id (bcv-commons/alignments-by-id, CC0).
 
-    python -m macula.nt_layout_crosscheck --alignments DIR [--classes kept] [--layout macula/data/nt-clause-layout]
+    python -m macula.nt_layout_crosscheck --alignments DIR --revision REV [--classes kept] [--layout macula/data/nt-clause-layout]
                                           [--analysis macula/data/clause-tagger/export/heb_scg] [--out macula/data/nt-clause-layout]
 
 The unit is a pair of neighbouring Hebrew tokens of a verse whose Greek words are known (links of the chosen classes; a token
@@ -59,6 +59,7 @@ def hebrew_segments(analysis: Path) -> tuple[dict[tuple, int], dict[tuple, str],
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--alignments", required=True, help="a download of bcv-commons/alignments-by-id")
+    ap.add_argument("--revision", required=True, help="the alignments-by-id tag or commit the download is of (recorded)")
     ap.add_argument("--classes", default="kept", help="link classes to use (comma-separated)")
     ap.add_argument("--layout", default=str(HERE / "data" / "nt-clause-layout"))
     ap.add_argument("--analysis", default=str(HERE / "data" / "clause-tagger" / "export" / EDITION))
@@ -118,7 +119,7 @@ def main() -> None:
                 "hebrew_boundary_also_greek": round(p, 4), "greek_boundary_also_hebrew": round(r, 4),
                 "boundary_f1": round(2 * p * r / (p + r), 4) if p + r else 0.0}
 
-    report = {"edition": EDITION, "classes": sorted(classes), "alignment_built": manifest["languages"]["heb"]["editions"][EDITION]["built"],
+    report = {"edition": EDITION, "classes": sorted(classes), "alignments": f"bcv-commons/alignments-by-id@{a.revision}", "alignment_built": manifest["languages"]["heb"]["editions"][EDITION]["built"],
               "analysis": f"{pin['dataset']} {pin['revision']}", **stats, **figures(table),
               "books": {b: figures(c) for b, c in sorted(per_book.items())}}
     out = Path(a.out)

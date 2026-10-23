@@ -33,6 +33,7 @@ structure of a sentence at a glance, and as a base for comparing the clause stru
 | Release | **@TAG@**, built @BUILT@ from bcv-query `@COMMIT@` |
 | Text | Nestle 1904, as MACULA Greek has it (@WORDS@ words, @BOOKS@ books) |
 | Size | @LINES@ lines (clause segments) of @CLAUSES@ clauses; @IN_QUOTE@ lines inside a speech |
+| Changes | v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
 | Companion | [Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout), the same idea for the Hebrew Bible |
 
 Matthew 5:1–4 in `layout/MAT.txt`:
@@ -57,6 +58,8 @@ Matthew 5:1–4 in `layout/MAT.txt`:
 | `data/clauses.parquet` | one row per line, in text order |
 | `layout/<BOOK>.txt` | the indented text, one line per row: `chapter:verse`, a tab, four spaces per level, the text |
 | `build.json` | the build record: counts, the MACULA trees' and the speaker data's SHA-256 |
+| `crosscheck/crosscheck.json` | the cross-check against a Hebrew translation (see *Cross-check*), overall and per book |
+| `crosscheck/crosscheck-disagreements.tsv` | every pair of words where the two readings disagree, with the Hebrew segments and Greek lines side by side |
 | `SHA256SUMS` | SHA-256 of every file |
 
 ## The rows
@@ -99,7 +102,8 @@ of a vocative alone (Κύριε,) keeps its line and adds no level.
   so is a participle modifying a noun when the noun's line is nothing but that noun phrase (φωνὴ βοῶντος ἐν τῇ ἐρήμῳ). A participle
   with words of its own after a longer line keeps its line (τοῖς ἁγίοις / τοῖς οὖσιν ἐν Ἐφέσῳ). (@INLINE@ participles.)
 - A preposition, conjunction, negation or ascensive καί that ends a line goes with the clause below it that follows, which it
-  governs or introduces (εἰς τὸ φαγεῖν).
+  governs or introduces (εἰς τὸ φαγεῖν). Such a word, and the question particles οὐχί and μήτι, never ends a line inside a verse
+  (ἵνα ἀγαπῶμεν ἀλλήλους; Κύριε, / οὐχὶ καλὸν σπέρμα…).
 - No line is function words alone (ἀλλὰ, οὐ γὰρ, καὶ ἰδοὺ, a relative pronoun): such words go with the line they introduce. A short
   question (τί γάρ;) stays a line.
 - A line breaks where a speech starts or ends inside it (ὁ δὲ ἔφη / Ἄνδρες ἀδελφοί…, Acts 7:2), at the start of the phrase the break
@@ -118,11 +122,38 @@ Lines per level: @DEPTHS@.
 ## What it does not do (yet)
 
 - No text-level hierarchy between sentences beyond the speeches: a paragraph's sentences all start at the margin of their speech.
-- Where MACULA's tree or the speaker data differs from a reading you'd expect, the layout follows them: Rev 4:8 "ὁ ἦν" stands one
+- Where MACULA's tree or the speaker data differs from a reading you'd expect, the layout follows them (the speaker data has no
+  quotations inside a parable's speakers, so in Matt 13:27 the servants' second question stands at the parable's level): Rev 4:8 "ὁ ἦν" stands one
   level deeper than "καὶ ὁ ὢν καὶ ὁ ἐρχόμενος"; John 4:9 "οὐ γὰρ συνχρῶνται Ἰουδαῖοι Σαμαρείταις" is inside the woman's words; Acts
   7:7 "ὁ Θεὸς εἶπεν" is inside Stephen's quotation of God. @NO_CLAUSE@ lines have no clause in MACULA (titles such as Matt 1:1).
-- Not checked by hand beyond reading passages from each kind of book. A cross-check against a Hebrew translation of the New
-  Testament ([hebrew-nt-analysis](https://huggingface.co/datasets/bcv-commons/hebrew-nt-analysis)) is planned.
+- Not checked by hand beyond reading passages from each kind of book; the cross-check below compares it with an independent
+  reading.
+
+## Cross-check
+
+The layout was compared with an independent reading of the same text: the clause segments of Salkinson–Ginsburg's Hebrew New
+Testament as given by a tagger trained on the Old Testament alone ([@CC_ANALYSIS@](https://huggingface.co/datasets/bcv-commons/hebrew-nt-analysis)),
+joined to the Greek words through the alignment
+[@CC_ALIGNMENTS@](https://huggingface.co/datasets/bcv-commons/alignments-by-id) (links of class `kept`, 25 of 25 right in its hand
+check). Neither reading uses the alignment, nor the other. The unit is a pair of neighbouring Hebrew words whose Greek words are
+known: are they in one clause segment in Hebrew, and on one line here? @CC_PAIRS@ pairs.
+
+| | |
+|---|---|
+| Pairs where both readings agree | **@CC_AGREE@** |
+| Hebrew segment boundaries that are also line breaks here | @CC_P@ |
+| Line breaks here that are also Hebrew boundaries | @CC_R@ |
+| Boundary F1 | @CC_F1@ |
+
+This is agreement between two readings, not accuracy. Most of the @CC_DISAGREE@ disagreeing pairs are the translation: Salkinson
+often makes a clause where the Greek has a phrase (Rev 9:11 adds "הוּא מַלְאַךְ"; Eph 2:8 renders διὰ πίστεως "עֵקֶב אֱמוּנַתְכֶם") or
+renders a participle as a finite clause, so the letters with the densest participle and noun style agree least. Reading the
+disagreements found one fault of the layout, fixed in v0.2: a conjunction or question particle ending a line (Matt 13:27 "Κύριε,
+οὐχὶ / καλὸν σπέρμα"). The full list is in `crosscheck/`.
+
+| Book | Pairs | Agree | Boundary F1 |
+|---|---|---|---|
+@CC_BOOKS@
 
 ## Sources and licence
 
