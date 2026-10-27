@@ -43,7 +43,9 @@ at the margin. `text_depth`: a quotation's lines stand at least one level in fro
 first line), never further out while it lasts, and keep the tree's levels relative to the speech's lowest line in each sentence;
 a quotation inside a quotation is one further in; one that directly follows another of the same depth (no introducing line) stands
 where that one stands, one with no line before it at level 1 (or one in from the quotation around it). Lines outside every
-quotation keep their tree depth. `quotation` is the innermost quotation (its first word id), `speaker` its speaker. Two
+quotation keep their tree depth. `quotation` is the innermost quotation (its first word id). `speaker` names who speaks it in
+Greek, from the text (macula.greek_speakers: the subject of the verb that introduces the quotation, as MACULA links it; Ἰησοῦς,
+Πέτρος, μαθητής), and `speaker_ref` gives the word ids that name; the speaker data's English labels are not used. Two
 quotations of one speaker are one when what stands between them is short (at most 12 words) and has no finite verb (the speaker
 data leaves Luke 1:74 out of Zechariah's song, and Mark 7:21's list of vices out of Jesus' words); the words between belong to it.
 `depth` is the number of clause ancestors in the sentence, wrappers not counted. `parent` is the parent clause's id; a clause is named
@@ -70,6 +72,7 @@ SHORESH = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SHORESH))
 
 import trees_macula  # noqa: E402
+from macula import greek_speakers  # noqa: E402
 
 FORMAT_VERSION = 1
 WRAPPER_CLASSES = {"conj", "ptcl", "det"}
@@ -487,7 +490,7 @@ def main() -> None:
         for s in segs:
             if s["_cl"] is not None:
                 key_of.setdefault(s["_cl"], s["_rows"][0]["key"])
-    speaker_of = {q["id"]: q["speaker"] for qs in quotes.values() for q in qs}
+    speakers, lowfat_sha = greek_speakers.find(quotes, con)
     by_book: dict[str, list[dict]] = collections.defaultdict(list)
     for book, ch, segs in chapters:
         by_book[book] += segs
@@ -506,7 +509,8 @@ def main() -> None:
             depth = tree.depth(cid) if cid is not None else 0
             text = " ".join(r["surface"] + (r["after"] or "").strip() for r in rows)
             rec = {"verse": s["verse"], "seg": s["seg"], "clause": key_of.get(cid), "parent": key_of.get(tree.parent.get(cid)),
-                   "depth": depth, "text_depth": s["_td"], "quotation": s["_q"], "speaker": speaker_of.get(s["_q"]), "kind": trees_macula._clause_kind(own or rows) if cid is not None else None,
+                   "depth": depth, "text_depth": s["_td"], "quotation": s["_q"], "speaker": ", ".join(speakers[s["_q"]]["names"]) or None if s["_q"] else None,
+                   "speaker_ref": speakers[s["_q"]]["refs"] if s["_q"] else [], "kind": trees_macula._clause_kind(own or rows) if cid is not None else None,
                    "rule": tree.node[cid]["rule"] if cid is not None else None, "role": tree.role.get(cid),
                    "via": tree.via.get(cid, []), "junction": tree.node[cid]["junction"] if cid is not None else None,
                    "sentence": rows[0]["sent"], "first": rows[0]["key"], "last": rows[-1]["key"],
@@ -532,7 +536,9 @@ def main() -> None:
              "books": len(books), "chapters": len(chapters), "clauses": len(key_of), "wrappers": len(tree.wrapper),
              "coordinations": len(tree.coord), **stats,
              "text_depth": dict(sorted(depths.items())), "quotations": sum(len(q) for q in quotes.values()),
-             "quotations_joined_over_a_gap": joined}
+             "quotations_joined_over_a_gap": joined,
+             "quotations_with_greek_speaker": sum(bool(v["names"]) for v in speakers.values()),
+             "lowfat_grc_sha256": lowfat_sha}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in build.items() if k != "trees_db_sha256"}, ensure_ascii=False))
 

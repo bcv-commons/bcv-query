@@ -33,7 +33,7 @@ structure of a sentence at a glance, and as a base for comparing the clause stru
 | Release | **@TAG@**, built @BUILT@ from bcv-query `@COMMIT@` |
 | Text | Nestle 1904, as MACULA Greek has it (@WORDS@ words, @BOOKS@ books) |
 | Size | @LINES@ lines (clause segments) of @CLAUSES@ clauses; @IN_QUOTE@ lines inside a speech |
-| Changes | v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
+| Changes | v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
 | Companion | [Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout), the same idea for the Hebrew Bible |
 
 Matthew 5:1–4 in `layout/MAT.txt`:
@@ -57,7 +57,7 @@ Matthew 5:1–4 in `layout/MAT.txt`:
 |---|---|
 | `data/clauses.parquet` | one row per line, in text order |
 | `layout/<BOOK>.txt` | the indented text, one line per row: `chapter:verse`, a tab, four spaces per level, the text |
-| `build.json` | the build record: counts, the MACULA trees' and the speaker data's SHA-256 |
+| `build.json` | the build record: counts, the SHA-256 of the MACULA trees, the MACULA Greek files read for the speakers, and the speaker data |
 | `crosscheck/crosscheck.json` | the cross-check against a Hebrew translation (see *Cross-check*), overall and per book |
 | `crosscheck/crosscheck-disagreements.tsv` | every pair of words where the two readings disagree, with the Hebrew segments and Greek lines side by side |
 | `SHA256SUMS` | SHA-256 of every file |
@@ -80,7 +80,8 @@ Matthew 5:1–4 in `layout/MAT.txt`:
 | `junction` | MACULA's junction of the clause, where given |
 | `sentence` | the MACULA sentence: the word id of its first word. A sentence can run over several verses |
 | `quotation` | the innermost speech the line stands in: the word id where it starts in the speaker data; empty in narrative |
-| `speaker` | that speech's speaker, as the speaker data names them |
+| `speaker` | who speaks it, named from the Greek text: the subject of the verb that introduces the speech (Ἰησοῦς, Πέτρος, Στέφανος, μαθητής, ἡγεμών, φωνή), as a lemma; several subjects separated by commas. Empty where the text names no one (a passive γέγραπται, an unnamed "they", a participle) |
+| `speaker_ref` | the word ids of the words that name the speaker; a pronoun or an article used as one (ὁ δὲ ἔφη) is followed to the word it refers to |
 | `inline` | clauses written on this line though they are clauses of their own (participles, see the rules) |
 | `split_at_quotation` | the line was broken off its clause where a speech starts or ends (see the rules) |
 | `first`, `last`, `words` | MACULA word ids (`BBCCCVVVWWW`, as `n…` ids in MACULA's files) |
@@ -113,7 +114,8 @@ of a vocative alone (Κύριε,) keeps its line and adds no level.
 stand at least one level in from the line that introduces it, and none goes further out while it lasts, also over the many
 sentences of a long speech (Matthew 5:3–7:27 stay in from 5:2 "λέγων"). A speech inside a speech is one further in; a speech that
 follows another directly (no introducing line) stands where that one stands. Two speeches of one speaker with only a few verbless
-words between them are one (@JOINED@ joins; the speaker data leaves Luke 1:74 out of Zechariah's song). Last, a line steps in one
+words between them are one (@JOINED@ joins; the speaker data leaves Luke 1:74 out of Zechariah's song). @GREEK_SPEAKERS@ of the @QUOTATIONS@ speeches have a speaker named from the text. The speaker data's own labels for who speaks are in
+English; they are not used. Last, a line steps in one
 level at a time: where the tree has a level with no line of its own, deeper lines move out to one in from the line above, keeping
 the order of the levels.
 
@@ -160,14 +162,15 @@ disagreements found one fault of the layout, fixed in v0.2: a conjunction or que
 | Part | Source | Licence |
 |---|---|---|
 | Greek text, clauses, sentence trees | MACULA Greek (Clear Bible / Biblica), `Nestle1904/lowfat`, through trees-macula.db (SHA-256 `@TREES_SHA@…`) | CC BY 4.0 |
-| Speeches and speakers | MACULA Quotation and Speaker Data (Clear Bible), with character names from SIL Glyssen `CharacterVerse.txt`, as `resources/speaker_quotations` in bcv-query (SHA-256 `@SPEAKERS_SHA@…`) | CC BY 4.0; Glyssen MIT |
+| Where speeches run | MACULA Quotation and Speaker Data (Clear Bible), as `resources/speaker_quotations` in bcv-query (SHA-256 `@SPEAKERS_SHA@…`); used for its word spans, and to tell whether two speeches next to each other have one speaker (to join them over a gap); its names are not used | CC BY 4.0 |
+| Who speaks | MACULA Greek's subject and referent links (`Nestle1904/lowfat`, SHA-256 `@LOWFAT_SHA@…`) | CC BY 4.0 |
 | The layout | bcv-commons | **CC BY 4.0** |
 | The code (`macula/build_nt_clause_layout.py`, bcv-query) | bcv-commons | MIT |
 
 **Attribution** when you use this dataset:
 
 > Greek New Testament Clause Layout (@TAG@), bcv-commons, CC BY 4.0. Text and syntax: MACULA Greek, Clear Bible / Biblica (CC BY 4.0).
-> Speeches: MACULA Quotation and Speaker Data, Clear Bible (CC BY 4.0), with character data from SIL Glyssen (MIT).
+> Speeches: MACULA Quotation and Speaker Data, Clear Bible (CC BY 4.0).
 
 ## Feedback
 
