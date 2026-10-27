@@ -5,7 +5,9 @@ from BHSA and are dropped here:
   phrase_id, function, rela   -- BHSA phrase-level syntax (via the BHSA<->MACULA bridge)
   sense, sense_conf, sense_source -- our sense clustering, built on BHSA clauses
 Everything else is MACULA (CC BY 4.0). Added: `construct_role` (regens / rectum / regens+rectum) from the
-lowfat tree's NPofNP groups, the MACULA-only stand-in for BHSA `rela='rec'`.
+lowfat tree's NPofNP groups, the MACULA-only stand-in for BHSA `rela='rec'`; and `greek` / `greekstrong`, the Septuagint's
+equivalent of each Hebrew word as MACULA gives it (the inflected Greek form and its Strong's, as written there; NULL where MACULA
+has none, and on Greek rows).
 
 The full lexeme-spine.db is left untouched; the aligner keeps it as a private, unpublished baseline.
 
@@ -33,6 +35,13 @@ def export(spine: Path, lowfat: Path, out: Path) -> dict:
     shutil.copyfile(spine, out)
     stats = enrich(out, lowfat)
     db = sqlite3.connect(out)
+    for col in ("greek", "greekstrong"):
+        db.execute(f"ALTER TABLE spine_words ADD COLUMN {col} TEXT")
+    db.execute(f"ATTACH DATABASE ? AS lf", (f"file:{lowfat}?mode=ro",))
+    db.execute("""UPDATE spine_words SET (greek, greekstrong) = (SELECT greek, greekstrong FROM lf.lowfat_words l
+                  WHERE l.key = spine_words.key AND l.is_inserted = 0) WHERE lexeme LIKE 'hbo:%'""")
+    db.commit()
+    db.execute("DETACH DATABASE lf")
     present = {r[1] for r in db.execute("PRAGMA table_info(spine_words)")}
     for col in BHSA_COLUMNS:
         if col in present:
@@ -47,8 +56,10 @@ def export(spine: Path, lowfat: Path, out: Path) -> dict:
     db.commit()
     db.execute("VACUUM")
     db.close()
-    stats["construct_role_set"] = sqlite3.connect(f"file:{out}?mode=ro", uri=True).execute(
-        "SELECT COUNT(*) FROM spine_words WHERE construct_role IS NOT NULL").fetchone()[0]
+    ro = sqlite3.connect(f"file:{out}?mode=ro", uri=True)
+    stats["construct_role_set"] = ro.execute("SELECT COUNT(*) FROM spine_words WHERE construct_role IS NOT NULL").fetchone()[0]
+    stats["greek_set"], stats["greekstrong_set"] = ro.execute(
+        "SELECT COUNT(greek), COUNT(greekstrong) FROM spine_words WHERE lexeme LIKE 'hbo:%'").fetchone()
     from macula.spine_stamp import stamp
     stats["spine_content_sha256"] = stamp(out)["spine_content_sha256"]
     stats["sha256"] = hashlib.sha256(out.read_bytes()).hexdigest()
@@ -61,11 +72,12 @@ def main() -> int:
     ap.add_argument("--lowfat", type=Path, default=LOWFAT_DEFAULT)
     ap.add_argument("--out", type=Path, default=OUT_DEFAULT)
     args = ap.parse_args()
-    if "construct_role" not in {r[1] for r in sqlite3.connect(f"file:{args.lowfat}?mode=ro", uri=True)
-                                .execute("PRAGMA table_info(lowfat_words)")}:
-        sys.exit(f"{args.lowfat} has no construct_role -- rebuild it with `python -m macula.parse_lowfat_hbo`")
+    if not {r[1] for r in sqlite3.connect(f"file:{args.lowfat}?mode=ro", uri=True)
+            .execute("PRAGMA table_info(lowfat_words)")} >= {"construct_role", "greekstrong"}:
+        sys.exit(f"{args.lowfat} has no construct_role or greekstrong -- rebuild it with `python -m macula.parse_lowfat_hbo`")
     stats = export(args.spine, args.lowfat, args.out)
-    print(f"construct_role: {stats['construct_role_set']} set; dropped {', '.join(BHSA_COLUMNS)}")
+    print(f"construct_role: {stats['construct_role_set']} set; greek {stats['greek_set']}, greekstrong {stats['greekstrong_set']}; "
+          f"dropped {', '.join(BHSA_COLUMNS)}")
     print(f"-> {args.out}\nsha256 {stats['sha256']}")
     return 0
 

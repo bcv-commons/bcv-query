@@ -68,6 +68,9 @@ _XML_ID = "{http://www.w3.org/XML/1998/namespace}id"  # ElementTree expands xml:
 _W_FIELDS = ("class", "morph", "pos", "type", "lemma", "gloss", "state",
              "gender", "number", "person", "role")
 _STRONG_ATTR = "strongnumberx"
+# The Septuagint's equivalent of the word, as MACULA gives it (item 3 and 5 of its LICENSE.md, Clear's own, CC BY 4.0): `greek` is the
+# inflected Greek form (ἀρξῇ, ἐποίησεν), not a lemma; `greekstrong` its Strong's number, unpadded ("1722"), "1722|1698" for two.
+_LXX_FIELDS = ("greek", "greekstrong")
 
 
 def _fetch_source(env: str) -> Path:
@@ -161,6 +164,8 @@ def parse_chapter(path: Path) -> list[dict]:
                 }
                 for f in _W_FIELDS:
                     row[f] = child.get(f, "") or ""
+                for f in _LXX_FIELDS:
+                    row[f] = child.get(f) or None
                 rows.append(row)
             else:
                 # Any other wrapper tag (sentence, chapter, or the rarer <c> compound/coordination
@@ -192,6 +197,7 @@ def build(src: Path, out_path: Path) -> dict:
             phrase_role TEXT,               -- v/s/o/o2/p/pp/adv -- own role, else nearest ancestor's
             construct_group TEXT,          -- shared id for all words in one NPofNP chain, else NULL
             construct_role TEXT,           -- regens / rectum / regens+rectum (middle link), else NULL
+            greek TEXT, greekstrong TEXT,  -- the Septuagint's equivalent (form, Strong's) as MACULA gives it, else NULL
             PRIMARY KEY (book, chapter, verse, seq)
         );
         CREATE INDEX ix_lowfat_key ON lowfat_words(key);
@@ -206,7 +212,7 @@ def build(src: Path, out_path: Path) -> dict:
             "INSERT INTO lowfat_words VALUES "
             "(:key,:xml_id,:book,:chapter,:verse,:word,:seq,:is_inserted,:surface,:strong,"
             " :class,:morph,:pos,:type,:lemma,:gloss,:state,:gender,:number,:person,"
-            " :head_key,:phrase_role,:construct_group,:construct_role)",
+            " :head_key,:phrase_role,:construct_group,:construct_role,:greek,:greekstrong)",
             rows,
         )
         n_words += len(rows)
