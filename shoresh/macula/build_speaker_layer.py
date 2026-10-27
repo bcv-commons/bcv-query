@@ -34,6 +34,7 @@ import trees_macula  # noqa: E402
 from macula import discourse_rules as D  # noqa: E402
 from macula.build_clause_layout import _verb_person  # noqa: E402
 from macula import speaker_votes  # noqa: E402
+from macula import hebrew_speakers  # noqa: E402
 
 SPANS = SHORESH.parent / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
 LAYOUT = SHORESH / "macula" / "data" / "clause-layout" / "clauses"
@@ -275,6 +276,7 @@ def main() -> None:
     corr_path = SHORESH.parent / "resources" / "speaker_layer" / "corrections.tsv"
     applied = 0
     frame_fixed: dict = {}                        # (book number, chapter) -> the frame a correction sets ("" for none)
+    frame_hebrew: dict = {}                       # a frame's label -> its name in Hebrew, as the heading or title writes it
     sender_last: dict = {}                        # a relayed message's formula (first word) -> the last word of the sender's words
     if corr_path.exists():
         with open(corr_path, encoding="utf-8") as fh:
@@ -287,6 +289,7 @@ def main() -> None:
                 continue
             if c["field"] == "frame" and c.get("reason"):
                 frame_fixed[(c["first"][:2], int(c["first"][2:5]))] = c["value"]   # the chapter that starts with this word
+                frame_hebrew[c["value"]] = D._n(tok[c["name_key"]]["lemma"]) if c.get("name_key") else ""
                 applied += 1
                 continue
             sp = by_first.get(c["first"])
@@ -914,6 +917,7 @@ def main() -> None:
         return w
     wrapped: list[dict] = []
 
+    frame_hebrew.update({"Psalmist": "", "narrator (I)": "אֲנִי"})     # an untitled psalm; a first-person account (its "I")
     frame_of: dict = {}                           # (book, chapter) -> the person its title names with "לְ" (לְדָוִד, לְאָסָף, לִבְנֵי־קֹרַח)
     for sg in segs:
         if sg["book"] in D.GROUPS["frame_poems"] and sg["verse"] == 1 and (sg["book"], sg["chapter"]) not in frame_of:
@@ -923,6 +927,7 @@ def main() -> None:
                     name = names.get(f"H{int(D._strong(tok[b])):04d}")
                     if name:
                         frame_of[(sg["book"], sg["chapter"])] = name
+                        frame_hebrew[name] = D._n(tok[b]["lemma"])
                         break
     # relayed messages: a messenger formula outside any quotation ("וַיֹּאמֶר יְהוֹשֻׁעַ … כֹּה־אָמַר יְהוָה", Josh 24:2; "וַיִּשְׁלַח מֹשֶׁה
     # מַלְאָכִים … כֹּה אָמַר אָחִיךָ יִשְׂרָאֵל", Num 20:14) right before a quotation: the formula line is the messenger's speech (level 1),
@@ -1070,6 +1075,7 @@ def main() -> None:
         p_ = line.rstrip("\n").split("\t")
         if len(p_) >= 2 and not line.startswith("#") and p_[0] != "book":
             prophet_of[p_[0]] = p_[1]
+            frame_hebrew[p_[1]] = D._n(tok[p_[3]]["lemma"])               # name_key: the heading's word for him
     oracle_breaks, opener_of = [], {}
     opened_without_formula = 0
     region: list = [None] * len(segs)
@@ -1334,6 +1340,8 @@ def main() -> None:
                 a0, b0 = order[q["first"]], order[q["last"]]
                 if f == "speaker":
                     q["speaker"], q["divine"] = val, "Y" if val == "God" else ""
+                elif f == "name":                       # the words that name the speaker, where the inquit's subject does not
+                    q["_name_keys"] = val.split()
                 elif f == "drop":
                     for x in range(a0, b0 + 1):
                         unnest(x, q)
@@ -1459,15 +1467,36 @@ def main() -> None:
             seg_q[i] = (q, seg_q[i][1] or 1.0)
 
     allq = sorted(final, key=lambda q: (q["first"], q["level"]))
-    cols = ["id", "level", "parent", "speaker", "speaker_hebrew", "alt_speaker", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
+    # who speaks, named in Hebrew from the text (macula.hebrew_speakers: the inquit's subject), or by the words a review row gives;
+    # the English labels above (Clear's, Glyssen's, the prophets table) only steer the build and go to _work/labels.tsv
+    finder = hebrew_speakers.Finder(con, sqlite3.connect(f"file:{spine}?mode=ro", uri=True))
+    named = collections.Counter()
+    for q in allq:
+        if q.get("_name_keys"):
+            ks = [k for k in q["_name_keys"] if k in tok]
+            q["name"], q["name_ref"] = " ".join(D._n(tok[k]["lemma"]) for k in ks), " ".join(ks)
+            named["review"] += 1
+            continue
+        x = finder(q["first"], q["last"])
+        q["name"], q["name_ref"] = ", ".join(x["names"]), " ".join(x["refs"])
+        named["text" if x["names"] else "none"] += 1
+    unknown = sorted({fr for fr in frame if fr and fr not in frame_hebrew})
+    if unknown:
+        raise SystemExit(f"frames with no Hebrew name (prophets.tsv name_key, corrections.tsv name_key, a psalm title): {unknown}")
+    cols = ["id", "level", "parent", "speaker", "speaker_ref", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
             "end_fit", "pieces", "inquit"]
     with open(OUT / "quotations.tsv", "w", encoding="utf-8") as fh:
-        fh.write("# Hebrew speaker layer (steps 1-2): Clear's quotation spans (CC BY 4.0) on MACULA's Hebrew words, with the quotations\n")
-        fh.write("# nested inside them from the clause layout's speech structure (basis 'layout'; speaker: the outer speaker for an 'I' inquit,\n")
-        fh.write("# speaker_hebrew: the inquit's subject as MACULA lemmas)\n")
+        fh.write("# Hebrew speaker layer: Clear's quotation spans (CC BY 4.0) on MACULA's Hebrew words, with the quotations nested inside\n")
+        fh.write("# them from the clause layout's speech structure. speaker: who speaks, as MACULA lemmas of the words that name them in the\n")
+        fh.write("# text (the subject of the inquit; speaker_ref: those words' keys)\n")
         fh.write("\t".join(cols) + "\n")
         for q in allq:
-            fh.write("\t".join(str(q.get(c, "")) for c in cols) + "\n")
+            fh.write("\t".join(str({"speaker": q["name"], "speaker_ref": q["name_ref"]}.get(c, q.get(c, ""))) for c in cols) + "\n")
+    (OUT / "_work").mkdir(exist_ok=True)
+    with open(OUT / "_work" / "labels.tsv", "w", encoding="utf-8") as fh:      # the English labels, for the review tools only
+        fh.write("id\tlabel\talt_label\tspeaker\n")
+        for q in allq:
+            fh.write(f"{q['id']}\t{q.get('speaker', '')}\t{q.get('alt_speaker', '')}\t{q['name']}\n")
     (OUT / "segments").mkdir(exist_ok=True)
     by_book = collections.defaultdict(list)
     for i, s in enumerate(segs):
@@ -1477,7 +1506,7 @@ def main() -> None:
             fh.write("chapter\tverse\tseg\tclause_key\tquotation\tlevel\tspeaker\tshare\tframe\n")
             for s, q, share, lv, fr in rows:
                 fh.write(f"{s['chapter']}\t{s['verse']}\t{s['seg']}\t{s['clause_key']}\t{q['id'] if q else ''}\t{lv}\t"
-                         f"{q['speaker'] if q else ''}\t{share:.2f}\t{fr}\n")
+                         f"{q['name'] if q else ''}\t{share:.2f}\t{frame_hebrew.get(fr, '')}\n")
     frames_inside = frames_agree + frames_disagree
 
     # the evidence per segment, for a review pass over doubtful passages (macula/speaker_review.py): the translations' votes, the verb,
@@ -1541,11 +1570,10 @@ def main() -> None:
              f"- other third-person wayyiqtols inside a quotation, outside the books of poems: {len(frames_inside)}; the layout also has them in a"
              f" speech (a story the speaker tells): {len(frames_agree)}; not (the sources disagree): {len(frames_disagree)}",
              f"- nested quotations (from the layout, a messenger formula or the translations' votes): {len(inner)} (level 2: {sum(q['level'] == 2 for q in inner)}, deeper:"
-             f" {sum(q['level'] > 2 for q in inner)}); with a speaker: {sum(bool(q['speaker'] or q['speaker_hebrew']) for q in inner)}"
-             f" (named: {sum(q['speaker'] not in ('', '(the one addressed)', '(they)', '(he/she)') for q in inner)}, a Hebrew subject only: "
-             f"{sum(bool(q['speaker_hebrew']) and q['speaker'] in ('', '(they)', '(he/she)', '(the one addressed)') for q in inner)}, 'you': {sum(q['speaker'] == '(the one addressed)' for q in inner)},"
-             f" only in the verb: {sum(q['speaker'] in ('(they)', '(he/she)') for q in inner)}); of them opened by a messenger formula"
+             f" {sum(q['level'] > 2 for q in inner)}); named in the text: {sum(bool(q.get('name')) for q in inner)}; of them opened by a messenger formula"
              f" inside a quotation: {messenger}",
+             f"- speakers named in Hebrew (the inquit's subject, macula/hebrew_speakers.py; MACULA Hebrew lowfat sha256 {finder.sha[:12]}): "
+             f"{named['text']} of {len(allq)} quotations from the text, {named['review']} by a review row, {named['none']} not named",
              f"- refinement 7, touching pieces of a voice implied in the outer speech (Glyssen's Implicit) joined into one speech: {implicit}",
              "- one structure (quotations, segment levels and innermost quotations made to agree): "
              + (", ".join(f"{k} {v}" for k, v in consistent.most_common()) or "nothing to change"),
@@ -1578,6 +1606,7 @@ def main() -> None:
              "- layout speech without a Clear quotation, by book: " + ", ".join(f"{b} {n}" for b, n in layout_only.most_common(10)),
              f"- first- or second-person finite verbs outside any quotation, in the narrative books: {len(voiced_outside)}", ""]
     breaks = [(f"{segs[i]['book']} {segs[i]['chapter']}:{segs[i]['verse']}", "", segs[i]["text"]) for _, i in oracle_breaks]
+    public = list(lines)
     for title, rows in (("Third-person wayyiqtols outside quotations inside an oracle (the prophet narrates, or the oracle ends)", breaks),
                         ("Quotations without an inquit before them", no_inquit), ("Wayyiqtols of saying inside a quotation", inner_inquits),
                         ("Third-person wayyiqtols inside a quotation where the layout has no speech (sources disagree)", frames_disagree),
@@ -1585,7 +1614,11 @@ def main() -> None:
                         ("First/second person outside quotations (narrative books)", voiced_outside),
                         ("Speakers Glyssen doesn't list for the verse", gmiss)):
         lines += [f"## {title} ({len(rows)})", ""] + [f"- {a} [{b}] {c}" for a, b, c in rows[:60]] + [""]
-    (OUT / "report.md").write_text("\n".join(lines), encoding="utf-8")
+        if title.startswith("Speakers Glyssen"):        # about the English labels only: not in the released report
+            continue
+        public += [f"## {title} ({len(rows)})", ""] + [f"- {a} {c}" for a, b, c in rows[:60]] + [""]
+    (OUT / "_work" / "report-labels.md").write_text("\n".join(lines), encoding="utf-8")     # with the English labels, for the review
+    (OUT / "report.md").write_text("\n".join(public), encoding="utf-8")
     print("\n".join(lines[:23]))
 
 

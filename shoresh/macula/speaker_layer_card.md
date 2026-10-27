@@ -28,6 +28,8 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 | Clause segments in a quotation | @IN_QUOTE@ of @SEGMENTS@ |
 | Clause segments from | the clause layout's segmentation `8977039d6ddb5383` (the same in every clause-layout release since v0.22) |
 | Review | @REVIEW_ROWS@ reviewed changes, each with its reason (`review.tsv`) |
+| Speakers named in Hebrew | @NAMED@ of the quotations, from the text itself |
+| Changes | @TAG@: speakers and frames named in Hebrew from the text (`speaker`, `speaker_ref`, `frame`); no English names (`alt_speaker` and `speaker_hebrew` are gone) |
 | Licence | CC BY 4.0 |
 
 ## Files
@@ -36,7 +38,7 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 - `segments/<BOOK>.tsv`: one row per clause segment of the clause layout.
 - `corrections.tsv`: the hand corrections, each with the reason the Hebrew text gives.
 - `review.tsv`: the changes from the review of doubtful passages, each with its reason, its source and a confidence.
-- `prophets.tsv`: the prophet of each prophetic book, as its heading names him (the `frame` there).
+- `prophets.tsv`: the prophet of each prophetic book and the word of its heading that names him (the `frame` there).
 - `parallels.tsv`: where parallel texts (Samuel-Kings and Chronicles, Isa 36-39 and 2 Kgs 18-20, Ps 18 and 2 Sam 22 …) differ in
   level or speaker.
 - `report.md`: the build's figures and its lists of doubtful places.
@@ -48,14 +50,14 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 |---|---|
 | `id` | the quotation: `q…` from Clear's data, `L…` added from the clause layout, `S…` a song or speech, `N…` a song its inquit announces, `W…` a quotation the layer puts around others (God's words in the prophets, a relayed message, a psalm opened by an inquit), `R…` added by a review row; a suffix (`.1`, `.m2`, `.t3`, `.i4`, `.r5`) marks a quotation inside the one before it |
 | `level`, `parent` | 1 for an outermost quotation; a quotation inside another is one level deeper and names it as `parent` |
-| `speaker` | in English, Glyssen's character names where possible ("God", "Moses", "Abraham's chief servant"); "(the one addressed)", "(he/she)", "(they)" where the Hebrew gives no name |
-| `speaker_hebrew` | for nested quotations: the subject of the inquit, as MACULA lemmas |
-| `divine` | `Y` when the speaker is God |
+| `speaker` | who speaks, named from the Hebrew text: the subject of the verb that introduces the quotation, as MACULA lemmas (יהוה, מֹשֶׁה, דָּוִד, מֶלֶךְ, אִשָּׁה), with the nouns of its construct chain (מַלְאָךְ יהוה, בֵּן יִשְׂרָאֵל, מֶלֶךְ אַשּׁוּר); for "the word of X" or "the oracle of X" (וַיְהִי דְבַר־יְהוָה … לֵאמֹר, נְאֻם יְהוָה) X; several subjects separated by commas. Empty where the text names no one there: the subject is a pronoun or only in the verb, or the quotation has no inquit (see below) |
+| `speaker_ref` | the word keys of the words that name the speaker |
+| `divine` | `Y` when the speaker is God (decided in the build, also where `speaker` is empty) |
 | `quote_type`, `basis` | where the quotation comes from: Clear's data (`block`, `referent`, `character`), the clause layout (`layout`), the translations' votes (`translations`), a saying verb inside a quotation (`inner inquit`), God's words in the prophets (`oracle`), a messenger formula (`messenger formula`, `relayed message`, `commanded message`), a song (`song`, `voice`), a psalm title (`titled psalm`), a hand correction (`correction`), a review row (`review`) |
 | `first`, `last` | the first and last word, MACULA word keys (12 digits: book, chapter, verse, word, part) |
 | `from`, `to` | the verses, Hebrew numbering |
 | `start_fit`, `end_fit` | how the edges fit the clause segments |
-| `inquit` | the line that opens a nested quotation |
+| `inquit` | the line that opens a nested quotation (its verb also shows who speaks where `speaker` is empty: וְאָמַרְתָּ, וַיֹּאמְרוּ) |
 
 ### segments/<BOOK>.tsv
 
@@ -64,7 +66,7 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 | `chapter`, `verse`, `seg`, `clause_key` | the clause segment, as in the clause layout |
 | `quotation`, `level`, `speaker` | the innermost quotation the segment stands in, its level (0: none), its speaker |
 | `share` | the share of the segment's words in that quotation |
-| `frame` | the speaker of a text that is speech from its first line, as a field rather than a level: a psalm's psalmist (the name in its title, "לְדָוִד", else "Psalmist"); in the prophetic books the prophet; a first-person account's narrator (Ezra 9, Neh 13, Dan 8-10) and Nebuchadnezzar's letter (Dan 4) |
+| `frame` | the speaker of a text that is speech from its first line, as a field rather than a level, by the Hebrew lemma of the word that names them: a psalm's psalmist (the name in its title, לְדָוִד: דָּוִד; empty for a psalm without one); in the prophetic books the prophet, as the book's heading names him (יְשַׁעְיָהוּ, יִרְמְיָהוּ); Nebuchadnezzar's letter (Dan 4, נְבוּכַדְנֶצַּר of 3:31) and Daniel's visions (Dan 8-10, דָּנִיֵּאל of 8:1); a first-person account's narrator (Ezra 9, Neh 13): אֲנִי |
 
 Every segment's `quotation` is in `quotations.tsv` at the segment's `level`, and every `parent` holds its quotation.
 
@@ -115,6 +117,15 @@ the user.
 6. **Hand corrections** (`corrections.tsv`), each with its reason.
 7. **The review rows** (`review.tsv`) last: changes from a review of doubtful passages, each with the reason the Hebrew gives (see
    below).
+8. **Names in Hebrew** (`shoresh/macula/hebrew_speakers.py`): the steps above work with English labels (Clear's speakers, Glyssen's
+   characters, the English names in `prophets.tsv`, `corrections.tsv` and `review.tsv`); none of them is in the data. Each
+   quotation's `speaker` is read afresh from the Hebrew: the inquit is the verb of the nearest clause above the quotation's first word
+   in MACULA's tree, else the nearest אָמַר or דִּבֶּר in the 20 words before it; its subject is MACULA's subject link (`subjref`, all of them:
+   וַתַּעַן רָחֵל וְלֵאָה gives both), else the clause's subject. Where there is no inquit, a נְאֻם in the quotation's first words names
+   the speaker. A subject that is a pronoun is not followed: MACULA's participant references agreed with the speaker data's speaker
+   in about half of the cases, against three in four for a written subject (and most of the rest are the text being more exact: אַבְרָם
+   before Gen 17, יִשְׂרָאֵל for Jacob, אָחִיהָ וְאִמָּהּ in Gen 24:55, הַמֶּלֶךְ), so an empty name is left rather than a doubtful one.
+   A review row `name` gives the words that name the speaker where the subject does not (Ezra 1:2: כֹּרֶשׁ, not רוּחַ כֹּרֶשׁ).
 
 The code is `shoresh/macula/build_speaker_layer.py` in [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query).
 
@@ -185,24 +196,28 @@ prophet's own questions).
   measure, not as input). With the frame counted as a level, the layer nests at 87.0% of them (narrative 87.5%, law
   85.5%, prophecy 87.4%, wisdom 89.7%); without the review rows 84.9% (v0.7: 54%).
 - Parallel texts, aligned word by word: 77.4% of matched words at the same level (the frame counted) and 93.4% with
-  the same speaker. Some differences are by design (the Decalogue in Exod 20 and in Moses' speech, Deut 5).
+  the same speaker (the English labels of v0.11); with the Hebrew names of v0.12 90.5%, as the two texts at times name one
+  speaker differently (הַמֶּלֶךְ for דָּוִד). Some differences are by design (the Decalogue in Exod 20 and in Moses' speech, Deut 5).
 
 **Known gaps (open work):**
 - the Rabshakeh's words in Isa 36:7b are one level deeper than in 2 Kgs 18:22;
 - a decree quoted in a letter (Ezra 6:3–12) and most levels of Nebuchadnezzar's letter (Dan 4);
 - a nested speaker named through "I" can be the outer speaker where the reference chain does not reach the quoted person (Jer 22:18);
 - the prophecy ends have not been measured against BHSA since the formula fix;
-- the review covered 48 passages of about 700 doubtful ones.
+- the review covered 48 passages of about 700 doubtful ones;
+- @UNNAMED@ quotations have no Hebrew name: no inquit before them (most of them in poetry and the prophets), or a subject that is a
+  pronoun or only in the verb.
 
 ## Sources and licence
 
 | Part | Source | Licence |
 |---|---|---|
-| Quotations and speakers | Clear's "MACULA Quotation and Speaker Data", © 2023 Clear Bible, Inc. | CC BY 4.0 |
-| Character names per verse | Glyssen `CharacterVerse.txt`, © 2014–2020 SIL LSDev and Faith Comes By Hearing | MIT |
+| Quotations (and their speakers, used in the build only) | Clear's "MACULA Quotation and Speaker Data", © 2023 Clear Bible, Inc. | CC BY 4.0 |
+| Character names per verse (used in the build only) | Glyssen `CharacterVerse.txt`, © 2014–2020 SIL LSDev and Faith Comes By Hearing | MIT |
+| Who speaks (`speaker`, `frame`) | MACULA Hebrew's subject links and lemmas (lowfat, SHA-256 `@LOWFAT_SHA@…`) | CC BY 4.0 |
 | Hebrew words, syntax | MACULA Hebrew (Clear Bible / Biblica) | CC BY 4.0 |
 | Clause segments | Hebrew Bible Clause Layout (bcv-commons) | CC BY-SA 4.0 (the segments are referenced by key) |
-| Names of persons | STEPBible TIPNR (Tyndale House) | CC BY 4.0 |
+| Names of persons (English, used in the build only) | STEPBible TIPNR (Tyndale House) | CC BY 4.0 |
 | Quotation depth per word in eight translations (numbers only) | Clear's alignment-quotations, Clear-Bible/speaker-quotations @ b09e308a3a1a | CC BY 4.0 |
 | The BSB's quotation marks per Hebrew word | Berean Standard Bible Translation Tables | public domain |
 | Participant references | MACULA Hebrew (Clear Bible / Biblica) | CC BY 4.0 |

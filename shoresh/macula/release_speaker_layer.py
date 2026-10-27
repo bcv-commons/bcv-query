@@ -20,6 +20,7 @@ import datetime
 import gzip
 import hashlib
 import io
+import re
 import shutil
 import subprocess
 import tarfile
@@ -90,7 +91,10 @@ def main() -> None:
               "@QUOTATIONS@": f'{sum(q["level"] == "1" for q in quotes):,}',
               "@NESTED@": f'{sum(q["level"] not in ("", "1") for q in quotes):,}',
               "@IN_QUOTE@": f'{sum(r["quotation"] != "" for r in segs):,}', "@SEGMENTS@": f"{len(segs):,}",
-              "@REVIEW_ROWS@": f'{len(_rows(out / "review.tsv")):,}'}
+              "@REVIEW_ROWS@": f'{len(_rows(out / "review.tsv")):,}',
+              "@NAMED@": f'{sum(bool(q["speaker"]) for q in quotes):,} of {len(quotes):,}',
+              "@UNNAMED@": f'{sum(not q["speaker"] for q in quotes):,}',
+              "@LOWFAT_SHA@": re.search(r"MACULA Hebrew lowfat sha256 ([0-9a-f]+)", (out / "report.md").read_text(encoding="utf-8")).group(1)[:12]}
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         card = card.replace(k, v)

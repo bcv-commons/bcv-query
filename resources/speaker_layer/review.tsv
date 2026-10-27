@@ -2,6 +2,8 @@
 # build_speaker_layer.py, left out with --no-review). Each row: the word key it is keyed on, the field (speaker, first, last, drop:
 # a quotation found by its first word; add: a new quotation from first to last inside parent; level: the level of the segments
 # first..last; frame: the chapter's frame), the value, the reason the Hebrew gives, and its source (the reviewers and the prompt).
+# name: the words that name the quotation's speaker (their keys, space-separated), where the inquit's subject does not; the
+# dataset's speaker is their Hebrew lemmas.
 first	field	value	reason	last	parent	source	confidence	quotation
 140100100251	speaker	Rehoboam, king	כֹּה תֹאמַר אֲלֵהֶם tells Rehoboam what to say; 'I' in קָטָנִּי עָבָה מִמָּתְנֵי אָבִי and וַאֲנִי אֹסִיף is Rehoboam. The bounds (10:10b to the end of 10:11) are right. [layout-02]			agent:claude-opus-5-5:review-v1+adjudicated	high	q02856.2
 140100100081	drop		כֹּה־תֹאמַר לָעָם follows the young men's inquit לֵאמֹר and opens their own speech; it is not a separate speech. [layout-02]			agent:claude-opus-5-5:review-v1+adjudicated	high	L00025
@@ -191,3 +193,4 @@ first	field	value	reason	last	parent	source	confidence	quotation
 050050280111	add	God	'וַיֹּאמֶר יְהוָה אֵלַי' (5:28): God's words 'שָׁמַעְתִּי אֶת־קוֹל דִּבְרֵי הָעָם' to 5:31 'לְרִשְׁתָּהּ', inside Moses' speech; 6:1 'וְזֹאת הַמִּצְוָה … אֲשֶׁר צִוָּה יְהוָה אֱלֹהֵיכֶם' is Moses. [layout-check 2026-10-21]	050050310203	q01098	agent:claude-opus-5-5:layout-check-v1	high	
 050180170041	speaker	God	'וַיֹּאמֶר יְהוָה אֵלָי הֵיטִיבוּ … נָבִיא אָקִים לָהֶם … וְנָתַתִּי דְבָרַי בְּפִיו' (18:17-18): God speaks, Moses quotes him. [layout-check 2026-10-21]			agent:claude-opus-5-5:layout-check-v1	high	q01163
 050090130051	add	God	'וַיֹּאמֶר יְהוָה אֵלַי לֵאמֹר' (9:13): God's words 'רָאִיתִי אֶת־הָעָם הַזֶּה' to 9:14 'וְרָב מִמֶּנּוּ', inside Moses' speech; 9:15 'וָאֵפֶן וָאֵרֵד מִן־הָהָר' is Moses. [layout-check 2026-10-21]	050090140142	q01098	agent:claude-opus-5-5:layout-check-v1	high	
+150010020011	name	150010010151	Cyrus' proclamation: MACULA makes רוּחַ the subject of וַיַּעֲבֶר־קוֹל (1:1), but the one who proclaims is כֹּרֶשׁ, as כֹּה אָמַר כֹּרֶשׁ מֶלֶךְ פָּרַס (1:2) says			agent:claude-opus-5-5:hebrew-names-v1	high	R.r19

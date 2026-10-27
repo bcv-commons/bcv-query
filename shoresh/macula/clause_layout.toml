@@ -88,9 +88,9 @@ in, and the quotation it stands inside. The published release is read, never a b
 built on the clause layout's segments, v0.35; the segmentation is unchanged). Downloaded once and cached in
 macula/data/speaker-layer-release/<tag>/."""
 repository = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer"
-tag = "v0.11"
+tag = "v0.12"
 url = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer/resolve/{tag}/hebrew-speaker-layer-{tag}.tar.gz"
-archive_sha256 = "68ec601e456d535ca56bbada485153aa645da67947055c73b8bf372978843b16"
+archive_sha256 = "731b6a85d7c960a95de018d63ad903199aeb1ddfe66362ddf3bcd1da9ff882fa"
 licence = "CC BY 4.0"
 
 [sources.versification]
@@ -1175,7 +1175,7 @@ them count from the margin. Deuteronomy, Moses (0.37): in bsb-add-books' referen
 of Moses stand at or out of the inquit in 39% of cases (584 of 1,491), against 11% in all other books, and the new sections of his
 speeches start at the margin (Deut 4:9 "רַק", 20:16). Job is not a frame: the reference steps in at 42 of 47 inquits, and 94% of
 the speech lines stay in from the inquit."""
-frames = [{book = "DEU", speaker = "Moses"}]
+frames = [{book = "DEU", speaker = "מֹשֶׁה"}]               # the speaker layer's `speaker` (from v0.12 a Hebrew lemma; one of the names)
 
 [rules.speech_levels]
 scope = "all"

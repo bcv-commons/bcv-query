@@ -457,7 +457,7 @@ def main() -> None:
                         chain.append(q)
                         q = quote_parent.get(q)
                     chain.reverse()
-                    if chain and (book, quote_speaker.get(chain[0])) in frames:
+                    if chain and any((book, n) in frames for n in (quote_speaker.get(chain[0]) or "").split(", ")):
                         chain = chain[1:]                  # [speech] frames: a book-long speaker's speech is the frame, not a level
                     speech_of[s["clause"]] = tuple(chain)
         if segs and segs[0]["clause"] is not None:

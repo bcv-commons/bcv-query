@@ -5,14 +5,16 @@
 #   sender's words, after which the messenger speaks in his own name)
 # value: the new speaker name, or the new first / last word key
 # reason: how the Hebrew text settles it (required)
-first	field	value	reason
-190010010011	frame		Ps 1 has no title and no speaker or addressee of its own: a teaching about the two ways ("אַשְׁרֵי הָאִישׁ"), in the third person throughout
-190020010011	frame		Ps 2 has no title and no single speaker from its start: it quotes the nations (2:3), God (2:6) and the king (2:7-9) and then turns to the kings (2:10-12)
-060240020061	sender_last	060240130201	Josh 24:14-15 is Joshua's own appeal: "וְעַתָּה יְראוּ אֶת־יְהוָה" turns to the people with an imperative and speaks of the LORD in the third person, after God's first-person history of 24:2-13 ("וָאֶקַּח", "וָאֶתֵּן")
-150080010011	frame		Ezra 8 is a first-person account of the journey ("וָאֶקְבְּצֵם", "וַנַּחֲנֶה", "וָאָבִינָה"), told as narrative, not speech from its start; the frame stays on Ezra 9, where the account leads into Ezra's prayer
-160010010011	frame		Neh 1 is a first-person account told as narrative ("וָאֶשְׁאָלֵם", "וָאֵשְׁבָה"); Nehemiah's prayer in it (1:5-11) is a quotation of its own
-160020010011	frame		Neh 2 is a first-person account told as narrative ("וָאֶשָּׂא", "וָאָבוֹא", "וָאָקוּם"), with the speeches in it quoted
-270040010011	frame	Nebuchadnezzar, king of Babylon	Dan 4 is Nebuchadnezzar's letter, opened in 3:31 ("נְבוּכַדְנֶצַּר מַלְכָּא לְכָל־עַמְמַיָּא … שְׁלָמְכוֹן יִשְׂגֵּא") and told in his own voice from 4:1 ("אֲנָה נְבוּכַדְנֶצַּר שְׁלֵה הֲוֵית בְּבֵיתִי") to its doxology (4:34)
-270080010011	frame	Daniel	Dan 8 is Daniel's own account of his vision ("חָזוֹן נִרְאָה אֵלַי אֲנִי דָנִיֵּאל", 8:1; "וַאֲנִי דָנִיֵּאל נִהְיֵיתִי", 8:27)
-270090010011	frame	Daniel	Dan 9 is Daniel's own account ("אֲנִי דָּנִיֵּאל בִּינֹתִי בַּסְּפָרִים", 9:2), in which his prayer (9:4-19) and Gabriel's words (9:22-27) are quoted
-270100010011	frame	Daniel	Dan 10 is Daniel's own account ("בַּיָּמִים הָהֵם אֲנִי דָנִיֵּאל הָיִיתִי מִתְאַבֵּל", 10:2) of the vision that runs to 12:13
+# name_key: for a frame, the word that names its speaker in the text (Dan 3:31 נְבוּכַדְנֶצַּר, Dan 8:1 דָּנִיֵּאל); the dataset gives
+#   the frame by that word's Hebrew lemma, the English value is used inside the build only
+first	field	value	reason	name_key
+190010010011	frame		Ps 1 has no title and no speaker or addressee of its own: a teaching about the two ways ("אַשְׁרֵי הָאִישׁ"), in the third person throughout	
+190020010011	frame		Ps 2 has no title and no single speaker from its start: it quotes the nations (2:3), God (2:6) and the king (2:7-9) and then turns to the kings (2:10-12)	
+060240020061	sender_last	060240130201	Josh 24:14-15 is Joshua's own appeal: "וְעַתָּה יְראוּ אֶת־יְהוָה" turns to the people with an imperative and speaks of the LORD in the third person, after God's first-person history of 24:2-13 ("וָאֶקַּח", "וָאֶתֵּן")	
+150080010011	frame		Ezra 8 is a first-person account of the journey ("וָאֶקְבְּצֵם", "וַנַּחֲנֶה", "וָאָבִינָה"), told as narrative, not speech from its start; the frame stays on Ezra 9, where the account leads into Ezra's prayer	
+160010010011	frame		Neh 1 is a first-person account told as narrative ("וָאֶשְׁאָלֵם", "וָאֵשְׁבָה"); Nehemiah's prayer in it (1:5-11) is a quotation of its own	
+160020010011	frame		Neh 2 is a first-person account told as narrative ("וָאֶשָּׂא", "וָאָבוֹא", "וָאָקוּם"), with the speeches in it quoted	
+270040010011	frame	Nebuchadnezzar, king of Babylon	Dan 4 is Nebuchadnezzar's letter, opened in 3:31 ("נְבוּכַדְנֶצַּר מַלְכָּא לְכָל־עַמְמַיָּא … שְׁלָמְכוֹן יִשְׂגֵּא") and told in his own voice from 4:1 ("אֲנָה נְבוּכַדְנֶצַּר שְׁלֵה הֲוֵית בְּבֵיתִי") to its doxology (4:34)	270030310011
+270080010011	frame	Daniel	Dan 8 is Daniel's own account of his vision ("חָזוֹן נִרְאָה אֵלַי אֲנִי דָנִיֵּאל", 8:1; "וַאֲנִי דָנִיֵּאל נִהְיֵיתִי", 8:27)	270080010101
+270090010011	frame	Daniel	Dan 9 is Daniel's own account ("אֲנִי דָּנִיֵּאל בִּינֹתִי בַּסְּפָרִים", 9:2), in which his prayer (9:4-19) and Gabriel's words (9:22-27) are quoted	270080010101
+270100010011	frame	Daniel	Dan 10 is Daniel's own account ("בַּיָּמִים הָהֵם אֲנִי דָנִיֵּאל הָיִיתִי מִתְאַבֵּל", 10:2) of the vision that runs to 12:13	270080010101
