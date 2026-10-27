@@ -7,10 +7,11 @@ not used: the name comes from MACULA Greek (Nestle 1904 lowfat, CC BY 4.0).
 - Its subject: MACULA's `subjref` where the subject is not written (the word it points to), else the subject phrase (role s) of the
   inquit's clause. A pronoun (or the article used as one: ὁ δὲ ἔφη) is followed to the word it refers to (`referent`), up to three steps.
 - The name is the lemma of that noun or adjective: Ἰησοῦς, Πέτρος, μαθητής, ἡγεμών, γραφή. Several subjects are listed. Where the
-  subject is not a noun or adjective (a participle, an unnamed "they"), there is no name.
+  subject is not a noun or adjective (a participle, an unnamed "they"), there is no name; then the same speaker's usual name from
+  their other speeches (carry_over), else the speaker data's English label in alt_eng.
 
     from macula import greek_speakers
-    speakers = greek_speakers.find(quotations, con)     # quotation id -> {"names": [...], "refs": [...], "how": "tree"|"near"}
+    speakers = greek_speakers.find(quotations, con)     # quotation id -> {"names", "refs", "how": "tree"|"near", "basis", "alt_eng"}
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 LOWFAT = HERE / ".lowfat-src-grc"
+DIVINE = {"θεός"}                                  # God's name, carried over like a proper name
 SAYING = {"λέγω", "εἶπον", "φημί", "ἀποκρίνομαι", "λαλέω", "κράζω", "γράφω", "ἐρωτάω", "ἐπερωτάω", "βοάω", "φωνέω"}
 
 
@@ -38,7 +40,7 @@ def lowfat_words() -> tuple[dict[str, dict], str]:
         h.update(data)
         for m in re.finditer(r"<w\b([^>]*)>([^<]*)</w>", data.decode("utf-8")):
             at = dict(re.findall(r'([\w:]+)="([^"]*)"', m.group(1)))
-            out[at["xml:id"][1:]] = {k: at.get(k) for k in ("lemma", "class", "role", "subjref", "referent")}
+            out[at["xml:id"][1:]] = {k: at.get(k) for k in ("lemma", "class", "role", "subjref", "referent", "type")}
     return out, h.hexdigest()
 
 
@@ -114,5 +116,39 @@ def find(quotes: dict[str, list[dict]], con: sqlite3.Connection) -> tuple[dict[s
             verb, how = inquit(q)
             subj = subject(verb) if verb else []
             names = list(dict.fromkeys(n for n, _ in subj))
-            out[q["id"]] = {"names": names, "refs": [k for _, k in subj], "inquit": verb, "how": how}
+            out[q["id"]] = {"names": names, "refs": [k for _, k in subj], "inquit": verb, "how": how,
+                            "basis": "inquit" if names else "", "alt_eng": ""}
+    carry_over(quotes, out, W)
     return out, sha
+
+
+def carry_over(quotes: dict[str, list[dict]], out: dict[str, dict], W: dict[str, dict]) -> None:
+    """A speech whose inquit names no one takes its speaker's usual Greek name from the same speaker's other speeches (the speaker
+    data's label tells only who it is; the name and its word ids come from the text there): in the same book, else in the whole New
+    Testament. The name must be a proper name or θεός (not ἄνθρωπος, ὄχλος), named so in at least two of that speaker's speeches and
+    in more than half, and a name that is mostly this speaker's. What is still unnamed keeps the label in alt_eng, so no speaker the
+    speaker data names is lost."""
+    label = {q["id"]: q["speaker"] for qs in quotes.values() for q in qs}
+    named = [(k, v) for k, v in out.items() if v["basis"] == "inquit" and len(v["names"]) == 1]
+    owner: dict = collections.defaultdict(collections.Counter)
+    for k, v in named:
+        owner[v["names"][0]][label[k]] += 1
+
+    def fits(k: str, v: dict) -> bool:
+        head = W.get(v["refs"][0]) if v["refs"] else None
+        return head is not None and (head["type"] == "proper" or head["lemma"] in DIVINE) \
+            and owner[v["names"][0]].most_common(1)[0][0] == label[k]
+    for k, v in out.items():
+        if v["names"] or not label.get(k):
+            continue
+        cands = [(c, cv) for c, cv in named if label[c] == label[k] and fits(c, cv)]
+        for pool, basis in (([x for x in cands if x[0][:2] == k[:2]], "same speaker in book"), (cands, "same speaker in NT")):
+            usual = collections.Counter(cv["names"][0] for _, cv in pool).most_common(2)
+            if usual and usual[0][1] >= 2 and usual[0][1] * 2 > len(pool) and (len(usual) == 1 or usual[0][1] > usual[1][1]):
+                c, cv = min((x for x in pool if x[1]["names"][0] == usual[0][0]), key=lambda x: abs(int(x[0]) - int(k)))
+                v["names"], v["refs"], v["basis"] = list(cv["names"]), list(cv["refs"]), basis
+                break
+            if pool:
+                break
+        if not v["names"]:
+            v["alt_eng"] = label[k]

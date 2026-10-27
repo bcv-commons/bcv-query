@@ -33,7 +33,7 @@ structure of a sentence at a glance, and as a base for comparing the clause stru
 | Release | **@TAG@**, built @BUILT@ from bcv-query `@COMMIT@` |
 | Text | Nestle 1904, as MACULA Greek has it (@WORDS@ words, @BOOKS@ books) |
 | Size | @LINES@ lines (clause segments) of @CLAUSES@ clauses; @IN_QUOTE@ lines inside a speech |
-| Changes | v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
+| Changes | v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
 | Companion | [Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout), the same idea for the Hebrew Bible |
 
 Matthew 5:1–4 in `layout/MAT.txt`:
@@ -82,6 +82,8 @@ Matthew 5:1–4 in `layout/MAT.txt`:
 | `quotation` | the innermost speech the line stands in: the word id where it starts in the speaker data; empty in narrative |
 | `speaker` | who speaks it, named from the Greek text: the subject of the verb that introduces the speech (Ἰησοῦς, Πέτρος, Στέφανος, μαθητής, ἡγεμών, φωνή), as a lemma; several subjects separated by commas. Empty where the text names no one (a passive γέγραπται, an unnamed "they", a participle) |
 | `speaker_ref` | the word ids of the words that name the speaker; a pronoun or an article used as one (ὁ δὲ ἔφη) is followed to the word it refers to |
+| `speaker_basis` | where `speaker` comes from: `inquit` (the speech's own inquit), `same speaker in book` / `same speaker in NT` (the same speaker's usual name from their other speeches, see below; `speaker_ref` then points there); empty where there is no name |
+| `alt_eng` | the speaker data's English label, only where `speaker` is empty (@ALT_ENG@ speeches: "scripture", "crowd", "passers by"), so that no speaker the speaker data names is lost; empty everywhere else |
 | `inline` | clauses written on this line though they are clauses of their own (participles, see the rules) |
 | `split_at_quotation` | the line was broken off its clause where a speech starts or ends (see the rules) |
 | `first`, `last`, `words` | MACULA word ids (`BBCCCVVVWWW`, as `n…` ids in MACULA's files) |
@@ -114,7 +116,11 @@ of a vocative alone (Κύριε,) keeps its line and adds no level.
 stand at least one level in from the line that introduces it, and none goes further out while it lasts, also over the many
 sentences of a long speech (Matthew 5:3–7:27 stay in from 5:2 "λέγων"). A speech inside a speech is one further in; a speech that
 follows another directly (no introducing line) stands where that one stands. Two speeches of one speaker with only a few verbless
-words between them are one (@JOINED@ joins; the speaker data leaves Luke 1:74 out of Zechariah's song). @GREEK_SPEAKERS@ of the @QUOTATIONS@ speeches have a speaker named from the text. The speaker data's own labels for who speaks are in
+words between them are one (@JOINED@ joins; the speaker data leaves Luke 1:74 out of Zechariah's song). @GREEK_SPEAKERS@ of the @QUOTATIONS@ speeches have a speaker named from the text (@BY_INQUIT@ by their own inquit). A speech
+whose inquit names no one (a quotation of scripture, a speech that goes on after a narrator's aside) takes the name of the same
+speaker from their other speeches: the speaker data's label decides only who it is, the name comes from the Greek there. The name is
+the speaker's usual one in the book (most of that speaker's named speeches there, at least two), else in the New Testament, and must
+be a proper name or θεός, and mostly this speaker's. The speaker data's own labels for who speaks are in
 English; they are not used. Last, a line steps in one
 level at a time: where the tree has a level with no line of its own, deeper lines move out to one in from the line above, keeping
 the order of the levels.

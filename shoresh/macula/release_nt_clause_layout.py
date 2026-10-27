@@ -34,7 +34,7 @@ SPEAKERS = ROOT / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
 SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("seg", "int16"), ("text", "string"), ("depth", "int8"),
           ("text_depth", "int8"), ("clause", "string"), ("parent", "string"), ("kind", "string"), ("rule", "string"),
           ("role", "string"), ("via", "list<string>"), ("junction", "string"), ("sentence", "string"), ("quotation", "string"),
-          ("speaker", "string"), ("speaker_ref", "list<string>"), ("inline", "list<string>"), ("split_at_quotation", "bool_"), ("first", "string"), ("last", "string"),
+          ("speaker", "string"), ("speaker_ref", "list<string>"), ("speaker_basis", "string"), ("alt_eng", "string"), ("inline", "list<string>"), ("split_at_quotation", "bool_"), ("first", "string"), ("last", "string"),
           ("words", "list<string>")]
 
 
@@ -114,6 +114,7 @@ def main() -> None:
               "@DEPTHS@": ", ".join(f"{k}: {v:,}" for k, v in sorted(depth.items())),
               "@TREES_SHA@": build["trees_db_sha256"][:12], "@SPEAKERS_SHA@": build["speaker_data_sha256"][:12],
               "@LOWFAT_SHA@": build["lowfat_grc_sha256"][:12], "@GREEK_SPEAKERS@": f"{build['quotations_with_greek_speaker']:,}",
+              "@BY_INQUIT@": f"{build['speaker_basis'].get('inquit', 0):,}", "@ALT_ENG@": f"{build['quotations_with_alt_eng']:,}",
               "@CC_ALIGNMENTS@": cc["alignments"], "@CC_PAIRS@": f"{cc['pairs']:,}", "@CC_AGREE@": f"{cc['agree']:.1%}",
               "@CC_P@": f"{cc['hebrew_boundary_also_greek']:.1%}", "@CC_R@": f"{cc['greek_boundary_also_hebrew']:.1%}",
               "@CC_F1@": f"{cc['boundary_f1']:.1%}", "@CC_ANALYSIS@": cc["analysis"], "@CC_BOOKS@": book_rows,

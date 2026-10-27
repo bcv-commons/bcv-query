@@ -510,7 +510,9 @@ def main() -> None:
             text = " ".join(r["surface"] + (r["after"] or "").strip() for r in rows)
             rec = {"verse": s["verse"], "seg": s["seg"], "clause": key_of.get(cid), "parent": key_of.get(tree.parent.get(cid)),
                    "depth": depth, "text_depth": s["_td"], "quotation": s["_q"], "speaker": ", ".join(speakers[s["_q"]]["names"]) or None if s["_q"] else None,
-                   "speaker_ref": speakers[s["_q"]]["refs"] if s["_q"] else [], "kind": trees_macula._clause_kind(own or rows) if cid is not None else None,
+                   "speaker_ref": speakers[s["_q"]]["refs"] if s["_q"] else [],
+                   "speaker_basis": speakers[s["_q"]]["basis"] if s["_q"] else None,
+                   "alt_eng": speakers[s["_q"]]["alt_eng"] or None if s["_q"] else None, "kind": trees_macula._clause_kind(own or rows) if cid is not None else None,
                    "rule": tree.node[cid]["rule"] if cid is not None else None, "role": tree.role.get(cid),
                    "via": tree.via.get(cid, []), "junction": tree.node[cid]["junction"] if cid is not None else None,
                    "sentence": rows[0]["sent"], "first": rows[0]["key"], "last": rows[-1]["key"],
@@ -538,6 +540,8 @@ def main() -> None:
              "text_depth": dict(sorted(depths.items())), "quotations": sum(len(q) for q in quotes.values()),
              "quotations_joined_over_a_gap": joined,
              "quotations_with_greek_speaker": sum(bool(v["names"]) for v in speakers.values()),
+             "speaker_basis": dict(collections.Counter(v["basis"] for v in speakers.values() if v["basis"])),
+             "quotations_with_alt_eng": sum(bool(v["alt_eng"]) for v in speakers.values()),
              "lowfat_grc_sha256": lowfat_sha}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in build.items() if k != "trees_db_sha256"}, ensure_ascii=False))
