@@ -75,6 +75,15 @@ def load_spans() -> list[dict]:
     return [r for r in rows if r["word_start"].startswith("o") and r["word_end"].startswith("o")]
 
 
+def _owners(by_label: dict) -> dict:
+    """A Hebrew name -> how many quotations named so (from their inquit) each speaker label has."""
+    out: dict = collections.defaultdict(collections.Counter)
+    for label, qs in by_label.items():
+        for q in qs:
+            out[q["name"]][label] += 1
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--books", help="comma-separated USFM codes (default: all)")
@@ -1474,24 +1483,68 @@ def main() -> None:
     for q in allq:
         if q.get("_name_keys"):
             ks = [k for k in q["_name_keys"] if k in tok]
-            q["name"], q["name_ref"] = " ".join(D._n(tok[k]["lemma"]) for k in ks), " ".join(ks)
+            q["name"], q["name_ref"], q["name_basis"] = " ".join(D._n(tok[k]["lemma"]) for k in ks), " ".join(ks), "review"
             named["review"] += 1
             continue
         x = finder(q["first"], q["last"])
-        q["name"], q["name_ref"] = ", ".join(x["names"]), " ".join(x["refs"])
+        q["name"], q["name_ref"], q["name_basis"] = ", ".join(x["names"]), " ".join(x["refs"]), "inquit" if x["names"] else ""
         named["text" if x["names"] else "none"] += 1
+    # a quotation with no inquit of its own: the Hebrew name of the same speaker (the speaker data's label, used only to tell who it
+    # is) where the text names them, the nearest such quotation in the same book, else in the whole Bible; speaker_ref then points at
+    # that quotation's words. What is still unnamed keeps the label in alt_eng (only those, so no name is lost)
+    placeholder = ("", "(the one addressed)", "(he/she)", "(they)")
+    by_label = collections.defaultdict(list)
+    for q in allq:
+        if q["name_basis"] and "," not in q["name"] and q.get("speaker", "") not in placeholder:
+            by_label[q["speaker"]].append(q)
+    owner = {n: c.most_common(1)[0][0] for n, c in _owners(by_label).items()}
+    for q in allq:
+        q["alt_eng"] = ""
+        if q["name"] or q.get("speaker", "") in placeholder:
+            continue
+        cands = [] if q["speaker"] == "Psalmist" else by_label.get(q["speaker"], [])   # "Psalmist": any untitled psalm's, no one person
+        dist = lambda c: abs(int(c["first"]) - int(q["first"]))
+        src, same = None, False
+        def fits(c: dict, in_book: bool) -> bool:
+            # only a name of a person or people (a proper noun or God's name, not מֶלֶךְ, אִישׁ, עַם); God's name only for a divine
+            # speaker ("false prophets" quote כֹּה אָמַר יְהוָה); and a name that is this speaker's, not mostly another's (יִרְמְיָהוּ)
+            head = tok.get(c["name_ref"].split()[0]) if c["name_ref"] else None
+            if head is None or (D._strong(head) in D.DIVINE) != (q.get("divine") == "Y"):
+                return False
+            return (head["wtype"] == "proper" or D._strong(head) in D.DIVINE) and owner.get(c["name"]) == q["speaker"]
+        for pool, in_book in (([c for c in cands if c["first"][:2] == q["first"][:2]], True), (cands, False)):
+            pool = [c for c in pool if fits(c, in_book)]
+            usual = collections.Counter(c["name"] for c in pool).most_common(2)
+            if usual and usual[0][1] < 2:                # one quotation is too little to call a name the speaker's usual one
+                usual = []
+            # the speaker's usual name there: the most frequent, and more than half of them (Jeremiah's quotations in Jeremiah are
+            # named יִרְמְיָהוּ and, through כֹּה אָמַר יְהוָה, יהוה; "God" in a book is mostly יהוה)
+            if usual and usual[0][1] * 2 > len(pool) and (len(usual) == 1 or usual[0][1] > usual[1][1]):
+                src = min((c for c in pool if c["name"] == usual[0][0]), key=dist)
+                same = in_book
+                break
+            if pool:                                    # no clear usual name in the book: don't look further
+                break
+        if src is None:
+            q["alt_eng"] = q["speaker"]
+            named["English label kept (alt_eng)"] += 1
+            continue
+        q["name"], q["name_ref"] = src["name"], src["name_ref"]
+        q["name_basis"] = "same speaker in book" if same else "same speaker in Bible"
+        named[q["name_basis"]] += 1
     unknown = sorted({fr for fr in frame if fr and fr not in frame_hebrew})
     if unknown:
         raise SystemExit(f"frames with no Hebrew name (prophets.tsv name_key, corrections.tsv name_key, a psalm title): {unknown}")
-    cols = ["id", "level", "parent", "speaker", "speaker_ref", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
+    cols = ["id", "level", "parent", "speaker", "speaker_ref", "speaker_basis", "alt_eng", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
             "end_fit", "pieces", "inquit"]
     with open(OUT / "quotations.tsv", "w", encoding="utf-8") as fh:
         fh.write("# Hebrew speaker layer: Clear's quotation spans (CC BY 4.0) on MACULA's Hebrew words, with the quotations nested inside\n")
         fh.write("# them from the clause layout's speech structure. speaker: who speaks, as MACULA lemmas of the words that name them in the\n")
-        fh.write("# text (the subject of the inquit; speaker_ref: those words' keys)\n")
+        fh.write("# text (the subject of the inquit, or of another quotation of the same speaker: speaker_basis; speaker_ref: those\n")
+        fh.write("# words' keys); alt_eng: the speaker data's English label, only where no Hebrew name is found\n")
         fh.write("\t".join(cols) + "\n")
         for q in allq:
-            fh.write("\t".join(str({"speaker": q["name"], "speaker_ref": q["name_ref"]}.get(c, q.get(c, ""))) for c in cols) + "\n")
+            fh.write("\t".join(str({"speaker": q["name"], "speaker_ref": q["name_ref"], "speaker_basis": q["name_basis"]}.get(c, q.get(c, ""))) for c in cols) + "\n")
     (OUT / "_work").mkdir(exist_ok=True)
     with open(OUT / "_work" / "labels.tsv", "w", encoding="utf-8") as fh:      # the English labels, for the review tools only
         fh.write("id\tlabel\talt_label\tspeaker\n")
@@ -1573,7 +1626,9 @@ def main() -> None:
              f" {sum(q['level'] > 2 for q in inner)}); named in the text: {sum(bool(q.get('name')) for q in inner)}; of them opened by a messenger formula"
              f" inside a quotation: {messenger}",
              f"- speakers named in Hebrew (the inquit's subject, macula/hebrew_speakers.py; MACULA Hebrew lowfat sha256 {finder.sha[:12]}): "
-             f"{named['text']} of {len(allq)} quotations from the text, {named['review']} by a review row, {named['none']} not named",
+             f"{named['text']} of {len(allq)} quotations from their inquit, {named['review']} by a review row; of the {named['none']} others "
+             f"{named['same speaker in book']} by the same speaker's name elsewhere in the book, {named['same speaker in Bible']} elsewhere in"
+             f" the Bible, {named['English label kept (alt_eng)']} with only the English label (alt_eng), the rest not named",
              f"- refinement 7, touching pieces of a voice implied in the outer speech (Glyssen's Implicit) joined into one speech: {implicit}",
              "- one structure (quotations, segment levels and innermost quotations made to agree): "
              + (", ".join(f"{k} {v}" for k, v in consistent.most_common()) or "nothing to change"),

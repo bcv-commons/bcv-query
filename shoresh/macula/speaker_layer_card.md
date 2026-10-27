@@ -29,7 +29,7 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 | Clause segments from | the clause layout's segmentation `8977039d6ddb5383` (the same in every clause-layout release since v0.22) |
 | Review | @REVIEW_ROWS@ reviewed changes, each with its reason (`review.tsv`) |
 | Speakers named in Hebrew | @NAMED@ of the quotations, from the text itself |
-| Changes | @TAG@: speakers and frames named in Hebrew from the text (`speaker`, `speaker_ref`, `frame`); no English names (`alt_speaker` and `speaker_hebrew` are gone) |
+| Changes | v0.13: a quotation with no inquit of its own takes its speaker's Hebrew name from another quotation of the same speaker (`speaker_basis`); `alt_eng` keeps the English label only where no Hebrew name is found. v0.12: speakers and frames named in Hebrew from the text (`speaker`, `speaker_ref`, `frame`); `alt_speaker` and `speaker_hebrew` gone |
 | Licence | CC BY 4.0 |
 
 ## Files
@@ -50,8 +50,10 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 |---|---|
 | `id` | the quotation: `q…` from Clear's data, `L…` added from the clause layout, `S…` a song or speech, `N…` a song its inquit announces, `W…` a quotation the layer puts around others (God's words in the prophets, a relayed message, a psalm opened by an inquit), `R…` added by a review row; a suffix (`.1`, `.m2`, `.t3`, `.i4`, `.r5`) marks a quotation inside the one before it |
 | `level`, `parent` | 1 for an outermost quotation; a quotation inside another is one level deeper and names it as `parent` |
-| `speaker` | who speaks, named from the Hebrew text: the subject of the verb that introduces the quotation, as MACULA lemmas (יהוה, מֹשֶׁה, דָּוִד, מֶלֶךְ, אִשָּׁה), with the nouns of its construct chain (מַלְאָךְ יהוה, בֵּן יִשְׂרָאֵל, מֶלֶךְ אַשּׁוּר); for "the word of X" or "the oracle of X" (וַיְהִי דְבַר־יְהוָה … לֵאמֹר, נְאֻם יְהוָה) X; several subjects separated by commas. Empty where the text names no one there: the subject is a pronoun or only in the verb, or the quotation has no inquit (see below) |
-| `speaker_ref` | the word keys of the words that name the speaker |
+| `speaker` | who speaks, named from the Hebrew text: the subject of the verb that introduces the quotation, as MACULA lemmas (יהוה, מֹשֶׁה, דָּוִד, מֶלֶךְ, אִשָּׁה), with the nouns of its construct chain (מַלְאָךְ יהוה, בֵּן יִשְׂרָאֵל, מֶלֶךְ אַשּׁוּר); for "the word of X" or "the oracle of X" (וַיְהִי דְבַר־יְהוָה … לֵאמֹר, נְאֻם יְהוָה) X; several subjects separated by commas. Where the quotation's own inquit names no one, the speaker's usual Hebrew name from another quotation (see `speaker_basis`); else empty |
+| `speaker_ref` | the word keys of the words that name the speaker (in another quotation where `speaker_basis` says so) |
+| `speaker_basis` | where `speaker` comes from: `inquit` (the quotation's own inquit), `review` (a review row), `same speaker in book` / `same speaker in Bible` (another quotation of the same speaker, see below); empty where there is no name |
+| `alt_eng` | the speaker data's English label, only where `speaker` is empty and the label names someone (@ALT_ENG@ quotations: "shepherds at well", "watchman", "daughter of Zion"), so that no speaker the earlier releases named is lost; empty everywhere else |
 | `divine` | `Y` when the speaker is God (decided in the build, also where `speaker` is empty) |
 | `quote_type`, `basis` | where the quotation comes from: Clear's data (`block`, `referent`, `character`), the clause layout (`layout`), the translations' votes (`translations`), a saying verb inside a quotation (`inner inquit`), God's words in the prophets (`oracle`), a messenger formula (`messenger formula`, `relayed message`, `commanded message`), a song (`song`, `voice`), a psalm title (`titled psalm`), a hand correction (`correction`), a review row (`review`) |
 | `first`, `last` | the first and last word, MACULA word keys (12 digits: book, chapter, verse, word, part) |
@@ -126,6 +128,12 @@ the user.
    in about half of the cases, against three in four for a written subject (and most of the rest are the text being more exact: אַבְרָם
    before Gen 17, יִשְׂרָאֵל for Jacob, אָחִיהָ וְאִמָּהּ in Gen 24:55, הַמֶּלֶךְ), so an empty name is left rather than a doubtful one.
    A review row `name` gives the words that name the speaker where the subject does not (Ezra 1:2: כֹּרֶשׁ, not רוּחַ כֹּרֶשׁ).
+   A quotation whose inquit names no one (God's words in the prophets, a psalm's voices) takes the Hebrew name of the same speaker
+   from another quotation: the speaker data's label decides only who it is, the name and `speaker_ref` come from the text there. The
+   name is the speaker's usual one in the book (most of that speaker's named quotations there, at least two), else in the whole Bible;
+   it must be a proper name or God's name (not מֶלֶךְ, אִישׁ, עַם), God's name only for a divine speaker, and a name that is this
+   speaker's rather than mostly another's ("false prophets" are not named יִרְמְיָהוּ). "Psalmist" (any untitled psalm) is never
+   carried over. What is still unnamed keeps the label in `alt_eng`.
 
 The code is `shoresh/macula/build_speaker_layer.py` in [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query).
 
@@ -206,7 +214,7 @@ prophet's own questions).
 - the prophecy ends have not been measured against BHSA since the formula fix;
 - the review covered 48 passages of about 700 doubtful ones;
 - @UNNAMED@ quotations have no Hebrew name: no inquit before them (most of them in poetry and the prophets), or a subject that is a
-  pronoun or only in the verb.
+  pronoun or only in the verb; @ALT_ENG@ of them keep the English label in `alt_eng`.
 
 ## Sources and licence
 

@@ -88,9 +88,9 @@ in, and the quotation it stands inside. The published release is read, never a b
 built on the clause layout's segments, v0.35; the segmentation is unchanged). Downloaded once and cached in
 macula/data/speaker-layer-release/<tag>/."""
 repository = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer"
-tag = "v0.12"
+tag = "v0.13"
 url = "https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer/resolve/{tag}/hebrew-speaker-layer-{tag}.tar.gz"
-archive_sha256 = "731b6a85d7c960a95de018d63ad903199aeb1ddfe66362ddf3bcd1da9ff882fa"
+archive_sha256 = "e19f4374cfac80d5713a26b3f3b96f897930434ecdaaf49ce314ab52f5c8b2c1"
 licence = "CC BY 4.0"
 
 [sources.versification]

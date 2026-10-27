@@ -94,6 +94,7 @@ def main() -> None:
               "@REVIEW_ROWS@": f'{len(_rows(out / "review.tsv")):,}',
               "@NAMED@": f'{sum(bool(q["speaker"]) for q in quotes):,} of {len(quotes):,}',
               "@UNNAMED@": f'{sum(not q["speaker"] for q in quotes):,}',
+              "@ALT_ENG@": f'{sum(bool(q["alt_eng"]) for q in quotes):,}',
               "@LOWFAT_SHA@": re.search(r"MACULA Hebrew lowfat sha256 ([0-9a-f]+)", (out / "report.md").read_text(encoding="utf-8")).group(1)[:12]}
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
