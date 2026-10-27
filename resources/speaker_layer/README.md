@@ -4,7 +4,7 @@ Who speaks where in the Hebrew Bible, on MACULA Hebrew's words and on the clause
 (`shoresh/macula/data/clause-layout`). A layer of its own: it is refined and checked here first, and goes into the clause layout only
 after that. Built by `shoresh/macula/build_speaker_layer.py` into `shoresh/macula/data/speaker-layer/` (not tracked); this folder holds
 what is tracked: the hand corrections (`corrections.tsv`), the review rows (`review.tsv`), the prophet of each prophetic book
-(`prophets.tsv`) and this description.
+(`prophets.tsv`), the characters (`characters.tsv`) and this description.
 
 ## Sources and licence
 
@@ -152,6 +152,15 @@ the reason the Hebrew text gives. Every correction needs a reason. A `frame` row
 frame (empty for none: Ps 1 and 2, a teaching and a discourse with no single speaker from the start; Daniel for Dan 8-10, his own
 account; Nebuchadnezzar for Dan 4, his letter). A `sender_last` row, keyed on a
 relayed message's formula, gives the last word of the sender's words.
+
+## Characters
+
+`characters.tsv` gives each of the speaker data's character labels its `speaker_id` (id, label, book, name_key). A label with a
+proper name has one row for the whole Bible (book empty); one without, a row per book. The build appends a label it has not seen with
+the next id; ids already given never change. By hand: give two labels of one person the same id (Abraham, Abraham (Abram)); give
+`name_key`, the word key of a word that names the person, where no inquit does (רָחָב, Josh 2:1), one per row; or `-` where the
+inquits give a wrong name (a messenger named by his sender). The labels are English and steer the build only: the table is not
+released.
 
 ## The review
 

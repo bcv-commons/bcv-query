@@ -11,12 +11,17 @@ not used: the name comes from MACULA Greek (Nestle 1904 lowfat, CC BY 4.0).
   their other speeches (carry_over), else the speaker data's English label in alt_eng.
 
     from macula import greek_speakers
-    speakers = greek_speakers.find(quotations, con)     # quotation id -> {"names", "refs", "how": "tree"|"near", "basis", "alt_eng"}
+    speakers = greek_speakers.find(quotations, con)     # quotation id -> {"names", "refs", "how": "tree"|"near", "basis", "alt_eng",
+                                                        #   "speaker_id", "speaker_name", "speaker_name_ref"}
+Who the speaker is across speeches (characters): `speaker_id`, a stable id for the speaker data's label, and `speaker_name`, that
+person's proper name in the text, with `speaker_name_ref` the word that gives it; the same rules as the Hebrew speaker layer
+(macula/build_speaker_layer.characters).
 """
 from __future__ import annotations
 
 import bisect
 import collections
+import csv
 import glob
 import hashlib
 import re
@@ -25,6 +30,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 LOWFAT = HERE / ".lowfat-src-grc"
+CHARACTERS = HERE.parents[1] / "resources" / "speaker_quotations" / "nt_characters.tsv"
+NO_CHARACTER = ("", "(the one addressed)", "(he/she)", "(they)")     # labels that name no one person
 DIVINE = {"θεός"}                                  # God's name, carried over like a proper name
 SAYING = {"λέγω", "εἶπον", "φημί", "ἀποκρίνομαι", "λαλέω", "κράζω", "γράφω", "ἐρωτάω", "ἐπερωτάω", "βοάω", "φωνέω"}
 
@@ -119,6 +126,7 @@ def find(quotes: dict[str, list[dict]], con: sqlite3.Connection) -> tuple[dict[s
             out[q["id"]] = {"names": names, "refs": [k for _, k in subj], "inquit": verb, "how": how,
                             "basis": "inquit" if names else "", "alt_eng": ""}
     carry_over(quotes, out, W)
+    characters(quotes, out, W)
     return out, sha
 
 
@@ -152,3 +160,99 @@ def carry_over(quotes: dict[str, list[dict]], out: dict[str, dict], W: dict[str,
                 break
         if not v["names"]:
             v["alt_eng"] = label[k]
+
+
+def characters(quotes: dict[str, list[dict]], out: dict[str, dict], W: dict[str, dict]) -> collections.Counter:
+    """Each speech's character. `speaker_id`: a stable id for the speaker data's label, kept in resources/speaker_quotations/
+    nt_characters.tsv (id, label, book, name_key; a label not in it gets the next id, appended). A label with a proper name has one
+    id for the whole New Testament, one without ("crowd", "someone") one per book; two labels of one person share an id, set there by
+    hand. `speaker_name`: the proper name (or θεός) that more than half of the person's speeches named by a proper name, and at
+    least a third of those named at all, are named by in their own inquit, and that no other person is named by more than three
+    times as often (narrators get none); else the table's name_key, the word that names the person where no inquit does ("-": none).
+    `speaker_name_ref`: the speech's own word where its inquit gives that name, else the nearest speech's that does (in the same book
+    first), else the nearest name_key."""
+    import sys
+    sys.path.insert(0, str(HERE.parent))
+    from references import BOOK_NUMBERS
+    usfm = {f"{n:02d}": b for b, n in BOOK_NUMBERS.items()}
+    label = {q["id"]: q["speaker"] for qs in quotes.values() for q in qs}
+    rows, by_key = [], {}
+    if CHARACTERS.exists():
+        with open(CHARACTERS, encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh, delimiter="\t"))
+        by_key = {(r["label"], r["book"]): r for r in rows}
+
+    def proper(k: str) -> bool:                    # the speech's own inquit names one person by a proper name or θεός
+        v = out[k]
+        if v["basis"] != "inquit" or len(v["names"]) != 1 or not v["refs"]:
+            return False
+        head = W.get(v["refs"][0])
+        return head is not None and (head["type"] == "proper" or head["lemma"] in DIVINE)
+
+    def usual(ks: list[str]) -> str:
+        c = collections.Counter(out[k]["names"][0] for k in ks if proper(k))
+        top = c.most_common(1)
+        if not top or top[0][1] * 2 <= sum(c.values()):
+            return ""
+        return top[0][0] if top[0][1] * 3 >= sum(out[k]["basis"] == "inquit" for k in ks) else ""
+
+    by_label = collections.defaultdict(list)
+    for k in sorted(out):
+        if label.get(k, "") not in NO_CHARACTER:
+            by_label[label[k]].append(k)
+    named = {lb for lb, ks in by_label.items() if usual(ks)}
+    nxt = max((int(r["id"][1:]) for r in rows), default=0)
+    added, cid_of = [], {}
+    for k in sorted(out):
+        lb = label.get(k, "")
+        if lb in NO_CHARACTER:
+            continue
+        r = by_key.get((lb, "")) or by_key.get((lb, usfm[k[:2]]))
+        if r is None:
+            nxt += 1
+            r = {"id": f"n{nxt:04d}", "label": lb, "book": "" if lb in named else usfm[k[:2]], "name_key": ""}
+            by_key[(r["label"], r["book"])] = r
+            added.append(r)
+        cid_of[k] = r["id"]
+    if added:
+        with open(CHARACTERS, "a" if rows else "w", encoding="utf-8") as fh:
+            if not rows:
+                fh.write("id\tlabel\tbook\tname_key\n")
+            fh.write("".join(f"{r['id']}\t{r['label']}\t{r['book']}\t{r['name_key']}\n" for r in added))
+    by_id = collections.defaultdict(list)
+    for k, cid in cid_of.items():
+        by_id[cid].append(k)
+    hand = collections.defaultdict(list)
+    for r in by_key.values():
+        hand[r["id"]] += [x for x in r["name_key"].split() if x in W or x == "-"]
+    uses: dict = collections.defaultdict(collections.Counter)
+    for cid, ks in by_id.items():
+        for n, c in collections.Counter(out[k]["names"][0] for k in ks if proper(k)).items():
+            uses[n][cid] = c
+    stats = collections.Counter(added=len(added))
+    for v in out.values():
+        v["speaker_id"], v["speaker_name"], v["speaker_name_ref"] = "", "", ""
+    for cid, ks in by_id.items():
+        name = "" if "-" in hand[cid] else W[hand[cid][0]]["lemma"] if hand[cid] else usual(ks)
+        if not hand[cid] and name and (uses[name][cid] * 3 < max(uses[name].values()) or label[ks[0]].startswith("narrator")):
+            name = ""
+        givers = [k for k in ks if proper(k) and out[k]["names"][0] == name]
+        for k in ks:
+            v = out[k]
+            v["speaker_id"], v["speaker_name"] = cid, name
+            if not name:
+                continue
+            near = sorted(givers, key=lambda c: (c[:2] != k[:2], abs(int(c) - int(k))))
+            v["speaker_name_ref"] = out[near[0]]["refs"][0] if near else \
+                min(hand[cid], key=lambda x: (x[:2] != k[:2], abs(int(x) - int(k))))
+            stats["named by hand" if not near else "named"] += 1
+        stats["characters"] += 1
+        stats["characters named"] += bool(name)
+    stats["speeches with a character"] = sum(len(ks) for ks in by_id.values())
+    return stats
+
+
+def named_by_hand() -> int:
+    """How many people the characters table names (a name_key, not "-")."""
+    with open(CHARACTERS, encoding="utf-8") as fh:
+        return len({r["id"] for r in csv.DictReader(fh, delimiter="\t") if r["name_key"] and r["name_key"] != "-"})

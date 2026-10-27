@@ -33,7 +33,8 @@ structure of a sentence at a glance, and as a base for comparing the clause stru
 | Release | **@TAG@**, built @BUILT@ from bcv-query `@COMMIT@` |
 | Text | Nestle 1904, as MACULA Greek has it (@WORDS@ words, @BOOKS@ books) |
 | Size | @LINES@ lines (clause segments) of @CLAUSES@ clauses; @IN_QUOTE@ lines inside a speech |
-| Changes | v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
+| Characters | @CHARACTERS@ people (`speaker_id`) over @WITH_ID@ speeches; @CHAR_NAMED@ of them with a proper name (`speaker_name`, on @NAME_QUOTES@ speeches) |
+| Changes | v0.5: who the speaker is across speeches, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text: Κλεοπᾶς where the inquit says εἷς, Luke 24:18); `speaker` unchanged. v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
 | Companion | [Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout), the same idea for the Hebrew Bible |
 
 Matthew 5:1–4 in `layout/MAT.txt`:
@@ -83,7 +84,10 @@ Matthew 5:1–4 in `layout/MAT.txt`:
 | `speaker` | who speaks it, named from the Greek text: the subject of the verb that introduces the speech (Ἰησοῦς, Πέτρος, Στέφανος, μαθητής, ἡγεμών, φωνή), as a lemma; several subjects separated by commas. Empty where the text names no one (a passive γέγραπται, an unnamed "they", a participle) |
 | `speaker_ref` | the word ids of the words that name the speaker; a pronoun or an article used as one (ὁ δὲ ἔφη) is followed to the word it refers to |
 | `speaker_basis` | where `speaker` comes from: `inquit` (the speech's own inquit), `same speaker in book` / `same speaker in NT` (the same speaker's usual name from their other speeches, see below; `speaker_ref` then points there); empty where there is no name |
-| `alt_eng` | the speaker data's English label, only where `speaker` is empty (@ALT_ENG@ speeches: "scripture", "crowd", "passers by"), so that no speaker the speaker data names is lost; empty everywhere else |
+| `alt_eng` | the speaker data's English label, only where `speaker` is empty (@ALT_ENG@ speeches: "scripture", "crowd", "passers by"), so that no name the speaker data gives is lost; empty everywhere else |
+| `speaker_id` | who speaks it across speeches: a stable id (`n0009`) for one person or group, the same in every speech they make and in later releases (`speaker` names each speech by its own inquit, so one person can be Πέτρος in one and Σίμων or μαθητής in the next). A person with a proper name has one id across the New Testament; a group or person without one ("crowd", "someone") one per book. Empty for a speaker the speaker data names no one by |
+| `speaker_name` | that person's proper name as the text gives it (MACULA lemma; θεός for God): Ἰησοῦς, Πέτρος, Κλεοπᾶς; empty where the text of that book gives none (the blind men of Matt 20:30) |
+| `speaker_name_ref` | the word id of a word that gives that name: the speech's own inquit where it does, else the nearest speech's that does (in the same book first), else a word a hand table gives (Luke 24:18 ὀνόματι Κλεοπᾶς) |
 | `inline` | clauses written on this line though they are clauses of their own (participles, see the rules) |
 | `split_at_quotation` | the line was broken off its clause where a speech starts or ends (see the rules) |
 | `first`, `last`, `words` | MACULA word ids (`BBCCCVVVWWW`, as `n…` ids in MACULA's files) |
@@ -121,7 +125,14 @@ whose inquit names no one (a quotation of scripture, a speech that goes on after
 speaker from their other speeches: the speaker data's label decides only who it is, the name comes from the Greek there. The name is
 the speaker's usual one in the book (most of that speaker's named speeches there, at least two), else in the New Testament, and must
 be a proper name or θεός, and mostly this speaker's. The speaker data's own labels for who speaks are in
-English; they are not used. Last, a line steps in one
+English; they decide only who a speaker is and are not in the data (except `alt_eng`). **Characters:** each label gets a stable
+id, kept in a table in the repository (`resources/speaker_quotations/nt_characters.tsv`, not released: its labels are English);
+two labels of one person share an id (Jesus, Jesus (child)), and God, Moses, David and Solomon, who speak in quotations of scripture
+across many books, have one id each. The name (`speaker_name`) is the proper name or θεός that more than half of the person's
+speeches named by a proper name, and at least a third of those named at all, are named by in their own inquit, and that no other
+person is named by more than three times as often; where no inquit names a person the text names elsewhere in the book, the table
+gives the word that does (@HAND@ people: Κλεοπᾶς, Γαβριήλ, Στέφανος, θεός for God, whose inquits are mostly φωνή or γραφή).
+Narrators get no name. Last, a line steps in one
 level at a time: where the tree has a level with no line of its own, deeper lines move out to one in from the line above, keeping
 the order of the levels.
 

@@ -11,7 +11,8 @@ DIR gets:
   crosscheck/            crosscheck.json and crosscheck-disagreements.tsv from `python -m macula.nt_layout_crosscheck` (required)
   SHA256SUMS             SHA-256 of every file
 
-The build must come from committed code (`git status` clean for macula/build_nt_clause_layout.py and the speaker data), unless
+The build must come from committed code (`git status` clean for macula/build_nt_clause_layout.py, macula/greek_speakers.py, the
+speaker data and its characters table), unless
 --allow-dirty.
 """
 from __future__ import annotations
@@ -34,7 +35,7 @@ SPEAKERS = ROOT / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
 SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("seg", "int16"), ("text", "string"), ("depth", "int8"),
           ("text_depth", "int8"), ("clause", "string"), ("parent", "string"), ("kind", "string"), ("rule", "string"),
           ("role", "string"), ("via", "list<string>"), ("junction", "string"), ("sentence", "string"), ("quotation", "string"),
-          ("speaker", "string"), ("speaker_ref", "list<string>"), ("speaker_basis", "string"), ("alt_eng", "string"), ("inline", "list<string>"), ("split_at_quotation", "bool_"), ("first", "string"), ("last", "string"),
+          ("speaker", "string"), ("speaker_ref", "list<string>"), ("speaker_basis", "string"), ("alt_eng", "string"), ("speaker_id", "string"), ("speaker_name", "string"), ("speaker_name_ref", "string"), ("inline", "list<string>"), ("split_at_quotation", "bool_"), ("first", "string"), ("last", "string"),
           ("words", "list<string>")]
 
 
@@ -51,7 +52,8 @@ def main() -> None:
     a = ap.parse_args()
     src, out = Path(a.src), Path(a.out)
     if not a.allow_dirty:
-        dirty = subprocess.run(["git", "status", "--porcelain", "--", str(BUILDER), str(SPEAKERS)], cwd=ROOT, capture_output=True,
+        dirty = subprocess.run(["git", "status", "--porcelain", "--", str(BUILDER), str(SPEAKERS), str(HERE / "greek_speakers.py"),
+                                str(SPEAKERS.parent / "nt_characters.tsv")], cwd=ROOT, capture_output=True,
                                text=True).stdout.strip()
         if dirty:
             raise SystemExit("uncommitted changes in the builder or the speaker data; commit first (or --allow-dirty):\n" + dirty)
@@ -115,6 +117,8 @@ def main() -> None:
               "@TREES_SHA@": build["trees_db_sha256"][:12], "@SPEAKERS_SHA@": build["speaker_data_sha256"][:12],
               "@LOWFAT_SHA@": build["lowfat_grc_sha256"][:12], "@GREEK_SPEAKERS@": f"{build['quotations_with_greek_speaker']:,}",
               "@BY_INQUIT@": f"{build['speaker_basis'].get('inquit', 0):,}", "@ALT_ENG@": f"{build['quotations_with_alt_eng']:,}",
+              "@CHARACTERS@": f"{build['characters']:,}", "@WITH_ID@": f"{build['quotations_with_character']:,}",
+              "@CHAR_NAMED@": f"{build['characters_named']:,}", "@NAME_QUOTES@": f"{build['quotations_with_speaker_name']:,}", "@HAND@": str(build["characters_named_by_hand"]),
               "@CC_ALIGNMENTS@": cc["alignments"], "@CC_PAIRS@": f"{cc['pairs']:,}", "@CC_AGREE@": f"{cc['agree']:.1%}",
               "@CC_P@": f"{cc['hebrew_boundary_also_greek']:.1%}", "@CC_R@": f"{cc['greek_boundary_also_hebrew']:.1%}",
               "@CC_F1@": f"{cc['boundary_f1']:.1%}", "@CC_ANALYSIS@": cc["analysis"], "@CC_BOOKS@": book_rows,

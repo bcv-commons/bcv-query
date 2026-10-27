@@ -39,6 +39,8 @@ from macula import hebrew_speakers  # noqa: E402
 SPANS = SHORESH.parent / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
 LAYOUT = SHORESH / "macula" / "data" / "clause-layout" / "clauses"
 OUT = SHORESH / "macula" / "data" / "speaker-layer"
+CHARACTERS = SHORESH.parent / "resources" / "speaker_layer" / "characters.tsv"
+NO_CHARACTER = ("", "(the one addressed)", "(he/she)", "(they)", "Psalmist")     # labels that name no one person
 
 
 GLYSSEN_URL = "https://raw.githubusercontent.com/sillsdev/Glyssen/master/GlyssenCharacters/Resources/CharacterVerse.txt"
@@ -82,6 +84,103 @@ def _owners(by_label: dict) -> dict:
         for q in qs:
             out[q["name"]][label] += 1
     return out
+
+
+def characters(allq: list[dict], tok: dict) -> collections.Counter:
+    """Who each quotation's speaker is, across quotations: `speaker_id`, a stable id for the speaker data's label (one person, one
+    id; the labels are Clear's and Glyssen's characters), and `speaker_name` / `speaker_name_ref`, that person's proper name as the
+    text gives it, with the words that give it. `speaker` stays the words of each inquit (אִישׁ, עֶבֶד for one servant).
+    - The ids are kept in resources/speaker_layer/characters.tsv (id, label, book, name_key), so they do not change between builds;
+      a label not in it gets the next id, appended. A label with a proper name gets one id for the whole Bible; one without (an
+      unnamed servant, "people", "someone") one per book, so that different unnamed people are not made one. Two labels of one
+      person (Abraham, Abraham (Abram)) share an id, set there by hand.
+    - The name: the proper name (or God's name, for God) that more than half of the person's quotations named by a proper name
+      are named by in their own inquit (several people may share one: the Pharaohs); else the table's name_key, the word that names them where no inquit does (רָחָב, Josh
+      2:1; one per book where the person speaks in several; "-" for none, where the inquits give a wrong one). speaker_name_ref: the quotation's own words where its inquit gives
+      that name, else the nearest quotation's that does (in the same book first), else the nearest name_key."""
+    rows, by_key = [], {}
+    if CHARACTERS.exists():
+        with open(CHARACTERS, encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh, delimiter="\t"))
+        by_key = {(r["label"], r["book"]): r for r in rows}
+
+    def book(q: dict) -> str:
+        return q["from"].split(" ")[0]
+
+    def proper(q: dict, divine: bool) -> bool:     # the quotation's own inquit names one person by a proper name or God's name
+        if q["name_basis"] != "inquit" or "," in q["name"] or not q["name_ref"]:
+            return False
+        head = tok.get(q["name_ref"].split()[0])
+        return head is not None and (head["wtype"] == "proper" or (divine and D._strong(head) in D.DIVINE))
+
+    def usual(qs: list[dict]) -> str:
+        divine = sum(q.get("divine") == "Y" for q in qs) * 2 > len(qs)
+        c = collections.Counter(q["name"] for q in qs if proper(q, divine))
+        top = c.most_common(1)
+        if not top or top[0][1] * 2 <= sum(c.values()):
+            return ""
+        # and a third of the quotations their inquit names at all: the angel who talks with Zechariah is מַלְאָךְ 18 times, and
+        # זְכַרְיָה 7 times where the speaker data gives him a line Zechariah speaks
+        return top[0][0] if top[0][1] * 3 >= sum(q["name_basis"] == "inquit" for q in qs) else ""
+
+    by_label = collections.defaultdict(list)
+    for q in allq:
+        if q.get("speaker", "") not in NO_CHARACTER:
+            by_label[q["speaker"]].append(q)
+    named = {lb for lb, qs in by_label.items() if usual(qs)}
+    nxt = max((int(r["id"][1:]) for r in rows), default=0)
+    added = []
+    for q in allq:
+        lb = q.get("speaker", "")
+        if lb in NO_CHARACTER:
+            continue
+        r = by_key.get((lb, "")) or by_key.get((lb, book(q)))
+        if r is None:
+            nxt += 1
+            r = {"id": f"c{nxt:04d}", "label": lb, "book": "" if lb in named else book(q), "name_key": ""}
+            by_key[(r["label"], r["book"])] = r
+            added.append(r)
+        q["speaker_id"] = r["id"]
+    if added:
+        with open(CHARACTERS, "a" if rows else "w", encoding="utf-8") as fh:
+            if not rows:
+                fh.write("id\tlabel\tbook\tname_key\n")
+            fh.write("".join(f"{r['id']}\t{r['label']}\t{r['book']}\t{r['name_key']}\n" for r in added))
+    by_id = collections.defaultdict(list)
+    for q in allq:
+        if q.get("speaker_id"):
+            by_id[q["speaker_id"]].append(q)
+    hand = collections.defaultdict(list)            # id -> the words that name the person, one per row (a book) of the table
+    for r in by_key.values():
+        hand[r["id"]] += [k for k in r["name_key"].split() if k in tok or k == "-"]   # "-": no name (a wrong one from the inquits)
+    uses: dict = collections.defaultdict(collections.Counter)      # a name -> how often each person's own inquits use it
+    for cid, qs in by_id.items():
+        divine = sum(q.get("divine") == "Y" for q in qs) * 2 > len(qs)
+        uses_ = collections.Counter(q["name"] for q in qs if proper(q, divine))
+        for n, c in uses_.items():
+            uses[n][cid] = c
+    stats = collections.Counter(added=len(added))
+    for cid, qs in by_id.items():
+        name = "" if "-" in hand[cid] else D._n(tok[hand[cid][0]]["lemma"]) if hand[cid] else usual(qs)
+        # a name another person is named by far more often is theirs, quoted by a messenger or a prophet (כֹּה אָמַר שָׁאוּל,
+        # כֹּה אָמַר יְהוָה); several people may share a name they are each named by (the Pharaohs). A narrator is no one in the story
+        if not hand[cid] and name and (uses[name][cid] * 3 < max(uses[name].values()) or qs[0]["speaker"].startswith("narrator")):
+            name = ""
+        divine = sum(q.get("divine") == "Y" for q in qs) * 2 > len(qs)
+        givers = [q for q in qs if q["name"] == name and proper(q, divine)]
+        for q in qs:
+            q["speaker_name"] = name
+            if not name:
+                q["speaker_name_ref"] = ""
+                continue
+            near = sorted(givers, key=lambda c: (book(c) != book(q), abs(int(c["first"]) - int(q["first"]))))
+            q["speaker_name_ref"] = near[0]["name_ref"] if near else \
+                min(hand[cid], key=lambda k: (k[:2] != q["first"][:2], abs(int(k) - int(q["first"]))))
+            stats["named by hand" if not near else "named"] += 1
+        stats["characters"] += 1
+        stats["characters named"] += bool(name)
+    stats["quotations with a character"] = sum(len(qs) for qs in by_id.values())
+    return stats
 
 
 def main() -> None:
@@ -1532,16 +1631,18 @@ def main() -> None:
         q["name"], q["name_ref"] = src["name"], src["name_ref"]
         q["name_basis"] = "same speaker in book" if same else "same speaker in Bible"
         named[q["name_basis"]] += 1
+    character = characters(allq, tok)
     unknown = sorted({fr for fr in frame if fr and fr not in frame_hebrew})
     if unknown:
         raise SystemExit(f"frames with no Hebrew name (prophets.tsv name_key, corrections.tsv name_key, a psalm title): {unknown}")
-    cols = ["id", "level", "parent", "speaker", "speaker_ref", "speaker_basis", "alt_eng", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
+    cols = ["id", "level", "parent", "speaker", "speaker_ref", "speaker_basis", "alt_eng", "speaker_id", "speaker_name", "speaker_name_ref", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
             "end_fit", "pieces", "inquit"]
     with open(OUT / "quotations.tsv", "w", encoding="utf-8") as fh:
         fh.write("# Hebrew speaker layer: Clear's quotation spans (CC BY 4.0) on MACULA's Hebrew words, with the quotations nested inside\n")
         fh.write("# them from the clause layout's speech structure. speaker: who speaks, as MACULA lemmas of the words that name them in the\n")
         fh.write("# text (the subject of the inquit, or of another quotation of the same speaker: speaker_basis; speaker_ref: those\n")
-        fh.write("# words' keys); alt_eng: the speaker data's English label, only where no Hebrew name is found\n")
+        fh.write("# words' keys); alt_eng: the speaker data's English label, only where no Hebrew name is found; speaker_id: one person\n")
+        fh.write("# across quotations; speaker_name, speaker_name_ref: that person's proper name in the text and the words that give it\n")
         fh.write("\t".join(cols) + "\n")
         for q in allq:
             fh.write("\t".join(str({"speaker": q["name"], "speaker_ref": q["name_ref"], "speaker_basis": q["name_basis"]}.get(c, q.get(c, ""))) for c in cols) + "\n")
@@ -1629,6 +1730,10 @@ def main() -> None:
              f"{named['text']} of {len(allq)} quotations from their inquit, {named['review']} by a review row; of the {named['none']} others "
              f"{named['same speaker in book']} by the same speaker's name elsewhere in the book, {named['same speaker in Bible']} elsewhere in"
              f" the Bible, {named['English label kept (alt_eng)']} with only the English label (alt_eng), the rest not named",
+             f"- characters (speaker_id, resources/speaker_layer/characters.tsv): {character['characters']}, over"
+             f" {character['quotations with a character']} quotations ({character['added']} new in this build); named by a proper name"
+             f" (speaker_name): {character['characters named']}, on {character['named'] + character['named by hand']} quotations"
+             f" ({character['named by hand']} through a hand-given name_key)",
              f"- refinement 7, touching pieces of a voice implied in the outer speech (Glyssen's Implicit) joined into one speech: {implicit}",
              "- one structure (quotations, segment levels and innermost quotations made to agree): "
              + (", ".join(f"{k} {v}" for k, v in consistent.most_common()) or "nothing to change"),

@@ -512,7 +512,10 @@ def main() -> None:
                    "depth": depth, "text_depth": s["_td"], "quotation": s["_q"], "speaker": ", ".join(speakers[s["_q"]]["names"]) or None if s["_q"] else None,
                    "speaker_ref": speakers[s["_q"]]["refs"] if s["_q"] else [],
                    "speaker_basis": speakers[s["_q"]]["basis"] if s["_q"] else None,
-                   "alt_eng": speakers[s["_q"]]["alt_eng"] or None if s["_q"] else None, "kind": trees_macula._clause_kind(own or rows) if cid is not None else None,
+                   "alt_eng": speakers[s["_q"]]["alt_eng"] or None if s["_q"] else None,
+                   "speaker_id": speakers[s["_q"]]["speaker_id"] or None if s["_q"] else None,
+                   "speaker_name": speakers[s["_q"]]["speaker_name"] or None if s["_q"] else None,
+                   "speaker_name_ref": speakers[s["_q"]]["speaker_name_ref"] or None if s["_q"] else None, "kind": trees_macula._clause_kind(own or rows) if cid is not None else None,
                    "rule": tree.node[cid]["rule"] if cid is not None else None, "role": tree.role.get(cid),
                    "via": tree.via.get(cid, []), "junction": tree.node[cid]["junction"] if cid is not None else None,
                    "sentence": rows[0]["sent"], "first": rows[0]["key"], "last": rows[-1]["key"],
@@ -542,6 +545,11 @@ def main() -> None:
              "quotations_with_greek_speaker": sum(bool(v["names"]) for v in speakers.values()),
              "speaker_basis": dict(collections.Counter(v["basis"] for v in speakers.values() if v["basis"])),
              "quotations_with_alt_eng": sum(bool(v["alt_eng"]) for v in speakers.values()),
+             "characters": len({v["speaker_id"] for v in speakers.values() if v["speaker_id"]}),
+             "quotations_with_character": sum(bool(v["speaker_id"]) for v in speakers.values()),
+             "characters_named": len({v["speaker_id"] for v in speakers.values() if v["speaker_name"]}),
+             "quotations_with_speaker_name": sum(bool(v["speaker_name"]) for v in speakers.values()),
+             "characters_named_by_hand": greek_speakers.named_by_hand(),
              "lowfat_grc_sha256": lowfat_sha}
     (out / "build.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in build.items() if k != "trees_db_sha256"}, ensure_ascii=False))

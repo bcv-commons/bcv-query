@@ -29,7 +29,8 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 | Clause segments from | the clause layout's segmentation `8977039d6ddb5383` (the same in every clause-layout release since v0.22) |
 | Review | @REVIEW_ROWS@ reviewed changes, each with its reason (`review.tsv`) |
 | Speakers named in Hebrew | @NAMED@ of the quotations, from the text itself |
-| Changes | v0.13: a quotation with no inquit of its own takes its speaker's Hebrew name from another quotation of the same speaker (`speaker_basis`); `alt_eng` keeps the English label only where no Hebrew name is found. v0.12: speakers and frames named in Hebrew from the text (`speaker`, `speaker_ref`, `frame`); `alt_speaker` and `speaker_hebrew` gone |
+| Characters | @CHARACTERS@ people (`speaker_id`) over @WITH_ID@ quotations; @CHAR_NAMED@ of them with a proper name (`speaker_name`, on @NAME_QUOTES@ quotations) |
+| Changes | v0.14: who the speaker is across quotations, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text, רָחָב for the woman of Josh 2); `speaker` unchanged. v0.13: a quotation with no inquit of its own takes its speaker's Hebrew name from another quotation of the same speaker (`speaker_basis`); `alt_eng` keeps the English label only where no Hebrew name is found. v0.12: speakers and frames named in Hebrew from the text (`speaker`, `speaker_ref`, `frame`); `alt_speaker` and `speaker_hebrew` gone |
 | Licence | CC BY 4.0 |
 
 ## Files
@@ -53,7 +54,10 @@ quotations, on MACULA Hebrew's words and on the clause segments of the
 | `speaker` | who speaks, named from the Hebrew text: the subject of the verb that introduces the quotation, as MACULA lemmas (יהוה, מֹשֶׁה, דָּוִד, מֶלֶךְ, אִשָּׁה), with the nouns of its construct chain (מַלְאָךְ יהוה, בֵּן יִשְׂרָאֵל, מֶלֶךְ אַשּׁוּר); for "the word of X" or "the oracle of X" (וַיְהִי דְבַר־יְהוָה … לֵאמֹר, נְאֻם יְהוָה) X; several subjects separated by commas. Where the quotation's own inquit names no one, the speaker's usual Hebrew name from another quotation (see `speaker_basis`); else empty |
 | `speaker_ref` | the word keys of the words that name the speaker (in another quotation where `speaker_basis` says so) |
 | `speaker_basis` | where `speaker` comes from: `inquit` (the quotation's own inquit), `review` (a review row), `same speaker in book` / `same speaker in Bible` (another quotation of the same speaker, see below); empty where there is no name |
-| `alt_eng` | the speaker data's English label, only where `speaker` is empty and the label names someone (@ALT_ENG@ quotations: "shepherds at well", "watchman", "daughter of Zion"), so that no speaker the earlier releases named is lost; empty everywhere else |
+| `alt_eng` | the speaker data's English label, only where `speaker` is empty and the label names someone (@ALT_ENG@ quotations: "shepherds at well", "watchman", "daughter of Zion"), so that no name the earlier releases gave is lost; empty everywhere else |
+| `speaker_id` | who the speaker is across quotations: a stable id (`c0124`) for one person or group, the same in every quotation they speak and in later releases. Before v0.12 the label did this (one person, one label across a story); `speaker` names each quotation by its own inquit, so one person can be אִישׁ in one and עֶבֶד in the next, and one word stands for many people. A person with a proper name has one id across the Bible, one without (an unnamed servant, "the people") one per book. Empty for a speaker the speaker data names no one by ("he", "they", the one addressed, an untitled psalm) |
+| `speaker_name` | that person's proper name as the text gives it (MACULA lemma; God's name for God): רָחָב, אַבְרָהָם, יהוה; empty for a person the text gives no name (Abraham's servant in Gen 24) |
+| `speaker_name_ref` | the word key of a word that gives that name: the quotation's own inquit where it does, else the nearest quotation's that does (in the same book first), else the word a hand table gives (Josh 2:1, וּשְׁמָהּ רָחָב) |
 | `divine` | `Y` when the speaker is God (decided in the build, also where `speaker` is empty) |
 | `quote_type`, `basis` | where the quotation comes from: Clear's data (`block`, `referent`, `character`), the clause layout (`layout`), the translations' votes (`translations`), a saying verb inside a quotation (`inner inquit`), God's words in the prophets (`oracle`), a messenger formula (`messenger formula`, `relayed message`, `commanded message`), a song (`song`, `voice`), a psalm title (`titled psalm`), a hand correction (`correction`), a review row (`review`) |
 | `first`, `last` | the first and last word, MACULA word keys (12 digits: book, chapter, verse, word, part) |
@@ -134,6 +138,16 @@ the user.
    it must be a proper name or God's name (not מֶלֶךְ, אִישׁ, עַם), God's name only for a divine speaker, and a name that is this
    speaker's rather than mostly another's ("false prophets" are not named יִרְמְיָהוּ). "Psalmist" (any untitled psalm) is never
    carried over. What is still unnamed keeps the label in `alt_eng`.
+9. **Characters** (`speaker_id`, `speaker_name`): one id for each of the speaker data's characters (Clear's and Glyssen's labels,
+   which already tell people apart: Pharaoh (1st) and (2nd), the two Lamechs), kept in a table in the repository so that ids do not
+   change between releases (the labels in it are English, so the table is not part of this release). Two labels of one person
+   (Abraham, Abraham (Abram); Samuel (boy), Samuel) share an id. A label without a proper name gets one id per book, so that unnamed
+   people with the same label in different stories ("people", "someone") are not made one. The name is the proper name (or God's
+   name) that more than half of the person's quotations named by a proper name, and at least a third of those named at all, are
+   named by in their own inquit, and that no other person is named by more than three times as often (a messenger quoting כֹּה
+   אָמַר שָׁאוּל, a prophet quoting יְהוָה); narrators get none. Where no inquit names a person the text names elsewhere, the table
+   gives the word that does (רָחָב, Josh 2:1; חַוָּה, Gen 3:20; the prophets' headings): 50 people. Where the speaker data's label
+   is the tradition's guess and not the text's (the brothers in Gen 37, the young Miriam of Exod 2), no name is given.
 
 The code is `shoresh/macula/build_speaker_layer.py` in [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query).
 
@@ -213,6 +227,8 @@ prophet's own questions).
 - a nested speaker named through "I" can be the outer speaker where the reference chain does not reach the quoted person (Jer 22:18);
 - the prophecy ends have not been measured against BHSA since the formula fix;
 - the review covered 48 passages of about 700 doubtful ones;
+- `speaker_id` follows the speaker data's labels: where a label puts a line in the wrong mouth, the id does too, and one person
+  under two labels the build does not know as one has two ids;
 - @UNNAMED@ quotations have no Hebrew name: no inquit before them (most of them in poetry and the prophets), or a subject that is a
   pronoun or only in the verb; @ALT_ENG@ of them keep the English label in `alt_eng`.
 

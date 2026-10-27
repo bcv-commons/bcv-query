@@ -1,0 +1,419 @@
+id	label	book	name_key
+n0001	angel	MAT	
+n0002	Isaiah		
+n0003	magi (wise men from East)	MAT	
+n0004	Good Priest	MAT	
+n0005	Herod the Great		
+n0006	God	MAT	40001023022
+n0007	scripture	MAT	
+n0008	John the Baptist		
+n0009	Jesus		
+n0010	Satan (Devil)	MAT	40004010007
+n0011	leper	MAT	
+n0012	centurion with great faith	MAT	
+n0013	teacher of religious law	MAT	
+n0014	disciple who wanted to bury his father	MAT	
+n0015	disciples	MAT	
+n0016	demons (Legion)	MAT	
+n0017	teachers of religious law	MAT	
+n0018	Pharisees		
+n0019	disciples of John the Baptist	MAT	
+n0020	Jairus (synagogue leader)	MAT	
+n0021	woman, bleeding for twelve years	MAT	
+n0022	blind men, two	MAT	
+n0023	crowd after mute healed	MAT	
+n0024	Pharisees, some		
+n0025	people who saw healing of demon-possessed man who was blind and mute	MAT	
+n0026	crowd	MAT	
+n0027	men in Nazareth synagogue	MAT	
+n0028	Herod Antipas (the tetrarch)		
+n0029	Herodias' daughter	MAT	
+n0030	Andrew		
+n0031	Peter (Simon)		
+n0032	Canaanite (Syrophoenician) mother of possessed girl	MAT	
+n0033	John	MAT	40017001013
+n0034	father of demon-possessed boy	MAT	
+n0035	collectors of temple tax	MAT	
+n0036	rich young ruler	MAT	
+n0037	mother of the sons of Zebedee (James and John)	MAT	
+n0038	Bartimaeus (a blind man)	MAT	
+n0039	Zechariah the prophet, son of Berechiah	MAT	
+n0040	crowd preparing for Passover Feast	MAT	
+n0041	people of Jerusalem	MAT	
+n0042	children	MAT	
+n0043	chief priests	MAT	
+n0044	spies (from Pharisees and Herodians)	MAT	
+n0045	Sadducees		
+n0046	Pharisee (expert in religious law)		
+n0047	Judas Iscariot		
+n0048	witnesses, false	MAT	
+n0049	Caiaphas, the high priest	MAT	40026057008
+n0050	servant girl at high priest's courtyard	MAT	
+n0051	servant girl, another	MAT	
+n0052	high priest's servant (relative of the man whose ear Peter cut off)	MAT	
+n0053	Jeremiah		
+n0054	Pilate		
+n0055	Pilate's wife	MAT	
+n0056	crowd before Pilate		
+n0057	soldiers, Roman	MAT	
+n0058	narrator-MAT	MAT	
+n0059	passers by	MAT	
+n0060	bystanders at Calvary, some	MAT	
+n0061	bystanders at Calvary, the rest	MAT	
+n0062	centurion at crucifixion	MAT	
+n0063	angels in white, two	MAT	
+n0006	God	MRK	41001001007
+n0064	man possessed by evil spirit	MRK	
+n0065	men in Capernaum synagogue	MRK	
+n0066	leper	MRK	
+n0067	teachers of religious law	MRK	
+n0068	everyone who saw healing of paralytic	MRK	
+n0069	people, some	MRK	
+n0070	evil spirits	MRK	
+n0071	Jesus' family	MRK	
+n0072	crowd	MRK	
+n0073	disciples	MRK	
+n0074	demons (Legion)	MRK	
+n0075	Jairus (synagogue leader)	MRK	41005022007
+n0076	woman, bleeding for twelve years	MRK	
+n0077	men from Jairus' house	MRK	
+n0078	narrator-MRK		
+n0079	men in Nazareth synagogue	MRK	
+n0080	people, other	MRK	
+n0081	people, still others	MRK	
+n0082	Herodias	MRK	41006022007
+n0083	Herodias' daughter	MRK	
+n0084	Philip the apostle		
+n0085	Pharisees/teachers of religious law		
+n0086	Canaanite (Syrophoenician) mother of possessed girl	MRK	
+n0087	people of Decapolis	MRK	
+n0088	blind man	MRK	
+n0033	John	MRK	41009002014
+n0089	father of demon-possessed boy	MRK	
+n0090	many in crowd	MRK	
+n0091	rich young ruler	MRK	
+n0092	Bartimaeus (a blind man)	MRK	41010046020
+n0093	crowd, many in the	MRK	
+n0094	owners of colt	MRK	
+n0095	crowd preparing for Passover Feast	MRK	
+n0096	chief priests	MRK	
+n0097	spies (from Pharisees and Herodians)	MRK	
+n0098	expert in religious law	MRK	
+n0099	witnesses, false	MRK	
+n0100	Caiaphas, the high priest	MRK	
+n0101	servant girl at high priest's courtyard	MRK	
+n0102	soldiers, Roman	MRK	
+n0103	passers by	MRK	
+n0104	bystanders at Calvary, some	MRK	
+n0105	man with sponge	MRK	
+n0106	centurion at crucifixion	MRK	
+n0107	Mary Magdalene		
+n0108	angels in white, two	MRK	
+n0109	Gabriel	LUK	42001019009
+n0110	Zacharias (Zechariah)		
+n0111	Mary, Jesus' mother		
+n0112	Elizabeth		
+n0113	neighbors and relatives of Elizabeth and Zacharias (Zechariah)	LUK	
+n0114	everyone in Judean hills who heard	LUK	
+n0115	angel	LUK	
+n0116	great company of heavenly host	LUK	
+n0117	shepherds outside Bethlehem	LUK	
+n0006	God	LUK	42002020009
+n0118	Simeon, devout man in Jerusalem		
+n0009	Jesus (child)		
+n0119	crowd	LUK	
+n0120	tax collectors	LUK	
+n0010	Satan (Devil)	LUK	42010018006
+n0121	all in Nazareth synagogue	LUK	
+n0122	man possessed by evil spirit	LUK	
+n0123	men in Capernaum synagogue	LUK	
+n0124	demons coming out of people	LUK	
+n0125	leper	LUK	
+n0126	teachers of religious law	LUK	
+n0127	everyone seeing healing of paralyzed man	LUK	
+n0128	elders of the Jews	LUK	
+n0129	centurion with great faith	LUK	
+n0130	crowd, large (witnessed healing of widow's son)	LUK	
+n0131	disciples of John the Baptist	LUK	
+n0132	Pharisee (Simon)	LUK	42006015009
+n0133	other guests at Pharisee (Simon)'s house	LUK	
+n0134	disciples	LUK	
+n0135	demons (Legion)	LUK	
+n0136	men from Jairus' house	LUK	
+n0137	father of demon-possessed boy	LUK	
+n0033	John	LUK	42009049004
+n0138	teacher of religious law	LUK	
+n0139	man, still another	LUK	
+n0140	seventy-two	LUK	
+n0141	expert in religious law	LUK	
+n0142	Martha		
+n0143	crowd, some in	LUK	
+n0144	woman in crowd	LUK	
+n0145	experts in religious law, one of the	LUK	
+n0146	someone in crowd	LUK	
+n0147	synagogue ruler	LUK	
+n0148	someone	LUK	
+n0149	one at table of Pharisee (expert in religious law)	LUK	
+n0150	lepers, ten	LUK	
+n0151	rich young ruler	LUK	
+n0152	crowd at Jericho	LUK	
+n0153	Bartimaeus (a blind man)	LUK	
+n0154	crowd, many in the	LUK	
+n0155	people in Jericho, all the	LUK	
+n0156	Zacchaeus		
+n0157	owners of colt	LUK	
+n0158	crowd preparing for Passover Feast	LUK	
+n0159	chief priests	LUK	
+n0160	spies (from Pharisees and Herodians)	LUK	
+n0161	followers of Jesus		
+n0162	servant girl at high priest's courtyard	LUK	
+n0163	second person to accuse Peter (man)	LUK	
+n0164	high priest's servant (relative of the man whose ear Peter cut off)	LUK	
+n0165	narrator-LUK	LUK	
+n0166	guards at high priests' house	LUK	
+n0167	council of elders	LUK	
+n0168	soldier at the cross	LUK	
+n0169	criminal on cross, insulting	LUK	
+n0170	criminal on cross, repentant	LUK	
+n0171	centurion at crucifixion	LUK	
+n0172	angels in white, two	LUK	
+n0173	Cleopas	LUK	42024018005
+n0174	Cleopas' companion (on road to Emmaus)	LUK	
+n0175	priests	JHN	
+n0176	Nathanael		
+n0177	master of the banquet	JHN	
+n0178	David	JHN	43007042009
+n0179	Jews, the	JHN	
+n0180	Nicodemus		
+n0181	disciples of John the Baptist	JHN	
+n0182	woman, Samaritan	JHN	
+n0183	no one	JHN	
+n0184	disciples	JHN	
+n0185	many Samaritans	JHN	
+n0186	official, royal (father)	JHN	
+n0187	servants of royal official (father)	JHN	
+n0188	invalid for 38 years	JHN	
+n0189	people in crowd by Sea of Galilee	JHN	
+n0190	crowd	JHN	
+n0191	Jesus' brothers	JHN	
+n0192	crowd at Festival of Tabernacles in Jerusalem, some	JHN	
+n0193	crowd at Festival of Tabernacles in Jerusalem, others	JHN	
+n0194	crowd at Festival of Tabernacles in Jerusalem, the	JHN	
+n0195	people of Jerusalem, some		
+n0196	crowd at Festival of Tabernacles in Jerusalem, many in the	JHN	
+n0197	crowd at Festival of Tabernacles in Jerusalem, still others	JHN	
+n0198	chief priests	JHN	
+n0199	temple guards	JHN	
+n0200	teachers of religious law	JHN	
+n0201	Jews who had believed Jesus	JHN	
+n0202	neighbors of man blind from birth	JHN	
+n0203	cured man, blind from birth	JHN	
+n0204	neighbors of man blind from birth, others	JHN	
+n0205	Pharisees, other	JHN	
+n0206	parents of cured man, blind from birth	JHN	
+n0207	Jews, many	JHN	
+n0208	Jews, other	JHN	
+n0209	people near Jordan River	JHN	
+n0210	Mary, sister of Martha		43011002003
+n0211	Thomas		
+n0212	Jews who had been with Mary and Martha	JHN	
+n0213	Jews who had been with Mary and Martha, some	JHN	
+n0049	Caiaphas, the high priest	JHN	43011049006
+n0214	crowd preparing for Passover Feast	JHN	
+n0215	Zechariah the prophet, son of Berechiah	JHN	
+n0216	Greeks		
+n0217	crowd preparing for Passover Feast, others	JHN	
+n0218	narrator-JHN		
+n0033	John	JHN	43010041018
+n0219	Judas, apostle (not Judas Iscariot)		
+n0220	soldiers	JHN	
+n0221	servant girl at high priest's courtyard	JHN	
+n0222	officials of high priest, one of the	JHN	
+n0223	people in high priest's courtyard	JHN	
+n0224	high priest's servant (relative of the man whose ear Peter cut off)	JHN	
+n0225	soldiers, Roman	JHN	
+n0226	angels in white, two	JHN	
+n0227	disciples (but not Thomas)	JHN	
+n0228	disciples	ACT	
+n0229	men dressed in white, two (angels)	ACT	
+n0230	believers, one hundred twenty	ACT	
+n0231	Jews, God-fearing from every nation	ACT	
+n0232	Jews, God-fearing from every nation, some	ACT	
+n0233	crowd in Jerusalem on Pentecost	ACT	
+n0234	Ananias (Annas), the high priest (father-in-law of Caiaphas)	ACT	
+n0235	apostles, elders, and whole church at Jerusalem	ACT	
+n0236	Sapphira, wife of Ananias of Jerusalem	ACT	44005001007
+n0237	angel	ACT	
+n0238	officers	ACT	
+n0239	person who told the guards and priests where the apostles were	ACT	
+n0240	Peter (Simon)/disciples	ACT	
+n0241	Gamaliel	ACT	44005034009
+n0242	Jews of Cyrene, Alexandria, Cilicia & Asia	ACT	
+n0243	false witnesses	ACT	
+n0244	Stephen	ACT	44006009023
+n0245	people of Samaria, all the	ACT	
+n0246	Simon, sorcerer		44008018004
+n0247	Holy Spirit, the	ACT	
+n0248	Philip the evangelist		44008030004
+n0249	Ethiopian officer of Queen Candace	ACT	
+n0250	Ananias of Damascus		
+n0251	all who heard (in synagogues)	ACT	
+n0252	disciples, two men (from Joppa)	ACT	
+n0253	men from Cornelius	ACT	
+n0254	Cornelius		
+n0255	believers, circumcised (in Jerusalem)	ACT	
+n0256	people praying at John Mark's mother's house	ACT	
+n0257	people of Tyre and Sidon	ACT	
+n0258	synagogue rulers in Pisidian Antioch	ACT	
+n0259	Paul		
+n0260	crowd in Lystra	ACT	
+n0261	men from Judea, some	ACT	
+n0262	believers who were Pharisees	ACT	
+n0263	James		
+n0264	Macedonian	ACT	
+n0265	Lydia	ACT	44016014005
+n0266	fortune telling slave girl	ACT	
+n0267	owners of fortune telling slave girl	ACT	
+n0268	jailer in Philippi	ACT	
+n0269	officers of magistrates	ACT	
+n0270	mob	ACT	
+n0271	Epicurean and Stoic philosophers, other	ACT	
+n0272	Epicurean and Stoic philosophers, some	ACT	
+n0273	Epicurean and Stoic philosophers	ACT	
+n0274	Epicurean and Stoic philosophers, interested	ACT	
+n0275	Jews, the	ACT	
+n0276	Gallio, proconsul of Achaia		
+n0277	seven sons of Sceva	ACT	
+n0278	evil spirit in possessed man	ACT	
+n0279	Demetrius the silversmith	ACT	44019024001
+n0280	craftsmen and workmen	ACT	
+n0281	city clerk of Ephesus	ACT	
+n0282	Agabus the prophet	ACT	44021010012
+n0283	Paul's traveling companions, Luke and	ACT	
+n0284	Jews from Asia	ACT	
+n0285	crowd	ACT	
+n0286	commander of Roman troops in Jerusalem	ACT	
+n0287	crowd in Jerusalem	ACT	
+n0288	centurion at Paul's flogging	ACT	
+n0289	those standing near Paul in Sanhedrin	ACT	
+n0290	Jews, more than forty in conspiracy	ACT	
+n0291	centurion in the barracks	ACT	
+n0292	son of Paul's sister (young man)	ACT	
+n0293	Felix, governor of Judea		
+n0294	Tertullus, lawyer		
+n0295	Festus, governor of Judea		
+n0296	King Herod Agrippa II		
+n0297	Malta islanders	ACT	
+n0298	Jews, leaders of the (in Rome)	ACT	
+n0006	God	ROM	45001017003
+n0178	David	ROM	45001003009
+n0299	scripture	ROM	
+n0300	narrator-ROM	ROM	
+n0301	sons of Korah	ROM	
+n0302	one of you	ROM	
+n0303	molded thing	ROM	
+n0304	Moses	ROM	45010005001
+n0305	you (hypothetical)	ROM	
+n0306	Elijah		
+n0307	you (hypothetical Gentile)	ROM	
+n0308	follower of Apollos	1CO	
+n0006	God	1CO	46001018017
+n0309	follower of Paul	1CO	
+n0310	Eliphaz the Temanite	1CO	
+n0311	narrator-1CO	1CO	
+n0312	saying about doing anything	1CO	
+n0313	saying about food	1CO	
+n0314	scripture	1CO	
+n0304	Moses	1CO	46009009004
+n0178	David	1CO	
+n0315	anyone	1CO	
+n0316	someone	1CO	
+n0317	foot	1CO	
+n0318	ear	1CO	
+n0319	eye	1CO	
+n0320	head	1CO	
+n0321	person without the gift of tongues	1CO	
+n0322	unbeliever who comes under conviction	1CO	
+n0323	someone (hypothetical argument)	1CO	
+n0006	God	2CO	47004006003
+n0324	scripture	2CO	
+n0304	Moses	2CO	47003015007
+n0325	narrator-2CO	2CO	
+n0326	narrator-GAL	GAL	
+n0006	God	GAL	48003008012
+n0304	Moses	GAL	
+n0327	Holy Spirit, the	GAL	
+n0328	Sarah (Sarai)	GAL	
+n0178	David	EPH	
+n0329	scripture	EPH	
+n0006	God	EPH	49005020013
+n0330	rules of the world	COL	
+n0331	people	1TH	
+n0332	scripture	1TI	
+n0333	scripture	2TI	
+n0334	Cretan prophet		
+n0006	God	HEB	58001001006
+n0178	David	HEB	58004007007
+n0335	scripture	HEB	
+n0304	Moses	HEB	58009019009
+n0336	Holy Spirit, the	HEB	
+n0337	Solomon, king	HEB	
+n0338	someone	JAS	
+n0006	God	JAS	59002005007
+n0339	one of you	JAS	
+n0340	scripture	JAS	
+n0341	you ought to say	JAS	
+n0006	God	1PE	60002005016
+n0178	David	1PE	
+n0337	Solomon, king	1PE	
+n0006	God	2PE	61001017004
+n0337	Solomon, king	2PE	
+n0342	saying about sow	2PE	
+n0343	scoffers	2PE	
+n0344	man who says 'I know him'	1JN	
+n0345	anyone	1JN	
+n0346	Michael, archangel		
+n0347	Enoch	JUD	65001014008
+n0348	living creature, first	REV	
+n0349	twenty-four elders	REV	
+n0350	angel, powerful	REV	
+n0351	elders, one of the	REV	
+n0352	every created thing	REV	
+n0353	living creature, second		
+n0354	living creature, third		
+n0355	voice from among living creatures	REV	
+n0356	living creature, fourth		
+n0357	souls of those killed for word of God	REV	
+n0358	kings, princes, generals, rich, powerful, slave and free	REV	
+n0359	angel standing in sun	REV	
+n0360	multitude from all nations, tribes, peoples, languages	REV	
+n0361	angels, all the	REV	
+n0362	eagle crying with loud voice	REV	
+n0363	voice from altar	REV	
+n0364	voice from heaven (God?)	REV	
+n0365	angel standing on sea and land	REV	
+n0366	angel or messenger (Greek variant: someone speaking to John)	REV	
+n0367	voices in heaven, loud	REV	
+n0368	voice in heaven, loud	REV	
+n0369	worshipers of the beast	REV	
+n0370	angel flying directly overhead	REV	
+n0371	angel flying directly overhead, second	REV	
+n0372	angel flying directly overhead, third	REV	
+n0373	Holy Spirit, the	REV	
+n0374	angel, coming out of temple	REV	
+n0375	angel, coming out of temple, another	REV	
+n0376	conquerors of beast, image & his name	REV	
+n0377	voice from temple	REV	
+n0378	angel over waters	REV	
+n0379	altar	REV	
+n0380	voice from throne	REV	
+n0381	angel (one of the seven)	REV	
+n0382	angel, another, coming down from heaven	REV	
+n0383	voice from heaven, another	REV	
+n0384	kings of the earth	REV	
+n0385	merchants of the earth	REV	
+n0386	sea captains, seafarers, sailors	REV	
+n0387	voice of great crowd in heaven, loud	REV	
+n0388	voice of great crowd, like roar of many waters, loud thunderclaps	REV	
+n0006	God	REV	66021003029
+n0389	Holy Spirit, the/bride, the (referring to the Church)	REV	

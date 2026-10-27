@@ -95,6 +95,10 @@ def main() -> None:
               "@NAMED@": f'{sum(bool(q["speaker"]) for q in quotes):,} of {len(quotes):,}',
               "@UNNAMED@": f'{sum(not q["speaker"] for q in quotes):,}',
               "@ALT_ENG@": f'{sum(bool(q["alt_eng"]) for q in quotes):,}',
+              "@CHARACTERS@": f'{len({q["speaker_id"] for q in quotes if q["speaker_id"]}):,}',
+              "@WITH_ID@": f'{sum(bool(q["speaker_id"]) for q in quotes):,}',
+              "@CHAR_NAMED@": f'{len({q["speaker_id"] for q in quotes if q["speaker_name"]}):,}',
+              "@NAME_QUOTES@": f'{sum(bool(q["speaker_name"]) for q in quotes):,}',
               "@LOWFAT_SHA@": re.search(r"MACULA Hebrew lowfat sha256 ([0-9a-f]+)", (out / "report.md").read_text(encoding="utf-8")).group(1)[:12]}
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():

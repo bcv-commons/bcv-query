@@ -1,0 +1,796 @@
+id	label	book	name_key
+c0001	God		
+c0002	Adam	GEN	
+c0003	serpent	GEN	
+c0004	Eve	GEN	010030200051
+c0005	Cain		
+c0006	Lamech (descendent of Cain)		
+c0007	Lamech (descendent of Seth)		
+c0008	Noah		
+c0009	saying about Nimrod	GEN	
+c0010	men of Babel	GEN	
+c0011	Abraham (Abram)		
+c0012	Pharaoh (1st)		
+c0013	Melchizedek, king of Salem (priest of God Most High)		
+c0014	Bera, king of Sodom	GEN	010140020041
+c0015	Sarah (Sarai)		
+c0016	Yahweh's angel	GEN	
+c0017	Hagar, Sarai's maid		
+c0018	Sarah (Sarai) (old)		
+c0015	Sarah		
+c0019	Lot		
+c0020	men of Sodom (wicked)	GEN	
+c0021	angels at Sodom, two	GEN	
+c0022	older daughter of Lot	GEN	
+c0023	Abimelech 1, king of the Philistines (in Gerar)		
+c0011	Abraham	GEN	
+c0024	Abimelech 1, king of the Philistines (in Gerar)/Phicol		
+c0025	Isaac		
+c0026	saying (proverb)	GEN	
+c0027	messenger to Abraham	GEN	
+c0028	Hittites	GEN	
+c0029	Ephron the Hittite		
+c0030	Abraham's chief servant	GEN	
+c0031	Rebekah		
+c0032	Laban		
+c0033	Esau		
+c0034	Jacob (Israel)		
+c0035	Abimelech 2, king of the Philistines (in Gerar)		
+c0036	herdsman	GEN	
+c0037	servants of Isaac	GEN	
+c0025	Isaac (old)		
+c0038	shepherds at well	GEN	
+c0039	Leah		
+c0040	Rachel		
+c0041	Laban's sons	GEN	
+c0042	messengers sent by Jacob	GEN	
+c0043	angel who wrestled with Jacob	GEN	
+c0044	Shechem, son of Hamor		
+c0045	Hamor, Hivite ruler		
+c0046	Simeon	GEN	
+c0047	midwife of Rachel	GEN	
+c0048	Joseph		
+c0049	Levi	GEN	
+c0050	man (at Shechem)	GEN	
+c0051	Reuben		
+c0052	Judah		
+c0053	person who informed Tamar, daughter-in-law of Judah	GEN	
+c0054	Tamar, daughter-in-law of Judah		
+c0055	Hirah, the Adullamite	GEN	010380120152
+c0056	men of Enaim	GEN	
+c0057	person who informed Judah	GEN	
+c0058	message from Tamar, daughter-in-law of Judah	GEN	
+c0059	midwife of Tamar, daughter-in-law of Judah	GEN	
+c0060	Potiphar's wife	GEN	
+c0061	chief baker of Egypt	GEN	
+c0062	chief cupbearer of Egypt	GEN	
+c0063	Pharaoh (2nd)		
+c0064	Pharaoh (2nd)'s men	GEN	
+c0065	Dan	GEN	
+c0066	Reuben/Levi/Judah/Issachar/Zebulun/Dan/Naphtali/Gad/Asher	GEN	
+c0067	steward of Joseph's house	GEN	
+c0068	Egyptians, all the	GEN	
+c0069	news giver to Joseph	GEN	
+c0070	news giver to Jacob	GEN	
+c0071	Israel		
+c0072	Canaanites	GEN	
+c0073	Pharaoh (3rd)		
+c0074	Shiphrah (midwife)	EXO	020010150091
+c0075	Pharaoh's daughter	EXO	
+c0076	Miriam (young)	EXO	
+c0077	Moses		
+c0078	man (Hebrew fighting)	EXO	
+c0079	Jethro (Reuel), Moses' father-in-law		
+c0080	Zipporah, Moses' wife		
+c0081	narrator-GEN		
+c0082	Aaron		
+c0083	Pharaoh		
+c0084	slave drivers, Egyptian	EXO	
+c0085	Israelite foremen	EXO	
+c0086	magicians	EXO	
+c0087	Pharaoh's officials	EXO	
+c0088	Egyptians		
+c0089	Israelites	EXO	
+c0090	Miriam	EXO	020150210031
+c0091	Egypt		
+c0092	Joshua		
+c0093	craftsman	EXO	
+c0094	Moses and Aaron	LEV	
+c0095	Israelites, some	NUM	
+c0096	Hobab, Moses brother-in-law		
+c0097	Israelites	NUM	
+c0098	young man	NUM	
+c0090	Miriam	NUM	040120010021
+c0099	explorers, ten	NUM	
+c0100	Caleb		
+c0101	Israelite community	NUM	
+c0102	Korah	NUM	040160010021
+c0103	Dathan	NUM	040160120042
+c0104	Edom		
+c0105	messengers Moses sent to king of Edom	NUM	
+c0106	Book of the Wars of Yahweh		
+c0107	messengers Israel sent to Amorite king Sihon		
+c0108	poets	NUM	
+c0109	Moabites		
+c0110	Balak		
+c0111	Balaam		
+c0112	Moabite officials	NUM	
+c0113	donkey (female)	NUM	
+c0114	Yahweh's angel	NUM	
+c0115	narrator-NUM		
+c0116	daughters of Zelophehad	NUM	
+c0117	Eleazar the priest, son of Aaron		
+c0118	Israelite army commanding officers	NUM	
+c0119	Gadites	NUM	
+c0120	family heads of Gilead	NUM	
+c0121	Reubenites	JOS	
+c0122	messenger to king of Jericho	JOS	
+c0123	king of Jericho	JOS	
+c0124	Rahab	JOS	060020030051
+c0125	Israelite spies from Joshua, two men	JOS	
+c0126	Israelite officers	JOS	
+c0127	commander of Yahweh's army	JOS	
+c0128	Israelite spies Joshua sent to Ai	JOS	
+c0129	Achan		
+c0130	Gibeonites	JOS	
+c0131	Israel, men of	JOS	
+c0132	Israel, leaders of	JOS	
+c0133	Adoni-Zedek, king of Jerusalem		
+c0134	Achsah, Caleb's daughter		
+c0135	daughters of Zelophehad	JOS	
+c0136	Joseph, people of	JOS	
+c0137	Levites, family heads of	JOS	
+c0138	Reubenites/Gadites/half-tribe of Manasseh	JOS	
+c0139	Phineas the priest		
+c0092	Joshua (old)		
+c0140	Israelites	JOS	
+c0141	Israelites	JDG	
+c0142	Judah, men of	JDG	
+c0143	Adoni-Bezek		
+c0144	Israelite spies from house of Joseph	JDG	
+c0145	Yahweh's angel	JDG	
+c0146	Ehud, Israelite deliverer		
+c0147	Eglon, king of Moab		
+c0148	servants of Eglon, king of Moab	JDG	
+c0149	Deborah		
+c0150	Barak		
+c0151	Jael		
+c0152	Sisera		
+c0153	Deborah/Barak	JDG	
+c0154	Gideon (Jerubbaal)		
+c0155	townsmen of Ophrah	JDG	
+c0156	person who informed townsmen of Ophrah	JDG	
+c0157	Joash, father of Gideon (Jerubbaal)		
+c0158	Midianite soldier who had a dream	JDG	
+c0159	Midianite soldier who interprets dream	JDG	
+c0160	Israelite fighting men	JDG	
+c0161	Ephraimites	JDG	
+c0162	officials of Succoth	JDG	
+c0163	Zebah	JDG	070080180031
+c0164	Zebah/Zalmunna		
+c0165	Abimelech, son of Gideon (Jerubbaal)		
+c0166	citizens of Shechem	JDG	
+c0167	Jotham, son of Gideon (Jerubbaal)		
+c0168	trees	JDG	
+c0169	olive tree	JDG	
+c0170	fig tree	JDG	
+c0171	vine	JDG	
+c0172	bramble	JDG	
+c0173	Gaal, son of Ebed		
+c0174	Zebul, governor of Shechem		
+c0175	Abimelech	JDG	-
+c0176	Gilead, leaders of	JDG	
+c0177	Jephthah's half-brothers	JDG	
+c0178	Gilead, elders of	JDG	
+c0179	Jephthah		
+c0180	messengers from Jephthah		
+c0181	king of the Ammonites	JDG	
+c0182	Iphtah		
+c0183	Jephthah's daughter	JDG	
+c0184	Gilead, men of	JDG	
+c0185	Manoah's wife, mother of Samson	JDG	
+c0186	Manoah, father of Samson		
+c0187	Samson		
+c0188	Samson's 30 Philistine companions	JDG	
+c0189	Samson's father-in-law	JDG	
+c0190	Philistines	JDG	
+c0191	person who informed people of Gaza	JDG	
+c0192	Gaza, people of (wicked)	JDG	
+c0193	Philistine rulers	JDG	
+c0194	Delilah		
+c0195	Micah of Ephraim		
+c0196	Micah's mother	JDG	
+c0197	Danites	JDG	
+c0198	warriors from Zorah and Eshtaol, five	JDG	
+c0199	Levite, young, from Bethlehem	JDG	
+c0200	father of concubine	JDG	
+c0201	servant of concubine's husband	JDG	
+c0202	Levite husband of concubine	JDG	
+c0203	old man in Gibeah	JDG	
+c0204	wicked men of Gibeah	JDG	
+c0205	Benjamites		
+c0206	Israel, men of	JDG	
+c0207	Israelite assembly	JDG	
+c0208	Israelite assembly, elders of	JDG	
+c0209	Naomi		
+c0210	Orpah	RUT	080010040071
+c0211	Ruth		
+c0212	women of Bethlehem	RUT	
+c0213	Boaz		
+c0214	harvesters	RUT	
+c0215	foreman	RUT	
+c0216	kinsman-redeemer	RUT	
+c0217	elders	RUT	
+c0218	Elkanah		
+c0219	Hannah		
+c0220	Eli		
+c0221	servant of priest	1SA	
+c0222	person sacrificing	1SA	
+c0223	Samuel (boy)		
+c0224	elders of Israel	1SA	
+c0225	Philistines	1SA	
+c0226	Benjamite messenger to Eli	1SA	
+c0227	attendents of Phineas' wife	1SA	
+c0228	Phineas' wife (daughter-in-law of Eli)	1SA	
+c0229	men of Ashdod	1SA	
+c0230	Ekron, people of	1SA	
+c0231	Philistine priests and fortune tellers	1SA	
+c0232	Beth Shemesh, men of	1SA	
+c0233	Beth Shemesh, messenger from	1SA	
+c0223	Samuel		
+c0234	Israelites	1SA	
+c0235	Kish, father of Saul		
+c0236	Saul		
+c0237	servant of Saul (and of his father Kish)	1SA	
+c0238	saying about seer	1SA	
+c0239	young women (maidens)	1SA	
+c0240	people who had known Saul	1SA	
+c0241	man of Gibeah	1SA	
+c0242	saying about Saul	1SA	
+c0243	Saul's uncle	1SA	
+c0244	troublemakers	1SA	
+c0245	men of Jabesh	1SA	
+c0246	Jabesh (Gilead)	1SA	
+c0247	Nahash the Ammonite		
+c0248	elders of Jabesh	1SA	
+c0249	messengers of Saul		
+c0250	Israel, all	1SA	
+c0251	Jonathan		
+c0252	Jonathan's armor bearer	1SA	
+c0253	Israelite soldier in Saul's army	1SA	
+c0254	messengers to Saul	1SA	
+c0255	Ahijah the priest	1SA	090140180032
+c0256	Israelites (soldiers)	1SA	
+c0257	person who told Samuel where Saul was	1SA	
+c0258	Agag, king of the Amalekites		
+c0259	Bethlehem, elders of	1SA	
+c0260	Jesse		
+c0261	Saul's servants	1SA	
+c0262	Saul's servant (young)	1SA	
+c0263	Goliath, Philistine champion	1SA	090170040061
+c0264	David		
+c0265	men (soldiers) standing near David	1SA	
+c0266	Eliab, David's brother		
+c0267	Abner, commander of Saul's army		
+c0268	women, dancing	1SA	
+c0269	Michal, David's wife		
+c0270	message to Saul	1SA	
+c0271	Ahimelech the priest (son of Ahitub)		
+c0272	servants of Achish, king of Gath	1SA	
+c0273	Achish, king of Gath		
+c0274	Gad the prophet, David's seer		
+c0275	Doeg the Edomite		
+c0276	person who told David about Philistines	1SA	
+c0277	David's men	1SA	
+c0278	Ziphites	1SA	
+c0279	messenger to Saul	1SA	
+c0280	person who told Saul where David was	1SA	
+c0281	Nabal		
+c0282	servant of Nabal	1SA	
+c0283	Abigail		
+c0284	servants of David	1SA	
+c0285	Abishai, Joab's brother		
+c0286	woman medium	1SA	
+c0223	Samuel (dead)		
+c0287	Philistine commanders	1SA	
+c0273	Achish	1SA	090290090021
+c0288	Egyptian (slave of Amalekite)	1SA	
+c0289	evil men and troublemakers	1SA	
+c0290	Amalekite (young man from Saul's camp)	2SA	
+c0291	Judah, men of	2SA	
+c0292	Joab		
+c0293	Ish-Bosheth, son of Saul		
+c0294	Abner		
+c0295	messengers to Joab	2SA	
+c0296	Rechab	2SA	100040060112
+c0297	Israel, all the tribes	2SA	
+c0298	Jebusites		
+c0299	saying about blind and lame	2SA	
+c0300	person who told David about Obed-Edom	2SA	
+c0301	Nathan		
+c0302	Ziba, servant of Saul's household		
+c0303	Mephibosheth, son of Jonathan		
+c0304	Ammonite nobles	2SA	
+c0305	man answered David	2SA	
+c0306	Bathsheba		
+c0307	Uriah		
+c0308	messenger from battle to David	2SA	
+c0309	servants of David	2SA	
+c0310	Jonadab		
+c0311	Amnon, son of David		
+c0312	Tamar, daughter of David		
+c0313	Absalom, son of David		
+c0314	man reporting to David	2SA	
+c0315	woman from Tekoa	2SA	
+c0316	anyone with complaint for king	2SA	
+c0317	messenger to David	2SA	
+c0318	officials of David	2SA	
+c0319	Ittai		
+c0320	Hushai		
+c0321	Shimei		
+c0322	Hushai, David's friend		
+c0323	Ahithophel		
+c0324	Absalom's men	2SA	
+c0325	woman in Bahurim	2SA	
+c0326	Ahimaaz (messenger)		
+c0327	Shobi	2SA	100170270052
+c0328	men of David	2SA	
+c0329	men of David, one	2SA	
+c0330	watchman	2SA	
+c0331	messenger, Cushite	2SA	
+c0332	people, Israel, tribes of	2SA	
+c0333	Barzillai (old)		
+c0334	Israel, men of	2SA	
+c0335	Sheba, son of Bicri	2SA	100200010061
+c0336	Joab's men, one of	2SA	
+c0337	woman, wise	2SA	
+c0338	Gibeonites	2SA	
+c0339	David's men	2SA	
+c0340	Araunah, the Jebusite		
+c0341	servants of David	1KI	
+c0342	Adonijah, son of David	1KI	110010080161
+c0264	David (old)	1KI	
+c0343	person who told David of Nathan's arrival	1KI	
+c0344	Benaiah, son of Jehoiada		
+c0345	people, all the	1KI	
+c0346	Jonathan, son of Abiathar		
+c0347	informer	1KI	
+c0348	Solomon, king	1KI	
+c0349	person who informed Solomon		
+c0350	person who told Shimei where his servants were	1KI	
+c0351	prostitute, one	1KI	
+c0352	prostitute, other	1KI	
+c0353	Hiram, king of Tyre		
+c0354	queen of Sheba	1KI	
+c0355	Hadad the Edomite		
+c0356	Pharaoh (6th)		
+c0357	Ahijah the prophet	1KI	110110300021
+c0358	Jeroboam	1KI	
+c0359	Rehoboam, king	1KI	
+c0360	elders in Shechem	1KI	
+c0361	young men (advisors of Rehoboam)	1KI	
+c0362	Israel, all	1KI	
+c0363	man of God from Judah	1KI	
+c0364	old prophet in Bethel	1KI	
+c0365	Asa, king of Judah		
+c0366	Elijah		
+c0367	widow at Zarephath	1KI	
+c0368	Ahab, king of Israel	1KI	
+c0369	Obadiah, manager of Ahab's palace		
+c0370	prophets of Baal	1KI	
+c0371	servant of Elijah		
+c0372	Jezebel		
+c0373	angel	1KI	
+c0374	Elisha		
+c0375	messengers of Ben-Hadad, king of Aram		-
+c0376	elders	1KI	
+c0377	Ben-Hadad, king of Aram	1KI	110200010012
+c0378	scouts of Ben-Hadad, king of Aram	1KI	
+c0379	prophet	1KI	
+c0380	officials of Ben-Hadad, king of Aram	1KI	
+c0381	man of God (prophet to the king of Israel)	1KI	-
+c0382	prophet who confronts Ahab	1KI	
+c0383	Naboth		
+c0384	scoundrels	1KI	
+c0385	messengers to Jezebel	1KI	
+c0386	Jehoshaphat, king of Judah		
+c0387	prophets, 400 false	1KI	
+c0388	messenger of Ahab, king of Israel	1KI	
+c0389	Micaiah, son of Imlah		
+c0390	Ahab	1KI	
+c0391	Zedekiah, son of Kenaanah, false prophet		
+c0392	chariot commanders of Aram	1KI	
+c0393	army cry	1KI	
+c0394	Ahaziah, king of Israel		
+c0395	Yahweh's angel	2KI	
+c0396	messengers of Ahaziah	2KI	
+c0397	captain, first	2KI	
+c0398	captain, second	2KI	
+c0399	captain, third	2KI	
+c0400	company of the prophets (Bethel)	2KI	
+c0401	company of the prophets (Jericho)	2KI	
+c0402	men of Jericho	2KI	
+c0403	boys	2KI	
+c0404	Joram (Jehoram), king of Israel	2KI	
+c0405	officer of King Jehoshaphat of Israel	2KI	
+c0406	widow (from company of prophets)	2KI	
+c0407	son of widow	2KI	
+c0408	Shunammite woman	2KI	
+c0409	Gehazi		
+c0410	husband of Shunammite	2KI	
+c0411	son of Shunammite	2KI	
+c0412	company of the prophets	2KI	
+c0413	servant of Naaman's wife (young girl)	2KI	
+c0414	Ben-Hadad, king of Aram	2KI	110200010012
+c0415	Elisha's messenger	2KI	
+c0416	Naaman		
+c0417	Naaman's servants	2KI	
+c0418	officers of king of Aram	2KI	
+c0419	report to king of Aram	2KI	
+c0420	woman in famine	2KI	
+c0421	men with leprosy, four	2KI	
+c0422	Aramean soldiers	2KI	
+c0423	Aram		
+c0424	officer of King Joram of Israel	2KI	
+c0425	officer of king of Israel, on whose arm the king leaned	2KI	
+c0426	person who told king of Aram of Elisha's arrival	2KI	
+c0427	Hazael of Aram		
+c0428	king of Aram	2KI	-
+c0429	company of the prophets, one of (young man)	2KI	
+c0430	Jehu, son of Nimshi		
+c0431	army officer, one of	2KI	
+c0432	army officers	2KI	
+c0433	horseman, first	2KI	
+c0434	horseman, second	2KI	
+c0435	lookout in Jezreel	2KI	
+c0436	officials of Samaria	2KI	
+c0437	palace administrator and overseer (elder) of the city	2KI	
+c0438	relatives of Ahaziah, king of Judah	2KI	
+c0439	Jehoiada the priest		
+c0440	people at coronation of King Joash	2KI	
+c0441	Athaliah, mother of Ahaziah (Queen)		
+c0442	Joash, king of Judah	2KI	
+c0443	Jehoash, king of Israel		
+c0374	Elisha (old)		
+c0444	Amaziah, king of Judah		
+c0445	Ahaz, king of Judah		
+c0446	report to king of Assyria	2KI	
+c0447	Shalmaneser, king of Assyria	2KI	
+c0448	Hezekiah, king of Judah		
+c0449	Rabshakeh		
+c0450	king of Assyria	2KI	
+c0451	Eliakim		
+c0448	Hezekiah		
+c0452	Isaiah		
+c0453	person who informed Rabshakeh	2KI	
+c0454	Josiah, king of Judah		
+c0455	Hilkiah, high priest		
+c0456	Shaphan, secretary		
+c0457	Huldah, prophetess	2KI	120220140091
+c0458	men of Bethel	2KI	
+c0459	Gedaliah, governor of Judah		
+c0460	Jabez's mother	1CH	
+c0461	Jabez		
+c0462	Israel, all	1CH	
+c0463	Amasai, chief of thirty	1CH	130120190041
+c0464	Philistine rulers	1CH	
+c0465	people, all the	1CH	
+c0466	Ammonite nobles	1CH	
+c0274	Gad		
+c0467	Solomon, king	2CH	
+c0468	singers, and relatives	2CH	
+c0469	queen of Sheba	2CH	
+c0470	Jeroboam	2CH	
+c0471	Rehoboam, king	2CH	
+c0472	elders in Shechem	2CH	
+c0473	young men (advisors of Rehoboam)	2CH	
+c0474	Israel, all	2CH	
+c0475	Israel, leaders of	2CH	
+c0476	Abijah, king of Judah		
+c0477	Azariah, son of Oded		
+c0478	Hanani the seer		
+c0479	Ahab, king of Israel	2CH	
+c0480	prophets, 400 false	2CH	
+c0481	messenger	2CH	
+c0482	Ben-Hadad, king of Aram	2CH	110200010012
+c0483	chariot commanders of Aram	2CH	
+c0484	Jehu, son of Hanani		
+c0485	men, some	2CH	
+c0486	Jahaziel		
+c0487	men appointed to sing and praise	2CH	
+c0488	Eliezer the prophet, son of Dodavahu		
+c0489	Joash, king of Judah	2CH	
+c0490	Zechariah, son of Jehoiada the priest		
+c0491	man of God (prophet to Amaziah)	2CH	
+c0492	prophet sent to Amaziah	2CH	
+c0493	Azariah the priest (during reign of Uzziah)	2CH	140260170031
+c0494	people	2CH	
+c0495	Oded, prophet	2CH	140280090051
+c0496	Azariah, son of Jehohanan	2CH	140280120061
+c0497	priests/Levites	2CH	
+c0498	Azariah the chief priest (during reign of Hezekiah)		
+c0499	men, large force of	2CH	
+c0500	king of Sennacherib		
+c0501	Jehizkiah		
+c0500	Sennacherib, king of Assyria	2CH	
+c0457	Huldah, prophetess	2CH	140340220061
+c0502	Neco, king of Egypt	2CH	140350200101
+c0503	Cyrus, king of Persia		
+c0504	priests	EZR	
+c0505	enemies of Judah and Benjamin	EZR	
+c0506	Zerubbabel		
+c0507	Rehum, commanding officer	EZR	150040090021
+c0508	Artaxerxes, king of Persia	EZR	150040110081
+c0509	Tattenai, governor	EZR	150050030051
+c0510	elders of the Jews	EZR	
+c0511	Darius, king of Medes and Persians	EZR	150060010021
+c0512	leaders	EZR	
+c0513	Shecaniah, son of Jehiel		
+c0514	Ezra, priest and teacher		
+c0515	assembly, whole	EZR	
+c0516	Hanani, brother of Nehemiah	NEH	160010020021
+c0508	Artaxerxes, king of Persia	NEH	160020010062
+c0517	Nehemiah		
+c0518	nobles and officials (Jewish)	NEH	
+c0519	Sanballat the Horonite	NEH	
+c0520	Tobiah the Ammonite official		
+c0521	Judah, people in		
+c0522	Jews, the	NEH	
+c0523	men	NEH	
+c0524	men, other	NEH	
+c0525	men, still others	NEH	
+c0526	Shemaiah, son of Delaiah	NEH	160060100041
+c0527	people, all the	NEH	
+c0528	Nehemiah/Ezra, priest and teacher/Levites	NEH	
+c0529	Levites	NEH	
+c0530	heads of all the families	NEH	
+c0531	leaders	NEH	
+c0532	Xerxes, king of Persia and Media (Ahasuerus)	EST	170010100211
+c0533	Memucan, noble advisor to Xerxes, king		
+c0534	king of Ahasuerus	EST	
+c0535	King Xerxes' personal servants	EST	
+c0536	King Xerxes' servants at the gate	EST	
+c0537	Haman, highest noble to Xerxes, king		
+c0538	Esther, queen		
+c0539	Mordecai, cousin of Esther		
+c0540	Zeresh, wife of Haman/friends of Haman		
+c0541	Zeresh, wife of Haman	EST	170060130142
+c0542	Harbona, eunuch attending Xerxes, king		
+c0543	Job		
+c0544	Satan (Devil)	JOB	
+c0545	messenger to Job	JOB	
+c0546	messenger to Job, another	JOB	
+c0547	messenger to Job, still another	JOB	
+c0548	messenger to Job, yet another	JOB	
+c0549	Job's wife	JOB	
+c0550	Eliphaz the Temanite		
+c0551	Bildad the Shuhite		
+c0552	Zophar the Naamathite		
+c0553	Elihu, son of Barakel		
+c0554	kings of the earth	PSA	
+c0555	David's enemies	PSA	
+c0556	man, wicked	PSA	
+c0557	someone (hypothetical argument)	PSA	
+c0558	flatterers	PSA	
+c0559	fool	PSA	
+c0560	men	PSA	
+c0561	all in temple	PSA	
+c0562	David's supporters	PSA	
+c0563	all seeking God	PSA	
+c0564	sons of Korah's enemies	PSA	
+c0565	sons of Korah	PSA	
+c0566	people, righteous	PSA	
+c0567	you (hypothetical)	PSA	
+c0568	proclaimers of God's word	PSA	
+c0569	those who seek God	PSA	
+c0570	people, arrogant wicked	PSA	
+c0571	enemies of God	PSA	
+c0572	Israelite community	PSA	
+c0573	nations	PSA	
+c0574	enemies of Israel	PSA	
+c0163	Zebah	PSA	190830120053
+c0575	saying about Gentile nations	PSA	
+c0576	musicians	PSA	
+c0577	wicked, the	PSA	
+c0578	people, all the	PSA	
+c0579	house of Aaron, the	PSA	
+c0580	those who fear Yahweh	PSA	
+c0581	voice of rejoicing and salvation	PSA	
+c0582	worshipers	PSA	
+c0583	those who go by	PSA	
+c0584	captors, our	PSA	
+c0585	Edomites	PSA	
+c0586	sinners	PRO	
+c0587	Wisdom	PRO	
+c0588	you (hypothetical)	PRO	
+c0589	sons (hypothetical), at end of life	PRO	
+c0590	son (receiving instructions)	PRO	
+c0591	immoral woman	PRO	
+c0592	Folly	PRO	
+c0593	person claiming to have a pure heart	PRO	
+c0594	buyer	PRO	
+c0595	sluggard	PRO	
+c0596	stingy man	PRO	
+c0597	drunkard	PRO	
+c0598	judge (corrupt)	PRO	
+c0599	king	PRO	
+c0600	man, deceitful	PRO	
+c0601	one who robs his father or mother	PRO	
+c0602	leech's two daughters	PRO	
+c0603	narrator-PRO	PRO	
+c0604	husband of excellent wife	PRO	
+c0605	Solomon, king	ECC	
+c0606	someone	ECC	
+c0607	man all alone	ECC	
+c0608	fool	ECC	
+c0609	man (hypothetical)	ECC	
+c0610	you (old)	ECC	
+c0611	Solomon, king	SNG	
+c0612	queens and concubines	SNG	
+c0613	peoples, many	ISA	
+c0614	man (hypothetical)	ISA	
+c0615	man's brother (hypothetical)	ISA	
+c0616	women, seven	ISA	
+c0617	people, hurried	ISA	
+c0618	seraphs	ISA	
+c0619	seraph, one of the	ISA	
+c0620	messenger	ISA	
+c0423	Syria		
+c0621	someone	ISA	
+c0622	Ephraim		
+c0623	Sennacherib, king of Assyria	ISA	-
+c0624	soldiers, Assyrian	ISA	
+c0625	fir trees and cedars of Lebanon	ISA	
+c0626	kings over the nations	ISA	
+c0627	you (people of Zion, restored)	ISA	
+c0628	king of Babylon	ISA	
+c0629	onlookers	ISA	
+c0630	answer from Israel	ISA	
+c0631	wise counselors of Pharaoh	ISA	
+c0632	lookout	ISA	
+c0633	someone from Seir	ISA	
+c0634	watchman	ISA	
+c0635	someone in Jerusalem	ISA	
+c0636	sea	ISA	
+c0637	people, God's	ISA	
+c0638	scoffers who rule people in Jerusalem	ISA	
+c0639	person asking someone to read a sealed book	ISA	
+c0640	reader	ISA	
+c0641	non-reader	ISA	
+c0642	thing formed from clay	ISA	
+c0643	rebels	ISA	
+c0644	sinners	ISA	
+c0645	you (hypothetical)	ISA	
+c0646	king of Assyria	ISA	
+c0647	person who informed Rabshakeh	ISA	
+c0648	voice of one calling (preparing way for Christ)	ISA	
+c0649	one who brings good news	ISA	
+c0650	nations	ISA	
+c0651	craftsman	ISA	
+c0652	Egyptians/Ethiopians/Sabeans	ISA	
+c0653	every tongue	ISA	
+c0654	exiles	ISA	
+c0655	Zion		
+c0656	foreigner who has joined himself to Yahweh	ISA	
+c0657	eunuch	ISA	
+c0658	watchmen of Israel	ISA	
+c0659	Israel, men of	ISA	
+c0660	Jesus	ISA	
+c0661	Jeremiah		
+c0662	you (hypothetical)	JER	
+c0663	daughter of Zion	JER	
+c0664	people of Jerusalem	JER	
+c0665	invaders	JER	
+c0666	lying words		
+c0667	people	JER	
+c0668	men of Anathoth	JER	
+c0669	messenger to the king and to the queen mother		
+c0670	Judah, all		
+c0671	false prophets	JER	
+c0672	saying about God's deliverance	JER	
+c0673	nations	JER	
+c0674	Jeremiah's enemies	JER	
+c0675	Judah, men of	JER	
+c0676	Jeremiah's friends (bad)	JER	
+c0677	messenger	JER	
+c0678	Pashur	JER	240210010131
+c0679	no one		
+c0680	the prophets	JER	
+c0681	priests	JER	
+c0682	officials	JER	
+c0683	elders of the land	JER	
+c0684	Hananiah, false prophet		
+c0685	Shemaiah the Nehelamite		
+c0686	watchman	JER	
+c0687	Zedekiah, king of Judah	JER	240320030031
+c0688	Hanamel		
+c0688	Hanamel (Jeremiah's cousin)		
+c0689	Rechabite family, men of	JER	
+c0690	Jehudi		
+c0691	Elishama	JER	240360120121
+c0692	Baruch		
+c0693	Jehucal	JER	240370030051
+c0694	Irijah, captain of the guard of Judah	JER	240370130091
+c0695	Shephatiah	JER	240380010021
+c0696	Ebed-Melech (official of king of Judea)		
+c0697	women, remnant of the king of Judah's house	JER	
+c0698	Nebuzaradan	JER	240400010111
+c0699	Johanan		
+c0700	Ishmael, son of Nethaniah (murderer)		
+c0701	men in mourning, ten of eighty	JER	
+c0702	Azariah, son of Hoshaiah	JER	240430020021
+c0703	idolaters from Judah (men)	JER	
+c0704	idolaters from Judah (women)	JER	
+c0705	Heshbon, people of	JER	
+c0706	Jerusalem (personified)	JER	
+c0707	Seraiah		
+c0708	children of Zion (Jerusalem)	LAM	
+c0709	passers by	LAM	
+c0710	enemies of God	LAM	
+c0711	men	LAM	
+c0712	nations	LAM	
+c0713	Ezekiel	EZK	
+c0714	man in linen with writing kit (in vision)	EZK	
+c0715	people	EZK	
+c0716	Gog	EZK	260380030081
+c0717	man like bronze with measuring rod (in vision)	EZK	
+c0718	chief official	DAN	
+c0719	Daniel		
+c0720	Nebuchadnezzar, king of Babylon	DAN	
+c0721	astrologers	DAN	
+c0722	Arioch		
+c0723	herald	DAN	
+c0724	Shadrach	DAN	
+c0725	Nebuchadnezzar		
+c0726	voice from heaven (angel?)	DAN	
+c0727	Belshazzar, king of Babylon	DAN	270050020011
+c0728	queen of Babylon	DAN	
+c0729	satraps	DAN	
+c0730	Darius, king of Medes and Persians	DAN	270060100051
+c0731	angel	DAN	
+c0732	another holy one (in vision)	DAN	
+c0733	holy one (in vision)	DAN	
+c0734	man's voice from the Ulai (in vision)	DAN	
+c0735	Gabriel		
+c0736	man in linen above river	DAN	
+c0737	one of the others who stood on the river bank	DAN	
+c0738	prostitute (symbolic of Israel)	HOS	
+c0739	people, God's	HOS	
+c0740	Hosea	HOS	280010020081
+c0741	saying about (or by) idolaters	HOS	
+c0742	priests	JOL	
+c0743	weakling	JOL	
+c0744	Amos		
+c0745	women who oppress the poor ("cows of Bashan")	AMO	
+c0746	relative	AMO	
+c0747	someone hiding	AMO	
+c0748	conquerors of Lo Debar	AMO	
+c0749	Amaziah, priest of Bethel		
+c0750	oppressors of poor	AMO	
+c0751	captain of ship to Tarshish	JON	
+c0752	sailors on ship to Tarshish	JON	
+c0753	Jonah		
+c0754	king of Nineveh	JON	
+c0755	people	MIC	
+c0756	false prophets	MIC	
+c0757	leaders	MIC	
+c0758	nations	MIC	
+c0759	enemy (female)	MIC	
+c0760	slave girls	NAM	
+c0761	Habakkuk	HAB	350010010041
+c0762	people	HAB	
+c0763	beam	HAB	
+c0764	man (hypothetical)	HAB	
+c0765	men who are complacent	ZEP	
+c0766	Nineveh	ZEP	
+c0767	Haggai		
+c0768	priests	HAG	
+c0769	Zechariah the prophet, son of Berechiah	ZEC	380010010101
+c0770	angel who talked with Zechariah	ZEC	
+c0771	angelic riders or horses (in vision)	ZEC	
+c0772	Yahweh's angel	ZEC	
+c0773	man with measuring line (in vision)		
+c0774	Sharezer		
+c0775	priests	MAL	
+c0776	people	MAL	
+c0777	Malachi	MAL	390010010071
