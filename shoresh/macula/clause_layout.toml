@@ -71,7 +71,7 @@ trees_db_sha256 = "efe5b5a1c5e8cea4f8b273328b665c58a49cd663ee24537ddac52c4f7c192
 doc = """Our lexeme spine (bcv-commons, built from MACULA Hebrew and Greek, with STEPBible extended Strong's numbers): the person of each
 verb and pronoun. Pinned by its spine_content_sha256 (spine_meta), which changes with any row."""
 file = "lexeme-spine-macula.db"
-spine_content_sha256 = "471a3ac7fb152fac5f31e28a383451a0ff35b8d4f2fb5f9a73ff2fe108d742a8"
+spine_content_sha256 = "ef96b9ffd45ecdd4ad3714423dfbb41eeef7cc0dc5a712d47d9381201bf5c988"
 licence = "CC BY 4.0"
 
 [sources.uhb]

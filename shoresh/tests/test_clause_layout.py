@@ -491,9 +491,11 @@ def test_release_packaging(tmp_path, monkeypatch):
     src = tmp_path / "src"
     monkeypatch.setattr("sys.argv", ["x", "--books", "RUT", "--out", str(src)])
     b.main()
+    steps = tmp_path / "steps.md"
+    steps.write_text("| book | agree |\n|---|---|\n| RUT | 1.0 |\n")
     sums = []
     for name in ("a", "b"):
-        monkeypatch.setattr("sys.argv", ["x", "--src", str(src), "--out", str(tmp_path / name), "--allow-dirty"])
+        monkeypatch.setattr("sys.argv", ["x", "--src", str(src), "--out", str(tmp_path / name), "--steps", str(steps), "--allow-dirty"])
         rel.main()
         sums.append((tmp_path / name / "SHA256SUMS").read_text())
     assert sums[0] == sums[1]                                                                # reproducible archive and data
