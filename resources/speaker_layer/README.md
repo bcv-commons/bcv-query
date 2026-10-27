@@ -160,7 +160,9 @@ proper name has one row for the whole Bible (book empty); one without, a row per
 the next id; ids already given never change. By hand: give two labels of one person the same id (Abraham, Abraham (Abram)); give
 `name_key`, the word key of a word that names the person, where no inquit does (רָחָב, Josh 2:1), one per row; or `-` where the
 inquits give a wrong name (a messenger named by his sender). The labels are English and steer the build only: the table is not
-released.
+released. A group (several speak, named by their inquit) has a row labelled `group: ` and their Hebrew names; where a label puts a
+line in the wrong mouth, fix it in `review.tsv` (field `speaker`), not here. A review `name` row may name several people, their
+word keys separated by `,`.
 
 ## The review
 

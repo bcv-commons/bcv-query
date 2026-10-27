@@ -97,7 +97,10 @@ def characters(allq: list[dict], tok: dict) -> collections.Counter:
     - The name: the proper name (or God's name, for God) that more than half of the person's quotations named by a proper name
       are named by in their own inquit (several people may share one: the Pharaohs); else the table's name_key, the word that names them where no inquit does (רָחָב, Josh
       2:1; one per book where the person speaks in several; "-" for none, where the inquits give a wrong one). speaker_name_ref: the quotation's own words where its inquit gives
-      that name, else the nearest quotation's that does (in the same book first), else the nearest name_key."""
+      that name, else the nearest quotation's that does (in the same book first), else the nearest name_key.
+    - Where the inquit (or a review row) names several (Rachel and Leah, Gen 31:14; Moses and Aaron), the speaker is that group, with
+      its own id (one for the Bible where each of them has a proper name, else one per book) and no name; speaker_members lists the
+      ids of the people it names who are characters of their own."""
     rows, by_key = [], {}
     if CHARACTERS.exists():
         with open(CHARACTERS, encoding="utf-8") as fh:
@@ -123,16 +126,26 @@ def characters(allq: list[dict], tok: dict) -> collections.Counter:
         # זְכַרְיָה 7 times where the speaker data gives him a line Zechariah speaks
         return top[0][0] if top[0][1] * 3 >= sum(q["name_basis"] == "inquit" for q in qs) else ""
 
+    def group(q: dict) -> list[str]:                # the people a quotation's own inquit (or a review row) names, where several speak
+        return q["name"].split(", ") if q["name_basis"] in ("inquit", "review") and "," in q["name"] else []
+
+    def all_proper(q: dict) -> bool:                # each of them named by a proper name (מֹשֶׁה, אַהֲרֹן), not אָח, אֵם
+        heads = {D._n(tok[k]["lemma"]) for k in q["name_ref"].split() if k in tok and tok[k]["wtype"] == "proper"}
+        return all(p.split()[0] in heads for p in group(q))
+
     by_label = collections.defaultdict(list)
     for q in allq:
-        if q.get("speaker", "") not in NO_CHARACTER:
+        if q.get("speaker", "") not in NO_CHARACTER and not group(q):
             by_label[q["speaker"]].append(q)
     named = {lb for lb, qs in by_label.items() if usual(qs)}
     nxt = max((int(r["id"][1:]) for r in rows), default=0)
     added = []
     for q in allq:
         lb = q.get("speaker", "")
-        if lb in NO_CHARACTER:
+        if group(q):        # several speak (Rachel and Leah, Gen 31:14): a group, named by the people its inquit names
+            lb = "group: " + ", ".join(sorted(group(q)))
+            named.add(lb) if all_proper(q) else None
+        elif lb in NO_CHARACTER:
             continue
         r = by_key.get((lb, "")) or by_key.get((lb, book(q)))
         if r is None:
@@ -161,6 +174,8 @@ def characters(allq: list[dict], tok: dict) -> collections.Counter:
             uses[n][cid] = c
     stats = collections.Counter(added=len(added))
     for cid, qs in by_id.items():
+        if group(qs[0]):
+            continue
         name = "" if "-" in hand[cid] else D._n(tok[hand[cid][0]]["lemma"]) if hand[cid] else usual(qs)
         # a name another person is named by far more often is theirs, quoted by a messenger or a prophet (כֹּה אָמַר שָׁאוּל,
         # כֹּה אָמַר יְהוָה); several people may share a name they are each named by (the Pharaohs). A narrator is no one in the story
@@ -179,6 +194,23 @@ def characters(allq: list[dict], tok: dict) -> collections.Counter:
             stats["named by hand" if not near else "named"] += 1
         stats["characters"] += 1
         stats["characters named"] += bool(name)
+    # a group's members: the people its inquit names who are characters of their own (the one whose name it is)
+    # (and who speak in that book: יְהוּדָה in Jeremiah is not Jacob's son)
+    name_of = {cid: qs[0]["speaker_name"] for cid, qs in by_id.items() if not group(qs[0])}
+    books_of = {cid: {book(q) for q in qs} for cid, qs in by_id.items()}
+    for cid, qs in by_id.items():
+        if not group(qs[0]):
+            for q in qs:
+                q["speaker_members"] = ""
+            continue
+        stats["groups"] += 1
+        for q in qs:
+            members = [m for p in group(q) for m, _ in collections.Counter({m: n for m, n in uses.get(p, {}).items()
+                       if name_of.get(m) == p and book(q) in books_of[m]}).most_common(1)]
+            q["speaker_name"] = q["speaker_name_ref"] = ""
+            q["speaker_members"] = " ".join(dict.fromkeys(members))
+            stats["group quotations"] += 1
+            stats["group quotations with members"] += bool(members)
     stats["quotations with a character"] = sum(len(qs) for qs in by_id.values())
     return stats
 
@@ -1448,8 +1480,8 @@ def main() -> None:
                 a0, b0 = order[q["first"]], order[q["last"]]
                 if f == "speaker":
                     q["speaker"], q["divine"] = val, "Y" if val == "God" else ""
-                elif f == "name":                       # the words that name the speaker, where the inquit's subject does not
-                    q["_name_keys"] = val.split()
+                elif f == "name":                       # the words that name the speaker, where the inquit's subject does not ("," between people)
+                    q["_name_keys"] = [p.split() for p in val.split(",")]
                 elif f == "drop":
                     for x in range(a0, b0 + 1):
                         unnest(x, q)
@@ -1581,8 +1613,9 @@ def main() -> None:
     named = collections.Counter()
     for q in allq:
         if q.get("_name_keys"):
-            ks = [k for k in q["_name_keys"] if k in tok]
-            q["name"], q["name_ref"], q["name_basis"] = " ".join(D._n(tok[k]["lemma"]) for k in ks), " ".join(ks), "review"
+            parts = [[k for k in p if k in tok] for p in q["_name_keys"]]
+            q["name"] = ", ".join(" ".join(D._n(tok[k]["lemma"]) for k in p) for p in parts if p)
+            q["name_ref"], q["name_basis"] = " ".join(k for p in parts for k in p), "review"
             named["review"] += 1
             continue
         x = finder(q["first"], q["last"])
@@ -1635,7 +1668,7 @@ def main() -> None:
     unknown = sorted({fr for fr in frame if fr and fr not in frame_hebrew})
     if unknown:
         raise SystemExit(f"frames with no Hebrew name (prophets.tsv name_key, corrections.tsv name_key, a psalm title): {unknown}")
-    cols = ["id", "level", "parent", "speaker", "speaker_ref", "speaker_basis", "alt_eng", "speaker_id", "speaker_name", "speaker_name_ref", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
+    cols = ["id", "level", "parent", "speaker", "speaker_ref", "speaker_basis", "alt_eng", "speaker_id", "speaker_name", "speaker_name_ref", "speaker_members", "divine", "quote_type", "basis", "first", "last", "from", "to", "start_fit",
             "end_fit", "pieces", "inquit"]
     with open(OUT / "quotations.tsv", "w", encoding="utf-8") as fh:
         fh.write("# Hebrew speaker layer: Clear's quotation spans (CC BY 4.0) on MACULA's Hebrew words, with the quotations nested inside\n")
@@ -1643,6 +1676,7 @@ def main() -> None:
         fh.write("# text (the subject of the inquit, or of another quotation of the same speaker: speaker_basis; speaker_ref: those\n")
         fh.write("# words' keys); alt_eng: the speaker data's English label, only where no Hebrew name is found; speaker_id: one person\n")
         fh.write("# across quotations; speaker_name, speaker_name_ref: that person's proper name in the text and the words that give it\n")
+        fh.write("# speaker_members: where several speak (a group id), the speaker_ids of the people its inquit names who are characters of their own\n")
         fh.write("\t".join(cols) + "\n")
         for q in allq:
             fh.write("\t".join(str({"speaker": q["name"], "speaker_ref": q["name_ref"], "speaker_basis": q["name_basis"]}.get(c, q.get(c, ""))) for c in cols) + "\n")
@@ -1733,7 +1767,8 @@ def main() -> None:
              f"- characters (speaker_id, resources/speaker_layer/characters.tsv): {character['characters']}, over"
              f" {character['quotations with a character']} quotations ({character['added']} new in this build); named by a proper name"
              f" (speaker_name): {character['characters named']}, on {character['named'] + character['named by hand']} quotations"
-             f" ({character['named by hand']} through a hand-given name_key)",
+             f" ({character['named by hand']} through a hand-given name_key); groups (several speak, speaker_members): {character['groups']},"
+             f" on {character['group quotations']} quotations ({character['group quotations with members']} with members)",
              f"- refinement 7, touching pieces of a voice implied in the outer speech (Glyssen's Implicit) joined into one speech: {implicit}",
              "- one structure (quotations, segment levels and innermost quotations made to agree): "
              + (", ".join(f"{k} {v}" for k, v in consistent.most_common()) or "nothing to change"),
