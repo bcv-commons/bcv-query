@@ -43,6 +43,7 @@ in Phase 0.
 | `speaker_quotations/` | who speaks where — quotations → speaker, verse-range, red-letter flag (S1) | `speaker, …, start_bbcccvvv, end_bbcccvvv, divine` |
 | `lxx_bridge.tsv` | Hebrew→Greek LXX bridge (from MACULA `greekstrong`); concept expansion across the Testaments | `hebrew_strong, greek_strong, count` |
 | `lxx_bridge_tiers/` | the same bridge with every pair (count ≥ 3), for both directions: `macula.tsv` (CC BY; `lxx_bridge.tsv` is its top 4 per Hebrew lexeme) and `glaux.tsv` (Septuagint verse co-occurrence, CC BY-SA) — see its README | `hebrew_strong, greek_strong, tier, count, score` |
+| `grammar_bridge/` | Hebrew verb form (MACULA `type\|stem`) ↔ Greek verb form (GLAUx tense\|voice\|mood) over the Septuagint, for verb pairs the lexeme bridge links in the same verse; CC BY-SA — see its README | `hebrew_form, greek_form, count, p_greek_given_hebrew, p_hebrew_given_greek` |
 | `semantic_domains/<lang>.tsv` | Strong's → semantic domain (SDBG Greek / SDBH Hebrew, from MACULA); broaden a lexeme to its domain (S2) — see its README | `strong, domain_type, domain, label, count, share` |
 | `senses/{hbo,grc}.tsv` | **Strong's**-keyed word-sense inventory (polysemy; e.g. ruach → spirit/wind/breath), from MACULA — see its README | `strong, sense, gloss, count, share` |
 | `senses/hbo_lex.tsv` (local only, git-ignored) | **lex**-keyed, binyan-aware, homograph-split sense inventory derived from Hebrew context (the newer Hebrew sense layer) — see its README | `lex, stem, sense, gloss, count, share` |

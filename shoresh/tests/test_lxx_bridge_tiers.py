@@ -27,3 +27,13 @@ def test_tier_files():
             assert h[0] == "H" and g[0] == "G" and t == tier and int(c) >= 3 and 0 < float(s) <= 1
         if tier == "glaux":
             assert min(float(r[4]) for r in data[1:]) >= 0.3
+
+
+def test_grammar_bridge():
+    data = rows("grammar_bridge/grammar_bridge.tsv")
+    assert data[0] == ["hebrew_form", "greek_form", "count", "p_greek_given_hebrew", "p_hebrew_given_greek"]
+    share = {}
+    for hf, gf, c, pg, ph in data[1:]:
+        assert "|" in hf and gf.count("|") == 2 and int(c) >= 1
+        share[hf] = share.get(hf, 0) + float(pg)
+    assert all(abs(s - 1) < 1e-3 for s in share.values())

@@ -56,15 +56,16 @@ def macula_tier(words: dict, min_count: int) -> dict[tuple[int, int], tuple[int,
     return {k: (c, round(c / tot[k[0]], 5)) for k, c in pairs.items() if c >= min_count}
 
 
-def verse_sets(rows, scheme: str) -> dict[tuple, set[int]]:
-    out: dict[tuple, set[int]] = collections.defaultdict(set)
+def verse_sets(rows, scheme: str, multi: bool = False) -> dict[tuple, set]:
+    """{English verse: set of the rows' values}; with multi, a list with every occurrence (build_grammar_bridge)."""
+    out: dict[tuple, set | list] = collections.defaultdict(list if multi else set)
     eng: dict[tuple, list] = {}
     for b, c, v, s in rows:
         r = (b, c, v)
         if r not in eng:
             eng[r] = vrsmap.to_eng(r, scheme)
         for e in eng[r]:
-            out[e].add(s)
+            out[e].append(s) if multi else out[e].add(s)
     return out
 
 

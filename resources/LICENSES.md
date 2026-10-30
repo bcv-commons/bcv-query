@@ -19,6 +19,7 @@ Genesis annotation is Pedalion Trees (CC BY-SA 4.0). It replaces the CATSS/CCAT-
 **CC BY-SA 4.0**; keep the attribution and the share-alike:
 - `lxx_orphan_lexemes/` — LXX-only Greek lexemes, grouped by GLAUx lemma.
 - `lxx_bridge_tiers/glaux.tsv` — Hebrew–Greek lexeme pairs from verse co-occurrence with the Septuagint (`lxx_bridge_tiers/macula.tsv` beside it is MACULA only, CC BY 4.0).
+- `grammar_bridge/` — Hebrew verb form against Greek verb form over the Septuagint.
 - `ot_nt_quotations/` — OT-in-NT quotations from LXX Strong's overlap (Odes excluded).
 Strong's numbers on this data come from the open lemma lists of UGNT (unfoldingWord, CC BY-SA 4.0) and MACULA Greek (CC BY 4.0) and from a short table of public-domain
 classic Strong's numbers; the case of names that GLAUx leaves untagged is inferred from the context and flagged (`morph_inferred`). The CATSS-based tables of 2026-10-09 and
