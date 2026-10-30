@@ -60,7 +60,7 @@ def lowfat_words() -> tuple[dict[str, dict], str]:
 
 
 def review() -> dict[tuple[str, str], str]:
-    """(speech id, field) -> value of the hand review."""
+    """(speech id, field) -> value of the review (nt_review.tsv)."""
     if not REVIEW.exists():
         return {}
     with open(REVIEW, encoding="utf-8") as fh:
