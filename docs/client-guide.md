@@ -322,7 +322,7 @@ Key required only on `/api/ask`, `/api/ask/branched` (LLM), `/mcp`, and writes; 
 
 | Path | Purpose |
 |---|---|
-| `/verse/{book}/{ch}/{v}` | Interlinear: per-word gloss, sense, domain (+ LXX parallel for OT). Add `?versification=<scheme>` (the reader's numbering, see below) |
+| `/verse/{book}/{ch}/{v}` | Interlinear: per-word gloss, sense, domain (+ Septuagint parallel for Tanakh verses). Add `?versification=<scheme>` (the reader's numbering, see below) |
 | `/wordstudy/{strong}` | Composite word study (gloss, stems, senses, domains, TW articles) |
 | `/word/{strong}` | Concordance for a Strong's number |
 | `/senses/{strong}` | Sense distribution for a Strong's number |

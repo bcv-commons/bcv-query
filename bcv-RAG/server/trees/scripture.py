@@ -17,7 +17,7 @@ def root(db: sqlite3.Connection, *, lang: str = "en") -> dict:
         "lang": lang,
         "node": {"id": "root", "label": "Scripture"},
         "children": [
-            {"id": OT, "label": "Old Testament", "child_count": _book_count(db, OT),
+            {"id": OT, "label": "Tanakh", "child_count": _book_count(db, OT),
              "url": f"/{lang}/scripture/{OT}"},
             {"id": NT, "label": "New Testament", "child_count": _book_count(db, NT),
              "url": f"/{lang}/scripture/{NT}"},
@@ -84,7 +84,7 @@ def _testament_view(db: sqlite3.Connection, testament: str, *, lang: str) -> dic
     return {
         "tree": "scripture",
         "lang": lang,
-        "node": {"id": testament, "label": "Old Testament" if testament == OT else "New Testament"},
+        "node": {"id": testament, "label": "Tanakh" if testament == OT else "New Testament"},
         "children": children,
     }
 

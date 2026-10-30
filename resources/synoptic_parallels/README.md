@@ -1,7 +1,7 @@
 # Synoptic Gospel parallels (X2)
 
 `parallels.tsv` — pairs of Gospel verses that tell the same passage, found by matching **content Greek
-Strong's** shared across Gospels (same technique as the OT-in-NT quotation detector, applied within
+Strong's** shared across Gospels (same technique as the Tanakh-quotation detector, applied within
 Matt/Mark/Luke/John). Built by `shoresh/macula/build_synoptic.py`.
 
 **Licence:** CC BY 4.0, derived from MACULA Greek (Clear Bible, CC BY 4.0); attribute MACULA Greek.

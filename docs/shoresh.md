@@ -57,8 +57,8 @@ precise. How it's built is documented separately in
 
 | Module | Purpose |
 |---|---|
-| `spine/` | The original-language **spine** — UHB (Hebrew OT) + UGNT (Greek NT), ~443k words. Builds `spine.db`. |
-| `lxx/` | The **Septuagint** (Greek OT) from GLAUx (CC BY-SA 4.0) — ~592k words across 54 books, 93% Strong's-tagged. Builds `lxx-glaux.db`. |
+| `spine/` | The original-language **spine** — UHB (Hebrew) + UGNT (Greek), ~443k words. Builds `spine.db`. |
+| `lxx/` | The **Septuagint** (the Greek translation of the Tanakh) from GLAUx (CC BY-SA 4.0) — ~592k words across 54 books, 93% Strong's-tagged. Builds `lxx-glaux.db`. |
 | `search/` | Clause-level semantic search: the embedder selector, the build pipeline, and a brute-force cosine store loaded at startup. |
 | `embed_eval/` | A harness for measuring embedder quality (sense separation + word-study retrieval) — how we know BEREL/SPhilBERTa beat the baseline. |
 | `data/` | Runtime volume: the clause vectors (`clauses_<lang>.npy`) + metadata (`clauses_<lang>.sqlite`). |
@@ -138,7 +138,7 @@ structural endpoints (`/structure`) from the corpus engine via `CORPUS_URL`.
 Going forward the project is **"shoresh-first"**: original-language data and logic
 get first priority here, and bcv-RAG becomes a consumer via this API. See
 **[ROADMAP.md](ROADMAP.md)** for the items slated to be built in shoresh
-(speaker/quotation index, semantic domains, OT-in-NT quotations, multilingual
+(speaker/quotation index, semantic domains, Tanakh quotations in the NT, multilingual
 glosses).
 
 ## Deployment

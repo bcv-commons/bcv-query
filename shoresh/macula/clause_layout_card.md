@@ -221,7 +221,7 @@ by bsb-add-books (the law chapters in `text_depth_law`):
 These are test sets: chapters chosen because they are hard (speeches, law, prophecy, poetry), not a sample of the whole Old
 Testament. A chapter in two sets counts in each set once and in "all" once.
 
-Over the whole Old Testament (all 929 chapters, 88,634 line pairs; measured by bsb-add-books; "tree kinds" is the trial of v0.35
+Over the whole Tanakh (all 929 chapters, 88,634 line pairs; measured by bsb-add-books; "tree kinds" is the trial of v0.35
 with the tree kinds, before the three openers were left out, which by their estimate adds about 0.1 point):
 
 | Genre | Line pairs | v0.22 | v0.35 | v0.35 + tree kinds |

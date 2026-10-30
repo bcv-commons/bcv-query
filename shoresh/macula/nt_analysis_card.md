@@ -28,7 +28,7 @@ configs:
 
 # Hebrew New Testament Analysis
 
-Hebrew translations of the New Testament, analysed word by word as MACULA Hebrew analyses the Old Testament. Each word is split
+Hebrew translations of the New Testament, analysed word by word as MACULA Hebrew analyses the Tanakh. Each word is split
 into its parts (prefixes and suffixes are parts of their own), and each part has a class, a lemma, a MACULA lexeme id and a Strong's
 number. Each verse is also divided into clause segments, with their depth and parent inside the verse. It is meant for aligning a
 Hebrew New Testament with the Greek, for lexical study across the two Testaments, and as a Hebrew reading of the New Testament's
@@ -40,7 +40,7 @@ clause structure.
 | Editions | `heb_scg`: Salkinson–Ginsburg (1885/86) |
 | Size | @WORDS@ words, @PARTS@ word parts, @SEGMENTS@ clause segments |
 
-**Most of this is model output.** The New Testament has no MACULA analysis. Words whose form occurs in MACULA's Old Testament with
+**Most of this is model output.** The New Testament has no MACULA analysis. Words whose form occurs in MACULA's Tanakh with
 one near-unanimous analysis take MACULA's own (`source = "macula"`, @MACULA_WORDS@ words, @MACULA_SHARE@). The rest, @MODEL_WORDS@
 words, and every clause segment come from a tagger trained on MACULA Hebrew (`source = "model"`). It has not yet been checked by
 hand on the New Testament: see *Quality*.
@@ -73,7 +73,7 @@ edition: `i` is the aligner's token number, and the text fingerprints in `manife
 | `lexeme` | MACULA lexeme id (`hbo:0559`); empty for a name or word MACULA does not have, and where no known lemma fits the letters |
 | `strong` | Strong's number as MACULA gives it (`0559`, `3807a`) |
 | `role` | MACULA role, where the part heads one (`v`, `s`, `o`, `p`, `adv`, …) |
-| `source` | `macula`: the analysis of this form in MACULA's Old Testament (at least 90% of its occurrences analysed alike); `model`: the tagger's |
+| `source` | `macula`: the analysis of this form in MACULA's Tanakh (at least 90% of its occurrences analysed alike); `model`: the tagger's |
 | `p_split` | for `model` words, on part 0: the tagger's confidence in the split (among the splits that fit the word) |
 | `form`, `person` | on the verb part: MACULA's verb form (qatal, wayyiqtol, yiqtol, weqatal, imperative, jussive, cohortative, participle active/passive, infinitive construct/absolute) and the person (first, second, third) |
 | `seg` | the clause segment of the verse the word stands in (1-based; see `clauses.parquet`) |
@@ -98,7 +98,7 @@ interrupted by another gives two segments.
 
 The tagger (`python -m macula.clause_tagger` in [bcv-query](https://github.com/bcv-commons/bcv-query)) reads a verse with a Hebrew
 BERT ([dicta-il/dictabert](https://huggingface.co/dicta-il/dictabert), CC BY 4.0), whose tokenizer drops the vowel points, and with a
-character channel that reads each word with its points. It was trained on MACULA Hebrew's Old Testament (commit `@MACULA_COMMIT@`): the
+character channel that reads each word with its points. It was trained on MACULA Hebrew's Tanakh (commit `@MACULA_COMMIT@`): the
 words, their parts, classes, lemmas and roles, MACULA's verb forms, and the clause segments, depth, parents, clause rules and
 attachment kinds of MACULA's trees as the clause layout reads them. No BHSA data, and no English, went in. A lemma has to fit the
 part: among the model's best lemmas the one whose strong consonants (not א ה ו י נ) the part carries most fully; where none
@@ -107,8 +107,8 @@ part of this release.
 
 ## Quality
 
-Measured on 856 Old Testament verses the tagger was not trained on (Gen 37–45, Ruth, Jonah, 1 Sam 1–10, Deut 5–11; narrative and
-discourse, the closest Old Testament match to a New Testament in this style), against MACULA, with the same lookup of known forms
+Measured on 856 Tanakh verses the tagger was not trained on (Gen 37–45, Ruth, Jonah, 1 Sam 1–10, Deut 5–11; narrative and
+discourse, the closest Tanakh match to a New Testament in this style), against MACULA, with the same lookup of known forms
 as here (from the training books only):
 
 | | All words | Forms not in the training books (12%) |

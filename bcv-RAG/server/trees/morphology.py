@@ -22,7 +22,7 @@ def root(db: sqlite3.Connection, *, lang: str = "en") -> dict:
         "lang": lang,
         "node": {"id": "root", "label": "Morphology (verse-level word parses)"},
         "children": [
-            {"id": OT, "label": "Old Testament (Hebrew)",
+            {"id": OT, "label": "Tanakh (Hebrew)",
              "url": f"/{lang}/morphology/{OT}"},
             {"id": NT, "label": "New Testament (Greek)",
              "url": f"/{lang}/morphology/{NT}"},
@@ -71,7 +71,7 @@ def _testament_view(db, testament: str, *, lang: str) -> dict:
     return {
         "tree": "morphology",
         "lang": lang,
-        "node": {"id": testament, "label": "Old Testament" if testament == OT else "New Testament"},
+        "node": {"id": testament, "label": "Tanakh" if testament == OT else "New Testament"},
         "children": children,
     }
 

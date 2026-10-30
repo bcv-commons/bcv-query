@@ -276,7 +276,7 @@ def get_word(strong: str, limit: int = 200) -> dict:
 
 @app.get("/senses/{strong}")
 def get_senses(strong: str) -> dict:
-    """Sense-concordance: a Hebrew Strong's GROUPED by binyan/sense (the OT linguistic core, hbo.db) —
+    """Sense-concordance: a Hebrew Strong's GROUPED by binyan/sense (the Hebrew linguistic core, hbo.db) —
     e.g. H6942 → piel 'consecrate' (63×) · niphal 'be shown holy' (9×) · qal 'be holy' (7×). H#### only."""
     result = data.sense_concordance(strong)
     if "error" in result:
@@ -636,7 +636,7 @@ def get_concept(word: str, limit: int = 5) -> dict:
 def get_field(strong: str, limit: int = 12) -> dict:
     """Semantic field for a Strong's: data-derived (CC0) related codes — synonyms/same-field words
     plus antonyms, each with gloss + relation + confidence. A MARBLE-free alternative to /domain
-    (Louw-Nida). Hebrew/OT for now (from the semantic-neighbors pack). Homograph-aware: when a
+    (Louw-Nida). Hebrew for now (from the semantic-neighbors pack). Homograph-aware: when a
     Strong's conflates several lexemes it returns them split under `lexemes` (each with its own
     field); `field` stays a flat merged list."""
     return data.semantic_field(strong, limit=min(limit, 30))
@@ -647,14 +647,14 @@ def get_genre_context(strong: str, limit: int = 12) -> dict:
     """Words sharing a Strong's per-book occurrence PROFILE — register/setting (Priesthood, Warfare,
     Sanctuary, ...), CC BY 4.0, derived from MACULA Hebrew occurrence counts. NOT a synonym list
     (see /field for that) — two words can share a setting without meaning the same thing, and vice
-    versa. Hebrew/OT only."""
+    versa. Hebrew only."""
     return data.genre_context(strong, limit=min(limit, 30))
 
 
 @app.get("/quotations/{book}/{chapter}/{verse}")
 def get_quotations(book: str, chapter: int, verse: int) -> dict:
-    """OT-in-NT quotations (X1) for a verse, both directions: `quotes` = OT verses an NT verse quotes
-    (via LXX Strong's overlap); `quoted_by` = NT verses that quote this OT verse. Each link carries a
+    """Tanakh quotations in the NT (X1) for a verse, both directions: `quotes` = Tanakh verses an NT verse quotes
+    (via Septuagint Strong's overlap); `quoted_by` = NT verses that quote this Tanakh verse. Each link carries a
     confidence tier + shared Strong's. Empty lists where none."""
     return data.quotations(book, chapter, verse)
 

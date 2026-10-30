@@ -75,8 +75,10 @@ keyed by USFM book codes + Strong's numbers.
   services): **[huggingface.co/datasets/bcv-commons/strongs](https://huggingface.co/datasets/bcv-commons/strongs)**
   (full, with a browsable viewer) and **[github.com/bcv-commons/strongs](https://github.com/bcv-commons/strongs)**
   (samples + pointer). It lives under the **[`bcv-commons`](https://github.com/bcv-commons)**
-  org — home for the reusable Bible datasets and the services that produce them;
-  a `bibles` repo (translations) is next. Dataset card + build: [`resources/strongs/`](resources/strongs).
+  org — home for the reusable Bible datasets and the services that produce them,
+  among them **[`bibles`](https://github.com/bcv-commons/bibles)** (Bible editions and their versification maps) and
+  **[`spine-releases`](https://github.com/bcv-commons/spine-releases)** (every build of the word spines as an immutable,
+  sha256-pinned release). Dataset card + build: [`resources/strongs/`](resources/strongs).
 - **Hosting moved to Hetzner.** The services are now self-hosted on a Hetzner
   server via Docker Compose (they previously ran on Railway; the Railway configs
   are still in the repo for portability). Hosting specifics are kept in
@@ -90,7 +92,7 @@ keyed by USFM book codes + Strong's numbers.
   (e.g. from helloAO) in the browser; a working example in JavaScript is in
   **[docs/examples/interlinear](docs/examples/interlinear)**.
 - **A living roadmap.** Lots of the value here comes from *derived* data tables
-  (speaker/red-letter index, semantic domains, OT-in-NT quotations, …). The plan
+  (speaker/red-letter index, semantic domains, Tanakh quotations in the NT, …). The plan
   and the open datasets to build them from are catalogued in
   **[docs/ROADMAP.md](docs/ROADMAP.md)**.
 

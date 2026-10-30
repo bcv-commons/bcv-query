@@ -32,11 +32,11 @@ in Phase 0.
 | `stopwords/<lang>.tsv` | data-derived function-word stopwords, 10 langs (R2) — unioned into the analyzer | `surface, codes, max_share` |
 | `analyzer_lang/<lang>.json` | per-language analyzer intent configs, 10 langs | — |
 | `book_names.json` | localized Bible book names + aliases, 10 langs | USFM code → names |
-| `bible_editions.json` | edition registry (handles OT≠NT composites) | edition id → metadata |
+| `bible_editions.json` | edition registry (handles composites of different Hebrew-side and Greek-side editions) | edition id → metadata |
 | `strongs_gloss.tsv` | authoritative UBS/English glosses | `strong → gloss` |
 | `strongs_freq.tsv` | Strong's frequency + `is_function` flag; counted from UHB/UGNT and the GLAUx Septuagint, CC BY-SA 4.0 | `strong` |
-| `strongs_keyness.tsv` | per-Strong's biblical-salience weight (`bible − general` zipf), **content words only** (noun/verb/adj — matches the Greek scope; function words have no keyness). anchor `he` = spine OT − modern Hebrew (wordfreq) w/ `modern_he` (`0` = archaic); `grc` = NT1904 − pagan Koine (LAGT) w/ `koine_general` (`0` = scripture_only); `arc` = biblical Aramaic (no presence flag — modern Hebrew is the wrong denominator for it). At most one general column set per row | `strong, keyness, anchor, modern_he, koine_general` |
-| `word_freq/grc.tsv` (+ local-only `hbo.tsv`) | corpus-internal lemma frequency **rank** for the `/words` trainer (lex-keyed, NOT Strong's; OT BHSA / NT Nestle1904) — built by `shoresh/corpus_engine/build_freq.py` | `lex, count, rank` |
+| `strongs_keyness.tsv` | per-Strong's biblical-salience weight (`bible − general` zipf), **content words only** (noun/verb/adj — matches the Greek scope; function words have no keyness). anchor `he` = spine Hebrew − modern Hebrew (wordfreq) w/ `modern_he` (`0` = archaic); `grc` = NT1904 − pagan Koine (LAGT) w/ `koine_general` (`0` = scripture_only); `arc` = biblical Aramaic (no presence flag — modern Hebrew is the wrong denominator for it). At most one general column set per row | `strong, keyness, anchor, modern_he, koine_general` |
+| `word_freq/grc.tsv` (+ local-only `hbo.tsv`) | corpus-internal lemma frequency **rank** for the `/words` trainer (lex-keyed, NOT Strong's; Hebrew BHSA / Greek Nestle1904) — built by `shoresh/corpus_engine/build_freq.py` | `lex, count, rank` |
 | `word_freq/grc_strong.tsv` (+ local-only `hbo_strong.tsv`) | TF lexeme → Strong's bridge so `/words` can attach keyness (Gr from Nestle1904 `strong`; He via spine.db 3-tier resolver, ~96% freq-weighted) — built by `shoresh/corpus_engine/build_lex_strong.py` | `lex, strong` |
 | `strongs_tw.tsv` | Strong's → unfoldingWord Translation-Words article(s), ranked by occurrence | `strong, tw_article, category, is_kt, lemma, n` |
 | `topic_strongs.tsv` | Nave's topic → Strong's; Nave's (public domain) × STEPBible TAHOT/TAGNT tags, CC BY 4.0 | `topic_id, strong, verse_count` |

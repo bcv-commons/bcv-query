@@ -164,6 +164,6 @@ response) are kept in private notes, not in this public repo.
   service takes ownership of the Hebrew/Greek layer (see the ROADMAP's
   "shoresh-first" direction).
 - Gain new **derived tables** — speaker/red-letter index, semantic domains,
-  OT-in-NT quotations, ranked cross-references, geography — each a build-time
+  Tanakh quotations in the NT, ranked cross-references, geography — each a build-time
   table projected through Strong's. The ordered plan is in
   **[ROADMAP.md](ROADMAP.md)**.

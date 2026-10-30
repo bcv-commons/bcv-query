@@ -1,7 +1,7 @@
 # spine/
 
 The original-language spine: per-word Strong's + lemma + morphology from
-UHB (Hebrew OT) and UGNT (Greek NT).
+UHB (Hebrew) and UGNT (Greek).
 
 Originally built to test prepending a language-neutral anchor to embedding
 inputs. That investigation **concluded: do not re-embed** — the anchor
@@ -20,7 +20,7 @@ Parser spec: [../docs/spine-parser.md](../docs/spine-parser.md).
 | `parse.py` | **the spine parser** — UHB/UGNT → per-word records → `spine.db` |
 | `common.py` | shared constants/helpers (pinned tags, book maps, Strong's normalization) |
 | `build_glosses.py` | builds `spine_glosses.tsv` from STEPBible TBESH/TBESG (CC BY) |
-| `spine_glosses.tsv` | Strong's → concise English gloss (Lexical line); 100% coverage of the OT spine |
+| `spine_glosses.tsv` | Strong's → concise English gloss (Lexical line); 100% coverage of the Hebrew spine |
 | `prefix.py` | **the prefix builder** — `PrefixBuilder.build(passage_refs)` → Location + Lexical lines for a chunk |
 | `ablation.py` | easy thematic ablation (saturated — production model already nails distinct-verse + cross-lingual retrieval) |
 | `ablation_wordstudy.py` | **discriminating ablation** — original-language precision: clustering separation + word-study queries over confusable create-family verbs (ULT bodies, spine.db ground truth). Arms: body / code+gloss / gloss-only / **hebrew_lemma** / **lemma+gloss** (the last two = arm A, anchoring in the original language's own space) |
@@ -32,12 +32,12 @@ Parser spec: [../docs/spine-parser.md](../docs/spine-parser.md).
 
 ## Status
 
-- The UHB↔BHSA reconciliation (99.59% OT-wide) was an offline comparison; its script and report were removed on 2026-10-10 (git history).
+- The UHB↔BHSA reconciliation (99.59% across the Hebrew text) was an offline comparison; its script and report were removed on 2026-10-10 (git history).
 - Parser **implemented** (`parse.py`) — fetches the pinned UHB `v2.1.32` /
   UGNT `v0.34`, parses to per-word records with fidelity assertions,
   writes `spine.db`. Spec: [`../docs/spine-parser.md`](../docs/spine-parser.md).
 - Gloss dictionary **built** (`spine_glosses.tsv`) — **100% coverage** of
-  the OT spine's content words.
+  the Hebrew spine's content words.
 - Prefix builder **implemented** (`prefix.py`) — Location + Lexical lines
   (no dedup; broad-range cap; gloss-only ablation flag). Genesis 1:1:
   `Genesis 1:1 | GEN 1:1` / `H7225 first H1254 create H430 God H8064 heaven H776 land`.
@@ -55,8 +55,8 @@ current dir to the import path):
 
 ```bash
 cd bcv-RAG
-PYTHONPATH=. python3 -m spine.parse           # build spine.db (OT+NT) — needs httpx
-PYTHONPATH=. python3 -m spine.parse --ot      # OT only
+PYTHONPATH=. python3 -m spine.parse           # build spine.db (Hebrew and Greek) — needs httpx
+PYTHONPATH=. python3 -m spine.parse --ot      # Hebrew only
 PYTHONPATH=. python3 -m spine.build_glosses   # build spine_glosses.tsv — needs httpx
 
 # ablation — needs voyageai (pip install voyageai); set the model to match production:

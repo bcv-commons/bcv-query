@@ -161,7 +161,7 @@ specific verse, or to re-aggregate yourself.
 A few source alignments are internally scrambled (correct verse, wrong per-token target). These are
 **quarantined, not dropped**: their files carry `quality=source-defective` (TSV `#`-header + Parquet
 schema metadata) and every `review` cell is `source-defective`, so filtering on `review=human-verified`
-excludes them. Currently quarantined: **`rus`** (Clear RUSSYN, OT position-shift). Prefer
+excludes them. Currently quarantined: **`rus`** (Clear RUSSYN, Hebrew-side position shift). Prefer
 `review=human-verified` for benchmark/gold use.
 
 ## Languages

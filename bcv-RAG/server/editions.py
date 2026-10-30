@@ -31,14 +31,14 @@ def edition_info(edition_id: str) -> dict | None:
 
 
 def edition_label(edition_id: str) -> str:
-    """Human label, e.g. 'Louis Segond 1910' or 'Louis Segond 1910 (OT)' for an
-    OT-only edition in a composite Bible. Falls back to the raw id if unknown."""
+    """Human label, e.g. 'Louis Segond 1910' or 'Louis Segond 1910 (Tanakh)' for a
+    Tanakh-only edition in a composite Bible. Falls back to the raw id if unknown."""
     e = edition_info(edition_id)
     if not e:
         return edition_id
     label = e.get("name", edition_id)
     if e.get("books") == "ot":
-        label += " (OT)"
+        label += " (Tanakh)"
     elif e.get("books") == "nt":
         label += " (NT)"
     return label

@@ -60,5 +60,5 @@ embed. Will be built alongside the embedder switch:
 - BGE-M3 (default): same Cloudflare endpoint, $0
 - SPhilBERTa (opt-in via `SEARCH_EMBEDDER=berel`): 3.7× Greek advantage
 
-The LXX (OT Greek) has no clause boundaries — a future clause segmenter
+The Septuagint has no clause boundaries — a future clause segmenter
 would extend `/search?lang=grc` coverage to the 54 LXX books.

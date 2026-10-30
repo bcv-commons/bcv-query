@@ -223,7 +223,7 @@ one row applied to the wrong quotation (2 Kgs 19:29–34), fixed in this release
 prophet's own questions).
 
 **Our own measures for this release** (bcv-query's checks):
-- unfoldingWord's translationNotes mark 647 quotations inside quotations in the OT (`figs-quotesinquotes`, CC BY-SA 4.0; used to
+- unfoldingWord's translationNotes mark 647 quotations inside quotations in the Tanakh (`figs-quotesinquotes`, CC BY-SA 4.0; used to
   measure, not as input). With the frame counted as a level, the layer nests at 87.0% of them (narrative 87.5%, law
   85.5%, prophecy 87.4%, wisdom 89.7%); without the review rows 84.9% (v0.7: 54%).
 - Parallel texts, aligned word by word: 77.4% of matched words at the same level (the frame counted) and 93.4% with

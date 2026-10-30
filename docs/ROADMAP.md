@@ -38,7 +38,7 @@ done"** — no need to touch the live serving path.
 | **1** | Free recall wins (no new data) | ✅ **Done** — R1 + R2 shipped |
 | **2** | Headline ingests (speaker index, semantic domains) | ✅ **Done** — S1 + S2 live (see below) |
 | **3** | Better answers (concept briefs, speech-acts, genre) | ⬜ Open |
-| **4** | Breadth (OT-in-NT, proper nouns, synoptics, geography) | ⬜ Open |
+| **4** | Breadth (Tanakh quotations in the NT, proper nouns, synoptics, geography) | ⬜ Open |
 | **5** | Depth (association graph, MWEs, discourse, versification) | ⬜ Open |
 
 **Already live:** the full retrieval pipeline (13 retrievers + RRF + expansion
@@ -90,8 +90,10 @@ Strong's→words, provenance-marked, 10 aligned + 12 gloss languages, four tiers
 Card + build: [`resources/strongs/`](../resources/strongs); the dataset itself is
 git-ignored here (re-derivable, published externally).
 
-**Next:** **`bcv-commons/bibles`** — the many Bible translations that don't yet have
-a home, same pattern (build/normalize → card → HF + GitHub shop window).
+**Also live:** **[`bcv-commons/bibles`](https://github.com/bcv-commons/bibles)** — Bible editions and
+their versification maps (which `shoresh/vrsmap.py` reads), and
+**[`bcv-commons/spine-releases`](https://github.com/bcv-commons/spine-releases)** — every build of the word
+spines as an immutable GitHub release with its sha256, for consumers that pin a build.
 
 Conventions for any published dataset: anchored on Hebrew/Greek (Strong's + lemma,
 never English), one language per file, canonical ISO 639-3 / BCP 47 codes, and
@@ -198,7 +200,7 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
 
 ### Phase 4 — breadth (intertextual / names / relational)
 
-- **X1 · OT-in-NT quotations** — 🟢 **BUILT + SERVED** (`resources/ot_nt_quotations/`,
+- **X1 · Tanakh quotations in the NT** — 🟢 **BUILT + SERVED** (`resources/ot_nt_quotations/`,
   `shoresh/lxx/build_quotations.py`; endpoint `/quotations/{book}/{ch}/{v}`, both directions) —
   IDF-cosine over shared LXX content Strong's; LXX→MT Psalm versification; confidence tiers.
   6,594 links, 8/12 on known quotations.
@@ -245,7 +247,7 @@ acceptable — just attribute, and keep SA-derived data under a compatible licen
   per-scheme diffs → KJV, `hebrew` (2,031) + `lxx` (5,386). Resolver `to_standard`/`from_standard` +
   `/versify/{scheme}/{book}/{ch}/{v}` (**2026-10-05: deprecated, removal 2026-11-05** — verse maps between schemes are
   the bcv-commons/bibles project's job, published at `cdn.bibel.wiki/_vrs/map/`; bcv-query keeps only the LXX table
-  as an internal build input, and declares its spines' own numbering in `spine_meta`). **Wired into X1** (OT refs → KJV; retired the hardcoded Psalm
+  as an internal build input, and declares its spines' own numbering in `spine_meta`). **Wired into X1** (Tanakh refs → KJV; retired the hardcoded Psalm
   map + `vrs=lxx?`, 15→0). Versification is now a **per-version property** (each Bible declares its
   scheme, external metadata — see `internal-docs/bibles-recipe-layer.md`). Remaining: (a) auto-tag our
   corpora + spec the bibles-layer `versification` field; (b) ranges/sub-verses + Latin/NT (out of v1 scope).
@@ -258,7 +260,7 @@ Original-language data and logic get **first priority in shoresh**, and bcv-RAG
 becomes a **consumer** of it via the API (it already calls `/verse`, `/bridge`).
 Original-language bits migrate out of bcv-RAG into shoresh where it makes sense.
 So the original-language roadmap items — **S1** (speaker), **S2** (domains),
-**X1** (OT-in-NT via `/bridge`), **D1** (referents/coref) — are built **in
+**X1** (Tanakh quotations in the NT via `/bridge`), **D1** (referents/coref) — are built **in
 shoresh**, exposed via its API.
 
 Because shoresh is Strong's-keyed, the shared `resources/` is directly consumable
@@ -270,7 +272,7 @@ by it. Concrete wins from the shared data:
 | `aligned_lex` | `/gloss` + `/concept` accept **non-English** input (Spanish word → Strong's). |
 | semantic_domains (S2) | ✅ live — Louw-Nida/SDBH domain in the `/wordstudy` card + `/domain/{code}` browse. |
 | speaker_quotations (S1) | speaker per word/verse in `/verse`, `/structure` — shoresh is the natural token-level home. |
-| OT-in-NT (X1) | shoresh already has `/bridge` + `lxx-glaux.db` → the natural quotation-detection engine. |
+| Tanakh quotations in the NT (X1) | shoresh already has `/bridge` + `lxx-glaux.db` → the natural quotation-detection engine. |
 
 *Consolidation note:* shoresh builds its own glosses while bcv-RAG ships
 `strongs_gloss.tsv` + LLM glosses. Under the shared `resources/` these should
@@ -290,19 +292,19 @@ alignment work.
 
 | Dataset | Provides | License | Notes |
 |---|---|---|---|
-| **[Clear-Bible/speaker-quotations](https://github.com/Clear-Bible/speaker-quotations)** | **Whole-Bible (OT+NT)** quotations → original-language words + speaker (`CharacterId`, from Faith Comes By Hearing); TSV per translation; Clear-aligned | see repo | **The headline for S1** — red-letter + all named speakers, our token scheme |
+| **[Clear-Bible/speaker-quotations](https://github.com/Clear-Bible/speaker-quotations)** | **Whole-Bible** quotations → original-language words + speaker (`CharacterId`, from Faith Comes By Hearing); TSV per translation; Clear-aligned | see repo | **The headline for S1** — red-letter + all named speakers, our token scheme |
 | **[OpenText context-annotation](https://github.com/OpenText-org/context-annotation)** | Speaker turns for the whole Greek NT (per token), projected/embedded speech | CC-BY-SA-4.0 | base texts n1904 (matches ours) + sblgnt; NT-only complement to the above |
 | **[Clear-Bible/macula-greek](https://github.com/Clear-Bible/macula-greek)** | syntax, morphology, semantic roles, participant referents (coref), **Louw-Nida domains**, glosses, quotations | per-source | TSV word-level; same provider as our alignment data |
-| **[Clear-Bible/macula-hebrew](https://github.com/Clear-Bible/macula-hebrew)** | OT counterpart: morphology, referents, domains | per-source | use with BHSA for OT speakers |
+| **[Clear-Bible/macula-hebrew](https://github.com/Clear-Bible/macula-hebrew)** | Hebrew counterpart: morphology, referents, domains | per-source | use with BHSA for speakers in the Tanakh |
 | **[UBS Dictionary SDBH + SDGNT](https://github.com/ubsicap/ubs-open-license)** | lexical **semantic domains** + definitions + glosses (Heb ~90%, Greek NT); XML/JSON | CC-BY-SA-4.0 | the open, licensed source for **S2** |
-| **[STEPBible-Data](https://github.com/STEPBible/STEPBible-Data)** (Tyndale) | tagged OT/NT/LXX morphology, lexica, **proper names (TIPNR)** | CC BY 4.0 | foundational; proper names feed **N1** |
+| **[STEPBible-Data](https://github.com/STEPBible/STEPBible-Data)** (Tyndale) | tagged Hebrew, Greek NT and Septuagint morphology, lexica, **proper names (TIPNR)** | CC BY 4.0 | foundational; proper names feed **N1** |
 
 ### Original-language "gold" (shoresh-side)
 
 | Resource | What | License |
 |---|---|---|
-| **STEPBible** TAHOT/TAGNT, TBESH/TBESG, TFLSJ, TEHMC/TEGMC, TIPNR | tagged Hebrew OT + Greek NT (extended Strong's + morphology), brief lexica, morph-code explanations, proper names | CC BY 4.0 |
-| **CATSS MT-LXX** ([codykingham/catss_lxx](https://github.com/codykingham/catss_lxx)) | Hebrew↔Greek **parallel alignment** of the OT + morphology | academic (confirm) — powers `/bridge` + X1 |
+| **STEPBible** TAHOT/TAGNT, TBESH/TBESG, TFLSJ, TEHMC/TEGMC, TIPNR | tagged Hebrew + Greek NT (extended Strong's + morphology), brief lexica, morph-code explanations, proper names | CC BY 4.0 |
+| **CATSS MT-LXX** ([codykingham/catss_lxx](https://github.com/codykingham/catss_lxx)) | Hebrew↔Greek **parallel alignment** of the Tanakh and the Septuagint + morphology | academic (confirm) — powers `/bridge` + X1 |
 | **[OpenScriptures](https://github.com/openscriptures)** (morphhb/OSHB, HebrewLexicon, strongs) | Hebrew morphology + BDB/Strong's lexica | CC-BY-SA / MIT |
 | **MACULA Greek / lowfat trees** | Greek syntax trees | CC-BY / per-source — `/structure` + clause units |
 | **[OpenGNT](https://github.com/eliranwong/OpenGNT)** | NA28-equiv text + Levinsohn discourse + clause division + textual variants | open — text/variants + D1 |

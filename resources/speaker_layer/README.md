@@ -133,7 +133,7 @@ The layer is CC BY 4.0. Keep the attribution to Clear Bible, Inc. and, for the n
 - The work lists in the report: third-person wayyiqtols inside quotations (a story told, or a quotation running too long),
   quotations without an inquit, first- and second-person verbs outside quotations, speakers Glyssen doesn't list.
 - Our own yardstick: unfoldingWord's translationNotes on quotations inside quotations (`figs-quotesinquotes`, CC BY-SA 4.0; 647
-  notes on OT verses; used to measure, not as input): the share of those notes where the layer nests somewhere in the verses
+  notes on Tanakh verses; used to measure, not as input): the share of those notes where the layer nests somewhere in the verses
   noted (a frame counted as a level). v0.7: 54%; v0.8: 82%; v0.10: 87.0% (narrative 87.5%, law 85.5%, prophecy 87.4%, wisdom
   89.7%), 84.9% without the review rows.
 - The parallel texts, v0.10: 77.4% of matched words at the same level, 93.4% with the same speaker.

@@ -23,7 +23,7 @@ Per-language file — `lang` is implied by the filename, not a column:
 | `weight` | `1.0` for tipnr/gloss · alignment `share` for aligned |
 
 ## Three complementary signals
-- **`tipnr`** — the authoritative proper-name set (STEPBible-Data TIPNR): OT **and NT**, typed, with the
+- **`tipnr`** — the authoritative proper-name set (STEPBible-Data TIPNR): the **whole Bible**, typed, with the
   original Hebrew/Greek surface (Ἰησοῦς, דָּוִד). This is what brings NT Greek names in.
 - **`gloss`** — the canonical name per language, broad coverage (19 langs incl. amh/cmn/rus).
 - **`aligned`** — names *actually attested* in translations, including morphological variants a query
@@ -45,6 +45,6 @@ The proper-noun **set + typing** come from **TIPNR** (`STEPBible-Data`, CC-BY), 
 cd bcv-RAG && python -m ingest.tipnr    # fetches TIPNR_{people,places,other}.json into _staging/tipnr/
 cd shoresh && python -m macula.build_proper_nouns   # -> resources/proper_nouns/<lang>.tsv
 ```
-Without TIPNR staged it falls back to STEPBible `Np` (OT-Hebrew only, all `type=name`).
+Without TIPNR staged it falls back to STEPBible `Np` (Hebrew only, all `type=name`).
 `aligned_lex_hf/` must be populated first (`python3 bcv-RAG/scripts/build_aligned_lex_hf.py`) for
 full language coverage — without it, coverage falls back to `aligned_lex/`'s ~10 manual languages.

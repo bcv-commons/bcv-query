@@ -6,14 +6,14 @@ Validation and data: [`../spine/`](../spine/).
 
 Status: **implemented** — [`spine/parse.py`](../spine/parse.py) (+
 [`spine/common.py`](../spine/common.py)). Reconciliation solved at 99.59%
-OT-wide (an offline comparison; the report was removed on 2026-10-10, see git history). This doc is the contract the
+across the Hebrew text (an offline comparison; the report was removed on 2026-10-10, see git history). This doc is the contract the
 parser implements.
 
 ## Inputs (pin exact versions)
 
 | Input | Source | Pin |
 |---|---|---|
-| UHB (Hebrew OT) | `unfoldingWord/hbo_uhb` USFM | **`v2.1.32`** (latest; byte-identical to the validated `master`) |
+| UHB (Hebrew) | `unfoldingWord/hbo_uhb` USFM | **`v2.1.32`** (latest; byte-identical to the validated `master`) |
 | UGNT (Greek NT) | `unfoldingWord/el-x-koine_ugnt` USFM | **`v0.34`** (latest) |
 | BHSA↔Strong's crosswalk | OpenHebrewBible `002` | `BHS-with-Strong-no.csv` (etcbc4c-keyed) |
 | Versification map | OpenHebrewBible `019` | `BHSA_KJV_versification_all_differences.csv` |
@@ -68,7 +68,7 @@ conjunction, DOM) as noise.
 
 - **Spine ↔ BHSA syntax (Layer 4)** — match BHSA role-head → spine word by
   Strong's within the verse (BHSA Strong's via the `002` crosswalk).
-  ~99.6% OT-wide.
+  ~99.6% across the Hebrew text.
 - **Spine ↔ translation chunk** — map the chunk's English reference onto
   the spine verse via the `019` versification map (~4% of verses differ;
   e.g. Genesis 32).
@@ -111,4 +111,4 @@ rather than guessed.
 - The rigorous per-node BHSA-version map (only needed for exact
   cross-corpus token queries; the loose Strong's join covers Layer 4).
 - The last ~0.4% reconciliation tail (sparse, diminishing returns).
-- UGNT↔Greek-syntax: NT syntactic annotation is thin; Layer 4 is OT-first.
+- UGNT↔Greek-syntax: NT syntactic annotation is thin; Layer 4 is Hebrew-first.

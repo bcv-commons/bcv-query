@@ -25,7 +25,7 @@ multi-word surfaces).
 ## Quality — read before using
 Derived from **type-level** alignments (surface→lexeme, no verse/occurrence ids), so a phrase's lexeme
 *set* is the corpus union — we can't see per-verse co-occurrence. Filters applied: **content lexemes
-only** (POS from the prior pack — drops article/preposition glue), **same-testament** sets (drops OT/NT
+only** (POS from the prior pack — drops article/preposition glue), **same-testament** sets (drops Hebrew/Greek
 homograph pooling), `count ≥ 2`, `share ≥ 0.10`, and a leading-short-token drop on fertility.
 
 - **`phrasal` is the high-precision subset** — genuine collocations, verb periphrases, and compound

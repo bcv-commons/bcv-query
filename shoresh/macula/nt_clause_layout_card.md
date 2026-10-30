@@ -157,7 +157,7 @@ Lines per level: @DEPTHS@.
 ## Cross-check
 
 The layout was compared with an independent reading of the same text: the clause segments of Salkinson–Ginsburg's Hebrew New
-Testament as given by a tagger trained on the Old Testament alone ([@CC_ANALYSIS@](https://huggingface.co/datasets/bcv-commons/hebrew-nt-analysis)),
+Testament as given by a tagger trained on the Tanakh alone ([@CC_ANALYSIS@](https://huggingface.co/datasets/bcv-commons/hebrew-nt-analysis)),
 joined to the Greek words through the alignment
 [@CC_ALIGNMENTS@](https://huggingface.co/datasets/bcv-commons/alignments-by-id) (links of class `kept`, 25 of 25 right in its hand
 check). Neither reading uses the alignment, nor the other. The unit is a pair of neighbouring Hebrew words whose Greek words are

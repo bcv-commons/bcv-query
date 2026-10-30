@@ -23,7 +23,7 @@ retired, BHSA-keyed inputs untracked; 2026-10-10 Septuagint on GLAUx, CATSS stor
 
 | Source | Used for | License | Attribution |
 |---|---|---|---|
-| **unfoldingWord Hebrew Bible (UHB)** — `unfoldingWord/hbo_uhb` | OT spine (Strong's, lemma, morph per word) | CC BY-SA 4.0 | unfoldingWord® |
+| **unfoldingWord Hebrew Bible (UHB)** — `unfoldingWord/hbo_uhb` | Hebrew spine (Strong's, lemma, morph per word) | CC BY-SA 4.0 | unfoldingWord® |
 | **unfoldingWord Greek NT (UGNT)** — `unfoldingWord/el-x-koine_ugnt` | NT spine | CC BY-SA 4.0 | unfoldingWord® |
 | ~~BHSA~~ — `ETCBC/bhsa` (no longer read by the service) | former syntactic roles | CC BY-NC-SA 4.0 | ETCBC, VU Amsterdam |
 | ~~OpenHebrewBible~~ — `eliranwong/OpenHebrewBible` (no longer used) | former crosswalk / versification map | CC BY-NC 4.0 | Eliran Wong, *Open Hebrew Bible Project* |

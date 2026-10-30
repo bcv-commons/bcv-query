@@ -1,6 +1,6 @@
-# OT-in-NT quotations (via the LXX)
+# Tanakh quotations in the NT (via the Septuagint)
 
-`quotations.tsv` — for each NT verse, the OT verse(s) it most likely quotes, found by matching
+`quotations.tsv` — for each NT verse, the Tanakh verse(s) it most likely quotes, found by matching
 **content Greek Strong's** the NT shares with the Septuagint (LXX). Each verse is an IDF-weighted
 bag of content Strong's and the score is their **cosine similarity** — rare shared words (ἄρτος,
 μάννα) drive the match, common ones (θεός, λέγω) barely count, and the cosine's length normalization
@@ -12,14 +12,14 @@ the New Testament canticles themselves). Same licence as the store.
 | col | meaning |
 |---|---|
 | `nt_ref` | NT verse (`MAT 4:4`) |
-| `ot_ref` | OT verse quoted, **Masoretic/English numbering** |
+| `ot_ref` | Tanakh verse quoted, **Masoretic/English numbering** |
 | `confidence` | `high` (cosine ≥ 0.45, ≈ real quotation) · `med` (0.30–0.45, candidate) |
 | `vrs` | `mt` = ref normalized to Masoretic · `lxx?` = a merge/split boundary Psalm left in LXX numbering (needs the V1 verse-map) |
 | `n_shared` | count of shared content Strong's |
 | `score` | IDF-cosine of the two verses' content-Strong's bags (∈ [0,1]) |
 | `shared_strongs` | the shared Greek Strong's (`G0740,…`) |
 
-Up to 3 OT candidates per NT verse, ranked by score.
+Up to 3 Tanakh candidates per NT verse, ranked by score.
 
 ## Coverage & accuracy
 6,594 links over 3,524 NT verses; **1,906** are `high`-confidence. On 12 well-known quotations the

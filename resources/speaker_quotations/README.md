@@ -48,7 +48,7 @@ the Greek text settles it; each row gives its reason. The labels are English and
 
 ## Anchor & granularity
 Word span: the source's `CLEAR START`/`CLEAR END` (MACULA word ids). Its verses are mapped from MACULA's numbering
-(Hebrew numbering in the OT) to English with bibles' `org-to-eng` map (via `shoresh/vrsmap.py`); a Psalm title counts
+(Hebrew numbering in the Tanakh) to English with bibles' `org-to-eng` map (via `shoresh/vrsmap.py`); a Psalm title counts
 as verse 1. `start_partial`/`end_partial` compare the span with its verse's first and last word in shoresh's MACULA
 word table (on the MACULA verse). 25 NT rows without word ids keep the FCBH quote block's verse range.
 

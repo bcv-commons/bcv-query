@@ -292,8 +292,8 @@ def chunk_preview_from_card(card, lang: str = "en") -> dict:
     }
     # Bible chunks: resolve resource:<edition_id> to registry metadata so the
     # correct version is cited per testament. A language's Bible may be a
-    # composite (aligned NT + plain-text OT from a different edition/source),
-    # so the raw id ("lsg-ot") becomes a proper label ("Louis Segond 1910 (OT)").
+    # composite (aligned NT + plain-text Tanakh from a different edition/source),
+    # so the raw id ("lsg-ot") becomes a proper label ("Louis Segond 1910 (Tanakh)").
     if kind == "bible":
         from server.editions import edition_citation, edition_label
         eid = first_tag(card.tags, "resource:")

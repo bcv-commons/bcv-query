@@ -883,7 +883,7 @@ def _word_study(args: dict, db: sqlite3.Connection) -> dict:
     description=(
         "Per-word interlinear for a verse: each original word with surface, lemma, Strong's, "
         "morphology, localized gloss, binyan-correct sense (Hebrew), and domain: Louw-Nida (Greek) or "
-        "the Hebrew semantic group as 'Hebrew label · gloss' (Hebrew), plus the LXX parallel for OT "
+        "the Hebrew semantic group as 'Hebrew label · gloss' (Hebrew), plus the Septuagint parallel for Tanakh "
         "verses. Hebrew words also carry `setting`, `explanation` (Metzudat Zion / Malbim, in Hebrew) and "
         "`menahem` (root, sense division n/m, sense phrase); `malbim_comments` = how many comments "
         "verse_commentary has for this verse. $0. Localized via `lang`."
@@ -921,7 +921,7 @@ def _verse_interlinear(args: dict, db: sqlite3.Connection) -> dict:
     ),
     input_schema={
         "type": "object",
-        "properties": {"reference": {"type": "string", "description": "A single OT verse, e.g. 'Isaiah 1:1'."}},
+        "properties": {"reference": {"type": "string", "description": "A single Tanakh verse, e.g. 'Isaiah 1:1'."}},
         "required": ["reference"],
     },
 )

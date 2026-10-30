@@ -30,7 +30,7 @@ Schemes built now (the ones our corpora + consumers need):
 `/versify/{scheme}/{book}/{chapter}/{verse}`.
 
 ## Consumers
-- **X1 quotations** — OT refs normalized to KJV (e.g. LXX `PSA 15:8 → PSA 16:8`, `JOL 3:1 → JOL 2:28`);
+- **X1 quotations** — Tanakh refs normalized to KJV (e.g. LXX `PSA 15:8 → PSA 16:8`, `JOL 3:1 → JOL 2:28`);
   retired the old hardcoded Psalm map + the `vrs=lxx?` flag (0 remaining).
 - **Aligner** — tag each target Bible with its scheme; Psalm superscription offset (`hebrew`) lets
   Psalm verses align.
@@ -52,7 +52,7 @@ not just neural. Tables are UTF-8 TSV, `BOOK ch:v` (USFM); `title` = a superscri
 Single-verse remaps only (identity elsewhere). **Out of scope, flagged for a later pass:** ranges /
 LXX sub-verses / concatenations (`;` `-` `!` in TVTMS — long verses, merges/splits like the LXX 9|10
 Psalm merge), the Latin/other traditions, and the NT sub-verse micro-differences. The single-verse
-map covers the Psalm superscriptions + OT chapter/verse offsets, which is what X1 + the aligner need.
+map covers the Psalm superscriptions + Tanakh chapter/verse offsets, which is what X1 + the aligner need.
 
 ## Per-version metadata (external — the design point)
 Each Bible **version** declares its `versification` scheme; this is external metadata, not derivable

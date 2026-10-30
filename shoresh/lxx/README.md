@@ -1,6 +1,6 @@
 # lxx/
 
-The **Septuagint** (Greek Old Testament) as a per-word original-language store: the Greek OT the English corpus lacks, and the text the NT quotes.
+The **Septuagint** (the Greek translation of the Tanakh) as a per-word original-language store: the Septuagint text the English corpus lacks, and the text the NT quotes.
 
 ## Source and licence
 

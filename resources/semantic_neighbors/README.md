@@ -19,7 +19,7 @@ domains, **re-derived from open data** rather than laundered from the MARBLE tax
 **Consume by tier:** `confidence=high` for domain-grade tie-breaking, `high`+`prior` for good coverage,
 everything for broad concept expansion; **exclude `relation=antonym`** from any "similar" use.
 
-`manifest.json` (committed) carries the counts + `content_sha256`. Hebrew/OT only (the context
+`manifest.json` (committed) carries the counts + `content_sha256`. Hebrew only (the context
 embeddings are Hebrew clauses).
 
 ## Committed service forms (small, tracked — the parquet is the bulk/gitignored source)

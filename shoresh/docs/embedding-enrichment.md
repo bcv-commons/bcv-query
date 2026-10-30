@@ -128,7 +128,7 @@ measures on Genesis (against local BHSA), increasingly truthful:
 
 The Strong's join (UHB's native `strong` ↔ BHSA's Strong's from the
 [OpenHebrewBible crosswalk](#external-resources)) reconciles at **98.83%**
-across the full OT — and **99.59%** after a 9-entry Strong's
+across the whole Tanakh — and **99.59%** after a 9-entry Strong's
 [equivalence table](../spine/strongs_equivalence.tsv) closes the
 high-frequency variant pairs (yalak/halak, YHWH variants, 'et homographs,
 …). Run + per-book results: [`spine/reconciliation/`](../spine/reconciliation/).
@@ -380,7 +380,7 @@ Mode A "$0/query" ethos + already self-hosting the whole stack):
   advance the cross-lingual or sovereignty goals.
 
 **Decide fast, not endlessly:** pick the top two (likely BGE-M3 vs.
-Cohere), and run the **representation × model ablation** below on one OT
+Cohere), and run the **representation × model ablation** below on one Tanakh
 book in English + one target language (French or Spanish). Measure
 cross-lingual recall (French query → correct English-anchored chunk).
 That picks both the model and the representation before the full
@@ -514,17 +514,17 @@ gives every BHSA word a Strong's number, so the join is **Strong's↔Strong's**
 
 ### The reconciliation gate — result
 
-**Passed — full OT.** Reconciliation against local BHSA, three measures —
+**Passed — whole Tanakh.** Reconciliation against local BHSA, three measures —
 the Strong's join via the crosswalk is the operative one:
 
 | Method | UHB↔BHSA coherence | |
 |---|---|---|
 | per-verse word count | 94% exact (Genesis) | proxy (partly coincidental) |
 | consonantal surface | 86% word-level (Genesis) | too strict (spelling, ketiv/qere, empty nodes) |
-| **Strong's via `002` crosswalk** | **98.83%** OT-wide | the real join |
-| **+ 9-entry equivalence table** | **99.59%** OT-wide | high-frequency variants closed |
+| **Strong's via `002` crosswalk** | **98.83%** across the Tanakh | the real join |
+| **+ 9-entry equivalence table** | **99.59%** across the Tanakh | high-frequency variants closed |
 
-Run across all 39 OT books ([`spine/reconcile.py`](../spine/reconcile.py),
+Run across all 39 Tanakh books ([`spine/reconcile.py`](../spine/reconcile.py),
 results in [`spine/reconciliation/`](../spine/reconciliation/)); every book
 lands 98.5–99.6%. Sourcing from UHB removed the duplication / omission /
 versification artifacts; the Strong's crosswalk then carries the match past
@@ -553,7 +553,7 @@ variant pairs.
 
 ## Validation: the ablation
 
-One harness, run on a single OT book, settles three decisions at once:
+One harness, run on a single Tanakh book, settles three decisions at once:
 **the model, the representation, and whether Layer 4 earns its re-embed.**
 
 Arms to cross (pick the top two models — likely BGE-M3 vs. Cohere):
@@ -562,7 +562,7 @@ Arms to cross (pick the top two models — likely BGE-M3 vs. Cohere):
   vs. `+pointed Hebrew` (expected to regress — confirms the rule above).
 - **Input/intent** (dual-embedding #3): single spine-prefixed embedding
   vs. intent-routed spine-prefixed + body-only.
-- Embed one OT book in English **plus one target language** (French or
+- Embed one Tanakh book in English **plus one target language** (French or
   Spanish) so cross-lingual recall is measurable, not assumed.
 
 Win conditions (named, to avoid clashing with the Mode A/B/C labels):
@@ -618,10 +618,10 @@ locking in a bad format.
 ## NT caveat
 
 UGNT carries the same per-word `strong`/`lemma`/`x-morph` markup, so the
-NT spine (Location + Lexical) is just as good as the OT's. But Nestle1904
+NT spine (Location + Lexical) is just as good as the Hebrew spine's. But Nestle1904
 / the Greek NT's *syntactic* annotation is far thinner than BHSA's — so
 the **Structural** line (Layer 4) will be shallow for the NT regardless.
-The OT is where structural enrichment pays off.
+The Hebrew text is where structural enrichment pays off.
 
 ## Prerequisites / open items
 
@@ -640,7 +640,7 @@ Resolved (see [`../spine/`](../spine/)): the `002` Strong's crosswalk and
 [equivalence table](../spine/strongs_equivalence.tsv) is built.
 
 Done: spine source settled (UHB/UGNT); parse verified; BHSA reconciliation
-solved (99.59% OT-wide via the `002` Strong's crosswalk — see *The reconciliation
+solved (99.59% across the Tanakh via the `002` Strong's crosswalk — see *The reconciliation
 gate — result*); versification map and Strong's crosswalk located and
 tested. The earlier USFM→USJ / translation-alignment experiments are
 dropped (USJ lossy; original-language texts are the source).
