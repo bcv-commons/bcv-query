@@ -19,6 +19,15 @@ in the manifest. A published name is never given new content: build a new versio
 
   cd shoresh && .venv/bin/python3 publish_files.py --set source-structure-v1 /path/to/dir
   set.json: {"files": {"heb-open.sqlite.gz": {"license": "...", "source": "...", "description": "..."}, ...}}
+
+files.qombi.com replaces a spine in place, so a pin on its URL breaks with every new build. Each spine build therefore
+also gets its own GitHub release in bcv-commons/spine-releases (public, immutable releases): tag <name>-<build date>, one
+asset <name>.db.zst, notes with the sha256 of the .zst and of the .db, spine_content_sha256 and what changed. A build
+already released (its .db sha256 is in a release's notes) is not released again. For a new build, say what changed:
+
+  cd shoresh && .venv/bin/python3 publish_files.py --changes "adds the columns greek, greekstrong"
+
+The asset and notes are staged in macula/data/public/releases/<tag>/; the gh commands are printed with the others.
 """
 from __future__ import annotations
 
@@ -26,6 +35,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -35,6 +45,9 @@ REPO = HERE.parent
 STAGE = HERE / "macula" / "data" / "public"
 REMOTE_DIR = "/opt/shoresh/data/public"          # mounted as /data/public in the shoresh container
 DEFAULT = ["macula/lexeme-spine-macula.db", "macula/rp2018-spine.db", "macula/tr-textus-receptus-spine.db"]
+RELEASE_REPO = "bcv-commons/spine-releases"
+RELEASES = STAGE / "releases"
+NOTES_DB_SHA = re.compile(r"decompressed[^|]*\| `([0-9a-f]{64})`")   # the .db sha256 in a release's notes
 REFUSE = {"lexeme-spine.db": "carries BHSA-derived columns (CC BY-NC-SA)",
           "lexeme-spine-bhsa-baseline.db": "carries BHSA-derived columns (CC BY-NC-SA)"}
 DESCRIPTION = {
@@ -73,6 +86,52 @@ def entry(path: Path) -> dict:
                         .isoformat(timespec="seconds")}
 
 
+def released() -> dict[str, tuple[str, str]]:
+    """{.db sha256: (tag, asset url)} of the spine releases on GitHub (read without a token)."""
+    import urllib.request
+    url = f"https://api.github.com/repos/{RELEASE_REPO}/releases?per_page=100"
+    with urllib.request.urlopen(url, timeout=30) as r:
+        out = {}
+        for rel in json.load(r):
+            for h in NOTES_DB_SHA.findall(rel.get("body") or ""):
+                out[h] = (rel["tag_name"], rel["assets"][0]["browser_download_url"] if rel["assets"] else "")
+        return out
+
+
+def stage_release(path: Path, e: dict, changes: str, tags: set[str]) -> tuple[str, Path, Path]:
+    """Write <tag>/<name>.zst and <tag>/NOTES.md for a spine build not yet released; returns (tag, asset, notes)."""
+    from compression import zstd
+    tag = f"{path.stem}-{e['modified'][:10]}"
+    if tag in tags:
+        sys.exit(f"{tag} is already released with other content; build again on another day or rename the tag by hand")
+    d = RELEASES / tag
+    d.mkdir(parents=True, exist_ok=True)
+    z = d / f"{path.name}.zst"
+    z.write_bytes(zstd.compress(path.read_bytes(), level=19))
+    db = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    cols = ", ".join(r[1] for r in db.execute("PRAGMA table_info(spine_words)"))
+    tables = ", ".join(r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"))
+    import subprocess
+    commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+    (d / "NOTES.md").write_text(f"""`{z.name}`: zstd-compressed `{path.name}` (decompress: `zstd -d {z.name}`, or Python 3.14 `compression.zstd`).
+
+| | sha256 |
+|---|---|
+| `{z.name}` ({z.stat().st_size:,} bytes) | `{sha256(z)}` |
+| `{path.name}` decompressed ({e['bytes']:,} bytes) | `{e['sha256']}` |
+| `spine_content_sha256` (in `spine_meta`) | `{e['spine_content_sha256']}` |
+
+Built by bcv-query commit {commit}. Licence: {e['license']}.
+
+**What changed:** {changes}
+
+Tables: {tables}. Columns of spine_words: {cols}.
+
+This asset is never replaced; a new build gets a new release.
+""", encoding="utf-8")
+    return tag, z, d / "NOTES.md"
+
+
 def publish_set(name: str, folder: Path) -> int:
     """Add the files of <folder>/set.json as <name>-<file> to the existing manifest (kept as it is otherwise)."""
     spec = json.loads((folder / "set.json").read_text(encoding="utf-8"))["files"]
@@ -109,6 +168,7 @@ def publish_set(name: str, folder: Path) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("files", nargs="*", default=DEFAULT, help="paths relative to shoresh/")
+    ap.add_argument("--changes", help="what changed since the previous build (release notes of a new spine build)")
     ap.add_argument("--set", nargs=2, metavar=("NAME", "DIR"), help="add a versioned set of files (see above)")
     a = ap.parse_args()
     if a.set:
@@ -126,6 +186,17 @@ def main() -> int:
     for f in files:
         if not f["license"]:
             sys.exit(f"{f['name']}: no licence in its spine_meta; add one before publishing")
+    have = released()
+    new = []                              # spine builds not yet on GitHub: stage a release each
+    for p, f in zip(paths, files):
+        if f["sha256"] in have:
+            f["release"] = have[f["sha256"]][1]
+            continue
+        if not a.changes:
+            sys.exit(f"{p.name} is a new build ({f['sha256'][:16]}…, not in {RELEASE_REPO}): say what changed with --changes")
+        tag, z, notes = stage_release(p, f, a.changes, {t for t, _ in have.values()})
+        f["release"] = f"https://github.com/{RELEASE_REPO}/releases/download/{tag}/{z.name}"
+        new.append((tag, z, notes))
     names = {f["name"] for f in files}
     try:                                  # keep the published sets (--set) when the spines are republished
         kept = [f for f in json.loads((STAGE / "manifest.json").read_text(encoding="utf-8"))["files"]
@@ -140,7 +211,10 @@ def main() -> int:
     for f in files:
         print(f"{f['name']:32s} {f['bytes'] / 1e6:7.1f} MB  {f['sha256'][:16]}…  {f['license'][:60]}",
               file=sys.stderr)
-    print(f"\nmanifest -> {STAGE / 'manifest.json'}\n\nship (files first, manifest last):", file=sys.stderr)
+    print(f"\nmanifest -> {STAGE / 'manifest.json'}\n\nship (releases and files first, manifest last):", file=sys.stderr)
+    for tag, z, notes in new:
+        print(f"gh release create {tag} shoresh/{z.relative_to(HERE)} -R {RELEASE_REPO} --title {tag} "
+              f"--notes-file shoresh/{notes.relative_to(HERE)} --latest=false")
     for p in paths:
         print(f"deploy/deploy-data.sh shoresh/{p.relative_to(HERE)} {p.name} {REMOTE_DIR}")
     print(f"deploy/deploy-data.sh shoresh/{(STAGE / 'manifest.json').relative_to(HERE)} manifest.json {REMOTE_DIR}")

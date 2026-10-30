@@ -16,6 +16,13 @@ not used: the name comes from MACULA Greek (Nestle 1904 lowfat, CC BY 4.0).
 Who the speaker is across speeches (characters): `speaker_id`, a stable id for the speaker data's label, and `speaker_name`, that
 person's proper name in the text, with `speaker_name_ref` the word that gives it; the same rules as the Hebrew speaker layer
 (macula/build_speaker_layer.characters).
+
+Groups: a speech whose inquit (or review row) names two or more is a group's: its id is that set of names (global where all are
+proper names, else per book), it has no `speaker_name`, and `speaker_members` lists the ids of the members who speak on their own in
+the same book.
+
+Review (resources/speaker_quotations/nt_review.tsv): where the speaker data's label or the inquit found is wrong, a row sets the
+speech's label (field speaker) or the words naming its speaker (field name: word ids, people separated by ","; "-" for none).
 """
 from __future__ import annotations
 
@@ -31,6 +38,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 LOWFAT = HERE / ".lowfat-src-grc"
 CHARACTERS = HERE.parents[1] / "resources" / "speaker_quotations" / "nt_characters.tsv"
+REVIEW = HERE.parents[1] / "resources" / "speaker_quotations" / "nt_review.tsv"
 NO_CHARACTER = ("", "(the one addressed)", "(he/she)", "(they)")     # labels that name no one person
 DIVINE = {"θεός"}                                  # God's name, carried over like a proper name
 SAYING = {"λέγω", "εἶπον", "φημί", "ἀποκρίνομαι", "λαλέω", "κράζω", "γράφω", "ἐρωτάω", "ἐπερωτάω", "βοάω", "φωνέω"}
@@ -51,8 +59,19 @@ def lowfat_words() -> tuple[dict[str, dict], str]:
     return out, h.hexdigest()
 
 
+def review() -> dict[tuple[str, str], str]:
+    """(speech id, field) -> value of the hand review."""
+    if not REVIEW.exists():
+        return {}
+    with open(REVIEW, encoding="utf-8") as fh:
+        return {(r["word_start"], r["field"]): r["value"]
+                for r in csv.DictReader((line for line in fh if not line.startswith("#")), delimiter="\t")}
+
+
 def find(quotes: dict[str, list[dict]], con: sqlite3.Connection) -> tuple[dict[str, dict], str]:
     W, sha = lowfat_words()
+    fix = review()
+    quotes = {b: [dict(q, speaker=fix.get((q["id"], "speaker"), q["speaker"])) for q in qs] for b, qs in quotes.items()}
     parent = {r[0]: r[1] for r in con.execute("SELECT id, parent FROM nodes WHERE corpus='grc'")}
     info = {r[0]: (r[1], r[2]) for r in con.execute("SELECT id, role, cls FROM nodes WHERE corpus='grc'")}
     kids: dict[int, list[int]] = collections.defaultdict(list)
@@ -123,8 +142,17 @@ def find(quotes: dict[str, list[dict]], con: sqlite3.Connection) -> tuple[dict[s
             verb, how = inquit(q)
             subj = subject(verb) if verb else []
             names = list(dict.fromkeys(n for n, _ in subj))
-            out[q["id"]] = {"names": names, "refs": [k for _, k in subj], "inquit": verb, "how": how,
-                            "basis": "inquit" if names else "", "alt_eng": ""}
+            v = out[q["id"]] = {"names": names, "refs": [k for _, k in subj], "inquit": verb, "how": how,
+                                "basis": "inquit" if names else "", "alt_eng": "", "reviewed": any((q["id"], f) in fix for f in ("speaker", "name"))}
+            given = fix.get((q["id"], "name"))
+            if given == "-":
+                v["names"], v["refs"], v["basis"] = [], [], ""
+            elif given:
+                parts = [p.split() for p in given.split(",")]
+                if any(k not in W for p in parts for k in p):
+                    raise SystemExit(f"{REVIEW.name}: {q['id']}: a word id not in MACULA Greek: {given}")
+                v["names"] = list(dict.fromkeys(W[p[0]]["lemma"] for p in parts))
+                v["refs"], v["basis"] = [k for p in parts for k in p], "review"
     carry_over(quotes, out, W)
     characters(quotes, out, W)
     return out, sha
@@ -182,9 +210,17 @@ def characters(quotes: dict[str, list[dict]], out: dict[str, dict], W: dict[str,
             rows = list(csv.DictReader(fh, delimiter="\t"))
         by_key = {(r["label"], r["book"]): r for r in rows}
 
+    def group(k: str) -> list[str]:                # the names of a speech two or more speak (inquit or review)
+        v = out[k]
+        return v["names"] if v["basis"] in ("inquit", "review") and len(v["names"]) > 1 else []
+
+    def all_proper(k: str) -> bool:
+        heads = {W[r]["lemma"]: W[r] for r in out[k]["refs"] if r in W}
+        return all(n in heads and (heads[n]["type"] == "proper" or n in DIVINE) for n in group(k))
+
     def proper(k: str) -> bool:                    # the speech's own inquit names one person by a proper name or θεός
         v = out[k]
-        if v["basis"] != "inquit" or len(v["names"]) != 1 or not v["refs"]:
+        if v["basis"] not in ("inquit", "review") or len(v["names"]) != 1 or not v["refs"]:
             return False
         head = W.get(v["refs"][0])
         return head is not None and (head["type"] == "proper" or head["lemma"] in DIVINE)
@@ -198,7 +234,9 @@ def characters(quotes: dict[str, list[dict]], out: dict[str, dict], W: dict[str,
 
     by_label = collections.defaultdict(list)
     for k in sorted(out):
-        if label.get(k, "") not in NO_CHARACTER:
+        if group(k):
+            label[k] = "group: " + ", ".join(sorted(group(k)))
+        elif label.get(k, "") not in NO_CHARACTER:
             by_label[label[k]].append(k)
     named = {lb for lb, ks in by_label.items() if usual(ks)}
     nxt = max((int(r["id"][1:]) for r in rows), default=0)
@@ -210,7 +248,8 @@ def characters(quotes: dict[str, list[dict]], out: dict[str, dict], W: dict[str,
         r = by_key.get((lb, "")) or by_key.get((lb, usfm[k[:2]]))
         if r is None:
             nxt += 1
-            r = {"id": f"n{nxt:04d}", "label": lb, "book": "" if lb in named else usfm[k[:2]], "name_key": ""}
+            whole = all_proper(k) if group(k) else lb in named
+            r = {"id": f"n{nxt:04d}", "label": lb, "book": "" if whole else usfm[k[:2]], "name_key": ""}
             by_key[(r["label"], r["book"])] = r
             added.append(r)
         cid_of[k] = r["id"]
@@ -231,8 +270,15 @@ def characters(quotes: dict[str, list[dict]], out: dict[str, dict], W: dict[str,
             uses[n][cid] = c
     stats = collections.Counter(added=len(added))
     for v in out.values():
-        v["speaker_id"], v["speaker_name"], v["speaker_name_ref"] = "", "", ""
+        v["speaker_id"], v["speaker_name"], v["speaker_name_ref"], v["speaker_members"], v["group"] = "", "", "", [], False
+    name_of, books_of = {}, collections.defaultdict(set)
     for cid, ks in by_id.items():
+        if group(ks[0]):
+            for k in ks:
+                out[k]["speaker_id"], out[k]["group"] = cid, True
+            stats["groups"] += 1
+            continue
+        books_of[cid] |= {k[:2] for k in ks}
         name = "" if "-" in hand[cid] else W[hand[cid][0]]["lemma"] if hand[cid] else usual(ks)
         if not hand[cid] and name and (uses[name][cid] * 3 < max(uses[name].values()) or label[ks[0]].startswith("narrator")):
             name = ""
@@ -248,6 +294,16 @@ def characters(quotes: dict[str, list[dict]], out: dict[str, dict], W: dict[str,
             stats["named by hand" if not near else "named"] += 1
         stats["characters"] += 1
         stats["characters named"] += bool(name)
+        if name:
+            name_of[cid] = name
+    for k, v in out.items():                       # a group's members: the people of its names who speak in the same book; where
+        if v["speaker_id"] and group(k):           # two share a name (Ἰωάννης), the one who speaks nearest
+            near = {m: min(abs(int(x) - int(k)) for x in by_id[m] if x[:2] == k[:2])
+                    for m in name_of if k[:2] in books_of[m]}
+            v["speaker_members"] = [min((m for m in near if name_of[m] == p), key=near.get) for p in group(k)
+                                    if any(name_of[m] == p for m in near)]
+            stats["group speeches"] += 1
+            stats["group speeches with members"] += bool(v["speaker_members"])
     stats["speeches with a character"] = sum(len(ks) for ks in by_id.values())
     return stats
 

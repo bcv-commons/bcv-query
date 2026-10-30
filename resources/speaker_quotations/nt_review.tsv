@@ -1,0 +1,132 @@
+# Hand review of NT speeches, applied by shoresh/macula/greek_speakers.py (clause layout v0.6). Only where the Greek text settles it;
+# the reason says how. field speaker: the speech's label (who it is: sets speaker_id; the label stays internal, in English).
+# field name: the word ids naming the speaker, people separated by "," (two or more: a group); "-": the inquit found names no one.
+word_start	field	value	reason	source
+40001023001	speaker	God	τὸ ῥηθὲν ὑπὸ Κυρίου διὰ τοῦ προφήτου: the Lord speaks, through the prophet	agent:claude-opus-5-5:nt-characters-v1
+40001023019	speaker	narrator-MAT	ὅ ἐστιν μεθερμηνευόμενον: the narrator translates Ἐμμανουήλ	agent:claude-opus-5-5:nt-characters-v1
+40001023019	name	-	Ἐμμανουήλ is the word translated, not a speaker	agent:claude-opus-5-5:nt-characters-v1
+40002018001	speaker	Jeremiah	τὸ ῥηθὲν διὰ Ἰερεμίου τοῦ προφήτου λέγοντος	agent:claude-opus-5-5:nt-characters-v1
+40011003003	speaker	John the Baptist	ὁ Ἰωάνης ... πέμψας διὰ τῶν μαθητῶν αὐτοῦ εἶπεν αὐτῷ: John's question, sent through his disciples	agent:claude-opus-5-5:nt-characters-v1
+40012018001	speaker	Isaiah	τὸ ῥηθὲν διὰ Ἠσαΐου τοῦ προφήτου λέγοντος	agent:claude-opus-5-5:nt-characters-v1
+40013051006	speaker	disciples	λέγουσιν αὐτῷ Ναί: the disciples answer Jesus' question	agent:claude-opus-5-5:nt-characters-v1
+40014017005	speaker	disciples	οἱ δὲ λέγουσιν αὐτῷ: the disciples (plural), no one named	agent:claude-opus-5-5:nt-characters-v1
+40017010007	speaker	disciples	ἐπηρώτησαν αὐτὸν οἱ μαθηταὶ λέγοντες	agent:claude-opus-5-5:nt-characters-v1
+40017025002	speaker	Peter (Simon)	λέγει Ναί: Peter answers the collectors (τῷ Πέτρῳ)	agent:claude-opus-5-5:nt-characters-v1
+40017026003	speaker	Peter (Simon)	εἰπόντος δέ Ἀπὸ τῶν ἀλλοτρίων ἔφη αὐτῷ ὁ Ἰησοῦς: Peter answers, Jesus replies after	agent:claude-opus-5-5:nt-characters-v1
+40020022020	speaker	sons of Zebedee (James and John)	λέγουσιν αὐτῷ Δυνάμεθα: the two sons answer (plural)	agent:claude-opus-5-5:nt-characters-v1
+40021027012	speaker	Jesus	ἔφη αὐτοῖς καὶ αὐτός Οὐδὲ ἐγὼ λέγω ὑμῖν	agent:claude-opus-5-5:nt-characters-v1
+40024003016	speaker	disciples	προσῆλθον αὐτῷ οἱ μαθηταὶ ... λέγοντες	agent:claude-opus-5-5:nt-characters-v1
+40026017012	speaker	disciples	προσῆλθον οἱ μαθηταὶ τῷ Ἰησοῦ λέγοντες	agent:claude-opus-5-5:nt-characters-v1
+40027004009	name	40027003015,40027003017	οἱ δὲ εἶπαν Τί πρὸς ἡμᾶς: the chief priests and elders Judas spoke to	agent:claude-opus-5-5:nt-characters-v1
+40027011014	speaker	Pilate	ἐπηρώτησεν αὐτὸν ὁ ἡγεμὼν λέγων	agent:claude-opus-5-5:nt-characters-v1
+40027021018	speaker	crowd before Pilate	οἱ δὲ εἶπαν Τὸν Βαραββᾶν: the crowd answers Pilate	agent:claude-opus-5-5:nt-characters-v1
+40027022005	speaker	Pilate	λέγει αὐτοῖς ὁ Πειλᾶτος	agent:claude-opus-5-5:nt-characters-v1
+40027022014	speaker	crowd before Pilate	λέγουσιν πάντες Σταυρωθήτω	agent:claude-opus-5-5:nt-characters-v1
+40027023004	speaker	Pilate	ὁ δὲ ἔφη: Pilate answers the crowd	agent:claude-opus-5-5:nt-characters-v1
+40027023013	speaker	crowd before Pilate	οἱ δὲ περισσῶς ἔκραζον λέγοντες	agent:claude-opus-5-5:nt-characters-v1
+41006024007	speaker	Herodias' daughter	ἐξελθοῦσα εἶπεν τῇ μητρὶ αὐτῆς: the girl asks her mother	agent:claude-opus-5-5:nt-characters-v1
+41006037013	speaker	disciples	λέγουσιν αὐτῷ: the disciples (plural)	agent:claude-opus-5-5:nt-characters-v1
+41006038013	speaker	disciples	γνόντες λέγουσιν Πέντε: the disciples answer	agent:claude-opus-5-5:nt-characters-v1
+41007005009	name	41007005005,41007005008	ἐπερωτῶσιν αὐτὸν οἱ Φαρισαῖοι καὶ οἱ γραμματεῖς	agent:claude-opus-5-5:nt-characters-v1
+41008019016	speaker	disciples	λέγουσιν αὐτῷ Δώδεκα: the disciples answer	agent:claude-opus-5-5:nt-characters-v1
+41009007012	name	-	ἐγένετο φωνὴ ἐκ τῆς νεφέλης: the voice from the cloud; Peter is the subject of an earlier clause	agent:claude-opus-5-5:nt-characters-v1
+41010037005	name	41010035004,41010035006	οἱ δὲ εἶπαν: Ἰάκωβος καὶ Ἰωάνης of 10:35	agent:claude-opus-5-5:nt-characters-v1
+41010039005	name	41010035004,41010035006	οἱ δὲ εἶπαν αὐτῷ Δυνάμεθα: James and John	agent:claude-opus-5-5:nt-characters-v1
+41010049014	speaker	crowd	φωνοῦσιν τὸν τυφλὸν λέγοντες: those around call the blind man	agent:claude-opus-5-5:nt-characters-v1
+41010051016	speaker	Bartimaeus (a blind man)	ὁ δὲ τυφλὸς εἶπεν αὐτῷ Ῥαββουνεί	agent:claude-opus-5-5:nt-characters-v1
+41014012016	speaker	disciples	λέγουσιν αὐτῷ οἱ μαθηταὶ αὐτοῦ	agent:claude-opus-5-5:nt-characters-v1
+41014072019	speaker	Jesus	τὸ ῥῆμα ὡς εἶπεν αὐτῷ ὁ Ἰησοῦς: Jesus' words, remembered	agent:claude-opus-5-5:nt-characters-v1
+41015002006	speaker	Pilate	ἐπηρώτησεν αὐτὸν ὁ Πειλᾶτος	agent:claude-opus-5-5:nt-characters-v1
+41015014006	speaker	Pilate	ὁ δὲ Πειλᾶτος ἔλεγεν αὐτοῖς	agent:claude-opus-5-5:nt-characters-v1
+41015034018	name	-	ὅ ἐστιν μεθερμηνευόμενον: the narrator translates Jesus' cry	agent:claude-opus-5-5:nt-characters-v1
+42002023007	name	-	γέγραπται ἐν νόμῳ Κυρίου: the subject found (ἅγιον) is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+42002024012	name	-	κατὰ τὸ εἰρημένον ἐν τῷ νόμῳ Κυρίου: the law's words, not Joseph and Mary's	agent:claude-opus-5-5:nt-characters-v1
+42003004009	name	42003004006	ὡς γέγραπται ἐν βίβλῳ λόγων Ἠσαΐου τοῦ προφήτου	agent:claude-opus-5-5:nt-characters-v1
+42003022018	name	-	φωνὴν ἐξ οὐρανοῦ γενέσθαι: the voice from heaven	agent:claude-opus-5-5:nt-characters-v1
+42005014007	name	-	αὐτὸς παρήγγειλεν αὐτῷ: Jesus orders; ἀνήρ is the leper	agent:claude-opus-5-5:nt-characters-v1
+42008030013	speaker	demons (Legion)	ὁ δὲ εἶπεν Λεγιών: the possessed man answers Jesus	agent:claude-opus-5-5:nt-characters-v1
+42009013012	speaker	disciples	οἱ δὲ εἶπαν: the twelve answer	agent:claude-opus-5-5:nt-characters-v1
+42009054009	name	42009054005,42009054007	οἱ μαθηταὶ Ἰάκωβος καὶ Ἰωάνης εἶπαν	agent:claude-opus-5-5:nt-characters-v1
+42020016015	speaker	crowd	ἀκούσαντες δὲ εἶπαν Μὴ γένοιτο: the people hearing the parable	agent:claude-opus-5-5:nt-characters-v1
+42022009005	name	42022008003,42022008005	οἱ δὲ εἶπαν: Πέτρον καὶ Ἰωάνην of 22:8	agent:claude-opus-5-5:nt-characters-v1
+42022035019	speaker	disciples	οἱ δὲ εἶπαν Οὐθενός: the apostles answer	agent:claude-opus-5-5:nt-characters-v1
+42022049009	name	-	οἱ περὶ αὐτὸν ... εἶπαν: those around Jesus, not Jesus	agent:claude-opus-5-5:nt-characters-v1
+42023003018	speaker	Jesus	ὁ δὲ ἀποκριθεὶς αὐτῷ ἔφη Σὺ λέγεις: Jesus answers Pilate	agent:claude-opus-5-5:nt-characters-v1
+42024019009	speaker	Cleopas and his companion	οἱ δὲ εἶπαν αὐτῷ: the two on the road answer	agent:claude-opus-5-5:nt-characters-v1
+42024020001	speaker	Cleopas and his companion	the same answer as 24:19, continued	agent:claude-opus-5-5:nt-characters-v1
+42024029005	speaker	Cleopas and his companion	παρεβιάσαντο αὐτὸν λέγοντες: the two urge him	agent:claude-opus-5-5:nt-characters-v1
+42024034003	speaker	the eleven and those with them	τοὺς ἕνδεκα καὶ τοὺς σὺν αὐτοῖς λέγοντας	agent:claude-opus-5-5:nt-characters-v1
+43001038017	speaker	disciples of John the Baptist	οἱ δὲ εἶπαν αὐτῷ Ῥαββεί: John's two disciples	agent:claude-opus-5-5:nt-characters-v1
+43004017006	speaker	woman, Samaritan	ἀπεκρίθη ἡ γυνὴ καὶ εἶπεν	agent:claude-opus-5-5:nt-characters-v1
+43004053016	name	-	ἐν ᾗ εἶπεν αὐτῷ ὁ Ἰησοῦς: Jesus' words, remembered by the father	agent:claude-opus-5-5:nt-characters-v1
+43008011004	speaker	woman caught in adultery	ἡ δὲ εἶπεν Οὐδείς κύριε	agent:claude-opus-5-5:nt-characters-v1
+43008041010	speaker	Jews, the	εἶπαν αὐτῷ Ἡμεῖς ἐκ πορνείας οὐκ ἐγεννήθημεν	agent:claude-opus-5-5:nt-characters-v1
+43009017020	speaker	cured man, blind from birth	ὁ δὲ εἶπεν ὅτι Προφήτης ἐστίν	agent:claude-opus-5-5:nt-characters-v1
+43011003008	name	43011001011,43011001013	ἀπέστειλαν οὖν αἱ ἀδελφαὶ: Μαρίας καὶ Μάρθας of 11:1	agent:claude-opus-5-5:nt-characters-v1
+43012019007	speaker	Pharisees	οἱ οὖν Φαρισαῖοι εἶπαν πρὸς ἑαυτούς	agent:claude-opus-5-5:nt-characters-v1
+43013011010	speaker	Jesus	διὰ τοῦτο εἶπεν ὅτι: Jesus' words, repeated	agent:claude-opus-5-5:nt-characters-v1
+43018006005	speaker	Jesus	ὡς οὖν εἶπεν αὐτοῖς Ἐγώ εἰμι: Jesus' words, repeated	agent:claude-opus-5-5:nt-characters-v1
+43018009008	name	-	ὁ λόγος ὃν εἶπεν: Jesus' word; λόγος is not a speaker	agent:claude-opus-5-5:nt-characters-v1
+43019015004	name	-	ἐκραύγασαν οὖν ἐκεῖνοι: the Jews; Pilate is the one addressed before	agent:claude-opus-5-5:nt-characters-v1
+43019019015	speaker	Pilate	ἔγραψεν δὲ καὶ τίτλον ὁ Πειλᾶτος: the inscription Pilate wrote	agent:claude-opus-5-5:nt-characters-v1
+43019019015	name	43019019006	ὁ Πειλᾶτος wrote the title	agent:claude-opus-5-5:nt-characters-v1
+43021005012	speaker	disciples	ἀπεκρίθησαν αὐτῷ Οὔ: the disciples (plural)	agent:claude-opus-5-5:nt-characters-v1
+43021017017	speaker	Jesus	ὅτι εἶπεν αὐτῷ τὸ τρίτον Φιλεῖς με: Jesus' question, repeated	agent:claude-opus-5-5:nt-characters-v1
+44001004015	name	-	παρήγγειλεν αὐτοῖς: Jesus orders; ἀπόστολος is the one addressed	agent:claude-opus-5-5:nt-characters-v1
+44002038005	name	44002038001	Πέτρος δὲ πρὸς αὐτούς	agent:claude-opus-5-5:nt-characters-v1
+44003021001	name	-	Peter's speech goes on; κύριος is inside it	agent:claude-opus-5-5:nt-characters-v1
+44005009006	name	44005009003	ὁ δὲ Πέτρος πρὸς αὐτήν	agent:claude-opus-5-5:nt-characters-v1
+44009004010	name	-	ἤκουσεν φωνὴν λέγουσαν αὐτῷ: the voice speaks; Saul hears	agent:claude-opus-5-5:nt-characters-v1
+44009005003	speaker	Paul	εἶπεν δέ Τίς εἶ Κύριε: Saul asks	agent:claude-opus-5-5:nt-characters-v1
+44009010017	speaker	Jesus	εἶπεν πρὸς αὐτὸν ἐν ὁράματι ὁ Κύριος Ἀνανία	agent:claude-opus-5-5:nt-characters-v1
+44009010021	speaker	Ananias of Damascus	ὁ δὲ εἶπεν Ἰδοὺ ἐγώ Κύριε	agent:claude-opus-5-5:nt-characters-v1
+44010015008	name	-	φωνὴ πάλιν ἐκ δευτέρου πρὸς αὐτόν: the voice speaks to Peter	agent:claude-opus-5-5:nt-characters-v1
+44014015003	name	44014014005,44014014007	Βαρνάβας καὶ Παῦλος ... κράζοντες καὶ λέγοντες	agent:claude-opus-5-5:nt-characters-v1
+44019003010	speaker	disciples	οἱ δὲ εἶπαν: the disciples at Ephesus answer Paul	agent:claude-opus-5-5:nt-characters-v1
+44021014007	name	-	ἡσυχάσαμεν εἰπόντες: "we"; the names found belong to another clause	agent:claude-opus-5-5:nt-characters-v1
+44021037022	speaker	commander of Roman troops in Jerusalem	ὁ δὲ ἔφη: the commander answers Paul	agent:claude-opus-5-5:nt-characters-v1
+44021038001	name	-	the commander's question goes on; Paul is the one addressed	agent:claude-opus-5-5:nt-characters-v1
+44022014001	speaker	Ananias of Damascus	ὁ δὲ εἶπεν: Ananias, in Paul's account	agent:claude-opus-5-5:nt-characters-v1
+44023011010	name	-	ἐπιστὰς αὐτῷ ὁ Κύριος εἶπεν; νύξ is not a speaker	agent:claude-opus-5-5:nt-characters-v1
+44026025004	name	44026025003	ὁ δὲ Παῦλος Οὐ μαίνομαι φησίν	agent:claude-opus-5-5:nt-characters-v1
+45002024001	name	-	καθὼς γέγραπται: scripture; ἄνθρωπος is not the speaker	agent:claude-opus-5-5:nt-characters-v1
+45003010004	name	-	καθὼς γέγραπται: the subjects found are inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+45004009015	speaker	narrator-ROM	λέγομεν γάρ: Paul says it	agent:claude-opus-5-5:nt-characters-v1
+45004009015	name	-	λέγομεν: "we", no one named	agent:claude-opus-5-5:nt-characters-v1
+45009027007	speaker	Isaiah	Ἠσαΐας δὲ κράζει ὑπὲρ τοῦ Ἰσραήλ	agent:claude-opus-5-5:nt-characters-v1
+45009029005	speaker	Isaiah	καθὼς προείρηκεν Ἠσαΐας	agent:claude-opus-5-5:nt-characters-v1
+45010006008	speaker	righteousness by faith (personified)	ἡ δὲ ἐκ πίστεως δικαιοσύνη οὕτως λέγει	agent:claude-opus-5-5:nt-characters-v1
+45010007001	speaker	righteousness by faith (personified)	the same speech as 10:6, continued	agent:claude-opus-5-5:nt-characters-v1
+45010007001	name	45010006005	ἡ ἐκ πίστεως δικαιοσύνη of 10:6	agent:claude-opus-5-5:nt-characters-v1
+45010008004	speaker	righteousness by faith (personified)	ἀλλὰ τί λέγει: the same speaker as 10:6	agent:claude-opus-5-5:nt-characters-v1
+45010015009	name	-	καθάπερ γέγραπται: the subject found is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+45010018007	name	-	the quotation follows Paul's question without an inquit of its own	agent:claude-opus-5-5:nt-characters-v1
+45010019010	speaker	Moses	πρῶτος Μωϋσῆς λέγει	agent:claude-opus-5-5:nt-characters-v1
+45010020006	speaker	Isaiah	Ἠσαΐας δὲ ἀποτολμᾷ καὶ λέγει	agent:claude-opus-5-5:nt-characters-v1
+45010021006	speaker	Isaiah	πρὸς δὲ τὸν Ἰσραὴλ λέγει: Isaiah, as in 10:20	agent:claude-opus-5-5:nt-characters-v1
+45011004007	speaker	God	τί λέγει αὐτῷ ὁ χρηματισμός: the divine answer	agent:claude-opus-5-5:nt-characters-v1
+45011009004	speaker	David	καὶ Δαυεὶδ λέγει	agent:claude-opus-5-5:nt-characters-v1
+45011026008	name	-	καθὼς γέγραπται: the subject found is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+45013009023	name	-	ἀνακεφαλαιοῦται ἐν τῷ: the word found is not a speaker	agent:claude-opus-5-5:nt-characters-v1
+45015012005	speaker	Isaiah	καὶ πάλιν Ἠσαΐας λέγει	agent:claude-opus-5-5:nt-characters-v1
+45015021005	name	-	καθὼς γέγραπται: the subject found is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+46010026001	name	-	scripture without an inquit; the word found is not a speaker	agent:claude-opus-5-5:nt-characters-v1
+46014025018	name	-	one person, "an unbeliever or outsider" (ἄπιστος ἢ ἰδιώτης), not a group	agent:claude-opus-5-5:nt-characters-v1
+47009009003	name	-	καθὼς γέγραπται: the subject found is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+48003010013	name	-	γέγραπται γὰρ ὅτι: the subject found is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+48003013015	name	-	γέγραπται: the subject found is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+48004006018	name	48004006009	τὸ Πνεῦμα ... κρᾶζον Ἀββᾶ: the Spirit cries	agent:claude-opus-5-5:nt-characters-v1
+48004027003	name	-	γέγραπται γάρ: the subject found is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+48005014011	name	-	πεπληρωται ἐν τῷ: the word found is not a speaker	agent:claude-opus-5-5:nt-characters-v1
+51004017004	name	-	εἴπατε Ἀρχίππῳ: Paul's message, said by the readers	agent:claude-opus-5-5:nt-characters-v1
+58007017004	name	-	μαρτυρεῖται γὰρ ὅτι: the subject found is inside the quotation	agent:claude-opus-5-5:nt-characters-v1
+58008005015	name	-	κεχρημάτισται Μωϋσῆς: God speaks to Moses (φησίν)	agent:claude-opus-5-5:nt-characters-v1
+58011018005	name	-	πρὸς ὃν ἐλαλήθη: spoken to Abraham, the subject found is not the speaker	agent:claude-opus-5-5:nt-characters-v1
+58012021009	speaker	Moses	Μωϋσῆς εἶπεν Ἔκφοβός εἰμι	agent:claude-opus-5-5:nt-characters-v1
+59002008009	name	-	κατὰ τὴν γραφήν: the word found is not a speaker	agent:claude-opus-5-5:nt-characters-v1
+66006001023	name	66006001018	ἤκουσα ἑνὸς ἐκ τῶν τεσσάρων ζῴων λέγοντος	agent:claude-opus-5-5:nt-characters-v1
+66006003013	name	66006003011	ἤκουσα τοῦ δευτέρου ζῴου λέγοντος	agent:claude-opus-5-5:nt-characters-v1
+66006005013	name	66006005011	ἤκουσα τοῦ τρίτου ζῴου λέγοντος	agent:claude-opus-5-5:nt-characters-v1
+66006007014	name	66006007012	ἤκουσα φωνὴν τοῦ τετάρτου ζῴου λέγοντος	agent:claude-opus-5-5:nt-characters-v1
+66007014004	speaker	John (seer of Revelation)	καὶ εἴρηκα αὐτῷ Κύριέ μου: the seer answers the elder	agent:claude-opus-5-5:nt-characters-v1
+41006024012	speaker	Herodias	ἡ δὲ εἶπεν Τὴν κεφαλὴν Ἰωάνου: the mother answers her daughter (the speaker data swaps the two)	agent:claude-opus-5-5:nt-characters-v1

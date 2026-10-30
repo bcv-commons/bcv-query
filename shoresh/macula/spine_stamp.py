@@ -58,6 +58,9 @@ def stamp(path: Path) -> dict:
     with sqlite3.connect(path) as db:
         filled = fill_strong_gaps(db)
         digest = content_sha256(db)
+        old = db.execute("SELECT value FROM spine_meta WHERE key = 'spine_content_sha256'").fetchone()
+        if not filled and old and old[0] == digest:   # no write: a write bumps SQLite's change counter, and so the file's sha256
+            return {"filled": 0, "spine_content_sha256": digest}
         db.executemany("INSERT OR REPLACE INTO spine_meta(key, value) VALUES (?, ?)", [
             ("spine_content_sha256", digest),
             ("spine_content_rule", "sha256 over the spine_words column names and every row in key order (JSON); changes with any row or "

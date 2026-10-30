@@ -33,8 +33,8 @@ structure of a sentence at a glance, and as a base for comparing the clause stru
 | Release | **@TAG@**, built @BUILT@ from bcv-query `@COMMIT@` |
 | Text | Nestle 1904, as MACULA Greek has it (@WORDS@ words, @BOOKS@ books) |
 | Size | @LINES@ lines (clause segments) of @CLAUSES@ clauses; @IN_QUOTE@ lines inside a speech |
-| Characters | @CHARACTERS@ people (`speaker_id`) over @WITH_ID@ speeches; @CHAR_NAMED@ of them with a proper name (`speaker_name`, on @NAME_QUOTES@ speeches) |
-| Changes | v0.5: who the speaker is across speeches, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text: Κλεοπᾶς where the inquit says εἷς, Luke 24:18); `speaker` unchanged. v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
+| Characters | @CHARACTERS@ people and @GROUPS@ groups (`speaker_id`) over @WITH_ID@ speeches (@GROUP_QUOTES@ spoken by a group, @WITH_MEMBERS@ of them with members in `speaker_members`); @CHAR_NAMED@ people with a proper name (`speaker_name`, on @NAME_QUOTES@ speeches) |
+| Changes | v0.6: `speaker_id` agrees with the inquit: a hand review of @REVIEWED@ speeches where the speaker data's label or the inquit found was wrong (Pilate's questions labelled as Jesus', "Ναί" of Matt 17:25 as Jesus', Rom 10:19 "Μωϋσῆς λέγει" as David's); a speech that two or more speak (Ἰάκωβος καὶ Ἰωάνης, οἱ ἀρχιερεῖς καὶ οἱ πρεσβύτεροι) is a group's, with its own id and the ids of its members in the new column `speaker_members`. v0.5: who the speaker is across speeches, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text: Κλεοπᾶς where the inquit says εἷς, Luke 24:18); `speaker` unchanged. v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
 | Companion | [Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout), the same idea for the Hebrew Bible |
 
 Matthew 5:1–4 in `layout/MAT.txt`:
@@ -83,10 +83,11 @@ Matthew 5:1–4 in `layout/MAT.txt`:
 | `quotation` | the innermost speech the line stands in: the word id where it starts in the speaker data; empty in narrative |
 | `speaker` | who speaks it, named from the Greek text: the subject of the verb that introduces the speech (Ἰησοῦς, Πέτρος, Στέφανος, μαθητής, ἡγεμών, φωνή), as a lemma; several subjects separated by commas. Empty where the text names no one (a passive γέγραπται, an unnamed "they", a participle) |
 | `speaker_ref` | the word ids of the words that name the speaker; a pronoun or an article used as one (ὁ δὲ ἔφη) is followed to the word it refers to |
-| `speaker_basis` | where `speaker` comes from: `inquit` (the speech's own inquit), `same speaker in book` / `same speaker in NT` (the same speaker's usual name from their other speeches, see below; `speaker_ref` then points there); empty where there is no name |
+| `speaker_basis` | where `speaker` comes from: `inquit` (the speech's own inquit), `review` (a hand review gives the words, where the inquit found is wrong), `same speaker in book` / `same speaker in NT` (the same speaker's usual name from their other speeches, see below; `speaker_ref` then points there); empty where there is no name |
 | `alt_eng` | the speaker data's English label, only where `speaker` is empty (@ALT_ENG@ speeches: "scripture", "crowd", "passers by"), so that no name the speaker data gives is lost; empty everywhere else |
 | `speaker_id` | who speaks it across speeches: a stable id (`n0009`) for one person or group, the same in every speech they make and in later releases (`speaker` names each speech by its own inquit, so one person can be Πέτρος in one and Σίμων or μαθητής in the next). A person with a proper name has one id across the New Testament; a group or person without one ("crowd", "someone") one per book. Empty for a speaker the speaker data names no one by |
 | `speaker_name` | that person's proper name as the text gives it (MACULA lemma; θεός for God): Ἰησοῦς, Πέτρος, Κλεοπᾶς; empty where the text of that book gives none (the blind men of Matt 20:30) |
+| `speaker_members` | for a group's speech: the `speaker_id`s of its members who speak on their own in the same book (Ἰάκωβος, Ἰωάννης); empty for one person's speech and for members who never speak alone |
 | `speaker_name_ref` | the word id of a word that gives that name: the speech's own inquit where it does, else the nearest speech's that does (in the same book first), else a word a hand table gives (Luke 24:18 ὀνόματι Κλεοπᾶς) |
 | `inline` | clauses written on this line though they are clauses of their own (participles, see the rules) |
 | `split_at_quotation` | the line was broken off its clause where a speech starts or ends (see the rules) |
@@ -132,7 +133,12 @@ across many books, have one id each. The name (`speaker_name`) is the proper nam
 speeches named by a proper name, and at least a third of those named at all, are named by in their own inquit, and that no other
 person is named by more than three times as often; where no inquit names a person the text names elsewhere in the book, the table
 gives the word that does (@HAND@ people: Κλεοπᾶς, Γαβριήλ, Στέφανος, θεός for God, whose inquits are mostly φωνή or γραφή).
-Narrators get no name. Last, a line steps in one
+Narrators get no name. **Review and groups:** where the label or the inquit found is wrong, a row in
+`resources/speaker_quotations/nt_review.tsv` sets the speech's label or the words that name its speaker, with the reason in the
+Greek text (@REVIEWED@ speeches). The inquit decides who speaks: a quotation of scripture is the speaker its inquit names (Ἠσαΐας
+λέγει; τὸ ῥηθὲν ὑπὸ Κυρίου διὰ τοῦ προφήτου is God's), and a speech whose inquit names two or more is a group's: its id stands for
+that set of names (one id across the New Testament where all are proper names, else one per book), it has no `speaker_name`, and
+`speaker_members` lists its members' own ids. Last, a line steps in one
 level at a time: where the tree has a level with no line of its own, deeper lines move out to one in from the line above, keeping
 the order of the levels.
 

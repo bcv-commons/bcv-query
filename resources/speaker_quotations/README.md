@@ -39,6 +39,13 @@ angel's; 1 Sam 3:6 Samuel's answer was God's). Each span now gets its own speake
 - `correction`: a hand correction from `corrections.tsv`, only where the Hebrew/Greek text itself settles who speaks; each
   row gives its reason (1 so far: Gen 16:8, the angel's question to Hagar, which the source's block gave to Hagar). Top speakers: God, Jesus, Moses, David, Jeremiah.
 
+## NT characters and review (clause layout only)
+Two files here are read only by the Greek NT clause layout (`shoresh/macula/greek_speakers.py`), not by this table's
+builder. `nt_characters.tsv` gives each speaker label a stable id (`speaker_id`); labels starting `group: ` are speeches
+that two or more speak, named by their Greek inquit. `nt_review.tsv` corrects, per speech (`word_start`), the label
+(field `speaker`) or the words naming the speaker (field `name`: word ids, people separated by ","; "-" for none) where
+the Greek text settles it; each row gives its reason. The labels are English and stay internal.
+
 ## Anchor & granularity
 Word span: the source's `CLEAR START`/`CLEAR END` (MACULA word ids). Its verses are mapped from MACULA's numbering
 (Hebrew numbering in the OT) to English with bibles' `org-to-eng` map (via `shoresh/vrsmap.py`); a Psalm title counts
