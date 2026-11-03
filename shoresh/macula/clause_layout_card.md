@@ -39,6 +39,7 @@ non-commercial licence.
 | Segmentation | `@SEGMENTATION@`: changes only when a segment boundary moves |
 | Levels | `@LEVELS@`: the rules version and the hash of the settings the levels were computed with |
 | Size | @BOOKS@ books, @CHAPTERS@ chapters, @VERSES@ verses, @SEGMENTS@ clause segments |
+| Clause columns | [bcv-commons/clause-columns](https://huggingface.co/datasets/bcv-commons/clause-columns) (make-tanakh-grammar, CC BY-SA 4.0): force, negation, voice, juncture, speech, actor and undergoer, subject switch, Septuagint tense and more for each clause, keyed by this dataset's clause keys (pinned to v0.37); its card gives each column's source and checks |
 
 Since v0.35 (levels only; the segmentation and every book's `sha256` are unchanged): every speech is a level, from the
 [Hebrew Bible Speaker Layer](https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer), with Moses as Deuteronomy's frame
