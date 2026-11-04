@@ -30,8 +30,8 @@ from the **MACULA Hebrew** syntax trees over the **unfoldingWord Hebrew Bible (U
 tools and agents that help them, to read a chapter clause by clause, with each subordinate clause, speech and law case indented
 under the clause it belongs to.
 
-It is a share-alike alternative to clause layouts derived from the ETCBC BHSA (CC BY-NC 4.0). It contains no data under a
-non-commercial licence.
+It is an open alternative to clause layouts derived from the ETCBC BHSA (CC BY-NC 4.0). It contains no data under a
+non-commercial licence. Which parts are CC BY 4.0 and which are CC BY-SA 4.0 is set out in *Sources and licence*.
 
 | | |
 |---|---|
@@ -269,10 +269,29 @@ BHSA: Eep Talstra Centre for Bible and Computer, VU Amsterdam; DOI 10.17026/dans
 | Clauses, words, clause kinds and rules | MACULA Hebrew (Clear Bible / Biblica), `WLC/lowfat`, commit `@MACULA_COMMIT@` | CC BY 4.0 |
 | English verse numbers | bcv-commons/bibles `org-to-eng`, from STEPBible TVTMS (rev. `@TVTMS_REV@`) | CC BY 4.0 |
 | Speech levels | Hebrew Bible Speaker Layer @SPEAKER_TAG@, bcv-commons (`hebrew-speaker-layer`) | CC BY 4.0 |
-| The text-level hierarchy, this compilation | bcv-commons | **CC BY-SA 4.0** |
+| The segmentation: MACULA's clauses cut at word and verse boundaries | bcv-commons, from MACULA Hebrew | **CC BY 4.0** |
+| The text-level hierarchy | bcv-commons | **CC BY-SA 4.0** |
 | The rules and code (`clause_layout.toml`, bcv-query) | bcv-commons | MIT |
 
-**Attribution** when you use this dataset:
+The segmentation (`clause_key`, `seg`, `first`, `last`, `words`) is MACULA's clauses cut at word and verse boundaries and is
+licensed CC BY 4.0, like MACULA; CC BY-SA 4.0 applies to the UHB text and the text-level hierarchy.
+
+Field by field, in `clauses/` and `data/`:
+- CC BY 4.0: the segmentation above; MACULA's own clause fields `parent_key`, `depth`, `kind`, `rule`, `language`; the row ids
+  `clause`, `parent`, `sentence`; the references `book`, `chapter`, `verse`, `verse_ref_en`.
+- CC BY-SA 4.0: the UHB text (`text`, `ketiv_qere`) and the text-level hierarchy (`discourse_parent`, `relation`,
+  `discourse_attach`, `discourse_rule`, `text_depth`, `text_depth_law`, `tree_depth`).
+- `layout/` holds the UHB text and the hierarchy's indentation: CC BY-SA 4.0.
+
+The `license: cc-by-sa-4.0` in this card's header names the licence that covers the dataset as a whole; it does not
+extend share-alike to the CC BY 4.0 fields. A work that uses only CC BY 4.0 fields is not bound by share-alike.
+
+**Attribution** when you use the CC BY 4.0 fields only:
+
+> Hebrew Bible Clause Layout (@TAG@), bcv-commons, segmentation CC BY 4.0. Syntax: MACULA Hebrew, Clear Bible / Biblica
+> (CC BY 4.0). Versification: STEPBible TVTMS (CC BY 4.0).
+
+**Attribution** when you use the dataset as a whole, or any CC BY-SA 4.0 field:
 
 > Hebrew Bible Clause Layout (@TAG@), bcv-commons, CC BY-SA 4.0. Text: unfoldingWord Hebrew Bible (CC BY-SA 4.0). Syntax: MACULA
 > Hebrew, Clear Bible / Biblica (CC BY 4.0). Versification: STEPBible TVTMS (CC BY 4.0). Speeches: Hebrew Bible Speaker Layer,

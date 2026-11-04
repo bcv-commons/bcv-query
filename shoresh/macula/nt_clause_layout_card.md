@@ -191,6 +191,9 @@ disagreements found one fault of the layout, fixed in v0.2: a conjunction or que
 | The layout | bcv-commons | **CC BY 4.0** |
 | The code (`macula/build_nt_clause_layout.py`, bcv-query) | bcv-commons | MIT |
 
+The segmentation (`clause`, `seg`, `first`, `last`, `words`) is MACULA's clauses cut at word and verse boundaries and is
+licensed CC BY 4.0, like MACULA. The rest of the dataset is CC BY 4.0 as well: no part of it is share-alike.
+
 **Attribution** when you use this dataset:
 
 > Greek New Testament Clause Layout (@TAG@), bcv-commons, CC BY 4.0. Text and syntax: MACULA Greek, Clear Bible / Biblica (CC BY 4.0).
