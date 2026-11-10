@@ -31,14 +31,14 @@ spine.
 ## Files
 
 - `data/<BOOK>/<CCC>.json`: one chapter (USFM book code, chapter zero-padded to three digits), in Hebrew verse numbering.
-- `build.json`: the format, build date, layout revision, spine release and its sha256, and the counts.
+- `build.json`: the schema (see *Versions*), build date, layout revision, spine release and its sha256, and the counts.
 - `SHA256SUMS`: the sha256 of every file.
 
 Fetch a chapter at a pinned revision:
 `https://huggingface.co/datasets/bcv-commons/tanakh-hebrew-clauses/resolve/<revision>/data/RUT/001.json`
 
 ```json
-{"format": "tanakh-hebrew-clauses/1", "book": "RUT", "chapter": 1,
+{"book": "RUT", "chapter": 1,
  "verses": {"1": [
    {"key": "080010010011", "kind": "VC", "rule": "V-PP", "words": [
      {"id": "08001001001", "surface": "וַיְהִ֗י", "content": true},
@@ -75,6 +75,9 @@ No CC BY-SA part of the clause layout is included: not its `text` (UHB) nor the 
 ## Versions
 
 A new layout or spine release gets a new revision of this dataset; a revision is never changed. Pin the revision.
+
+`schema` in `build.json` is the version of the file shape. It is 1 now and goes up only when a field is renamed, dropped or
+changes meaning; a new field or new data leaves it unchanged. Such a change is listed here.
 
 ## Feedback
 

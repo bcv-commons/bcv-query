@@ -9,11 +9,12 @@ kind, rule and words are read (the CC BY 4.0 part; never `text` or the hierarchy
 No English: MACULA's glosses are not carried (a reader joins them from the spine release by word key).
 
 data/<BOOK>/<CCC>.json, per verse one entry per segment in `seg` order (an interrupted clause appears again for its later piece):
-  {"format": "tanakh-hebrew-clauses/1", "book": "RUT", "chapter": 1,
+  {"book": "RUT", "chapter": 1,
    "verses": {"1": [{"key": "080010010011", "kind": "VC", "rule": "V-PP",
                      "words": [{"id": "08001001001", "surface": "וַיְהִ֗י", "content": true}, ...]}, ...]}}
   word id = the first 11 digits of the morpheme keys; surface = the morphemes' surfaces joined; content = any morpheme is a content word.
-Also README.md (tanakh_hebrew_clauses_card.md filled in), build.json and SHA256SUMS.
+Also README.md (tanakh_hebrew_clauses_card.md filled in), build.json (with `schema`, the version of the file shape: SCHEMA goes up only
+when a field is renamed, dropped or changes meaning) and SHA256SUMS.
 """
 from __future__ import annotations
 
@@ -29,7 +30,7 @@ import pyarrow.parquet as pq
 
 HERE = Path(__file__).resolve().parent
 CARD = HERE / "tanakh_hebrew_clauses_card.md"
-FORMAT = "tanakh-hebrew-clauses/1"
+SCHEMA = 1
 LAYOUT_REPO, LAYOUT_TAG, LAYOUT_REV = "bcv-commons/hebrew-clause-layout", "v0.37", "f7e58a2211973852d1fd7704dfb86ada34c82672"
 SPINE_TAG = "lexeme-spine-macula-2026-10-12"
 SPINE_SHA256 = "f1003a2b19036788bfc063427cb5da1e883181d39c5c87e7ccb79eb5f7bf956d"
@@ -77,7 +78,7 @@ def main() -> int:
                 {"key": r["clause_key"], "kind": r["kind"], "rule": r["rule"], "words": ws})
         (a.out / "data" / book).mkdir(parents=True)
         for ch, verses in by_ch.items():
-            doc = {"format": FORMAT, "book": book, "chapter": ch, "verses": verses}
+            doc = {"book": book, "chapter": ch, "verses": verses}
             (a.out / "data" / book / f"{ch:03d}.json").write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         chapters[book] = len(by_ch)
     assert not missing, f"{len(missing)} layout words not in the spine, e.g. {missing[:5]}"
@@ -85,7 +86,7 @@ def main() -> int:
     code = subprocess.check_output(["git", "log", "-1", "--format=%h", "--", *ours], cwd=HERE.parent, text=True).strip()
     dirty = subprocess.check_output(["git", "status", "--porcelain", "--", *ours], cwd=HERE.parent, text=True).strip()
     assert a.allow_dirty or (code and not dirty), "commit the builder and its card first (or --allow-dirty)"
-    build = {"format": FORMAT, "built": datetime.date.today().isoformat(), "code": code,
+    build = {"schema": SCHEMA, "built": datetime.date.today().isoformat(), "code": code,
              "layout": {"repo": LAYOUT_REPO, "tag": LAYOUT_TAG, "revision": LAYOUT_REV, "columns": COLUMNS[1:]},
              "spine": {"release": SPINE_TAG, "repo": "bcv-commons/spine-releases", "sha256": SPINE_SHA256, "columns": ["key", "surface", "is_content"]},
              "books": len(chapters), "chapters": sum(chapters.values()), "segments": segments, "words": words, "chapters_per_book": chapters}
