@@ -187,9 +187,10 @@ Ruth 1:1, fifth segment:
 | `speaker_basis` | where `speaker` comes from: `inquit`, `review`, `same speaker in book`, `same speaker in Bible` |
 | `speaker_id`, `speaker_name`, `speaker_name_ref`, `speaker_members` | one person or group across quotations (`c0073`); that person's proper name in the text and its words; for a group, its members' ids |
 | `frame_speaker` | for text outside quotations that is one speaker's from its start (a psalm's psalmist, a prophet): that speaker (דָּוִד) |
-| `force` | what the clause does by its grammar, inside speech: `fc.imp` imperative, `fc.jus` jussive, `fc.coh` cohortative, `fc.q` question (an interrogative word) |
+| `force` | what the clause does by its grammar, in every segment, in speech or not (a psalm's plea counts as a speech's does; `quotation` and `frame_speaker` tell where the segment stands): `fc.imp` imperative, `fc.jus` jussive, `fc.coh` cohortative, `fc.proh` prohibition (אַל with a jussive, cohortative or yiqtol, in place of `fc.jus` / `fc.coh`; proposed by make-tanakh-research), `fc.q` question (an interrogative word). לֹא with a second-person yiqtol is not given: whether it commands or foretells is a reading |
 | `you` | the number of the segment's second-person forms inside speech: `ad.sg`, `ad.pl`, `ad.both`; `null` if none |
 | `para_end` | `sc.pe` (petuchah) or `sc.sa` (setumah) where a Leningrad Codex paragraph ends with this segment |
+| `shape` | the roles of the clause's constituents in order, in one vocabulary for both layouts: `S` subject, `O` object, `V` verb (the Greek copula too), `P` predicate, `A` adjunct (PP, ADV, IO; a run is one A), `N` a lone noun phrase, `I` interjection, `+` a coordination of clauses, `~` another clause complex; joined by `-` (`V-S-A`). Read from MACULA's rule string, else from the tree. The two layouts' `rule` strings name the same shapes differently (only 36% of Hebrew clauses have a rule that occurs in the Greek); 95% of Hebrew clauses have a `shape` found in the Greek. Vocabulary by make-tanakh-research |
 
 These are the same columns the Greek NT layout carries, so both layouts have one shape for speech. The codes are those of
 [bcv-commons/passage-facts](https://huggingface.co/datasets/bcv-commons/passage-facts) (`codes.tsv`), which holds these facts and more
@@ -292,7 +293,7 @@ BHSA: Eep Talstra Centre for Bible and Computer, VU Amsterdam; DOI 10.17026/dans
 | Clauses, words, clause kinds and rules | MACULA Hebrew (Clear Bible / Biblica), `WLC/lowfat`, commit `@MACULA_COMMIT@` | CC BY 4.0 |
 | English verse numbers | bcv-commons/bibles `org-to-eng`, from STEPBible TVTMS (rev. `@TVTMS_REV@`) | CC BY 4.0 |
 | Speech levels; `quotation` … `frame_speaker` | Hebrew Bible Speaker Layer @SPEAKER_TAG@, bcv-commons (`hebrew-speaker-layer`), from MACULA Quotation and Speaker Data (Clear Bible, CC BY 4.0) | CC BY 4.0 |
-| `force`, `you` | bcv-commons passage facts, read from MACULA Hebrew's grammar | CC BY 4.0 |
+| `force`, `you`, `shape` | bcv-commons, read from MACULA Hebrew's grammar and trees | CC BY 4.0 |
 | `para_end` | Open Scriptures Hebrew Bible, Leningrad Codex paragraph marks | CC BY 4.0 |
 | The segmentation: MACULA's clauses cut at word and verse boundaries | bcv-commons, from MACULA Hebrew | **CC BY 4.0** |
 | The text-level hierarchy | bcv-commons | **CC BY-SA 4.0** |
@@ -304,7 +305,7 @@ licensed CC BY 4.0, like MACULA; CC BY-SA 4.0 applies to the UHB text and the te
 Field by field, in `clauses/` and `data/`:
 - CC BY 4.0: the segmentation above; MACULA's own clause fields `parent_key`, `depth`, `kind`, `rule`, `language`; the row ids
   `clause`, `parent`, `sentence`; the references `book`, `chapter`, `verse`, `verse_ref_en`; the columns added in v0.37.1
-  (`quotation` to `para_end`).
+  (`quotation` to `shape`).
 - CC BY-SA 4.0: the UHB text (`text`, `ketiv_qere`) and the text-level hierarchy (`discourse_parent`, `relation`,
   `discourse_attach`, `discourse_rule`, `text_depth`, `text_depth_law`, `tree_depth`).
 - `layout/` holds the UHB text and the hierarchy's indentation: CC BY-SA 4.0.

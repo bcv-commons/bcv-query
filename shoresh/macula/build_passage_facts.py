@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import bisect
 import collections
+import functools
 import csv
 import datetime
 import glob
@@ -73,7 +74,18 @@ NAMED_BY = {"inquit": "sb.inquit", "review": "sb.review", "same speaker in book"
 TN_SLUGS = {r["code"][3:] for r in csv.DictReader((l for l in open(Path(__file__).resolve().parents[2] / "resources" / "passage_facts" /
             "codes.tsv", encoding="utf-8") if not l.startswith("#")), delimiter="\t") if r["code"].startswith("tn.")}
 POETRY_MARKERS = {"q", "q1", "q2", "q3", "q4", "qm1", "qm2", "qc", "qr"}
-GRC_PARTICLES = {"ιδου", "ιδε", "αγε"}    # ἰδού, ἴδε, ἄγε: imperative in form, particles in use; no command, no listener
+GRC_PARTICLES = {"ιδου", "ιδε", "αγε"}
+GRC_MH = {"μη", "μηδε", "μηδεις", "μηκετι", "μητε", "μηδεποτε"}
+GRC_SUBORDINATORS = {"ινα", "εαν", "οταν", "οπως", "ει", "ως", "καθως", "εως", "μηποτε", "μηπως", "πριν", "ωστε", "επει", "επαν", "οτε",
+                     "διοτι", "ος", "οστις", "οπου", "οθεν", "αν", "εανπερ", "ειπερ", "ωσπερ", "καθαπερ", "οσος",
+                     "μεχρι", "μεχρις", "αχρι", "αχρις"}
+GRC_MH = {w.replace("ς", "σ") for w in GRC_MH}                # nestle1904_layout._norm casefolds a final ς to σ
+GRC_SUBORDINATORS = {w.replace("ς", "σ") for w in GRC_SUBORDINATORS} | {"τίς?"}    # τίς with a subjunctive: a deliberative or indirect question
+
+
+@functools.lru_cache(maxsize=1)
+def _grc_nodes() -> dict:
+    return dict(sqlite3.connect(TREES).execute("SELECT id, parent FROM nodes WHERE corpus='grc'"))    # ἰδού, ἴδε, ἄγε: imperative in form, particles in use; no command, no listener
 HEB_FORCE = {"imperative": "fc.imp", "jussive": "fc.jus", "cohortative": "fc.coh", "interrogative": "fc.q"}
 # Open groups: the source's wording is the English; new values get the next number with --update-codes, never renumbered.
 OPEN = {"delivery": "dl", "listener": "tl", "attitude": "ta", "age_relation": "tg", "tb_force": "tf", "rhetorical": "tr",
@@ -472,9 +484,95 @@ class Builder:
                 self.add("delivery", self.codes.of("delivery", v), first, last, "b.source", ["clear", "glyssen"],
                          of=q["id"] if q else None)
 
+    def force_codes(self, inner: list | None = None) -> dict[int, list[str]]:
+        """Word index -> force codes, by the grammar, everywhere (inside and outside speech).
+        Hebrew: imperative, jussive, cohortative, interrogative (wtype); אַל before a jussive, cohortative or yiqtol of the same segment
+        (no verb between) is a prohibition (fc.proh, in place of fc.jus / fc.coh).
+        Greek: imperative; μή (μηδέ, μηδείς, μηκέτι, μήτε) before an imperative of the same segment (no verb between; not εἰ δὲ μή) is a
+        prohibition, and so is μή before a second-person aorist subjunctive in a main clause (not οὐ μή); a first-person plural
+        subjunctive in a main clause is an exhortation (fc.hort); a vocative; every word from the stop before to a question mark is
+        a question (fc.q), counting only words in the same quotation as the mark (or, like it, in none), so an inquit with no stop
+        before the speech is no question (correction by make-tanakh-research). Not after μή ποτε / μή πως ("lest") or a subordinator earlier in the segment. A main clause: no subordinator (ἵνα, ἐάν, ὅταν, ὡς, ὅς ἄν ...) in its own tree node or any node above it.
+        ἰδού, ἴδε, ἄγε are left out. Not taken: οὐ + future as a command, לֹא + yiqtol (whether they command is a reading)."""
+        bk = self.bk
+        out: dict[int, list[str]] = collections.defaultdict(list)
+        finite = {"imperative", "indicative", "subjunctive", "optative", "jussive", "cohortative", "yiqtol", "qatal", "wayyiqtol", "weqatal"}
+        verbs = {i for i, k in enumerate(bk.keys) if bk.cls.get(k) == "verb" and (bk.w[k][4] in finite or bk.wtype.get(k) in finite)}
+
+        def neg_before(i, neg):                     # a negation earlier in the segment with no verb between
+            s = self.seg_of.get(bk.keys[i])
+            j = i - 1
+            while j >= 0 and self.seg_of.get(bk.keys[j]) == s and j not in verbs:
+                if neg(j):
+                    return j
+                j -= 1
+            return None
+        if bk.hebrew:
+            for i, k in enumerate(bk.keys):
+                wt = bk.wtype.get(k)
+                if wt in ("jussive", "cohortative", "yiqtol") and neg_before(i, lambda j: bk.w[bk.keys[j]][1] == "אַל") is not None:
+                    out[i].append("fc.proh")
+                elif wt in HEB_FORCE:
+                    out[i].append(HEB_FORCE[wt])
+            return out
+        tr = sqlite3.connect(TREES)
+        info = {k: (cl, tense) for k, cl, tense in tr.execute(
+            "SELECT key, cl, tense FROM words WHERE corpus='grc' AND key LIKE ? AND inserted=0", (bk.num + "%",))}
+        parent = _grc_nodes()
+        norm = lambda k: "τίς?" if bk.w[k][1] == "τίς" else nestle1904_layout._norm(bk.w[k][1] or "")   # τίς, not the indefinite τὶς
+        has_sub: dict = {}                         # node -> position of its first subordinator word
+        for i, k in enumerate(bk.keys):
+            if k in info and norm(k) in GRC_SUBORDINATORS:
+                has_sub.setdefault(info[k][0], i)
+
+        def main(k):                                # in its own node only a subordinator before the verb counts
+            n, steps = info.get(k, (None, None))[0], 0
+            while n is not None and steps < 80:
+                if n in has_sub and (steps or has_sub[n] < bk.pos[k]):
+                    return False
+                n, steps = parent.get(n), steps + 1
+            return True
+        question, start = set(), 0
+        for i, k in enumerate(bk.keys):
+            after = self.surface(k) + (bk.after.get(k) or "")          # the mark is sometimes part of the surface (ἀνθρώπων;)
+            if ";" in after or "\u037e" in after:          # the question: back to the stop before, in the mark's own quotation only
+                question.update(j for j in range(start, i + 1) if inner is None or inner[j] is inner[i] or
+                                (inner[j] is not None and inner[i] is not None and inner[j]["level"] == inner[i]["level"]))
+                # (a quote the speaker data splits in two, JHN 4:27 Τί ζητεῖς / τί λαλεῖς ...; one mark: one question)
+            if any(c in after for c in ".;·\u0387\u037e"):
+                start = i + 1
+        lest = lambda j: j + 1 < len(bk.keys) and norm(bk.keys[j + 1]) in ("ποτε", "πωσ", "που")      # μή ποτε, μή πως: "lest"
+        def sub_before(i):                          # a subordinator earlier in the segment (ὅπως μή, ἕως οὗ, παρ' ᾧ)
+            s, j = self.seg_of.get(bk.keys[i]), i - 1
+            while j >= 0 and self.seg_of.get(bk.keys[j]) == s:
+                if norm(bk.keys[j]) in GRC_SUBORDINATORS or (norm(bk.keys[j]) == "μη" and lest(j)):
+                    return True
+                j -= 1
+            return False
+        is_mh = lambda j: not lest(j) and norm(bk.keys[j]) in GRC_MH and not (j >= 1 and norm(bk.keys[j - 1]) in ("ει", "δε") and
+                                                              (norm(bk.keys[j - 1]) == "ει" or (j >= 2 and norm(bk.keys[j - 2]) == "ει")))
+        for i, k in enumerate(bk.keys):
+            if nestle1904_layout._norm(self.surface(k)) in GRC_PARTICLES:
+                continue
+            _, lemma, person, number, mood, case = bk.w[k]
+            if mood == "imperative":
+                out[i].append("fc.proh" if neg_before(i, is_mh) is not None else "fc.imp")
+            elif mood == "subjunctive" and i not in question and main(k) and not sub_before(i):
+                m = neg_before(i, is_mh)
+                if person in ("second", "2") and info.get(k, (0, ""))[1] == "aorist" and m is not None and \
+                        not (m >= 1 and norm(bk.keys[m - 1]) == "ου"):
+                    out[i].append("fc.proh")
+                elif person in ("first", "1") and number == "plural" and not (m is not None and m >= 1 and norm(bk.keys[m - 1]) == "ου"):
+                    out[i].append("fc.hort")
+            if case == "vocative":
+                out[i].append("fc.voc")
+            if i in question:
+                out[i].append("fc.q")
+        return out
+
     def force_and_addressee(self, quotes: list[dict]):
-        """Inside the quotes, by the grammar: force per clause segment (imperative, jussive, cohortative, question, vocative), and the
-        number of the second-person forms per quote (its own words, not those of quotes inside it)."""
+        """Force per clause segment, by the grammar, inside and outside speech (force_codes); and, inside the quotes, the number of the
+        second-person forms per quote (its own words, not those of quotes inside it)."""
         bk = self.bk
         inner = [None] * len(bk.keys)
         for q in sorted(quotes, key=lambda q: q["level"]):
@@ -484,6 +582,10 @@ class Builder:
         found: dict[tuple, list[str]] = collections.defaultdict(list)
         p2: dict[int, set] = collections.defaultdict(set)
         p2_at: dict[int, list] = collections.defaultdict(list)
+        for i, codes in self.force_codes(inner).items():
+            q = inner[i]
+            for c in codes:
+                found[(id(q) if q else None, self.seg_of.get(bk.keys[i], -1), c)].append(bk.keys[i])
         for i, k in enumerate(bk.keys):
             q = inner[i]
             if q is None:
@@ -491,34 +593,22 @@ class Builder:
             _, lemma, person, number, mood, case = bk.w[k]
             if not bk.hebrew and nestle1904_layout._norm(self.surface(k)) in GRC_PARTICLES:
                 continue
-            codes = []
-            if bk.hebrew:
-                if bk.wtype.get(k) in HEB_FORCE:
-                    codes.append(HEB_FORCE[bk.wtype[k]])
-            else:
-                if mood == "imperative":
-                    codes.append("fc.imp")
-                if case == "vocative":
-                    codes.append("fc.voc")
-                if ";" in (bk.after.get(k) or ""):
-                    codes.append("fc.q")
-            for c in codes:
-                found[(id(q), self.seg_of.get(k, -1), c)].append(k)
             if person in ("second", "2") and number in ("singular", "plural"):
                 p2[id(q)].add(number)
                 p2_at[id(q)].append(k)
         qmap = {id(q): q for q in quotes}
         for (qid, si, code), at in found.items():
-            q = qmap[qid]
-            lo, hi = bk.pos[q["first"]], bk.pos[q["last"]]
+            q = qmap.get(qid)
+            lo, hi = (bk.pos[q["first"]], bk.pos[q["last"]]) if q else (0, len(bk.keys) - 1)
             if si >= 0:
                 s = self.segs[si]["words"]
                 a, b = max(lo, bk.pos[s[0]]), min(hi, bk.pos[s[-1]])
             else:
                 a = b = bk.pos[at[0]]
-            if code == "fc.voc":
+            if code in ("fc.voc", "fc.q"):
                 a, b = bk.pos[at[0]], bk.pos[at[-1]]
-            self.add("force", code, bk.keys[a], bk.keys[b], "b.text", ["macula"] if si < 0 else ["macula", "layout"], of=q["fact"]["id"], at=at)
+            extra = {"of": q["fact"]["id"]} if q else {}
+            self.add("force", code, bk.keys[a], bk.keys[b], "b.text", ["macula"] if si < 0 else ["macula", "layout"], at=at, **extra)
         for qid, nums in p2.items():
             q = qmap[qid]
             code = "ad.both" if len(nums) == 2 else "ad.sg" if "singular" in nums else "ad.pl"

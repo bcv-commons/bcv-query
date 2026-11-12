@@ -61,8 +61,10 @@ sb.nt	how the speaker was named	the same speaker's name elsewhere in the New Tes
 fc.imp	force	command: an imperative	macula	
 fc.jus	force	wish or command in the third person: a jussive	macula	
 fc.coh	force	resolve or request in the first person: a cohortative	macula	
-fc.q	force	question: a question word, or the Greek question mark	macula	
+fc.q	force	question: a Hebrew question word; in Greek, every clause of a sentence that ends with a question mark	macula	
 fc.voc	force	address: a vocative	macula	
+fc.proh	force	prohibition: Hebrew אַל with a jussive, cohortative or yiqtol; Greek μή with an imperative, or with a second-person aorist subjunctive in a main clause	macula	
+fc.hort	force	exhortation (let us): a Greek first-person plural subjunctive in a main clause	macula	
 ad.sg	addressee	second-person forms are singular only	macula	
 ad.pl	addressee	second-person forms are plural only	macula	
 ad.both	addressee	second-person forms are singular and plural	macula	

@@ -31,12 +31,16 @@ ROOT = HERE.parents[1]
 CARD = HERE / "nt_clause_layout_card.md"
 BUILDER = HERE / "build_nt_clause_layout.py"
 SPEAKERS = ROOT / "resources" / "speaker_quotations" / "speaker_quotations.tsv"
+COLUMN_CODE = [HERE / n for n in ("segment_columns.py", "greek_relation.py", "build_passage_facts.py", "nestle1904_layout.py",
+                                  "release_nt_clause_layout.py", "nt_clause_layout_card.md")] + [ROOT / "resources" / "passage_facts"]
 
 SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("seg", "int16"), ("text", "string"), ("depth", "int8"),
           ("text_depth", "int8"), ("clause", "string"), ("parent", "string"), ("kind", "string"), ("rule", "string"),
           ("role", "string"), ("via", "list<string>"), ("junction", "string"), ("sentence", "string"), ("quotation", "string"),
           ("speaker", "string"), ("speaker_ref", "list<string>"), ("speaker_basis", "string"), ("alt_eng", "string"), ("speaker_id", "string"), ("speaker_name", "string"), ("speaker_name_ref", "string"), ("speaker_members", "list<string>"), ("inline", "list<string>"), ("split_at_quotation", "bool_"), ("first", "string"), ("last", "string"),
-          ("words", "list<string>"), ("force", "list<string>"), ("you", "string"), ("printed", "string"), ("printed_line", "bool_")]
+          ("words", "list<string>"), ("force", "list<string>"), ("you", "string"), ("printed", "string"), ("printed_line", "bool_"),
+          ("connective", "list<string>"), ("connective_of", "string"), ("shape", "string"), ("relation", "string"),
+          ("relation_basis", "string")]
 
 
 def _type(pa, t: str):
@@ -53,11 +57,12 @@ def main() -> None:
     src, out = Path(a.src), Path(a.out)
     if not a.allow_dirty:
         dirty = subprocess.run(["git", "status", "--porcelain", "--", str(BUILDER), str(SPEAKERS), str(HERE / "greek_speakers.py"),
-                                str(SPEAKERS.parent / "nt_characters.tsv"), str(SPEAKERS.parent / "nt_review.tsv")], cwd=ROOT, capture_output=True,
+                                str(SPEAKERS.parent / "nt_characters.tsv"), str(SPEAKERS.parent / "nt_review.tsv"), *map(str, COLUMN_CODE)],
+                               cwd=ROOT, capture_output=True,
                                text=True).stdout.strip()
         if dirty:
             raise SystemExit("uncommitted changes in the builder or the speaker data; commit first (or --allow-dirty):\n" + dirty)
-    commit = subprocess.run(["git", "log", "-1", "--format=%h", "--", str(BUILDER)], cwd=ROOT, capture_output=True,
+    commit = subprocess.run(["git", "log", "-1", "--format=%h", "--", str(BUILDER), *map(str, COLUMN_CODE)], cwd=ROOT, capture_output=True,
                             text=True).stdout.strip()
     build = json.loads((src / "build.json").read_text(encoding="utf-8"))
     if out.exists():
