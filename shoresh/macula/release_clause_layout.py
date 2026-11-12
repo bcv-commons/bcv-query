@@ -32,7 +32,7 @@ import tarfile
 import time
 from pathlib import Path
 
-from macula import discourse_rules
+from macula import discourse_rules, segment_columns
 
 HERE = Path(__file__).resolve().parent
 CARD = HERE / "clause_layout_card.md"
@@ -200,6 +200,7 @@ def main() -> None:
     ap.add_argument("--reach", help="a rule-reach table, for the release notes")
     ap.add_argument("--steps", required=True, help="a Markdown table of bsb-add-books' step agreement for this build, for the card")
     ap.add_argument("--allow-dirty", action="store_true", help="package even if macula/ has uncommitted changes")
+    ap.add_argument("--tag", help="the release tag (default v<rules version>; a release that only adds columns gets v<rules>.<n>)")
     args = ap.parse_args()
     src, out = Path(args.src), Path(args.out)
     if out.exists():
@@ -209,8 +210,13 @@ def main() -> None:
         raise SystemExit("the build was not made with the settings in use (rules version or settings hash differ); rebuild first")
     if not _git_clean() and not args.allow_dirty:
         raise SystemExit("macula/ has uncommitted changes; commit first (or --allow-dirty for a trial)")
-    tag = f"v{build['discourse_rules']}"
+    tag = args.tag or f"v{build['discourse_rules']}"
     books = _rows(src)
+    spans = [r for r in segment_columns.pf._tsv(segment_columns.pf.SPEAKER_SPANS) if r["word_start"]]
+    for book, chapters in books.items():                  # the added columns (speaker layer, CC BY passage facts)
+        rows = [r for _, rs in chapters for r in rs]
+        for r, c in zip(rows, segment_columns.columns(book, rows, spans)):
+            r.update(c)
     schema_fields = set(json.loads(SCHEMA.read_text(encoding="utf-8"))["properties"])
     for chapters in books.values():
         for _, rows in chapters:
@@ -227,7 +233,15 @@ def main() -> None:
     (out / "README.md").write_text(_card(stamp, build, tag, Path(args.steps).read_text(encoding="utf-8")), encoding="utf-8")
     mtime = int(time.mktime(time.strptime(build["built"], "%Y-%m-%d")))
     extra = [out / n for n in ("README.md", "_clauses_source.json", "build.json", "clause_layout.toml")] + [out / "schema" / SCHEMA.name]
-    archive = _archive(src, out, tag, extra, mtime)
+    staged = out / "_src"                                 # the archive's clauses/ carry the added columns too
+    for book, chapters in books.items():
+        (staged / "clauses" / book).mkdir(parents=True)
+        for ch, rows in chapters:
+            (staged / "clauses" / book / f"{book}_{ch:03d}.jsonl").write_text(
+                "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    shutil.copytree(src / "layout", staged / "layout")
+    archive = _archive(staged, out, tag, extra, mtime)
+    shutil.rmtree(staged)
     data = _parquet(books, out)
     sums = [(p.name if p.parent == out else str(p.relative_to(out)), _sha256(p)) for p in [archive] + data]
     (out / "SHA256SUMS").write_text("".join(f"{h}  {n}\n" for n, h in sums), encoding="utf-8")

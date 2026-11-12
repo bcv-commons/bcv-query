@@ -34,7 +34,7 @@ structure of a sentence at a glance, and as a base for comparing the clause stru
 | Text | Nestle 1904, as MACULA Greek has it (@WORDS@ words, @BOOKS@ books) |
 | Size | @LINES@ lines (clause segments) of @CLAUSES@ clauses; @IN_QUOTE@ lines inside a speech |
 | Characters | @CHARACTERS@ people and @GROUPS@ groups (`speaker_id`) over @WITH_ID@ speeches (@GROUP_QUOTES@ spoken by a group, @WITH_MEMBERS@ of them with members in `speaker_members`); @CHAR_NAMED@ people with a proper name (`speaker_name`, on @NAME_QUOTES@ speeches) |
-| Changes | v0.6: `speaker_id` agrees with the inquit: a review of @REVIEWED@ speeches (by Claude, an AI model, from the Greek text; each row gives its reason) where the speaker data's label or the inquit found was wrong (Pilate's questions labelled as Jesus', "Ναί" of Matt 17:25 as Jesus', Rom 10:19 "Μωϋσῆς λέγει" as David's); a speech that two or more speak (Ἰάκωβος καὶ Ἰωάνης, οἱ ἀρχιερεῖς καὶ οἱ πρεσβύτεροι) is a group's, with its own id and the ids of its members in the new column `speaker_members`. v0.5: who the speaker is across speeches, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text: Κλεοπᾶς where the inquit says εἷς, Luke 24:18); `speaker` unchanged. v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
+| Changes | v0.7: four columns, nothing else changed: `force` and `you` (read from MACULA Greek's grammar inside speech), `printed` and `printed_line` (where Nestle 1904 prints poetic lines, quoted lines or a hymn block). v0.6: `speaker_id` agrees with the inquit: a review of @REVIEWED@ speeches (by Claude, an AI model, from the Greek text; each row gives its reason) where the speaker data's label or the inquit found was wrong (Pilate's questions labelled as Jesus', "Ναί" of Matt 17:25 as Jesus', Rom 10:19 "Μωϋσῆς λέγει" as David's); a speech that two or more speak (Ἰάκωβος καὶ Ἰωάνης, οἱ ἀρχιερεῖς καὶ οἱ πρεσβύτεροι) is a group's, with its own id and the ids of its members in the new column `speaker_members`. v0.5: who the speaker is across speeches, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text: Κλεοπᾶς where the inquit says εἷς, Luke 24:18); `speaker` unchanged. v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
 | Companion | [Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout), the same idea for the Hebrew Bible |
 | Clause columns | [bcv-commons/clause-columns](https://huggingface.co/datasets/bcv-commons/clause-columns) (make-tanakh-grammar, CC BY-SA 4.0): force, negation, voice, juncture, speech, actor and undergoer, subject switch and more for each clause, keyed by this dataset's clause keys (pinned to v0.5); its card gives each column's source and checks |
 
@@ -93,6 +93,15 @@ Matthew 5:1–4 in `layout/MAT.txt`:
 | `inline` | clauses written on this line though they are clauses of their own (participles, see the rules) |
 | `split_at_quotation` | the line was broken off its clause where a speech starts or ends (see the rules) |
 | `first`, `last`, `words` | MACULA word ids (`BBCCCVVVWWW`, as `n…` ids in MACULA's files) |
+| `force` | (v0.7) what the clause does by its grammar, inside speech: `fc.imp` imperative, `fc.q` question (the Greek question mark), `fc.voc` vocative. ἰδού, ἴδε and ἄγε are imperative in form but particles in use and are not counted |
+| `you` | (v0.7) the number of the line's second-person forms inside speech: `ad.sg`, `ad.pl`, `ad.both`; empty if none |
+| `printed` | (v0.7) where Nestle 1904 prints the line set apart: `fm.ed.lines` poetic lines, `fm.ed.qlines` lines quoted from the Scriptures, `fm.ed.block` a hymn printed as a narrower block (from the page images of the 1904 edition) |
+| `printed_line` | (v0.7) true where a printed line of Nestle 1904 starts at this line's first word |
+
+The codes in `force`, `you` and `printed` are those of [bcv-commons/passage-facts](https://huggingface.co/datasets/bcv-commons/passage-facts)
+(`codes.tsv`), which holds these facts and more (the verb that introduces each speech, poetic lines of translations, notes), each tied
+to its words and source. The lines agree with independent line breaks: 94% of Nestle 1904's 358 printed lines and 88% of the 703
+poetic lines of the unfoldingWord Literal Text end where a line here ends. Neither was used to make the lines; they are a check only.
 
 ## How a line is made
 
@@ -188,6 +197,8 @@ disagreements found one fault of the layout, fixed in v0.2: a conjunction or que
 | Greek text, clauses, sentence trees | MACULA Greek (Clear Bible / Biblica), `Nestle1904/lowfat`, through trees-macula.db (SHA-256 `@TREES_SHA@…`) | CC BY 4.0 |
 | Where speeches run | MACULA Quotation and Speaker Data (Clear Bible), as `resources/speaker_quotations` in bcv-query (SHA-256 `@SPEAKERS_SHA@…`); used for its word spans, and to tell whether two speeches next to each other have one speaker (to join them over a gap); its names are not used | CC BY 4.0 |
 | Who speaks | MACULA Greek's subject and referent links (`Nestle1904/lowfat`, SHA-256 `@LOWFAT_SHA@…`) | CC BY 4.0 |
+| `force`, `you` | bcv-commons passage facts, read from MACULA Greek's grammar | CC BY 4.0 |
+| `printed`, `printed_line` | E. Nestle, Η ΚΑΙΝΗ ΔΙΑΘΗΚΗ, BFBS 1904: passages from the page images (archive.org/details/biblentgreektext00nestuoft), lines from github.com/biblicalhumanities/Nestle1904 | Public Domain |
 | The layout | bcv-commons | **CC BY 4.0** |
 | The code (`macula/build_nt_clause_layout.py`, bcv-query) | bcv-commons | MIT |
 

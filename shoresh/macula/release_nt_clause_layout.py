@@ -36,7 +36,7 @@ SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("seg", 
           ("text_depth", "int8"), ("clause", "string"), ("parent", "string"), ("kind", "string"), ("rule", "string"),
           ("role", "string"), ("via", "list<string>"), ("junction", "string"), ("sentence", "string"), ("quotation", "string"),
           ("speaker", "string"), ("speaker_ref", "list<string>"), ("speaker_basis", "string"), ("alt_eng", "string"), ("speaker_id", "string"), ("speaker_name", "string"), ("speaker_name_ref", "string"), ("speaker_members", "list<string>"), ("inline", "list<string>"), ("split_at_quotation", "bool_"), ("first", "string"), ("last", "string"),
-          ("words", "list<string>")]
+          ("words", "list<string>"), ("force", "list<string>"), ("you", "string"), ("printed", "string"), ("printed_line", "bool_")]
 
 
 def _type(pa, t: str):
@@ -66,6 +66,8 @@ def main() -> None:
     (out / "layout").mkdir()
 
     rows, sentence_key = [], {}
+    from macula import segment_columns
+    spans = [r for r in segment_columns.pf._tsv(segment_columns.pf.SPEAKER_SPANS) if r["word_start"]]
 
     def book_number(book: str) -> str:                       # canonical order: the book number of the first word id
         with open(sorted((src / "clauses" / book).glob("*.jsonl"))[0], encoding="utf-8") as fh:
@@ -83,6 +85,9 @@ def main() -> None:
                 rows.append(r)
             lines.append((src / "layout" / book / f"{f.stem}.txt").read_text(encoding="utf-8"))
         (out / "layout" / f"{book}.txt").write_text("".join(lines), encoding="utf-8")
+        mine = [r for r in rows if r["book"] == book]          # the added columns (CC BY / public-domain passage facts)
+        for r, c in zip(mine, segment_columns.columns(book, mine, spans)):
+            r.update(c)
 
     import pyarrow as pa
     import pyarrow.parquet as pq

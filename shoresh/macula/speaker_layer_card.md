@@ -19,7 +19,9 @@ size_categories:
 
 Who speaks where in the Hebrew Bible: every quotation, its speaker, its edges on the Hebrew words, and the quotations inside
 quotations, on MACULA Hebrew's words and on the clause segments of the
-[Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout).
+[Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout) (which carries these columns on each
+segment since v0.37.1). [bcv-commons/passage-facts](https://huggingface.co/datasets/bcv-commons/passage-facts) builds on it: the verb
+that introduces each speech, the narrator's voice, the force of each clause, song and poetic lines, each tied to its words and source.
 
 | | |
 |---|---|

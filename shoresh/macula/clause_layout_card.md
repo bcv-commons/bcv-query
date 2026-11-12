@@ -177,6 +177,28 @@ Ruth 1:1, fifth segment:
 | `text` | surface text of the segment, as in `layout/` |
 | `ketiv_qere` | `{key, ketiv, qere}` for the words of the segment that have a ketiv/qere (from UHB); `ketiv` or `qere` is `null` where only one exists |
 
+**Added in v0.37.1** (CC BY 4.0 sources only; the segments, hierarchy and text are those of v0.37):
+
+| Field | Meaning |
+|---|---|
+| `quotation` | the innermost quotation the segment stands in: its id in the [Hebrew Bible Speaker Layer](https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer); `null` in narrative |
+| `quote_level` | 1 a speech in the narrative or text, 2 a speech inside it, and so on; 0 in narrative |
+| `speaker`, `speaker_ref` | who speaks, as MACULA lemmas of the words that name the speaker in the text (יהוה, מֹשֶׁה, מֶלֶךְ מִצְרַיִם), and those words' keys |
+| `speaker_basis` | where `speaker` comes from: `inquit`, `review`, `same speaker in book`, `same speaker in Bible` |
+| `speaker_id`, `speaker_name`, `speaker_name_ref`, `speaker_members` | one person or group across quotations (`c0073`); that person's proper name in the text and its words; for a group, its members' ids |
+| `frame_speaker` | for text outside quotations that is one speaker's from its start (a psalm's psalmist, a prophet): that speaker (דָּוִד) |
+| `force` | what the clause does by its grammar, inside speech: `fc.imp` imperative, `fc.jus` jussive, `fc.coh` cohortative, `fc.q` question (an interrogative word) |
+| `you` | the number of the segment's second-person forms inside speech: `ad.sg`, `ad.pl`, `ad.both`; `null` if none |
+| `para_end` | `sc.pe` (petuchah) or `sc.sa` (setumah) where a Leningrad Codex paragraph ends with this segment |
+
+These are the same columns the Greek NT layout carries, so both layouts have one shape for speech. The codes are those of
+[bcv-commons/passage-facts](https://huggingface.co/datasets/bcv-commons/passage-facts) (`codes.tsv`), which holds these facts and more
+(the verb that introduces each speech, Masoretic and translation poetic lines, notes), each tied to its words and source.
+
+The segmentation agrees with independent line breaks: 90% of the 10,391 poetic lines of Miqra according to the Masorah (Psalms,
+Proverbs, Job) and 92% of the 13,473 poetic lines of the unfoldingWord Literal Text end where a segment ends. Neither was used to
+make the segmentation; they are a check only.
+
 ## Versification
 
 Verses use the **Hebrew numbering** of the source text, which differs from English Bibles in places: Gen 31:55 = Hebrew 32:1;
@@ -199,6 +221,7 @@ The chapter files carry no version header. `_clauses_source.json` is the version
   the segments and their word keys don't.
 - A **levels-only release** keeps `segmentation` and every book's `sha256`. Anything keyed on the segments (sidecars, alignments
   to clause segments) stays valid.
+- A **columns release** (`v<rules>.<n>`, such as v0.37.1) keeps the segments, the hierarchy and the text, and only adds fields.
 
 `build.json` records the sources: the MACULA Hebrew commit, the UHB tag, the TVTMS revision and the hashes of the versification
 files.
@@ -268,7 +291,9 @@ BHSA: Eep Talstra Centre for Bible and Computer, VU Amsterdam; DOI 10.17026/dans
 | Hebrew/Aramaic text, ketiv/qere | unfoldingWord Hebrew Bible (UHB) @UHB_TAG@, based on the Westminster Leningrad Codex | CC BY-SA 4.0 |
 | Clauses, words, clause kinds and rules | MACULA Hebrew (Clear Bible / Biblica), `WLC/lowfat`, commit `@MACULA_COMMIT@` | CC BY 4.0 |
 | English verse numbers | bcv-commons/bibles `org-to-eng`, from STEPBible TVTMS (rev. `@TVTMS_REV@`) | CC BY 4.0 |
-| Speech levels | Hebrew Bible Speaker Layer @SPEAKER_TAG@, bcv-commons (`hebrew-speaker-layer`) | CC BY 4.0 |
+| Speech levels; `quotation` … `frame_speaker` | Hebrew Bible Speaker Layer @SPEAKER_TAG@, bcv-commons (`hebrew-speaker-layer`), from MACULA Quotation and Speaker Data (Clear Bible, CC BY 4.0) | CC BY 4.0 |
+| `force`, `you` | bcv-commons passage facts, read from MACULA Hebrew's grammar | CC BY 4.0 |
+| `para_end` | Open Scriptures Hebrew Bible, Leningrad Codex paragraph marks | CC BY 4.0 |
 | The segmentation: MACULA's clauses cut at word and verse boundaries | bcv-commons, from MACULA Hebrew | **CC BY 4.0** |
 | The text-level hierarchy | bcv-commons | **CC BY-SA 4.0** |
 | The rules and code (`clause_layout.toml`, bcv-query) | bcv-commons | MIT |
@@ -278,7 +303,8 @@ licensed CC BY 4.0, like MACULA; CC BY-SA 4.0 applies to the UHB text and the te
 
 Field by field, in `clauses/` and `data/`:
 - CC BY 4.0: the segmentation above; MACULA's own clause fields `parent_key`, `depth`, `kind`, `rule`, `language`; the row ids
-  `clause`, `parent`, `sentence`; the references `book`, `chapter`, `verse`, `verse_ref_en`.
+  `clause`, `parent`, `sentence`; the references `book`, `chapter`, `verse`, `verse_ref_en`; the columns added in v0.37.1
+  (`quotation` to `para_end`).
 - CC BY-SA 4.0: the UHB text (`text`, `ketiv_qere`) and the text-level hierarchy (`discourse_parent`, `relation`,
   `discourse_attach`, `discourse_rule`, `text_depth`, `text_depth_law`, `tree_depth`).
 - `layout/` holds the UHB text and the hierarchy's indentation: CC BY-SA 4.0.
@@ -289,7 +315,8 @@ extend share-alike to the CC BY 4.0 fields. A work that uses only CC BY 4.0 fiel
 **Attribution** when you use the CC BY 4.0 fields only:
 
 > Hebrew Bible Clause Layout (@TAG@), bcv-commons, segmentation CC BY 4.0. Syntax: MACULA Hebrew, Clear Bible / Biblica
-> (CC BY 4.0). Versification: STEPBible TVTMS (CC BY 4.0).
+> (CC BY 4.0). Versification: STEPBible TVTMS (CC BY 4.0). Speakers (if used): Hebrew Bible Speaker Layer, bcv-commons, and MACULA
+> Quotation and Speaker Data, Clear Bible (CC BY 4.0). Paragraph marks (if used): Open Scriptures Hebrew Bible (CC BY 4.0).
 
 **Attribution** when you use the dataset as a whole, or any CC BY-SA 4.0 field:
 

@@ -238,3 +238,6 @@ resources/lexicons/heb_en.csv
 
 # Superseded documentation kept for reference
 doc-bak/
+
+# passage facts: pinned downloads (unfoldingWord v91, MAM, UBS, BSB); re-derivable
+shoresh/macula/.cache/

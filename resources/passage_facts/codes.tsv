@@ -1,0 +1,503 @@
+# Codes of the passage facts and what they mean. The data holds codes only; this table is the English.
+# Delivery codes (dl.NNN) carry the source's own wording; new values are appended by build_passage_facts --update-codes, never renumbered.
+code	group	english	source	note
+voice	kind	who is heard in a stretch of text		
+quote	kind	a speech, with its speaker		
+delivery	kind	a note on how the speech is delivered		
+frame	kind	the words that introduce a speech (its verbs are given as lexemes)		
+force	kind	what a clause inside a speech does, by its grammar		
+addressee	kind	who a speech is addressed to		
+section	kind	a break in the text		
+form	kind	how the text is set: song, poetry, prose		
+listener	kind	TBTA: the role of the one spoken to		
+attitude	kind	TBTA: the speaker's attitude		
+age_relation	kind	TBTA: the speaker's age relative to the listener		
+tb_force	kind	TBTA: illocutionary force		
+rhetorical	kind	TBTA: rhetorical question		
+domain	kind	the dictionary's meaning domain of the verb that introduces a speech		
+note	kind	a translation note: the issue it names in these Hebrew or Greek words (unfoldingWord)		
+b.source	basis	stated by the source		
+b.text	basis	read from the Hebrew or Greek text by a fixed rule		
+b.rule	basis	inferred by a published rule from other facts		
+b.review	basis	set by a review row, with its reason in the repository		
+p.word	precision	anchored to exact words		
+p.verse	precision	the source says it of the verse; the words inside the verse are not known		
+vc.narrator	voice	the narrator	layer	
+vc.frame	voice	a text that is one speaker's from its start (a psalm's psalmist, a prophetic book's prophet)	layer	
+qt.normal	quote type	Normal: speech set in quotation marks	clear	Glyssen
+qt.dialogue	quote type	Dialogue: an exchange of short speeches	clear	Glyssen
+qt.implicit	quote type	Implicit: a known speaker where no quotation marks are expected	clear	Glyssen
+qt.quotation	quote type	Quotation: past speech or written words quoted, a proverb, or words someone is told to say	clear	Glyssen
+qt.hypothetical	quote type	Hypothetical: speech no real person spoke	clear	Glyssen
+qt.nested	quote type	a speech inside a speech, found by the speaker layer	clear	layer
+qt.layout	quote type	speech found from the clause layout only	clear	layer
+qt.relayed	quote type	a message the speaker is told to deliver	clear	layer
+qt.oracle	quote type	God's words in a prophetic book, found from its oracle formulas	layer	
+qt.commanded	quote type	a message the speaker is commanded to deliver, found from a messenger formula	layer	
+qt.song	quote type	a song that its inquit announces	layer	
+qt.song_speech	quote type	a song or speech that the text gives in the first person after its introduction	layer	
+qt.titled	quote type	a psalm whose title names its speaker	layer	
+qt.review	quote type	set by a review row	layer	
+qf.block	how the quote was found	the source's quote block	layer	
+qf.referent	how the quote was found	the source's speaker referent	layer	
+qf.character	how the quote was found	the casting data's character of the verse	layer	
+qf.correction	how the quote was found	a hand correction	layer	
+qf.layout	how the quote was found	the clause layout's speech structure	layer	
+qf.voice	how the quote was found	a run in the first or second person	layer	
+qf.translations	how the quote was found	most translations nest it	layer	
+qf.inner	how the quote was found	an inquit inside a speech	layer	
+qf.relayed	how the quote was found	a relayed message	layer	
+qf.review	how the quote was found	a review row	layer	
+qf.messenger	how the quote was found	a messenger formula	layer	
+qf.oracle	how the quote was found	an oracle formula	layer	
+qf.commanded	how the quote was found	a commanded message	layer	
+qf.song	how the quote was found	an inquit that announces a song	layer	
+qf.titled	how the quote was found	a psalm title	layer	
+sb.inquit	how the speaker was named	the subject of the words that introduce the speech	layer	
+sb.review	how the speaker was named	a review row	layer	
+sb.book	how the speaker was named	the same speaker's name elsewhere in the book	layer	
+sb.bible	how the speaker was named	the same speaker's name elsewhere in the Hebrew Bible	layer	
+sb.nt	how the speaker was named	the same speaker's name elsewhere in the New Testament	layer	
+fc.imp	force	command: an imperative	macula	
+fc.jus	force	wish or command in the third person: a jussive	macula	
+fc.coh	force	resolve or request in the first person: a cohortative	macula	
+fc.q	force	question: a question word, or the Greek question mark	macula	
+fc.voc	force	address: a vocative	macula	
+ad.sg	addressee	second-person forms are singular only	macula	
+ad.pl	addressee	second-person forms are plural only	macula	
+ad.both	addressee	second-person forms are singular and plural	macula	
+ad.named	addressee	the one spoken to is an argument of the verb that introduces the speech	macula	
+sc.pe	section	petuchah: an open paragraph ends here	oshb	the source names the tradition: oshb the Leningrad Codex, mam the Aleppo Codex tradition
+sc.sa	section	setumah: a closed paragraph ends here	oshb	the source names the tradition: oshb the Leningrad Codex, mam the Aleppo Codex tradition
+fm.ed.lines	form	the edition prints these words in poetic lines, and they are not a quotation from the Scriptures	nestle1904	
+fm.ed.block	form	the edition prints these words as a narrower block (a hymn with no metrical arrangement, in Westcott-Hort's words)	nestle1904	
+fm.ed.qlines	form	the edition prints these words in poetic lines because they are quoted from the Scriptures	nestle1904	
+fm.ms.song	form	the Masoretic text sets these words in song layout, in the lines given	mam	the layout the tradition prescribes for the songs (Exod 15, Deut 32, Judg 5, 2 Sam 22) and some lists
+fm.ms.lines	form	the Masoretic text sets these words in poetic lines, in the lines given	mam	Psalms, Proverbs and Job (the books with their own accent system); markers: v a line that starts the verse, r0-r4 MAM's line-break templates ר0-ר4 (indent levels)
+fm.tr.poetry	form	the translation sets these verses in indented lines, as it sets poetry	bsb	also some lists (Luke 3:23-38, the genealogy)
+cv.all	cover	all of the verse		
+cv.part	cover	part of the verse		
+tn.figs-rquestion	note	a rhetorical question: a question asked for effect, not for an answer	tn	unfoldingWord Translation Academy article
+tn.figs-quotesinquotes	note	a quotation inside a quotation	tn	unfoldingWord Translation Academy article
+tn.figs-quotations	note	direct or indirect quotation: the note discusses how the speech is reported	tn	unfoldingWord Translation Academy article
+tn.figs-quotemarks	note	where quotation marks (and nested ones) belong	tn	unfoldingWord Translation Academy article
+tn.writing-quotations	note	the words that introduce a quotation	tn	unfoldingWord Translation Academy article
+tn.figs-apostrophe	note	apostrophe: the speaker addresses someone or something not present	tn	unfoldingWord Translation Academy article
+tn.figs-parallelism	note	parallelism: two lines say the same or nearly the same thing	tn	unfoldingWord Translation Academy article
+tn.writing-poetry	note	poetry	tn	unfoldingWord Translation Academy article
+tn.figs-exclamations	note	an exclamation	tn	unfoldingWord Translation Academy article
+tn.figs-imperative	note	an imperative that is not a command (a blessing, a wish, a permission)	tn	unfoldingWord Translation Academy article
+tn.figs-declarative	note	a statement used to give a command or make a request	tn	unfoldingWord Translation Academy article
+tn.figs-123person	note	the speaker refers to himself or the listener in the third person	tn	unfoldingWord Translation Academy article
+tn.figs-you	note	the forms of 'you': singular or plural	tn	unfoldingWord Translation Academy article
+tn.figs-youdual	note	'you' is plural but addresses one person, or the reverse	tn	unfoldingWord Translation Academy article
+tn.figs-yousingular	note	'you' is singular	tn	unfoldingWord Translation Academy article
+tn.figs-youcrowd	note	'you' addresses a crowd	tn	unfoldingWord Translation Academy article
+tn.figs-yougeneral	note	'you' means people in general	tn	unfoldingWord Translation Academy article
+tn.figs-youformal	note	formal or informal 'you'	tn	unfoldingWord Translation Academy article
+tn.figs-exclusive	note	'we' that excludes the listener	tn	unfoldingWord Translation Academy article
+tn.figs-inclusive	note	'we' that includes the listener	tn	unfoldingWord Translation Academy article
+tn.figs-hypo	note	a hypothetical situation	tn	unfoldingWord Translation Academy article
+tn.figs-irony	note	irony	tn	unfoldingWord Translation Academy article
+tn.figs-litany	note	a litany: a list of items said in the same pattern	tn	unfoldingWord Translation Academy article
+tn.writing-oathformula	note	an oath formula	tn	unfoldingWord Translation Academy article
+tn.writing-proverbs	note	a proverb	tn	unfoldingWord Translation Academy article
+tn.translate-blessing	note	a blessing	tn	unfoldingWord Translation Academy article
+tn.writing-blessing	note	a blessing	tn	unfoldingWord Translation Academy article
+dl.001	delivery	questioning	glyssen	
+dl.002	delivery	lament	glyssen	
+dl.003	delivery	rebuking	glyssen	
+dl.004	delivery	giving orders	glyssen	
+dl.005	delivery	shouting	glyssen	
+dl.006	delivery	letter	glyssen	
+dl.007	delivery	to crowd	glyssen	
+dl.008	delivery	angry	glyssen	
+dl.009	delivery	amazed	glyssen	
+dl.010	delivery	commanding	glyssen	
+dl.011	delivery	mocking	glyssen	
+dl.012	delivery	praising	glyssen	
+dl.013	delivery	puzzled	glyssen	
+dl.014	delivery	excited	glyssen	
+dl.015	delivery	to Jesus	glyssen	
+dl.016	delivery	accusing	glyssen	
+dl.017	delivery	challenging	glyssen	
+dl.018	delivery	pleading	glyssen	
+dl.019	delivery	singing	glyssen	
+dl.020	delivery	praying	glyssen	
+dl.021	delivery	thinking	glyssen	
+dl.022	delivery	thought	glyssen	
+dl.023	delivery	demanding	glyssen	
+dl.024	delivery	instructing	glyssen	
+dl.025	delivery	thinking (saying in their hearts)	glyssen	
+dl.026	delivery	vision	glyssen	
+dl.027	delivery	afraid	glyssen	
+dl.028	delivery	grumbling	glyssen	
+dl.029	delivery	preaching	glyssen	
+dl.030	delivery	calling out	glyssen	
+dl.031	delivery	respectful	glyssen	
+dl.032	delivery	sad	glyssen	
+dl.033	delivery	terrified	glyssen	
+dl.034	delivery	to themselves	glyssen	
+dl.035	delivery	upset	glyssen	
+dl.036	delivery	warning	glyssen	
+dl.037	delivery	weeping	glyssen	
+dl.038	delivery	blessing	glyssen	
+dl.039	delivery	compassionately	glyssen	
+dl.040	delivery	forcefully	glyssen	
+dl.041	delivery	plotting	glyssen	
+dl.042	delivery	very old	glyssen	
+dl.043	delivery	awe	glyssen	
+dl.044	delivery	critical	glyssen	
+dl.045	delivery	declare	glyssen	
+dl.046	delivery	decree	glyssen	
+dl.047	delivery	denial, stronger	glyssen	
+dl.048	delivery	encouraging	glyssen	
+dl.049	delivery	fearful	glyssen	
+dl.050	delivery	impatient	glyssen	
+dl.051	delivery	insulting	glyssen	
+dl.052	delivery	inviting	glyssen	
+dl.053	delivery	perplexed	glyssen	
+dl.054	delivery	shocked	glyssen	
+dl.055	delivery	begging	glyssen	
+dl.056	delivery	boldly	glyssen	
+dl.057	delivery	denial	glyssen	
+dl.058	delivery	desperate	glyssen	
+dl.059	delivery	exasperated	glyssen	
+dl.060	delivery	indignant	glyssen	
+dl.061	delivery	mourning	glyssen	
+dl.062	delivery	proclamation	glyssen	
+dl.063	delivery	prophecy	glyssen	
+dl.064	delivery	said to himself	glyssen	
+dl.065	delivery	said/thought in heart	glyssen	
+dl.066	delivery	shrewd	glyssen	
+dl.067	delivery	sternly	glyssen	
+dl.068	delivery	superior	glyssen	
+dl.069	delivery	boasting	glyssen	
+dl.070	delivery	calling out from the sky	glyssen	
+dl.071	delivery	complaining	glyssen	
+dl.072	delivery	crying	glyssen	
+dl.073	delivery	denial, strongest	glyssen	
+dl.074	delivery	distraught	glyssen	
+dl.075	delivery	frustrated	glyssen	
+dl.076	delivery	furious	glyssen	
+dl.077	delivery	harsh	glyssen	
+dl.078	delivery	jeering	glyssen	
+dl.079	delivery	offended	glyssen	
+dl.080	delivery	passionate	glyssen	
+dl.081	delivery	polite	glyssen	
+dl.082	delivery	quarreling	glyssen	
+dl.083	delivery	resigned	glyssen	
+dl.084	delivery	speaking to Peter (Simon)	glyssen	
+dl.085	delivery	suspicious	glyssen	
+dl.086	delivery	taking charge	glyssen	
+dl.087	delivery	testing	glyssen	
+dl.088	delivery	against Jesus	glyssen	
+dl.089	delivery	announcing	glyssen	
+dl.090	delivery	anxious	glyssen	
+dl.091	delivery	complimenting	glyssen	
+dl.092	delivery	contempt	glyssen	
+dl.093	delivery	curious	glyssen	
+dl.094	delivery	deeply distressed	glyssen	
+dl.095	delivery	defending Jesus	glyssen	
+dl.096	delivery	defensive	glyssen	
+dl.097	delivery	drunk	glyssen	
+dl.098	delivery	eager	glyssen	
+dl.099	delivery	gloating	glyssen	
+dl.100	delivery	gruff	glyssen	
+dl.101	delivery	hesitant	glyssen	
+dl.102	delivery	insisting	glyssen	
+dl.103	delivery	loud	glyssen	
+dl.104	delivery	making excuse	glyssen	
+dl.105	delivery	message	glyssen	
+dl.106	delivery	no more be said	glyssen	
+dl.107	delivery	ordering	glyssen	
+dl.108	delivery	proclaim	glyssen	
+dl.109	delivery	reassuring	glyssen	
+dl.110	delivery	rejoicing	glyssen	
+dl.111	delivery	said in his heart	glyssen	
+dl.112	delivery	screaming	glyssen	
+dl.113	delivery	sent letter	glyssen	
+dl.114	delivery	sent message	glyssen	
+dl.115	delivery	sneering	glyssen	
+dl.116	delivery	wailing	glyssen	
+dl.117	delivery	writing	glyssen	
+dl.118	delivery	angry, quarreling	glyssen	
+dl.119	delivery	approving	glyssen	
+dl.120	delivery	arguing	glyssen	
+dl.121	delivery	arrogantly	glyssen	
+dl.122	delivery	asking question	glyssen	
+dl.123	delivery	astonished	glyssen	
+dl.124	delivery	believing Jesus	glyssen	
+dl.125	delivery	boastful	glyssen	
+dl.126	delivery	bribing	glyssen	
+dl.127	delivery	call to worship	glyssen	
+dl.128	delivery	calling out in anguish	glyssen	
+dl.129	delivery	cautious	glyssen	
+dl.130	delivery	concerned	glyssen	
+dl.131	delivery	confused	glyssen	
+dl.132	delivery	courageous	glyssen	
+dl.133	delivery	critically wounded	glyssen	
+dl.134	delivery	deceitful	glyssen	
+dl.135	delivery	deceiving	glyssen	
+dl.136	delivery	defense to governor	glyssen	
+dl.137	delivery	diplomatic	glyssen	
+dl.138	delivery	discouraged	glyssen	
+dl.139	delivery	disdain	glyssen	
+dl.140	delivery	entreating	glyssen	
+dl.141	delivery	exclaimed	glyssen	
+dl.142	delivery	frightened	glyssen	
+dl.143	delivery	frightened (probably drunk)	glyssen	
+dl.144	delivery	gracious	glyssen	
+dl.145	delivery	guessing	glyssen	
+dl.146	delivery	humble	glyssen	
+dl.147	delivery	humbly	glyssen	
+dl.148	delivery	instructions to Ezekiel	glyssen	
+dl.149	delivery	insulted	glyssen	
+dl.150	delivery	interceding	glyssen	
+dl.151	delivery	joyfully singing	glyssen	
+dl.152	delivery	judgmental	glyssen	
+dl.153	delivery	justifying	glyssen	
+dl.154	delivery	lamenting	glyssen	
+dl.155	delivery	laughing	glyssen	
+dl.156	delivery	loud voice	glyssen	
+dl.157	delivery	malicious	glyssen	
+dl.158	delivery	message, scheming	glyssen	
+dl.159	delivery	misunderstanding	glyssen	
+dl.160	delivery	murmuring	glyssen	
+dl.161	delivery	negotiating	glyssen	
+dl.162	delivery	outraged	glyssen	
+dl.163	delivery	over-dramatic	glyssen	
+dl.164	delivery	plotting evil	glyssen	
+dl.165	delivery	praising Jesus	glyssen	
+dl.166	delivery	protesting	glyssen	
+dl.167	delivery	quieter	glyssen	
+dl.168	delivery	quotation of Jesus' words (should be spoken by narrator)	glyssen	
+dl.169	delivery	quoting the wicked who live in the land	glyssen	
+dl.170	delivery	reading	glyssen	
+dl.171	delivery	ready to fight	glyssen	
+dl.172	delivery	relieved	glyssen	
+dl.173	delivery	remorse	glyssen	
+dl.174	delivery	requesting	glyssen	
+dl.175	delivery	response to Isaiah	glyssen	
+dl.176	delivery	say in your heart	glyssen	
+dl.177	delivery	scolding	glyssen	
+dl.178	delivery	secret oath	glyssen	
+dl.179	delivery	serious	glyssen	
+dl.180	delivery	shrieking	glyssen	
+dl.181	delivery	skeptical	glyssen	
+dl.182	delivery	sly	glyssen	
+dl.183	delivery	smug	glyssen	
+dl.184	delivery	speaking or thinking to himself	glyssen	
+dl.185	delivery	stubborn	glyssen	
+dl.186	delivery	suggesting solution	glyssen	
+dl.187	delivery	surprised	glyssen	
+dl.188	delivery	taunting	glyssen	
+dl.189	delivery	taunting proverb	glyssen	
+dl.190	delivery	testing faith	glyssen	
+dl.191	delivery	thinking or talking to himself	glyssen	
+dl.192	delivery	threatening	glyssen	
+dl.193	delivery	to new believers	glyssen	
+dl.194	delivery	trembled	glyssen	
+dl.195	delivery	trembling	glyssen	
+dl.196	delivery	unbelief	glyssen	
+dl.197	delivery	uneasy	glyssen	
+dl.198	delivery	unhappy	glyssen	
+dl.199	delivery	urgent	glyssen	
+dl.200	delivery	urging	glyssen	
+dl.201	delivery	weeping, pleading	glyssen	
+dl.202	delivery	whining	glyssen	
+dl.203	delivery	whispering	glyssen	
+dl.204	delivery	with authority	glyssen	
+dl.205	delivery	worshiping God	glyssen	
+dl.206	delivery	written proclamation	glyssen	
+sd.001	sdbh	Speak	ubs	SDBH lexical domain
+sd.002	sdbh	Name	ubs	SDBH lexical domain
+sd.003	sdbh	Apart	ubs	SDBH lexical domain
+sd.004	sdbh	Control	ubs	SDBH lexical domain
+sd.005	sdbh	See	ubs	SDBH lexical domain
+sd.006	sdbh	Professions	ubs	SDBH lexical domain
+sd.007	sdbh	Shout	ubs	SDBH lexical domain
+sd.008	sdbh	Sin	ubs	SDBH lexical domain
+sd.009	sdbh	Sing	ubs	SDBH lexical domain
+sd.010	sdbh	Happen	ubs	SDBH lexical domain
+sd.011	sdbh	Exist	ubs	SDBH lexical domain
+sd.012	sdbh	Cover	ubs	SDBH lexical domain
+sd.013	sdbh	Move	ubs	SDBH lexical domain
+sd.014	sdbh	Curse	ubs	SDBH lexical domain
+sd.015	sdbh	Engage	ubs	SDBH lexical domain
+sd.016	sdbh	Leaders	ubs	SDBH lexical domain
+sd.017	sdbh	Complete	ubs	SDBH lexical domain
+sd.018	sdbh	Different	ubs	SDBH lexical domain
+sd.019	sdbh	Know	ubs	SDBH lexical domain
+sd.020	sdbh	Conflict	ubs	SDBH lexical domain
+sd.021	sdbh	Hold	ubs	SDBH lexical domain
+sd.022	sdbh	Impact	ubs	SDBH lexical domain
+sd.023	sdbh	Afraid	ubs	SDBH lexical domain
+sd.024	sdbh	 Gather	ubs	SDBH lexical domain
+sd.025	sdbh	People	ubs	SDBH lexical domain
+sd.026	sdbh	Sacrifice	ubs	SDBH lexical domain
+sd.027	sdbh	Stance	ubs	SDBH lexical domain
+sd.028	sdbh	Vow	ubs	SDBH lexical domain
+sd.029	sdbh	Associate	ubs	SDBH lexical domain
+sd.030	sdbh	Speak|Know	ubs	SDBH lexical domain
+sd.031	sdbh	Write	ubs	SDBH lexical domain
+sd.032	sdbh	Angry	ubs	SDBH lexical domain
+sd.033	sdbh	Great	ubs	SDBH lexical domain
+sd.034	sdbh	Flee	ubs	SDBH lexical domain
+sd.035	sdbh	Grieve	ubs	SDBH lexical domain
+sd.036	sdbh	Serve	ubs	SDBH lexical domain
+sd.037	sdbh	Soldiers	ubs	SDBH lexical domain
+sd.038	sdbh	Dwell	ubs	SDBH lexical domain
+sd.039	sdbh	Praise	ubs	SDBH lexical domain
+sd.040	sdbh	Help	ubs	SDBH lexical domain
+sd.041	sdbh	Chastise	ubs	SDBH lexical domain
+sd.042	sdbh	Urge	ubs	SDBH lexical domain
+sd.043	sdbh	Intense	ubs	SDBH lexical domain
+sd.044	sdbh	Space|Stance	ubs	SDBH lexical domain
+sd.045	sdbh	Unfaithful	ubs	SDBH lexical domain
+sd.046	sdbh	Possess	ubs	SDBH lexical domain
+sd.047	sdbh	Revile	ubs	SDBH lexical domain
+sd.048	sdbh	Unable	ubs	SDBH lexical domain
+sd.049	sdbh	Think	ubs	SDBH lexical domain
+sd.050	sdbh	Bear	ubs	SDBH lexical domain
+sd.051	sdbh	Merciful	ubs	SDBH lexical domain
+sd.052	sdbh	Burn	ubs	SDBH lexical domain
+sd.053	sdbh	Judge|Relief|Safe	ubs	SDBH lexical domain
+sd.054	sdbh	Turn	ubs	SDBH lexical domain
+sd.055	sdbh	Rebuke	ubs	SDBH lexical domain
+sd.056	sdbh	Judge|Chastise	ubs	SDBH lexical domain
+sd.057	sdbh	Non-Engage	ubs	SDBH lexical domain
+sd.058	sdbh	Wish	ubs	SDBH lexical domain
+sd.059	sdbh	Ingest	ubs	SDBH lexical domain
+sd.060	sdbh	Non-Exist|Dead	ubs	SDBH lexical domain
+sd.061	sdbh	Relief	ubs	SDBH lexical domain
+sd.062	sdbh	Vision	ubs	SDBH lexical domain
+sd.063	sdbh	Hear	ubs	SDBH lexical domain
+sd.064	sdbh	Stage	ubs	SDBH lexical domain
+sd.065	sdbh	Unwilling	ubs	SDBH lexical domain
+sd.066	sdbh	Location	ubs	SDBH lexical domain
+sd.067	sdbh	Shine	ubs	SDBH lexical domain
+sd.068	sdbh	Rejoice	ubs	SDBH lexical domain
+sd.069	sdbh	Contain	ubs	SDBH lexical domain
+sd.070	sdbh	Unsteady	ubs	SDBH lexical domain
+sd.071	sdbh	Safe	ubs	SDBH lexical domain
+sd.072	sdbh	Dry	ubs	SDBH lexical domain
+sd.073	sdbh	Gather	ubs	SDBH lexical domain
+sd.074	sdbh	Weak	ubs	SDBH lexical domain
+sd.075	sdbh	Select	ubs	SDBH lexical domain
+sd.076	sdbh	Confident	ubs	SDBH lexical domain
+sd.077	sdbh	Space	ubs	SDBH lexical domain
+sd.078	sdbh	Innocent	ubs	SDBH lexical domain
+sd.079	sdbh	Unsafe	ubs	SDBH lexical domain
+sd.080	sdbh	Birth	ubs	SDBH lexical domain
+sd.081	sdbh	Quantity|Frequency	ubs	SDBH lexical domain
+sd.082	sdbh	Pray	ubs	SDBH lexical domain
+sd.083	sdbh	Act	ubs	SDBH lexical domain
+sd.084	sdbh	Willing	ubs	SDBH lexical domain
+sd.085	sdbh	Non-Know	ubs	SDBH lexical domain
+sd.086	sdbh	Impact|Dead|Possess|Unsafe	ubs	SDBH lexical domain
+sd.087	sdbh	Wrong	ubs	SDBH lexical domain
+sd.088	sdbh	Well	ubs	SDBH lexical domain
+sd.089	sdbh	Sounds	ubs	SDBH lexical domain
+sd.090	sdbh	Flow	ubs	SDBH lexical domain
+sd.091	sdbh	Unwilling|Despise	ubs	SDBH lexical domain
+sd.092	sdbh	Touch	ubs	SDBH lexical domain
+sd.093	sdbh	Dead	ubs	SDBH lexical domain
+sd.094	sdbh	Role	ubs	SDBH lexical domain
+sd.095	sdbh	Shape	ubs	SDBH lexical domain
+sd.096	sdbh	Strong	ubs	SDBH lexical domain
+sd.097	sdbh	Wet	ubs	SDBH lexical domain
+sd.098	sdbh	Foolish	ubs	SDBH lexical domain
+sd.099	sdbh	Non-Exist	ubs	SDBH lexical domain
+sd.100	sdbh	Patient	ubs	SDBH lexical domain
+sd.101	sdbh	Non-Contain	ubs	SDBH lexical domain
+sd.102	sdbh	Non-Possess	ubs	SDBH lexical domain
+sd.103	sdbh	Bow	ubs	SDBH lexical domain
+ln.001	louw_nida	Speak, Talk	ubs	Louw-Nida subdomain 033006
+ln.002	louw_nida	Interpret, Mean, Explain	ubs	Louw-Nida subdomain 033010
+ln.003	louw_nida	Addition	ubs	Louw-Nida subdomain 089017
+ln.004	louw_nida	Whom or What Spoken or Written About	ubs	Louw-Nida subdomain 092004
+ln.005	louw_nida	Sequential Addition	ubs	Louw-Nida subdomain 089015
+ln.006	louw_nida	Come/Go Behind	ubs	Louw-Nida subdomain 015017
+ln.007	louw_nida	Have an Opinion, Hold a View	ubs	Louw-Nida subdomain 031001
+ln.008	louw_nida	Change Behavior	ubs	Louw-Nida subdomain 041005
+ln.009	louw_nida	Urge, Persuade	ubs	Louw-Nida subdomain 033028
+ln.010	louw_nida	Travel, Journey	ubs	Louw-Nida subdomain 015002
+ln.011	louw_nida	A Point of Time with Reference to Other Points of Time: Before, Long Ago, Now, At the Same Time, When, About, After	ubs	Louw-Nida subdomain 067002
+ln.012	louw_nida	Learn Something Against Someone	ubs	Louw-Nida subdomain 027003
+ln.013	louw_nida	Admit, Confess, Deny	ubs	Louw-Nida subdomain 033022
+ln.014	louw_nida	Swear, Put Under Oath, Vow	ubs	Louw-Nida subdomain 033054
+ln.015	louw_nida	Written Language	ubs	Louw-Nida subdomain 033005
+ln.016	louw_nida	Equivalence	ubs	Louw-Nida subdomain 089019
+ln.017	louw_nida	Happen	ubs	Louw-Nida subdomain 013004
+ln.018	louw_nida	Rebuke	ubs	Louw-Nida subdomain 033046
+ln.019	louw_nida	To Think, Thought	ubs	Louw-Nida subdomain 030001
+ln.020	louw_nida	Parts of the Body	ubs	Louw-Nida subdomain 008002
+ln.021	louw_nida	Change of State	ubs	Louw-Nida subdomain 013002
+ln.022	louw_nida	Question, Answer	ubs	Louw-Nida subdomain 033014
+ln.023	louw_nida	Extension From a Source	ubs	Louw-Nida subdomain 084001
+ln.024	louw_nida	Females	ubs	Louw-Nida subdomain 009003
+ln.025	louw_nida	Teach	ubs	Louw-Nida subdomain 033017
+ln.026	louw_nida	Anger, Be Indignant With	ubs	Louw-Nida subdomain 088024
+ln.027	louw_nida	Stand	ubs	Louw-Nida subdomain 017001
+ln.028	louw_nida	Judicial Hearing, Inquiry	ubs	Louw-Nida subdomain 056004
+ln.029	louw_nida	Discourse Types	ubs	Louw-Nida subdomain 033003
+ln.030	louw_nida	Religious Practice	ubs	Louw-Nida subdomain 053001
+ln.031	louw_nida	Baptize	ubs	Louw-Nida subdomain 053005
+ln.032	louw_nida	Move, Come/Go	ubs	Louw-Nida subdomain 015001
+ln.033	louw_nida	Language Levels	ubs	Louw-Nida subdomain 033004
+ln.034	louw_nida	Sickness, Disease, Weakness	ubs	Louw-Nida subdomain 023009
+ln.035	louw_nida	Experiencer	ubs	Louw-Nida subdomain 090013
+ln.036	louw_nida	Inform, Announce	ubs	Louw-Nida subdomain 033015
+ln.037	louw_nida	High Status or Rank [including persons of high status]	ubs	Louw-Nida subdomain 087003
+ln.038	louw_nida	Happy, Glad, Joyful	ubs	Louw-Nida subdomain 025011
+ln.039	louw_nida	Invite	ubs	Louw-Nida subdomain 033030
+ln.040	louw_nida	Sorrow, Regret	ubs	Louw-Nida subdomain 025023
+ln.041	louw_nida	Hear	ubs	Louw-Nida subdomain 024002
+ln.042	louw_nida	Come, Come To, Arrive	ubs	Louw-Nida subdomain 015006
+ln.043	louw_nida	Persons	ubs	Louw-Nida subdomain 093001
+ln.044	louw_nida	Exist	ubs	Louw-Nida subdomain 013003
+ln.045	louw_nida	Insult, Slander	ubs	Louw-Nida subdomain 033042
+ln.046	louw_nida	Kinship Relations Based upon Marriage	ubs	Louw-Nida subdomain 010004
+ln.047	louw_nida	Name	ubs	Louw-Nida subdomain 033009
+ln.048	louw_nida	Witness, Testify	ubs	Louw-Nida subdomain 033020
+ln.049	louw_nida	Relative Reference	ubs	Louw-Nida subdomain 092006
+ln.050	louw_nida	Trust, Rely	ubs	Louw-Nida subdomain 031009
+ln.051	louw_nida	Do, Perform	ubs	Louw-Nida subdomain 042002
+ln.052	louw_nida	Contrast	ubs	Louw-Nida subdomain 089023
+ln.053	louw_nida	Live, Die	ubs	Louw-Nida subdomain 023007
+ln.054	louw_nida	Be in a Place	ubs	Louw-Nida subdomain 085001
+ln.055	louw_nida	Pierce, Cut	ubs	Louw-Nida subdomain 019002
+ln.056	louw_nida	Have, Possess, Property, Owner	ubs	Louw-Nida subdomain 057001
+ln.057	louw_nida	Love, Affection, Compassion	ubs	Louw-Nida subdomain 025003
+ln.058	louw_nida	Follow, Be a Disciple	ubs	Louw-Nida subdomain 036004
+ln.059	louw_nida	Remain, Stay	ubs	Louw-Nida subdomain 085003
+ln.060	louw_nida	To Choose, To Select, To Prefer	ubs	Louw-Nida subdomain 030006
+ln.061	louw_nida	State	ubs	Louw-Nida subdomain 013001
+ln.062	louw_nida	Ask For, Request	ubs	Louw-Nida subdomain 033012
+ln.063	louw_nida	Prompters of Attention	ubs	Louw-Nida subdomain 091003
+ln.064	louw_nida	Continue	ubs	Louw-Nida subdomain 068002
+ln.065	louw_nida	Places	ubs	Louw-Nida subdomain 093002
+ln.066	louw_nida	Learn	ubs	Louw-Nida domain 027
+ln.067	louw_nida	Defend, Excuse	ubs	Louw-Nida subdomain 033049
+ln.068	louw_nida	In Front Of, Face To Face, In Back Of, Behind	ubs	Louw-Nida subdomain 083006
+ln.069	louw_nida	Visit	ubs	Louw-Nida subdomain 034006
+ln.070	louw_nida	Keep Records	ubs	Louw-Nida subdomain 057020
+ln.071	louw_nida	Archetype, Corresponding Type [Antitype]	ubs	Louw-Nida subdomain 058010
+ln.072	louw_nida	Nature, Character	ubs	Louw-Nida subdomain 058001
+ln.073	louw_nida	Foretell, Tell Fortunes	ubs	Louw-Nida subdomain 033024
+ln.074	louw_nida	Lead, Bring, Take	ubs	Louw-Nida subdomain 015023
+ln.075	louw_nida	Profess Allegiance	ubs	Louw-Nida subdomain 033021
+ln.076	louw_nida	Unite	ubs	Louw-Nida subdomain 063002
+ln.077	louw_nida	Try To Learn	ubs	Louw-Nida subdomain 027004
+ln.078	louw_nida	Establish or Confirm a Relation	ubs	Louw-Nida subdomain 034005
+ln.079	louw_nida	Cause and/or Reason	ubs	Louw-Nida subdomain 089007
+ln.080	louw_nida	Obey, Disobey	ubs	Louw-Nida subdomain 036003
+ln.081	louw_nida	Know	ubs	Louw-Nida domain 028
+ln.082	louw_nida	Markers of Emphasis	ubs	Louw-Nida subdomain 091002
+ln.083	louw_nida	Command, Order	ubs	Louw-Nida subdomain 033032
+ln.084	louw_nida	Content	ubs	Louw-Nida subdomain 090006
+ln.085	louw_nida	Be a Believer, Christian Faith	ubs	Louw-Nida subdomain 031010
+ln.086	louw_nida	Affirmation	ubs	Louw-Nida subdomain 069001
+ln.087	louw_nida	Sit	ubs	Louw-Nida subdomain 017002
+ln.088	louw_nida	Fly	ubs	Louw-Nida subdomain 015033
