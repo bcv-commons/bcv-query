@@ -31,7 +31,8 @@ One row per constituent: the words of a layout clause grouped under their neares
                        Hebrew preposition phrases: lxx_nt_domain = the Septuagint's preposition + case + the LN domain its noun's lemma
                        has in the NT, read through the NT's Greek rows (8+ rows, 60%); lxx_nt = the same without the domain (20+, 60%);
                        hebrew_domain = Hebrew preposition + head noun's SDBH domain, learned from the Hebrew rows the first two labelled;
-                       lxx_dative = לְ the Septuagint gives as a bare dative -> recipient; hebrew_prep = כְּ -> standard
+                       lxx_dative = לְ the Septuagint gives as a bare dative -> recipient; hebrew_prep = כְּ -> standard;
+                       a `+speech` suffix: a goal turned addressee because the verb is one of speaking
 
 Codes only; no English content values. Licence of the output: CC BY-SA 4.0 (the Hebrew layout's keys; the UBS senses).
 Not read: BHSA, TBTA, English text.
@@ -46,6 +47,7 @@ import datetime
 import json
 import sqlite3
 import subprocess
+import unicodedata
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -62,6 +64,7 @@ NOMINAL = {"noun", "pron", "adj", "num"}
 COLS = ["corpus", "clause_key", "words", "head", "relation", "verb", "voice", "macrorole", "case", "prep", "prep_lemma", "prep_ln",
         "prep_lxx", "lxx_case", "role", "role_basis"]
 LXX = HERE.parent / "lxx" / "data" / "lxx-glaux.db"
+SPEAK_HBO = {"0559", "1696", "7121", "6680", "6030", "7592", "5046", "2199", "6817", "6419", "0560", "4449"}
 CASE = {"N": "nominative", "G": "genitive", "D": "dative", "A": "accusative", "V": "vocative"}
 LN = {"090001": "agent", "090002": "instrument", "090003": "source_event", "090004": "responsibility", "090005": "viewpoint",
       "090006": "content", "090007": "guarantor", "090008": "opposition", "090009": "beneficiary", "090010": "reason_participant",
@@ -178,7 +181,10 @@ def main() -> int:
             for (nid, rel), gw in groups.items():
                 head = next((w for w in gw if cls_of.get(w) in NOMINAL), "")
                 mr = next((labs[w] for w in gw if w in labs), "")
-                prep = next((w for w in gw if cls_of.get(w) == "prep"), "")
+                # the preposition heading the constituent: its first word after conjunctions (a preposition nested deeper, as
+                # διά in "Παῦλος κλητὸς ἀπόστολος ... διὰ θελήματος θεοῦ", does not give the whole constituent a role)
+                first = next((w for w in gw if cls_of.get(w) not in ("cj", "conj")), "")
+                prep = first if cls_of.get(first) == "prep" else ""
                 ln = prep_ln.get(prep, "") if corpus == "grc" and prep else ""
                 role, basis = "", ""
                 if mr == "A0":
@@ -230,7 +236,7 @@ def main() -> int:
         new = ""
         if r[I["prep_lemma"]] == "לְ" and r[I["lxx_case"]] == "dative" and lxx_word(r[I["prep"]])[0] in ("", "ὁ"):
             new, b_ = "recipient", "lxx_dative"
-        elif r[I["prep_lemma"]] == "כְּ":
+        elif unicodedata.normalize("NFC", r[I["prep_lemma"]]) == unicodedata.normalize("NFC", "כְּ"):   # MACULA orders dagesh / vowel otherwise
             new, b_ = "standard", "hebrew_prep"
         if new:
             r[I["role"]], r[I["role_basis"]] = new, b_
@@ -264,6 +270,19 @@ def main() -> int:
                     st[("hbo", "role:-")] -= 1
                     st[("hbo", "role:" + top)] += 1
                     st[("hbo", "basis:hebrew_domain")] += 1
+    # goal -> addressee with a verb of speaking (research 2026-11-13: Tagalog kay / sa): Hebrew אֶל / לְ / עַל / Aramaic לְ with
+    # אָמַר, דָּבַר, קָרָא, צָוָה, עָנָה, שָׁאַל, נָגַד, זָעַק, צָעַק, פָּלַל, Aramaic אֲמַר, מָלַל; Greek: a goal with a verb whose sense is speaking (LN 33)
+    strong_of = dict(m.execute("select key, strong from macula_words where lang='hbo'"))
+    for r in rows:
+        if r[I["role"]] != "goal":
+            continue
+        v = r[I["verb"]]
+        speech = ((strong_of.get(v) or "").zfill(4)[:4] in SPEAK_HBO and r[I["prep_lemma"]] in ("אֶל", "לְ", "עַל"))\
+            if r[0] == "hbo" else dom.get(v, "")[:3] == "033"
+        if speech:
+            r[I["role"]], r[I["role_basis"]] = "addressee", r[I["role_basis"]] + "+speech"
+            st[(r[0], "role:goal")] -= 1
+            st[(r[0], "role:addressee")] += 1
     OUT.mkdir(parents=True, exist_ok=True)
     with open(OUT / "roles.tsv", "w", encoding="utf-8") as f:
         f.write("\t".join(COLS) + "\n")
