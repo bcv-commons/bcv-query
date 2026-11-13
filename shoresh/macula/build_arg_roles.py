@@ -26,7 +26,12 @@ One row per constituent: the words of a layout clause grouped under their neares
                        basis, specification, relation, standard, separation, origin, distribution (LN 89), accompaniment (LN 34),
                        partitive (LN 63.D), state (LN 13); experiencer becomes addressee when the verb's sense is one of speaking
                        (LN 33); '' when no rule applies
-  role_basis           frame | frame_passive | ln | ln_speech | '' : which rule gave `role`
+  lxx_case             Hebrew: the case of the Septuagint word MACULA aligns to the phrase's first noun (GLAUx parse, its verse first)
+  role_basis           frame | frame_passive | ln | ln_speech | lxx_nt_domain | lxx_nt | hebrew_domain | '' : which rule gave `role`.
+                       Hebrew preposition phrases: lxx_nt_domain = the Septuagint's preposition + case + the LN domain its noun's lemma
+                       has in the NT, read through the NT's Greek rows (8+ rows, 60%); lxx_nt = the same without the domain (20+, 60%);
+                       hebrew_domain = Hebrew preposition + head noun's SDBH domain, learned from the Hebrew rows the first two labelled;
+                       lxx_dative = לְ the Septuagint gives as a bare dative -> recipient; hebrew_prep = כְּ -> standard
 
 Codes only; no English content values. Licence of the output: CC BY-SA 4.0 (the Hebrew layout's keys; the UBS senses).
 Not read: BHSA, TBTA, English text.
@@ -55,7 +60,9 @@ LOWFAT = HERE / "lowfat-hbo.db"
 ROLES = ("s", "o", "o2", "io", "p", "adv", "pp")
 NOMINAL = {"noun", "pron", "adj", "num"}
 COLS = ["corpus", "clause_key", "words", "head", "relation", "verb", "voice", "macrorole", "case", "prep", "prep_lemma", "prep_ln",
-        "prep_lxx", "role", "role_basis"]
+        "prep_lxx", "lxx_case", "role", "role_basis"]
+LXX = HERE.parent / "lxx" / "data" / "lxx-glaux.db"
+CASE = {"N": "nominative", "G": "genitive", "D": "dative", "A": "accusative", "V": "vocative"}
 LN = {"090001": "agent", "090002": "instrument", "090003": "source_event", "090004": "responsibility", "090005": "viewpoint",
       "090006": "content", "090007": "guarantor", "090008": "opposition", "090009": "beneficiary", "090010": "reason_participant",
       "090011": "agent", "090012": "agent", "090013": "experiencer", "090014": "experiencer",
@@ -104,6 +111,21 @@ def _constituents(t, corpus):
     return out
 
 
+def _lxx_lookup():
+    """GLAUx Septuagint: (book, chapter, verse, plain form) -> (lemma, case letter); plain form -> commonest (lemma, case)"""
+    from macula.build_clause_columns import plain
+    verse, glob_ = {}, collections.defaultdict(collections.Counter)
+    for b, c, v, surf, lem, morph in _ro(LXX).execute("select book, chapter, verse, surface, lemma, morph from lxx_words"):
+        mm = (morph or "").split(".", 1)
+        cs = mm[1][0] if len(mm) == 2 and mm[1][:1] in CASE and mm[0][:1] in ("N", "A", "R") else ""   # N.NSM: case first
+        if mm[0] == "P":
+            cs = ""
+        key = plain(surf)
+        verse.setdefault((b, c, v, key), (lem or "", cs))
+        glob_[key][(lem or "", cs)] += 1
+    return plain, verse, {k: c.most_common(1)[0][0] for k, c in glob_.items()}
+
+
 def main() -> int:
     t = _ro(TREES)
     m = _ro(MSPINE)
@@ -111,7 +133,20 @@ def main() -> int:
     for k, cl, lem in m.execute("select key, class, lemma from macula_words"):
         cls_of[k], lemma_of[k] = cl or "", lem or ""
     case = {k: c or "" for k, c in _ro(LSPINE).execute("select key, case_ from spine_words where length(key)=11")}
-    lxx = {k: g or "" for k, g in _ro(LOWFAT).execute("select key, greek from lowfat_words where class='prep' and is_inserted=0")}
+    lxx, hpos = {}, {}
+    for k, g, b, c, v in _ro(LOWFAT).execute("select key, greek, book, chapter, verse from lowfat_words where is_inserted=0"):
+        lxx[k], hpos[k] = (g or "").strip('"'), (b, c, v)
+    plain, lxx_verse, lxx_glob = _lxx_lookup()
+
+    def lxx_word(k):
+        """the Septuagint word MACULA aligns to Hebrew word k: (lemma, case letter), its own verse first"""
+        g = lxx.get(k, "")
+        if not g:
+            return "", ""
+        b, c, v = hpos[k]
+        pl = plain(g.split()[-1])
+        return lxx_verse.get((b, c, v, pl)) or lxx_glob.get(pl, ("", ""))
+    nt_table = collections.defaultdict(collections.Counter)    # (Greek preposition lemma, case[, noun's LN domain]) -> roles, NT
     frame_lab = collections.defaultdict(dict)                 # verb -> word -> label
     for v, lab, a in m.execute("select verb_key, role, arg_key from frames"):
         if a:
@@ -120,14 +155,18 @@ def main() -> int:
     for r in csv.DictReader(open(DATA / "word-senses-ubs/words.tsv", encoding="utf-8"), delimiter="\t"):
         if r["lang"] == "grc" and r["subdomains"]:
             prep_ln.setdefault(r["key"], r["subdomains"].split(";")[0])
-        if r["lang"] == "grc" and r["domains"]:
+        if r["domains"]:                                     # Greek LN / Hebrew SDBH domain of each word (first sense)
             dom.setdefault(r["key"], r["domains"].split(";")[0])
+    lemma_dom_c = collections.defaultdict(collections.Counter)  # Greek lemma -> its LN domains in the NT
+    for k, d in dom.items():
+        lemma_dom_c[lemma_of.get(k, "")][d[:3]] += 1
+    lemma_dom = {l: c.most_common(1)[0][0] for l, c in lemma_dom_c.items() if l}
     cc = {}
     for name, corpus in (("hebrew", "hbo"), ("greek-nt", "grc")):
         for r in pq.read_table(DATA / "clause-columns" / f"{name}.parquet", columns=["clause_key", "verb", "voice"]).to_pylist():
             cc[(corpus, r["clause_key"])] = (r["verb"] or "", r["voice"] or "")
     rows, st = [], collections.Counter()
-    for corpus in ("hbo", "grc"):
+    for corpus in ("grc", "hbo"):            # Greek first: its preposition roles teach the table the Hebrew rows read
         con = _constituents(t, corpus)
         for ck, ws in _layout_clauses(corpus):
             verb, voice = cc.get((corpus, ck), ("", ""))
@@ -153,14 +192,78 @@ def main() -> int:
                     basis = "ln" if role else ""
                     if role == "experiencer" and dom.get(verb, "")[:3] == "033":   # LN 90 M with a verb of speaking (LN 33)
                         role, basis = "addressee", "ln_speech"
+                    if role:
+                        nt_table[(lemma_of.get(prep, ""), case.get(head, ""))][role] += 1
+                        nt_table[(lemma_of.get(prep, ""), case.get(head, ""), dom.get(head, "")[:3])][role] += 1
+                lxx_case = ""
+                if corpus == "hbo" and prep and not mr:
+                    # the Septuagint's preposition for this one and the case of the word it gives for the head noun, read
+                    # through the NT: the role Greek preposition + case most often has there (at least 20 phrases, 60%)
+                    # first with the LN domain the Septuagint noun's lemma has in the NT, then without it
+                    plem = lxx_word(prep)[0]
+                    after = [w for w in gw if w > prep and cls_of.get(w) in NOMINAL]
+                    nlem, ncase = lxx_word(after[0]) if after else ("", "")
+                    lxx_case = CASE.get(ncase, "")
+                    for key, minimum, b_ in (((plem, lxx_case, lemma_dom.get(nlem, "")), 8, "lxx_nt_domain"),
+                                             ((plem, lxx_case), 20, "lxx_nt")):
+                        dist = nt_table.get(key)
+                        if plem and lxx_case and all(key) and dist and sum(dist.values()) >= minimum:
+                            top, n = dist.most_common(1)[0]
+                            if n / sum(dist.values()) >= 0.6:
+                                role, basis = top, b_
+                                break
                 rows.append([corpus, ck, " ".join(gw), head, rel, verb, voice, mr, case.get(head, "") if corpus == "grc" else "",
                              prep, lemma_of.get(prep, "") if prep else "", ln, lxx.get(prep, "") if corpus == "hbo" and prep else "",
-                             role, basis])
+                             lxx_case, role, basis])
                 st[(corpus, "rows")] += 1
                 st[(corpus, "role:" + (role or "-"))] += 1
                 if prep:
                     st[(corpus, "prep")] += 1
-                    st[(corpus, "prep_with_role" if basis == "ln" else "prep_no_role")] += 1
+                    st[(corpus, "prep_with_role" if basis in ("ln", "ln_speech", "lxx_nt", "lxx_nt_domain") else
+                                "prep_core" if mr else "prep_no_role")] += 1
+    # Hebrew rules for what the Septuagint route cannot see: לְ that the Septuagint gives as a bare dative (no preposition: the
+    # aligned form is an article or nothing, the noun dative) -> recipient; כְּ -> standard (a comparison)
+    I = {c: i for i, c in enumerate(COLS)}
+    for r in rows:
+        if r[0] != "hbo" or not r[I["prep"]] or r[I["role"]] or r[I["macrorole"]]:
+            continue
+        new = ""
+        if r[I["prep_lemma"]] == "לְ" and r[I["lxx_case"]] == "dative" and lxx_word(r[I["prep"]])[0] in ("", "ὁ"):
+            new, b_ = "recipient", "lxx_dative"
+        elif r[I["prep_lemma"]] == "כְּ":
+            new, b_ = "standard", "hebrew_prep"
+        if new:
+            r[I["role"]], r[I["role_basis"]] = new, b_
+            st[("hbo", "prep_no_role")] -= 1
+            st[("hbo", "prep_with_role")] += 1
+            st[("hbo", "role:-")] -= 1
+            st[("hbo", "role:" + new)] += 1
+            st[("hbo", "basis:" + b_)] += 1
+    # second Hebrew step: (Hebrew preposition lemma, head noun's SDBH domain at two levels) -> role, learned from the Hebrew rows
+    # the Septuagint route labelled (at least 8 rows, 60%), applied to the Hebrew preposition phrases still without a role
+    I = {c: i for i, c in enumerate(COLS)}
+    learn = collections.defaultdict(collections.Counter)
+
+    def hkey(r):
+        ws = r[I["words"]].split()
+        p_ = r[I["prep"]]
+        nom = [w for w in ws if w > p_ and cls_of.get(w) in NOMINAL]
+        return (r[I["prep_lemma"]], dom.get(nom[0], "")[:6]) if nom and dom.get(nom[0]) else None
+    for r in rows:
+        if r[0] == "hbo" and r[I["role_basis"]] in ("lxx_nt", "lxx_nt_domain") and hkey(r):
+            learn[hkey(r)][r[I["role"]]] += 1
+    for r in rows:
+        if r[0] == "hbo" and r[I["prep"]] and not r[I["role"]] and not r[I["macrorole"]] and hkey(r):
+            dist = learn.get(hkey(r))
+            if dist and sum(dist.values()) >= 8:
+                top, n = dist.most_common(1)[0]
+                if n / sum(dist.values()) >= 0.6:
+                    r[I["role"]], r[I["role_basis"]] = top, "hebrew_domain"
+                    st[("hbo", "prep_no_role")] -= 1
+                    st[("hbo", "prep_with_role")] += 1
+                    st[("hbo", "role:-")] -= 1
+                    st[("hbo", "role:" + top)] += 1
+                    st[("hbo", "basis:hebrew_domain")] += 1
     OUT.mkdir(parents=True, exist_ok=True)
     with open(OUT / "roles.tsv", "w", encoding="utf-8") as f:
         f.write("\t".join(COLS) + "\n")
