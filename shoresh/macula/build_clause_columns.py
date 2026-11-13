@@ -52,8 +52,15 @@ Columns (research's names and value names; the definition is research's unless "
                  the form (then of the Greek NT form) anywhere ("form"); "" when unknown
   neg_scope, subj_form, part, part_switch, front, focus, m_trans, subj_role, recip   research's extra columns, same rules
                  (clause_layers.py extra_ot / extra_nt), from the same MACULA data read from our stores
-Not rebuilt: research's copies of layout columns (kind, rule, relation, discourse, via, role, junction, parent, depth: read the layout),
-force / person / number / gender / stem (the layout's force column and the spine's morphology hold them), juncture / nexus (wave 2,
+  kind           the layout's clause kind (VC / NC), carried because consumers filter on it
+  force          prohibitive | imperative | jussive | cohortative | hortatory | interrogative | declarative: the strongest of the
+                 layout's force codes over the clause's segments (macula.segment_columns `force`: fc.proh, fc.imp, fc.jus, fc.coh,
+                 fc.hort, fc.q), declarative when none (ours: research reads the verb form and a few particles)
+  interrog       true when the clause has the question code fc.q
+  person, number, gender, stem, causative, strong   the main verb's (Hebrew from MACULA's morph code and Strong's number; Greek from
+                 the spine's morphology, stem null, causative false); causative = hiphil, hophal and the causative stems of both languages
+Not rebuilt: research's copies of layout columns (rule, relation, discourse, via, role, junction, parent, depth: read the layout),
+legal_future (a reading, left out of the layouts' force on purpose), juncture / nexus (wave 2,
 clause relation), akt / akt_p / juss_p (model answers, not source facts), heb_form (research's private Delitzsch alignment).
 """
 from __future__ import annotations
@@ -320,6 +327,40 @@ def _hebrew_verb(morph: str, lang: str):
     return {"conj": H_CONJ.get(m[2], m[2]), "stem": (A_STEM if lang == "A" else H_STEM).get(m[1], m[1])}
 
 
+# force codes of the layouts (macula.segment_columns, from build_passage_facts.force_codes) -> research's words, strongest first
+FORCE = [("fc.proh", "prohibitive"), ("fc.imp", "imperative"), ("fc.jus", "jussive"), ("fc.coh", "cohortative"),
+         ("fc.hort", "hortatory"), ("fc.q", "interrogative")]
+CAUSATIVE = {"hiphil", "hophal", "tiphil", "aphel", "haphel", "saphel", "shaphel", "hephal", "tiphel", "ittaphal", "hishtaphel",
+             "ishtaphel", "hithaphel"}
+G_PNG = {"first": "1", "second": "2", "third": "3", "singular": "s", "plural": "p", "masculine": "m", "feminine": "f", "neuter": "n"}
+
+
+def _force(book: str, rows: list[dict], key) -> dict[str, list[str]]:
+    """clause key -> the force codes of its segments (macula.segment_columns, the layouts' `force` column)"""
+    from macula import segment_columns as sc
+    out: dict[str, list[str]] = collections.defaultdict(list)
+    for r, c in zip(rows, sc.columns(book, rows)):
+        for code in c.get("force") or []:
+            if code not in out[key(r)]:
+                out[key(r)].append(code)
+    return out
+
+
+def _force_word(codes: list[str]) -> str:
+    return next((w for c, w in FORCE if c in codes), "declarative")
+
+
+def _hebrew_png(morph: str, lang: str) -> tuple:
+    """person, gender, number of a MACULA Hebrew / Aramaic verb morph (HVqp3ms, HVqrmsa ...); None where the form has none"""
+    m = morph[1:] if lang == "A" and morph.startswith("A") else morph
+    rest = m[3:] if m.startswith("V") else ""
+    person = rest[0] if rest[:1] in ("1", "2", "3") else None
+    rest = rest[1:] if person else rest
+    gender = rest[0] if rest[:1] in ("m", "f", "c", "b") else None
+    number = rest[1] if gender and rest[1:2] in ("s", "p", "d") else None
+    return person, gender, number
+
+
 def hebrew(S: Stores, replica: bool = False) -> list[dict]:
     """One row per clause_key. replica=True reproduces research's reading, for the contract check only: a clause the layout splits
     into several segments takes its verb (and neg) from the last segment and its word order from the first (research's
@@ -343,6 +384,7 @@ def hebrew(S: Stores, replica: bool = False) -> list[dict]:
         for r in rows:
             clauses.setdefault(r["clause_key"], []).append(r)
         last_subj, last_part = {}, {}
+        fc = {} if replica else _force(book, rows, lambda r: r["clause_key"])
         for k, segs in clauses.items():
             r0 = segs[0]
             ws = sorted({w for r in segs for w in r["words"]})
@@ -412,6 +454,10 @@ def hebrew(S: Stores, replica: bool = False) -> list[dict]:
                        undergoer=und, undergoer_basis=ub, args="+".join(labs),
                        subj=subj, subj_switch=sw, lxx_form=gk, lxx_tense=t, lxx_mood=m, lxx_basis=basis)
             row.update(_extra_hebrew(ws, v, conj, voice, args, info, last_part, ch))
+            person, gender, number = _hebrew_png(info(v)[7], info(v)[9]) if v else (None, None, None)
+            codes = fc.get(k, [])
+            row.update(kind=r0.get("kind"), force=_force_word(codes), interrog="fc.q" in codes, person=person, number=number,
+                       gender=gender, stem=stem, causative=stem in CAUSATIVE, strong=(info(v)[2] or None) if v else None)
             out.append(row)
     return out
 
@@ -459,6 +505,7 @@ def greek(S: Stores) -> list[dict]:
     out = []
     for book, rows in _layout(GRC_LAYOUT).items():
         last_subj, last_part = {}, {}
+        fc = _force(book, rows, lambda r: r["first"])
         for r in rows:
             k, ws = r["first"], list(r["words"])
             neg, cand, prev = None, [], None
@@ -523,6 +570,11 @@ def greek(S: Stores) -> list[dict]:
                        neg=neg, speech=sp, speaker=r["speaker_id"] or "", genre=genre, line=line, actor=actor, undergoer=undergoer, undergoer_basis=ubasis,
                        args="+".join(labs), subj=subj, subj_switch=sw)
             row.update(_extra_greek(ws, v, voice, neg, finite, info, S, last_part, ch))
+            codes = fc.get(k, [])
+            x = info(v) if v else None
+            row.update(kind=r.get("kind"), force=_force_word(codes), interrog="fc.q" in codes,
+                       person=G_PNG.get(x[8]) if x else None, number=G_PNG.get(x[9]) if x else None,
+                       gender=G_PNG.get(x[10]) if x else None, stem=None, causative=False, strong=(x[1] or None) if x else None)
             out.append(row)
     return out
 

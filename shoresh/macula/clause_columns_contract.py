@@ -24,9 +24,10 @@ from macula import build_clause_columns as bc
 # columns compared, per testament; "id" columns (word ids, lemmas, forms) get kinds of disagreement instead of value pairs
 HEB = ["verb", "conj", "voice", "neg", "speech", "speaker", "frame", "genre", "line", "actor", "undergoer", "args", "subj", "subj_switch",
        "lxx_form", "lxx_tense", "lxx_mood", "neg_scope", "subj_form", "part", "part_switch", "front", "focus", "m_trans", "subj_role",
-       "recip"]
+       "recip", "kind", "force", "interrog", "person", "number", "gender", "stem", "causative", "strong"]
 GRC = ["verb", "conj", "voice", "neg", "speech", "speaker", "genre", "line", "actor", "undergoer", "neg_scope", "subj_form", "part",
-       "part_switch", "front", "focus", "m_trans", "subj_role", "recip"]
+       "part_switch", "front", "focus", "m_trans", "subj_role", "recip", "kind", "force", "interrog", "person", "number", "gender",
+       "strong"]
 LAYOUT_HEB = {"kind": "kind", "rule": "rule", "relation": "relation", "parent": "parent_key", "depth": "depth"}
 LAYOUT_GRC = {"kind": "kind", "rule": "rule", "parent": "parent", "depth": "depth"}
 IDS = {"verb", "speaker", "frame", "args", "subj", "lxx_form", "part", "rule", "parent"}
@@ -50,6 +51,12 @@ VERDICT.update({
                            "Hebrew definition; research's word-own-role rule replicated from our stores agrees 1.0000",
     ("greek-nt", "undergoer"): "differs by design: tree roles o / o2 and Greek frames (A1 inside overt, outside implicit), as the "
                                "Hebrew definition; research's word-own-role rule replicated from our stores agrees 1.0000",
+})
+VERDICT.update({
+    ("greek-nt", "force"): "differs by design: the Greek layout's force codes (v0.7): a question covers every word from the stop before "
+                           "to the question mark within its quotation, and exhortation / prohibition only in main clauses (rules "
+                           "proposed by make-tanakh-research, packets 03 and 06); research's table reads the clause alone",
+    ("greek-nt", "interrog"): "differs by design: true where the clause carries the layout's question code fc.q (as `force`)",
 })
 NOTES: dict[tuple[str, str], str] = {}
 
@@ -239,10 +246,9 @@ def run(out: Path, snap: Path) -> None:
                   f"{VERDICT.get((r['testament'], r['column']), '')} |")
     md += ["", "Columns of ours with no counterpart in research's table (not compared): Hebrew `speaker_id` (the layer's character id, "
            "as the Greek layout uses), `lxx_basis` (verse | form); Greek `args`, `subj`, `subj_switch` (from the Greek frames and "
-           "references). Research columns not rebuilt here: copies of layout columns (`kind`, `rule`, `relation`, `discourse`, `via`, "
-           "`role`, `junction`, `parent`, `depth`: checked above as layout identity), morphology (`stem`, `person`, `number`, "
-           "`gender`, `strong`, `causative`, `interrog`: in the spine), `force` / `legal_future` (the layouts' own `force` codes), "
-           "`juncture` / `nexus` (wave 2, clause relation), `akt` / `akt_p` / `juss_p` (Jev model answers: model layer, not source "
+           "references). Research columns not rebuilt here: copies of layout columns (`rule`, `relation`, `discourse`, `via`, "
+           "`role`, `junction`, `parent`, `depth`: checked above as layout identity), `legal_future` (a reading, left out of the "
+           "layouts' force on purpose), `juncture` / `nexus` (wave 2, clause relation), `akt` / `akt_p` / `juss_p` (Jev model answers: model layer, not source "
            "facts), `heb_form` (research's private Delitzsch alignment and tagger).", "", "## Disagreements", ""]
     for r in results:
         if not r["confusion"] and not r["diag"]:
