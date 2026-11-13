@@ -25,6 +25,7 @@ import shutil
 import subprocess
 import tarfile
 from pathlib import Path
+from macula import release_guard  # refuses TBTA and private inputs
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -61,6 +62,7 @@ def main() -> None:
     ap.add_argument("--src", default=str(HERE / "data" / "speaker-layer"))
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
+    release_guard.check(a)
     src, out = Path(a.src), Path(a.out)
     if not a.allow_dirty:
         dirty = subprocess.run(["git", "status", "--porcelain", "--", str(HERE), str(CORRECTIONS.parent)], cwd=ROOT,

@@ -42,5 +42,8 @@ earlier remain in the git history of this public repository and stay non-commerc
 `parallelism/parallelism_pairs.local.tsv` (the BHSA-derived "detected" tier). They remain in the git history of this public repository.
 
 ## Rules for new files
-1. Anything published as CC0 / CC BY / CC BY-SA must not take BHSA, OpenHebrewBible, or UBS MARBLE fields (ETCBC Nestle1904 is MIT / MACULA-derived, not NC, but prefer MACULA Greek directly) as input. Use MACULA (and the open sources named in `internal-docs`).
+1. Anything published as CC0 / CC BY / CC BY-SA must not take BHSA or OpenHebrewBible as input, nor MACULA's inline copies of the UBS dictionary fields
+   (`sdbh`, `lexdomain`, `coredomain`, `contextualdomain`, `sensenumber`, `domain`, `ln`; they came "used with permission"). UBS's own open release
+   (github.com/ubsicap/ubs-open-license, CC BY-SA 4.0 since 2026-09: SDBH, Louw-Nida, the word index, parallel passages) may be used, and anything built
+   from it is CC BY-SA 4.0 (decision 2026-11-13). ETCBC Nestle1904 is MIT / MACULA-derived, not NC, but prefer MACULA Greek directly. Use MACULA (and the open sources named in `internal-docs`).
 2. Facts about the Hebrew or Greek text are derived from original-language and versification sources, never from English translations.

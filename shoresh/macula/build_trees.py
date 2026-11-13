@@ -4,7 +4,9 @@
 Source: Clear-Bible/macula-hebrew (WLC/lowfat) and Clear-Bible/macula-greek (Nestle1904/lowfat), both CC BY 4.0, no BHSA or ETCBC input.
 Only the tree's STRUCTURAL attributes are kept (class, role, rule, type, junction, clauseType, articular, head) plus the surface, trailer, lemma, class and
 Strong's number of each word, and the verb form (`type`: qatal, wayyiqtol, ...) and language (H/A) attributes. Everything else about a token (gloss, morphology, lexeme id) is joined from lexeme-spine-macula.db / macula-spine.db by its key at read
-time. The UBS MARBLE fields (domain, ln, sdbh, lexdomain, coredomain, sensenumber) and the translations (mandarin, english) are never read.
+time. MACULA's inline copies of the UBS dictionary fields (domain, ln, sdbh, lexdomain, coredomain, sensenumber) and the translations (mandarin, english)
+are not read here. Senses and domains come from UBS's own open release (CC BY-SA 4.0 since 2026-09; macula.build_ubs_open, macula.ubs,
+macula.build_word_senses_ubs), keyed by word.
 
 Tables
   nodes(id, corpus, kind 'sentence'|'wg', parent, ord, cls, role, rule, type, junction, clausetype, articular, head, book, chapter, verse, lo, hi)
@@ -232,7 +234,7 @@ def main() -> int:
         ("built", time.strftime("%Y-%m-%d")), ("source_hbo", "Clear-Bible/macula-hebrew WLC/lowfat (CC BY 4.0)"),
         *([("source_hbo_commit", hbo_commit)] if (hbo_commit := _git_commit(a.hbo)) else []),
         ("source_grc", "Clear-Bible/macula-greek Nestle1904/lowfat (CC BY 4.0)"),
-        ("note", "structural attributes only; UBS MARBLE fields and translations are never read")])
+        ("note", "structural attributes only; MACULA's inline UBS fields and translations are not read (senses come from UBS's open release)")])
     con.commit()
     for t in ("nodes", "words"):
         print(t, con.execute(f"SELECT corpus, COUNT(*) FROM {t} GROUP BY corpus").fetchall(), file=sys.stderr)

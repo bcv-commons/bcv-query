@@ -27,6 +27,7 @@ import subprocess
 from pathlib import Path
 
 import pyarrow.parquet as pq
+from macula import release_guard  # refuses TBTA and private inputs
 
 HERE = Path(__file__).resolve().parent
 CARD = HERE / "tanakh_hebrew_clauses_card.md"
@@ -52,6 +53,7 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
+    release_guard.check(a)
     assert sha256(a.spine) == SPINE_SHA256, f"{a.spine} is not {SPINE_TAG}"
     spine = {k: (s, bool(c)) for k, s, c in sqlite3.connect(a.spine).execute(
         "SELECT key, surface, is_content FROM spine_words")}

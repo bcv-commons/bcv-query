@@ -21,6 +21,7 @@ from pathlib import Path
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+from macula import release_guard  # refuses TBTA and private inputs
 
 ROOT = Path(__file__).resolve().parents[2]
 CARD = Path(__file__).with_name("hebrew_phrase_types_model_card.md")
@@ -44,6 +45,7 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
+    release_guard.check(a)
     assert sha256(a.table) == TABLE_SHA256, f"{a.table} is not packet 07 v2.1"
     dirty = subprocess.check_output(["git", "status", "--porcelain", "--", "shoresh/macula"], cwd=ROOT, text=True).strip()
     if dirty and not a.allow_dirty:

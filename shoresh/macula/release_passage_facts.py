@@ -20,6 +20,7 @@ import subprocess
 from pathlib import Path
 
 from macula import build_passage_facts as pf
+from macula import release_guard  # refuses TBTA and private inputs
 
 HERE = Path(__file__).resolve().parent
 CARD = HERE / "passage_facts_card.md"
@@ -88,6 +89,7 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
+    release_guard.check(a)
     ours = ["macula/build_passage_facts.py", "macula/release_passage_facts.py", "macula/passage_facts_card.md", "macula/unfoldingword.py",
             "macula/mam.py", "macula/ubs.py", "macula/nestle1904_layout.py", "../resources/passage_facts"]
     code = subprocess.check_output(["git", "log", "-1", "--format=%h", "--", *ours], cwd=HERE.parent, text=True).strip()

@@ -241,3 +241,9 @@ doc-bak/
 
 # passage facts: pinned downloads (unfoldingWord v91, MAM, UBS, BSB); re-derivable
 shoresh/macula/.cache/
+# wave 0 builds (development-phase plan 2026-11-13); outputs local until a release
+shoresh/macula/data/word-senses-ubs/
+shoresh/macula/data/translation-notes/
+shoresh/macula/data/clause-args/
+shoresh/macula/data/entities/
+shoresh/macula/data/clause-columns/

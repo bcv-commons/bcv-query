@@ -33,6 +33,7 @@ import time
 from pathlib import Path
 
 from macula import discourse_rules, segment_columns
+from macula import release_guard  # refuses TBTA and private inputs
 
 HERE = Path(__file__).resolve().parent
 CARD = HERE / "clause_layout_card.md"
@@ -202,6 +203,7 @@ def main() -> None:
     ap.add_argument("--allow-dirty", action="store_true", help="package even if macula/ has uncommitted changes")
     ap.add_argument("--tag", help="the release tag (default v<rules version>; a release that only adds columns gets v<rules>.<n>)")
     args = ap.parse_args()
+    release_guard.check(args)
     src, out = Path(args.src), Path(args.out)
     if out.exists():
         raise SystemExit(f"{out} exists; give a new folder")

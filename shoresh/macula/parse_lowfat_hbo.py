@@ -33,8 +33,9 @@ word IN the clause verb itself gets head_key=NULL (it's that clause's root).
 LICENSE DISCIPLINE (same posture as macula.parse.py): the lowfat <w> elements bundle UBS MARBLE
 fields (`sdbh`, `lexdomain`, `coredomain`, `sensenumber`) inline with the CC-BY grammatical ones --
 verified directly, they're present on ordinary word elements. Only CC-BY fields are extracted here;
-`sdbh`/`lexdomain`/`coredomain`/`sensenumber`/`contextualdomain`/`domain`/`ln`/`mandarin` are never
-read.
+`sdbh`/`lexdomain`/`coredomain`/`sensenumber`/`contextualdomain`/`domain`/`ln`/`mandarin` are not
+read. (Since 2026-09 UBS publishes its dictionaries as CC BY-SA 4.0; senses and domains come from that
+release instead: macula.build_ubs_open, macula.ubs, macula.build_word_senses_ubs.)
 
   python -m macula.parse_lowfat_hbo                    # git-fetch (sparse, blobless) + build
   MACULA_HBO_LOWFAT_DIR=/path/to/WLC/lowfat python -m macula.parse_lowfat_hbo   # use a local checkout
@@ -64,7 +65,7 @@ _XML_ID = "{http://www.w3.org/XML/1998/namespace}id"  # ElementTree expands xml:
 # CC-BY grammatical fields only -- mirrors macula.parse.MORPH_FIELDS + COLS, extended with the
 # lowfat tree's own structural attributes (role, head, rule, class govern tree-walking below, not
 # extracted as flat fields). Deliberately excludes sdbh/lexdomain/coredomain/sensenumber/
-# contextualdomain/domain/ln (UBS MARBLE, NC) and mandarin (a different licensed translation).
+# contextualdomain/domain/ln (MACULA's copies of the UBS fields; the open UBS release is read elsewhere) and mandarin (a different licensed translation).
 _W_FIELDS = ("class", "morph", "pos", "type", "lemma", "gloss", "state",
              "gender", "number", "person", "role")
 _STRONG_ATTR = "strongnumberx"

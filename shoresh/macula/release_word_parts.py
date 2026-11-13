@@ -25,6 +25,7 @@ import pyarrow.parquet as pq
 
 from macula import build_word_parts as B
 from macula import build_passage_facts as pf
+from macula import release_guard  # refuses TBTA and private inputs
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
@@ -52,6 +53,7 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
+    release_guard.check(a)
     dirty = subprocess.check_output(["git", "status", "--porcelain", "--", "shoresh/macula"], cwd=ROOT, text=True).strip()
     if dirty and not a.allow_dirty:
         raise SystemExit(f"uncommitted changes in shoresh/macula:\n{dirty}")

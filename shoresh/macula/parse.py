@@ -4,9 +4,11 @@
   MACULA_GRC_TSV=… MACULA_HBO_TSV=… python -m macula.parse   # use local files
 
 Ingests ONLY the CC BY 4.0 columns (frame, subjref, participantref, referent,
-role/class, lemma/strong/gloss). The UBS MARBLE domain/sense columns
-(lexdomain/coredomain/contextualdomain/sensenumber/domain/ln) are deliberately
-skipped — they are "used with permission," outside CC-BY (plan §12).
+role/class, lemma/strong/gloss). MACULA's copies of the UBS domain/sense columns
+(lexdomain/coredomain/contextualdomain/sensenumber/domain/ln) are skipped: they came
+"used with permission" (MARBLE). Since 2026-09 UBS publishes its dictionaries as
+CC BY-SA 4.0; senses and domains are taken from that release instead
+(macula.build_ubs_open, macula.ubs, macula.build_word_senses_ubs), into share-alike outputs.
 
 Pointer ids: Greek token-ids carry an `n` prefix, Hebrew an `o`, and the in-cell
 frame/ref pointers drop the prefix (Hebrew) or keep it (Greek). We normalize every
@@ -27,7 +29,7 @@ token (space, maqqef). Both are additive columns at the end of macula_words; old
 Structured morphology (wishlist #2): both MACULA TSVs carry person/number/gender as decomposed
 columns already — no code-string parsing needed, just selection. Greek additionally has
 case/tense/voice/mood/degree; Hebrew additionally has `state` (construct/absolute). Grammatical
-fields (CC-BY), not the NC MARBLE sense/domain columns.
+fields (CC-BY), not MACULA's copies of the UBS sense/domain columns.
 """
 from __future__ import annotations
 
@@ -85,7 +87,7 @@ def _parse_ref(ref: str):
 
 
 # Per-language column aliases (the two TSVs name a few fields differently).
-# `stem` = verbal stem (Hebrew binyan) — a CC-BY grammatical field, distinct from the NC MARBLE
+# `stem` = verbal stem (Hebrew binyan) — a CC-BY grammatical field, distinct from MACULA's copies of the UBS
 # domain/sense columns we skip. Carried so downstream can key senses on (lexeme, stem) with a clean
 # (non-BHSA) binyan. Greek has no binyan; its `stem` is empty/NA there.
 COLS = {

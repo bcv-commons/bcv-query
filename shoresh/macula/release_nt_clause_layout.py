@@ -25,6 +25,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
+from macula import release_guard  # refuses TBTA and private inputs
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -54,6 +55,7 @@ def main() -> None:
     ap.add_argument("--src", default=str(HERE / "data" / "nt-clause-layout"))
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
+    release_guard.check(a)
     src, out = Path(a.src), Path(a.out)
     if not a.allow_dirty:
         dirty = subprocess.run(["git", "status", "--porcelain", "--", str(BUILDER), str(SPEAKERS), str(HERE / "greek_speakers.py"),
