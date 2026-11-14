@@ -92,7 +92,13 @@ def main() -> int:
         raise SystemExit(f"concepts without a definition: {missing[:5]}")
     a.out.mkdir(parents=True, exist_ok=False)
     (a.out / "data").mkdir()
-    tcols = ["stage"] + [c for c in toks[0] if c != "stage"]
+    import sqlite3
+    sp = sqlite3.connect(f"file:{Path(__file__).resolve().parent / 'macula-spine.db'}?mode=ro", uri=True)
+    aram = {k for (k,) in sp.execute("select key from macula_words where wlang = 'A'")}
+    for r in toks:
+        r["lang"] = "arc" if r["key"] in aram else "hbo"
+    n_arc = sum(r["lang"] == "arc" for r in toks)
+    tcols = ["stage", "key", "lang"] + [c for c in toks[0] if c not in ("stage", "key", "lang")]
     for r in toks:
         for c in tcols:
             r.setdefault(c, "")
@@ -117,7 +123,7 @@ def main() -> int:
         f.writelines(f"{c}\t{d}\n" for c, d in review)
     lab = collections.Counter(r.get("labeller") or "opus" for r in toks)
     n_lex = len({r["strong"] for r in crow})
-    (a.out / "README.md").write_text(card(a.version, len(toks), n_lex, len(codes), lab, stages), encoding="utf-8")
+    (a.out / "README.md").write_text(card(a.version, len(toks), n_lex, len(codes), lab, stages, n_arc), encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file() and p.name != "review.tsv")
     meta = {"schema": 1, "version": a.version, "repo": REPO, "built": datetime.date.today().isoformat(), "licence": "CC BY-SA 4.0",
             "model_output": True, "human_checked": False, "stages": {p: m for p, m, _, _ in stages}, "tokens": len(toks),
@@ -185,13 +191,16 @@ def stage_text(prefix: str, m: dict, n: int, lab: dict) -> str:
     return "\n".join(out)
 
 
-def card(version: str, n_tok: int, n_lex: int, n_con: int, lab: dict, stages: list) -> str:
+def card(version: str, n_tok: int, n_lex: int, n_con: int, lab: dict, stages: list, n_arc: int = 0) -> str:
     first = stages[0][1]
     opus = (first.get("opus_model") or "claude-opus-5-5").split(" ")[0]
     eds = sorted({e.split("-", 2)[-1] for _, m, _, _ in stages for e in m.get("editions_shown", [])})
     held = sorted({e for _, m, _, _ in stages for e in m.get("editions_held", [])})
     labs = ", ".join(f"{k} {v:,}" for k, v in sorted(lab.items()))
     sections = "\n\n".join(stage_text(p, m, n, l) for p, m, n, l in stages)
+    arc_note = (f"\n\n{n_arc:,} occurrences are Aramaic (Ezra's Aramaic chapters, `lang` arc). Their concepts are keyed by the Aramaic "
+                "lexeme's own Strong's number (the codes do not collide with Hebrew ones); bcv-commons/aramaic-hebrew-equivalents links "
+                "those lexemes to Hebrew.") if n_arc else ""
     return f"""---
 license: cc-by-sa-4.0
 language: [hbo]
@@ -233,11 +242,11 @@ Translations whose grouping was shown (public domain or CC BY-SA 4.0, verified):
 
 | file | content |
 |---|---|
-| `data/tokens.parquet` | `stage`, `key` (MACULA Hebrew word id), `concept`, `labeller`, and each labelling run (labels, Jev's confidence) |
+| `data/tokens.parquet` | `stage`, `key` (MACULA Hebrew word id), `lang` (hbo, or arc for Aramaic), `concept`, `labeller`, and each labelling run (labels, Jev's confidence) |
 | `data/concepts.parquet` | `code`, `strong`, `ubs_sense` (the UBS sense the concept refines) |
 | `definitions.tsv` | the model's one-line English definition per concept, kept apart from the data; examples quoting a phrase were removed |
 
-Occurrences in Genesis 22, 37 and 44, Esther, Daniel and Jonah are left out (held back for evaluation elsewhere).
+Occurrences in Genesis 22, 37 and 44, Esther, Daniel and Jonah are left out (held back for evaluation elsewhere).{arc_note}
 
 ## Licence
 
