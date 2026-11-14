@@ -112,7 +112,52 @@ def main() -> int:
     return 0
 
 
+def _ci(d: dict, scale: float = 1.0, nd: int = 3) -> str:
+    lo, hi = d["95%"]
+    return f"{d['diff'] * scale:+.{nd}f} [{lo * scale:+.{nd}f}, {hi * scale:+.{nd}f}]"
+
+
+def facts(m: dict) -> dict:
+    """turn research's structured run record into card sentences; plain strings pass through (the pilot's dry runs)"""
+    out = dict(m)
+    if isinstance(m.get("opus_model"), str):
+        out["opus_model"] = m["opus_model"].split(" ")[0]
+    c = m.get("cost_usd")
+    if isinstance(c, dict):
+        out["cost"] = "USD " + f"{c['total']:.2f} (" + "; ".join(f"{k} {v:.2f}" for k, v in c.items() if k != "total") + ")"
+    s = m.get("consistency")
+    if isinstance(s, dict):
+        out["consistency"] = (f"{s['Jev run 1 = run 2 (all tokens)']:.3f} for Jev's two runs over all occurrences and "
+                              f"{s['Opus run 1 = run 2 (the 2,791 tokens below the band)']:.3f} for Opus's two runs on the "
+                              f"2,791 occurrences below Jev's band; {s['concepts per lexeme']:.1f} concepts per word against "
+                              f"{s['UBS senses per lexeme']:.1f} UBS senses")
+    h = m.get("held_result")
+    if isinstance(h, dict):
+        out["held_count"] = str(len(m.get("editions_held", [])) or 39)
+        out["held_result"] = (f"NMI {h['NMI']['concept']:.3f} against {h['NMI']['ubs']:.3f}, {_ci(h['NMI'])}; AMI {_ci(h['AMI'])}; "
+                              f"purity {_ci(h['purity'])} (95% intervals, over {int(re.search(r'(\d+) pairs', h['what']).group(1)):,} word-edition pairs)")
+    d = m.get("drafting")
+    if isinstance(d, dict):
+        g = d["governed (tokens where the concept cell differs)"]
+        v = d["Genesis verses"]
+        out["drafting"] = (f"an Indonesian word list keyed by (word, concept) against one keyed by (word, UBS sense), learned and "
+                           f"scored on separate halves of Genesis: on the {g['tokens']:,} occurrences where the two differ, "
+                           f"{g['sense']:.3f} -> {g['concept']:.3f}, {_ci(g, 100, 1)} points; over Genesis's {v['verses']:,} "
+                           f"verses word F1 {v['word F1']['sense']:.2f} -> {v['word F1']['concept']:.2f}, chrF1 "
+                           f"{v['chrF1']['sense']:.2f} -> {v['chrF1']['concept']:.2f} (point figures)")
+    j = m.get("jev_parity")
+    if isinstance(j, dict):
+        out["jev_parity"] = (f"{j['Jev = Opus']:.3f} overall on the pilot's 1,421 occurrences, 0.995 or more at confidence 0.8 and "
+                             f"above; on Genesis Opus was asked only below that band, where Jev agrees with it "
+                             f"{m['consistency']['Jev run 1 = the Opus agreed label on those tokens']:.3f} (the hard cases)")
+    if m.get("jev_model"):
+        out["labelling"] = m["labelling"].rstrip(".") + f". Jev version: {m['jev_model'].split(' (')[0]}"
+    out["editions_shown"] = [e.split("-", 2)[-1] for e in m.get("editions_shown", [])]
+    return out
+
+
 def card(n_tok: int, n_lex: int, n_con: int, lab: dict, m: dict) -> str:
+    m = facts(m)
     eds = ", ".join(m.get("editions_shown", [])) or "(see build.json)"
     labs = ", ".join(f"{k} {v:,}" for k, v in sorted(lab.items()))
     return f"""---
@@ -130,8 +175,8 @@ configs:
 # Hebrew word concepts, model-labelled ({VERSION})
 
 **This dataset is model output. No person has checked it.** For contested Hebrew content words (where translations split a word's
-renderings, or one UBS sense covers renderings that differ), each word gets a small set of concepts, finer than or equal to its UBS
-senses, and each occurrence its concept: {n_tok:,} occurrences of {n_lex} words, {n_con} concepts. Scope: {m.get('scope', 'see build.json')}.
+renderings, or one UBS sense covers renderings that differ), each word gets a set of concepts, finer than or equal to its UBS
+senses, and each occurrence its concept: {n_tok:,} occurrences of {n_lex} words, {n_con:,} concepts. Scope: {m.get('scope', 'see build.json')}.
 
 ## How it was made
 
@@ -147,7 +192,7 @@ Translations whose grouping was shown (public domain or CC BY-SA 4.0, verified):
 
 ## How good it is
 
-- Two labellings of the same occurrences agree {m.get('consistency', '…')} (model with itself, not human agreement).
+- Two labellings of the same occurrences agree (model with itself, not human agreement): {m.get("consistency", "…")}.
 - Independent check: on {m.get('held_count', '39')} translations not shown, the concept predicts how a translation groups a word's
   occurrences better than the UBS sense: {m.get('held_result', 'see build.json')}.
 - Use in drafting: {m.get('drafting', 'see build.json')}.
