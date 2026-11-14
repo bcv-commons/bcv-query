@@ -28,7 +28,7 @@ from macula.release_clause_columns import LAYOUTS, layout_keys
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
-VERSION = "v0.1"
+VERSION = "v0.2"
 REPO = "bcv-commons/reference-status"
 
 
@@ -115,6 +115,13 @@ already knows them. This dataset gives every noun-phrase head of the Hebrew Bibl
 |---|---|---|---|---|---|
 | Hebrew Bible | {h['status:new']:,} | {h['status:given']:,} | {h['status:restaged']:,} | {h['status:known']:,} | {h['status:unresolved']:,} |
 | Greek New Testament | {g['status:new']:,} | {g['status:given']:,} | {g['status:restaged']:,} | {g['status:known']:,} | {g['status:unresolved']:,} |
+
+## Changes
+
+- v0.2: referents keep ACAI's full entity ids. v0.1 folded an id into its alias's main entity, so that, for one, Saul the king
+  (ACAI Saul.2) took Paul's code (ACAI lists Saul as one of Paul's names). A reference chain ending on a word with no lemma gave
+  an empty `lemma:`; those 454 Hebrew pronoun phrases are now `unresolved`. Against v0.1, referents change on 5,165 Hebrew and
+  3,701 Greek phrases, status on 214.
 
 ## Columns
 

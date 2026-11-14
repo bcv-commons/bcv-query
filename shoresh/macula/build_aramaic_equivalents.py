@@ -63,15 +63,7 @@ def n(s) -> str:
     return m.group(1) if m else ""
 
 
-def dan_greek_verse(ch: int, v: int) -> tuple[int, int]:
-    """Hebrew / Aramaic Daniel verse -> GLAUx verse (the Greek carries the 3:24-90 additions; MT 3:31-33 is Greek 4:1-3)"""
-    if ch == 3 and 24 <= v <= 30:
-        return 3, v + 67
-    if ch == 3 and v >= 31:
-        return 4, v - 30
-    if ch == 4:
-        return 4, v + 3
-    return ch, v
+from macula.lxx_verses import dan_greek_verse  # noqa: E402,F401  (moved there; used below)
 
 
 def main() -> int:

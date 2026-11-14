@@ -177,6 +177,11 @@ present indicative in narration as a historical present). Where the rule alone d
 
 {counts}
 
+## Changes
+
+- v0.2: built on bcv-commons/clause-columns v1.1, whose Septuagint parse is looked up in the right verse where the Septuagint numbers
+  verses its own way (the Psalms, Jeremiah, Daniel 3-4). `lxx` changes on 82 Hebrew clauses, `time` on 23.
+
 ## Measured use
 
 In a rule-based drafting engine tested on the Tanakh in six rotating test groups: with a Tagalog focus x aspect analyser, verb form
@@ -230,7 +235,7 @@ CC BY-SA 4.0. Built from MACULA Hebrew and Greek (CC BY 4.0), bcv-commons/clause
 """
 
 LAYERS = {
-    "time-aspect": {"repo": "bcv-commons/time-aspect", "build": T, "file": "clauses.tsv", "card": TA_CARD, "keyed": True,
+    "time-aspect": {"repo": "bcv-commons/time-aspect", "version": "v0.2", "build": T, "file": "clauses.tsv", "card": TA_CARD, "keyed": True,
                     "count_col": "time"},
     "clause-extras": {"repo": "bcv-commons/clause-extras", "build": X, "file": "clauses.tsv", "card": EX_CARD, "keyed": True,
                       "count_col": "mood"},
@@ -277,9 +282,9 @@ def main() -> int:
     counts = f"| `{L['count_col']}` | Hebrew | Greek |\n|---|---|---|\n" + "\n".join(
         f"| {v} | {tally['hebrew'].get(v, 0):,} | {tally['greek-nt'].get(v, 0):,} |" for v in vals)
     (a.out / "checks.md").write_text((L["build"].OUT / "checks.md").read_text(encoding="utf-8"), encoding="utf-8")
-    (a.out / "README.md").write_text(L["card"].format(v=VERSION, nh=n["hebrew"], ng=n["greek-nt"], counts=counts), encoding="utf-8")
+    (a.out / "README.md").write_text(L["card"].format(v=L.get("version", VERSION), nh=n["hebrew"], ng=n["greek-nt"], counts=counts), encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file())
-    meta = {"schema": 1, "version": VERSION, "repo": L["repo"], "built": datetime.date.today().isoformat(), "code": commit,
+    meta = {"schema": 1, "version": L.get("version", VERSION), "repo": L["repo"], "built": datetime.date.today().isoformat(), "code": commit,
             "licence": "CC BY-SA 4.0", "rows": n,
             "layouts": {c: {"repo": v["repo"], "version": v["version"], "revision": v["revision"]} for c, v in LAYOUTS.items()},
             "not_read": ["BHSA", "TBTA", "English text"], "files": {str(p.relative_to(a.out)): sha256(p) for p in files}}

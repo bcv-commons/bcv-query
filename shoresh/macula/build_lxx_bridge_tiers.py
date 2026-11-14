@@ -72,8 +72,11 @@ def verse_sets(rows, scheme: str, multi: bool = False) -> dict[tuple, set]:
 def glaux_tier(words: dict, spine: sqlite3.Connection, glaux: sqlite3.Connection, min_count: int, min_dice: float) -> tuple[dict, dict]:
     content = spine.execute("SELECT key, book, chapter, verse FROM spine_words WHERE lexeme LIKE 'hbo:%' AND is_content = 1")
     hv = verse_sets(((b, c, v, words[k][0]) for k, b, c, v in content if k in words), "org")
-    gv = verse_sets(glaux.execute("SELECT book, chapter, verse, strong FROM lxx_words WHERE canonical = 1 AND is_content = 1 "
-                                  "AND strong IS NOT NULL"), "lxx")
+    from macula.lxx_verses import verse_rows                     # Daniel from Theodotion, in Hebrew numbering
+    gv = {}
+    for scheme, rows in verse_rows("SELECT book, chapter, verse, strong FROM lxx_words WHERE canonical = 1 AND is_content = 1 "
+                                   "AND strong IS NOT NULL"):
+        gv.update(verse_sets(rows, scheme))
     both = set(hv) & set(gv)
     ch, cg, chg = collections.Counter(), collections.Counter(), collections.Counter()
     for r in both:

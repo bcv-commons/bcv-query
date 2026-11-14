@@ -77,6 +77,7 @@ import subprocess
 import unicodedata
 from pathlib import Path
 
+from macula.lxx_verses import greek_keys, hebrew_keys  # noqa: E402
 HERE = Path(__file__).resolve().parent
 HEB_LAYOUT = HERE / "data" / "clause-layout" / "clauses"
 GRC_LAYOUT = HERE / "data" / "nt-clause-layout" / "clauses"
@@ -263,7 +264,8 @@ class Stores:
             if len(mm) >= 3:
                 p = (G_TENSE.get(mm[0], ""), G_MOOD.get(mm[2], ""))
                 c[plain(surf)][p] += 1
-                verse.setdefault((book, ch, vs, plain(surf)), p)
+                for gk in greek_keys(book, ch, vs):            # the Septuagint's numbering, matched to the Hebrew (lxx_verses)
+                    verse.setdefault(gk + (plain(surf),), p)
         nt = collections.defaultdict(collections.Counter)
         for g in self.G.values():
             if g[7]:
@@ -426,7 +428,8 @@ def hebrew(S: Stores, replica: bool = False) -> list[dict]:
             gk = info(v)[8] if v else ""
             t, m, basis = "", "", ""
             if gk:
-                p = None if replica else S.lxx_verse.get((book, int(v[2:5]), int(v[5:8]), plain(gk)))   # same verse in GLAUx
+                p = None if replica else next((S.lxx_verse[hk + (plain(gk),)] for hk in hebrew_keys(book, int(v[2:5]), int(v[5:8]))
+                                               if hk + (plain(gk),) in S.lxx_verse), None)   # same verse in GLAUx (lxx_verses)
                 if p:
                     (t, m), basis = p, "verse"
                 elif plain(gk) in S.lxx_form:

@@ -117,6 +117,7 @@ def _constituents(t, corpus):
 def _lxx_lookup():
     """GLAUx Septuagint: (book, chapter, verse, plain form) -> (lemma, case letter); plain form -> commonest (lemma, case)"""
     from macula.build_clause_columns import plain
+    from macula.lxx_verses import greek_keys
     verse, glob_ = {}, collections.defaultdict(collections.Counter)
     for b, c, v, surf, lem, morph in _ro(LXX).execute("select book, chapter, verse, surface, lemma, morph from lxx_words"):
         mm = (morph or "").split(".", 1)
@@ -124,7 +125,8 @@ def _lxx_lookup():
         if mm[0] == "P":
             cs = ""
         key = plain(surf)
-        verse.setdefault((b, c, v, key), (lem or "", cs))
+        for gk in greek_keys(b, c, v):                         # the Septuagint's numbering, matched to the Hebrew (lxx_verses)
+            verse.setdefault(gk + (key,), (lem or "", cs))
         glob_[key][(lem or "", cs)] += 1
     return plain, verse, {k: c.most_common(1)[0][0] for k, c in glob_.items()}
 
@@ -140,6 +142,7 @@ def main() -> int:
     for k, g, b, c, v in _ro(LOWFAT).execute("select key, greek, book, chapter, verse from lowfat_words where is_inserted=0"):
         lxx[k], hpos[k] = (g or "").strip('"'), (b, c, v)
     plain, lxx_verse, lxx_glob = _lxx_lookup()
+    from macula.lxx_verses import hebrew_keys
 
     def lxx_word(k):
         """the Septuagint word MACULA aligns to Hebrew word k: (lemma, case letter), its own verse first"""
@@ -148,7 +151,7 @@ def main() -> int:
             return "", ""
         b, c, v = hpos[k]
         pl = plain(g.split()[-1])
-        return lxx_verse.get((b, c, v, pl)) or lxx_glob.get(pl, ("", ""))
+        return next((lxx_verse[hk + (pl,)] for hk in hebrew_keys(b, c, v) if hk + (pl,) in lxx_verse), None) or lxx_glob.get(pl, ("", ""))
     nt_table = collections.defaultdict(collections.Counter)    # (Greek preposition lemma, case[, noun's LN domain]) -> roles, NT
     frame_lab = collections.defaultdict(dict)                 # verb -> word -> label
     for v, lab, a in m.execute("select verb_key, role, arg_key from frames"):

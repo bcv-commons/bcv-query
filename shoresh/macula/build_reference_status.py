@@ -98,10 +98,10 @@ def main() -> int:
                 return ent[nxt], "ref"
             seen.add(nxt)
             cur = nxt
-        if cur != k and cls.get(cur) != "pron":
+        if cur != k and cls.get(cur) != "pron" and (strong.get(cur) or lemma.get(cur)):
             return "lemma:" + (strong.get(cur) or lemma.get(cur, "")), "ref"
-        if cls.get(cur) == "pron":                             # a pronoun with no referent: no chain on the pronoun's own lemma
-            return "unresolved:" + k, "unresolved"
+        if cls.get(cur) == "pron" or not (strong.get(k) or lemma.get(k)):   # a pronoun with no referent, or a chain ending on a
+            return "unresolved:" + k, "unresolved"                        # word with no lemma: no chain on an empty lemma
         return "lemma:" + (strong.get(k) or lemma.get(k, "")), "lemma"
 
     # animacy of a word from its UBS domains (SDBH / Louw-Nida): the first domain that says person / deity / animal

@@ -59,6 +59,9 @@ def main() -> int:
     m = sqlite3.connect(f"file:{HERE / 'macula-spine.db'}?mode=ro", uri=True)
     w = {k: (lang, cls or "", (st or "").zfill(4)[:4] if lang == "hbo" else "", NFC(lem or ""), pers or "", num or "")
          for k, lang, cls, st, lem, pers, num in m.execute("select key, lang, class, strong, lemma, person, number from macula_words")}
+    participle = {k[:12]: (t or "").startswith("participle") for k, t in
+                  sqlite3.connect(f"file:{HERE / 'lowfat-hbo.db'}?mode=ro", uri=True).execute(
+                      "select key, type from lowfat_words where class = 'verb'")}
     # word -> entity: reference-status referents first (they follow chains), then ACAI's own links
     ref = {}
     for r in tsv(DATA / "reference-status/np.tsv"):
@@ -128,8 +131,16 @@ def main() -> int:
         for r in roles.get(ck, []):
             head = r["head"]
             hw = w.get(head, ("", "", "", "", "", ""))
-            if hw[1] == "verb":
-                continue                                              # לֵאמֹר and other infinitives
+            if not head and corpus == "hbo":                          # אֵלָיו "to him": the hearer is the preposition's suffix,
+                for x in [y for y in r["words"].split() if y != r["prep"]] + ([r["prep"]] if r["prep"] else []):
+                    e = entity(x)                                     # ACAI links the suffix (its own word id) or the preposition
+                    if e:
+                        return e, x, ""
+                continue
+            if not head:
+                continue
+            if hw[1] == "verb" and not (corpus == "hbo" and participle.get(head, False)):
+                continue                                              # לֵאמֹר and other infinitives; a participle (נֹשֵׂא "bearer") can be the hearer
             verb = w.get(r["verb"], ("", "", "", "", "", "")) if r["verb"] else None
             ok = False
             if corpus == "hbo":
@@ -140,7 +151,8 @@ def main() -> int:
                     or (r["relation"] == "o" and verb is not None and verb[3] in OBJ_GRC)
             if ok:
                 e = entity(head)
-                return (e or f"lemma:{hw[3]}"), head, hw[5]
+                if e or hw[3]:
+                    return (e or f"lemma:{hw[3]}"), head, hw[5]
         return "", "", ""
 
     def from_second(qws: list) -> str:

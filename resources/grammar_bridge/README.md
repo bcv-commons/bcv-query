@@ -13,8 +13,8 @@ threshold, so a consumer cuts at a count.
 | `p_greek_given_hebrew` | count / all pairs with this `hebrew_form` |
 | `p_hebrew_given_greek` | count / all pairs with this `greek_form` |
 
-The table has 1,557 form pairs (140 Hebrew forms, 50 Greek forms). They come from 67,160 verb pairs in 20,667 verses that have verbs
-on both sides. For example, `wayyiqtol|qal` → `aorist|active|indicative` has a count of 8,667, which is 0.67 of all `wayyiqtol|qal`
+The table has 1,567 form pairs (140 Hebrew forms, 49 Greek forms). They come from 67,425 verb pairs in 20,687 verses that have verbs
+on both sides (Daniel's Greek from Theodotion, as in `../lxx_bridge_tiers/glaux.tsv`). For example, `wayyiqtol|qal` → `aorist|active|indicative` has a count of 8,672, which is 0.67 of all `wayyiqtol|qal`
 pairs. A few verbs that MACULA types `adjective`, `common`, `proper` or `relative` (participles used as nouns or adjectives) form
 their own `hebrew_form` with small counts.
 

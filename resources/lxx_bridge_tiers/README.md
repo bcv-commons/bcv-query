@@ -6,7 +6,7 @@ Greek → Hebrew. These files keep every pair with count ≥ 3, and the tier eac
 | file | tier | count | score | pairs | licence |
 |---|---|---|---|---|---|
 | `macula.tsv` | `macula`: MACULA Hebrew's per-occurrence `greekstrong` column | occurrences | P(greek \| hebrew) | 4,643 (Hebrew 1,862, Greek 1,724) | CC BY 4.0 |
-| `glaux.tsv` | `glaux`: verse co-occurrence of the Hebrew text and the Septuagint | verses with both | Dice over the two verse sets, ≥ 0.3 | 1,881 (Hebrew 1,546, Greek 1,354) | CC BY-SA 4.0 |
+| `glaux.tsv` | `glaux`: verse co-occurrence of the Hebrew text and the Septuagint | verses with both | Dice over the two verse sets, ≥ 0.3 | 1,941 (Hebrew 1,588, Greek 1,372) | CC BY-SA 4.0 |
 
 Both files have the columns `hebrew_strong, greek_strong, tier, count, score`. The codes are zero-padded (`H2617`, `G1656`). Rows
 are sorted by Hebrew lexeme, then by count, highest first.
@@ -16,8 +16,10 @@ are sorted by Hebrew lexeme, then by count, highest first.
   numbers (H0582 into H0376, H2009 into H2005, H3069 into H3068), and a reader looks the bridge up by the number they have.
 - **`glaux`** pairs Hebrew and Greek content words that stand in the same verses. Both texts are converted to the English verse
   scheme with `shoresh/vrsmap.py` (bibles' TVTMS maps): the Hebrew text from MACULA numbering, and the Septuagint (`lxx-glaux.db`,
-  canonical books only) from Septuagint numbering. 22,704 verses match. 1,097 of its pairs are also in `macula`. 529 pairs cover
-  447 Hebrew lexemes that `macula` has no pair for. Make-tanakh-grammar found that below Dice 0.3 the pairs are collocates rather
+  canonical books only) from Septuagint numbering; Daniel from Theodotion (GLAUx 0527-057, `lxx-glaux-dan-theodotion.db`, moved to
+  Hebrew numbering by `shoresh/macula/lxx_verses.py`), which follows the Hebrew and Aramaic closely where the Old Greek of chapters
+  3-6 is free: Aramaic lexemes with a pair go from 45 to 86. 22,724 verses match. 1,105 of its pairs are also in `macula`.
+  569 pairs cover 473 Hebrew lexemes that `macula` has no pair for. Make-tanakh-grammar found that below Dice 0.3 the pairs are collocates rather
   than equivalents.
 
 Built by `shoresh/macula/build_lxx_bridge_tiers.py` from the MACULA Hebrew WLC TSV (sha256 `965cb0599beed2fe…`) and `lxx-glaux.db`

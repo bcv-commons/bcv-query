@@ -25,7 +25,7 @@ from macula import release_guard  # refuses TBTA and private inputs
 ROOT = Path(__file__).resolve().parents[2]
 SRC = Path(__file__).resolve().parent / "data" / "clause-columns"
 SCHEMA = 1
-VERSION = "v1.0"
+VERSION = "v1.1"
 REPO = "bcv-commons/clause-columns"
 RESEARCH_REV = "8a132e44224c83cdaa92fadd93cf440c58552354"
 LAYOUTS = {
@@ -178,6 +178,14 @@ Join a row to its layout by `clause_key` (Hebrew `clause_key`; Greek `first`). E
 layouts' own columns (rule, relation, parent, depth and so on) are not copied here: read them from the layout.
 
 ## What changed from the previous version
+
+**v1.1:** the Septuagint word is now looked up in its own verse through the verse map (`macula/lxx_verses.py`). GLAUx numbers the
+Septuagint's way (Psalms one off, Jeremiah 25-51 reordered, Daniel 3-4 with the Greek additions), so the lookup found its verse
+for 0.785 of Hebrew words before (Psalms 0.13, Jeremiah 0.45) and 0.867 now; the rest fall back to the form's commonest parse, as
+before. Daniel's words keep the Old Greek: MACULA aligns them to it. `lxx_basis` moves from form to verse on 6,045 Hebrew clauses; `lxx_tense` / `lxx_mood` change on 116 (60 in
+the Psalms, 29 in Jeremiah).
+
+**v1.0**, against research's table:
 
 The previous table (revision `{RESEARCH_REV[:8]}`) was built by make-tanakh-research. This version is rebuilt by bcv-query from the
 same free sources, under the same column names and value names, and research has agreed to retire its builder. Differences, all

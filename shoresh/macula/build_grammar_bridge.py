@@ -67,10 +67,11 @@ def main(argv: list[str]) -> int:
              for k, b, c, v, s in spine.execute("SELECT key, book, chapter, verse, strong FROM spine_words WHERE lexeme LIKE 'hbo:%' "
                                                 "AND strong IS NOT NULL") if k in verbs)
     hv = verse_sets(hrows, "org", multi=True)
-    grows = ((b, c, v, (s, gf)) for b, c, v, s, m in sqlite3.connect(GLAUX).execute(
-        "SELECT book, chapter, verse, strong, morph FROM lxx_words WHERE canonical = 1 AND strong IS NOT NULL AND morph LIKE 'V.%'")
-        if (gf := greek_form(m)))
-    gv = verse_sets(grows, "lxx", multi=True)
+    from macula.lxx_verses import verse_rows                     # Daniel from Theodotion, in Hebrew numbering
+    gv = {}
+    for scheme, rows in verse_rows("SELECT book, chapter, verse, strong, morph FROM lxx_words WHERE canonical = 1 "
+                                   "AND strong IS NOT NULL AND morph LIKE 'V.%'"):
+        gv.update(verse_sets(((b, c, v, (s, gf)) for b, c, v, s, m in rows if (gf := greek_form(m))), scheme, multi=True))
     eq = lexeme_pairs()
     pairs: collections.Counter = collections.Counter()
     both = set(hv) & set(gv)

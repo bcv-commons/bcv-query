@@ -29,7 +29,7 @@ from macula.release_clause_columns import LAYOUTS, layout_keys
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
-VERSION = "v0.1"
+VERSION = "v0.2"
 REPO = "bcv-commons/argument-roles"
 
 
@@ -115,6 +115,14 @@ prepositions and voice.
 
 Join a row to its clause by `clause_key`: the Hebrew layout's `clause_key`, the Greek layout's `first`, as in
 [bcv-commons/clause-columns](https://huggingface.co/datasets/bcv-commons/clause-columns).
+
+## Changes
+
+- v0.2: the Septuagint word is now looked up in its own verse through the verse map (`macula/lxx_verses.py`). GLAUx numbers the
+  Septuagint's way (Psalms one off, Jeremiah 25-51 reordered, Daniel 3-4 with the Greek additions), so the lookup found its verse
+  for 0.785 of Hebrew words before (Psalms 0.13, Jeremiah 0.45) and 0.867 now; the rest fall back to the form's commonest parse,
+  as before. Daniel's words keep the Old Greek: MACULA aligns them to it. `lxx_case` changes on 348 Hebrew phrases (203 in the
+  Psalms, 71 in Jeremiah), `role` on 88.
 
 ## Columns
 
