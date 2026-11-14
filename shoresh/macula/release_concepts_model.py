@@ -153,7 +153,7 @@ def _pick(d: dict, *words: str):
 
 
 def stage_text(prefix: str, m: dict, n: int, lab: dict) -> str:
-    out = [f"### {m.get('stage', prefix).capitalize() if isinstance(m.get('stage'), str) else prefix.capitalize()}: "
+    out = [f"### {m.get('stage', prefix).replace("_", " and ").capitalize() if isinstance(m.get('stage'), str) else prefix.replace("_", " and ").capitalize()}: "
            f"{', '.join(m.get('books', [])) or prefix} ({n:,} occurrences)", ""]
     if m.get("scope"):
         out.append(f"- Scope: {m['scope']}.")
