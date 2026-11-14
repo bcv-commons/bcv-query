@@ -74,7 +74,7 @@ def main() -> int:
     ent_words = collections.defaultdict(list)                  # (corpus, book, chapter) -> [(word, entity)]
     for r in csv.DictReader(open(DATA / "entities/entity_words.tsv", encoding="utf-8"), delimiter="\t"):
         if r["kind"] in ("explicit", "pronominal", "subject"):
-            ent.setdefault(r["word"], r["entity"].split(".")[0])
+            ent.setdefault(r["word"], r["entity"])           # the full ACAI id: Saul.2 (the king) is not Saul (an alias of Paul)
     hb = {}                                                     # Hebrew word -> (type, state, word number)
     art_words, sfx_words = set(), set()
     for k, c, typ, st, lem, morph in sqlite3.connect(f"file:{LOWFAT}?mode=ro", uri=True).execute(

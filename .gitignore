@@ -258,4 +258,9 @@ shoresh/macula/data/coordination/
 shoresh/macula/data/word-context/
 shoresh/macula/data/time-aspect/
 shoresh/macula/data/clause-extras/
+shoresh/macula/data/addressees/
+shoresh/macula/data/aramaic-cognates/
+shoresh/macula/data/aramaic-equivalents/
+shoresh/macula/data/HebrewStrong-*.xml
+shoresh/macula/data/openscriptures-hebrewlexicon-*/
 shoresh/macula/data/noun-relations/

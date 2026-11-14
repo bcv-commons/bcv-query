@@ -3,11 +3,12 @@ labelled by models (Claude Opus 5.5 defines each word's concepts; Jev (TypeSafe)
 Made by make-tanakh-research to bcv-query's specification (packet 25 and the Genesis pass); model output, attributed apart from our
 rule-built layers (the user's rule, 2026-11-14).
 
-    cd shoresh && .venv/bin/python3 -m macula.release_concepts_model --src DIR --prefix PREFIX --out OUT [--meta META.json]
+    cd shoresh && .venv/bin/python3 -m macula.release_concepts_model --src DIR --stage PREFIX[:META.json] [--stage ...] --out OUT
+                                                                    [--version v0.2]
 
   --src     research's hand-over folder (internal-docs/handover/bcv-query-2026-11-12 in make-tanakh-research)
-  --prefix  file prefix there: concept_cleared (pilot, cleared editions) or the Genesis pass's prefix
-  --meta    a JSON with the run's facts (model ids, dates, costs, editions shown / held, scope); required for a real release
+  --stage   one labelling stage: its file prefix there (genesis, torah, ...) and its run record (genesis_run.json, ...); repeat
+            for every stage, in order. Concept codes a later stage reuses must be identical (strong, UBS sense, definition).
 
 Writes OUT/data/tokens.parquet, OUT/data/concepts.parquet, OUT/definitions.tsv (the English table, apart from the data),
 review.tsv (definitions that still quote a phrase: read before publishing), README.md, build.json, SHA256SUMS. Rows of the closed
@@ -16,6 +17,7 @@ chapters GEN 22 / 37 / 44 are dropped. Nothing is uploaded.
 from __future__ import annotations
 
 import argparse
+import collections
 import csv
 import datetime
 import hashlib
@@ -28,7 +30,6 @@ import pyarrow.parquet as pq
 
 from macula import release_guard  # refuses TBTA and private inputs
 
-VERSION = "v0.1"
 REPO = "bcv-commons/hebrew-word-concepts-model"
 CLOSED = ("01022", "01037", "01044")
 QUOTE = re.compile(r"'[^']{3,}'|\"[^\"]{3,}\"|‘[^’]{3,}’|“[^”]{3,}”")
@@ -56,34 +57,56 @@ def tsv(p: Path) -> list[dict]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", type=Path, required=True)
-    ap.add_argument("--prefix", required=True)
+    ap.add_argument("--stage", action="append", required=True)
     ap.add_argument("--out", type=Path, required=True)
-    ap.add_argument("--meta", type=Path)
+    ap.add_argument("--version", default="v0.1")
     a = ap.parse_args()
     release_guard.check(a)
-    toks = [r for r in tsv(a.src / f"{a.prefix}_tokens.tsv") if not r["key"].startswith(CLOSED)]
-    concepts = tsv(a.src / f"{a.prefix}_concepts.tsv")
-    defs = {r["code"]: r["definition"] for r in tsv(a.src / f"{a.prefix}_concept_definitions.tsv")}
-    codes = {r["code"] for r in concepts}
+    toks, concepts, defs, stages = [], {}, {}, []
+    for st in a.stage:
+        prefix, _, meta_name = st.partition(":")
+        meta_path = a.src / (meta_name or f"{prefix}_run.json")
+        m = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {"note": "dry run: no run facts given"}
+        rows = [dict(r, stage=prefix) for r in tsv(a.src / f"{prefix}_tokens.tsv") if not r["key"].startswith(CLOSED)]
+        for r in tsv(a.src / f"{prefix}_concepts.tsv"):
+            if r["code"] in concepts and concepts[r["code"]] != r:
+                raise SystemExit(f"{prefix}: concept {r['code']} differs from an earlier stage")
+            concepts[r["code"]] = r
+        for r in tsv(a.src / f"{prefix}_concept_definitions.tsv"):
+            if r["code"] in defs and defs[r["code"]] != r["definition"]:
+                raise SystemExit(f"{prefix}: definition of {r['code']} differs from an earlier stage")
+            defs[r["code"]] = r["definition"]
+        seen = {r["key"] for r in toks}
+        dup = [r["key"] for r in rows if r["key"] in seen]
+        if dup:
+            raise SystemExit(f"{prefix}: {len(dup)} tokens already in an earlier stage: {dup[:5]}")
+        lab = collections.Counter(r.get("labeller") or "opus" for r in rows)
+        stages.append((prefix, m, len(rows), lab))
+        toks += rows
+    codes = set(concepts)
     bad = [r["key"] for r in toks if r["concept"] and r["concept"] not in codes]
     if bad:
-        raise SystemExit(f"{len(bad)} tokens carry a concept not in concepts.tsv: {bad[:5]}")
+        raise SystemExit(f"{len(bad)} tokens carry a concept not in the concepts files: {bad[:5]}")
     missing = sorted(codes - set(defs))
     if missing:
         raise SystemExit(f"concepts without a definition: {missing[:5]}")
     a.out.mkdir(parents=True, exist_ok=False)
     (a.out / "data").mkdir()
-    tcols = list(toks[0])
+    tcols = ["stage"] + [c for c in toks[0] if c != "stage"]
+    for r in toks:
+        for c in tcols:
+            r.setdefault(c, "")
     floats = {c for c in tcols if "confidence" in c}
     pq.write_table(pa.table({c: (pa.array([float(r[c]) if r[c] else None for r in toks], type=pa.float32()) if c in floats else
                                  pa.array([r[c] for r in toks], type=pa.string())) for c in tcols}), a.out / "data/tokens.parquet")
-    pq.write_table(pa.table({c: pa.array([r[c] for r in concepts], type=pa.string()) for c in concepts[0]}),
-                   a.out / "data/concepts.parquet")
+    crow = [concepts[c] for c in sorted(codes, key=lambda x: (int(re.sub(r"\D", "", x.split(".")[0]) or 0), x))]
+    pq.write_table(pa.table({c: pa.array([r[c] for r in crow], type=pa.string()) for c in crow[0]}), a.out / "data/concepts.parquet")
     review, n_clean = [], 0
     with open(a.out / "definitions.tsv", "w", encoding="utf-8") as f:
         f.write("# The data holds concept codes only; this table is the English: model-written definitions (Claude Opus 5.5).\n")
         f.write("code\tdefinition\n")
-        for c in sorted(codes, key=lambda x: (int(re.sub(r"\D", "", x.split(".")[0]) or 0), x)):
+        for r in crow:
+            c = r["code"]
             d = clean(defs[c])
             n_clean += d != defs[c]
             f.write(f"{c}\t{d}\n")
@@ -92,23 +115,21 @@ def main() -> int:
     with open(a.out / "review.tsv", "w", encoding="utf-8") as f:
         f.write("code\tdefinition (still quotes a phrase: check it is a gloss, not a translation's wording)\n")
         f.writelines(f"{c}\t{d}\n" for c, d in review)
-    meta_in = json.loads(a.meta.read_text(encoding="utf-8")) if a.meta else {"note": "dry run: no run facts given"}
-    lab = {}
-    for r in toks:
-        k = r.get("labeller") or "opus"
-        lab[k] = lab.get(k, 0) + 1
-    n_lex = len({r["strong"] for r in concepts})
-    (a.out / "README.md").write_text(card(len(toks), n_lex, len(codes), lab, meta_in), encoding="utf-8")
+    lab = collections.Counter(r.get("labeller") or "opus" for r in toks)
+    n_lex = len({r["strong"] for r in crow})
+    (a.out / "README.md").write_text(card(a.version, len(toks), n_lex, len(codes), lab, stages), encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file() and p.name != "review.tsv")
-    meta = {"schema": 1, "version": VERSION, "repo": REPO, "built": datetime.date.today().isoformat(), "licence": "CC BY-SA 4.0",
-            "model_output": True, "human_checked": False, "run": meta_in, "tokens": len(toks), "lexemes": n_lex, "concepts": len(codes),
-            "labellers": lab, "dropped_closed_chapters": list(CLOSED), "definitions_cleaned": n_clean, "definitions_to_review": len(review),
-            "not_read": ["BHSA", "TBTA", "English text"], "files": {str(p.relative_to(a.out)): sha256(p) for p in files}}
+    meta = {"schema": 1, "version": a.version, "repo": REPO, "built": datetime.date.today().isoformat(), "licence": "CC BY-SA 4.0",
+            "model_output": True, "human_checked": False, "stages": {p: m for p, m, _, _ in stages}, "tokens": len(toks),
+            "lexemes": n_lex, "concepts": len(codes), "labellers": dict(lab), "dropped_closed_chapters": list(CLOSED),
+            "definitions_cleaned": n_clean, "definitions_to_review": len(review), "not_read": ["BHSA", "TBTA", "English text"],
+            "files": {str(p.relative_to(a.out)): sha256(p) for p in files}}
     (a.out / "build.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file() and p.name != "review.tsv")
     (a.out / "SHA256SUMS").write_text("".join(f"{sha256(p)}  {p.relative_to(a.out)}\n" for p in files), encoding="utf-8")
-    print(f"{a.out}: {len(toks):,} tokens, {n_lex} lexemes, {len(codes)} concepts; labellers {lab}; "
-          f"definitions cleaned {n_clean}, still quoting {len(review)} (review.tsv, not published)")
+    print(f"{a.out}: {len(toks):,} tokens, {n_lex} lexemes, {len(codes):,} concepts; stages "
+          f"{[(p, n) for p, _, n, _ in stages]}; labellers {dict(lab)}; definitions cleaned {n_clean}, still quoting {len(review)} "
+          f"(review.tsv, not published)")
     return 0
 
 
@@ -117,49 +138,60 @@ def _ci(d: dict, scale: float = 1.0, nd: int = 3) -> str:
     return f"{d['diff'] * scale:+.{nd}f} [{lo * scale:+.{nd}f}, {hi * scale:+.{nd}f}]"
 
 
-def facts(m: dict) -> dict:
-    """turn research's structured run record into card sentences; plain strings pass through (the pilot's dry runs)"""
-    out = dict(m)
-    if isinstance(m.get("opus_model"), str):
-        out["opus_model"] = m["opus_model"].split(" ")[0]
-    c = m.get("cost_usd")
-    if isinstance(c, dict):
-        out["cost"] = "USD " + f"{c['total']:.2f} (" + "; ".join(f"{k} {v:.2f}" for k, v in c.items() if k != "total") + ")"
+def _pick(d: dict, *words: str):
+    """the value under the first key containing every word (research's record keys are descriptive and vary a little)"""
+    for k, v in d.items():
+        if all(w in k for w in words):
+            return k, v
+    return None, None
+
+
+def stage_text(prefix: str, m: dict, n: int, lab: dict) -> str:
+    out = [f"### {m.get('stage', prefix).capitalize() if isinstance(m.get('stage'), str) else prefix.capitalize()}: "
+           f"{', '.join(m.get('books', [])) or prefix} ({n:,} occurrences)", ""]
+    if m.get("scope"):
+        out.append(f"- Scope: {m['scope']}.")
+    if m.get("labelling"):
+        jv = f" Jev version: {m['jev_model'].split(' (')[0]}." if m.get("jev_model") else ""
+        out.append(f"- Labelling: {m['labelling'].rstrip('.')}.{jv} Labellers: " + ", ".join(f"{k} {v:,}" for k, v in sorted(lab.items())) + ".")
     s = m.get("consistency")
     if isinstance(s, dict):
-        out["consistency"] = (f"{s['Jev run 1 = run 2 (all tokens)']:.3f} for Jev's two runs over all occurrences and "
-                              f"{s['Opus run 1 = run 2 (the 2,791 tokens below the band)']:.3f} for Opus's two runs on the "
-                              f"2,791 occurrences below Jev's band; {s['concepts per lexeme']:.1f} concepts per word against "
-                              f"{s['UBS senses per lexeme']:.1f} UBS senses")
+        parts = [f"{k}: {v:.3f}" for k, v in s.items() if "=" in k and isinstance(v, float)]
+        _, cpl = _pick(s, "concepts per")
+        _, upl = _pick(s, "UBS senses per")
+        out.append("- Two labellings of the same occurrences (model with itself, not human agreement): " + "; ".join(parts) +
+                   (f". {cpl:.1f} concepts per word against {upl:.1f} UBS senses." if cpl and upl else "."))
     h = m.get("held_result")
     if isinstance(h, dict):
-        out["held_count"] = str(len(m.get("editions_held", [])) or 39)
-        out["held_result"] = (f"NMI {h['NMI']['concept']:.3f} against {h['NMI']['ubs']:.3f}, {_ci(h['NMI'])}; AMI {_ci(h['AMI'])}; "
-                              f"purity {_ci(h['purity'])} (95% intervals, over {int(re.search(r'(\d+) pairs', h['what']).group(1)):,} word-edition pairs)")
+        pairs = re.search(r"(\d+) pairs", h.get("what", ""))
+        out.append(f"- Independent check on {len(m.get('editions_held', []))} translations never shown: the concept predicts how a "
+                   f"translation groups a word's occurrences better than the UBS sense. NMI {h['NMI']['concept']:.3f} against "
+                   f"{h['NMI']['ubs']:.3f}, {_ci(h['NMI'])}; AMI {_ci(h['AMI'])}; purity {_ci(h['purity'])}"
+                   + (f" (95% intervals, {int(pairs.group(1)):,} word-translation pairs)." if pairs else "."))
     d = m.get("drafting")
     if isinstance(d, dict):
-        g = d["governed (tokens where the concept cell differs)"]
-        v = d["Genesis verses"]
-        out["drafting"] = (f"an Indonesian word list keyed by (word, concept) against one keyed by (word, UBS sense), learned and "
-                           f"scored on separate halves of Genesis: on the {g['tokens']:,} occurrences where the two differ, "
-                           f"{g['sense']:.3f} -> {g['concept']:.3f}, {_ci(g, 100, 1)} points; over Genesis's {v['verses']:,} "
-                           f"verses word F1 {v['word F1']['sense']:.2f} -> {v['word F1']['concept']:.2f}, chrF1 "
-                           f"{v['chrF1']['sense']:.2f} -> {v['chrF1']['concept']:.2f} (point figures)")
-    j = m.get("jev_parity")
-    if isinstance(j, dict):
-        out["jev_parity"] = (f"{j['Jev = Opus']:.3f} overall on the pilot's 1,421 occurrences, 0.995 or more at confidence 0.8 and "
-                             f"above; on Genesis Opus was asked only below that band, where Jev agrees with it "
-                             f"{m['consistency']['Jev run 1 = the Opus agreed label on those tokens']:.3f} (the hard cases)")
-    if m.get("jev_model"):
-        out["labelling"] = m["labelling"].rstrip(".") + f". Jev version: {m['jev_model'].split(' (')[0]}"
-    out["editions_shown"] = [e.split("-", 2)[-1] for e in m.get("editions_shown", [])]
-    return out
+        _, g = _pick(d, "governed")
+        _, v = _pick(d, "verses")
+        txt = "- Use in drafting (Indonesian word list keyed by (word, concept) against (word, UBS sense), learned and scored on separate halves)"
+        if g:
+            txt += f": on the {g['tokens']:,} occurrences where the two differ, {g['sense']:.3f} -> {g['concept']:.3f}, {_ci(g, 100, 1)} points"
+        if v:
+            txt += (f"; over {v['verses']:,} verses word F1 {v['word F1']['sense']:.2f} -> {v['word F1']['concept']:.2f}, chrF1 "
+                    f"{v['chrF1']['sense']:.2f} -> {v['chrF1']['concept']:.2f} (point figures)")
+        out.append(txt + ".")
+    c = m.get("cost_usd")
+    if isinstance(c, dict):
+        out.append("- Cost (list price): USD " + f"{c['total']:.2f} (" + "; ".join(f"{k} {v:.2f}" for k, v in c.items() if k != "total") + ").")
+    return "\n".join(out)
 
 
-def card(n_tok: int, n_lex: int, n_con: int, lab: dict, m: dict) -> str:
-    m = facts(m)
-    eds = ", ".join(m.get("editions_shown", [])) or "(see build.json)"
+def card(version: str, n_tok: int, n_lex: int, n_con: int, lab: dict, stages: list) -> str:
+    first = stages[0][1]
+    opus = (first.get("opus_model") or "claude-opus-5-5").split(" ")[0]
+    eds = sorted({e.split("-", 2)[-1] for _, m, _, _ in stages for e in m.get("editions_shown", [])})
+    held = sorted({e for _, m, _, _ in stages for e in m.get("editions_held", [])})
     labs = ", ".join(f"{k} {v:,}" for k, v in sorted(lab.items()))
+    sections = "\n\n".join(stage_text(p, m, n, l) for p, m, n, l in stages)
     return f"""---
 license: cc-by-sa-4.0
 language: [hbo]
@@ -172,41 +204,40 @@ configs:
   data_files: data/concepts.parquet
 ---
 
-# Hebrew word concepts, model-labelled ({VERSION})
+# Hebrew word concepts, model-labelled ({version})
 
 **This dataset is model output. No person has checked it.** For contested Hebrew content words (where translations split a word's
 renderings, or one UBS sense covers renderings that differ), each word gets a set of concepts, finer than or equal to its UBS
-senses, and each occurrence its concept: {n_tok:,} occurrences of {n_lex} words, {n_con:,} concepts. Scope: {m.get('scope', 'see build.json')}.
+senses, and each occurrence its concept: {n_tok:,} occurrences of {n_lex:,} words, {n_con:,} concepts, labelled in {len(stages)}
+stage{'s' if len(stages) > 1 else ''} ({', '.join(p for p, _, _, _ in stages)}). Labellers over all: {labs}.
 
 ## How it was made
 
-- **Concepts per word:** Claude Opus 5.5 ({m.get('opus_model', 'claude-opus-5-5')}, {m.get('date', '')}) read up to 80 occurrences of
-  the word across the Tanakh: the Hebrew clause (MACULA lemma and morphology), the word's UBS senses and their definitions, the
-  Septuagint lemma at each place, and how {len(m.get('editions_shown', [])) or 'the shown'} openly licensed translations group the
-  occurrences (cluster ids and counts only, no translation text). It did not see MACULA's English gloss, any translation's wording or
-  BHSA data. It proposed codes `H<strong>.<n>` with a one-line definition each.
-- **Concept per occurrence:** {m.get('labelling', 'see build.json')}. Labellers: {labs}.
-- Run by make-tanakh-research to bcv-query's specification. Cost (list): {m.get('cost', 'see build.json')}.
+- **Concepts per word:** Claude Opus 5.5 ({opus}) read up to 80 occurrences of the word across the Tanakh: the Hebrew clause (MACULA
+  lemma and morphology), the word's UBS senses and their definitions, the Septuagint lemma at each place, and how {len(eds)} openly
+  licensed translations group the occurrences (cluster ids and counts only, no translation text). It did not see MACULA's English
+  gloss, any translation's wording or BHSA data. It proposed codes `H<strong>.<n>` with a one-line definition each. A word defined in
+  an earlier stage keeps its concepts and codes.
+- **Concept per occurrence:** Jev (TypeSafe) and Claude Opus 5.5 chose among the word's concepts; each stage's rule and its labeller
+  per row are below and in `tokens` (`labeller`, each run's label, Jev's confidence).
+- Run by make-tanakh-research to bcv-query's specification.
 
-Translations whose grouping was shown (public domain or CC BY-SA 4.0, verified): {eds}.
+Translations whose grouping was shown (public domain or CC BY-SA 4.0, verified): {', '.join(eds) or '(see build.json)'}.
+{len(held)} other translations were held back for the independent check.
 
-## How good it is
+## How good it is, per stage
 
-- Two labellings of the same occurrences agree (model with itself, not human agreement): {m.get("consistency", "…")}.
-- Independent check: on {m.get('held_count', '39')} translations not shown, the concept predicts how a translation groups a word's
-  occurrences better than the UBS sense: {m.get('held_result', 'see build.json')}.
-- Use in drafting: {m.get('drafting', 'see build.json')}.
-- Jev against Opus on the pilot's occurrences: {m.get('jev_parity', '0.966 overall; 0.995 where Jev is confident (0.84 of occurrences)')}.
+{sections}
 
 ## Files
 
 | file | content |
 |---|---|
-| `data/tokens.parquet` | `key` (MACULA Hebrew word id), `concept`, and each labelling run (labeller, confidence) |
+| `data/tokens.parquet` | `stage`, `key` (MACULA Hebrew word id), `concept`, `labeller`, and each labelling run (labels, Jev's confidence) |
 | `data/concepts.parquet` | `code`, `strong`, `ubs_sense` (the UBS sense the concept refines) |
 | `definitions.tsv` | the model's one-line English definition per concept, kept apart from the data; examples quoting a phrase were removed |
 
-Occurrences in Genesis 22, 37 and 44 are left out (held back for evaluation elsewhere).
+Occurrences in Genesis 22, 37 and 44, Esther, Daniel and Jonah are left out (held back for evaluation elsewhere).
 
 ## Licence
 

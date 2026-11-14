@@ -302,6 +302,9 @@ def main() -> int:
     ap.add_argument("--xml", type=Path, default=HERE / "data" / "glaux", help="directory with (or to download) the GLAUx 0527-*.xml files")
     ap.add_argument("--out", type=Path, default=HERE / "data" / "lxx-glaux.db")
     ap.add_argument("--no-syntax", action="store_true", help="do not infer the case of names from the syntactic relation (article and preposition rules only)")
+    ap.add_argument("--doc", action="append", default=[], metavar="BOOK=NUM",
+                    help="take this GLAUx document for a book instead of choosing by --compare (DAN=57: Theodotion, whose Daniel follows the Hebrew "
+                         "and Aramaic closely; 56 is the Old Greek, free in chapters 3-6)")
     ap.add_argument("--compare", type=Path, default=HERE / "lxx.db", help="existing store, only used to pick between two GLAUx versions of a book")
     a = ap.parse_args()
     ref = sqlite3.connect(f"file:{a.compare}?mode=ro", uri=True) if a.compare and a.compare.exists() else None
@@ -310,8 +313,12 @@ def main() -> int:
     for num, book in BOOKS.items():
         docs[book].append((num, parse(fetch(a.xml, num))))
     chosen: dict[str, tuple[int, list]] = {}
+    force = {b: int(n) for b, n in (d.split("=") for d in a.doc)}
     for book, versions in docs.items():
-        if len(versions) == 1 or ref is None or "+" in book:
+        if book in force:
+            chosen[book] = next(v for v in versions if v[0] == force[book])
+            print(f"{book}: 0527-{force[book]:03d} (--doc)", file=sys.stderr)
+        elif len(versions) == 1 or ref is None or "+" in book:
             chosen[book] = versions[0]
         else:
             scores = [(match_score(rows, book, ref), num) for num, rows in versions]
