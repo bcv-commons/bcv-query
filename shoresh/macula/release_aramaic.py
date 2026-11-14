@@ -30,7 +30,7 @@ from macula import build_aramaic_equivalents as E
 from macula import release_guard  # refuses TBTA and private inputs
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "v0.1"
+VERSION = "v0.1.1"          # v0.1.1: card only (coverage and list-vote results); data as v0.1
 REPO = "bcv-commons/aramaic-hebrew-equivalents"
 # measured by make-tanakh-research (track D, Daniel in its own fold; chrF3 on Daniel's 196 Aramaic verses; base -> with the table)
 MEASURED_COGNATES = "Indonesian 27.96 -> 31.74, Swahili 25.78 -> 28.89, Tagalog 25.69 -> 28.78; Daniel's Hebrew verses unchanged"
@@ -124,6 +124,14 @@ the evidence does not settle between the candidates, not that all are equally go
 - **For the bridge** ({b_n:,} Aramaic words whose own Greek link MACULA records; that link hidden, the lists ranked from the Greek
   verse, the information an aligner has): the hidden Greek is among the bridge's Greek for the cognate alone {b_cog} of the time;
   for the list with the cognate {b_list} (a mean {b_len} Hebrew lexemes offered per word); for the single pick {b_pick}.
+- **Coverage of the translations' words** (the same engine and test; for each Aramaic word linked to a word in a translation, is that
+  word among the renderings the engine learned for the Hebrew side): cognate alone / single pick / list, Indonesian 0.330 / 0.366
+  / 0.477 (2,182 words), Swahili 0.230 / 0.266 / 0.356 (2,045), Tagalog 0.277 / 0.303 / 0.400 (2,085): the list reaches +12 to +15
+  points more. Long lists add too: words with 10+ candidates gain about as much per word as words with 2-9. A list consults about
+  5 Hebrew lexemes and 90-150 renderings per word, against 1 and 35-60 for the cognate, so this measures reach, not precision.
+- **Voting over the list** (every listed lexeme votes for its renderings, weighted by score) made the drafts worse: exact words
+  -2 to -5 points, as frequent lexemes' general renderings outweigh the cognate's specific one. Choosing from a list needs context
+  (an aligner's own evidence at the place), not a flat vote.
 - **The pick in drafting** (the same engine and test, the pick in place of the cognate): exact content words +0.0 to +0.5 points
   and chrF3 +0.3 to +0.7, small. A rule engine that takes one word gains little from it; the lists serve the bridge and
   alignment.
