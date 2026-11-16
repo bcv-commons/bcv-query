@@ -29,6 +29,19 @@ def test_tier_files():
             assert min(float(r[4]) for r in data[1:]) >= 0.3
 
 
+def test_greek_numbers():
+    data = rows("lxx_bridge_tiers/greek_numbers.tsv")
+    assert data[0] == ["source_strong", "nt_strong", "nt_lemma", "links", "found", "share", "example"]
+    mapped = {r[0]: r[1] for r in data[1:] if r[1]}
+    assert mapped["G4675"] == "G4771" and mapped["G2036"] == "G3004"          # σου -> σύ, εἶπεν -> λέγω
+    assert not set(mapped) & set(mapped.values())                             # a target is never itself remapped
+    for src, nt, lemma, links, found, share, _ in data[1:]:
+        assert src[0] == "G" and int(found) <= int(links) and bool(nt) == bool(lemma)
+        assert not nt or (int(found) >= 3 and float(share) >= 0.9)
+    used = {r[1] for r in rows("lxx_bridge_tiers/macula.tsv")[1:]} | {r[1] for r in rows("lxx_bridge.tsv")[1:]}
+    assert not used & set(mapped)                                             # no mapped form number is left in the bridge
+
+
 def test_grammar_bridge():
     data = rows("grammar_bridge/grammar_bridge.tsv")
     assert data[0] == ["hebrew_form", "greek_form", "count", "p_greek_given_hebrew", "p_hebrew_given_greek"]

@@ -10,6 +10,10 @@ rule-built layers (the user's rule, 2026-11-14).
   --stage   one labelling stage: its file prefix there (genesis, torah, ...) and its run record (genesis_run.json, ...); repeat
             for every stage, in order. Concept codes a later stage reuses must be identical (strong, UBS sense, definition).
 
+Also writes data/concept_greek.parquet (v0.5): per concept, the Greek lexemes its occurrences are rendered by in the Septuagint
+(MACULA Hebrew's `greekstrong` per word, lowfat-hbo.db), on the Greek NT's number per lemma (resources/lxx_bridge_tiers/
+greek_numbers.tsv, built by macula/build_lxx_bridge_tiers.py), with counts, both shares and the labelling behind each pair.
+
 Writes OUT/data/tokens.parquet, OUT/data/concepts.parquet, OUT/definitions.tsv (the English table, apart from the data),
 review.tsv (definitions that still quote a phrase: read before publishing), README.md, build.json, SHA256SUMS. Rows of the closed
 chapters GEN 22 / 37 / 44 are dropped. Nothing is uploaded.
@@ -52,6 +56,41 @@ def clean(defn: str) -> str:
 
 def tsv(p: Path) -> list[dict]:
     return list(csv.DictReader(open(p, encoding="utf-8"), delimiter="\t"))
+
+
+def concept_greek(toks: list[dict]) -> tuple[list[dict], dict]:
+    """rows of concept_greek and its counts: each labelled occurrence's Septuagint word (MACULA's alignment), by the NT's number"""
+    import sqlite3
+    here = Path(__file__).resolve().parent
+    num = lambda x: (m.group(1) if (m := re.match(r"\D*0*(\d+)", x or "")) else "")
+    to_nt = {num(r["source_strong"]): num(r["nt_strong"])
+             for r in tsv(here.parents[1] / "resources/lxx_bridge_tiers/greek_numbers.tsv") if r["nt_strong"]}
+    hb = sqlite3.connect(f"file:{here / 'lowfat-hbo.db'}?mode=ro", uri=True)
+    greek = {k: num(g) for k, g in hb.execute("select key, greekstrong from lowfat_words where is_inserted = 0 and greekstrong != ''")}
+    sp = sqlite3.connect(f"file:{here / 'macula-spine.db'}?mode=ro", uri=True)
+    lem: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
+    for strong, lemma in sp.execute("select strong, lemma from macula_words where lang = 'grc'"):
+        lem[num(strong)][lemma] += 1
+    pair: dict[tuple, list] = collections.defaultdict(list)
+    for r in toks:
+        src = greek.get(r["key"])
+        if r["concept"] and src:
+            pair[(r["concept"], to_nt.get(src, src))].append((src, r.get("labeller") or "opus", r.get("jev_confidence") or ""))
+    by_c, by_g = collections.Counter(), collections.Counter()
+    for (c, g), v in pair.items():
+        by_c[c] += len(v); by_g[g] += len(v)
+    labs = sorted({lab for v in pair.values() for _, lab, _ in v})
+    rows = []
+    for (c, g), v in sorted(pair.items(), key=lambda kv: (int(re.sub(r"\D", "", kv[0][0].split(".")[0]) or 0), kv[0][0], -len(kv[1]), int(kv[0][1]))):
+        conf = [float(x) for _, _, x in v if x]
+        rows.append({"concept": c, "greek_strong": g, "greek_lemma": lem[g].most_common(1)[0][0] if g in lem else "",
+                     "source_strong": " ".join(sorted({s for s, _, _ in v}, key=int)), "count": len(v),
+                     "share_in_concept": round(len(v) / by_c[c], 4), "share_in_greek": round(len(v) / by_g[g], 4),
+                     **{f"n_{lab.replace('+', '_')}": sum(l == lab for _, l, _ in v) for lab in labs},
+                     "jev_confidence_mean": round(sum(conf) / len(conf), 4) if conf else None})
+    n_tok = sum(1 for r in toks if r["concept"])
+    return rows, {"pairs": len(rows), "tokens_with_greek": sum(by_c.values()), "tokens": n_tok, "concepts": len(by_c),
+                  "greek_lexemes": len(by_g), "greek_not_in_nt": sum(1 for g in by_g if g not in lem), "labellers": labs}
 
 
 def main() -> int:
@@ -107,6 +146,11 @@ def main() -> int:
                                  pa.array([r[c] for r in toks], type=pa.string())) for c in tcols}), a.out / "data/tokens.parquet")
     crow = [concepts[c] for c in sorted(codes, key=lambda x: (int(re.sub(r"\D", "", x.split(".")[0]) or 0), x))]
     pq.write_table(pa.table({c: pa.array([r[c] for r in crow], type=pa.string()) for c in crow[0]}), a.out / "data/concepts.parquet")
+    grows, gstat = concept_greek(toks)
+    ints = {"count"} | {c for c in grows[0] if c.startswith("n_")}
+    fl = {"share_in_concept", "share_in_greek", "jev_confidence_mean"}
+    pq.write_table(pa.table({c: pa.array([r[c] for r in grows], type=pa.int32() if c in ints else pa.float64() if c in fl else pa.string())
+                             for c in grows[0]}), a.out / "data/concept_greek.parquet")
     review, n_clean = [], 0
     with open(a.out / "definitions.tsv", "w", encoding="utf-8") as f:
         f.write("# The data holds concept codes only; this table is the English: model-written definitions (Claude Opus 5.5).\n")
@@ -123,19 +167,19 @@ def main() -> int:
         f.writelines(f"{c}\t{d}\n" for c, d in review)
     lab = collections.Counter(r.get("labeller") or "opus" for r in toks)
     n_lex = len({r["strong"] for r in crow})
-    (a.out / "README.md").write_text(card(a.version, len(toks), n_lex, len(codes), lab, stages, n_arc), encoding="utf-8")
+    (a.out / "README.md").write_text(card(a.version, len(toks), n_lex, len(codes), lab, stages, n_arc, gstat), encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file() and p.name != "review.tsv")
     meta = {"schema": 1, "version": a.version, "repo": REPO, "built": datetime.date.today().isoformat(), "licence": "CC BY-SA 4.0",
             "model_output": True, "human_checked": False, "stages": {p: m for p, m, _, _ in stages}, "tokens": len(toks),
             "lexemes": n_lex, "concepts": len(codes), "labellers": dict(lab), "dropped_closed_chapters": list(CLOSED),
-            "definitions_cleaned": n_clean, "definitions_to_review": len(review), "not_read": ["BHSA", "TBTA", "English text"],
+            "concept_greek": gstat, "definitions_cleaned": n_clean, "definitions_to_review": len(review), "not_read": ["BHSA", "TBTA", "English text"],
             "files": {str(p.relative_to(a.out)): sha256(p) for p in files}}
     (a.out / "build.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file() and p.name != "review.tsv")
     (a.out / "SHA256SUMS").write_text("".join(f"{sha256(p)}  {p.relative_to(a.out)}\n" for p in files), encoding="utf-8")
     print(f"{a.out}: {len(toks):,} tokens, {n_lex} lexemes, {len(codes):,} concepts; stages "
           f"{[(p, n) for p, _, n, _ in stages]}; labellers {dict(lab)}; definitions cleaned {n_clean}, still quoting {len(review)} "
-          f"(review.tsv, not published)")
+          f"(review.tsv, not published); concept_greek {gstat}")
     return 0
 
 
@@ -191,7 +235,8 @@ def stage_text(prefix: str, m: dict, n: int, lab: dict) -> str:
     return "\n".join(out)
 
 
-def card(version: str, n_tok: int, n_lex: int, n_con: int, lab: dict, stages: list, n_arc: int = 0) -> str:
+def card(version: str, n_tok: int, n_lex: int, n_con: int, lab: dict, stages: list, n_arc: int = 0, g: dict | None = None) -> str:
+    g = g or {}
     first = stages[0][1]
     opus = (first.get("opus_model") or "claude-opus-5-5").split(" ")[0]
     eds = sorted({e.split("-", 2)[-1] for _, m, _, _ in stages for e in m.get("editions_shown", [])})
@@ -211,6 +256,8 @@ configs:
   data_files: data/tokens.parquet
 - config_name: concepts
   data_files: data/concepts.parquet
+- config_name: concept_greek
+  data_files: data/concept_greek.parquet
 ---
 
 # Hebrew word concepts, model-labelled ({version})
@@ -244,7 +291,29 @@ Translations whose grouping was shown (public domain or CC BY-SA 4.0, verified):
 |---|---|
 | `data/tokens.parquet` | `stage`, `key` (MACULA Hebrew word id), `lang` (hbo, or arc for Aramaic), `concept`, `labeller`, and each labelling run (labels, Jev's confidence) |
 | `data/concepts.parquet` | `code`, `strong`, `ubs_sense` (the UBS sense the concept refines) |
+| `data/concept_greek.parquet` | per concept, the Greek lexemes of the Septuagint at its occurrences (below) |
 | `definitions.tsv` | the model's one-line English definition per concept, kept apart from the data; examples quoting a phrase were removed |
+
+## `concept_greek`: the concepts seen through the Septuagint
+
+{g.get('tokens_with_greek', 0):,} of the {g.get('tokens', 0):,} labelled occurrences have a Greek word in MACULA Hebrew's Septuagint
+alignment. Counted per concept, that gives {g.get('pairs', 0):,} concept-Greek pairs over {g.get('concepts', 0):,} concepts and
+{g.get('greek_lexemes', 0):,} Greek lexemes. The pairs are counts over model labels; the alignment is MACULA's.
+
+| column | description |
+|---|---|
+| `concept` | the concept code |
+| `greek_strong` | the Greek lexeme's Strong's number as MACULA's Greek NT numbers it, one per lemma (plain digits) |
+| `greek_lemma` | that lexeme's lemma in MACULA's Greek NT; empty for the {g.get('greek_not_in_nt', 0)} numbers the NT does not have |
+| `source_strong` | the number or numbers the alignment itself gives (it numbers some inflected forms apart, e.g. 2036 for εἶπεν; mapped to the NT's number by bcv-query's `resources/lxx_bridge_tiers/greek_numbers.tsv`) |
+| `count` | occurrences of the concept rendered by this Greek lexeme |
+| `share_in_concept` | `count` over the concept's occurrences that have a Greek word |
+| `share_in_greek` | `count` over all labelled occurrences rendered by this Greek lexeme; low when the Greek word serves several concepts |
+| `n_jev`, `n_opus`, `n_opus_jev` | how many of the `count` occurrences each labeller labelled (`labeller` in `tokens`) |
+| `jev_confidence_mean` | mean of Jev's confidence over the occurrences that have one |
+
+Only occurrences in this dataset are counted: contested words outside the closed books, so the shares are not the whole
+Septuagint's.
 
 Occurrences in Genesis 22, 37 and 44, Esther, Daniel and Jonah are left out (held back for evaluation elsewhere).{arc_note}
 

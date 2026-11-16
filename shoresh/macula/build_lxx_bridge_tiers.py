@@ -10,6 +10,16 @@ tail of Greek -> Hebrew. These files keep every pair with count >= 3, one file p
               Septuagint numbering), both converted to the English scheme with vrsmap (bibles' TVTMS maps); content words of the canonical
               books only. count = verses with both, score = Dice over the two verse sets, kept at Dice >= 0.3. CC BY-SA 4.0.
 
+Greek numbers (2026-11-16). MACULA Hebrew's `greekstrong` gives some Greek words the number of an inflected form (Strong's own
+per-form entries: σου 4675, εἶπεν 2036, ἔσται 2071, τοῦτο 5124 ...), while MACULA's Greek NT has one number per lemma. Such a pair
+never meets the NT. greek_numbers.tsv maps every `greekstrong` number the Greek NT never uses to the NT number of its forms, from
+MACULA alone: each occurrence's Greek form is looked up among the NT's forms (as written; then with grave read as acute; then
+without acute and grave, keeping circumflex and breathings; forms written without any accent, as the names are, also without
+accents), and the number is mapped when at least 3 occurrences are
+found and 0.9 of them agree. Numbers with no such evidence stay as they are, with an empty `nt_strong`. The macula tier counts by the mapped number, so forms of one word merge. Numbers the NT does use are
+never changed, also where the alignment's form belongs to another NT lemma (not counted: some `greek` forms upstream are garbled,
+e.g. ξ for χ in ἀρξῆς). Make-tanakh-research's list (50 pairs, from GLAUx lemmas and Strong's form lists) agrees on all 48 it shares.
+
 The Hebrew key is MACULA's `strongnumberx` in both, not the spine's `strong`: the spine merges some numbers (H0582 into H0376, H2009 into
 H2005, H3069 into H3068), and the bridge is looked up by the number a reader has. Columns of both: hebrew_strong, greek_strong, tier, count, score (codes zero-padded as in lxx_bridge.tsv). Make-tanakh-grammar's
 lab/bridge/strong_bridge.py was the reference (2026-10-30); the thresholds are theirs.
@@ -23,6 +33,7 @@ import collections
 import re
 import sqlite3
 import sys
+import unicodedata
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -35,16 +46,74 @@ SPINE = HERE / "lexeme-spine-macula.db"
 GLAUX = HERE.parent / "lxx" / "data" / "lxx-glaux.db"
 OUT = ROOT / "resources" / "lxx_bridge_tiers"
 HEADER = "hebrew_strong\tgreek_strong\ttier\tcount\tscore\n"
+MACULA_DB = HERE / "macula-spine.db"
+MAP = OUT / "greek_numbers.tsv"
+MAP_HEADER = "source_strong\tnt_strong\tnt_lemma\tlinks\tfound\tshare\texample\n"
+MAP_MIN, MAP_SHARE = 3, 0.9
 
 
-def hebrew_words(path: Path) -> dict[str, tuple[int, int | None]]:
-    """{spine key: (Hebrew strong, Greek strong or None)} from the MACULA Hebrew TSV, numbers as build_lxx_bridge.py reads them."""
+def hebrew_words(path: Path, forms: collections.Counter | None = None) -> dict[str, tuple[int, int | None]]:
+    """{spine key: (Hebrew strong, Greek strong or None)} from the MACULA Hebrew TSV, numbers as build_lxx_bridge.py reads them.
+    With forms, also counts (Greek strong, Greek form) over the same rows."""
     out = {}
     for row in _rows(path):
         h = re.match(r"(\d+)", (row.get("strongnumberx") or "").strip())
         if h:
             g = re.match(r"(\d+)", (row.get("greekstrong") or "").strip())
             out[row["xml:id"][1:]] = (int(h.group(1)), int(g.group(1)) if g else None)
+            if g and forms is not None:
+                forms[(int(g.group(1)), row.get("greek") or "")] += 1
+    return out
+
+
+def _form(s: str) -> str:
+    return re.sub(r"[^\w]", "", unicodedata.normalize("NFC", s or "").lower())
+
+
+def _acute(s: str) -> str:
+    return unicodedata.normalize("NFC", unicodedata.normalize("NFD", _form(s)).replace("\u0300", "\u0301"))
+
+
+def _tone(s: str) -> str:
+    """without acute and grave (their place shifts with enclitics: ἰδέ, ἴδε); circumflex and breathings stay (ἦ is not ἤ or ἡ)"""
+    return unicodedata.normalize("NFC", "".join(c for c in unicodedata.normalize("NFD", _form(s)) if c not in "\u0300\u0301"))
+
+
+def _bare(s: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", _form(s)) if not unicodedata.combining(c)).replace("ς", "σ")
+
+
+def greek_number_map(forms: collections.Counter, db: Path = MACULA_DB) -> list[tuple]:
+    """[(source number, NT number or None, NT lemma, links, found, share, commonest form)] for every `greekstrong` number the
+    Greek NT never uses (module docstring)."""
+    nt = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    by: tuple[dict, ...] = tuple(collections.defaultdict(collections.Counter) for _ in range(4))
+    lemma: dict[int, collections.Counter] = collections.defaultdict(collections.Counter)
+    for text, lem, strong in nt.execute("SELECT text, lemma, strong FROM macula_words WHERE lang = 'grc'"):
+        m = re.match(r"\D*(\d+)", strong or "")
+        if m:
+            k = int(m.group(1))
+            lemma[k][lem] += 1
+            for d, f in zip(by, (_form, _acute, _tone, _bare)):
+                d[f(text)][k] += 1
+    src: dict[int, collections.Counter] = collections.defaultdict(collections.Counter)
+    for (g, form), n in forms.items():
+        if g not in lemma:
+            src[g][form] += n
+    out = []
+    for g, c in sorted(src.items()):
+        tgt: collections.Counter = collections.Counter()
+        for form, n in c.items():
+            plain = _bare(form) == _form(form).replace("ς", "σ")             # written without any accent or breathing
+            d = (by[0].get(_form(form)) or by[1].get(_acute(form)) or by[2].get(_tone(form))
+                 or (by[3].get(_bare(form)) if plain else None))
+            if d:
+                tgt[d.most_common(1)[0][0]] += n
+        found = sum(tgt.values())
+        top, n = tgt.most_common(1)[0] if tgt else (None, 0)
+        ok = found >= MAP_MIN and n / found >= MAP_SHARE
+        out.append((g, top if ok else None, lemma[top].most_common(1)[0][0] if ok else "", sum(c.values()), found,
+                    round(n / found, 3) if found else 0.0, c.most_common(1)[0][0]))
     return out
 
 
@@ -102,10 +171,21 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--min-count", type=int, default=3)
     ap.add_argument("--min-dice", type=float, default=0.3)
     a = ap.parse_args(argv)
-    words = hebrew_words(_src(HBO_URL, "MACULA_HBO_TSV"))
+    forms: collections.Counter = collections.Counter()
+    words = hebrew_words(_src(HBO_URL, "MACULA_HBO_TSV"), forms)
+    gmap = greek_number_map(forms)
+    to_nt = {g: t for g, t, *_ in gmap if t}
+    words = {k: (h, to_nt.get(g, g)) for k, (h, g) in words.items()}
     mac = macula_tier(words, a.min_count)
     lxx, stats = glaux_tier(words, sqlite3.connect(SPINE), sqlite3.connect(GLAUX), a.min_count, a.min_dice)
     OUT.mkdir(parents=True, exist_ok=True)
+    with open(MAP, "w", encoding="utf-8") as f:
+        f.write(MAP_HEADER)
+        f.writelines(f"G{g:04d}\t{f'G{t:04d}' if t else ''}\t{lem}\t{n}\t{found}\t{share}\t{ex}\n" for g, t, lem, n, found, share, ex in gmap)
+    n_links = sum(forms.values())
+    print(f"greek numbers: {len(gmap)} numbers the Greek NT never uses, {sum(r[3] for r in gmap):,} of {n_links:,} links; mapped "
+          f"{sum(1 for r in gmap if r[1])} ({sum(r[3] for r in gmap if r[1]):,} links), left {sum(1 for r in gmap if not r[1])} "
+          f"({sum(r[3] for r in gmap if not r[1]):,} links)")
     write(OUT / "macula.tsv", "macula", mac)
     write(OUT / "glaux.tsv", "glaux", lxx)
     for name, p in (("macula", mac), ("glaux", lxx)):

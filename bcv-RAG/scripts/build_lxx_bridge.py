@@ -11,6 +11,10 @@ and is dramatically cleaner than the positional `/bridge` computation it replace
 (Biblica): MACULA lists the Greek equivalents and their Strong's numbers among Clear's own datasets; the UBS
 permission in MACULA covers only the SDBH columns, which this bridge does not read. No shoresh dependency anymore.
 
+GREEK NUMBERS (2026-11-16): `greekstrong` gives some Greek words the number of an inflected form (σου 4675, εἶπεν 2036 ...),
+which the Greek NT never uses. They are replaced by the NT's number per lemma from resources/lxx_bridge_tiers/greek_numbers.tsv
+(built by shoresh/macula/build_lxx_bridge_tiers.py; run that first), so the expansion reaches NT words.
+
 Output TSV columns: hebrew_strong<TAB>greek_strong<TAB>count
 (zero-padded codes, e.g. H0430 / G1656; top GREEK_PER_HEBREW greek per hebrew,
 each with count >= MIN_GREEK_COUNT; sorted by hebrew then count desc).
@@ -38,6 +42,13 @@ MACULA_HEBREW_TSV = ("https://media.githubusercontent.com/media/"
                      "Clear-Bible/macula-hebrew/main/WLC/tsv/macula-hebrew.tsv")
 GREEK_PER_HEBREW = 4
 MIN_GREEK_COUNT = 3
+GREEK_NUMBERS = Path(__file__).resolve().parents[2] / "resources" / "lxx_bridge_tiers" / "greek_numbers.tsv"
+
+
+def greek_numbers(path: Path = GREEK_NUMBERS) -> dict[str, str]:
+    """{Septuagint-side number: the Greek NT's number} for the numbers the NT never uses and that have a mapping"""
+    with open(path, encoding="utf-8") as f:
+        return {r["source_strong"]: r["nt_strong"] for r in csv.DictReader(f, delimiter="\t") if r["nt_strong"]}
 
 
 def _hnorm(s: str) -> str | None:
@@ -66,6 +77,7 @@ def main() -> None:
     ap.add_argument("--tsv", default="", help="cached macula-hebrew TSV (else download)")
     args = ap.parse_args()
 
+    to_nt = greek_numbers()
     gk: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
     n_rows = n_pairs = 0
     fh = _rows(args.tsv or None)
@@ -75,7 +87,7 @@ def main() -> None:
             h = _hnorm(row.get("strongnumberx") or "")
             g = _gnorm(row.get("greekstrong") or "")
             if h and g:
-                gk[h][g] += 1
+                gk[h][to_nt.get(g, g)] += 1
                 n_pairs += 1
     finally:
         fh.close()
