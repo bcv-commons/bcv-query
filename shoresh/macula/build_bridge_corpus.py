@@ -1,6 +1,7 @@
 """One Context-Fabric dataset on MACULA's keys: the texts in the original biblical languages with the published layers and, later, the
-bridges between Hebrew and Greek (plan: internal-docs/bridge-corpus-plan-2026-11-16.md). This is step 1: the Tanakh and the Greek New
-Testament, every layer as features and edges inside a text.
+bridges between Hebrew and Greek (plan: internal-docs/bridge-corpus-plan-2026-11-16.md). Steps 1, 2 and 5: the Tanakh and the Greek New
+Testament with every layer as features and edges inside a text; the two Hebrew New Testaments (Salkinson-Ginsburg `heb_scg`, Delitzsch
+`heb_mod`) as texts of their own, with our analysis, their clause segments, their links to the Greek NT and their marked quotations.
 
     python -m macula.build_bridge_corpus --fetch             download the pinned releases (bridge_corpus_pins.json) and check them
     python -m macula.build_bridge_corpus --build             -> macula/data/bridge-corpus/build-<pins>/ (the dataset) and its report.json
@@ -12,13 +13,19 @@ layouts' alt_eng and text columns are left out) and no BHSA values; a new versio
 
 Units: word (the base unit: a word part in Hebrew, a word in Greek), token (a written Hebrew word), phrase (a clause constituent of
 argument-roles), line (a row of a clause layout), clause (the layers' clause key: in Hebrew a clause can have several lines, in Greek
-each line is a clause), quotation, verse, chapter, book, text.
+each line is a clause; in a Hebrew NT a clause is a segment of hebrew-nt-analysis), quotation, verse, chapter, book, text.
+Sections: `sec` on books (GEN, MAT; SCG.MAT and DEL.MAT in the Hebrew NTs, since one book name in two texts breaks the lookup), chapter,
+verse; `book` stays the plain name on every section.
 Features: the source's word features have no prefix (mid = the MACULA key, text, lang, lemma, strong, pos, ...); a layer's column is
 `<prefix><column>` (lay_ layout, cc_ clause-columns, cn_ clause-connectives, cx_ clause-extras, ta_ time-aspect, ar_ argument-roles,
 rs_ reference-status, nr_ noun-relations, ws_ word-senses, we_ inclusive-we, ad_ addressees, m_ model-made).
 Edges: parent and discourse_parent (clause to clause), arg (verb to its argument phrase, value: the relation), ar_head and ar_prep
 (phrase to word), nr_relation / nr_form / nr_animacy (head noun to dependent), frame (verb to argument word, MACULA's role), ref (word
-to the word it refers to, MACULA's kind).
+to the word it refers to, MACULA's kind); between texts: heb_scg and heb_mod (Greek NT word to Hebrew NT word part, value: the aligner's
+class, `compact` for heb_mod), parallel (Hebrew NT verse to the Greek NT verse of the same number), quotes (Hebrew NT verse to the Tanakh
+verse it follows, value: the weight).
+Hebrew NT words carry the source's word features under the same names (text, lemma, strong, pos, role, person) and the rest of the
+analysis under hna_ (source macula / model, lexeme, form, word, p_split as 0 to 100, token); `hkey` = "<edition> BOOK C:V i.part".
 """
 from __future__ import annotations
 
@@ -39,10 +46,11 @@ WORD = (("lemma", "lemma"), ("strong", "strong"), ("class", "pos"), ("role", "ro
         ("gender", "gender"), ("case_", "case"), ("tense", "tense"), ("voice", "voice"), ("mood", "mood"), ("degree", "degree"), ("state", "state"))
 LANG = {"H": "hbo", "A": "arc", "": "grc"}
 TEXT = {"hbo": "tanakh", "grc": "greek_nt"}
+HNT = {"heb_scg": ("salkinson", "SCG"), "heb_mod": ("delitzsch", "DEL")}
 CORPUS = {"hebrew": "hbo", "greek-nt": "grc"}
 CLAUSE_LAYERS = (("clause-columns", "cc_"), ("clause-connectives", "cn_"), ("clause-extras", "cx_"), ("time-aspect", "ta_"))
 LINE_SKIP = {"book", "chapter", "verse", "words", "text", "first", "last", "alt_eng", "clause_key", "parent_key", "discourse_parent"}
-REFERENCES = {"lay_verse_ref_en", "cc_ref", "lay_via"}                  # verse references and lists of codes: Latin script with spaces, no English text
+REFERENCES = {"lay_verse_ref_en", "cc_ref", "lay_via", "hkey"}                  # verse references and lists of codes: Latin script with spaces, no English text
 QUERIES = (                                              # fixed queries with their hits in this build (the check fails when they move)
     ("speech clauses in Ruth, imperative or prohibitive, with an undergoer phrase that holds a noun",
      "book book=RUT\n  clause cc_speech>0 cc_force=imperative|prohibitive\n    phrase ar_role=undergoer\n      word pos=noun\n", 6),
@@ -53,6 +61,10 @@ QUERIES = (                                              # fixed queries with th
     ("nouns that are the A1 of a form of ἀγαπάω (MACULA's frames)", "v:word lemma=ἀγαπάω\na:word pos=noun\nv -frame=A1> a\n", 50),
     ("Hebrew kinship pairs (noun-relations)", "a:word lang=hbo\nb:word\na -nr_relation=kin> b\n", 6560),
     ("future clauses whose parent clause is imperative", "c:clause cc_force=imperative\nd:clause ta_time=future\nd -parent> c\n", 21),
+    ("Greek NT words of λόγος that Salkinson renders by דָּבָר", "g:word lemma=λόγος\nh:word strong=1697\ng -heb_scg> h\n", 249),
+    ("the same in Delitzsch", "g:word lemma=λόγος\nh:word strong=1697\ng -heb_mod> h\n", 267),
+    ("Salkinson verses that follow a verse of Isaiah", "v:verse\nt:verse book=ISA\nv -quotes> t\n", 190),
+    ("Hebrew NT words of the verb Strong 1980 inside a Salkinson clause of John", "text name=salkinson\n  book book=JHN\n    clause\n      word strong=1980\n", 114),
 )
 
 
@@ -178,19 +190,20 @@ def add_words(c: Corpus, db: Path) -> None:
         c.set("mid", c.node("token", sl, k), k, "words")
     chapters, books, texts = collections.OrderedDict(), collections.OrderedDict(), collections.OrderedDict()
     for (lang, b, ch, v), sl in sections.items():
-        h = c.node("verse", sl, (b, ch, v))
+        h = c.node("verse", sl, (TEXT[lang], b, ch, v))
         c.F["book"][h], c.F["chapter"][h], c.F["verse"][h] = b, ch, v
         chapters.setdefault((lang, b, ch), []).extend(sl)
     for (lang, b, ch), sl in chapters.items():
-        h = c.node("chapter", sl, (b, ch))
+        h = c.node("chapter", sl, (TEXT[lang], b, ch))
         c.F["book"][h], c.F["chapter"][h] = b, ch
         books.setdefault((lang, b), []).extend(sl)
     for (lang, b), sl in books.items():
-        c.F["book"][c.node("book", sl, b)] = b
+        h = c.node("book", sl, (TEXT[lang], b))
+        c.F["book"][h] = c.F["sec"][h] = b
         texts.setdefault(lang, []).extend(sl)
     for lang, sl in texts.items():
         c.F["name"][c.node("text", sl, TEXT[lang])] = TEXT[lang]
-    for name in ("book", "chapter", "verse", "name"):
+    for name in ("book", "chapter", "verse", "name", "sec"):
         c.origin[name] = "words"
     c.report["words"] = {"hbo": sum(1 for r in rows if r["lang"] == "hbo"), "grc": sum(1 for r in rows if r["lang"] == "grc")}
     for edge, sql in (("frame", "select verb_key, arg_key, role from frames"), ("ref", "select src_key, tgt_key, kind from refs")):
@@ -336,6 +349,77 @@ def add_word_layers(c: Corpus) -> None:
     c.report["layers"]["addressees"] = dict(st)
 
 
+def add_hebrew_nt(c: Corpus) -> None:
+    """the two Hebrew NTs: words, tokens, clause segments, sections, text; then the links to the Greek NT, the parallel verses, the quotes"""
+    import pyarrow.parquet as pq
+    an, br = folder("hebrew-nt-analysis", pins()["layers"]["hebrew-nt-analysis"]), folder("hebrew-nt-bridge", pins()["layers"]["hebrew-nt-bridge"])
+    for ed, (name, tag) in HNT.items():
+        st = collections.Counter()
+        rows = [r for r in pq.read_table(an / ed / "words.parquet").to_pylist() if r["class"] != "verse-number"]
+        tokens, segs, verses = collections.OrderedDict(), collections.OrderedDict(), collections.OrderedDict()
+        for i, r in enumerate(rows):
+            key = f"{ed} {r['book']} {r['chapter']}:{r['verse']} {r['i']}.{r['part']}"
+            s = c.slot[key] = len(c.slot) + 1
+            nxt = rows[i + 1] if i + 1 < len(rows) else None
+            same = nxt is not None and (nxt["book"], nxt["chapter"], nxt["verse"], nxt["i"]) == (r["book"], r["chapter"], r["verse"], r["i"])
+            c.F["hkey"][s], c.F["text"][s], c.F["lang"][s], c.F["trailer"][s] = key, r["text"], "hbo", "" if same else " "
+            for col, feat in (("lemma", "lemma"), ("strong", "strong"), ("class", "pos"), ("role", "role"), ("person", "person")):
+                if r[col]:
+                    c.F[feat][s] = r[col]
+            for col in ("source", "lexeme", "form", "word", "token"):
+                if r[col] and not (col == "word" and same and r["part"]):
+                    c.F[f"hna_{col}"][s] = r[col]
+            if r["p_split"] is not None:
+                c.F["hna_p_split"][s] = value(r["p_split"])
+            tokens.setdefault((r["book"], r["chapter"], r["verse"], r["i"]), []).append(s)
+            segs.setdefault((r["book"], r["chapter"], r["verse"], r["seg"]), []).append(s)
+            verses.setdefault((r["book"], r["chapter"], r["verse"]), []).append(s)
+        for k in ("hkey", "hna_source", "hna_lexeme", "hna_form", "hna_word", "hna_token", "hna_p_split"):
+            c.origin[k] = "hebrew-nt-analysis"
+        for k, sl in tokens.items():
+            c.node("token", sl)
+        for r in pq.read_table(an / ed / "clauses.parquet").to_pylist():
+            k = (r["book"], r["chapter"], r["verse"], r["seg"])
+            h = c.node("clause", segs.get(k, []), (ed, *k))
+            st["clauses"] += 1
+            st["clauses placed"] += h is not None
+            if h is not None:
+                c.put(h, r, "hna_", "hebrew-nt-analysis", {"book", "chapter", "verse", "first_i", "last_i"})
+        for (b, ch, v, sg), h in [(k[1:], h) for k, h in c.at["clause"].items() if isinstance(k, tuple) and k[0] == ed]:
+            p = c.F["hna_parent"].get(h)
+            if p in ("-1", "+1"):
+                st["parent edges"] += c.edge("parent", h, c.at["clause"].get((ed, b, ch, v, sg + int(p))), None, "hebrew-nt-analysis")
+        chapters, books = collections.OrderedDict(), collections.OrderedDict()
+        for (b, ch, v), sl in verses.items():
+            h = c.node("verse", sl, (name, b, ch, v))
+            c.F["book"][h], c.F["chapter"][h], c.F["verse"][h] = b, ch, v
+            chapters.setdefault((b, ch), []).extend(sl)
+            st["parallel edges"] += c.edge("parallel", h, c.at["verse"].get(("greek_nt", b, ch, v)), None, "hebrew-nt-bridge")
+            st["verses"] += 1
+        for (b, ch), sl in chapters.items():
+            h = c.node("chapter", sl, (name, b, ch))
+            c.F["book"][h], c.F["chapter"][h] = b, ch
+            books.setdefault(b, []).extend(sl)
+        for b, sl in books.items():
+            h = c.node("book", sl, (name, b))
+            c.F["book"][h], c.F["sec"][h] = b, f"{tag}.{b}"
+        c.F["name"][c.node("text", [s for sl in books.values() for s in sl], name)] = name
+        st["words"] = len(rows)
+        for r in pq.read_table(br / "links" / f"{ed}.parquet").to_pylist():
+            a = c.slot.get(r["greek_id"][1:])
+            t = c.slot.get(f"{ed} {r['book']} {r['chapter']}:{r['verse']} {r['i']}.{r['part']}")
+            st["links"] += 1
+            st["links placed"] += c.edge(ed, a, t, r["link"], "hebrew-nt-bridge")
+        for line in (br / "quotes" / f"{ed}.tsv").read_text(encoding="utf-8").splitlines()[1:]:
+            nt, tk, w, *_ = line.split("\t")
+            (nb, ncv), (tb, tcv) = nt.split(), tk.split()
+            a = c.at["verse"].get((name, nb, *map(int, ncv.split(":"))))
+            t = c.at["verse"].get(("tanakh", tb, *map(int, tcv.split(":"))))
+            st["quotes"] += 1
+            st["quotes placed"] += c.edge("quotes", a, t, w, "hebrew-nt-bridge")
+        c.report["layers"][f"hebrew NT {ed}"] = dict(st)
+
+
 def save(c: Corpus, out: Path) -> dict:
     import cfabric
     p = pins()
@@ -355,7 +439,7 @@ def save(c: Corpus, out: Path) -> dict:
     source["words"] = {"source": f"{p['words']['origin']}; {p['words']['source']} {p['words']['tag']}", "licence": p["words"]["licence"], "model_made": "no"}
     source["layout"] = {"source": "the two clause layouts (see lay_ features)", "licence": "cc-by-sa-4.0", "model_made": "no"}
     meta = {"": {"name": "bridge corpus (working name)", "version": version(p), "licence": "cc-by-sa-4.0", "pins": "pins.json in this folder"},
-            "otext": {"sectionTypes": "book,chapter,verse", "sectionFeatures": "book,chapter,verse", "fmt:text-orig-full": "{text}{trailer}"},
+            "otext": {"sectionTypes": "book,chapter,verse", "sectionFeatures": "sec,chapter,verse", "fmt:text-orig-full": "{text}{trailer}"},
             "otype": {"valueType": "str"}, "oslots": {"valueType": "str"}}
     nodef, edgef = {"otype": otype}, {"oslots": oslots}
     for name, vals in c.F.items():
@@ -395,6 +479,7 @@ def build(out: Path, db: Path) -> dict:
     add_clause_layers(c)
     add_phrases(c)
     add_word_layers(c)
+    add_hebrew_nt(c)
     rep = save(c, out)
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return rep

@@ -19,12 +19,14 @@ def small() -> m.Corpus:
     for i, k in enumerate(("010010010011", "010010010012", "010010010021", "40001001001")):
         c.slot[k] = i + 1
         c.F["mid"][i + 1], c.F["text"][i + 1], c.F["trailer"][i + 1] = k, "x", " "
-        c.origin.update({"mid": "words", "text": "words", "trailer": "words", "book": "words", "chapter": "words", "verse": "words"})
+        c.origin.update({"mid": "words", "text": "words", "trailer": "words", "book": "words", "chapter": "words", "verse": "words", "sec": "words"})
     for typ, sl, key in (("verse", [1, 2, 3], ("GEN", 1, 1)), ("verse", [4], ("MAT", 1, 1)), ("clause", [1, 2, 3], "010010010011"), ("clause", [4], "40001001001"),
                          ("phrase", [3], None), ("chapter", [1, 2, 3], None), ("chapter", [4], None), ("book", [1, 2, 3], None), ("book", [4], None)):
         h = c.node(typ, sl, key)
         if typ in ("verse", "chapter", "book"):
             c.F["book"][h] = "GEN" if 1 in sl else "MAT"
+            if typ == "book":
+                c.F["sec"][h] = c.F["book"][h]
             if typ != "book":
                 c.F["chapter"][h] = 1
             if typ == "verse":
