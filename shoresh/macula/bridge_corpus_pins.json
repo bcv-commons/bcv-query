@@ -182,6 +182,14 @@
    "sha256": "86da6520cee57eaf69bdd0f71de0dfc2d92d8c91fab0f454863ca08ca7aec594",
    "licence": "cc-by-4.0",
    "origin": "MACULA Hebrew's Septuagint forms (greek, greekstrong), placed by bridge_corpus_lxx"
+  },
+  "trees": {
+   "source": "github:bcv-commons/spine-releases",
+   "tag": "trees-macula-2026-10-08",
+   "path": "macula/trees-macula.db",
+   "sha256": "efe5b5a1c5e8cea4f8b273328b665c58a49cd663ee24537ddac52c4f7c192f44",
+   "licence": "cc-by-4.0",
+   "origin": "MACULA Hebrew (WLC lowfat) and MACULA Greek (Nestle 1904 lowfat) syntax trees, Clear Bible"
   }
  }
 }

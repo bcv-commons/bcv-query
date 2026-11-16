@@ -25,7 +25,8 @@ to the word it refers to, MACULA's kind); between texts: heb_scg and heb_mod (Gr
 class, `compact` for heb_mod), parallel (Hebrew NT verse to the Greek NT verse of the same number), quotes (Hebrew NT verse to the Tanakh
 verse it follows, value: the weight).
 Lexeme, concept and person units and the tier edges: see bridge_corpus_units. word-parts (wp_), hebrew-phrase-types-model (m_pt_) and
-passage-facts (fact units, pf_): see bridge_corpus_more.
+passage-facts (fact units, pf_): see bridge_corpus_more. MACULA's trees (sentence and wordgroup units, tr_, the source's trailers): see
+bridge_corpus_trees.
 The Septuagint: see bridge_corpus_lxx (texts septuagint; words, lxx and carried edges, parallel verses, LXX.<BOOK> sections).
 Hebrew NT words carry the source's word features under the same names (text, lemma, strong, pos, role, person) and the rest of the
 analysis under hna_ (source macula / model, lexeme, form, word, p_split as 0 to 100, token); `hkey` = "<edition> BOOK C:V i.part".
@@ -45,7 +46,7 @@ PINS = HERE / "bridge_corpus_pins.json"
 DATA = HERE / "data" / "bridge-corpus"
 INPUTS = DATA / "inputs"
 ROOT_RESOURCES = HERE.parents[1] / "resources"
-TYPES = ("token", "phrase", "line", "clause", "quotation", "verse", "chapter", "book", "text", "lexeme", "concept", "person", "fact")     # after word; nodes are numbered type by type
+TYPES = ("token", "phrase", "line", "clause", "quotation", "verse", "chapter", "book", "text", "lexeme", "concept", "person", "fact", "sentence", "wordgroup")     # after word; nodes are numbered type by type
 WORD = (("lemma", "lemma"), ("strong", "strong"), ("class", "pos"), ("role", "role"), ("stem", "stem"), ("person", "person"), ("number", "number"),
         ("gender", "gender"), ("case_", "case"), ("tense", "tense"), ("voice", "voice"), ("mood", "mood"), ("degree", "degree"), ("state", "state"))
 LANG = {"H": "hbo", "A": "arc", "": "grc"}
@@ -83,6 +84,9 @@ QUERIES = (                                              # fixed queries with th
     ("Hebrew phrases typed Instrument by the model whose preposition is בְּ", "phrase m_pt_label=Instrument\n  word strong=0871a\n", 2159),
     ("imperative facts inside a quotation fact of the Tanakh", "q:fact pf_kind=quote\n  f:fact pf_kind=force pf_value=fc.imp\n    word lang=hbo\n", 15171),
     ("semantic-domain facts tied to their quotation", "a:fact pf_kind=domain\nb:fact pf_kind=quote\na -pf_of> b\n", 6499),
+    ("Hebrew words joined by maqaf to the next", "word lang=hbo trailer=־\n", None),
+    ("Greek NT prepositional groups inside a clause group that is the object", "c:wordgroup tr_cls=cl tr_role=o\n  wordgroup tr_cls=pp\n", None),
+    ("Hebrew head groups that are noun phrases, under a prepositional phrase", "p:wordgroup tr_cls=pp\nn:wordgroup tr_cls=np tr_head=1\nn -tr_parent> p\n", None),
 )
 
 
@@ -510,7 +514,8 @@ def build(out: Path, db: Path) -> dict:
     add_hebrew_nt(c)
     from macula import bridge_corpus_lxx
     bridge_corpus_lxx.add_septuagint(c, stores)
-    from macula import bridge_corpus_more, bridge_corpus_units
+    from macula import bridge_corpus_more, bridge_corpus_trees, bridge_corpus_units
+    bridge_corpus_trees.add_trees(c, stores["trees"])
     bridge_corpus_more.add_more(c)
     bridge_corpus_units.add_units(c)
     rep = save(c, out)
