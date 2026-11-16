@@ -1,0 +1,149 @@
+{
+ "inputs": {
+  "by_id": "bcv-commons/alignments-by-id@v1.0",
+  "compact": "bcv-commons/compact-alignments@11583082",
+  "greek": "MACULA Greek, Nestle 1904 (macula-spine.db)",
+  "septuagint_tiers": "resources/lxx_bridge_tiers",
+  "tanakh": "MACULA Hebrew (macula-spine.db)"
+ },
+ "quote_rule": {
+  "listed_from_weight": 16.0,
+  "marked_from_weight": 20.0
+ },
+ "editions": {
+  "heb_scg": {
+   "analysis_model": {
+    "file": "model-dictabert.pt",
+    "sha256": "6a5877b528523f91e4b2d3ad3ed84871062293e1e782911c3a6adaf76fbef7cf",
+    "encoder": "dicta-il/dictabert",
+    "epoch": 4
+   },
+   "compact_against_by_id": {
+    "greek content words with a Hebrew lexeme in both": 50491,
+    "same lexemes": 49453,
+    "share same": 0.9794,
+    "share with a lexeme in common": 0.9857
+   },
+   "compact_figures": {
+    "greek words linked (compact)": 63632,
+    "links with no part of a fitting class": 1188,
+    "links to a position the analysis lacks": 5,
+    "links in a verse the analysis lacks": 6,
+    "compact verses whose content words could not be matched": 2
+   },
+   "form": "by-id",
+   "figures": {
+    "greek words linked (kept)": 79430,
+    "greek words linked (edited)": 6877,
+    "greek words linked (part)": 4103,
+    "greek words linked (inside)": 22440,
+    "links with no part of a fitting class": 1676,
+    "greek words linked (edited-wide)": 5316
+   },
+   "link_rows": 123728,
+   "greek content words": 65264,
+   "greek content words linked to a Hebrew part": 61542,
+   "greek content words with a Hebrew lexeme": 51196,
+   "linked hebrew content parts": 72887,
+   "of them with a Strong's number": 68204,
+   "tier": {
+    "pairs": 3209,
+    "hebrew lexemes": 1154,
+    "greek lexemes": 1557,
+    "pairs of greek nouns, verbs and adjectives": 2337,
+    "of them also in a Septuagint tier": 1109,
+    "pairs also in a Septuagint tier": 1578,
+    "share of pairs": 0.4917,
+    "share of links on those pairs": 0.8645,
+    "pairs in macula tier": 1540,
+    "pairs in glaux tier": 615,
+    "pairs new to the Septuagint tiers": 1631,
+    "hebrew lexemes with no Septuagint pair that gain one": 118,
+    "NT greek lexemes": 5346,
+    "NT greek lexemes with a Septuagint pair": 2004,
+    "NT greek lexemes with no Septuagint pair that gain one": 448,
+    "NT words of those greek lexemes": 7702
+   },
+   "quotes": {
+    "pairs of verses listed": 739,
+    "NT verses listed": 496,
+    "NT verses with a marked stretch": 226,
+    "Tanakh verses they follow": 184,
+    "hebrew parts in a marked stretch": 1450,
+    "counted links in a marked stretch": 1302,
+    "content links in a marked stretch": 1146,
+    "of them on a Septuagint pair": 0.801,
+    "content links outside": 51026,
+    "of them on a Septuagint pair (outside)": 0.6576,
+    "pairs with fewer than 3 links outside the marked stretches": 68,
+    "pairs with a link in a marked stretch": 384
+   }
+  },
+  "heb_mod": {
+   "analysis_model": {
+    "file": "model-dictabert-unpointed.pt",
+    "sha256": "ec8afe7e38e97caf8563c234e3d86e5a9cd8130d40486beb8b718a5134a71d26",
+    "encoder": "dicta-il/dictabert",
+    "epoch": 4,
+    "vowel_points": "stripped"
+   },
+   "form": "compact",
+   "figures": {
+    "greek words linked (compact)": 63292,
+    "links with no part of a fitting class": 1235,
+    "links in a verse the analysis lacks": 13,
+    "compact verses whose content words could not be matched": 2
+   },
+   "link_rows": 64531,
+   "greek content words": 65264,
+   "greek content words linked to a Hebrew part": 62057,
+   "greek content words with a Hebrew lexeme": 56527,
+   "linked hebrew content parts": 62397,
+   "of them with a Strong's number": 58101,
+   "tier": {
+    "pairs": 2485,
+    "hebrew lexemes": 1100,
+    "greek lexemes": 1505,
+    "pairs of greek nouns, verbs and adjectives": 2482,
+    "of them also in a Septuagint tier": 1081,
+    "pairs also in a Septuagint tier": 1082,
+    "share of pairs": 0.4354,
+    "share of links on those pairs": 0.7965,
+    "pairs in macula tier": 1045,
+    "pairs in glaux tier": 601,
+    "pairs new to the Septuagint tiers": 1403,
+    "hebrew lexemes with no Septuagint pair that gain one": 132,
+    "NT greek lexemes": 5346,
+    "NT greek lexemes with a Septuagint pair": 2004,
+    "NT greek lexemes with no Septuagint pair that gain one": 478,
+    "NT words of those greek lexemes": 6951
+   },
+   "quotes": {
+    "pairs of verses listed": 559,
+    "NT verses listed": 370,
+    "NT verses with a marked stretch": 179,
+    "Tanakh verses they follow": 145,
+    "hebrew parts in a marked stretch": 1181,
+    "counted links in a marked stretch": 983,
+    "content links in a marked stretch": 983,
+    "of them on a Septuagint pair": 0.7945,
+    "content links outside": 57116,
+    "of them on a Septuagint pair (outside)": 0.6373,
+    "pairs with fewer than 3 links outside the marked stretches": 41,
+    "pairs with a link in a marked stretch": 310
+   }
+  }
+ },
+ "agreement": {
+  "editions": [
+   "heb_scg",
+   "heb_mod"
+  ],
+  "greek content words with a Hebrew lexeme in both": 47599,
+  "same lexemes": 33776,
+  "share same": 0.7096,
+  "share with a lexeme in common": 0.7252,
+  "NT verses with a marked stretch in both": 156,
+  "in either": 249
+ }
+}

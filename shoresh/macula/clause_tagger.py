@@ -29,10 +29,15 @@ clause layout's segments (macula/data/clause-layout/clauses, built by macula.bui
 chapters of the Parsan comparison (Gen 37-45, Ruth, Jonah, 1 Sam 1-10, Deut 5-11); for development: Judges 1-5.
 
   python -m macula.clause_tagger prep                       # -> data/clause-tagger/verses.jsonl
-  python -m macula.clause_tagger train [--encoder dicta-il/dictabert] [--epochs 4]
+  python -m macula.clause_tagger train [--encoder dicta-il/dictabert] [--epochs 4] [--unpointed]
   python -m macula.clause_tagger score [--split test] [--lookup]   # the metrics of the Parsan comparison
   python -m macula.clause_tagger tag FILE.txt               # one verse per line -> JSON lines
   python -m macula.clause_tagger export --helloao DIR --edition heb_scg   # a Hebrew NT, word by word as lexeme-aligner counts words
+
+--unpointed (2026-11-16) trains a second model for a text printed without vowel points (Delitzsch's NT as eBible has it): the
+same data with the points stripped from the words, the part lengths counted in letters, and the lemma labels as MACULA has them.
+The model file says how it was trained (`unpointed`); score, tag and export then strip the points of what they read, and the table
+of known forms is keyed by the unpointed form (a form whose readings differ is left to the model, by the same 0.9 share).
 
 export reads helloAO chapter JSON (DIR/<BOOK>_<chapter>.json), takes each verse's text and its words by bcv-commons/bibles' rule and
 tokenizer (macula/vendor_bibles, as lexeme-aligner does), so word i of a verse is the aligner's token i, and writes to
@@ -181,9 +186,26 @@ def _meet_kind(paths: list[list], j: int) -> str:
     return paths[j][best[1] - 1][1] if best and best[1] > 0 else "-"
 
 
-def load(split: str | None = None) -> list[dict]:
+def depoint(v: dict) -> dict:
+    """the verse as a text without vowel points gives it: the words and the parts' lengths without the points"""
+    words = []
+    for w in v["words"]:
+        x = dict(w, text=unpointed(w["text"]))
+        if "parts" in w:
+            at, parts = 0, []
+            for p in w["parts"]:
+                parts.append({**p, "len": len(unpointed(w["text"][at:at + p["len"]]))})
+                at += p["len"]
+            x["parts"] = parts
+        words.append(x)
+    return {**v, "words": words}
+
+
+def load(split: str | None = None, plain: bool = False) -> list[dict]:
+    """the verses of prep(); plain: without their vowel points"""
     rows = [json.loads(l) for l in (OUT / "verses.jsonl").open()]
-    return [r for r in rows if split is None or r["split"] == split]
+    rows = [r for r in rows if split is None or r["split"] == split]
+    return [depoint(r) for r in rows] if plain else rows
 
 
 # ---------------------------------------------------------------- model
@@ -309,11 +331,11 @@ class Batcher:
                  "first": first.to(device), "char_ids": chars.to(device)}, mask, gold)
 
 
-def train(encoder: str, epochs: int, batch: int, seed: int) -> None:
+def train(encoder: str, epochs: int, batch: int, seed: int, plain: bool = False) -> None:
     import torch
     from transformers import AutoTokenizer, get_linear_schedule_with_warmup
     random.seed(seed); torch.manual_seed(seed)
-    tr, dev = load("train"), load("dev")
+    tr, dev = load("train", plain), load("dev", plain)
     chars = sorted({c for v in tr for w in v["words"] for c in w["text"]})
     tok = AutoTokenizer.from_pretrained(encoder)
     dev_ice = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -328,7 +350,7 @@ def train(encoder: str, epochs: int, batch: int, seed: int) -> None:
     loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-100)
     scaler = torch.amp.GradScaler()
     best = -1.0
-    tag = encoder.split("/")[-1]
+    tag = encoder.split("/")[-1] + ("-unpointed" if plain else "")
     for ep in range(epochs):
         model.train()
         random.shuffle(tr)
@@ -354,7 +376,8 @@ def train(encoder: str, epochs: int, batch: int, seed: int) -> None:
               f"split {m['split']:.1%}, lemma {m['part_lemma']:.1%}, word all {m['word_all']:.1%}", flush=True)
         if m["boundary_f1"] + m["segments_exact"] > best:
             best = m["boundary_f1"] + m["segments_exact"]
-            torch.save({"state": model.state_dict(), "encoder": encoder, "chars": chars, "vocab": vocab, "epoch": ep + 1, "dev": m, "seed": seed},
+            torch.save({"state": model.state_dict(), "encoder": encoder, "chars": chars, "vocab": vocab, "epoch": ep + 1, "dev": m, "seed": seed,
+                        "unpointed": plain},
                        OUT / f"model-{tag}.pt")
     print(f"[clause_tagger] best dev checkpoint -> {OUT / f'model-{tag}.pt'}")
 
@@ -449,11 +472,11 @@ def lexeme_of() -> dict[str, str]:
     return _LEXEME_OF
 
 
-def lookup_table(splits: tuple[str, ...], share: float = 0.9) -> dict[str, list[dict]]:
-    """pointed word -> its MACULA parts (split, class, lemma, Strong's), where at least `share` of its occurrences in these splits
-    are analysed alike"""
+def lookup_table(splits: tuple[str, ...], share: float = 0.9, plain: bool = False) -> dict[str, list[dict]]:
+    """pointed word (plain: the word without its points) -> its MACULA parts (split, class, lemma, Strong's), where at least `share`
+    of its occurrences in these splits are analysed alike"""
     seen: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
-    for v in load():
+    for v in load(plain=plain):
         if v["split"] in splits:
             for w in v["words"]:
                 seen[w["text"]][json.dumps([[x["len"], x["class"], x["lemma"], x["strong"], x.get("lexeme", "")] for x in w["parts"]],
@@ -579,22 +602,23 @@ def unseen_parts(gold: list[dict], pred: list[dict], forms: set[str]) -> dict:
 
 def score(path: Path, split: str, lookup: bool = False) -> None:
     model, bat, device, ck = load_model(path)
+    plain = bool(ck.get("unpointed"))
     VOCAB_SEEN.update(ck["vocab"])
-    gold = load(split)
+    gold = load(split, plain)
     pred = predict(model, bat, gold, device)
     if lookup:
-        n = apply_lookup(pred, lookup_table(("train",)))
+        n = apply_lookup(pred, lookup_table(("train",), plain=plain))
         print(f"[clause_tagger] known forms (from the training books) replace the model's parts in {n} words")
     m = metrics(gold, pred)
     (OUT / f"pred-{split}-{path.stem}.jsonl").write_text("".join(json.dumps(p, ensure_ascii=False) + "\n" for p in pred))
-    print(f"[clause_tagger] {path.name} (epoch {ck['epoch']}) on {split}: {len(gold)} verses")
+    print(f"[clause_tagger] {path.name} (epoch {ck['epoch']}{', unpointed' if plain else ''}) on {split}: {len(gold)} verses")
     print(f"  clause boundaries: P {m['boundary_p']:.1%}  R {m['boundary_r']:.1%}  F1 {m['boundary_f1']:.1%}")
     print(f"  layout segments reproduced exactly: {m['segments_exact']:.1%} of {m['segments']}")
     print(f"  depth in the verse (exactly matched segments): {m['depth']:.1%}")
     print(f"  finite verb: P {m['verb_p']:.1%}  R {m['verb_r']:.1%};  verb form {m['form']:.1%} of {m['form_n']};  person {m['person']:.1%}")
     print(f"  word parts: split right {m['split']:.1%}; on rightly split words: class {m['part_class']:.1%}, lemma {m['part_lemma']:.1%}, "
           f"role {m['part_role']:.1%}; words with split, classes and lemmas all right {m['word_all']:.1%}")
-    unseen = {w["text"] for v in gold for w in v["words"]} - {w["text"] for v in load("train") for w in v["words"]}
+    unseen = {w["text"] for v in gold for w in v["words"]} - {w["text"] for v in load("train", plain) for w in v["words"]}
     u = unseen_parts(gold, pred, unseen)
     print(f"  words whose form is not in the training books ({u['words']}, {u['words'] / sum(len(v['words']) for v in gold):.1%}): split right "
           f"{u['split']:.1%}, then class {u['class']:.1%}, lemma {u['lemma']:.1%}; all right {u['all']:.1%}")
@@ -603,11 +627,13 @@ def score(path: Path, split: str, lookup: bool = False) -> None:
 
 
 def tag(path: Path, text_file: Path) -> None:
-    model, bat, device, _ = load_model(path)
-    verses = [{"ref": None, "words": [{"text": pointed(w)} for w in re.split(r"[\s־]+", line) if pointed(w)]}
+    model, bat, device, ck = load_model(path)
+    plain = bool(ck.get("unpointed"))
+    form = unpointed if plain else pointed
+    verses = [{"ref": None, "words": [{"text": form(w)} for w in re.split(r"[\s־]+", line) if pointed(w)]}
               for line in text_file.read_text().splitlines() if line.strip()]
     pred = predict(model, bat, verses, device)
-    apply_lookup(pred, lookup_table(("train", "dev", "test")))                # every OT book: Salkinson is not in the OT
+    apply_lookup(pred, lookup_table(("train", "dev", "test"), plain=plain))                # every OT book: Salkinson is not in the OT
     for p in pred:
         print(json.dumps(p, ensure_ascii=False))
 
@@ -638,15 +664,17 @@ def pointed_tokens(text: str) -> list[str]:
     return [t for t in toks if any(unicodedata.category(c)[0] == "L" for c in t)]   # a stray point alone is no word (Acts 9:6)
 
 
-def export(path: Path, helloao: Path, edition: str, books: list[str] | None) -> None:
+def export(path: Path, helloao: Path, edition: str, books: list[str] | None, out: Path | None = None) -> None:
     import hashlib
     sys.path.insert(0, str(HERE / "vendor_bibles"))
     import bcv_tokenize
     import helloao_to_usj
     import verse_text
     model, bat, device, ck = load_model(path)
-    table = lookup_table(("train", "dev", "test"))              # every OT book: the edition is not in the OT
-    out_dir = OUT / "export" / edition
+    plain = bool(ck.get("unpointed"))
+    form = unpointed if plain else pointed
+    table = lookup_table(("train", "dev", "test"), plain=plain)   # every OT book: the edition is not in the OT
+    out_dir = out or OUT / "export" / edition
     out_dir.mkdir(parents=True, exist_ok=True)
     by_book = collections.defaultdict(list)
     for f in helloao.glob("*_*.json"):
@@ -655,7 +683,8 @@ def export(path: Path, helloao: Path, edition: str, books: list[str] | None) -> 
             by_book[b].append(json.loads(f.read_text()))
     manifest = {"edition": edition, "tokenizer_version": bcv_tokenize.TOKENIZER_VERSION, "text_fp_version": bcv_tokenize.TEXT_FP_VERSION,
                 "bibles_verse_text": (HERE / "vendor_bibles" / "VERSION").read_text().strip(),
-                "model": {"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "encoder": ck["encoder"], "epoch": ck["epoch"]},
+                "model": {"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "encoder": ck["encoder"], "epoch": ck["epoch"],
+                          "vowel_points": "stripped" if plain else "read"},
                 "books": {}}
     tables: dict[str, list[dict]] = {"words": [], "clauses": []}
     for b, chs in sorted(by_book.items()):
@@ -671,7 +700,7 @@ def export(path: Path, helloao: Path, edition: str, books: list[str] | None) -> 
                 raise SystemExit(f"{b} {c}:{v}: our pointed words differ from bibles' tokens")
             label = bool(toks) and toks[0] == heb_numeral(v) and pts[0] == toks[0]     # the verse number in the text: not a word
             rows.append({"ref": f"{b} {c}:{v}", "tokens": toks, "label": label})
-            words_in.append({"ref": f"{b} {c}:{v}", "words": [{"text": pointed(t)} for t in pts[int(label):]]})
+            words_in.append({"ref": f"{b} {c}:{v}", "words": [{"text": form(t)} for t in pts[int(label):]]})
         pred = predict(model, bat, words_in, device)
         for p_ in pred:
             for w in p_["words"]:
@@ -762,6 +791,7 @@ def main() -> None:
     t.add_argument("--epochs", type=int, default=4)
     t.add_argument("--batch", type=int, default=16)
     t.add_argument("--seed", type=int, default=13)
+    t.add_argument("--unpointed", action="store_true", help="train on the words without their vowel points -> model-<encoder>-unpointed.pt")
     s = sub.add_parser("score")
     s.add_argument("--model", default=str(OUT / "model-dictabert.pt"))
     s.add_argument("--split", default="test")
@@ -774,15 +804,16 @@ def main() -> None:
     e.add_argument("--edition", required=True)
     e.add_argument("--books", default="")
     e.add_argument("--model", default=str(OUT / "model-dictabert.pt"))
+    e.add_argument("--out", default="", help="folder to write to (default data/clause-tagger/export/<edition>)")
     a = ap.parse_args()
     if a.cmd == "prep":
         prep()
     elif a.cmd == "train":
-        train(a.encoder, a.epochs, a.batch, a.seed)
+        train(a.encoder, a.epochs, a.batch, a.seed, a.unpointed)
     elif a.cmd == "score":
         score(Path(a.model), a.split, a.lookup)
     elif a.cmd == "export":
-        export(Path(a.model), Path(a.helloao), a.edition, [b for b in a.books.split(",") if b])
+        export(Path(a.model), Path(a.helloao), a.edition, [b for b in a.books.split(",") if b], Path(a.out) if a.out else None)
     else:
         tag(Path(a.model), Path(a.file))
 
