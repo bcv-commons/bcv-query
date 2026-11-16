@@ -52,6 +52,14 @@ PROMPT = (
     "Reply with JSON only, no prose: a list of objects {{\"id\": <occurrence id>, \"choice\": <concept number>, \"sure\": <true or false>}}; "
     "\"sure\" is false where two concepts fit about equally well.\n\n"
     "Hebrew lexeme: {lexemes}\nConcepts:\n{inventory}\n\nOccurrences (id | reference | lemma | morphology | verse):\n{lines}\n")
+PROMPT_LXX = (
+    "You are labelling words of the Greek New Testament with concepts of Biblical Hebrew lexemes. The numbered concepts below are "
+    "concepts of Hebrew lexemes that the Septuagint renders by the target word's Greek lexeme (with the id of the lexicon sense each "
+    "belongs to). For every occurrence, read the Greek verse and choose exactly one concept: the one the target word (between ⟦ and ⟧) "
+    "expresses there; choose the last number if none of the concepts fits.\n"
+    "Reply with JSON only, no prose: a list of objects {{\"id\": <occurrence id>, \"choice\": <concept number>, \"sure\": <true or false>}}; "
+    "\"sure\" is false where two concepts fit about equally well.\n\n"
+    "Greek lexeme: {lexemes}\nConcepts:\n{inventory}\n\nOccurrences (id | reference | lemma | morphology | verse):\n{lines}\n")
 
 
 def definitions(folder: Path) -> dict[str, str]:
@@ -128,7 +136,7 @@ def batches(items: list[dict]) -> list[list[dict]]:
     by = collections.defaultdict(list)
     for it in items:
         if len(it["inventory"]) > 1:
-            by[(it["set"] != "quoted", *it["hebrew"])].append(it)
+            by[(it["set"] != "quoted", *it["inventory"])].append(it)        # one inventory per call, in its order
     out = [v[i:i + BATCH] for _, v in sorted(by.items()) for i in range(0, len(v), BATCH)]
     random.Random(SEED).shuffle(out)
     return sorted(out, key=lambda v: v[0]["set"] != "quoted")
@@ -140,8 +148,11 @@ def prompt(batch: list[dict], defs: dict, sense: dict, verse: dict) -> str:
     for it in batch:
         text = " ".join(f"⟦{t}⟧" if i == it["id"] else t for i, t in verse[it["ref"]])
         lines.append(f"{it['id']} | {it['ref']} | {it['lemma']} | {it['morph']} | {text}")
-    return PROMPT.format(lexemes=", ".join(f"Strong {h}" for h in batch[0]["hebrew"]),
-                         inventory="\n".join(f"{n}: {defs[c]} (UBS {sense[c]})" for n, c in enumerate(inv, 1)), lines="\n".join(lines))
+    choices = [f"{n}: {defs[c]} (UBS {sense[c]})" for n, c in enumerate(inv, 1)]
+    if batch[0].get("none"):                                            # the Septuagint-only words: one more choice, as Jev had
+        return PROMPT_LXX.format(lexemes=f"{batch[0]['lemma']} (Strong {batch[0]['greek_strong']})",
+                                 inventory="\n".join(choices + [f"{len(inv) + 1}: {NONE}"]), lines="\n".join(lines))
+    return PROMPT.format(lexemes=", ".join(f"Strong {h}" for h in batch[0]["hebrew"]), inventory="\n".join(choices), lines="\n".join(lines))
 
 
 def parse(text: str, batch: list[dict]) -> dict[str, dict]:
@@ -151,7 +162,7 @@ def parse(text: str, batch: list[dict]) -> dict[str, dict]:
         rows = json.loads(m.group(0)) if m else []
     except json.JSONDecodeError:
         return {}
-    inv, ids, out = batch[0]["inventory"], {it["id"] for it in batch}, {}
+    inv, ids, out = batch[0]["inventory"] + [""] * bool(batch[0].get("none")), {it["id"] for it in batch}, {}   # "" = none of the concepts
     for r in rows:
         if isinstance(r, dict) and r.get("id") in ids and isinstance(r.get("choice"), int) and 1 <= r["choice"] <= len(inv):
             out[r["id"]] = {"concept": inv[r["choice"] - 1], "sure": bool(r.get("sure", True))}
@@ -196,13 +207,13 @@ def load_jev(f: Path, items: list[dict]) -> dict[str, dict]:
     return out
 
 
-def load_answers() -> tuple[dict, list[dict]]:
-    f = OUT / "answers.jsonl"
+def load_answers(f: Path | None = None) -> tuple[dict, list[dict]]:
+    f = f or OUT / "answers.jsonl"
     calls = [json.loads(l) for l in f.read_text(encoding="utf-8").splitlines()] if f.exists() else []
     return {i: a for c in calls for i, a in c["answers"].items()}, calls
 
 
-def run(items: list[dict], folder: Path, max_usd: float, workers: int, judge: str) -> None:
+def run(items: list[dict], folder: Path, max_usd: float, workers: int, judge: str, answers: Path | None = None) -> None:
     import pyarrow.parquet as pq
     from macula import usability_judge as uj
     uj._load_env()
@@ -211,7 +222,8 @@ def run(items: list[dict], folder: Path, max_usd: float, workers: int, judge: st
     defs = definitions(folder)
     sense = {r["code"]: r["ubs_sense"] for r in pq.read_table(folder / "data" / "concepts.parquet").to_pylist()}
     _, verse = verses()
-    done, calls = load_answers()
+    answers = answers or OUT / "answers.jsonl"
+    done, calls = load_answers(answers)
     spent = sum(c["usd"] for c in calls)
     todo = [bt for bt in batches(items) if not all(it["id"] in done for it in bt)]
     print(f"[pilot] {len(todo)} calls to make, USD {spent:.2f} spent so far, limit {max_usd:.2f}")
@@ -222,7 +234,7 @@ def run(items: list[dict], folder: Path, max_usd: float, workers: int, judge: st
         return {"model": MODEL, "judge": judge, "prompt_sha256": hashlib.sha256(p.encode()).hexdigest(), "ids": [it["id"] for it in bt], "input_tokens": i,
                 "output_tokens": o, "usd": round((i * PRICE[0] + o * PRICE[1]) / 1e6, 6), "answers": parse(text, bt)}
 
-    with (OUT / "answers.jsonl").open("a", encoding="utf-8") as f, concurrent.futures.ThreadPoolExecutor(workers) as ex:
+    with answers.open("a", encoding="utf-8") as f, concurrent.futures.ThreadPoolExecutor(workers) as ex:
         for k in range(0, len(todo), workers):                          # a round of calls, then the money is counted before the next
             if spent >= max_usd:
                 print(f"[pilot] stopped at the limit: {len(todo) - k} calls left")
@@ -238,7 +250,7 @@ def run(items: list[dict], folder: Path, max_usd: float, workers: int, judge: st
             if failed:
                 print(f"[pilot] stopped: {failed} calls of this round failed (see the messages above)")
                 break
-    done, calls = load_answers()
+    done, calls = load_answers(answers)
     print(f"[pilot] {len(done):,} answers, {len(calls)} calls, USD {sum(c['usd'] for c in calls):.2f}")
 
 
