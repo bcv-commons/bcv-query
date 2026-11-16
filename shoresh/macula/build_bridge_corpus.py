@@ -84,9 +84,9 @@ QUERIES = (                                              # fixed queries with th
     ("Hebrew phrases typed Instrument by the model whose preposition is בְּ", "phrase m_pt_label=Instrument\n  word strong=0871a\n", 2159),
     ("imperative facts inside a quotation fact of the Tanakh", "q:fact pf_kind=quote\n  f:fact pf_kind=force pf_value=fc.imp\n    word lang=hbo\n", 15171),
     ("semantic-domain facts tied to their quotation", "a:fact pf_kind=domain\nb:fact pf_kind=quote\na -pf_of> b\n", 6499),
-    ("Hebrew words joined by maqaf to the next", "word lang=hbo trailer=־\n", None),
-    ("Greek NT prepositional groups inside a clause group that is the object", "c:wordgroup tr_cls=cl tr_role=o\n  wordgroup tr_cls=pp\n", None),
-    ("Hebrew head groups that are noun phrases, under a prepositional phrase", "p:wordgroup tr_cls=pp\nn:wordgroup tr_cls=np tr_head=1\nn -tr_parent> p\n", None),
+    ("Hebrew words joined by maqaf to the next", "word lang=hbo trailer=־\n", 42027),
+    ("Greek NT prepositional groups inside a clause group that is the object", "c:wordgroup tr_cls=cl tr_role=o\n  wordgroup tr_cls=pp\n", 4342),
+    ("Hebrew head groups that are noun phrases, under a prepositional phrase", "p:wordgroup tr_cls=pp\nn:wordgroup tr_cls=np tr_head=1\nn -tr_parent> p\n", 33094),
 )
 
 

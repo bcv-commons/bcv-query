@@ -2,7 +2,8 @@
 layout pins): the source's trailers and two unit types.
 
 trailer   the text after a word as the source prints it (`after`): a space, nothing inside a written word, maqaf ־, sof pasuq ׃, paseq ׀,
-          the open and closed section marks ׃פ / ׃ס, and the Greek NT's punctuation. Replaces the space-or-nothing of the word store.
+          the open and closed section marks ׃פ / ׃ס, and the Greek NT's punctuation. A space is added after punctuation and the marks that
+          the source gives without one. Replaces the space-or-nothing of the word store.
 sentence  MACULA's sentence node.
 wordgroup MACULA's word group (`wg`): tr_cls (cl, np, pp, vp, ...), tr_role, tr_rule, tr_type, tr_junction, tr_clausetype, tr_articular,
           tr_head (1 where the group is the head of its parent group, Hebrew only), tr_ord (its place among its parent's children);
@@ -30,8 +31,8 @@ def add_trees(c, db) -> None:
             st["tree words not in the word store (inserted)"] += 1
             continue
         slot_of_seq[seq] = s
-        if after is not None:
-            c.F["trailer"][s] = after
+        if after is not None:                                             # punctuation and ׃ / ׀ come without the space after them
+            c.F["trailer"][s] = after if after in ("", "־") or after.endswith(" ") else after + " "
             st["trailers"] += 1
     seqs = sorted(slot_of_seq)
     import bisect
