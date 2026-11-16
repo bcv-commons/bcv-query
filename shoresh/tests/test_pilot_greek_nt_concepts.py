@@ -31,3 +31,5 @@ def test_load_jev():
         f.write_text("".join(json.dumps(r) + "\n" for r in ({"id": "n1", "choice": "c2", "confidence": 0.93}, {"id": "n2", "choice": "c3", "confidence": 0.5},
                                                            {"id": "n3", "choice": "c7", "confidence": 0.9}, {"id": "n9", "choice": "c1", "confidence": 0.9})))
         assert m.load_jev(f, ITEMS) == {"n1": {"concept": "H559.1", "sure": True, "confidence": 0.93}, "n2": {"concept": "H559.3", "sure": False, "confidence": 0.5}}
+        f.write_text(json.dumps({"id": "n5", "choice": "c2", "confidence": 0.9}) + "\n")                    # the choice after the inventory: no concept
+        assert m.load_jev(f, [{"id": "n5", "inventory": ["H1.1"], "none": True}]) == {"n5": {"concept": "", "sure": True, "confidence": 0.9}}

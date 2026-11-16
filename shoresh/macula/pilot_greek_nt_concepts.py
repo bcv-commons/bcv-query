@@ -74,20 +74,34 @@ def verses() -> tuple[dict, dict]:
     return word, verse
 
 
+def lexemes(con: g.Concepts) -> tuple[dict, dict]:
+    """hebrew lexeme -> its concepts, and greek id -> the Hebrew lexemes of both editions that have concepts"""
+    import pyarrow.parquet as pq
+    of = collections.defaultdict(list)
+    for c, h in con.lexeme.items():
+        of[h].append(c)
+    hebrew = collections.defaultdict(set)                               # as the builder reads the links
+    for ed in g.EDITIONS:
+        for r in pq.read_table(b.DATA / ed / "links.parquet").to_pylist():
+            if r["link"] != "edited-wide" and r["hebrew_strong"] in of and r["hebrew_class"] in b.H_CONTENT:
+                hebrew[r["greek_id"]].add(r["hebrew_strong"])
+    return of, hebrew
+
+
+def inventory(concepts, key: str) -> list[str]:
+    """the concepts in the order shown to a model: one seeded order per inventory, the same in every call"""
+    inv = sorted(concepts, key=lambda c: (c.split(".")[0], int(c.split(".")[1])))
+    random.Random(f"{SEED} {key}").shuffle(inv)
+    return inv
+
+
 def build_items(folder: Path, n_dominated: int) -> list[dict]:
-    """the quoted words and a seeded sample of the dominated ones; `inventory` is in the order shown to the model"""
+    """the quoted words and a seeded sample of the dominated ones"""
     import pyarrow.parquet as pq
     con, lxx = g.Concepts(folder), g.septuagint_words()
     sense = {r["code"]: r["ubs_sense"] for r in pq.read_table(folder / "data" / "concepts.parquet").to_pylist()}
     labeller = {r["key"]: r["labeller"] for r in pq.read_table(folder / "data" / "tokens.parquet").to_pylist()}
-    of = collections.defaultdict(list)                                  # hebrew lexeme -> its concepts
-    for c, h in con.lexeme.items():
-        of[h].append(c)
-    hebrew = collections.defaultdict(set)                               # greek id -> the lexemes of both editions, as the builder reads them
-    for ed in g.EDITIONS:
-        for r in pq.read_table(b.DATA / ed / "links.parquet").to_pylist():
-            if r["link"] != "edited-wide" and r["hebrew_strong"] and r["hebrew_class"] in b.H_CONTENT:
-                hebrew[r["greek_id"]].add(r["hebrew_strong"])
+    of, hebrew = lexemes(con)
     word, _ = verses()
     rows = pq.read_table(g.OUT / "words.parquet").to_pylist()
     rnd = random.Random(SEED)
@@ -95,9 +109,8 @@ def build_items(folder: Path, n_dominated: int) -> list[dict]:
     chosen = [r for r in rows if r["basis"] == "quoted"] + rnd.sample(dominated, min(n_dominated, len(dominated)))
     items = []
     for r in chosen:
-        hs = sorted(h for h in hebrew[r["greek_id"]] if h in of)
-        inv = sorted((c for h in hs for c in of[h]), key=lambda c: (c.split(".")[0], int(c.split(".")[1])))
-        random.Random(f"{SEED} {' '.join(hs)}").shuffle(inv)                # one order per inventory, the same in every call
+        hs = sorted(hebrew[r["greek_id"]])
+        inv = inventory((c for h in hs for c in of[h]), " ".join(hs))
         it = {"id": r["greek_id"], "set": "quoted" if r["basis"] == "quoted" else "dominated", "ref": word[r["greek_id"]][0],
               "greek_strong": r["greek_strong"], "lemma": r["greek_lemma"], "morph": word[r["greek_id"]][1], "hebrew": hs, "inventory": inv,
               "answer": r["concept"], "answer_sense": sense[r["concept"]], "share": r["share"]}
@@ -149,7 +162,11 @@ JEV = ("The occurrence is a word of the Greek New Testament (between ⟦ and ⟧
        "lexeme. Which of the lexeme's concepts does this occurrence express? Choose exactly one.")
 
 
+NONE = "none of the concepts above: the word expresses something else here, or is a name"
+
+
 def jev_items(items: list[dict], folder: Path) -> list[dict]:
+    """an item with `none` gets one more choice after its inventory (load_jev reads it as no concept)"""
     import pyarrow.parquet as pq
     defs = definitions(folder)
     sense = {r["code"]: r["ubs_sense"] for r in pq.read_table(folder / "data" / "concepts.parquet").to_pylist()}
@@ -161,13 +178,15 @@ def jev_items(items: list[dict], folder: Path) -> list[dict]:
             out.append({"id": it["id"], "state": {"lexeme": ", ".join(f"Strong {h}" for h in it["hebrew"]),
                                                   "occurrence": f"{it['id']} | {it['ref']} | {it['lemma']} | {it['morph']} | verse: {text}"},
                         "question": {"type": "choice", "criteria": {f"c{n}": f"{defs[c]} (UBS {sense[c]})" for n, c in enumerate(it["inventory"], 1)},
-                                     "instructions": JEV}})
+                                     "instructions": it.get("instructions", JEV)}})
+            if it.get("none"):
+                out[-1]["question"]["criteria"][f"c{len(it['inventory']) + 1}"] = NONE
     return out
 
 
 def load_jev(f: Path, items: list[dict]) -> dict[str, dict]:
-    """id -> {concept, sure (confidence >= 0.8), confidence} from Jev's answers"""
-    inv = {it["id"]: it["inventory"] for it in items}
+    """id -> {concept, sure (confidence >= 0.8), confidence} from Jev's answers; concept "" = the item's choice "none of the concepts" """
+    inv = {it["id"]: it["inventory"] + [""] * bool(it.get("none")) for it in items}
     out = {}
     for l in f.read_text(encoding="utf-8").splitlines():
         r = json.loads(l)

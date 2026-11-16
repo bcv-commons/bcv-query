@@ -1,0 +1,21 @@
+{
+ "words": {"source": "github:bcv-commons/spine-releases", "tag": "macula-spine-2026-10-07", "file": "macula-spine.db",
+           "sha256": "9cdda337ffcb71d70ae6a6fc949e73e9ad933805215169b5920b4892160763b2", "licence": "cc-by-4.0",
+           "origin": "MACULA Hebrew (WLC) and MACULA Greek (Nestle 1904), Clear Bible"},
+ "layers": {
+  "hebrew-clause-layout": {"tag": "v0.37.1", "revision": "32f89b71", "licence": "cc-by-sa-4.0", "files": ["data/clauses-*.parquet"]},
+  "greek-nt-clause-layout": {"tag": "v0.7", "revision": "9168fac3", "licence": "cc-by-4.0", "files": ["data/clauses.parquet"]},
+  "clause-columns": {"tag": "v1.1", "revision": "4bf530de", "licence": "cc-by-sa-4.0", "files": ["data/*.parquet"]},
+  "clause-connectives": {"tag": "v0.1", "revision": "c26a84be", "licence": "cc-by-sa-4.0", "files": ["data/*.parquet"]},
+  "clause-extras": {"tag": "v0.1", "revision": "5dbd5d06", "licence": "cc-by-sa-4.0", "files": ["data/*.parquet"]},
+  "time-aspect": {"tag": "v0.2", "revision": "5d30d2c2", "licence": "cc-by-sa-4.0", "files": ["data/*.parquet"]},
+  "argument-roles": {"tag": "v0.2", "revision": "5065acab", "licence": "cc-by-sa-4.0", "files": ["data/*.parquet"]},
+  "reference-status": {"tag": "v0.2", "revision": "7612f663", "licence": "cc-by-sa-4.0", "files": ["data/*.parquet"]},
+  "noun-relations": {"tag": "v0.1", "revision": "73f86ec8", "licence": "cc-by-sa-4.0", "files": ["data/*.parquet"]},
+  "word-senses": {"tag": "v0.1", "revision": "00690ee3", "licence": "cc-by-sa-4.0", "files": ["data/words.parquet"]},
+  "inclusive-we": {"tag": "v0.1", "revision": "d2d67cf4", "licence": "cc-by-sa-4.0", "files": ["data/words.parquet"]},
+  "addressees": {"tag": "v0.1", "revision": "63683e3c", "licence": "cc-by-sa-4.0", "files": ["data/*.parquet"]},
+  "hebrew-word-concepts-model": {"tag": "v0.5", "revision": "5a7af303", "licence": "cc-by-sa-4.0", "model_made": true,
+                                 "files": ["data/tokens.parquet"]}
+ }
+}
