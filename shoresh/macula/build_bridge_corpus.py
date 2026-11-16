@@ -24,7 +24,8 @@ Edges: parent and discourse_parent (clause to clause), arg (verb to its argument
 to the word it refers to, MACULA's kind); between texts: heb_scg and heb_mod (Greek NT word to Hebrew NT word part, value: the aligner's
 class, `compact` for heb_mod), parallel (Hebrew NT verse to the Greek NT verse of the same number), quotes (Hebrew NT verse to the Tanakh
 verse it follows, value: the weight).
-Lexeme, concept and person units and the tier edges: see bridge_corpus_units.
+Lexeme, concept and person units and the tier edges: see bridge_corpus_units. word-parts (wp_), hebrew-phrase-types-model (m_pt_) and
+passage-facts (fact units, pf_): see bridge_corpus_more.
 The Septuagint: see bridge_corpus_lxx (texts septuagint; words, lxx and carried edges, parallel verses, LXX.<BOOK> sections).
 Hebrew NT words carry the source's word features under the same names (text, lemma, strong, pos, role, person) and the rest of the
 analysis under hna_ (source macula / model, lexeme, form, word, p_split as 0 to 100, token); `hkey` = "<edition> BOOK C:V i.part".
@@ -44,7 +45,7 @@ PINS = HERE / "bridge_corpus_pins.json"
 DATA = HERE / "data" / "bridge-corpus"
 INPUTS = DATA / "inputs"
 ROOT_RESOURCES = HERE.parents[1] / "resources"
-TYPES = ("token", "phrase", "line", "clause", "quotation", "verse", "chapter", "book", "text", "lexeme", "concept", "person")     # after word; nodes are numbered type by type
+TYPES = ("token", "phrase", "line", "clause", "quotation", "verse", "chapter", "book", "text", "lexeme", "concept", "person", "fact")     # after word; nodes are numbered type by type
 WORD = (("lemma", "lemma"), ("strong", "strong"), ("class", "pos"), ("role", "role"), ("stem", "stem"), ("person", "person"), ("number", "number"),
         ("gender", "gender"), ("case_", "case"), ("tense", "tense"), ("voice", "voice"), ("mood", "mood"), ("degree", "degree"), ("state", "state"))
 LANG = {"H": "hbo", "A": "arc", "": "grc"}
@@ -78,6 +79,10 @@ QUERIES = (                                              # fixed queries with th
     ("lexemes found in the Tanakh and both Hebrew NTs", "lexeme lex_texts=delitzsch,salkinson,tanakh\n", 2173),
     ("quotations whose speaker is a deity", "q:quotation\np:person ad_type=deity\nq -speaker> p\n", 1509),
     ("Septuagint words inside the unit of one Greek lexeme with an NT number", "lexeme lex_key=grc:πορεύομαι\n  word lkey\n", 990),
+    ("Greek NT verbs with a syllabic augment (word-parts)", "word pos=verb wp_part_features~augment=syllabic\n", 4408),
+    ("Hebrew phrases typed Instrument by the model whose preposition is בְּ", "phrase m_pt_label=Instrument\n  word strong=0871a\n", 2159),
+    ("imperative facts inside a quotation fact of the Tanakh", "q:fact pf_kind=quote\n  f:fact pf_kind=force pf_value=fc.imp\n    word lang=hbo\n", 15171),
+    ("semantic-domain facts tied to their quotation", "a:fact pf_kind=domain\nb:fact pf_kind=quote\na -pf_of> b\n", 6499),
 )
 
 
@@ -505,7 +510,8 @@ def build(out: Path, db: Path) -> dict:
     add_hebrew_nt(c)
     from macula import bridge_corpus_lxx
     bridge_corpus_lxx.add_septuagint(c, stores)
-    from macula import bridge_corpus_units
+    from macula import bridge_corpus_more, bridge_corpus_units
+    bridge_corpus_more.add_more(c)
     bridge_corpus_units.add_units(c)
     rep = save(c, out)
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

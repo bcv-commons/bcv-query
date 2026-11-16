@@ -131,6 +131,31 @@
     "quotes/*.tsv",
     "pairs/*.tsv"
    ]
+  },
+  "word-parts": {
+   "tag": "v0.1",
+   "revision": "1f32a49a",
+   "licence": "cc-by-4.0",
+   "files": [
+    "data/*.parquet"
+   ]
+  },
+  "hebrew-phrase-types-model": {
+   "tag": "v0.1",
+   "revision": "a5b12f05",
+   "licence": "cc-by-4.0",
+   "model_made": true,
+   "files": [
+    "data/*.parquet"
+   ]
+  },
+  "passage-facts": {
+   "tag": "v0.1",
+   "revision": "bbb9b2e3",
+   "licence": "cc-by-sa-4.0",
+   "files": [
+    "data/*.jsonl"
+   ]
   }
  },
  "stores": {
