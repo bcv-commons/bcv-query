@@ -24,6 +24,7 @@ Edges: parent and discourse_parent (clause to clause), arg (verb to its argument
 to the word it refers to, MACULA's kind); between texts: heb_scg and heb_mod (Greek NT word to Hebrew NT word part, value: the aligner's
 class, `compact` for heb_mod), parallel (Hebrew NT verse to the Greek NT verse of the same number), quotes (Hebrew NT verse to the Tanakh
 verse it follows, value: the weight).
+The Septuagint: see bridge_corpus_lxx (texts septuagint; words, lxx and carried edges, parallel verses, LXX.<BOOK> sections).
 Hebrew NT words carry the source's word features under the same names (text, lemma, strong, pos, role, person) and the rest of the
 analysis under hna_ (source macula / model, lexeme, form, word, p_split as 0 to 100, token); `hkey` = "<edition> BOOK C:V i.part".
 """
@@ -50,7 +51,7 @@ HNT = {"heb_scg": ("salkinson", "SCG"), "heb_mod": ("delitzsch", "DEL")}
 CORPUS = {"hebrew": "hbo", "greek-nt": "grc"}
 CLAUSE_LAYERS = (("clause-columns", "cc_"), ("clause-connectives", "cn_"), ("clause-extras", "cx_"), ("time-aspect", "ta_"))
 LINE_SKIP = {"book", "chapter", "verse", "words", "text", "first", "last", "alt_eng", "clause_key", "parent_key", "discourse_parent"}
-REFERENCES = {"lay_verse_ref_en", "cc_ref", "lay_via", "hkey"}                  # verse references and lists of codes: Latin script with spaces, no English text
+REFERENCES = {"lay_verse_ref_en", "cc_ref", "lay_via", "hkey", "lkey"}                  # verse references and lists of codes: Latin script with spaces, no English text
 QUERIES = (                                              # fixed queries with their hits in this build (the check fails when they move)
     ("speech clauses in Ruth, imperative or prohibitive, with an undergoer phrase that holds a noun",
      "book book=RUT\n  clause cc_speech>0 cc_force=imperative|prohibitive\n    phrase ar_role=undergoer\n      word pos=noun\n", 6),
@@ -65,6 +66,11 @@ QUERIES = (                                              # fixed queries with th
     ("the same in Delitzsch", "g:word lemma=λόγος\nh:word strong=1697\ng -heb_mod> h\n", 267),
     ("Salkinson verses that follow a verse of Isaiah", "v:verse\nt:verse book=ISA\nv -quotes> t\n", 190),
     ("Hebrew NT words of the verb Strong 1980 inside a Salkinson clause of John", "text name=salkinson\n  book book=JHN\n    clause\n      word strong=1980\n", 114),
+    ("Tanakh words of הלך placed on a Septuagint word of πορεύομαι", "h:word strong=1980\ng:word lemma=πορεύομαι\nh -lxx> g\n", 777),
+    ("the same, placed only by the Greek number", "h:word strong=1980\ng:word lemma=πορεύομαι\nh -lxx=number> g\n", 20),
+    ("carried Septuagint lines of Ruth whose Hebrew line is imperative speech",
+     "book sec=LXX.RUT\n  g:line\nh:line\nc:clause cc_force=imperative\n  h\ng -carried> h\n", 18),
+    ("Theodotion's verses of Daniel 7", "book sec=LXX.DAN-TH\n  chapter chapter=7\n    verse\n", 28),
 )
 
 
@@ -437,6 +443,8 @@ def save(c: Corpus, out: Path) -> dict:
     source = {name: {"source": f"bcv-commons/{name}@{pin['tag']} ({pin['revision']})", "licence": pin["licence"],
                      "model_made": "yes" if pin.get("model_made") else "no"} for name, pin in p["layers"].items()}
     source["words"] = {"source": f"{p['words']['origin']}; {p['words']['source']} {p['words']['tag']}", "licence": p["words"]["licence"], "model_made": "no"}
+    for name, pin in p.get("stores", {}).items():
+        source[name] = {"source": f"{pin['origin']}; {pin['source']} {pin['tag']}", "licence": pin["licence"], "model_made": "no"}
     source["layout"] = {"source": "the two clause layouts (see lay_ features)", "licence": "cc-by-sa-4.0", "model_made": "no"}
     meta = {"": {"name": "bridge corpus (working name)", "version": version(p), "licence": "cc-by-sa-4.0", "pins": "pins.json in this folder"},
             "otext": {"sectionTypes": "book,chapter,verse", "sectionFeatures": "sec,chapter,verse", "fmt:text-orig-full": "{text}{trailer}"},
@@ -473,6 +481,12 @@ def build(out: Path, db: Path) -> dict:
         raise SystemExit(f"{db} is not the pinned word store ({p['words']['tag']} of bcv-commons/spine-releases)")
     if out.exists():
         raise SystemExit(f"{out} exists; give a folder that does not exist yet")
+    stores = {}
+    for name, pin in p.get("stores", {}).items():
+        f = HERE.parent / pin["path"]
+        if hashlib.sha256(f.read_bytes()).hexdigest() != pin["sha256"]:
+            raise SystemExit(f"{f} is not the pinned store {pin['tag']}")
+        stores[name] = f
     c = Corpus()
     add_words(c, db)
     add_layout(c)
@@ -480,6 +494,8 @@ def build(out: Path, db: Path) -> dict:
     add_phrases(c)
     add_word_layers(c)
     add_hebrew_nt(c)
+    from macula import bridge_corpus_lxx
+    bridge_corpus_lxx.add_septuagint(c, stores)
     rep = save(c, out)
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return rep
