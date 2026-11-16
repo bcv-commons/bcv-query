@@ -32,3 +32,9 @@ def test_carry():
     assert m.carry(lines, links) == [None, None, (14, 14, 2)]
     assert m.carry([{1, 2}, {3}], {1: 10, 2: 12, 3: 13}) == [(10, 12, 0), (13, 13, 1)]   # 11 is unlinked: taken inside
     assert m.carry([{7}], {}) == [None]
+
+
+def test_strong_key():
+    from macula.bridge_corpus_units import strong_key
+    assert strong_key("H0871a") == "0871a" and strong_key("0871a") == "0871a" and strong_key(871) == "0871"
+    assert strong_key("G3962") == "3962" and strong_key("G0040") == "0040" and strong_key(None) is None and strong_key("") is None

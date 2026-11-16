@@ -24,6 +24,7 @@ Edges: parent and discourse_parent (clause to clause), arg (verb to its argument
 to the word it refers to, MACULA's kind); between texts: heb_scg and heb_mod (Greek NT word to Hebrew NT word part, value: the aligner's
 class, `compact` for heb_mod), parallel (Hebrew NT verse to the Greek NT verse of the same number), quotes (Hebrew NT verse to the Tanakh
 verse it follows, value: the weight).
+Lexeme, concept and person units and the tier edges: see bridge_corpus_units.
 The Septuagint: see bridge_corpus_lxx (texts septuagint; words, lxx and carried edges, parallel verses, LXX.<BOOK> sections).
 Hebrew NT words carry the source's word features under the same names (text, lemma, strong, pos, role, person) and the rest of the
 analysis under hna_ (source macula / model, lexeme, form, word, p_split as 0 to 100, token); `hkey` = "<edition> BOOK C:V i.part".
@@ -42,7 +43,8 @@ HERE = Path(__file__).resolve().parent
 PINS = HERE / "bridge_corpus_pins.json"
 DATA = HERE / "data" / "bridge-corpus"
 INPUTS = DATA / "inputs"
-TYPES = ("token", "phrase", "line", "clause", "quotation", "verse", "chapter", "book", "text")     # after word; nodes are numbered type by type
+ROOT_RESOURCES = HERE.parents[1] / "resources"
+TYPES = ("token", "phrase", "line", "clause", "quotation", "verse", "chapter", "book", "text", "lexeme", "concept", "person")     # after word; nodes are numbered type by type
 WORD = (("lemma", "lemma"), ("strong", "strong"), ("class", "pos"), ("role", "role"), ("stem", "stem"), ("person", "person"), ("number", "number"),
         ("gender", "gender"), ("case_", "case"), ("tense", "tense"), ("voice", "voice"), ("mood", "mood"), ("degree", "degree"), ("state", "state"))
 LANG = {"H": "hbo", "A": "arc", "": "grc"}
@@ -71,6 +73,11 @@ QUERIES = (                                              # fixed queries with th
     ("carried Septuagint lines of Ruth whose Hebrew line is imperative speech",
      "book sec=LXX.RUT\n  g:line\nh:line\nc:clause cc_force=imperative\n  h\ng -carried> h\n", 18),
     ("Theodotion's verses of Daniel 7", "book sec=LXX.DAN-TH\n  chapter chapter=7\n    verse\n", 28),
+    ("Greek lexemes that MACULA's Septuagint numbers pair with הלך", "h:lexeme lex_key=hbo:1980\ng:lexeme\nh -tier_macula> g\n", 17),
+    ("Hebrew lexemes paired with a Greek lexeme by both Salkinson and Delitzsch", "h:lexeme\ng:lexeme\nh -tier_heb_scg> g\nh -tier_heb_mod> g\n", 1490),
+    ("lexemes found in the Tanakh and both Hebrew NTs", "lexeme lex_texts=delitzsch,salkinson,tanakh\n", 2173),
+    ("quotations whose speaker is a deity", "q:quotation\np:person ad_type=deity\nq -speaker> p\n", 1509),
+    ("Septuagint words inside the unit of one Greek lexeme with an NT number", "lexeme lex_key=grc:πορεύομαι\n  word lkey\n", 990),
 )
 
 
@@ -443,6 +450,8 @@ def save(c: Corpus, out: Path) -> dict:
     source = {name: {"source": f"bcv-commons/{name}@{pin['tag']} ({pin['revision']})", "licence": pin["licence"],
                      "model_made": "yes" if pin.get("model_made") else "no"} for name, pin in p["layers"].items()}
     source["words"] = {"source": f"{p['words']['origin']}; {p['words']['source']} {p['words']['tag']}", "licence": p["words"]["licence"], "model_made": "no"}
+    source["tier-macula"] = {"source": "bcv-query resources/lxx_bridge_tiers/macula.tsv (MACULA Hebrew's Septuagint numbers)", "licence": "cc-by-4.0", "model_made": "no"}
+    source["tier-glaux"] = {"source": "bcv-query resources/lxx_bridge_tiers/glaux.tsv (verse co-occurrence with GLAUx's Septuagint)", "licence": "cc-by-sa-4.0", "model_made": "no"}
     for name, pin in p.get("stores", {}).items():
         source[name] = {"source": f"{pin['origin']}; {pin['source']} {pin['tag']}", "licence": pin["licence"], "model_made": "no"}
     source["layout"] = {"source": "the two clause layouts (see lay_ features)", "licence": "cc-by-sa-4.0", "model_made": "no"}
@@ -496,6 +505,8 @@ def build(out: Path, db: Path) -> dict:
     add_hebrew_nt(c)
     from macula import bridge_corpus_lxx
     bridge_corpus_lxx.add_septuagint(c, stores)
+    from macula import bridge_corpus_units
+    bridge_corpus_units.add_units(c)
     rep = save(c, out)
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return rep

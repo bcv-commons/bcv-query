@@ -128,7 +128,8 @@
    "licence": "cc-by-4.0",
    "files": [
     "links/*.parquet",
-    "quotes/*.tsv"
+    "quotes/*.tsv",
+    "pairs/*.tsv"
    ]
   }
  },
