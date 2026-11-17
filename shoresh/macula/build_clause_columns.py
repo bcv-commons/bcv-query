@@ -674,7 +674,7 @@ def build(out: Path) -> dict:
         "sources": {
             "hebrew-clause-layout": {"path": "macula/data/clause-layout", "built": hl.get("built"),
                                      "clauses_sha256": _tree_sha(HEB_LAYOUT, "*/*.jsonl"), "release": "same clause keys as v0.37 (checked)",
-                                     "licence": "CC BY-SA 4.0 (the release; its keys key this table)"},
+                                     "licence": "CC BY 4.0 (the clause keys: the segmentation is CC BY; the release as a whole is CC BY-SA)"},
             "greek-nt-clause-layout": {"path": "macula/data/nt-clause-layout", "built": gl.get("built"),
                                        "clauses_sha256": _tree_sha(GRC_LAYOUT, "*/*.jsonl"), "licence": "CC BY 4.0"},
             "hebrew-speaker-layer": {"path": "macula/data/speaker-layer", "quotations_sha256": _sha(LAYER / "quotations.tsv"),

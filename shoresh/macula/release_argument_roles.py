@@ -178,7 +178,7 @@ The Greek side has not been measured in drafting yet.
 
 ## Licence
 
-CC BY-SA 4.0: the Hebrew layout's clause keys, the UBS senses and the GLAUx parses are CC BY-SA 4.0. Credit: MACULA (Clear Bible /
+CC BY-SA 4.0, because of the UBS senses and the GLAUx parses (the Hebrew layout's clause keys are CC BY 4.0). Credit: MACULA (Clear Bible /
 Biblica), United Bible Societies (word senses), GLAUx (KU Leuven, Alek Keersmaekers), make-tanakh-research (the measurements), and
 this dataset.
 """

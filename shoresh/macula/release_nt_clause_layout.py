@@ -41,7 +41,8 @@ SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("seg", 
           ("speaker", "string"), ("speaker_ref", "list<string>"), ("speaker_basis", "string"), ("alt_eng", "string"), ("speaker_id", "string"), ("speaker_name", "string"), ("speaker_name_ref", "string"), ("speaker_members", "list<string>"), ("inline", "list<string>"), ("split_at_quotation", "bool_"), ("first", "string"), ("last", "string"),
           ("words", "list<string>"), ("force", "list<string>"), ("you", "string"), ("printed", "string"), ("printed_line", "bool_"),
           ("connective", "list<string>"), ("connective_of", "string"), ("shape", "string"), ("relation", "string"),
-          ("relation_basis", "string")]
+          ("relation_basis", "string"), ("neg", "string"), ("person", "string"), ("number", "string"),
+          ("gender", "string"), ("voice", "string")]
 
 
 def _type(pa, t: str):

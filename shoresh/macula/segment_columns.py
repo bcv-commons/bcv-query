@@ -25,6 +25,12 @@ Both, from the passage facts of non-share-alike sources (macula.build_passage_fa
                    Proposed and first listed by make-tanakh-research (2026-11-12); read from the MACULA Greek tree.
   shape            both: the roles of the clause's constituents in one vocabulary for both layouts (S O V P A N I + ~), from the
                    rule string or the tree (macula.greek_relation.shapes)
+  neg, person, number, gender, voice, stem
+                   both (stem Hebrew only), from v0.37.2 / v0.7.1: the clause's negator class and its main verb's person, number,
+                   gender, voice and stem, as in bcv-commons/clause-columns (macula.build_clause_columns, built locally in
+                   macula/data/clause-columns), read there from MACULA alone (Hebrew morph codes and negators; the Greek spine's
+                   morphology), CC BY 4.0 (the user's decision 1, 2026-11-17). Every segment of a clause carries the clause's values;
+                   Hebrew keyed by clause_key, Greek by the segment's first word (clause-columns' Greek key)
   relation, relation_basis
                    Greek: how the clause relates to what it hangs on, in the Hebrew layout's vocabulary, by rule; basis names the rule
                    (macula.greek_relation.relations; rules by make-tanakh-research)
@@ -34,12 +40,26 @@ from __future__ import annotations
 import collections
 import functools
 import sqlite3
+from pathlib import Path
 
 from macula import build_passage_facts as pf
 
 HEB_SPEAKER = ["quotation", "quote_level", "speaker", "speaker_ref", "speaker_basis", "speaker_id", "speaker_name", "speaker_name_ref",
                "speaker_members", "frame_speaker"]
 FACT_COLUMNS = ["force", "you", "para_end", "printed", "printed_line"]
+CLAUSE_COLUMNS = ["neg", "person", "number", "gender", "voice", "stem"]
+CLAUSE_TABLE = Path(__file__).resolve().parent / "data" / "clause-columns"
+
+
+@functools.lru_cache(maxsize=2)
+def clause_values(hebrew: bool) -> dict[str, dict]:
+    """clause key -> the six MACULA-only clause columns (Greek: no stem), from the local clause-columns build."""
+    import pyarrow.parquet as pq
+    cols = CLAUSE_COLUMNS if hebrew else CLAUSE_COLUMNS[:-1]
+    f = CLAUSE_TABLE / ("hebrew.parquet" if hebrew else "greek-nt.parquet")
+    if not f.exists():
+        raise SystemExit(f"{f} missing: run python -m macula.build_clause_columns first")
+    return {r["clause_key"]: {c: r[c] for c in cols} for r in pq.read_table(f, columns=["clause_key", *cols]).to_pylist()}
 
 
 def _hebrew_speakers(book: str) -> dict[tuple[int, int], dict]:
@@ -163,6 +183,8 @@ def columns(book: str, rows: list[dict], spans: list[dict] | None = None) -> lis
     shape = greek_relation.shapes("hbo" if hebrew else "grc", rows)
     rel = {} if hebrew else greek_relation.relations(rows)
     conn = {} if hebrew else connectives(rows)[0]
+    cv = clause_values(hebrew)
+    empty = {c: None for c in (CLAUSE_COLUMNS if hebrew else CLAUSE_COLUMNS[:-1])}
     out = []
     for i, r in enumerate(rows):
         c = {}
@@ -180,5 +202,6 @@ def columns(book: str, rows: list[dict], spans: list[dict] | None = None) -> lis
         else:
             con = conn.get(i)
             c.update(printed=printed.get(i), printed_line=i in line, connective=con[0] if con else [], connective_of=con[1] if con else None)
+        c.update(cv.get(r.get("clause_key") if hebrew else str(r.get("first") or "")) or empty)
         out.append(c)
     return out

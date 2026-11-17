@@ -192,6 +192,19 @@ Ruth 1:1, fifth segment:
 | `para_end` | `sc.pe` (petuchah) or `sc.sa` (setumah) where a Leningrad Codex paragraph ends with this segment |
 | `shape` | the roles of the clause's constituents in order, in one vocabulary for both layouts: `S` subject, `O` object, `V` verb (the Greek copula too), `P` predicate, `A` adjunct (PP, ADV, IO; a run is one A), `N` a lone noun phrase, `I` interjection, `+` a coordination of clauses, `~` another clause complex; joined by `-` (`V-S-A`). Read from MACULA's rule string, else from the tree. The two layouts' `rule` strings name the same shapes differently (only 36% of Hebrew clauses have a rule that occurs in the Greek); 95% of Hebrew clauses have a `shape` found in the Greek. Vocabulary by make-tanakh-research |
 
+**Added in v0.37.2** (MACULA Hebrew only, CC BY 4.0; segments, hierarchy, text and the v0.37.1 columns unchanged). The clause's
+value, on every segment of the clause, the same values as in
+[bcv-commons/clause-columns](https://huggingface.co/datasets/bcv-commons/clause-columns) for that clause key:
+
+| Field | Meaning |
+|---|---|
+| `neg` | the clause's negator class: `lo`, `al`, `en`, `bilti`, `bal`, `la`; `null` when none |
+| `person`, `number`, `gender` | the main verb's person (`1`, `2`, `3`), number (`s`, `p`) and gender (`m`, `f`, `c`), from MACULA's morph code; `null` with no finite verb |
+| `voice` | `active`, `passive` or `middle`, from the main verb's stem; `null` with no verb |
+| `stem` | the main verb's stem (`qal`, `niphal`, `piel`, `hiphil` …; Aramaic `peal` …); `null` with no verb |
+
+The main verb is the clause's first finite verb, else its participle or infinitive (clause-columns' definition).
+
 These are the same columns the Greek NT layout carries, so both layouts have one shape for speech. The codes are those of
 [bcv-commons/passage-facts](https://huggingface.co/datasets/bcv-commons/passage-facts) (`codes.tsv`), which holds these facts and more
 (the verb that introduces each speech, Masoretic and translation poetic lines, notes), each tied to its words and source.
@@ -294,6 +307,7 @@ BHSA: Eep Talstra Centre for Bible and Computer, VU Amsterdam; DOI 10.17026/dans
 | English verse numbers | bcv-commons/bibles `org-to-eng`, from STEPBible TVTMS (rev. `@TVTMS_REV@`) | CC BY 4.0 |
 | Speech levels; `quotation` … `frame_speaker` | Hebrew Bible Speaker Layer @SPEAKER_TAG@, bcv-commons (`hebrew-speaker-layer`), from MACULA Quotation and Speaker Data (Clear Bible, CC BY 4.0) | CC BY 4.0 |
 | `force`, `you`, `shape` | bcv-commons, read from MACULA Hebrew's grammar and trees | CC BY 4.0 |
+| `neg`, `person`, `number`, `gender`, `voice`, `stem` | bcv-commons (`clause-columns`), read from MACULA Hebrew's morph codes and negators | CC BY 4.0 |
 | `para_end` | Open Scriptures Hebrew Bible, Leningrad Codex paragraph marks | CC BY 4.0 |
 | The segmentation: MACULA's clauses cut at word and verse boundaries | bcv-commons, from MACULA Hebrew | **CC BY 4.0** |
 | The text-level hierarchy | bcv-commons | **CC BY-SA 4.0** |
@@ -305,7 +319,7 @@ licensed CC BY 4.0, like MACULA; CC BY-SA 4.0 applies to the UHB text and the te
 Field by field, in `clauses/` and `data/`:
 - CC BY 4.0: the segmentation above; MACULA's own clause fields `parent_key`, `depth`, `kind`, `rule`, `language`; the row ids
   `clause`, `parent`, `sentence`; the references `book`, `chapter`, `verse`, `verse_ref_en`; the columns added in v0.37.1
-  (`quotation` to `shape`).
+  (`quotation` to `shape`) and in v0.37.2 (`neg` to `stem`).
 - CC BY-SA 4.0: the UHB text (`text`, `ketiv_qere`) and the text-level hierarchy (`discourse_parent`, `relation`,
   `discourse_attach`, `discourse_rule`, `text_depth`, `text_depth_law`, `tree_depth`).
 - `layout/` holds the UHB text and the hierarchy's indentation: CC BY-SA 4.0.

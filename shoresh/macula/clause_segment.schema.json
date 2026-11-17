@@ -22,7 +22,13 @@
   "last",
   "words",
   "text",
-  "ketiv_qere"
+  "ketiv_qere",
+  "neg",
+  "person",
+  "number",
+  "gender",
+  "voice",
+  "stem"
  ],
  "properties": {
   "book": {
@@ -330,6 +336,48 @@
   },
   "shape": {
    "description": "(added in v0.37.1, from CC BY sources) The roles of the clause's constituents in order, in one vocabulary shared with the Greek NT layout: S subject, O object, V verb, P predicate, A adjunct (PP, ADV, IO; a run is one A), N a lone noun phrase, I interjection, + a coordination of clauses, ~ another clause complex; joined by '-' (V-S-A). From MACULA's rule string, else the tree. Vocabulary by make-tanakh-research.",
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "neg": {
+   "description": "(added in v0.37.2, CC BY 4.0, MACULA only; the clause's value on every segment, as in bcv-commons/clause-columns) The clause's negator class: lo, al, en, bilti, bal, la (MACULA negators, research's classes); null when the clause has none.",
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "person": {
+   "description": "(added in v0.37.2, CC BY 4.0, MACULA only; the clause's value on every segment, as in bcv-commons/clause-columns) The clause's main verb's person (1, 2, 3), from MACULA's morph code; null when the clause has no finite verb.",
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "number": {
+   "description": "(added in v0.37.2, CC BY 4.0, MACULA only; the clause's value on every segment, as in bcv-commons/clause-columns) The main verb's number: s, p; null when none.",
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "gender": {
+   "description": "(added in v0.37.2, CC BY 4.0, MACULA only; the clause's value on every segment, as in bcv-commons/clause-columns) The main verb's gender: m, f, c; null when none.",
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "voice": {
+   "description": "(added in v0.37.2, CC BY 4.0, MACULA only; the clause's value on every segment, as in bcv-commons/clause-columns) active, passive or middle, from the main verb's stem (passive: niphal, pual, hophal …; middle: hitpael …); null with no verb.",
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "stem": {
+   "description": "(added in v0.37.2, CC BY 4.0, MACULA only; the clause's value on every segment, as in bcv-commons/clause-columns) The main verb's stem (qal, niphal, piel, hiphil …; Aramaic peal …), from MACULA's morph code; null with no verb.",
    "type": [
     "string",
     "null"

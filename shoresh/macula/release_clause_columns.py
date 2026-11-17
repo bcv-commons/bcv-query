@@ -236,7 +236,8 @@ row by row. A human review of samples is planned for later and will be reported 
 
 ## Licence
 
-CC BY-SA 4.0: the Hebrew layout's clause keys are CC BY-SA 4.0, and so are GLAUx's parses. Credit: MACULA (Clear Bible / Biblica),
+CC BY-SA 4.0, because of GLAUx's parses (`lxx_tense`, `lxx_mood`). The Hebrew layout's clause keys are CC BY 4.0 (its
+segmentation is; see the layout's card), and every other column comes from CC BY 4.0 sources. Credit: MACULA (Clear Bible / Biblica),
 GLAUx (KU Leuven, Alek Keersmaekers), bcv-commons (the layouts, the speaker layer), make-tanakh-research (the column design and
 the previous version), and this dataset.
 """
