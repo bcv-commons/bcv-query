@@ -6,6 +6,7 @@ Testament with every layer as features and edges inside a text; the two Hebrew N
     python -m macula.build_bridge_corpus --fetch             download the pinned releases (bridge_corpus_pins.json) and check them
     python -m macula.build_bridge_corpus --build             -> macula/data/bridge-corpus/build-<pins>/ (the dataset) and its report.json
     python -m macula.build_bridge_corpus --check [DIR]       load a build, time it, run the fixed queries
+    python -m macula.build_bridge_corpus --build --release v0.1 --out DIR   a build for release_hebrew_greek_cf
 
 Rules of the build (plan 4.1): the releases stay the source and this is a derived view; every input is pinned and the pins are written
 into the dataset; every feature states its origin, licence and whether a model made it; no English content values (MACULA's gloss and the
@@ -44,6 +45,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PINS = HERE / "bridge_corpus_pins.json"
 DATA = HERE / "data" / "bridge-corpus"
+NAME = "hebrew-greek-cf"                                                 # the dataset's name (user, 2026-11-17)
 INPUTS = DATA / "inputs"
 ROOT_RESOURCES = HERE.parents[1] / "resources"
 TYPES = ("token", "phrase", "line", "clause", "quotation", "verse", "chapter", "book", "text", "lexeme", "concept", "person", "fact", "sentence", "wordgroup")     # after word; nodes are numbered type by type
@@ -94,8 +96,10 @@ def pins() -> dict:
     return json.loads(PINS.read_text())
 
 
-def version(p: dict | None = None) -> str:
-    return "0.1.0-dev+" + hashlib.sha256(json.dumps(p or pins(), sort_keys=True).encode()).hexdigest()[:8]
+def version(p: dict | None = None, release: str | None = None) -> str:
+    """'0.1.0-dev+<pins>' for a working build, '0.1+<pins>' for a release build (--release v0.1)"""
+    h = hashlib.sha256(json.dumps(p or pins(), sort_keys=True).encode()).hexdigest()[:8]
+    return f"{release.lstrip('v')}+{h}" if release else f"0.1.0-dev+{h}"
 
 
 def folder(name: str, pin: dict) -> Path:
@@ -442,7 +446,7 @@ def add_hebrew_nt(c: Corpus) -> None:
         c.report["layers"][f"hebrew NT {ed}"] = dict(st)
 
 
-def save(c: Corpus, out: Path) -> dict:
+def save(c: Corpus, out: Path, release: str | None = None) -> dict:
     import cfabric
     p = pins()
     n = len(c.slot)
@@ -464,7 +468,7 @@ def save(c: Corpus, out: Path) -> dict:
     for name, pin in p.get("stores", {}).items():
         source[name] = {"source": f"{pin['origin']}; {pin['source']} {pin['tag']}", "licence": pin["licence"], "model_made": "no"}
     source["layout"] = {"source": "the two clause layouts (see lay_ features)", "licence": "cc-by-sa-4.0", "model_made": "no"}
-    meta = {"": {"name": "bridge corpus (working name)", "version": version(p), "licence": "cc-by-sa-4.0", "pins": "pins.json in this folder"},
+    meta = {"": {"name": NAME, "version": version(p, release), "licence": "cc-by-sa-4.0", "pins": "pins.json in this folder"},
             "otext": {"sectionTypes": "book,chapter,verse", "sectionFeatures": "sec,chapter,verse", "fmt:text-orig-full": "{text}{trailer}"},
             "otype": {"valueType": "str"}, "oslots": {"valueType": "str"}}
     nodef, edgef = {"otype": otype}, {"oslots": oslots}
@@ -487,13 +491,13 @@ def save(c: Corpus, out: Path) -> dict:
         spaced = sum(1 for v in d if " " in v and v.isascii() and any(ch.isalpha() for ch in v))
         if len(d) > 200 and spaced > len(d) / 2 and name not in REFERENCES:
             latin[name] = {"distinct values": len(d), "with spaces, in Latin script": spaced}
-    c.report.update({"version": version(p), "features that lost a value (two rows on one unit)": twice, "features to read for free text": latin, "nodes": {"word": n, **{t: len(c.nodes[t]) for t in TYPES}}, "save seconds": round(time.time() - t, 1),
+    c.report.update({"version": version(p, release), "features that lost a value (two rows on one unit)": twice, "features to read for free text": latin, "nodes": {"word": n, **{t: len(c.nodes[t]) for t in TYPES}}, "save seconds": round(time.time() - t, 1),
                      "features": {name: {"values": len(v), "origin": c.origin[name]} for name, v in sorted(c.F.items())},
                      "edges": {name: {"pairs": sum(len(t_) for t_ in v.values()), "origin": c.origin[name]} for name, v in sorted(c.E.items())}})
     return c.report
 
 
-def build(out: Path, db: Path) -> dict:
+def build(out: Path, db: Path, release: str | None = None) -> dict:
     p = pins()
     if hashlib.sha256(db.read_bytes()).hexdigest() != p["words"]["sha256"]:
         raise SystemExit(f"{db} is not the pinned word store ({p['words']['tag']} of bcv-commons/spine-releases)")
@@ -518,7 +522,7 @@ def build(out: Path, db: Path) -> dict:
     bridge_corpus_trees.add_trees(c, stores["trees"])
     bridge_corpus_more.add_more(c)
     bridge_corpus_units.add_units(c)
-    rep = save(c, out)
+    rep = save(c, out, release)
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return rep
 
@@ -555,12 +559,13 @@ def main() -> None:
     ap.add_argument("--check", nargs="?", const="", metavar="DIR")
     ap.add_argument("--out", type=Path, help="the build's folder (default: data/bridge-corpus/build-<pins>)")
     ap.add_argument("--words", type=Path, default=HERE / "macula-spine.db")
+    ap.add_argument("--release", help="with --build: the release version written into the dataset (v0.1); default a working build")
     a = ap.parse_args()
     out = a.out or DATA / f"build-{version().split('+')[1]}"
     if a.fetch:
         fetch()
     if a.build:
-        rep = build(out, a.words)
+        rep = build(out, a.words, a.release)
         print(json.dumps({k: rep[k] for k in ("version", "nodes", "save seconds", "features that lost a value (two rows on one unit)",
                                               "features to read for free text", "layers")}, ensure_ascii=False, indent=1))
     if a.check is not None:
