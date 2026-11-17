@@ -90,15 +90,19 @@ def main() -> None:
     for (s, st), cs in sorted(cand.items()):
         merged.setdefault(s, []).append({"strong": st, "candidates": list(cs.values())})
     (a.out / "candidates.json").write_text(json.dumps(merged, ensure_ascii=False, indent=1), encoding="utf-8")
-    vec_run = [x for x in ans.values() if x["run"] == "vector"]
-    vec_pairs = sum(1 for r in rows if r[-1] == "vector")
     side = lambda s: sum(1 for r in rows if r[0] == s)
     fill = {"@TAG@": a.tag, "@BUILT@": datetime.date.today().isoformat(), "@COMMIT@": commit, "@ASKED@": f"{len(ans):,}",
             "@NONE@": f"{none:,}", "@LOW@": f"{low:,}", "@PAIRS@": f"{len(rows):,}", "@NT@": f"{side('nt'):,}", "@OT@": f"{side('ot'):,}",
-            "@MINP@": f"{a.min_p:g}", "@LEXEMES@": f"{len(lexemes):,}",
-            "@VEC_ASKED@": f"{len(vec_run):,}", "@VEC_PAIRS@": f"{vec_pairs:,}",
-            "@VEC_NONE@": f"{sum(1 for x in vec_run if x['choice'] == 'none'):,}",
-            "@VEC_BYVEC@": f"{sum(1 for r in rows if r[-1] == 'vector' and r[8]):,}"}
+            "@MINP@": f"{a.min_p:g}", "@LEXEMES@": f"{len(lexemes):,}",}
+    lines = ["| Run | Lexemes asked | Pairs kept (p ≥ " + f"{a.min_p:g}" + ") | of them proposed by the vectors only | \"none\" | below |",
+             "|---|---|---|---|---|---|"]
+    for name, _, _ in runs:
+        xs = [x for x in ans.values() if x["run"] == name]
+        kept = [r for r in rows if r[-1] == name]
+        nn = sum(1 for x in xs if x["choice"] == "none")
+        lines.append(f"| `{name}` | {len(xs):,} | {len(kept):,} | {sum(1 for r in kept if r[8] and not r[6] and not r[7]):,} | {nn:,} | "
+                     f"{len(xs) - nn - len(kept):,} |")
+    fill["@RUNS@"] = "\n".join(lines)
     card = CARD.read_text(encoding="utf-8")
     for k, v in fill.items():
         card = card.replace(k, v)
