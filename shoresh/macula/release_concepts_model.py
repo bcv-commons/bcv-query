@@ -229,6 +229,29 @@ def stage_text(prefix: str, m: dict, n: int, lab: dict) -> str:
             txt += (f"; over {v['verses']:,} verses word F1 {v['word F1']['sense']:.2f} -> {v['word F1']['concept']:.2f}, chrF1 "
                     f"{v['chrF1']['sense']:.2f} -> {v['chrF1']['concept']:.2f} (point figures)")
         out.append(txt + ".")
+    if m.get("keep rule"):
+        t = m.get("tokens", {})
+        out.append(f"- Kept: {m['keep rule'].rstrip('.')}; {t.get('kept', n):,} of {t.get('selected', n):,} occurrences asked. "
+                   "The rest are not in `tokens`.")
+    sc = m.get("score") if isinstance(m.get("score"), dict) else {}
+    for k, v in sc.items():
+        if isinstance(v, dict) and isinstance(v.get("pooled"), dict) and "AMI" in v["pooled"]:
+            ami = v["pooled"]["AMI"]
+            base = "the UBS sense" if "UBS" in k else "the Septuagint lemma" if "Septuagint" in k else "one class per word"
+            out.append(f"- Check on translations never shown, against {base}: AMI {ami['label']:.3f} against {ami['baseline']:.3f}, "
+                       f"difference {ami['diff']:+.3f} [{ami['95%'][0]:+.3f}, {ami['95%'][1]:+.3f}] (95% interval, "
+                       f"{v['pooled'].get('pairs', 0):,} word-translation pairs).")
+    if "run1 = run2 (where asked)" in sc:
+        out.append(f"- Two Jev runs agree on {sc['run1 = run2 (where asked)']:.1%} of the {sc.get('asked twice', 0):,} occurrences asked twice "
+                   "(model with itself); the bar set beforehand was 90%, so only agreeing runs are kept.")
+    if m.get("opus_model") and m.get("stage") == "b2":
+        out.append("- Concepts for these words were defined without UBS senses (none exist for them): from the Septuagint lemma, how "
+                   "the shown translations group the occurrences, and the Hebrew clause. Concept codes have `ubs_sense` = `none`.")
+    if m.get("english"):
+        out.append("- English: Jev read the concepts' English definitions this once, by the user's decision of 2026-11-17; later designs "
+                   "are to work without English descriptions.")
+    if "jev usd" in sc:
+        out.append(f"- Cost (list price): Jev USD {sc['jev usd']:.2f}.")
     c = m.get("cost_usd")
     if isinstance(c, dict):
         out.append("- Cost (list price): USD " + f"{c['total']:.2f} (" + "; ".join(f"{k} {v:.2f}" for k, v in c.items() if k != "total") + ").")
@@ -273,7 +296,8 @@ stage{'s' if len(stages) > 1 else ''} ({', '.join(p for p, _, _, _ in stages)}).
   lemma and morphology), the word's UBS senses and their definitions, the Septuagint lemma at each place, and how {len(eds)} openly
   licensed translations group the occurrences (cluster ids and counts only, no translation text). It did not see MACULA's English
   gloss, any translation's wording or BHSA data. It proposed codes `H<strong>.<n>` with a one-line definition each. A word defined in
-  an earlier stage keeps its concepts and codes.
+  an earlier stage keeps its concepts and codes. Stage b1 defines no concepts (it labels more occurrences of words already defined);
+  stage b2 defines concepts for 20 words that have no UBS sense, without UBS senses (see its section).
 - **Concept per occurrence:** Jev (TypeSafe) and Claude Opus 5.5 chose among the word's concepts; each stage's rule and its labeller
   per row are below and in `tokens` (`labeller`, each run's label, Jev's confidence).
 - Run by make-tanakh-research to bcv-query's specification.
