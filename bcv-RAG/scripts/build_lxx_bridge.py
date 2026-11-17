@@ -85,10 +85,11 @@ def main() -> None:
         for row in csv.DictReader(fh, delimiter="\t"):
             n_rows += 1
             h = _hnorm(row.get("strongnumberx") or "")
-            g = _gnorm(row.get("greekstrong") or "")
-            if h and g:
-                gk[h][to_nt.get(g, g)] += 1
-                n_pairs += 1
+            gs = (row.get("greekstrong") or "").strip()
+            for g in dict.fromkeys(_gnorm(x) for x in gs.split()[0].split("|")) if (h and gs) else ():
+                if g:                                   # a compound ("1722|1698") counts each number (2026-11-17)
+                    gk[h][to_nt.get(g, g)] += 1
+                    n_pairs += 1
     finally:
         fh.close()
 

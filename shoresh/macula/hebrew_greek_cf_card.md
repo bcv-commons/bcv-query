@@ -98,7 +98,10 @@ word lang=hbo
 ```
 
 Readers without Context Fabric: the links between the texts are also flat tables in `bridges/` (Parquet), keyed by the words'
-own ids (`mid` = the MACULA key, `lkey` = Septuagint word, `hkey` = Hebrew New Testament word part).
+own ids (`mid` = the MACULA key, `lkey` = Septuagint word, `hkey` = Hebrew New Testament word part). In `hebrew_nt`, `tanakh` names
+the Tanakh verse when the Hebrew word part lies in a stretch that follows that verse (a quotation the translator may have
+taken from the Hebrew Bible rather than translated from the Greek); in the dataset this is the feature `hnb_tanakh`. Leave
+these links out when counting the Hebrew NTs as evidence for a Greek-Hebrew pair.
 
 ## Files
 
@@ -120,3 +123,5 @@ The whole is CC BY-SA 4.0. Each feature's metadata names its source and licence,
 ## Versions
 
 - v0.1: the first release (2026-11-17).
+- v0.2: `hnb_tanakh` on the Hebrew NT word parts and `tanakh` in `bridges/hebrew_nt`; the Septuagint tiers count both numbers
+  of a compound Greek link (`1722|1698`, `1909|848`).

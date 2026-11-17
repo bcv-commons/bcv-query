@@ -52,17 +52,20 @@ MAP_HEADER = "source_strong\tnt_strong\tnt_lemma\tlinks\tfound\tshare\texample\n
 MAP_MIN, MAP_SHARE = 3, 0.9
 
 
-def hebrew_words(path: Path, forms: collections.Counter | None = None) -> dict[str, tuple[int, int | None]]:
-    """{spine key: (Hebrew strong, Greek strong or None)} from the MACULA Hebrew TSV, numbers as build_lxx_bridge.py reads them.
-    With forms, also counts (Greek strong, Greek form) over the same rows."""
+def hebrew_words(path: Path, forms: collections.Counter | None = None) -> dict[str, tuple[int, tuple[int, ...]]]:
+    """{spine key: (Hebrew strong, Greek strongs)} from the MACULA Hebrew TSV. A compound value counts each of its numbers
+    ("1722|1698", the form "ἐν|ἐμοί": 8 words; research 2026-11-16); before, only the first was read. With forms, also counts
+    (Greek strong, Greek form) over the same rows, the parts of a compound form paired with its numbers."""
     out = {}
     for row in _rows(path):
         h = re.match(r"(\d+)", (row.get("strongnumberx") or "").strip())
         if h:
-            g = re.match(r"(\d+)", (row.get("greekstrong") or "").strip())
-            out[row["xml:id"][1:]] = (int(h.group(1)), int(g.group(1)) if g else None)
-            if g and forms is not None:
-                forms[(int(g.group(1)), row.get("greek") or "")] += 1
+            gs = tuple(int(x) for x in re.findall(r"\d+", (row.get("greekstrong") or "").split()[0] if (row.get("greekstrong") or "").strip() else ""))
+            out[row["xml:id"][1:]] = (int(h.group(1)), gs)
+            if gs and forms is not None:
+                fs = (row.get("greek") or "").split("|")
+                for i, g in enumerate(gs):
+                    forms[(g, fs[i] if len(fs) == len(gs) else row.get("greek") or "")] += 1
     return out
 
 
@@ -118,10 +121,8 @@ def greek_number_map(forms: collections.Counter, db: Path = MACULA_DB) -> list[t
 
 
 def macula_tier(words: dict, min_count: int) -> dict[tuple[int, int], tuple[int, float]]:
-    pairs = collections.Counter((h, g) for h, g in words.values() if g)
-    tot: collections.Counter = collections.Counter()
-    for (h, _), c in pairs.items():
-        tot[h] += c
+    pairs = collections.Counter((h, g) for h, gs in words.values() for g in dict.fromkeys(gs))
+    tot = collections.Counter(h for h, gs in words.values() if gs)        # occurrences with a Greek link (a compound counts once)
     return {k: (c, round(c / tot[k[0]], 5)) for k, c in pairs.items() if c >= min_count}
 
 
@@ -175,7 +176,7 @@ def main(argv: list[str]) -> int:
     words = hebrew_words(_src(HBO_URL, "MACULA_HBO_TSV"), forms)
     gmap = greek_number_map(forms)
     to_nt = {g: t for g, t, *_ in gmap if t}
-    words = {k: (h, to_nt.get(g, g)) for k, (h, g) in words.items()}
+    words = {k: (h, tuple(to_nt.get(g, g) for g in gs)) for k, (h, gs) in words.items()}
     mac = macula_tier(words, a.min_count)
     lxx, stats = glaux_tier(words, sqlite3.connect(SPINE), sqlite3.connect(GLAUX), a.min_count, a.min_dice)
     OUT.mkdir(parents=True, exist_ok=True)

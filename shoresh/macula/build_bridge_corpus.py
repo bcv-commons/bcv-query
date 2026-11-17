@@ -57,7 +57,7 @@ HNT = {"heb_scg": ("salkinson", "SCG"), "heb_mod": ("delitzsch", "DEL")}
 CORPUS = {"hebrew": "hbo", "greek-nt": "grc"}
 CLAUSE_LAYERS = (("clause-columns", "cc_"), ("clause-connectives", "cn_"), ("clause-extras", "cx_"), ("time-aspect", "ta_"))
 LINE_SKIP = {"book", "chapter", "verse", "words", "text", "first", "last", "alt_eng", "clause_key", "parent_key", "discourse_parent"}
-REFERENCES = {"lay_verse_ref_en", "cc_ref", "lay_via", "hkey", "lkey"}                  # verse references and lists of codes: Latin script with spaces, no English text
+REFERENCES = {"lay_verse_ref_en", "cc_ref", "lay_via", "hkey", "lkey", "hnb_tanakh"}                  # verse references and lists of codes: Latin script with spaces, no English text
 QUERIES = (                                              # fixed queries with their hits in this build (the check fails when they move)
     ("speech clauses in Ruth, imperative or prohibitive, with an undergoer phrase that holds a noun",
      "book book=RUT\n  clause cc_speech>0 cc_force=imperative|prohibitive\n    phrase ar_role=undergoer\n      word pos=noun\n", 6),
@@ -70,6 +70,7 @@ QUERIES = (                                              # fixed queries with th
     ("future clauses whose parent clause is imperative", "c:clause cc_force=imperative\nd:clause ta_time=future\nd -parent> c\n", 21),
     ("Greek NT words of λόγος that Salkinson renders by דָּבָר", "g:word lemma=λόγος\nh:word strong=1697\ng -heb_scg> h\n", 249),
     ("the same in Delitzsch", "g:word lemma=λόγος\nh:word strong=1697\ng -heb_mod> h\n", 267),
+    ("Salkinson word parts in a stretch that follows a Tanakh verse", "text name=salkinson\n  word hnb_tanakh\n", 1343),
     ("Salkinson verses that follow a verse of Isaiah", "v:verse\nt:verse book=ISA\nv -quotes> t\n", 190),
     ("Hebrew NT words of the verb Strong 1980 inside a Salkinson clause of John", "text name=salkinson\n  book book=JHN\n    clause\n      word strong=1980\n", 114),
     ("Tanakh words of הלך placed on a Septuagint word of πορεύομαι", "h:word strong=1980\ng:word lemma=πορεύομαι\nh -lxx> g\n", 777),
@@ -436,6 +437,8 @@ def add_hebrew_nt(c: Corpus) -> None:
             t = c.slot.get(f"{ed} {r['book']} {r['chapter']}:{r['verse']} {r['i']}.{r['part']}")
             st["links"] += 1
             st["links placed"] += c.edge(ed, a, t, r["link"], "hebrew-nt-bridge")
+            if t and r["tanakh"]:                                       # the part lies in a stretch that follows this Tanakh verse
+                c.F["hnb_tanakh"][t] = r["tanakh"]
         for line in (br / "quotes" / f"{ed}.tsv").read_text(encoding="utf-8").splitlines()[1:]:
             nt, tk, w, *_ = line.split("\t")
             (nb, ncv), (tb, tcv) = nt.split(), tk.split()
@@ -443,6 +446,8 @@ def add_hebrew_nt(c: Corpus) -> None:
             t = c.at["verse"].get(("tanakh", tb, *map(int, tcv.split(":"))))
             st["quotes"] += 1
             st["quotes placed"] += c.edge("quotes", a, t, w, "hebrew-nt-bridge")
+        st["parts in a quoted stretch"] = sum(1 for k, s in c.slot.items() if k.startswith(ed + " ") and s in c.F["hnb_tanakh"])
+        c.origin["hnb_tanakh"] = "hebrew-nt-bridge"
         c.report["layers"][f"hebrew NT {ed}"] = dict(st)
 
 

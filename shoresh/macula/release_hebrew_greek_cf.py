@@ -41,7 +41,7 @@ BRIDGES = {                                                             # edge -
 LAYER_PREFIX = {"hebrew-clause-layout": "lay", "greek-nt-clause-layout": "lay", "clause-columns": "cc", "clause-connectives": "cn",
                 "clause-extras": "cx", "time-aspect": "ta", "argument-roles": "ar", "reference-status": "rs", "noun-relations": "nr",
                 "word-senses": "ws", "inclusive-we": "we", "addressees": "ad", "hebrew-word-concepts-model": "m", "hebrew-nt-analysis": "hna",
-                "hebrew-nt-bridge": "heb_scg, heb_mod, quotes", "word-parts": "wp", "hebrew-phrase-types-model": "m_pt", "passage-facts": "pf"}
+                "hebrew-nt-bridge": "heb_scg, heb_mod, quotes, hnb", "word-parts": "wp", "hebrew-phrase-types-model": "m_pt", "passage-facts": "pf"}
 
 
 def sha256(path: Path) -> str:
@@ -72,7 +72,8 @@ def bridges(api, out: Path) -> dict:
     rows = []
     for ed in ("heb_scg", "heb_mod"):
         e = getattr(E, ed)
-        rows += [{"edition": ed, "greek_mid": F.mid.v(w), "hebrew_key": F.hkey.v(m), "class": v} for w in words for m, v in e.f(w)]
+        rows += [{"edition": ed, "greek_mid": F.mid.v(w), "hebrew_key": F.hkey.v(m), "class": v, "tanakh": F.hnb_tanakh.v(m)}
+                 for w in words for m, v in e.f(w)]
     tables["hebrew_nt"] = rows
     ref = lambda n: "{} {}:{}".format(*T.sectionFromNode(n))
     tables["quotes"] = [{"hebrew_nt_verse": ref(v), "tanakh_verse": ref(m), "weight": float(x)} for v in F.otype.s("verse") for m, x in E.quotes.f(v)]

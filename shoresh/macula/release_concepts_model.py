@@ -66,15 +66,15 @@ def concept_greek(toks: list[dict]) -> tuple[list[dict], dict]:
     to_nt = {num(r["source_strong"]): num(r["nt_strong"])
              for r in tsv(here.parents[1] / "resources/lxx_bridge_tiers/greek_numbers.tsv") if r["nt_strong"]}
     hb = sqlite3.connect(f"file:{here / 'lowfat-hbo.db'}?mode=ro", uri=True)
-    greek = {k: num(g) for k, g in hb.execute("select key, greekstrong from lowfat_words where is_inserted = 0 and greekstrong != ''")}
+    greek = {k: [x.lstrip("0") or "0" for x in re.findall(r"\d+", g)]       # a compound ("1722|1698") counts each number
+             for k, g in hb.execute("select key, greekstrong from lowfat_words where is_inserted = 0 and greekstrong != ''")}
     sp = sqlite3.connect(f"file:{here / 'macula-spine.db'}?mode=ro", uri=True)
     lem: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
     for strong, lemma in sp.execute("select strong, lemma from macula_words where lang = 'grc'"):
         lem[num(strong)][lemma] += 1
     pair: dict[tuple, list] = collections.defaultdict(list)
     for r in toks:
-        src = greek.get(r["key"])
-        if r["concept"] and src:
+        for src in dict.fromkeys(greek.get(r["key"], ())) if r["concept"] else ():
             pair[(r["concept"], to_nt.get(src, src))].append((src, r.get("labeller") or "opus", r.get("jev_confidence") or ""))
     by_c, by_g = collections.Counter(), collections.Counter()
     for (c, g), v in pair.items():
@@ -89,7 +89,7 @@ def concept_greek(toks: list[dict]) -> tuple[list[dict], dict]:
                      **{f"n_{lab.replace('+', '_')}": sum(l == lab for _, l, _ in v) for lab in labs},
                      "jev_confidence_mean": round(sum(conf) / len(conf), 4) if conf else None})
     n_tok = sum(1 for r in toks if r["concept"])
-    return rows, {"pairs": len(rows), "tokens_with_greek": sum(by_c.values()), "tokens": n_tok, "concepts": len(by_c),
+    return rows, {"pairs": len(rows), "tokens_with_greek": sum(1 for r in toks if r["concept"] and greek.get(r["key"])), "tokens": n_tok, "concepts": len(by_c),
                   "greek_lexemes": len(by_g), "greek_not_in_nt": sum(1 for g in by_g if g not in lem), "labellers": labs}
 
 

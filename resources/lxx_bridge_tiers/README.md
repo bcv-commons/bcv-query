@@ -44,6 +44,9 @@ of the 323,362 Hebrew-to-Greek links (9.1%), never occur in the Greek NT, so a p
   written with no accent at all (the names) also without accents. A number is mapped when at least 3 occurrences are found and
   0.9 of them agree. 58 numbers are mapped (29,199 links); 20 stay as they are (295 links: compounds such as μήποτε 3379 that
   the NT splits, and words the NT lacks).
+- **Compound links count each number (2026-11-17).** Eight words carry two numbers: בִּי as ἐν|ἐμοί (`1722|1698`, 6) and
+  Zechariah 2:13 (Hebrew numbering; English 2:9) as ἐπ’|αὐτούς (`1909|848`, 2). Before, only the first number was read; now both are, and a
+  pair's score still divides by the Hebrew word's occurrences. One pair is new: H0994 G1473 (ἐγώ), 6.
 - **`macula.tsv` and `../lxx_bridge.tsv` count by the mapped number**, so the forms of one word merge: 4,643 pairs became 4,496.
   `glaux.tsv` is built from GLAUx lemmas and did not change.
 - **Not changed:** numbers the Greek NT does use, also where the alignment's Greek form belongs to another NT word. This was not
