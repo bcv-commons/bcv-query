@@ -29,7 +29,7 @@ Nestle 1904). A record says which Hebrew word renders the Greek word, how it ren
 
 **Model-made, no human check.** The decisions are by the Jev model (TypeSafe, `jev-1.14.0`) and by Claude (Anthropic,
 `claude-opus-5-5`). No person has checked them. The review was made by make-tanakh-research on 2026-10-31 and handed over to
-bcv-query on 2026-11-17. Its code is in bcv-query `shoresh/macula/hnt_review/`.
+bcv-query on 2026-11-17. The code stays with research; bcv-query `shoresh/macula/hnt_review/README.md` records the packet.
 
 | | |
 |---|---|

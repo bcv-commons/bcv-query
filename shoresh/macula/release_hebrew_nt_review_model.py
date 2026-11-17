@@ -1,6 +1,6 @@
 """Package bcv-commons/hebrew-nt-review-model: a model's review of the Hebrew NT word links, one record per Greek noun, verb and
 adjective of the NT, for Salkinson-Ginsburg (heb_scg) and Delitzsch (heb_mod). Made by make-tanakh-research (2026-10-31) and handed
-over to bcv-query (packet 32, 2026-11-17; code in macula/hnt_review/). Nothing is uploaded.
+over to bcv-query (packet 32, 2026-11-17; provenance in macula/hnt_review/README.md). Nothing is uploaded.
 
     python -m macula.release_hebrew_nt_review_model --tag v0.1 --packet macula/data/handover/p32 --checks DIR --out DIR [--allow-dirty]
 
