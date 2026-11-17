@@ -96,6 +96,10 @@ def main() -> None:
                        f"@{f}_Q_OUT@": f"{e['quotes']['of them on a Septuagint pair (outside)']:.1%}",
                        f"@{f}_Q_LOST@": f"{e['quotes']['pairs with fewer than 3 links outside the marked stretches']:,}"})
     ag, ca = report["agreement"], report["editions"]["heb_scg"]["compact_against_by_id"]
+    mc = report["editions"]["heb_mod"].get("compact_against_by_id")
+    if not mc:
+        raise SystemExit("heb_mod has no by-id links: build with --by-id-local heb_mod=<packet 32 heb_mod/by-id>")
+    fields.update({"@MODCAL_N@": f"{mc['greek content words with a Hebrew lexeme in both']:,}", "@MODCAL_SAME@": f"{mc['share same']:.1%}"})
     fields.update({"@AGREE_N@": f"{ag['greek content words with a Hebrew lexeme in both']:,}", "@AGREE_SAME@": f"{ag['share same']:.1%}",
                    "@AGREE_COMMON@": f"{ag['share with a lexeme in common']:.1%}",
                    "@CAL_N@": f"{ca['greek content words with a Hebrew lexeme in both']:,}", "@CAL_SAME@": f"{ca['share same']:.1%}",

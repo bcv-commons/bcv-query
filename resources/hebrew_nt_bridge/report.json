@@ -1,10 +1,13 @@
 {
  "inputs": {
-  "by_id": "bcv-commons/alignments-by-id@v1.0",
+  "by_id": "bcv-commons/alignments-by-id@v1.1",
   "compact": "bcv-commons/compact-alignments@11583082",
   "greek": "MACULA Greek, Nestle 1904 (macula-spine.db)",
   "septuagint_tiers": "resources/lxx_bridge_tiers",
-  "tanakh": "MACULA Hebrew (macula-spine.db)"
+  "tanakh": "MACULA Hebrew (macula-spine.db)",
+  "by_id_local": {
+   "heb_mod": "research's run of the aligner's alignments-by-id builder, handed over 2026-11-17 (packet 32), remapped to hebrew-nt-analysis v0.2"
+  }
  },
  "quote_rule": {
   "listed_from_weight": 16.0,
@@ -87,36 +90,50 @@
     "epoch": 4,
     "vowel_points": "stripped"
    },
-   "form": "compact",
-   "figures": {
+   "compact_against_by_id": {
+    "greek content words with a Hebrew lexeme in both": 51933,
+    "same lexemes": 48751,
+    "share same": 0.9387,
+    "share with a lexeme in common": 0.9573
+   },
+   "compact_figures": {
     "greek words linked (compact)": 63292,
     "links with no part of a fitting class": 1235,
     "links in a verse the analysis lacks": 13,
     "compact verses whose content words could not be matched": 2
    },
-   "link_rows": 64531,
+   "form": "by-id",
+   "figures": {
+    "greek words linked (kept)": 101237,
+    "greek words linked (edited-wide)": 5632,
+    "greek words linked (edited)": 11667,
+    "greek words linked (inside)": 2877,
+    "greek words linked (part)": 584,
+    "links with no part of a fitting class": 825
+   },
+   "link_rows": 128516,
    "greek content words": 65264,
-   "greek content words linked to a Hebrew part": 62057,
-   "greek content words with a Hebrew lexeme": 56527,
-   "linked hebrew content parts": 62397,
-   "of them with a Strong's number": 58101,
+   "greek content words linked to a Hebrew part": 62348,
+   "greek content words with a Hebrew lexeme": 53255,
+   "linked hebrew content parts": 72885,
+   "of them with a Strong's number": 68475,
    "tier": {
-    "pairs": 2485,
-    "hebrew lexemes": 1100,
-    "greek lexemes": 1505,
-    "pairs of greek nouns, verbs and adjectives": 2482,
-    "of them also in a Septuagint tier": 1081,
-    "pairs also in a Septuagint tier": 1082,
-    "share of pairs": 0.4354,
-    "share of links on those pairs": 0.7965,
-    "pairs in macula tier": 1045,
-    "pairs in glaux tier": 601,
-    "pairs new to the Septuagint tiers": 1403,
-    "hebrew lexemes with no Septuagint pair that gain one": 132,
+    "pairs": 3202,
+    "hebrew lexemes": 1161,
+    "greek lexemes": 1677,
+    "pairs of greek nouns, verbs and adjectives": 2373,
+    "of them also in a Septuagint tier": 1103,
+    "pairs also in a Septuagint tier": 1539,
+    "share of pairs": 0.4806,
+    "share of links on those pairs": 0.8535,
+    "pairs in macula tier": 1505,
+    "pairs in glaux tier": 597,
+    "pairs new to the Septuagint tiers": 1663,
+    "hebrew lexemes with no Septuagint pair that gain one": 130,
     "NT greek lexemes": 5346,
     "NT greek lexemes with a Septuagint pair": 2004,
-    "NT greek lexemes with no Septuagint pair that gain one": 478,
-    "NT words of those greek lexemes": 6951
+    "NT greek lexemes with no Septuagint pair that gain one": 500,
+    "NT words of those greek lexemes": 8016
    },
    "quotes": {
     "pairs of verses listed": 559,
@@ -124,13 +141,13 @@
     "NT verses with a marked stretch": 179,
     "Tanakh verses they follow": 145,
     "hebrew parts in a marked stretch": 1181,
-    "counted links in a marked stretch": 983,
-    "content links in a marked stretch": 983,
-    "of them on a Septuagint pair": 0.7945,
-    "content links outside": 57116,
-    "of them on a Septuagint pair (outside)": 0.6373,
-    "pairs with fewer than 3 links outside the marked stretches": 41,
-    "pairs with a link in a marked stretch": 310
+    "counted links in a marked stretch": 1085,
+    "content links in a marked stretch": 945,
+    "of them on a Septuagint pair": 0.8169,
+    "content links outside": 52860,
+    "of them on a Septuagint pair (outside)": 0.6777,
+    "pairs with fewer than 3 links outside the marked stretches": 43,
+    "pairs with a link in a marked stretch": 338
    }
   }
  },
@@ -139,10 +156,10 @@
    "heb_scg",
    "heb_mod"
   ],
-  "greek content words with a Hebrew lexeme in both": 47599,
-  "same lexemes": 33776,
-  "share same": 0.7096,
-  "share with a lexeme in common": 0.7252,
+  "greek content words with a Hebrew lexeme in both": 45661,
+  "same lexemes": 33819,
+  "share same": 0.7407,
+  "share with a lexeme in common": 0.7486,
   "NT verses with a marked stretch in both": 156,
   "in either": 249
  }

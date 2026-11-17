@@ -1,0 +1,49 @@
+{
+ "hebmod_byid.py": [
+  "BCV_COMMONS",
+  "MAKE_TANAKH_PRIVATE"
+ ],
+ "hebmod_parts.py": [
+  "BCV_COMMONS",
+  "MAKE_TANAKH_PRIVATE",
+  "MAKE_TANAKH_WORK",
+  "WORD_PARTS"
+ ],
+ "scg_check.py": [
+  "MAKE_TANAKH_PRIVATE",
+  "MAKE_TANAKH_WORK"
+ ],
+ "scg_review.py": [
+  "MAKE_TANAKH_PRIVATE",
+  "MAKE_TANAKH_WORK",
+  "TYPESAFE_API_KEY"
+ ],
+ "scg_export.py": [
+  "MAKE_TANAKH_PRIVATE",
+  "MAKE_TANAKH_WORK"
+ ],
+ "witness_agree.py": [
+  "MAKE_TANAKH_PRIVATE",
+  "MAKE_TANAKH_WORK"
+ ],
+ "key_bridge.py": [
+  "MAKE_TANAKH_PRIVATE"
+ ],
+ "scg_bridge_probe.py": [
+  "MAKE_TANAKH_PRIVATE",
+  "MAKE_TANAKH_WORK"
+ ],
+ "handover_hebnt.py": [
+  "BCV_COMMONS",
+  "MAKE_TANAKH_PRIVATE",
+  "MAKE_TANAKH_WORK",
+  "TYPESAFE_API_KEY",
+  "WORD_PARTS"
+ ],
+ "hnt_function_sample.py": [
+  "MAKE_TANAKH_WORK"
+ ],
+ "scg-review-design.md": [
+  "private/rules/bridge/scg_check/judgments.tsv"
+ ]
+}

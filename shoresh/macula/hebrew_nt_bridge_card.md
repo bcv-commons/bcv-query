@@ -53,9 +53,11 @@ Greek source to a Hebrew translation, in the Greek of the New Testament itself.
 | Editions | `heb_scg`: Salkinson–Ginsburg (1885/86), pointed. `heb_mod`: Delitzsch, as eBible's "Modern Hebrew Bible" has it, without vowel points |
 | Greek | MACULA Greek, Nestle 1904: 137,779 words, of which @SCG_CONTENT@ nouns, verbs and adjectives |
 
-**This is machine-made and has not been checked by hand.** The links are lexeme-aligner's word alignments; for `heb_scg` they
-were reviewed by a model (Jev, TypeSafe), for `heb_mod` not. The Hebrew lexemes come from a tagger trained on MACULA Hebrew. See
-*Quality* before relying on a single link.
+**This is machine-made and has not been checked by hand.** The links are word alignments by lexeme-aligner's method (its
+statistical chain by word parts, then the Jev model of TypeSafe by verse or clause). The Hebrew lexemes come from a tagger trained
+on MACULA Hebrew. A model's review of every Greek noun, verb and adjective, for both translations, is a dataset of its own:
+[hebrew-nt-review-model](https://huggingface.co/datasets/bcv-commons/hebrew-nt-review-model). See *Quality* before relying on a
+single link.
 
 ## Files
 
@@ -75,7 +77,7 @@ were reviewed by a model (Jev, TypeSafe), for `heb_mod` not. The Hebrew lexemes 
 | `greek_strong` | the Greek lexeme: Strong's number of MACULA Greek (`G3004`) |
 | `tier` | the edition |
 | `count` | Greek words of this lexeme linked to a part of this Hebrew lexeme (links of class `edited-wide` are not counted) |
-| `kept` | of them, links of class `kept`, the safest class. Empty for `heb_mod`, whose links have no classes |
+| `kept` | of them, links of class `kept`, the safest class |
 | `score` | `count` divided by all counted links of the Greek lexeme: how often the translator chose this Hebrew word for it |
 | `quoted` | of `count`, links to a Hebrew word inside a stretch that follows a Tanakh verse (see *Verses that follow the Tanakh*). `count` minus `quoted` is the evidence that does not lean on the Tanakh's own wording |
 
@@ -83,7 +85,7 @@ Rows are sorted by Greek lexeme, then by count. A Greek word rendered by two Heb
 
 | | `heb_scg` | `heb_mod` |
 |---|---|---|
-| Links from | Greek word ids, with classes (`@SCG_FORM@`) | the verse's content words, whole tokens (`@MOD_FORM@`) |
+| Links from | Greek word ids, with classes (`@SCG_FORM@`) | Greek word ids, with classes (`@MOD_FORM@`) |
 | Greek nouns, verbs and adjectives linked to a Hebrew word | @SCG_LINKED@ | @MOD_LINKED@ |
 | of them on a Hebrew lexeme of the Tanakh | @SCG_LEXEME@ | @MOD_LEXEME@ |
 | Pairs (count ≥ 3) | @SCG_PAIRS@ | @MOD_PAIRS@ |
@@ -151,11 +153,28 @@ tagger read wrongly, which is more often the case in `heb_mod`. A quotation that
 
 ## Quality
 
-**The links.** For `heb_scg` they are bcv-commons/alignments-by-id (`@BY_ID@`), whose card gives a hand check per class: `kept` 25 of
-25 right, `inside` 21 of 25, `part` 21 of 25, `edited` 25 of 39, `edited-wide` 17 of 36. For `heb_mod` only the coarser form is
-published (bcv-commons/compact-alignments, `@COMPACT@`): nouns, verbs and adjectives, linked to whole words, no review. What that
-form costs was measured on `heb_scg`, which has both: of @CAL_N@ Greek content words that reach a Hebrew lexeme by both forms,
-@CAL_SAME@ reach the same one.
+**The links.** For `heb_scg` they are bcv-commons/alignments-by-id (`@BY_ID@`), whose card gives a check per class: `kept` 25 of
+25 right, `inside` 21 of 25, `part` 21 of 25, `edited` 25 of 39, `edited-wide` 17 of 36. For `heb_mod` (since v0.2) they are made the
+same way: lexeme-aligner's own alignments-by-id builder, run by make-tanakh-research on 2026-10-31 on its alignment of Delitzsch
+(the statistical chain by word parts, then Jev v4 by clause; USD 5.61) and handed over to bcv-query, its parts mapped onto
+hebrew-nt-analysis v0.2 (141 words split differently; 10 links moved). Function words are linked too. v0.1 had only the coarser
+form (bcv-commons/compact-alignments, `@COMPACT@`: nouns, verbs and adjectives, whole words); on `heb_mod`, of @MODCAL_N@ Greek
+content words that reach a Hebrew lexeme by both forms, @MODCAL_SAME@ reach the same one (on `heb_scg`, @CAL_N@ and @CAL_SAME@).
+
+**Function words** (articles, prepositions, conjunctions, pronouns, particles) were checked blind on 2026-11-17: 40 Greek words per
+class and translation, one per verse, judged by a model (Claude Opus 5.5, not a person) from the two verses without seeing the link,
+then compared with it. Right = the same Hebrew parts; partial = an overlap:
+
+| Class | `heb_scg` right / + partial | `heb_mod` right / + partial |
+|---|---|---|
+| article | 48% / 50% | 40% / 48% |
+| preposition | 60% / 80% | 57% / 88% |
+| conjunction | 62% / 75% | 60% / 82% |
+| pronoun | 78% / 88% | 75% / 85% |
+| particle | 62% / 80% | 57% / 78% |
+
+Most misses are links to the whole Hebrew word or to the next word, and Greek articles left unlinked where the Hebrew has ה. Use
+function-word links with care; the content-word links are the ones the review dataset checks.
 
 **The Hebrew lexemes.** The New Testament has no reference analysis. On Tanakh text the tagger was not trained on, with the same
 lookup of known forms: see the card of hebrew-nt-analysis (pointed text for `heb_scg`, unpointed for `heb_mod`, which is weaker).
@@ -189,7 +208,7 @@ verse co-occurrence with GLAUx):
 |---|---|---|
 | Greek words | MACULA Greek, Nestle 1904 (Clear Bible / Biblica) | CC BY 4.0 |
 | Tanakh lexemes, for the mark | MACULA Hebrew (Clear Bible / Biblica) | CC BY 4.0 |
-| Word links | bcv-commons/alignments-by-id (`@BY_ID@`), bcv-commons/compact-alignments (`@COMPACT@`), by lexeme-aligner | CC0 1.0 |
+| Word links | `heb_scg`: bcv-commons/alignments-by-id (`@BY_ID@`), by lexeme-aligner. `heb_mod`: lexeme-aligner's method and builder, run by make-tanakh-research, handed over to bcv-query. Compared with bcv-commons/compact-alignments (`@COMPACT@`) | CC0 1.0 (the aligner's); this dataset CC BY 4.0 |
 | Hebrew word parts and lexemes | bcv-commons/hebrew-nt-analysis, trained on MACULA Hebrew (Clear Bible / Biblica) | CC BY 4.0 |
 | Hebrew texts | Salkinson–Ginsburg; Delitzsch (eBible "Modern Hebrew Bible"), via bible.helloao.org, by the route bcv-commons/bibles names | public domain |
 | This dataset | bcv-commons | **CC BY 4.0** |
@@ -206,3 +225,9 @@ The files hold no verse text: ids, positions, references, lemmas, lexeme numbers
 
 Issues and requests: [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query/issues). Please name the edition, the verse and
 the word, and what you expected.
+
+## Versions
+
+- v0.1 (2026-11-16): both translations; `heb_mod` from the compact form.
+- v0.2: `heb_mod` by Greek word id, with classes, word parts and function words (handed over by make-tanakh-research);
+  `heb_scg` read from alignments-by-id v1.1 (its files are the same as v1.0's); the function-word check.

@@ -12,7 +12,9 @@ Hebrew word a translator chose for each Greek word. Per edition it joins three p
                  edited, edited-wide) whose hand-checked precision is on that dataset's card. Published for heb_scg.
       `compact`  bcv-commons/compact-alignments: the n-th content word (noun, verb, adjective) of the verse -> whole tokens.
                  Published for both editions. It has no classes, no function words and no word parts.
-    An edition takes `by-id` when it is published for it, else `compact`;
+    An edition takes `by-id` when it is published for it, else `compact`. Delitzsch's by-id links (2026-11-17) are research's
+    run of the aligner's own alignments-by-id builder (chain by parts + Jev v4 by clause, 2026-10-31), handed over to bcv-query
+    (packet 32, remapped to hebrew-nt-analysis v0.2 parts) and given here with --by-id-local heb_mod=DIR;
   - the Hebrew word part with its lexeme: our analysis of the edition (bcv-commons/hebrew-nt-analysis; `macula.clause_tagger export`).
 
 The mark `tanakh` (2026-11-16). The translators knew the Hebrew Bible. Where the NT quotes it they could write the Hebrew verse instead
@@ -360,8 +362,10 @@ def write_links(rows: list[dict], folder: Path) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--editions", default="heb_scg,heb_mod")
-    ap.add_argument("--by-id", default=str(HERE / "data" / "alignments-by-id-v1.0"), help="a download of bcv-commons/alignments-by-id at a tag")
-    ap.add_argument("--by-id-revision", default="v1.0")
+    ap.add_argument("--by-id", default=str(HERE / "data" / "alignments-by-id-v1.1"), help="a download of bcv-commons/alignments-by-id at a tag")
+    ap.add_argument("--by-id-revision", default="v1.1")
+    ap.add_argument("--by-id-local", action="append", default=[], metavar="ED=DIR",
+                    help="an edition's by-id files not in alignments-by-id (heb_mod: the handed-over folder, packet 32 heb_mod/by-id)")
     ap.add_argument("--compact", default="", help="a download of bcv-commons/compact-alignments (default: the one folder data/compact-alignments-*)")
     a = ap.parse_args()
     compact = Path(a.compact) if a.compact else sorted((HERE / "data").glob("compact-alignments-*"))[-1]
@@ -374,6 +378,10 @@ def main() -> None:
                                "greek": "MACULA Greek, Nestle 1904 (macula-spine.db)", "septuagint_tiers": "resources/lxx_bridge_tiers", "tanakh": "MACULA Hebrew (macula-spine.db)"},
                     "quote_rule": {"listed_from_weight": QUOTE_LIST, "marked_from_weight": QUOTE_MARK}, "editions": {}}
     words: dict[str, dict] = {}
+    local = dict(x.split("=", 1) for x in a.by_id_local)
+    if local:
+        report["inputs"]["by_id_local"] = {ed: "research's run of the aligner's alignments-by-id builder, handed over 2026-11-17 (packet 32), "
+                                                "remapped to hebrew-nt-analysis v0.2" for ed in local}
     for ed in a.editions.split(","):
         if not (ANALYSIS / ed / "words.parquet").exists():
             print(f"[hebrew_nt_bridge] {ed}: no analysis export, skipped")
@@ -387,7 +395,7 @@ def main() -> None:
         verses_marked[ed] = {k[:3] for k in marked}
         crows, cstat = build(ed, "compact", links_compact(compact / "h" / "heb" / ed, compact / "_index", gw, gv, hashes, cst), gw, ana, marked)
         cstat.update(cst)
-        by_id = Path(a.by_id) / "n1904" / "h" / "heb" / ed
+        by_id = Path(local[ed]) if ed in local else Path(a.by_id) / "n1904" / "h" / "heb" / ed
         e: dict = {"analysis_model": manifest["model"]}
         if by_id.is_dir():
             if {b: f.stem.split("_")[1] for b, f in book_files(by_id).items()} != hashes:
