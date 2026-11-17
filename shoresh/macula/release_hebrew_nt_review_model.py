@@ -69,7 +69,7 @@ def main() -> None:
     from macula import build_hebrew_nt_bridge as hb
     gloss = {tuple(l.split("\t")[:2]) for l in a.gloss_tier.read_text().splitlines()[1:]}
     other = set()
-    for f in (ROOT / "resources" / "lxx_bridge_tiers" / "macula.tsv", ROOT / "resources" / "lxx_bridge_tiers" / "greek_numbers.tsv", ROOT / "resources" / "lxx_bridge.tsv"):
+    for f in (ROOT / "resources" / "lxx_bridge_tiers" / "macula.tsv", ROOT / "resources" / "lxx_bridge_tiers" / "glaux.tsv", ROOT / "resources" / "lxx_bridge.tsv"):
         other |= {tuple(l.split("\t")[:2]) for l in f.read_text().splitlines()[1:]}
     a.out.mkdir(parents=True, exist_ok=False)
     fields = {"@TAG@": a.tag, "@BUILT@": datetime.date.today().isoformat(), "@COMMIT@": commit}

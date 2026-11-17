@@ -110,3 +110,5 @@ words.
 ## Versions
 
 - v0.1: the review of 2026-10-31 for both translations, and the function-word check of 2026-11-17.
+- v0.1.1: the flag `bridge_pair_from_glosses` checked against the right Septuagint tiers (macula and glaux; v0.1 read another
+  file in place of glaux and flagged 6 + 12 records too many).
