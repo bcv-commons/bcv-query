@@ -277,3 +277,5 @@ shoresh/macula/data/bridge-corpus/
 # research handover packets copied in for intake (data published from here; the packets live in make-tanakh-research)
 shoresh/macula/data/handover/
 shoresh/macula/data/bridge-candidates/
+shoresh/macula/data/vector-store/
+shoresh/macula/data/vector-store-build.log
