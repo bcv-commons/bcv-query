@@ -32,7 +32,7 @@ that introduces each speech, the narrator's voice, the force of each clause, son
 | Review | @REVIEW_ROWS@ reviewed changes, each with its reason (`review.tsv`) |
 | Speakers named in Hebrew | @NAMED@ of the quotations, from the text itself |
 | Characters | @CHARACTERS@ people and groups (`speaker_id`) over @WITH_ID@ quotations; @CHAR_NAMED@ of them with a proper name (`speaker_name`, on @NAME_QUOTES@ quotations); @GROUPS@ groups where several speak, on @GROUP_QUOTES@ quotations (@WITH_MEMBERS@ with `speaker_members`) |
-| Changes | v0.15: `speaker_id` agrees with the quotation's own inquit (review rows where the speaker data put a line in the wrong mouth, or the inquit named the wrong person); where several speak, a group id and its members (`speaker_members`). v0.14: who the speaker is across quotations, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text, רָחָב for the woman of Josh 2); `speaker` unchanged. v0.13: a quotation with no inquit of its own takes its speaker's Hebrew name from another quotation of the same speaker (`speaker_basis`); `alt_eng` keeps the English label only where no Hebrew name is found. v0.12: speakers and frames named in Hebrew from the text (`speaker`, `speaker_ref`, `frame`); `alt_speaker` and `speaker_hebrew` gone |
+| Changes | v0.16: `alt_eng` (the speaker data's English label, kept where no Hebrew name is found) is dropped: the dataset carries no English; such a quotation has an empty `speaker` and its `speaker_id`. Nothing else changed. v0.15: `speaker_id` agrees with the quotation's own inquit (review rows where the speaker data put a line in the wrong mouth, or the inquit named the wrong person); where several speak, a group id and its members (`speaker_members`). v0.14: who the speaker is across quotations, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text, רָחָב for the woman of Josh 2); `speaker` unchanged. v0.13: a quotation with no inquit of its own takes its speaker's Hebrew name from another quotation of the same speaker (`speaker_basis`); `alt_eng` keeps the English label only where no Hebrew name is found. v0.12: speakers and frames named in Hebrew from the text (`speaker`, `speaker_ref`, `frame`); `alt_speaker` and `speaker_hebrew` gone |
 | Licence | CC BY 4.0 |
 
 ## Files
@@ -56,7 +56,6 @@ that introduces each speech, the narrator's voice, the force of each clause, son
 | `speaker` | who speaks, named from the Hebrew text: the subject of the verb that introduces the quotation, as MACULA lemmas (יהוה, מֹשֶׁה, דָּוִד, מֶלֶךְ, אִשָּׁה), with the nouns of its construct chain (מַלְאָךְ יהוה, בֵּן יִשְׂרָאֵל, מֶלֶךְ אַשּׁוּר); for "the word of X" or "the oracle of X" (וַיְהִי דְבַר־יְהוָה … לֵאמֹר, נְאֻם יְהוָה) X; several subjects separated by commas. Where the quotation's own inquit names no one, the speaker's usual Hebrew name from another quotation (see `speaker_basis`); else empty |
 | `speaker_ref` | the word keys of the words that name the speaker (in another quotation where `speaker_basis` says so) |
 | `speaker_basis` | where `speaker` comes from: `inquit` (the quotation's own inquit), `review` (a review row), `same speaker in book` / `same speaker in Bible` (another quotation of the same speaker, see below); empty where there is no name |
-| `alt_eng` | the speaker data's English label, only where `speaker` is empty and the label names someone (@ALT_ENG@ quotations: "shepherds at well", "watchman", "daughter of Zion"), so that no name the earlier releases gave is lost; empty everywhere else |
 | `speaker_id` | who the speaker is across quotations: a stable id (`c0124`) for one person or group, the same in every quotation they speak and in later releases. Before v0.12 the label did this (one person, one label across a story); `speaker` names each quotation by its own inquit, so one person can be אִישׁ in one and עֶבֶד in the next, and one word stands for many people. A person with a proper name has one id across the Bible, one without (an unnamed servant, "the people") one per book. Empty for a speaker the speaker data names no one by ("he", "they", the one addressed, an untitled psalm) |
 | `speaker_name` | that person's proper name as the text gives it (MACULA lemma; God's name for God): רָחָב, אַבְרָהָם, יהוה; empty for a person the text gives no name (Abraham's servant in Gen 24) |
 | `speaker_name_ref` | the word key of a word that gives that name: the quotation's own inquit where it does, else the nearest quotation's that does (in the same book first), else the word a hand table gives (Josh 2:1, וּשְׁמָהּ רָחָב) |
@@ -140,7 +139,7 @@ the user.
    name is the speaker's usual one in the book (most of that speaker's named quotations there, at least two), else in the whole Bible;
    it must be a proper name or God's name (not מֶלֶךְ, אִישׁ, עַם), God's name only for a divine speaker, and a name that is this
    speaker's rather than mostly another's ("false prophets" are not named יִרְמְיָהוּ). "Psalmist" (any untitled psalm) is never
-   carried over. What is still unnamed keeps the label in `alt_eng`.
+   carried over. What is still unnamed has an empty `speaker`; `speaker_id` still tells who speaks.
 9. **Characters** (`speaker_id`, `speaker_name`): one id for each of the speaker data's characters (Clear's and Glyssen's labels,
    which already tell people apart: Pharaoh (1st) and (2nd), the two Lamechs), kept in a table in the repository so that ids do not
    change between releases (the labels in it are English, so the table is not part of this release). Two labels of one person
@@ -242,7 +241,7 @@ prophet's own questions).
   several people; a wrong label on a quotation without such an inquit can still put a line in the wrong mouth, and one person
   under two labels the build does not know as one has two ids;
 - @UNNAMED@ quotations have no Hebrew name: no inquit before them (most of them in poetry and the prophets), or a subject that is a
-  pronoun or only in the verb; @ALT_ENG@ of them keep the English label in `alt_eng`.
+  pronoun or only in the verb.
 
 ## Sources and licence
 

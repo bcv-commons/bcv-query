@@ -19,6 +19,8 @@ One row per constituent: the words of a layout clause grouped under their neares
   prep, prep_lemma     the constituent's first preposition word and its lemma ('' when none)
   prep_ln              Greek: the Louw-Nida subdomain of that preposition's sense in this verse (UBS Greek dictionary, CC BY-SA 4.0)
   prep_lxx             Hebrew: the Septuagint's form MACULA Hebrew aligns to the preposition (its `greek` column), for a later rule
+  prep_lxx_lemma       Hebrew (S4, from v0.3): that Septuagint word's GLAUx lemma when it is a preposition the Greek NT uses (the same values
+                       as Greek `prep_lemma`, so the two sides compare); '' when the aligned word is no preposition (an article, καί ...)
   role                 actor | undergoer | A2 (core, from the frame and voice) or, for a Greek preposition phrase, the role its
                        Louw-Nida subdomain names: agent, instrument, source_event, responsibility, viewpoint, content, guarantor,
                        opposition, beneficiary, reason_participant, experiencer (LN 90), source, goal, path (LN 84), location (LN 83),
@@ -62,7 +64,7 @@ LOWFAT = HERE / "lowfat-hbo.db"
 ROLES = ("s", "o", "o2", "io", "p", "adv", "pp")
 NOMINAL = {"noun", "pron", "adj", "num"}
 COLS = ["corpus", "clause_key", "words", "head", "relation", "verb", "voice", "macrorole", "case", "prep", "prep_lemma", "prep_ln",
-        "prep_lxx", "lxx_case", "role", "role_basis"]
+        "prep_lxx", "prep_lxx_lemma", "lxx_case", "role", "role_basis"]
 LXX = HERE.parent / "lxx" / "data" / "lxx-glaux.db"
 SPEAK_HBO = {"0559", "1696", "7121", "6680", "6030", "7592", "5046", "2199", "6817", "6419", "0560", "4449"}
 CASE = {"N": "nominative", "G": "genitive", "D": "dative", "A": "accusative", "V": "vocative"}
@@ -152,6 +154,7 @@ def main() -> int:
         b, c, v = hpos[k]
         pl = plain(g.split()[-1])
         return next((lxx_verse[hk + (pl,)] for hk in hebrew_keys(b, c, v) if hk + (pl,) in lxx_verse), None) or lxx_glob.get(pl, ("", ""))
+    greek_preps = None                                        # Greek NT preposition lemmas (S4: prep_lxx_lemma)
     nt_table = collections.defaultdict(collections.Counter)    # (Greek preposition lemma, case[, noun's LN domain]) -> roles, NT
     frame_lab = collections.defaultdict(dict)                 # verb -> word -> label
     for v, lab, a in m.execute("select verb_key, role, arg_key from frames"):
@@ -205,6 +208,12 @@ def main() -> int:
                         nt_table[(lemma_of.get(prep, ""), case.get(head, ""))][role] += 1
                         nt_table[(lemma_of.get(prep, ""), case.get(head, ""), dom.get(head, "")[:3])][role] += 1
                 lxx_case = ""
+                plx = ""
+                if corpus == "hbo" and prep:
+                    if greek_preps is None:
+                        greek_preps = {lemma_of[w] for w in lemma_of if len(w) == 11 and cls_of.get(w) == "prep" and lemma_of[w]}
+                    pl_ = lxx_word(prep)[0]
+                    plx = pl_ if pl_ in greek_preps else ""
                 if corpus == "hbo" and prep and not mr:
                     # the Septuagint's preposition for this one and the case of the word it gives for the head noun, read
                     # through the NT: the role Greek preposition + case most often has there (at least 20 phrases, 60%)
@@ -223,7 +232,7 @@ def main() -> int:
                                 break
                 rows.append([corpus, ck, " ".join(gw), head, rel, verb, voice, mr, case.get(head, "") if corpus == "grc" else "",
                              prep, lemma_of.get(prep, "") if prep else "", ln, lxx.get(prep, "") if corpus == "hbo" and prep else "",
-                             lxx_case, role, basis])
+                             plx, lxx_case, role, basis])
                 st[(corpus, "rows")] += 1
                 st[(corpus, "role:" + (role or "-"))] += 1
                 if prep:

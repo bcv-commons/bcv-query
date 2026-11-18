@@ -278,4 +278,6 @@ shoresh/macula/data/bridge-corpus/
 shoresh/macula/data/handover/
 shoresh/macula/data/bridge-candidates/
 shoresh/macula/data/vector-store/
+shoresh/macula/data/source-ontology/
+shoresh/macula/data/clauses-similar/
 shoresh/macula/data/vector-store-build.log

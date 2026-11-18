@@ -55,6 +55,24 @@ def _archive(out: Path, tag: str, files: list[Path]) -> Path:
     return path
 
 
+def _drop_english(path: Path) -> None:
+    """From v0.16 the release carries no English: the build's `alt_eng` column (the speaker data's English label where no Hebrew
+    name is found; the user, 2026-11-17) is left out of quotations.tsv, and its note in the header."""
+    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    out, col = [], None
+    for line in lines:
+        if line.startswith("#"):
+            out.append(line.replace("alt_eng: the speaker data's English label, only where no Hebrew name is found; ", ""))
+            continue
+        cells = line.rstrip("\n").split("\t")
+        if col is None:
+            col = cells.index("alt_eng") if "alt_eng" in cells else -1
+        if col >= 0:
+            del cells[col]
+        out.append("\t".join(cells) + "\n")
+    path.write_text("".join(out), encoding="utf-8")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--tag", required=True)
@@ -78,6 +96,7 @@ def main() -> None:
     for name in ("quotations.tsv", "report.md"):
         shutil.copy(src / name, out / name)
         files.append(out / name)
+    _drop_english(out / "quotations.tsv")
     for f in (CORRECTIONS, REVIEW, PROPHETS):
         shutil.copy(f, out / f.name)
         files.append(out / f.name)
@@ -96,7 +115,6 @@ def main() -> None:
               "@REVIEW_ROWS@": f'{len(_rows(out / "review.tsv")):,}',
               "@NAMED@": f'{sum(bool(q["speaker"]) for q in quotes):,} of {len(quotes):,}',
               "@UNNAMED@": f'{sum(not q["speaker"] for q in quotes):,}',
-              "@ALT_ENG@": f'{sum(bool(q["alt_eng"]) for q in quotes):,}',
               "@CHARACTERS@": f'{len({q["speaker_id"] for q in quotes if q["speaker_id"]}):,}',
               "@WITH_ID@": f'{sum(bool(q["speaker_id"]) for q in quotes):,}',
               "@CHAR_NAMED@": f'{len({q["speaker_id"] for q in quotes if q["speaker_name"]}):,}',

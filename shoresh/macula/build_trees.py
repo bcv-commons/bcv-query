@@ -194,12 +194,25 @@ def finish(con: sqlite3.Connection, spine: Path | None = None) -> None:
 
 
 def _git_commit(d: Path) -> str | None:
-    """The commit of the git checkout that holds `d` (the MACULA Hebrew clone), recorded in meta and pinned by the clause layout."""
+    """The commit of the git checkout that holds `d` (the MACULA Hebrew or Greek clone), recorded in meta and pinned by the layouts."""
     import subprocess
     try:
+        top = subprocess.run(["git", "-C", str(d), "rev-parse", "--show-toplevel"], capture_output=True, text=True,
+                             check=True).stdout.strip()
+        if Path(top).resolve() == HERE.parents[1].resolve():   # inside bcv-query itself (a git-ignored download): not MACULA's commit
+            return None
         return subprocess.run(["git", "-C", str(d), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip() or None
     except (OSError, subprocess.CalledProcessError):
         return None
+
+
+def _files_hash(files) -> str:
+    """SHA-256 over the sorted input files' names and contents: pins the Greek lowfat even where it is not a git checkout (S4)."""
+    import hashlib
+    h = hashlib.sha256()
+    for f in sorted(Path(x) for x in files):
+        h.update(f.name.encode() + b"\0" + f.read_bytes())
+    return h.hexdigest()
 
 
 def main() -> int:
@@ -234,6 +247,8 @@ def main() -> int:
         ("built", time.strftime("%Y-%m-%d")), ("source_hbo", "Clear-Bible/macula-hebrew WLC/lowfat (CC BY 4.0)"),
         *([("source_hbo_commit", hbo_commit)] if (hbo_commit := _git_commit(a.hbo)) else []),
         ("source_grc", "Clear-Bible/macula-greek Nestle1904/lowfat (CC BY 4.0)"),
+        *([("source_grc_commit", grc_commit)] if (grc_commit := _git_commit(a.grc)) else []),
+        ("source_grc_files_sha256", _files_hash(grc_files(a.grc)) if a.only != "hbo" else ""),
         ("note", "structural attributes only; MACULA's inline UBS fields and translations are not read (senses come from UBS's open release)")])
     con.commit()
     for t in ("nodes", "words"):

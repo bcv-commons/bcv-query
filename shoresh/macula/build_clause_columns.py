@@ -45,7 +45,9 @@ Columns (research's names and value names; the definition is research's unless "
                  with no frame A1 and no et: complements, indefinite objects, and objects the tentative Hebrew frames miss
   args           the frame's argument labels in order (A0+A1+...); Greek too (ours: research has Hebrew only)
   subj           the subject's referent word id(s): MACULA subjref of the verb, else the A0's participantref (Greek: referent), else the
-                 A0 word; Greek too (ours)
+                 A0 word (Greek's null argument id 00000000000 is not a word and is skipped: from v1.2; v1.0-v1.1 carry it in 1,223 clauses);
+                 Greek too (ours), and from v1.2 Greek last falls back to the clause's own word with the subject role (S2 audit: 27 of 100
+                 sampled Greek clauses had an empty subj where the judge found one)
   subj_switch    same | switch | first | none, by referent word against the previous clause with a subject in the chapter
   lxx_form, lxx_tense, lxx_mood   (Hebrew) the Septuagint form MACULA gives for the verb and its tense and mood. Ours: the parse of that
                  very form in the same GLAUx verse when it is there (lxx_basis "verse"), else research's rule, the commonest GLAUx parse of
@@ -78,6 +80,8 @@ import unicodedata
 from pathlib import Path
 
 from macula.lxx_verses import greek_keys, hebrew_keys  # noqa: E402
+
+GREEK_NULL = "00000000000"                                # MACULA Greek frames: an unexpressed (null) argument
 HERE = Path(__file__).resolve().parent
 HEB_LAYOUT = HERE / "data" / "clause-layout" / "clauses"
 GRC_LAYOUT = HERE / "data" / "nt-clause-layout" / "clauses"
@@ -564,7 +568,9 @@ def greek(S: Stores) -> list[dict]:
             else:
                 ubasis = "role_o_without_a1"
                 undergoer = "complement"                         # an object-role word the frame does not list as A1 (packet 25 s.5)
-            subj = sref or (" ".join(S.refs.get(a0[0], {}).get("referent", [])) if a0 else "") or (a0[0] if a0 else "")
+            a0 = [w for w in a0 if w != GREEK_NULL]             # MACULA Greek's null argument id is no word (S2 audit, 2026-11-17)
+            own_s = next((w for w in ws if info(w)[3] == "s" and info(w)[0] in ("noun", "pron", "adj", "num")), "")
+            subj = sref or (" ".join(S.refs.get(a0[0], {}).get("referent", [])) if a0 else "") or (a0[0] if a0 else "") or own_s
             ch = r["chapter"] if "chapter" in r else int(k[2:5])
             sw = _switch(last_subj.get(ch), subj)
             if subj:

@@ -64,11 +64,19 @@ def main() -> int:
         keys = {r["clause_key"] for r in sel}
         extra = keys - layout_keys(LAYOUTS[name])
         assert not extra, f"{name}: {len(extra)} clause keys not in {LAYOUTS[name]['version']}"
-        drop = {"case", "prep_ln"} if corpus == "hbo" else {"prep_lxx", "lxx_case"}
+        drop = {"case", "prep_ln"} if corpus == "hbo" else {"prep_lxx", "prep_lxx_lemma", "lxx_case"}
         c_ = [c for c in cols if c not in drop]
         pq.write_table(pa.table({c: pa.array([r[c] for r in sel], type=pa.string()) for c in c_}), a.out / "data" / f"{name}.parquet")
         counts[name] = {"rows": len(sel), "clauses": len(keys), "with_role": sum(1 for r in sel if r["role"]),
                         "prep": sum(1 for r in sel if r["prep"]), "prep_with_role": sum(1 for r in sel if r["prep"] and r["role"])}
+    # S4: the per-word context compares across the two sides. Every Hebrew prep_lxx_lemma must be a Greek prep_lemma, and most
+    # aligned Septuagint prepositions must get one.
+    greek = {r["prep_lemma"] for r in rows if r["corpus"] == "grc" and r["prep_lemma"]}
+    heb = [r for r in rows if r["corpus"] == "hbo" and r["prep_lxx"]]
+    bad = {r["prep_lxx_lemma"] for r in heb if r["prep_lxx_lemma"] and r["prep_lxx_lemma"] not in greek}
+    assert not bad, f"prep_lxx_lemma values that are no Greek prep_lemma: {sorted(bad)[:10]}"
+    consistency = {"hebrew prep_lxx": len(heb), "with prep_lxx_lemma": sum(1 for r in heb if r["prep_lxx_lemma"])}
+    print("S4 consistency:", consistency)
     shutil.copyfile(B.OUT / "checks.md", a.out / "checks.md")
     (a.out / "README.md").write_text(card(counts), encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file())
