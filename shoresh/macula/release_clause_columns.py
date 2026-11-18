@@ -25,7 +25,7 @@ from macula import release_guard  # refuses TBTA and private inputs
 ROOT = Path(__file__).resolve().parents[2]
 SRC = Path(__file__).resolve().parent / "data" / "clause-columns"
 SCHEMA = 1
-VERSION = "v1.1"
+VERSION = "v1.2"
 REPO = "bcv-commons/clause-columns"
 RESEARCH_REV = "8a132e44224c83cdaa92fadd93cf440c58552354"
 LAYOUTS = {
@@ -178,6 +178,14 @@ Join a row to its layout by `clause_key` (Hebrew `clause_key`; Greek `first`). E
 layouts' own columns (rule, relation, parent, depth and so on) are not copied here: read them from the layout.
 
 ## What changed from the previous version
+
+**v1.2:** two Greek `subj` defects, found by a blind audit of 100 clauses per language (2026-11-17), are fixed; nothing else
+changes and Hebrew is identical. (1) MACULA Greek marks an unexpressed argument with the id `00000000000`; where a verb has no
+subject reference, `subj` took it from the frame's A0 as if it were a word (1,223 clauses in v1.0-v1.1). It is skipped now. (2) A
+clause's own subject word (tree role `s`: noun, pronoun, adjective, numeral) is the last fallback when MACULA gives no subject
+reference or A0; Greek clauses with no subject go from 6,791 to 3,673. Greek `subj` changes on 5,522 clauses and `subj_switch`
+on 6,659. On the audit sample, Greek `subj` agreement where the judge could decide went from 0.44 to 0.62 (shaped on that
+sample, so optimistic); Hebrew 0.75. Main verb 0.97 / 1.00, negator 1.00, negation scope 0.98, subject switch 0.93.
 
 **v1.1:** the Septuagint word is now looked up in its own verse through the verse map (`macula/lxx_verses.py`). GLAUx numbers the
 Septuagint's way (Psalms one off, Jeremiah 25-51 reordered, Daniel 3-4 with the Greek additions), so the lookup found its verse
