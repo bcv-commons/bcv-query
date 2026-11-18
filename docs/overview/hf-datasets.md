@@ -20,11 +20,11 @@ Conventions across the set:
 |---|---|---|---|
 | [hebrew-clause-layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout) | v0.37.2 | CC BY-SA 4.0 | The Hebrew Bible (with its Aramaic) one clause segment per line, with indentation, clause dependency across verses, quotations and speakers, and MACULA clause columns |
 | [greek-nt-clause-layout](https://huggingface.co/datasets/bcv-commons/greek-nt-clause-layout) | v0.7.1 | CC BY 4.0 | The same for the Greek New Testament (Nestle 1904) |
-| [hebrew-clause-lines](https://huggingface.co/datasets/bcv-commons/hebrew-clause-lines) | v0.1 | CC BY-SA 4.0 | The Hebrew layout cut at poetic lines (Miqra according to the Masorah, else the ULT's lines), with share-alike facts per line |
-| [greek-nt-clause-lines](https://huggingface.co/datasets/bcv-commons/greek-nt-clause-lines) | v0.1 | CC BY-SA 4.0 | The same for the Greek New Testament |
+| [hebrew-clause-lines](https://huggingface.co/datasets/bcv-commons/hebrew-clause-lines) | v0.2 | CC BY-SA 4.0 | The Hebrew layout cut at poetic lines (Miqra according to the Masorah, else the ULT's lines), with share-alike facts per line |
+| [greek-nt-clause-lines](https://huggingface.co/datasets/bcv-commons/greek-nt-clause-lines) | v0.2 | CC BY-SA 4.0 | The same for the Greek New Testament |
 | [tanakh-hebrew-clauses](https://huggingface.co/datasets/bcv-commons/tanakh-hebrew-clauses) | untagged | CC BY 4.0 | The Hebrew words of every clause segment, one JSON file per chapter, for showing Hebrew beside each clause |
 | [hebrew-speaker-layer](https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer) | v0.16 | CC BY 4.0 | Every quotation of the Hebrew Bible: its speaker (named in Hebrew, with a person id), its edges on the words, nested quotations |
-| [passage-facts](https://huggingface.co/datasets/bcv-commons/passage-facts) | v0.1 | CC BY-SA 4.0 (CC BY subset included) | Who is heard, what kind of speech, how the text is set (song, poetic lines, prose), each fact on exact words with its source |
+| [passage-facts](https://huggingface.co/datasets/bcv-commons/passage-facts) | v0.2 | CC BY-SA 4.0 (CC BY subset included) | Who is heard, what kind of speech, how the text is set (song, poetic lines and verse halves, prose, acrostics, refrains, psalm headings and selah), each fact on exact words with its source |
 | [word-parts](https://huggingface.co/datasets/bcv-commons/word-parts) / [word-parts-sa](https://huggingface.co/datasets/bcv-commons/word-parts-sa) | v0.1 | CC BY 4.0 / CC BY-SA 4.0 | Every Greek word cut into preverb, augment, reduplication, stem, ending; every Hebrew word into MACULA's morphemes |
 | [hebrew-greek-cf](https://huggingface.co/datasets/bcv-commons/hebrew-greek-cf) | v0.2 | CC BY-SA 4.0 | One searchable Context Fabric corpus: Tanakh, Greek NT, Septuagint and two Hebrew NTs on shared keys, linked both ways, with the layers below as features |
 
