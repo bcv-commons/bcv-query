@@ -246,4 +246,4 @@ def sections(book: str, verse_words: dict) -> list[tuple[str, int]]:
                         out.append((k, prev[-1][0]))
                 elif at[w - 1] is not None:
                     out.append((k, at[w - 1][1]))
-    return sorted(set(out), key=lambda x: x[1])
+    return sorted(set(out), key=lambda x: (x[1], x[0]))      # one word with both marks (Num 10:36): a fixed order

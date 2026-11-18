@@ -258,7 +258,7 @@ def heading(bk) -> list[tuple[str, int, int]]:
             out += _match(_heading_part(bk, ws), HEADING)
         if bk.book == "PSA" or c == 3:
             out += _match(ws, ANYWHERE)
-    return sorted(set(out), key=lambda x: x[1])
+    return sorted(set(out), key=lambda x: (x[1], x[2], x[0]))   # fixed order where two terms start on one word
 
 
 ATNACH, OLEH, MERKHA = "\u0591", "\u05ab", "\u05a5"
