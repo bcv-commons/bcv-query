@@ -668,6 +668,17 @@ class Builder:
             self.add("form", "fm.tx.acrostic", units[0][0], units[-1][1], "b.text",
                      ["macula", "mam"] if r["unit"] == "line" else ["macula"], unit=r["unit"],
                      letters=[[a, b, ch] for a, b, ch in units], missing=r["missing"], pe_before_ayin=r["swapped"] or None)
+        for code, i, j in text_forms.heading(bk):
+            self.add("form", f"fm.ps.{code}", bk.keys[i], bk.keys[bk.wend.get(j, j)], "b.text", ["macula"])
+        if bk.hebrew and enabled("mam") and enabled("bdb"):
+            words = {k: (c, text_forms._h(s)) for k, c, s in sqlite3.connect(SPINE).execute(
+                "SELECT key, class, strong FROM macula_words WHERE book=?", (bk.book,))}
+            for h in text_forms.halves(bk, mam.poem_lines(bk.book, bk.verse_words), mam.verses(bk.book), mam._align, words):
+                (a1, b1), (a2, b2) = h["halves"]
+                e = lambda i: bk.keys[bk.wend.get(i, i)]
+                self.add("form", "fm.tx.halves", bk.keys[a1], e(b2), "b.text", ["macula", "mam", "bdb"] if h["echoes"] else ["macula", "mam"],
+                         accent=h["accent"], halves=[[bk.keys[a1], e(b1)], [bk.keys[a2], e(b2)]], lines=h["lines"],
+                         echoes=[[bk.keys[i], bk.keys[j], kind] for i, j, kind in h["echoes"]])
         for r in text_forms.refrains(bk, self.segs):
             occ = [(bk.keys[a], bk.keys[bk.wend[b]]) for a, b in r["occurrences"]]
             self.add("form", "fm.tx.refrain", occ[0][0], occ[-1][1], "b.text", ["macula", "layout"], occurrences=occ,

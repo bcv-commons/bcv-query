@@ -87,8 +87,11 @@ specification later; that would be a schema change, listed here.
 
 - v0.2: two new `form` codes read from the letters by rule: `fm.tx.acrostic` (13 acrostics: Ps 9, 25, 34, 37, 111, 112, 119, 145,
   Prov 31, Lam 1-4, each letter on its verse or poetic line; the broken acrostics of Ps 10 and Nah 1 are not found) and
-  `fm.tx.refrain` (449 lines that come back in their chapter). Built on the speaker layer v0.16 and the clause layouts v0.37.2 /
-  v0.7.1; every other fact is the same as in v0.1 (62,663 facts; 63,125 with the new ones). Schema unchanged (new codes only).
+  `fm.tx.refrain` (449 lines that come back in their chapter); `fm.tx.halves` (every poetic verse of Psalms, Proverbs and Job split
+  at its main accent into half A and half B, the couplet, with the lines in each and the words that echo across them by lexeme or
+  BDB root); `fm.ps.*` (the psalm headings' terms and סלה, הגיון, הללו יה on their words: 55 for the leader, 57 mizmor, 71 selah, 73
+  ascribed to David). Built on the speaker layer v0.16 and the clause layouts v0.37.2 /
+  v0.7.1; every other fact is the same as in v0.1 (62,663 facts; 67,718 with the new ones). Schema unchanged (new codes only).
 - v0.1: first release.
 
 ## Feedback

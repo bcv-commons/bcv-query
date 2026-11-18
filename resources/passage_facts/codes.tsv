@@ -505,3 +505,41 @@ ln.087	louw_nida	Sit	ubs	Louw-Nida subdomain 017002
 ln.088	louw_nida	Fly	ubs	Louw-Nida subdomain 015033
 fm.tx.acrostic	form	the first letters of these verses or poetic lines follow the alphabet (an acrostic): read from the Hebrew letters by rule	macula	`unit` verse or line (MAM's poetic lines); `letters` each unit with its letter (empty for a unit between two letters); `missing` letters the run passes over; `pe_before_ayin` where פ stands before ע (Lam 2-4)
 fm.tx.refrain	form	these words come back as a whole line, at least three times in the chapter (twice when six words or longer): read from the text by rule	macula	`occurrences` each time it comes back; `words` its length; speech formulas (opening with a verb of saying) are left out; refrains with varied wording are not yet found
+fm.ps.lamnatseach	form	heading: for the leader (למנצח): a term of the text itself, read by rule	macula	the director of the temple music
+fm.ps.mizmor	form	heading: a psalm, a song with accompaniment (מזמור): a term of the text itself, read by rule	macula	
+fm.ps.shir	form	heading: a song (שיר): a term of the text itself, read by rule	macula	
+fm.ps.maalot	form	heading: a song of ascents (שיר המעלות): a term of the text itself, read by rule	macula	Ps 120-134
+fm.ps.maskil	form	heading: a maskil (משכיל): a term of the text itself, read by rule	macula	meaning debated
+fm.ps.miktam	form	heading: a miktam (מכתם): a term of the text itself, read by rule	macula	meaning debated
+fm.ps.tefillah	form	heading: a prayer (תפלה): a term of the text itself, read by rule	macula	
+fm.ps.tehillah	form	heading: a song of praise (תהלה): a term of the text itself, read by rule	macula	
+fm.ps.shiggayon	form	heading: a shiggayon (שגיון, על שגינות): a term of the text itself, read by rule	macula	Ps 7, Hab 3; meaning debated
+fm.ps.neginot	form	heading: with stringed instruments (בנגינות): a term of the text itself, read by rule	macula	
+fm.ps.nechilot	form	heading: for the flutes (אל הנחילות): a term of the text itself, read by rule	macula	
+fm.ps.sheminit	form	heading: on the sheminit, the eighth (על השמינית): a term of the text itself, read by rule	macula	an instrument or a register
+fm.ps.gittit	form	heading: on the gittit (על הגתית): a term of the text itself, read by rule	macula	an instrument or a tune
+fm.ps.alamot	form	heading: on alamot (על עלמות): a term of the text itself, read by rule	macula	a register or a tune
+fm.ps.shoshannim	form	heading: to the tune of the lilies (על שושנים, שושן עדות): a term of the text itself, read by rule	macula	a tune name
+fm.ps.ayelet	form	heading: to the tune of the doe of the dawn (על אילת השחר): a term of the text itself, read by rule	macula	a tune name
+fm.ps.yonat	form	heading: to the tune of the dove (על יונת אלם רחקים): a term of the text itself, read by rule	macula	a tune name
+fm.ps.al_tashchet	form	heading: to the tune of do not destroy (אל תשחת): a term of the text itself, read by rule	macula	a tune name
+fm.ps.machalat	form	heading: on machalat (על מחלת): a term of the text itself, read by rule	macula	a tune or an instrument
+fm.ps.mut_labben	form	heading: to the tune of the death of the son (על מות לבן): a term of the text itself, read by rule	macula	a tune name
+fm.ps.lehazkir	form	heading: to bring to remembrance (להזכיר): a term of the text itself, read by rule	macula	an occasion
+fm.ps.letodah	form	heading: for the thank offering (לתודה): a term of the text itself, read by rule	macula	an occasion
+fm.ps.lelamed	form	heading: to teach (ללמד): a term of the text itself, read by rule	macula	an occasion
+fm.ps.shabbat	form	heading: for the sabbath day (ליום השבת): a term of the text itself, read by rule	macula	an occasion
+fm.ps.yedidot	form	heading: a song of love (שיר ידידת): a term of the text itself, read by rule	macula	
+fm.ps.chanukkat	form	heading: at the dedication of the house (חנכת הבית): a term of the text itself, read by rule	macula	an occasion
+fm.ps.david	form	heading: ascribed to David (לדוד): a term of the text itself, read by rule	macula	
+fm.ps.asaph	form	heading: ascribed to Asaph (לאסף): a term of the text itself, read by rule	macula	
+fm.ps.korah	form	heading: ascribed to the sons of Korah (לבני קרח): a term of the text itself, read by rule	macula	
+fm.ps.solomon	form	heading: ascribed to Solomon (לשלמה): a term of the text itself, read by rule	macula	
+fm.ps.moses	form	heading: ascribed to Moses (למשה): a term of the text itself, read by rule	macula	
+fm.ps.heman	form	heading: ascribed to Heman (להימן): a term of the text itself, read by rule	macula	
+fm.ps.ethan	form	heading: ascribed to Ethan (לאיתן): a term of the text itself, read by rule	macula	
+fm.ps.jeduthun	form	heading: Jeduthun (ידותון): a term of the text itself, read by rule	macula	a temple musician
+fm.ps.selah	form	mark: selah (סלה): a term of the text itself, read by rule	macula	a musical or liturgical mark; Psalms 71 times, Habakkuk 3
+fm.ps.higgayon	form	mark: higgayon before selah (הגיון סלה): a term of the text itself, read by rule	macula	Ps 9:17
+fm.ps.halleluyah	form	mark: praise the LORD (הללו יה): a term of the text itself, read by rule	macula	a call to praise, at a psalm's start or end
+fm.tx.halves	form	this poetic verse divides at its main accent into half A and half B (a couplet; a half may hold two lines)	macula	`accent` oleh_weyored or atnach; `halves` the two spans; `lines` MAM lines in each half; `echoes` [word A, word B, lexeme|root]: the same lexeme or BDB root in both halves (sources mam, bdb). Psalms, Proverbs and Job

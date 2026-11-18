@@ -15,11 +15,24 @@ refrains(bk, segs)     Hebrew and Greek. A whole line that comes back: a word se
                        or longer): Gen 1 "evening and morning", Ps 136, Ps 42's refrain, Amos 4. A sequence that opens with a verb of
                        saying (אמר, דבר; λέγω, λαλέω) is a speech formula and is left out. The longest sequence is kept; one with half
                        or more of its occurrences inside a longer kept one is dropped (shifted copies, Num 7).
+heading(bk)            Hebrew, Psalms and Habakkuk 3. The psalm headings' own terms, each on its words (`fm.ps.*`): the kind of song
+                       (מזמור, שיר, משכיל, מכתם, תפלה, תהלה, שגיון), for the leader (למנצח), the instruments and tunes
+                       (בנגינות, אל הנחילות, על השמינית, על הגתית, על שושנים ...), the occasion (להזכיר, לתודה, ליום השבת) and
+                       the name it is ascribed to (לדוד, לאסף, לבני קרח ...); read in a psalm's first verse up to its first finite or
+                       imperative verb (Hab 3:1, 3:19). And
+                       anywhere in those books: סלה, הגיון before סלה, and הללו יה.
+halves(bk, poems)      Hebrew, Psalms, Proverbs and Job. Each verse of MAM's poetic lines splits at its main divider accent into
+                       half A and half B: oleh-weyored where the verse has it, else atnach (the poetic accents of these three books).
+                       In 4,252 of 4,303 verses checked the divider ends a MAM line, so a half is whole lines. With each split:
+                       the lines in each half and the echoes: a content word of half B with the same lexeme or the same BDB root
+                       as one of half A.
 """
 from __future__ import annotations
 
 import collections
+import re
 import unicodedata
+from pathlib import Path
 
 ALEF_BET = "אבגדהוזחטיכלמנסעפצקרשת"
 FINAL = str.maketrans("ךםןףץ", "כמנפצ")
@@ -186,6 +199,128 @@ def refrains(bk, segs: list[dict]) -> list[dict]:
                 chosen.append((t, occ))
         for t, occ in sorted(chosen, key=lambda x: x[1][0][0]):
             out.append({"chapter": c, "words": list(t), "occurrences": occ})
+    return out
+
+
+# heading terms: code -> word forms (unpointed, final letters as plain); a pair (a, b) needs b to follow a
+HEADING = {
+    "lamnatseach": {"למנצח"}, "mizmor": {"מזמור", "למזמור"}, "shir": {"שיר"}, "maalot": {"המעלות", "למעלות"},
+    "maskil": {"משכיל"}, "miktam": {"מכתמ"}, "tefillah": {"תפלה"}, "tehillah": {"תהלה"}, "shiggayon": {"שגיונ", "שגינות"},
+    "neginot": {"בנגינות", "בנגינת", "נגינת", "בנגינותי"}, "nechilot": {"הנחילות"}, "sheminit": {"השמינית"},
+    "gittit": {"הגתית"}, "alamot": {"עלמות"}, "shoshannim": {"ששנימ", "שושנימ", "שושנ", "ששנ"}, "ayelet": {"אילת"},
+    "yonat": {"יונת"}, "al_tashchet": {"תשחת"}, "machalat": {"מחלת"}, "lehazkir": {"להזכיר"}, "letodah": {"לתודה"},
+    "lelamed": {"ללמד"}, "shabbat": {"השבת"}, "yedidot": {"ידידת"}, "chanukkat": {"חנכת"}, "mut_labben": {("מות", "לבנ")},
+    "david": {"לדוד"}, "asaph": {"לאספ"}, "korah": {("לבני", "קרח")}, "solomon": {"לשלמה"}, "moses": {"למשה"},
+    "heman": {"להימנ"}, "ethan": {"לאיתנ"}, "jeduthun": {"ידותונ", "ידיתונ", "לידותונ", "לידיתונ"},
+}
+ANYWHERE = {"selah": {"סלה"}, "higgayon": {("הגיונ", "סלה")}, "halleluyah": {("הללו", "יה"), "הללויה"}}
+HEADING_VERSES = {"PSA": None, "HAB": {(3, 1), (3, 19)}}
+
+
+def _match(ws: list[tuple[int, str]], table: dict) -> list[tuple[str, int, int]]:
+    out = []
+    for code, forms in table.items():
+        for f in forms:
+            for n, (i, w) in enumerate(ws):
+                if isinstance(f, tuple):
+                    if w == f[0] and n + 1 < len(ws) and ws[n + 1][1] == f[1]:
+                        out.append((code, i, ws[n + 1][0] if code != "higgayon" else i))
+                elif w == f:
+                    out.append((code, i, i))
+    return out
+
+
+_FORMS = {f for fs in HEADING.values() for f in fs if isinstance(f, str)}
+FINITE = {"imperative", "qatal", "yiqtol", "wayyiqtol", "weqatal", "jussive", "cohortative"}
+
+
+def _heading_part(bk, ws: list[tuple[int, str]]) -> list[tuple[int, str]]:
+    """The words of a first verse up to its first finite or imperative verb (שירו ליהוה שיר חדש, זכור יהוה לדוד are the psalm's
+    own words); a verb right after אשר stays in the heading (אשר דבר, Ps 18:1)."""
+    for n, (i, w) in enumerate(ws):
+        z = bk.wend.get(i, i)
+        if w in _FORMS:
+            continue                                    # a heading term that is a verb form itself (אל תשחת)
+        if any(bk.wtype.get(bk.keys[j]) in FINITE for j in range(i, z + 1)) and not (n and ws[n - 1][1] == "אשר"):
+            return ws[:n]
+    return ws
+
+
+def heading(bk) -> list[tuple[str, int, int]]:
+    """(code, first word index, last word index) for each heading term and performance mark (Psalms, Habakkuk 3)."""
+    if bk.book not in HEADING_VERSES:
+        return []
+    out = []
+    for (c, v), vw in sorted(bk.verse_words.items()):
+        ws = [(i, w.translate(FINAL)) for i, w in vw]
+        allowed = HEADING_VERSES[bk.book]
+        if (v == 1 and allowed is None) or (allowed and (c, v) in allowed):
+            out += _match(_heading_part(bk, ws), HEADING)
+        if bk.book == "PSA" or c == 3:
+            out += _match(ws, ANYWHERE)
+    return sorted(set(out), key=lambda x: x[1])
+
+
+ATNACH, OLEH, MERKHA = "\u0591", "\u05ab", "\u05a5"
+CONTENT = {"noun", "verb", "adj"}
+ROOTS = Path(__file__).resolve().parents[2] / "resources" / "bdb_roots" / "root_groups.tsv"
+
+
+def _h(s: str) -> str | None:
+    m = re.match(r"H?0*(\d+)", s or "")
+    return "H%04d" % int(m.group(1)) if m else None
+
+
+def _roots() -> dict[str, str]:
+    out = {}
+    for line in ROOTS.read_text(encoding="utf-8").splitlines():
+        f = line.split("\t")
+        if line.startswith("#") or f[0] == "root_id" or len(f) < 2:
+            continue
+        out[f[1]] = f[0]
+    return out
+
+
+def halves(bk, poems: list[dict], mam_verses: dict, align, words: dict) -> list[dict]:
+    """The two halves of each verse of MAM's poetic lines (Psalms, Proverbs, Job), split at the main divider accent.
+    poems: mam.poem_lines; mam_verses: mam.verses; align: mam._align; words: key -> (class, strong).
+    Each: verse (c, v), accent, halves [(first, last), (first, last)] word indexes, lines [n, n], echoes [(i, j, 'lexeme'|'root')]."""
+    if bk.book not in ("PSA", "PRO", "JOB"):
+        return []
+    roots, out = _roots(), []
+    for poem in poems:
+        lend = {z for _, z in poem["lines"]}
+        for cv in poem["verses"]:
+            seq = [x for x in mam_verses.get(cv) or [] if x[0] == "w"]
+            ws = [(i, w) for (_, w), i in zip(seq, align(seq, bk.verse_words.get(cv, []))) if i is not None]
+            div, accent = None, None
+            for n, (i, w) in enumerate(ws):
+                if OLEH in w and MERKHA in w:
+                    div, accent = i, "oleh_weyored"
+                elif OLEH in w and n + 1 < len(ws) and MERKHA in ws[n + 1][1]:
+                    div, accent = ws[n + 1][0], "oleh_weyored"
+                if div is not None:
+                    break
+            if div is None:
+                div, accent = next((i for i, w in ws if ATNACH in w), None), "atnach"
+            if div is None or div not in lend or div == ws[-1][0]:
+                continue                                 # no divider, or it does not end a line: no claim
+            lines = [(a, z) for a, z in poem["lines"] if bk.cv(bk.keys[a]) == cv]
+            a1, b2 = lines[0][0], lines[-1][1]
+            b1 = div
+            a2 = next(a for a, _ in lines if a > div)
+            def content(a, z):
+                return [(i, words.get(bk.keys[i])) for i in range(a, bk.wend.get(z, z) + 1)
+                        if (words.get(bk.keys[i]) or ("", None))[0] in CONTENT and words[bk.keys[i]][1]]
+            echoes = []
+            for j, (_, s2) in content(a2, b2):
+                for i, (_, s1) in content(a1, b1):
+                    if s1 == s2:
+                        echoes.append((i, j, "lexeme")); break
+                    if roots.get(s1) and roots.get(s1) == roots.get(s2):
+                        echoes.append((i, j, "root")); break
+            out.append({"verse": cv, "accent": accent, "halves": [(a1, b1), (a2, b2)],
+                        "lines": [sum(1 for a, _ in lines if a <= div), sum(1 for a, _ in lines if a > div)], "echoes": echoes})
     return out
 
 
