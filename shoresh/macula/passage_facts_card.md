@@ -86,6 +86,9 @@ shape. It goes up only when a field is renamed, dropped or changes meaning; a ne
 never renumbered. Anchors (`first`, `last`, `pieces`, `lines`, `at`, `after`) are a first version and may follow a link-type
 specification later; that would be a schema change, listed here.
 
+- v0.3.2: the psalm purposes are named by Hebrew terms with `head`: `fm.pu.qinah` קִינָה (was lament), `fm.pu.tefillah`
+  תְּפִלָּה (petition), `fm.pu.tehillah` תְּהִלָּה (praise), `fm.pu.todah` תּוֹדָה (thanks), `fm.pu.mivtach` מִבְטָח (confidence),
+  `fm.pu.musar` מוּסָר (instruct). Same facts, new codes.
 - v0.3.1: moods by the text's own feeling words. The `md.*` values of v0.3 were the sources' English mood words (Scriptura's
   At-a-Glance, Glyssen's deliveries); from v0.3.1 a mood is one of 9 families named by its Hebrew head word (`md.samach` שָׂמַח,
   `md.bakah` בָּכָה, `md.yare` יָרֵא, `md.aph` אַף, `md.bosh` בּוֹשׁ, `md.batach` בָּטַח, `md.tsarah` צָרָה, `md.ahav` אָהֵב, `md.sane`

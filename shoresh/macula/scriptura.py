@@ -20,16 +20,18 @@ from pathlib import Path
 CACHE = Path(__file__).resolve().parent / ".cache" / "scriptura"
 
 # the stated purpose: the verbs of "To <verb> ..." (and of each "and to <verb>"), grouped; the group is the code (fm.pu.*)
+# the codes are Hebrew terms for the purpose (from v0.3.2); the English verbs only select them and are never stored
+PURPOSE_HEAD = {'qinah': 'קִינָה', 'tefillah': 'תְּפִלָּה', 'tehillah': 'תְּהִלָּה', 'todah': 'תּוֹדָה', 'mivtach': 'מִבְטָח', 'musar': 'מוּסָר'}
 PURPOSE = {
-    "lament": ("lament",),
-    "petition": ("ask", "petition", "plead", "pray", "invoke", "request", "cry", "intercede"),
-    "praise": ("praise", "celebrate", "delight", "exalt", "extol", "worship", "glorify", "honor", "honour", "bless"),
-    "thanks": ("thank", "give"),
-    "confidence": ("express", "promise", "assure", "reassure"),
-    "instruct": ("persuade", "instruct", "teach", "exhort", "rebuke", "warn", "call", "urge", "encourage", "remind", "challenge"),
+    "qinah": ("lament",),
+    "tefillah": ("ask", "petition", "plead", "pray", "invoke", "request", "cry", "intercede"),
+    "tehillah": ("praise", "celebrate", "delight", "exalt", "extol", "worship", "glorify", "honor", "honour", "bless"),
+    "todah": ("thank", "give"),
+    "mivtach": ("express", "promise", "assure", "reassure"),
+    "musar": ("persuade", "instruct", "teach", "exhort", "rebuke", "warn", "call", "urge", "encourage", "remind", "challenge"),
 }
-EXPRESS = {"confidence": "confidence", "trust": "confidence", "praise": "praise", "thanks": "thanks", "gratitude": "thanks",
-           "lament": "lament", "sorrow": "lament", "grief": "lament"}
+EXPRESS = {"confidence": "mivtach", "trust": "mivtach", "praise": "tehillah", "thanks": "todah", "gratitude": "todah",
+           "lament": "qinah", "sorrow": "qinah", "grief": "qinah"}
 MOOD = re.compile(r"^[a-z][a-z-]*(?: [a-z][a-z-]*)?$")      # a mood label: one or two plain words
 
 

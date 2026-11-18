@@ -844,7 +844,8 @@ class Builder:
             whole = self._psalm_span(n, 1, last[n])
             pic = "picture" if r["read_from"] == "picture" else None     # At-a-Glance read by OCR (macula/scriptura_glance.py)
             for code in scriptura.purpose_codes(r["purpose"]):
-                self.add("form", f"fm.pu.{code}", whole[0], whole[1], "b.source", ["scriptura"], "p.verse", page=r["url"])
+                self.add("form", f"fm.pu.{code}", whole[0], whole[1], "b.source", ["scriptura"], "p.verse", page=r["url"],
+                         head=scriptura.PURPOSE_HEAD[code])
             def span(a, nxt):
                 end = (nxt[0] - 1 if not nxt[1] or nxt[1] == "a" else nxt[0]) if nxt else last[n]
                 return self._psalm_span(n, a[0], max(a[0], end))
