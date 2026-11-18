@@ -61,6 +61,11 @@ def _text(x, out: list):
         name, params = x.get("tmpl_name"), x.get("tmpl_params") or {}
         if name in BREAKS:
             out.append((BREAKS[name], None))
+        elif name == "נוסח":                                    # a textual note: its first part is the reading (in a הערה-2 note)
+            first = params.get("1", "")
+            if isinstance(first, dict) and first.get("tmpl_name") == "מ:הערה-2":
+                first = (first.get("tmpl_params") or {}).get("1", "")
+            _text(first, out)
         elif name in NOTES:
             return
         elif name in ("כו״ק", "קו״כ", "מ:כו״ק מיוחד", "מ:קו״כ-אם-2"):
@@ -90,14 +95,45 @@ def verses(book: str) -> dict[tuple[int, int], list]:
     return out
 
 
-def _align(seq: list, words: list) -> list[int | None]:
-    """For each MAM word of a verse, the index of the MACULA word it is (None where the texts differ)."""
+def _align_spans(seq: list, words: list) -> list[tuple[int, int] | None]:
+    """For each MAM word of a verse, the (first, last) index of the MACULA word(s) it is (None where the texts differ). A MAM word
+    that is two or three MACULA words written together is split into them before the alignment: Esth 9:7-9 joins each ואת to its
+    name (וְאֵ֧תפַּרְשַׁנְדָּ֛תָא), as the scroll's two columns stand."""
     mw = [norm(w) for k, w in seq if k == "w"]
-    at: list[int | None] = [None] * len(mw)
-    for i, j, n in difflib.SequenceMatcher(None, mw, [s for _, s in words], autojunk=False).get_matching_blocks():
+    sw = [s for _, s in words]
+    have = set(sw)
+    parts, origin = [], []                              # the MAM words split where they join MACULA words; each part's MAM word
+    for i, w in enumerate(mw):
+        split = None
+        if w not in have:
+            for k in (2, 3):
+                for j in range(len(sw) - k + 1):
+                    if "".join(sw[j:j + k]) == w:
+                        split = sw[j:j + k]
+                        break
+                if split:
+                    break
+        for x in split or [w]:
+            parts.append(x)
+            origin.append(i)
+    at: list[tuple[int, int] | None] = [None] * len(mw)
+    for i, j, n in difflib.SequenceMatcher(None, parts, sw, autojunk=False).get_matching_blocks():
         for d in range(n):
-            at[i + d] = words[j + d][0]
+            o, idx = origin[i + d], words[j + d][0]
+            at[o] = (min(at[o][0], idx), max(at[o][1], idx)) if at[o] else (idx, idx)
+    # one MAM word and one MACULA word left over between two matched words are the same word spelled differently (Esth 9:9 ארדי, ארידי)
+    got = sorted((i, x) for i, x in enumerate(at) if x)
+    pos = {w[0]: j for j, w in enumerate(words)}
+    for (i1, x1), (i2, x2) in zip(got, got[1:]):
+        if i2 - i1 == 2 and pos[x2[0]] - pos[x1[1]] == 2:
+            k = words[pos[x1[1]] + 1][0]
+            at[i1 + 1] = (k, k)
     return at
+
+
+def _align(seq: list, words: list) -> list[int | None]:
+    """For each MAM word of a verse, the index of the (first) MACULA word it is (None where the texts differ)."""
+    return [x[0] if x else None for x in _align_spans(seq, words)]
 
 
 def songs(book: str, verse_words: dict) -> list[dict]:
@@ -127,7 +163,7 @@ def songs(book: str, verse_words: dict) -> list[dict]:
                 if line:
                     lines.append(line)
                 line, started = [], True
-            at = iter(_align(seq, verse_words.get(cv, [])))
+            at = iter(_align_spans(seq, verse_words.get(cv, [])))
             for k, _ in seq:
                 if k == "song":
                     if line:
@@ -136,7 +172,7 @@ def songs(book: str, verse_words: dict) -> list[dict]:
                 elif k == "w":
                     i = next(at)
                     if started and i is not None:
-                        line.append(i)
+                        line.extend(i)
             if n == len(run) - 1 and line:
                 lines.append(line)
         lines = [(min(l), max(l)) for l in lines if l]
@@ -172,7 +208,7 @@ def poem_lines(book: str, verse_words: dict) -> list[dict]:
         lines, marks = [], []
         for cv in run:
             seq = vs[cv]
-            at = iter(_align(seq, verse_words.get(cv, [])))
+            at = iter(_align_spans(seq, verse_words.get(cv, [])))   # a joined MAM word ends the line at its last MACULA word
             line, mark = [], "v"
             for k, _ in seq:
                 if k in LINE_BREAKS:
@@ -182,7 +218,7 @@ def poem_lines(book: str, verse_words: dict) -> list[dict]:
                 elif k == "w":
                     i = next(at)
                     if i is not None:
-                        line.append(i)
+                        line.extend(i)
             if line:
                 lines.append(line); marks.append(mark)
         if lines:
@@ -198,7 +234,7 @@ def sections(book: str, verse_words: dict) -> list[tuple[str, int]]:
     out = []
     for n, cv in enumerate(order):
         seq = vs[cv]
-        at = _align(seq, verse_words.get(cv, []))
+        at = _align_spans(seq, verse_words.get(cv, []))
         w = 0
         for k, _ in seq:
             if k == "w":
@@ -209,5 +245,5 @@ def sections(book: str, verse_words: dict) -> list[tuple[str, int]]:
                     if prev:
                         out.append((k, prev[-1][0]))
                 elif at[w - 1] is not None:
-                    out.append((k, at[w - 1]))
+                    out.append((k, at[w - 1][1]))
     return sorted(set(out), key=lambda x: x[1])

@@ -283,7 +283,8 @@ def _roots() -> dict[str, str]:
 
 def halves(bk, poems: list[dict], mam_verses: dict, align, words: dict) -> list[dict]:
     """The two halves of each verse of MAM's poetic lines (Psalms, Proverbs, Job), split at the main divider accent.
-    poems: mam.poem_lines; mam_verses: mam.verses; align: mam._align; words: key -> (class, strong).
+    poems: mam.poem_lines; mam_verses: mam.verses; align: mam._align_spans; words: key -> (class, strong). A MAM word joined
+    from two MACULA words (יְֽהִ֫יחֹ֥שֶׁךְ) divides after its last one.
     Each: verse (c, v), accent, halves [(first, last), (first, last)] word indexes, lines [n, n], echoes [(i, j, 'lexeme'|'root')]."""
     if bk.book not in ("PSA", "PRO", "JOB"):
         return []
@@ -292,7 +293,7 @@ def halves(bk, poems: list[dict], mam_verses: dict, align, words: dict) -> list[
         lend = {z for _, z in poem["lines"]}
         for cv in poem["verses"]:
             seq = [x for x in mam_verses.get(cv) or [] if x[0] == "w"]
-            ws = [(i, w) for (_, w), i in zip(seq, align(seq, bk.verse_words.get(cv, []))) if i is not None]
+            ws = [(sp[1], w) for (_, w), sp in zip(seq, align(seq, bk.verse_words.get(cv, []))) if sp is not None]
             div, accent = None, None
             for n, (i, w) in enumerate(ws):
                 if OLEH in w and MERKHA in w:

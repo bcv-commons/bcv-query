@@ -85,6 +85,29 @@ shape. It goes up only when a field is renamed, dropped or changes meaning; a ne
 never renumbered. Anchors (`first`, `last`, `pieces`, `lines`, `at`, `after`) are a first version and may follow a link-type
 specification later; that would be a schema change, listed here.
 
+- v0.3: passage-level facts from three new sources, and the whole Bible's moods by rule. Schema unchanged (new kinds and codes
+  only). 70,072 facts (67,718 in v0.2). New: `cue` 285, `link` 604, `mood` 381 (119 from Scriptura, 262 from
+  deliveries), `fm.gn.*` 104 on 88 psalms, `fm.pu.*` 46, `sc.part` 85, `sc.np` 722, `nt.key_term` 40, chapter register 22.
+  - Psalm types `fm.gn.*` (lament, praise, thanksgiving, trust, wisdom, royal …), read from the Tyndale Open Study Notes'
+    introductions by fixed keyword rules, on the whole psalm or on the part the note gives. Every match was read against its
+    note by Claude, not by a human. Purpose `fm.pu.*`, sections `sc.part`, moods `md.*`, background links `lk.background` (a psalm
+    and a passage its Background Orientation cites) and key terms `nt.key_term` (a Hebrew word it explains) come from Scriptura's
+    Psalms: Layer by Layer, a snapshot of 2026-11-18. The site has these pages for 65 psalms, so these facts cover 65 psalms. Only codes and places are stored, never the sources' English. Sources may
+    disagree, and each fact stands on its own.
+  - Moods beyond the Psalms: a speech whose Glyssen delivery names a feeling (angry, afraid, weeping …) gets that mood, by a
+    fixed table (b.rule).
+  - New kind `cue`: words that mark a register by their lemma, namely woe, a named lament, אֵיכָה opening Lamentations 1, 2
+    and 4, blessing and hallelujah.
+  - The chapter register: one delivery code that covers at least 40% of a chapter's words gives a chapter fact (Ezek 19, 27,
+    32 lament; 1 Kgs 8, Neh 9 and Jonah 2 praying; Exod 15 and Judg 5 singing).
+  - `fm.ms.song` carries `layout` song or list. List is Josh 12 and Esth 9, after b. Megillah 16b.
+  - Greek NT paragraphs `sc.np`, from Nestle 1904.
+  - MAM alignment corrected: a MAM word joined from two MACULA words, or a name inside a נוסח note, is now matched. Esther 9:7-10
+    lists all ten sons. The poetic lines gain 495 words that v0.2 had left out, and none are lost. Verse halves with a gap between
+    them fall from 69 to 6, and halves that divide at an oleh-weyored on a joined word now divide after it. Three paragraph
+    marks are added: before Exod 34:1 and before Lev 7:22 and 7:28.
+  - Left out: unfoldingWord's new psalm introductions with a Purpose line, because they credit Scriptura and would count it
+    twice.
 - v0.2: two new `form` codes read from the letters by rule: `fm.tx.acrostic` (13 acrostics: Ps 9, 25, 34, 37, 111, 112, 119, 145,
   Prov 31, Lam 1-4, each letter on its verse or poetic line; the broken acrostics of Ps 10 and Nah 1 are not found) and
   `fm.tx.refrain` (449 lines that come back in their chapter); `fm.tx.halves` (every poetic verse of Psalms, Proverbs and Job split

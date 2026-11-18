@@ -16,6 +16,9 @@ tb_force	kind	TBTA: illocutionary force
 rhetorical	kind	TBTA: rhetorical question		
 domain	kind	the dictionary's meaning domain of the verb that introduces a speech		
 note	kind	a translation note: the issue it names in these Hebrew or Greek words (unfoldingWord)		
+mood	kind	the mood of these words, as a source gives it (from v0.3)		
+link	kind	these words and another passage, tied by a source (from v0.3)		
+cue	kind	a word that marks a register in the text itself: woe, lament, blessing, hallelujah (from v0.3)		
 b.source	basis	stated by the source		
 b.text	basis	read from the Hebrew or Greek text by a fixed rule		
 b.rule	basis	inferred by a published rule from other facts		
@@ -74,7 +77,7 @@ sc.sa	section	setumah: a closed paragraph ends here	oshb	the source names the tr
 fm.ed.lines	form	the edition prints these words in poetic lines, and they are not a quotation from the Scriptures	nestle1904	
 fm.ed.block	form	the edition prints these words as a narrower block (a hymn with no metrical arrangement, in Westcott-Hort's words)	nestle1904	
 fm.ed.qlines	form	the edition prints these words in poetic lines because they are quoted from the Scriptures	nestle1904	
-fm.ms.song	form	the Masoretic text sets these words in song layout, in the lines given	mam	the layout the tradition prescribes for the songs (Exod 15, Deut 32, Judg 5, 2 Sam 22) and some lists
+fm.ms.song	form	the Masoretic text sets these words in song layout, in the lines given	mam	the layout the tradition prescribes for the songs (Exod 15, Deut 32, Judg 5, 2 Sam 22) and two lists; `layout` song or list (from v0.3): list for the two the Talmud names as written brick over brick, the kings of Canaan (Josh 12) and the sons of Haman (Esth 9), b. Megillah 16b (source talmud)
 fm.ms.lines	form	the Masoretic text sets these words in poetic lines, in the lines given	mam	Psalms, Proverbs and Job (the books with their own accent system); markers: v a line that starts the verse, r0-r4 MAM's line-break templates ר0-ר4 (indent levels)
 fm.tr.poetry	form	the translation sets these verses in indented lines, as it sets poetry	bsb	also some lists (Luke 3:23-38, the genealogy)
 cv.all	cover	all of the verse		
@@ -543,3 +546,82 @@ fm.ps.selah	form	mark: selah (סלה): a term of the text itself, read by rule	m
 fm.ps.higgayon	form	mark: higgayon before selah (הגיון סלה): a term of the text itself, read by rule	macula	Ps 9:17
 fm.ps.halleluyah	form	mark: praise the LORD (הללו יה): a term of the text itself, read by rule	macula	a call to praise, at a psalm's start or end
 fm.tx.halves	form	this poetic verse divides at its main accent into half A and half B (a couplet; a half may hold two lines)	macula	`accent` oleh_weyored or atnach; `halves` the two spans; `lines` MAM lines in each half; `echoes` [word A, word B, lexeme|root]: the same lexeme or BDB root in both halves (sources mam, bdb). Psalms, Proverbs and Job
+fm.gn.lament	form	this psalm (or the part in `pieces`) is a lament: a cry to God in distress, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.lament_communal	form	this psalm (or the part in `pieces`) is a communal lament: the people cry to God in distress, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.praise	form	this psalm (or the part in `pieces`) is a hymn of praise, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.thanksgiving	form	this psalm (or the part in `pieces`) is a thanksgiving: praise for a rescue already given, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.trust	form	this psalm (or the part in `pieces`) is a psalm of trust or confidence, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.wisdom	form	this psalm (or the part in `pieces`) is a wisdom psalm: teaching on how to live, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.royal	form	this psalm (or the part in `pieces`) is a royal psalm: about the king, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.penitential	form	this psalm (or the part in `pieces`) is a penitential psalm: confession of sin, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.zion	form	this psalm (or the part in `pieces`) is a song of Zion, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.kingship	form	this psalm (or the part in `pieces`) is a psalm of the LORD's kingship, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.prayer	form	this psalm (or the part in `pieces`) is a prayer: a request to God, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.imprecation	form	this psalm (or the part in `pieces`) is an imprecation: a call for judgment on enemies, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.gn.pilgrimage	form	this psalm (or the part in `pieces`) is a pilgrims' song, as a source states it	source	b.source: a scholarly source names the type; only the code is stored, with `note` (the source's note) and, from Scriptura, `page`; `part` true when the source gives it for a part of the psalm; sources may disagree, each fact stands
+fm.pu.lament	form	the psalm's purpose, as Scriptura states it: to lament	scriptura	the verbs of the Purpose sentence ("To petition ..."), grouped by a fixed table (shoresh/macula/scriptura.py); `page` the source page; the sentence is not stored
+fm.pu.petition	form	the psalm's purpose, as Scriptura states it: to ask God for help (ask, petition, plead, pray, invoke, intercede)	scriptura	the verbs of the Purpose sentence ("To petition ..."), grouped by a fixed table (shoresh/macula/scriptura.py); `page` the source page; the sentence is not stored
+fm.pu.praise	form	the psalm's purpose, as Scriptura states it: to praise (praise, celebrate, delight in, exalt, worship)	scriptura	the verbs of the Purpose sentence ("To petition ..."), grouped by a fixed table (shoresh/macula/scriptura.py); `page` the source page; the sentence is not stored
+fm.pu.thanks	form	the psalm's purpose, as Scriptura states it: to give thanks	scriptura	the verbs of the Purpose sentence ("To petition ..."), grouped by a fixed table (shoresh/macula/scriptura.py); `page` the source page; the sentence is not stored
+fm.pu.confidence	form	the psalm's purpose, as Scriptura states it: to express confidence or trust	scriptura	the verbs of the Purpose sentence ("To petition ..."), grouped by a fixed table (shoresh/macula/scriptura.py); `page` the source page; the sentence is not stored
+fm.pu.instruct	form	the psalm's purpose, as Scriptura states it: to teach or urge the hearers (persuade, instruct, exhort, rebuke, warn, call)	scriptura	the verbs of the Purpose sentence ("To petition ..."), grouped by a fixed table (shoresh/macula/scriptura.py); `page` the source page; the sentence is not stored
+sc.part	section	a section of the psalm, as Scriptura's At-a-Glance divides it (a break after its last word)	scriptura	`after` the last word; `from_part` b when the section starts in the second part of a verse (after the heading); titles are not stored
+sc.np	section	a paragraph of Nestle 1904 ends here	nestle1904	the digital edition's paragraphs, where the next one starts a verse; the printed lines of a passage the edition sets apart (fm.ed.*) are not breaks (from v0.3)
+lk.background	link	this psalm and the passage in `to` share background, as Scriptura's Background Orientation cites it	scriptura	`to` the passage (Tanakh in the Hebrew numbering), `to_first`/`to_last` its MACULA words; the anchor is the whole psalm; the explanation is not stored
+nt.key_term	note	a key term: Scriptura's Background Orientation explains this Hebrew word	scriptura	the word in the psalm whose form or lemma the note gives; the explanation is not stored
+rg.woe	cue	a woe word: הוֹי, אוֹי, אֱוִי, אוֹיָה, אַלְלַי, οὐαί	macula	by lemma; a woe oracle or cry is marked here
+rg.lament_named	cue	a lament named as such: קִינָה, קין (to chant a lament)	macula	by lemma
+rg.lament_open	cue	אֵיכָה opening a chapter of Lamentations (1, 2, 4)	macula	the first word of the chapter
+rg.blessing	cue	a blessing word: אַשְׁרֵי (אֶשֶׁר), μακάριος	macula	by lemma
+rg.hallelujah	cue	ἁλληλουϊά	macula	by lemma (the Hebrew הללו יה is fm.ps.halleluyah)
+md.abandonment	mood	abandonment	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.abhorrence	mood	abhorrence	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.admiration	mood	admiration	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.alarm	mood	alarm	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.amazement	mood	amazement	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.anger	mood	anger	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.anxiety	mood	anxiety	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.awe	mood	awe	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.calm	mood	calm	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.compassion	mood	compassion	glyssen	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.confidence	mood	confidence	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.confusion	mood	confusion	glyssen	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.contemplation	mood	contemplation	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.contempt	mood	contempt	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.courage	mood	courage	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.dependence	mood	dependence	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.desperation	mood	desperation	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.determination	mood	determination	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.discouragement	mood	discouragement	glyssen	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.disgust	mood	disgust	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.dismay	mood	dismay	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.distress	mood	distress	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.enthusiasm	mood	enthusiasm	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.expectation	mood	expectation	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.fear	mood	fear	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.frustration	mood	frustration	glyssen	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.grief	mood	grief	glyssen	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.guilt	mood	guilt	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.hope	mood	hope	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.humiliation	mood	humiliation	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.humility	mood	humility	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.impatience	mood	impatience	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.joy	mood	joy	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.misery	mood	misery	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.passion	mood	passion	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.peace	mood	peace	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.pensiveness	mood	pensiveness	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.pride	mood	pride	glyssen	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.reassurance	mood	reassurance	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.relief	mood	relief	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.remorse	mood	remorse	glyssen	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.reverence	mood	reverence	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.sadness	mood	sadness	glyssen	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.security	mood	security	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.shame	mood	shame	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.solemnity	mood	solemnity	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.terror	mood	terror	glyssen, scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.triumph	mood	triumph	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.vulnerability	mood	vulnerability	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.well_being	mood	well-being	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)
+md.zeal	mood	zeal	scriptura	the mood a source gives these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)

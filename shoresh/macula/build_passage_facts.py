@@ -42,7 +42,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-from macula import mam, nestle1904_layout, text_forms, ubs, unfoldingword
+from macula import mam, nestle1904_layout, scriptura, text_forms, tyndale, ubs, unfoldingword
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -160,6 +160,25 @@ class Codes:
             self.path.write_text(text.rstrip("\n") + "\n" + "\n".join(lines) + "\n", encoding="utf-8")
         self.new.clear()
         return len(lines)
+
+
+# the two passages the Talmud names as written "brick over brick" (a list), unlike every song's "half-brick over brick":
+# the kings of Canaan (Josh 12) and the sons of Haman (Esth 9), b. Megillah 16b. MAM sets both in its song layout.
+LIST_LAYOUT = {("JOS", 12), ("EST", 9)}
+
+
+@functools.lru_cache(maxsize=None)
+def _verse_index() -> dict[tuple[str, int, int], tuple[str, str]]:
+    """(book, chapter, verse) -> first and last MACULA word key, for both testaments."""
+    sp = sqlite3.connect(SPINE)
+    return {(b, c, v): (lo, hi) for b, c, v, lo, hi in
+            sp.execute("SELECT book, chapter, verse, MIN(key), MAX(key) FROM macula_words GROUP BY book, chapter, verse")}
+
+
+def verse_keys(book: str, c: int, v1: int, v2: int) -> tuple[str, str] | None:
+    ix = _verse_index()
+    a, z = ix.get((book, c, v1)), ix.get((book, c, v2))
+    return (a[0], z[1]) if a and z else None
 
 
 class Book:
@@ -336,9 +355,14 @@ class Builder:
         self.quotes(quotes)
         self.voices(quotes)
         self.delivery(spans)
+        self.chapter_register()
+        self.speech_moods()
+        self.register_cues()
         self.force_and_addressee(quotes)
         self.sections()
         self.forms()
+        self.psalm_types()
+        self.psalm_scriptura()
         self.notes(quotes)
         self.tbta()
         return self.facts
@@ -484,6 +508,91 @@ class Builder:
                 self.add("delivery", self.codes.of("delivery", v), first, last, "b.source", ["clear", "glyssen"],
                          of=q["id"] if q else None)
 
+    def chapter_register(self, share: float = 0.4):
+        """A chapter's register (from v0.3): one delivery code that covers at least `share` of the chapter's words, counted over
+        the delivery facts of its speeches (b.rule). Ezek 19 and 27 lament, 1 Kgs 8 and Jonah 2 praying, Exod 15 singing."""
+        bk = self.bk
+        words = collections.Counter(bk.cv(k)[0] for k in bk.keys)
+        cover = collections.defaultdict(set)                 # (chapter, code) -> word indexes
+        ids = collections.defaultdict(list)
+        for f in [f for f in self.facts if f["kind"] == "delivery"]:
+            for i in range(bk.pos[f["first"]], bk.pos[f["last"]] + 1):
+                cover[(bk.cv(bk.keys[i])[0], f["value"])].add(i)
+            for c in range(bk.cv(f["first"])[0], bk.cv(f["last"])[0] + 1):
+                ids[(c, f["value"])].append(f["id"])
+        for (c, code), ix in sorted(cover.items()):
+            s = len(ix) / words[c]
+            if s >= share:
+                ch = [i for i, k in enumerate(bk.keys) if bk.cv(k)[0] == c]
+                self.add("delivery", code, bk.keys[ch[0]], bk.keys[ch[-1]], "b.rule", ["clear", "glyssen"], scope="chapter",
+                         share=round(s, 3), from_facts=ids[(c, code)])
+
+    # Glyssen's delivery labels that name a feeling -> the mood code (from v0.3). Labels that name an act (praying, ordering,
+    # whispering, mocking as speech act aside) stay delivery only.
+    DELIVERY_MOOD = {
+        "anger": ["angry", "furious", "indignant", "outraged", "angry, quarreling"],
+        "fear": ["afraid", "fearful", "frightened", "frightened (probably drunk)", "trembled", "trembling"],
+        "terror": ["terrified"],
+        "sadness": ["sad", "unhappy"],
+        "grief": ["weeping", "weeping, pleading", "crying", "mourning", "wailing", "lamenting", "lament"],
+        "amazement": ["amazed", "astonished", "surprised", "shocked"],
+        "joy": ["rejoicing", "joyfully singing"],
+        "enthusiasm": ["excited", "eager"],
+        "anxiety": ["anxious", "uneasy", "concerned"],
+        "distress": ["distraught", "deeply distressed", "upset", "calling out in anguish"],
+        "desperation": ["desperate"],
+        "contempt": ["sneering", "jeering", "taunting", "disdain", "contempt", "insulting", "gloating"],
+        "pride": ["boasting", "boastful", "arrogantly", "smug", "superior"],
+        "relief": ["relieved"],
+        "awe": ["awe"],
+        "remorse": ["remorse"],
+        "humility": ["humble", "humbly"],
+        "courage": ["courageous", "boldly"],
+        "confusion": ["puzzled", "perplexed", "confused"],
+        "discouragement": ["discouraged"],
+        "frustration": ["frustrated", "exasperated"],
+        "compassion": ["compassionately"],
+    }
+
+    def speech_moods(self):
+        """A speech whose Glyssen delivery names a feeling gets that mood (b.rule, from v0.3), Bible-wide; `from_facts` the
+        delivery fact. The chapter register is left out (it repeats its speeches)."""
+        label = {self.codes.of("delivery", l): m for m, ls in self.DELIVERY_MOOD.items() for l in ls
+                 if l in self.codes.open["delivery"]}
+        for f in [f for f in self.facts if f["kind"] == "delivery" and f.get("scope") != "chapter"]:
+            m = label.get(f["value"])
+            if m:
+                self.add("mood", f"md.{m}", f["first"], f["last"], "b.rule", ["clear", "glyssen"], "p.word", from_facts=[f["id"]])
+
+    # words that mark a register in the text itself (lemma by Strong's number in MACULA), from v0.3
+    CUES = {
+        "rg.woe": {"1945", "0188", "0189", "0190", "0480", "3759"},      # הוֹי אוֹי אֱוִי אוֹיָה אַלְלַי, οὐαί
+        "rg.lament_named": {"7015", "6969"},                              # קִינָה, קין (to chant a lament)
+        "rg.blessing": {"0835", "0835a", "3107"},                         # אֶשֶׁר / אַשְׁרֵי, μακάριος
+        "rg.hallelujah": {"239"},                                         # ἁλληλουϊά (the Hebrew הללו יה is fm.ps.halleluyah)
+    }
+
+    def register_cues(self):
+        """Words that mark a register by their lemma (b.text, p.word): woe, a lament named as such, blessing, hallelujah; and
+        אֵיכָה opening a chapter of Lamentations (rg.lament_open). Cues, not moods: they say where the text marks it."""
+        bk = self.bk
+        strong = dict(sqlite3.connect(SPINE).execute("SELECT key, strong FROM macula_words WHERE book=?", (bk.book,)))
+        code_of = {s: c for c, ss in self.CUES.items() for s in ss}
+        first_of_chapter = set()
+        prev = None
+        for k in bk.keys:
+            c = bk.cv(k)[0]
+            if c != prev:
+                first_of_chapter.add(k)
+                prev = c
+        for k in bk.keys:
+            s = strong.get(k) or ""
+            c = code_of.get(s)
+            if c:
+                self.add("cue", c, k, k, "b.text", ["macula"])
+            elif bk.book == "LAM" and s == "0349a" and k in first_of_chapter:
+                self.add("cue", "rg.lament_open", k, k, "b.text", ["macula"])
+
     def force_codes(self, inner: list | None = None) -> dict[int, list[str]]:
         """Word index -> force codes, by the grammar, everywhere (inside and outside speech).
         Hebrew: imperative, jussive, cohortative, interrogative (wtype); אַל before a jussive, cohortative or yiqtol of the same segment
@@ -618,6 +727,7 @@ class Builder:
     def sections(self):
         bk = self.bk
         if not bk.hebrew:
+            self.greek_paragraphs()
             return
         for r in _tsv(PARASHOT):
             if r["book"] != bk.book:
@@ -630,6 +740,101 @@ class Builder:
             for mark, i in mam.sections(bk.book, bk.verse_words):
                 k = bk.keys[bk.wend[i]]
                 self.add("section", "sc." + mark, k, k, "b.source", ["mam"], after=k)
+
+    def greek_paragraphs(self):
+        """Nestle 1904's paragraphs (sc.np, from v0.3), from the digital edition's <p> elements: a break where the next paragraph
+        starts a verse. Printed lines inside a passage the edition sets apart (fm.ed.*) are lines, not paragraphs: no break
+        between two of them."""
+        bk = self.bk
+        if bk.book not in nestle1904_layout.FILES:
+            return
+        words = [(k, self.surface(k)) for k in bk.keys]
+        paras = nestle1904_layout.align(bk.book, words)
+        blocks = [(bk.pos[r["first"]], bk.pos[r["last"]]) for r in nestle1904_layout.passages(bk.book, words) if r["first"]]
+        starts = {i for i, _ in bk.verses.values()}
+        for (_, z), (a2, _) in zip(paras, paras[1:]):
+            if a2 not in starts or any(lo <= z and a2 <= hi for lo, hi in blocks):
+                continue
+            k = bk.keys[z]
+            self.add("section", "sc.np", k, k, "b.source", ["nestle1904"], after=k)
+
+    def _psalm_span(self, n: int, a: int, b: int) -> tuple[str, str] | None:
+        bk = self.bk
+        if (n, a) not in bk.verses or (n, b) not in bk.verses:
+            return None
+        return bk.keys[bk.verses[(n, a)][0]], bk.keys[bk.verses[(n, b)][1]]
+
+    def psalm_types(self):
+        """Psalm types (fm.gn.*, b.source, from v0.3): Tyndale Open Study Notes' introductions read by fixed keyword rules
+        (macula/tyndale.py). English verse numbers are moved to the Hebrew by the psalm's own offset (its last verse in MACULA minus
+        its last verse in the note). Only the code and the note's name are stored."""
+        bk = self.bk
+        if bk.book != "PSA" or not enabled("tyndale"):
+            return
+        last = collections.Counter()
+        for c, v in bk.verses:
+            last[c] = max(last[c], v)
+        for t in tyndale.psalm_types():
+            n = t["psalm"]
+            d = last[n] - t["eng_last"]
+            if d not in (0, 1, 2):
+                continue                                   # the note does not number this psalm as one unit
+            spans = [self._psalm_span(n, a + d, b + d) for a, b in t["ranges"]] or [self._psalm_span(n, 1, last[n])]
+            spans = [s for s in spans if s]
+            if not spans:
+                continue
+            self.add("form", f"fm.gn.{t['code']}", spans[0][0], spans[-1][1], "b.source", ["tyndale"], "p.verse",
+                     pieces=spans if len(spans) > 1 else None, note=t["note"],
+                     part=bool(t["ranges"]) or None)
+
+    def psalm_scriptura(self):
+        """From Psalms: Layer by Layer (Scriptura, CC BY 4.0; the dated snapshot of its Overview pages, macula/scriptura.py), from
+        v0.3: the stated purpose as a code (fm.pu.*), the At-a-Glance sections as breaks (sc.part) and the mood of each At-a-Glance
+        row (md.*). The site numbers verses as the Hebrew does. Only codes and the page's address are stored, never its text."""
+        bk = self.bk
+        if bk.book != "PSA" or not enabled("scriptura") or not scriptura.snapshot():
+            return
+        last = collections.Counter()
+        for c, v in bk.verses:
+            last[c] = max(last[c], v)
+        for n in range(1, 151):
+            r = scriptura.read(n)
+            if not r:
+                continue
+            whole = self._psalm_span(n, 1, last[n])
+            for code in scriptura.purpose_codes(r["purpose"]):
+                self.add("form", f"fm.pu.{code}", whole[0], whole[1], "b.source", ["scriptura"], "p.verse", page=r["url"])
+            def span(a, nxt):
+                end = (nxt[0] - 1 if not nxt[1] or nxt[1] == "a" else nxt[0]) if nxt else last[n]
+                return self._psalm_span(n, a[0], max(a[0], end))
+            if len(r["sections"]) > 1:
+                for a, nxt in r["sections"]:
+                    s = span(a, nxt)
+                    if s:
+                        self.add("section", "sc.part", s[0], s[1], "b.source", ["scriptura"], "p.verse", after=s[1], page=r["url"],
+                                 from_part=a[1] or None)
+            bg = scriptura.background(n)
+            for book, c, v1, v2 in bg["refs"]:
+                to = verse_keys(book, c, v1, v2)
+                if to:
+                    self.add("link", "lk.background", whole[0], whole[1], "b.source", ["scriptura"], "p.verse", page=r["url"],
+                             to=f"{book} {c}:{v1}" + (f"-{v2}" if v2 != v1 else ""), to_first=to[0], to_last=to[1])
+            terms = {unfoldingword.norm(h) for h in bg["hebrew"]}
+            if terms:
+                for (c, v), vw in sorted(bk.verse_words.items()):
+                    if c != n:
+                        continue
+                    for i, w in vw:
+                        z = bk.wend.get(i, i)
+                        forms = {w} | {unfoldingword.norm(bk.w[bk.keys[j]][1] or "") for j in range(i, z + 1)}
+                        if forms & terms:
+                            self.add("note", "nt.key_term", bk.keys[i], bk.keys[z], "b.source", ["scriptura"], page=r["url"])
+            for a, nxt, labels in r["moods"]:
+                s = span(a, nxt)
+                for lab in scriptura.mood_labels(labels):
+                    if s:
+                        self.add("mood", "md." + lab.replace(" ", "_").replace("-", "_"), s[0], s[1], "b.source", ["scriptura"],
+                                 "p.verse", page=r["url"], from_part=a[1] or None)
 
     def forms(self):
         bk = self.bk
@@ -645,7 +850,9 @@ class Builder:
         if bk.hebrew and enabled("mam"):
             for song in mam.songs(bk.book, bk.verse_words):
                 lines = [(bk.keys[a], bk.keys[bk.wend[b]]) for a, b in song["lines"]]
-                self.add("form", "fm.ms.song", lines[0][0], lines[-1][1], "b.source", ["mam"], lines=lines)
+                lst = (bk.book, song["verses"][0][0]) in LIST_LAYOUT and enabled("talmud")
+                self.add("form", "fm.ms.song", lines[0][0], lines[-1][1], "b.source", ["mam", "talmud"] if lst else ["mam"], lines=lines,
+                         layout="list" if lst else "song")
             for poem in mam.poem_lines(bk.book, bk.verse_words):
                 lines = [(bk.keys[a], bk.keys[bk.wend[b]]) for a, b in poem["lines"]]
                 self.add("form", "fm.ms.lines", lines[0][0], lines[-1][1], "b.source", ["mam"], lines=lines, markers=poem["markers"])
@@ -673,7 +880,7 @@ class Builder:
         if bk.hebrew and enabled("mam") and enabled("bdb"):
             words = {k: (c, text_forms._h(s)) for k, c, s in sqlite3.connect(SPINE).execute(
                 "SELECT key, class, strong FROM macula_words WHERE book=?", (bk.book,))}
-            for h in text_forms.halves(bk, mam.poem_lines(bk.book, bk.verse_words), mam.verses(bk.book), mam._align, words):
+            for h in text_forms.halves(bk, mam.poem_lines(bk.book, bk.verse_words), mam.verses(bk.book), mam._align_spans, words):
                 (a1, b1), (a2, b2) = h["halves"]
                 e = lambda i: bk.keys[bk.wend.get(i, i)]
                 self.add("form", "fm.tx.halves", bk.keys[a1], e(b2), "b.text", ["macula", "mam", "bdb"] if h["echoes"] else ["macula", "mam"],
