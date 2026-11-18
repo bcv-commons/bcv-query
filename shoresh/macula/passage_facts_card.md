@@ -85,6 +85,12 @@ shape. It goes up only when a field is renamed, dropped or changes meaning; a ne
 never renumbered. Anchors (`first`, `last`, `pieces`, `lines`, `at`, `after`) are a first version and may follow a link-type
 specification later; that would be a schema change, listed here.
 
+- v0.2: two new `form` codes read from the letters by rule: `fm.tx.acrostic` (13 acrostics: Ps 9, 25, 34, 37, 111, 112, 119, 145,
+  Prov 31, Lam 1-4, each letter on its verse or poetic line; the broken acrostics of Ps 10 and Nah 1 are not found) and
+  `fm.tx.refrain` (449 lines that come back in their chapter). Built on the speaker layer v0.16 and the clause layouts v0.37.2 /
+  v0.7.1; every other fact is the same as in v0.1 (62,663 facts; 63,125 with the new ones). Schema unchanged (new codes only).
+- v0.1: first release.
+
 ## Feedback
 
 Issues and requests: [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query/issues).

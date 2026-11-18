@@ -72,6 +72,11 @@ their keys and the text-level hierarchy are those of the layout; only the cut is
 Pin a tag. `schema` in `build.json` goes up only when a field is renamed, dropped or changes meaning. A new layout release, or new
 releases of MAM or unfoldingWord, give a new tag.
 
+- v0.2: built on hebrew-clause-layout v0.37.2 / greek-nt-clause-layout v0.7.1 and speaker layer v0.16. Adds the MACULA clause
+  columns of those layouts (`neg`, `person`, `number`, `gender`, `voice`, and Hebrew `stem`); the Greek lines drop `alt_eng`, the
+  speaker data's English label (331 lines in v0.1), so the Greek `schema` is 2. Every other value is the same as v0.1, row for row.
+- v0.1: first release.
+
 ## Feedback
 
 Issues and requests: [bcv-commons/bcv-query](https://github.com/bcv-commons/bcv-query/issues).

@@ -503,3 +503,5 @@ ln.085	louw_nida	Be a Believer, Christian Faith	ubs	Louw-Nida subdomain 031010
 ln.086	louw_nida	Affirmation	ubs	Louw-Nida subdomain 069001
 ln.087	louw_nida	Sit	ubs	Louw-Nida subdomain 017002
 ln.088	louw_nida	Fly	ubs	Louw-Nida subdomain 015033
+fm.tx.acrostic	form	the first letters of these verses or poetic lines follow the alphabet (an acrostic): read from the Hebrew letters by rule	macula	`unit` verse or line (MAM's poetic lines); `letters` each unit with its letter (empty for a unit between two letters); `missing` letters the run passes over; `pe_before_ayin` where פ stands before ע (Lam 2-4)
+fm.tx.refrain	form	these words come back as a whole line, at least three times in the chapter (twice when six words or longer): read from the text by rule	macula	`occurrences` each time it comes back; `words` its length; speech formulas (opening with a verb of saying) are left out; refrains with varied wording are not yet found

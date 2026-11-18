@@ -36,7 +36,7 @@ from macula import segment_columns
 
 HERE = Path(__file__).resolve().parent
 CARD = HERE / "clause_lines_card.md"
-SCHEMA = 1
+SCHEMA = {"hbo": 1, "grc": 2}   # grc 2 from v0.2: `alt_eng` dropped (the card: a dropped field raises the schema)
 LAYOUT = {"hbo": HERE / "data" / "clause-layout" / "clauses", "grc": HERE / "data" / "nt-clause-layout" / "clauses"}
 DATASET = {"hbo": "bcv-commons/hebrew-clause-lines", "grc": "bcv-commons/greek-nt-clause-lines"}
 
@@ -134,6 +134,8 @@ def main() -> int:
     per_book = {}
     for book in books:
         rows, stat = book_lines(a.lang, book, spans, surf)
+        for r in rows:
+            r.pop("alt_eng", None)     # the speaker data's English label: no English in the data (from v0.2; the layout dropped it in v0.7.1)
         total.update(stat)
         per_book[book] = rows
         print(book, dict(stat))
@@ -142,7 +144,7 @@ def main() -> int:
         pq.write_table(pa.Table.from_pylist(rows, schema=schema), a.out / "data" / f"lines-{book}.parquet", compression="zstd")
     for name in ("codes.tsv", "sources.tsv"):
         shutil.copy(pf.PF / name, a.out / name)
-    build = {"schema": SCHEMA, "dataset": DATASET[a.lang], "tag": a.tag, "built": datetime.date.today().isoformat(), "code": code,
+    build = {"schema": SCHEMA[a.lang], "dataset": DATASET[a.lang], "tag": a.tag, "built": datetime.date.today().isoformat(), "code": code,
              "licence": "CC BY-SA 4.0", "counts": dict(total), "books": len(books),
              "inputs": {"layout": str(LAYOUT[a.lang].parent.name), "unfoldingWord": "en_ult, en_tn v91", "MAM": "MAM-basics cfdbb64e",
                         "UBS": "ubs-open-license 33dcc8c6"}}

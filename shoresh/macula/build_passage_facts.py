@@ -42,7 +42,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-from macula import mam, nestle1904_layout, ubs, unfoldingword
+from macula import mam, nestle1904_layout, text_forms, ubs, unfoldingword
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -641,6 +641,7 @@ class Builder:
                 code = {"lines": "fm.ed.lines", "block": "fm.ed.block", "qlines": "fm.ed.qlines"}[r["class"]]
                 self.add("form", code, r["first"], r["last"], "b.source", ["nestle1904"], r["precision"],
                          lines=r["line_spans"], printed_lines=int(r["lines"]) if r["lines"] else None, leaf=r["leaf"], note=r["note"])
+        self.text_forms()
         if bk.hebrew and enabled("mam"):
             for song in mam.songs(bk.book, bk.verse_words):
                 lines = [(bk.keys[a], bk.keys[bk.wend[b]]) for a, b in song["lines"]]
@@ -653,6 +654,24 @@ class Builder:
         for (c1, v1), (c2, v2), start, end in bsb_poetry(bk):
             a, b = bk.verses[(c1, v1)][0], bk.verses[(c2, v2)][1]
             self.add("form", "fm.tr.poetry", bk.keys[a], bk.keys[b], "b.source", ["bsb"], "p.verse", start=start, end=end)
+
+    def text_forms(self):
+        """Acrostics (Hebrew) and refrains (both), read from the letters by fixed rules (macula/text_forms.py; from v0.2)."""
+        bk = self.bk
+        lines = collections.defaultdict(list)
+        if bk.hebrew and enabled("mam"):
+            for poem in mam.poem_lines(bk.book, bk.verse_words):
+                for a, b in poem["lines"]:
+                    lines[bk.cv(bk.keys[a])[0]].append((a, bk.wend[b]))
+        for r in text_forms.acrostics(bk, lines):
+            units = [(bk.keys[a], bk.keys[bk.wend[b]] if b in bk.wend else bk.keys[b], ch) for a, b, ch in r["units"]]
+            self.add("form", "fm.tx.acrostic", units[0][0], units[-1][1], "b.text",
+                     ["macula", "mam"] if r["unit"] == "line" else ["macula"], unit=r["unit"],
+                     letters=[[a, b, ch] for a, b, ch in units], missing=r["missing"], pe_before_ayin=r["swapped"] or None)
+        for r in text_forms.refrains(bk, self.segs):
+            occ = [(bk.keys[a], bk.keys[bk.wend[b]]) for a, b in r["occurrences"]]
+            self.add("form", "fm.tx.refrain", occ[0][0], occ[-1][1], "b.text", ["macula", "layout"], occurrences=occ,
+                     words=len(r["words"]))
 
     def ult_forms(self):
         """The ULT's runs of poetic paragraphs, each printed line on the Hebrew or Greek words aligned to it (p.word)."""
