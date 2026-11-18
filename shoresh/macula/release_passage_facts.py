@@ -110,6 +110,7 @@ def main() -> int:
     for name in ("codes.tsv", "sources.tsv", "build.json"):
         shutil.move(a.out / "data" / name, a.out / name)
     (a.out / "data" / "README.md").unlink()
+    shutil.copy(pf.PF / "mood_families.tsv", a.out / "mood_families.tsv")      # the mood families' definitions (from v0.3.1)
     facts = sum(sum(v.values()) for v in build["books"].values())
     by_facts = sum(sum(v.values()) for v in by_build["books"].values())
     build.update(code=code, release={"data": "CC BY-SA 4.0", "data-cc-by": "CC BY 4.0", "facts": facts, "facts_cc_by": by_facts,

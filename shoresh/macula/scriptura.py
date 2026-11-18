@@ -25,7 +25,7 @@ PURPOSE = {
     "petition": ("ask", "petition", "plead", "pray", "invoke", "request", "cry", "intercede"),
     "praise": ("praise", "celebrate", "delight", "exalt", "extol", "worship", "glorify", "honor", "honour", "bless"),
     "thanks": ("thank", "give"),
-    "confidence": ("express",),
+    "confidence": ("express", "promise", "assure", "reassure"),
     "instruct": ("persuade", "instruct", "teach", "exhort", "rebuke", "warn", "call", "urge", "encourage", "remind", "challenge"),
 }
 EXPRESS = {"confidence": "confidence", "trust": "confidence", "praise": "praise", "thanks": "thanks", "gratitude": "thanks",
@@ -54,7 +54,9 @@ FOLD = {"confident": "confidence", "hopeful": "hope", "joyful": "joy", "distress
         "anxious": "anxiety", "angry": "anger", "desperate": "desperation", "humiliated": "humiliation", "terrified": "terror",
         "ashamed": "shame", "reverent": "reverence", "passionate": "passion", "pensive": "pensiveness", "determined": "determination",
         "secure": "security", "calm": "calm", "grateful": "gratitude", "thankful": "gratitude", "sad": "sadness",
-        "lonely": "loneliness", "amazed": "amazement", "astonishment": "amazement", "joyous": "joy", "solemn": "solemnity", "astonished": "amazement", "afraid": "fear", "peaceful": "peace", "trusting": "trust"}
+        "lonely": "loneliness", "amazed": "amazement", "astonishment": "amazement", "joyous": "joy", "solemn": "solemnity", "astonished": "amazement", "afraid": "fear", "peaceful": "peace", "trusting": "trust",
+        "annoyed": "annoyance", "dependent": "dependence", "disappointed": "disappointment", "frustrated": "frustration",
+        "helpless": "helplessness", "triumphant": "triumph"}
 
 
 def mood_labels(labels: list[str]) -> list[str]:
@@ -135,7 +137,23 @@ def _close_skip(p: _Page, raw: str) -> str:
     return re.sub(r'<span class="smwttcontent">.*?</span>', "", raw, flags=re.S)
 
 
-def read(n: int, folder: Path | None = None) -> dict | None:
+def glance_rows(folder: Path) -> dict[int, list[tuple[str, tuple[int, str], str]]]:
+    """glance.tsv of a snapshot (macula/scriptura_glance.py: the At-a-Glance pictures read by OCR): psalm -> [(kind, verse,
+    labels)]."""
+    f = folder / "glance.tsv"
+    out: dict[int, list] = {}
+    if not f.exists():
+        return out
+    for line in f.read_text(encoding="utf-8").splitlines()[1:]:
+        n, kind, v, labels, _ = line.split("\t")
+        m = re.match(r"(\d+)([a-z]*)$", v)
+        out.setdefault(int(n), []).append((kind, (int(m.group(1)), m.group(2)), labels))
+    return out
+
+
+def read(n: int, folder: Path | None = None, pictures: bool = True) -> dict | None:
+    """With `pictures`, a page whose At-a-Glance is a picture (no sections or moods in its HTML) takes them from glance.tsv;
+    the result then says "read_from": "picture"."""
     folder = folder or snapshot()
     f = folder / f"psalm_{n:03d}.html" if folder else None
     if not f or not f.exists():
@@ -172,7 +190,7 @@ def read(n: int, folder: Path | None = None) -> dict | None:
             if (icon - 2 >= 1 and cells[icon - 2].strip("| ")) or (icon > 1 and titled):
                 sec.append(v)
             mood = cells[icon + 1] if icon + 1 < len(cells) else ""
-            labels = [x.strip().lower() for x in re.split(r"\s*[&|,/()]\s*|\s+and\s+|\s*\.\.\.\s*", mood) if x.strip()]
+            labels = [x.strip().lower() for x in re.split(r"\s*[&|,/()]\s*|\s+(?:and|amidst|amid)\s+|\s*\.\.\.\s*", mood) if x.strip()]
             if labels:
                 starts.append((v, labels))
         else:
@@ -181,10 +199,18 @@ def read(n: int, folder: Path | None = None) -> dict | None:
                 sec.append(v)                           # a page without icons: a short title cell starts a section
     def ends(xs):
         return [(v, xs[k + 1] if k + 1 < len(xs) else None) for k, v in enumerate(xs)]   # (start, next start or None = to the end)
+    read_from = "page"
+    rows = glance_rows(folder).get(n) if pictures and not sec and not starts else None
+    if rows:
+        read_from = "picture"
+        superscription = [v for kind, v, _ in rows if kind == "superscription"]
+        sec = [v for kind, v, _ in rows if kind == "section"]
+        starts = [(v, [x.strip().lower() for x in re.split(r"\s*[&|,/()]\s*|\s+(?:and|amidst|amid)\s+|\s*\.\.\.\s*", lab) if x.strip()])
+                  for kind, v, lab in rows if kind == "mood"]
     moods = [(a, b, starts[k][1]) for k, (a, b) in enumerate(ends([v for v, _ in starts]))]
     sections = ends(sec)
     return {"psalm": n, "purpose": purpose, "sections": sections, "moods": moods, "superscription": superscription,
-            "headed_sections": headed,
+            "headed_sections": headed, "read_from": read_from,
             "url": f"https://psalms.scriptura.org/w/Psalm_{n}/Overview", "snapshot": folder.name}
 
 
@@ -245,23 +271,17 @@ CODES = Path(__file__).resolve().parents[2] / "resources" / "passage_facts" / "c
 
 
 def update_mood_codes(path: Path = CODES) -> list[str]:
-    """Rewrite the md.* rows of codes.tsv: the moods of the snapshot (mood_labels) and those the builder maps from Glyssen's
-    deliveries (Builder.DELIVERY_MOOD). Run after a new snapshot:  python -m macula.scriptura --update-mood-codes"""
-    from macula.build_passage_facts import Builder
+    """Rewrite the md.* rows of codes.tsv from the mood families (resources/passage_facts/mood_families.tsv), from v0.3.1. Run
+    after changing that table:  python -m macula.scriptura --update-mood-codes"""
+    from macula import mood_families
     rows = [l for l in path.read_text(encoding="utf-8").splitlines(keepends=True) if not l.startswith("md.")]
-    src: dict[str, set[str]] = {}
-    for n in range(1, 151):
-        r = read(n)
-        for _, _, ls in (r or {}).get("moods", []):
-            for label in mood_labels(ls):
-                src.setdefault(label, set()).add("scriptura")
-    for m in Builder.DELIVERY_MOOD:
-        src.setdefault(m, set()).add("glyssen")
-    for label in sorted(src):
-        rows.append(f"md.{label.replace(' ', '_').replace('-', '_')}\tmood\t{label}\t{', '.join(sorted(src[label]))}\tthe mood a source gives "
-                    "these words: Scriptura's At-a-Glance (Psalms, by verse), or a Glyssen delivery that names this feeling (a speech, b.rule)\n")
+    for fid, r in mood_families.FAMILIES.items():
+        rows.append(f"{fid}\tmood\t{r['note']}\tubs, macula, scriptura, glyssen\ta feeling the Hebrew or Greek text marks, named by "
+                    f"its head word {r['head_hbo']} / {r['head_grc']}; the family's words are SDBH {', '.join(r['sdbh'].split('|')) or '-'}"
+                    f", Louw-Nida {', '.join(r['ln'].split('|'))} and the lemmas in mood_families.tsv; `head` the head word in the "
+                    f"fact's language, `marked_by` the words that mark it, `marks` why (domain, Strong's number, lemma or cue)\n")
     path.write_text("".join(rows), encoding="utf-8")
-    return sorted(src)
+    return list(mood_families.FAMILIES)
 
 
 if __name__ == "__main__":

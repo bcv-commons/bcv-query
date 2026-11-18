@@ -1,0 +1,10 @@
+id	head_hbo	head_grc	side	sdbh	sdbh_minus	hbo_strong	ln	grc_minus	grc_lemma	source_words	note
+md.yare	יָרֵא	φοβέω	painful	Afraid|Respect	0835	0926|0367|6427	025022|025020			fear|terror|anxiety|alarm|dismay|awe|reverence|amazement|solemnity	fear and awe: Hebrew יָרֵא and יִרְאָה cover both, and Greek amazement (LN 25.20) goes with them
+md.aph	אַף	ὀργή	painful	Angry|Complain			088024			anger|indignation|frustration|annoyance|impatience|discontentment	anger, indignation, resentment
+md.samach	שָׂמַח	χαίρω	pleasant	Rejoice|Praise|Sing	5542|4210|7015	7442|7440|8342|5937	025011|025009			joy|triumph|enthusiasm|admiration|passion|gratitude|well-being|delight|zeal	joy and praise; the heading terms סֶלָה and מִזְמוֹר are left out, קִינָה goes to md.bakah
+md.bakah	בָּכָה	κλαίω	painful	Grieve	8074	3015|7015	025012|025023|025024		γελάω:md.samach|γέλως:md.samach	grief|sadness|misery|abandonment|discouragement|depression|disappointment	grief, mourning, weeping, lament
+md.bosh	בּוֹשׁ	καταισχύνω	painful	Shame			025018			shame|guilt|remorse|humiliation	shame and disgrace
+md.batach	בָּטַח	ἐλπίς	pleasant	Confident		6960|8615	025004|025014|025013|022005		εἰρήνη:md.batach	confidence|security|hope|peace|calm|reassurance|relief|expectation|dependence|courage|determination|resolve	trust, hope, courage, consolation
+md.tsarah	צָרָה	θλῖψις	painful	Spasm		6869|6862|6693|4691|4689|6695|4712|2427|2427a|2199|2201|6817|6818|7768|7775|0584|0585|5009|1674|6040	025021|022001|022002	εἰρήνη|οὐαί		distress|desperation|vulnerability|confusion|anguish|discomfort|helplessness|longing	distress and anguish: the words of trouble and of crying out for help (זָעַק, צָעַק, שָׁוַע), groaning, birth pangs
+md.ahav	אָהֵב	ἀγαπάω	pleasant	Love|Merciful			025003			compassion	love and compassion
+md.sane	שָׂנֵא	μισέω	painful	Hate|Despise|Revile	2490		088025|088026|025017			contempt|abhorrence|disgust	hate, contempt, scorn

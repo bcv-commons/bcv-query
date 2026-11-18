@@ -39,6 +39,7 @@ fixed rule (`b.text`), inferred by a published rule from other facts (`b.rule`),
 | `data-cc-by/<BOOK>.jsonl` | **only the facts of sources that are not share-alike**. Licence: CC BY 4.0 |
 | `codes.tsv` | the decoding table: every code in the data, with its English meaning, its source, and notes |
 | `sources.tsv` | the sources: licence, share-alike or not, enabled or not, attribution wording, what each gives |
+| `mood_families.tsv` | the mood families: Hebrew and Greek head words, the SDBH and Louw-Nida domains and lemmas that mark each |
 | `build.json` | sources used, input hashes and pins, counts per book, and `checks`: how well each source landed on the words |
 | `SHA256SUMS` | the sha256 of every file |
 
@@ -85,6 +86,13 @@ shape. It goes up only when a field is renamed, dropped or changes meaning; a ne
 never renumbered. Anchors (`first`, `last`, `pieces`, `lines`, `at`, `after`) are a first version and may follow a link-type
 specification later; that would be a schema change, listed here.
 
+- v0.3.1: moods by the text's own feeling words. The `md.*` values of v0.3 were the sources' English mood words (Scriptura's
+  At-a-Glance, Glyssen's deliveries); from v0.3.1 a mood is one of 9 families named by its Hebrew head word (`md.samach` שָׂמַח,
+  `md.bakah` בָּכָה, `md.yare` יָרֵא, `md.aph` אַף, `md.bosh` בּוֹשׁ, `md.batach` בָּטַח, `md.tsarah` צָרָה, `md.ahav` אָהֵב, `md.sane`
+  שָׂנֵא), defined in `mood_families.tsv` by UBS domains (SDBH, Louw-Nida) and lemmas, and a mood fact is kept only where Hebrew
+  or Greek words in its span mark that family (`marked_by`, `marks`). Mood facts so carry UBS evidence and are CC BY-SA. Scriptura's
+  At-a-Glance is now read for all 65 psalms that have it (39 of them from a picture by OCR, `read` picture): sections `sc.part` on
+  62 psalms. The Ps 91 purpose (fm.pu) is read.
 - v0.3: passage-level facts from three new sources, and the whole Bible's moods by rule. Schema unchanged (new kinds and codes
   only). 70,072 facts (67,718 in v0.2). New: `cue` 285, `link` 604, `mood` 381 (119 from Scriptura, 262 from
   deliveries), `fm.gn.*` 104 on 88 psalms, `fm.pu.*` 46, `sc.part` 85, `sc.np` 722, `nt.key_term` 40, chapter register 22.

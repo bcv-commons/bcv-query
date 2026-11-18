@@ -356,8 +356,8 @@ class Builder:
         self.voices(quotes)
         self.delivery(spans)
         self.chapter_register()
-        self.speech_moods()
         self.register_cues()
+        self.speech_moods()
         self.force_and_addressee(quotes)
         self.sections()
         self.forms()
@@ -554,15 +554,54 @@ class Builder:
         "compassion": ["compassionately"],
     }
 
+    def _mood_marks(self) -> dict[int, list[tuple[str, str]]]:
+        """Word index -> [(mood family, why)]: the Hebrew and Greek words that mark a family (macula/mood_families.py), with the
+        cues of this book."""
+        if not hasattr(self, "_marks"):
+            from macula import mood_families
+            pos = self.bk.pos
+            cues = {pos[f["first"]]: f["value"] for f in self.facts if f["kind"] == "cue" and f["first"] in pos}
+            self._marks = mood_families.word_marks(self.bk.book, self.bk, cues)
+        return self._marks
+
+    def add_mood(self, label: str, first: str, last: str, src: list[str], extra_words: set[int] = frozenset(), **extra) -> dict | None:
+        """A source's mood word on a span becomes a mood fact only where the original text marks it (from v0.3.1): the word's
+        family (mood_families.tsv), with `marked_by` the keys of the Hebrew or Greek words in the span (and `extra_words`) that
+        mark that family and `marks` why. The source's own word is not stored. None when no word marks it."""
+        from macula import mood_families
+        fam = mood_families.source_family(label)
+        if not fam:
+            return None
+        bk, marks = self.bk, self._mood_marks()
+        idx = sorted(set(range(bk.pos[first], bk.pos[last] + 1)) | set(extra_words))
+        hits = [(bk.keys[i], why) for i in idx for f, why in marks.get(i, []) if f == fam]
+        if not hits:
+            return None
+        whys = sorted({w for _, w in hits})
+        srcs = list(src) + (["ubs"] if any(w.startswith(("sdbh:", "ln:")) for w in whys) else []) + (
+            ["macula"] if any(w.startswith(("strong:", "lemma:", "rg.")) for w in whys) and "macula" not in src else [])
+        return self.add("mood", fam, first, last, "b.rule", srcs, "p.word", head=mood_families.head(fam, bk.hebrew),
+                        marked_by=list(dict.fromkeys(k for k, _ in hits)), marks=whys, **extra)
+
     def speech_moods(self):
-        """A speech whose Glyssen delivery names a feeling gets that mood (b.rule, from v0.3), Bible-wide; `from_facts` the
-        delivery fact. The chapter register is left out (it repeats its speeches)."""
+        """A speech whose Glyssen delivery names a feeling gets that feeling's family where the text marks it (b.rule, from
+        v0.3; families from v0.3.1), Bible-wide; `from_facts` the delivery fact. The marking words are looked for in the speech,
+        its frame verb and the verse before it. The chapter register is left out (it repeats its speeches)."""
+        bk = self.bk
         label = {self.codes.of("delivery", l): m for m, ls in self.DELIVERY_MOOD.items() for l in ls
                  if l in self.codes.open["delivery"]}
+        frames = collections.defaultdict(set)
+        for f in self.facts:
+            if f["kind"] == "frame" and f["first"] in bk.pos:
+                frames[f["of"]].add(bk.pos[f["first"]])
         for f in [f for f in self.facts if f["kind"] == "delivery" and f.get("scope") != "chapter"]:
             m = label.get(f["value"])
             if m:
-                self.add("mood", f"md.{m}", f["first"], f["last"], "b.rule", ["clear", "glyssen"], "p.word", from_facts=[f["id"]])
+                a = bk.pos[f["first"]]
+                c, v = bk.cv(f["first"])
+                before = {i for i in range(max(0, a - 300), a) if bk.cv(bk.keys[i]) in ((c, v - 1), (c, v))}
+                self.add_mood(m, f["first"], f["last"], ["clear", "glyssen"], frames.get(f.get("of"), set()) | before,
+                              from_facts=[f["id"]])
 
     # words that mark a register in the text itself (lemma by Strong's number in MACULA), from v0.3
     CUES = {
@@ -791,6 +830,7 @@ class Builder:
         """From Psalms: Layer by Layer (Scriptura, CC BY 4.0; the dated snapshot of its Overview pages, macula/scriptura.py), from
         v0.3: the stated purpose as a code (fm.pu.*), the At-a-Glance sections as breaks (sc.part) and the mood of each At-a-Glance
         row (md.*). The site numbers verses as the Hebrew does. Only codes and the page's address are stored, never its text."""
+        from macula import mood_families
         bk = self.bk
         if bk.book != "PSA" or not enabled("scriptura") or not scriptura.snapshot():
             return
@@ -802,6 +842,7 @@ class Builder:
             if not r:
                 continue
             whole = self._psalm_span(n, 1, last[n])
+            pic = "picture" if r["read_from"] == "picture" else None     # At-a-Glance read by OCR (macula/scriptura_glance.py)
             for code in scriptura.purpose_codes(r["purpose"]):
                 self.add("form", f"fm.pu.{code}", whole[0], whole[1], "b.source", ["scriptura"], "p.verse", page=r["url"])
             def span(a, nxt):
@@ -812,7 +853,7 @@ class Builder:
                     s = span(a, nxt)
                     if s:
                         self.add("section", "sc.part", s[0], s[1], "b.source", ["scriptura"], "p.verse", after=s[1], page=r["url"],
-                                 from_part=a[1] or None)
+                                 from_part=a[1] or None, read=pic)
             bg = scriptura.background(n)
             for book, c, v1, v2 in bg["refs"]:
                 to = verse_keys(book, c, v1, v2)
@@ -831,10 +872,12 @@ class Builder:
                             self.add("note", "nt.key_term", bk.keys[i], bk.keys[z], "b.source", ["scriptura"], page=r["url"])
             for a, nxt, labels in r["moods"]:
                 s = span(a, nxt)
+                done = set()
                 for lab in scriptura.mood_labels(labels):
-                    if s:
-                        self.add("mood", "md." + lab.replace(" ", "_").replace("-", "_"), s[0], s[1], "b.source", ["scriptura"],
-                                 "p.verse", page=r["url"], from_part=a[1] or None)
+                    fam = mood_families.source_family(lab)
+                    if s and fam and fam not in done:
+                        done.add(fam)
+                        self.add_mood(lab, s[0], s[1], ["scriptura"], page=r["url"], from_part=a[1] or None, read=pic)
 
     def forms(self):
         bk = self.bk
