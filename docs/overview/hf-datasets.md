@@ -77,6 +77,8 @@ All keyed by the clause keys of the two layouts; all built by rule from MACULA a
 | [hebrew-phrase-types-model](https://huggingface.co/datasets/bcv-commons/hebrew-phrase-types-model) | v0.1 | CC BY 4.0 | Semantic types for the 50,829 clause-level prepositional phrases of the Hebrew Bible |
 | [clause-subjects-model](https://huggingface.co/datasets/bcv-commons/clause-subjects-model) | v0.1 | CC BY 4.0 | Who or what the subject is, for clauses the rule layers leave without one |
 | [passage-moods-model](https://huggingface.co/datasets/bcv-commons/passage-moods-model) | v0.1 | CC BY-SA 4.0 | Which feelings the Hebrew or Greek of a passage marks, and by which words, for 598 passages the mood rules leave open; read by a model, no human check |
+| [hebrew-commentary-terms](https://huggingface.co/datasets/bcv-commons/hebrew-commentary-terms) | v0.1 | CC BY-SA 4.0 | What the classical Hebrew commentators say about words and psalms, in their own Hebrew terms, on MACULA word keys: 15,095 statements from fixed formulas (Metzudat Zion, Radak, Meiri, Ibn Ezra, Rashi, Malbim), with the sages' word lists |
+| [hebrew-commentary-terms-model](https://huggingface.co/datasets/bcv-commons/hebrew-commentary-terms-model) | v0.1 | CC BY-SA 4.0 | The same commentators' openings on all 150 psalms read by a model (kind, voice, occasion, turn), terms copied from the text; no human check |
 
 ## 6. Vector tables (`-similar`)
 
