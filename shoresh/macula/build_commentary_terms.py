@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import functools
 import csv
 import json
 import re
@@ -174,12 +175,14 @@ def psalm_opening(work: str, n: int, verses: int = 2) -> tuple[list[tuple[str, s
     return out, v["license"]
 
 
+@functools.lru_cache(maxsize=None)
 def psalm_span(n: int) -> tuple[str, str] | None:
     sp = sqlite3.connect(f"file:{MACULA}?mode=ro", uri=True)
     r = sp.execute("SELECT MIN(key), MAX(key) FROM macula_words WHERE book='PSA' AND chapter=?", (n,)).fetchone()
     return (r[0], r[1]) if r and r[0] else None
 
 
+@functools.lru_cache(maxsize=None)
 def verse_span(book: str, c: int, v: int) -> tuple[str, str] | None:
     sp = sqlite3.connect(f"file:{MACULA}?mode=ro", uri=True)
     r = sp.execute("SELECT MIN(key), MAX(key) FROM macula_words WHERE book=? AND chapter=? AND verse=?", (book, c, v)).fetchone()
@@ -263,6 +266,88 @@ def psalm_rules() -> tuple[list[dict], collections.Counter]:
     return rows, st
 
 
+CITE_LEADS = ("זה שאמר הכתוב", "הדא הוא דכתיב", "הה\"ד", "ה\"ה דכתיב", "כדכתיב", "דכתיב", "וכתיב", "כתיב", "שנאמר", "ונאמר",
+              "כמו שנאמר", "כמו שכתוב", "שכתוב", "וכתוב", "ואומר", "כענין", "כמו", "וכן", "וכמו")
+CITE_WORKS = PSALM_WORKS + ("midrash_tehillim",)
+IBID_WORKS = {"midrash_tehillim", "radak"}   # "(שם …)" read as a verse only where it checks out (0.87, 0.84 against the
+                                             # quoted words); elsewhere "(שם כ)" is mostly a chapter (Metzudat Zion 0.10)
+
+
+CITE_CACHES = (("metzudat_zion", "metzudat_zion_chapters.jsonl"), ("malbim", "malbim_commentary_chapters.jsonl"),
+               ("malbim", "malbim_torah_chapters.jsonl"))            # earlier Sefaria caches, by chapter (macula/data)
+
+
+def _cached_comments():
+    """(work, book, chapter, verse, locus, plain text, licence) from CITE_CACHES; Public Domain chapters only; Malbim's Psalms
+    come from the Sefaria snapshot instead."""
+    for work, name in CITE_CACHES:
+        for line in (HERE / "data" / name).open(encoding="utf-8"):
+            r = json.loads(line)
+            if r.get("license") != "Public Domain" or (work == "malbim" and r["book"] == "PSA"):
+                continue
+            for vi, cs in enumerate(r["verses"], start=1):
+                for ci, c in enumerate(cs if isinstance(cs, list) else [cs], start=1):
+                    if isinstance(c, str) and c.strip():
+                        yield work, r["book"], r["chapter"], vi, f"{r['ref']}:{vi}:{ci}", _plain(c), r["license"]
+
+
+def cite_rules() -> tuple[list[dict], collections.Counter]:
+    """`cites`: every parenthesised verse citation in the six commentaries on the Psalms (all verses) and in Midrash Tehillim,
+    "(שם …)" resolved to the citation before (or the commented verse) for IBID_WORKS only;
+    also the earlier Metzudat Zion and Malbim caches (CITE_CACHES) on their verses. Subject: the commented verse (Midrash Tehillim:
+    the whole psalm, its sections are not per verse); object: the cited verse; formula: the lead words before the
+    parenthesis when they are one of CITE_LEADS (else empty); register derash for the midrash or where the sentence names
+    the sages. A witness citing the same verse twice on one subject gives one row."""
+    from macula import hebrew_refs
+    rows, st, seen = [], collections.Counter(), set()
+
+    def add(work, book, chap, subj, locus, text, lic):
+        for a, z, b, c, v, how in hebrew_refs.find_all(text, book, chap):
+            st[work, "citations"] += 1
+            if how == "ibid" and work not in IBID_WORKS:
+                st[work, "citation_ibid_skipped"] += 1
+                continue
+            obj = verse_span(b, c, v)
+            if not obj:
+                st[work, "citation_no_verse"] += 1
+                continue
+            if obj[0] >= subj[0] and obj[1] <= subj[1]:
+                st[work, "citation_self"] += 1
+                continue
+            key = (work, subj, obj)
+            if key in seen:
+                continue
+            seen.add(key)
+            before = re.sub(r"[\s:,.;-]+$", "", hebrew_refs.norm(text)[:a])
+            lead = next((l for l in sorted(CITE_LEADS, key=len, reverse=True) if before.endswith(l)), "")
+            sent = before[max(before.rfind("."), before.rfind(":")) + 1:]
+            rows.append({"subject_first": subj[0], "subject_last": subj[1], "says": "cites", "term": None,
+                         "object_first": obj[0], "object_last": obj[1], "witness": work, "locus": locus, "formula": lead,
+                         "register": "derash" if work == "midrash_tehillim" or DERASH.search(sent) else "peshat",
+                         "anchor": "rule", "citation": hebrew_refs.norm(text)[a:z], "licence": lic,
+                         "_check": (how, hebrew_refs.norm(text)[max(0, a - 60):a], hebrew_refs.norm(text)[z:z + 60])})
+            st[work, "cites"] += 1
+
+    for work, book, chap, vi, locus, text, lic in _cached_comments():
+        subj = verse_span(book, chap, vi)
+        if subj:
+            add(work, book, chap, subj, locus, text, lic)
+    for work in CITE_WORKS:
+        for n in range(1, 151):
+            got = psalm_opening(work, n, verses=999)
+            span = psalm_span(n)
+            if not got or not span:
+                continue
+            comments, lic = got
+            for locus, text in comments:
+                vi = int(locus.rsplit(" ", 1)[1].split(":")[1])
+                subj = span if work == "midrash_tehillim" else verse_span("PSA", n, vi)
+                if not subj:
+                    continue
+                add(work, "PSA", n, subj, locus, text, lic)
+    return rows, st
+
+
 def witnesses() -> list[dict]:
     return [dict(r) for r in csv.DictReader((RES / "witnesses.tsv").open(encoding="utf-8"), delimiter="\t")]
 
@@ -287,6 +372,9 @@ def build(out: Path) -> dict:
     prow, pst = psalm_rules()
     rows += prow
     st.update(pst)
+    crow, cst = cite_rules()
+    rows += crow
+    st.update(cst)
     ls = lists()
     on_list = collections.defaultdict(list)
     for l in ls:

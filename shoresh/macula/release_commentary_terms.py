@@ -1,7 +1,7 @@
 """Package hebrew-commentary-terms (rule rows) or hebrew-commentary-terms-model (model rows). Nothing is uploaded.
 
     cd shoresh && .venv/bin/python -m macula.release_commentary_terms --tag v0.1 --out DIR [--allow-dirty]
-    cd shoresh && .venv/bin/python -m macula.release_commentary_terms --model --tag v0.1 --out DIR [--run <commentary_model dir>]
+    cd shoresh && .venv/bin/python -m macula.release_commentary_terms --model --tag v0.2 --out DIR [--run DIR ...]
 
 Rule dataset: builds macula/build_commentary_terms.py into DIR's work folder and writes data/statements.parquet,
 data/terms.parquet, lists.tsv, witnesses.tsv, README.md (commentary_terms_card.md), build.json, SHA256SUMS.
@@ -22,7 +22,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-RUN = HERE / ".cache" / "commentary-model" / "2026-11-18"
+RUNS = [HERE / ".cache" / "commentary-model" / "2026-11-18", HERE / ".cache" / "commentary-model" / "2026-11-19-midrash"]
 
 
 def sha(p: Path) -> str:
@@ -49,7 +49,7 @@ def main() -> None:
     ap.add_argument("--tag", required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--model", action="store_true")
-    ap.add_argument("--run", type=Path, default=RUN)
+    ap.add_argument("--run", type=Path, nargs="+", default=RUNS, help="commentary_model run folders (collect done)")
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
     import pyarrow as pa
@@ -84,14 +84,14 @@ def main() -> None:
         table = "\n".join(f"| {w} | {s} | {n:,} |" for (w, s), n in sorted(by.items()))
         fill(HERE / "commentary_terms_card.md", {"@TAG@": a.tag, "@CODE@": commit, "@STATEMENTS@": f"{len(rows):,}",
                                                   "@TERMS@": f"{len(terms):,}", "@BY_WITNESS@": table,
-                                                  "@PSALMS@": len({r['subject_first'][:5] for r in rows if r['witness'] != 'metzudat_zion'})},
+                                                  "@PSALMS@": len({r['subject_first'][:5] for r in rows if r['says'] in ('kind', 'voice', 'occasion')})},
              a.out)
         (a.out / "build.json").write_text(json.dumps({**stats, "code": commit}, ensure_ascii=False, indent=1), encoding="utf-8")
     else:
         rows = [json.loads(l) for l in (work / "model" / "statements.jsonl").open(encoding="utf-8")]
         for r in rows:
             r["model"] = "anchor fallback (macula/anchor_llm.py)"
-        prows = [json.loads(l) for l in (a.run / "statements.jsonl").open(encoding="utf-8")]
+        prows = [json.loads(l) for run in a.run for l in (run / "statements.jsonl").open(encoding="utf-8")]
         from macula import commentary_model as cm
         for r in prows:
             r["model"] = cm.MODEL
@@ -99,14 +99,16 @@ def main() -> None:
         for i, r in enumerate(allrows, start=1):
             r["id"] = f"m{i:06d}"
         pq.write_table(pa.Table.from_pylist(allrows), a.out / "data" / "statements.parquet", compression="zstd")
-        col = json.loads((a.run / "collect.json").read_text(encoding="utf-8"))
+        cols = [json.loads((run / "collect.json").read_text(encoding="utf-8")) for run in a.run]
+        col = {k: round(sum(c.get(k, 0) for c in cols), 2) for k in ("units_answered", "usd_reported", "given")}
+        col.update({k: sum(c.get(k, 0) for c in cols) for c in cols for k in c if k.startswith("dropped_")})
         by = collections.Counter((r["witness"], r["says"]) for r in prows)
         table = "\n".join(f"| {w} | {s} | {n:,} |" for (w, s), n in sorted(by.items()))
         fill(HERE / "commentary_terms_model_card.md", {
             "@TAG@": a.tag, "@CODE@": commit, "@MODEL@": cm.MODEL, "@EFFORT@": cm.EFFORT, "@UNITS@": col["units_answered"],
             "@STATEMENTS@": f"{len(prows):,}", "@ANCHOR_ROWS@": len(rows), "@BY_WITNESS@": table, "@USD@": col["usd_reported"],
             "@DROPPED@": sum(v for k, v in col.items() if k.startswith("dropped_")), "@GIVEN@": col.get("given", 0),
-            "@RUN_SHA@": sha(a.run / "raw.jsonl")[:12]}, a.out)
+            "@RUN_SHA@": ", ".join(sha(run / "raw.jsonl")[:12] for run in a.run)}, a.out)
     sums(a.out)
     print(a.out, len(allrows) if a.model else len(rows), "rows; code", commit)
 

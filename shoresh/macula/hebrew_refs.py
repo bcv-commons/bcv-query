@@ -42,3 +42,26 @@ def find(text: str) -> list[tuple[int, int, str, int, int]]:
         if c and v:
             out.append((m.start(), m.end(), BOOKS[m.group(1)], c, v))
     return out
+
+
+_ANY = re.compile(r"\(\s*(?:(" + "|".join(re.escape(n) for n in _NAMES) + r")|שם)[,\s]+(" + NUM + r")(?:[\s:,.]+(" + NUM + r"))?\s*\)")
+
+
+def find_all(text: str, book: str | None = None, chapter: int | None = None) -> list[tuple[int, int, str, int, int, str]]:
+    """As find(), plus "(שם c v)" (the same book as the citation before) and "(שם v)" (the same book and chapter), in text
+    order. `book`/`chapter` give what שם points to before any citation (the commented verse). The last field: "named" or
+    "ibid". A named book with only one number (a chapter) gives no row but sets the book and chapter for a later שם."""
+    out = []
+    for m in _ANY.finditer(norm(text)):
+        a, b = number(m.group(2)), number(m.group(3)) if m.group(3) else None
+        if m.group(1):
+            book, chapter = BOOKS[m.group(1)], a          # a chapter-only citation still sets what a later שם points to
+            if a and b:
+                out.append((m.start(), m.end(), book, a, b, "named"))
+        elif book:
+            if a and b:
+                chapter = a
+                out.append((m.start(), m.end(), book, a, b, "ibid"))
+            elif a and chapter:
+                out.append((m.start(), m.end(), book, chapter, a, "ibid"))
+    return out

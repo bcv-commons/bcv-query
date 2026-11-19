@@ -21,8 +21,8 @@ lexeme, `on_list` term -> `list`). build.json records integrity checks (dangling
 other than the homonym markers).
 
 Ids (stable, become URIs later):  lexeme `lex:H0001` / `lex:G3962` (Aramaic under H, as Strong's) · concept `con:H1.1` · sense
-`sense:<UBS sense id>` · domain `dom:<UBS domain code>` · mention: a MACULA word id `w:010010010011` (Tanakh) / `w:n40001001001`
-(Greek NT), a GLAUx id `w:glx:104873137` (Septuagint), `w:heb_scg:MAT.1.1.3.0` (Hebrew NT edition, book, chapter, verse, word,
+`sense:<UBS sense id>` · domain `dom:<UBS domain code>` · mention: a MACULA word id `w:010010010011` (Tanakh) / `w:40001001001`
+(Greek NT, without MACULA's leading n), a GLAUx id `w:glx:104873137` (Septuagint), `w:heb_scg:MAT.1.1.3.0` (Hebrew NT edition, book, chapter, verse, word,
 part).
 
 OUT gets:

@@ -46,6 +46,8 @@ FILES = {
     "greek_dom_es": "greek/JSON/UBSGreekNTDicLexicalDomains-v1.0-es.JSON",
     "greek_dom_fr": "greek/JSON/UBSGreekNTDicLexicalDomains-v1.1-fr.JSON",
     "greek_dom_zh": "greek/JSON/UBSGreekNTDicLexicalDomains-v1.0-zh-hans.JSON",
+    "hebrew_dom": "hebrew/JSON/UBSHebrewDicLexicalDomains-v0.9.3-en.JSON",           # SDBH lexical domain tree (lexical-domains)
+    "hebrew_ctx": "hebrew/JSON/UBSHebrewDicContextualDomains-v0.9.3-en.JSON",        # SDBH contextual domain tree
 }
 LABEL_FILES = {"eng": "greek_dom_en", "spa": "greek_dom_es", "fra": "greek_dom_fr", "cmn-Hans": "greek_dom_zh"}
 MIN_COUNT = 2

@@ -49,10 +49,10 @@ def _n(s: str) -> str:
     return re.sub(r"\s+", " ", hebrew_refs.norm(s)).strip()
 
 
-def prepare(out: Path) -> None:
+def prepare(out: Path, works: tuple[str, ...] = ct.PSALM_WORKS) -> None:
     out.mkdir(parents=True, exist_ok=True)
     units = []
-    for work in ct.PSALM_WORKS:
+    for work in works:
         for n in range(1, 151):
             got = ct.psalm_opening(work, n)
             if not got or not got[0]:
@@ -204,9 +204,10 @@ def main() -> int:
     ap.add_argument("--cap", type=float, default=15.0)
     ap.add_argument("--limit", type=int)
     ap.add_argument("--workers", type=int, default=3)
+    ap.add_argument("--works", default=",".join(ct.PSALM_WORKS), help="prepare: which works (midrash_tehillim for the midrash run)")
     a = ap.parse_args()
     if a.step == "prepare":
-        prepare(a.out)
+        prepare(a.out, tuple(a.works.split(",")))
     elif a.step == "cli":
         cli(a.out, a.cap, a.limit, a.workers)
     else:

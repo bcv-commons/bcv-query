@@ -8,6 +8,9 @@ DIR (which must not exist yet) gets:
   pairs/<edition>.tsv           the lexeme pairs of resources/hebrew_nt_bridge (count >= 3)
   quotes/<edition>.tsv          the Hebrew NT verses that follow a Tanakh verse (resources/hebrew_nt_bridge/quotes)
   links/<edition>.parquet       one row per Greek word and linked Hebrew word part (macula/data/hebrew-nt-bridge/<edition>/links.parquet)
+  articles/<edition>.parquet    (from v0.3) every Greek article with its Hebrew part by rule (macula/hebrew_nt_articles.py, S1b)
+  function_words/<edition>.parquet  (from v0.3) every Greek preposition, pronoun and conjunction with its Hebrew part(s) by rule
+                                (macula/hebrew_nt_function_words.py, S1c)
   report.json                   the figures: per edition, the two editions against each other, each against the Septuagint tiers
   SHA256SUMS
 
@@ -31,7 +34,7 @@ from macula import release_guard  # refuses TBTA and private inputs
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 CARD = HERE / "hebrew_nt_bridge_card.md"
-CODE = [HERE / "build_hebrew_nt_bridge.py", HERE / "clause_tagger.py", Path(__file__).resolve(), CARD, b.OUT]
+CODE = [HERE / "build_hebrew_nt_bridge.py", HERE / "clause_tagger.py", HERE / "hebrew_nt_articles.py", HERE / "hebrew_nt_function_words.py", Path(__file__).resolve(), CARD, b.OUT]
 EDITIONS = ("heb_scg", "heb_mod")
 FIELD = {"heb_scg": "SCG", "heb_mod": "MOD"}
 
@@ -56,6 +59,13 @@ def main() -> None:
     (out / "pairs").mkdir(parents=True)
     (out / "links").mkdir()
     (out / "quotes").mkdir()
+    (out / "articles").mkdir()
+    (out / "function_words").mkdir()
+    from macula import hebrew_nt_function_words as F
+    fw_stats = {}
+    from macula import hebrew_nt_articles as A
+    import pyarrow as pa
+    art_stats = {}
     files = []
     for ed in EDITIONS:
         rows = pq.read_table(b.DATA / ed / "links.parquet").to_pylist()
@@ -72,6 +82,33 @@ def main() -> None:
         if {r["tanakh"] for r in rows if r["tanakh"]} - {l.split("\t")[1] for l in (b.OUT / "quotes" / f"{ed}.tsv").read_text().splitlines()[1:]}:
             raise SystemExit(f"{ed}: the links file marks Tanakh verses the committed quotes file lacks; rebuild")
         files += [out / "pairs" / f"{ed}.tsv", out / "links" / f"{ed}.parquet", out / "quotes" / f"{ed}.tsv"]
+        hw = {(r["book"], r["chapter"], r["verse"], r["i"], r["part"]): r for r in
+              pq.read_table(A.ANALYSIS / ed / "words.parquet", columns=["book", "chapter", "verse", "i", "part", "text", "lemma", "strong", "class"]).to_pylist()}
+        arows = []
+        for gid, x in sorted(A.links(ed).items()):
+            book, ch, vs = x["verse"]
+            for i, part in x["parts"] or [(None, None)]:
+                w = hw.get((book, ch, vs, i, part), {}) if i is not None else {}
+                arows.append({"edition": ed, "greek_id": gid, "book": book, "chapter": ch, "verse": vs, "i": i, "part": part,
+                              "hebrew_text": w.get("text"), "hebrew_lemma": w.get("lemma"), "hebrew_strong": w.get("strong"),
+                              "hebrew_class": w.get("class"), "status": x["status"], "by": x["by"]})
+        pq.write_table(pa.Table.from_pylist(arows), out / "articles" / f"{ed}.parquet", compression="zstd")
+        files.append(out / "articles" / f"{ed}.parquet")
+        c = collections.Counter((r["by"], r["status"]) for r in {r["greek_id"]: r for r in arows}.values())   # articles, not rows
+        art_stats[ed] = {"articles": len({r["greek_id"] for r in arows}), **{f"{k[0]} {k[1]}": v for k, v in c.items()}}
+        frows = []
+        for gid, x in sorted(F.links(ed).items()):
+            book, ch, vs = x["verse"]
+            for i, part in x["parts"] or [(None, None)]:
+                w = hw.get((book, ch, vs, i, part), {}) if i is not None and part is not None else {}
+                frows.append({"edition": ed, "greek_id": gid, "greek_class": x["cls"], "book": book, "chapter": ch, "verse": vs,
+                              "i": i, "part": part, "hebrew_text": w.get("text"), "hebrew_lemma": w.get("lemma"),
+                              "hebrew_strong": w.get("strong"), "hebrew_class": w.get("class"), "by": x["by"]})
+        pq.write_table(pa.Table.from_pylist(frows), out / "function_words" / f"{ed}.parquet", compression="zstd")
+        files.append(out / "function_words" / f"{ed}.parquet")
+        fc = collections.Counter((r["greek_class"], r["by"]) for r in {r["greek_id"]: r for r in frows}.values())
+        fw_stats[ed] = {f"{k[0]} {k[1]}": v for k, v in fc.items()}
+        fw_stats[ed]["whole word rows"] = sum(1 for r in frows if r["i"] is not None and r["part"] is None)
     shutil.copy(b.OUT / "report.json", out / "report.json")
     files.append(out / "report.json")
     fields = {"@TAG@": a.tag, "@BUILT@": datetime.date.today().isoformat(), "@COMMIT@": commit,
@@ -99,6 +136,17 @@ def main() -> None:
     mc = report["editions"]["heb_mod"].get("compact_against_by_id")
     if not mc:
         raise SystemExit("heb_mod has no by-id links: build with --by-id-local heb_mod=<packet 32 heb_mod/by-id>")
+    for ed, f in FIELD.items():
+        s_ = art_stats[ed]
+        fields.update({f"@{f}_ART@": f"{s_['articles']:,}", f"@{f}_ART_RULE@": f"{sum(v for k, v in s_.items() if k.startswith('rule')):,}",
+                       f"@{f}_ART_PRIMARY@": f"{s_.get('rule primary', 0):,}", f"@{f}_ART_IMPLIED@": f"{s_.get('rule implied', 0):,}",
+                       f"@{f}_ART_NONE@": f"{s_.get('rule not_rendered', 0):,}", f"@{f}_ART_ALIGNER@": f"{sum(v for k, v in s_.items() if k.startswith('aligner')):,}"})
+    for ed, f in FIELD.items():
+        s_ = fw_stats[ed]
+        for cls, short in (("prep", "PREP"), ("pron", "PRON"), ("conj", "CONJ")):
+            n = sum(v for k, v in s_.items() if k.startswith(cls + " "))
+            fields.update({f"@{f}_{short}@": f"{n:,}", f"@{f}_{short}_RULE@": f"{s_.get(cls + ' rule', 0):,}",
+                           f"@{f}_{short}_ALIGNER@": f"{s_.get(cls + ' aligner', 0):,}", f"@{f}_{short}_NONE@": f"{s_.get(cls + ' none', 0):,}"})
     fields.update({"@MODCAL_N@": f"{mc['greek content words with a Hebrew lexeme in both']:,}", "@MODCAL_SAME@": f"{mc['share same']:.1%}"})
     fields.update({"@AGREE_N@": f"{ag['greek content words with a Hebrew lexeme in both']:,}", "@AGREE_SAME@": f"{ag['share same']:.1%}",
                    "@AGREE_COMMON@": f"{ag['share with a lexeme in common']:.1%}",

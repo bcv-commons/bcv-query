@@ -18,6 +18,9 @@ prop_relations.parquet (subject, relation, object, tier, source):
   linked_to       prop -> the clause it attaches to in the clause layout (Hebrew discourse_parent, Greek parent; local
                   builds), else the previous prop of the same book (`target_basis` layout | previous); tier = the link type,
                   `gram` = the relation, `word` = the connective as written
+and prop_accuracy.parquet: S2's audit figures per language and feature (blind samples of 100 clauses judged from the text alone;
+internal-docs/clause-structure-work/s2-figures-2026-11-17.md): feature, figure, n, sample, basis (a code: same_word,
+verb_morphology, present, same_scope, both_named). A feature not listed (the roles of has_argument among them) has not been checked.
 No English content: feature values are the datasets' codes; the connective is Hebrew or Greek.
 """
 from __future__ import annotations
@@ -33,7 +36,7 @@ INPUTS = {
     "clause-columns": ("v1.2", "32beff0b", DOCS / "clause-columns-release" / "v1.2" / "data"),
     "argument-roles": ("v0.2", "5065acab", DOCS / "argument-roles-release" / "v0.2" / "data"),
     "time-aspect": ("v0.2", "5d30d2c2", DOCS / "time-aspect-release" / "v0.2" / "data"),
-    "clause-connectives": ("v0.1", "local copy", DOCS / "clause-connectives-release" / "v0.1" / "data"),
+    "clause-connectives": ("v0.1", "c26a84be", DOCS / "clause-connectives-release" / "v0.1" / "data"),
 }
 LAYOUT = {"hebrew": HERE / "data" / "clause-layout" / "clauses", "greek-nt": HERE / "data" / "nt-clause-layout" / "clauses"}
 
@@ -50,6 +53,22 @@ def layout_parents(side: str) -> dict[str, str]:
                 out[k] = par
     return out
 
+
+# S2 (clause-columns v1.1 Hebrew sample, seed 1119; v1.2 fresh Greek sample, seed 2611): exact agreement with the blind judge.
+# Hebrew columns are unchanged from v1.1 to v1.2. person, number, gender, voice follow the main verb's MACULA morphology.
+ACCURACY = [
+    # lang, feature, figure, n, sample, basis
+    ("hbo", "has_predicate", 0.97, 100, "s2:1119:v1.1", "same_word"),
+    ("hbo", "voice", 0.97, 100, "s2:1119:v1.1", "verb_morphology"),
+    ("hbo", "neg", 1.00, 100, "s2:1119:v1.1", "present"),
+    ("hbo", "neg_scope", 0.98, 100, "s2:1119:v1.1", "same_scope"),
+    ("hbo", "subj_switch", 0.931, 87, "s2:1119:v1.1", "both_named"),
+    ("grc", "has_predicate", 1.00, 100, "s2:2611:v1.2", "same_word"),
+    ("grc", "voice", 1.00, 100, "s2:2611:v1.2", "verb_morphology"),
+    ("grc", "neg", 1.00, 100, "s2:2611:v1.2", "present"),
+    ("grc", "neg_scope", 0.99, 100, "s2:2611:v1.2", "same_scope"),
+    ("grc", "subj_switch", 0.954, 87, "s2:2611:v1.2", "both_named"),
+]
 
 FEATURES = ("ref", "voice", "neg", "neg_scope", "force", "kind", "interrog", "speech", "speaker_id", "line", "genre", "front",
             "focus", "subj_switch", "part_switch", "causative")
@@ -111,6 +130,8 @@ def main() -> None:
     a.out.mkdir(parents=True, exist_ok=True)
     pq.write_table(pa.Table.from_pylist(props), a.out / "propositions.parquet", compression="zstd")
     pq.write_table(pa.Table.from_pylist(rel), a.out / "prop_relations.parquet", compression="zstd")
+    pq.write_table(pa.Table.from_pylist([dict(zip(("lang", "feature", "figure", "n", "sample", "basis"), r)) for r in ACCURACY]),
+                   a.out / "prop_accuracy.parquet", compression="zstd")
     counts = {"props": {k[0]: v for k, v in st.items() if k[1] == "props"},
               "relations": dict(collections.Counter((r["relation"], r["source"].split("@")[0]) for r in rel).most_common()),
               "roles": dict(collections.Counter(r["tier"] for r in rel if r["relation"] == "has_argument").most_common(15)),

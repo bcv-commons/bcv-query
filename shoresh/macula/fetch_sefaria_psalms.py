@@ -17,7 +17,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 WORKS = {"rashi": "Rashi on Psalms", "radak": "Radak on Psalms", "ibn_ezra": "Ibn Ezra on Psalms",
-         "metzudat_david": "Metzudat David on Psalms", "meiri": "Meiri on Psalms", "malbim": "Malbim on Psalms"}
+         "metzudat_david": "Metzudat David on Psalms", "meiri": "Meiri on Psalms", "malbim": "Malbim on Psalms",
+         "midrash_tehillim": "Midrash Tehillim"}           # sections per psalm, not per verse
 API = "https://www.sefaria.org/api/v3/texts/"
 
 

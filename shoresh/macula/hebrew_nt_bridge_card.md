@@ -66,6 +66,8 @@ single link.
 | `pairs/<edition>.tsv` | one per pair of a Hebrew and a Greek lexeme seen at least 3 times |
 | `links/<edition>.parquet` | one per Greek word and Hebrew word part it is linked to |
 | `quotes/<edition>.tsv` | one per verse of the translation and Tanakh verse it follows |
+| `articles/<edition>.parquet` | one per Greek article and the Hebrew part that renders it, by rule (from v0.3) |
+| `function_words/<edition>.parquet` | one per Greek preposition, pronoun and conjunction and the Hebrew part(s) that render it (from v0.3) |
 | `report.json` | the figures on this card, and more |
 | `SHA256SUMS` | SHA-256 of every file |
 
@@ -109,6 +111,59 @@ Rows are sorted by Greek lexeme, then by count. A Greek word rendered by two Heb
 A link to a whole Hebrew word is resolved to parts by rule: a word of one part is that part; for a Greek noun, verb, adjective,
 adverb or numeral, the word's parts of those classes; for a Greek function word, the parts of the same family (conjunction,
 preposition, article, pronoun, particle). `links` has @SCG_ROWS@ rows for `heb_scg` and @MOD_ROWS@ for `heb_mod`.
+
+## Articles (from v0.3)
+
+The Greek article (ὁ, ἡ, τό) is linked by a rule, not by the aligner: `articles/<edition>.parquet`, one row per article (an
+article with no Hebrew part has one row with `i` and `part` empty). For articles, read this file in place of `links`.
+
+The rule: the article's head is the first content word after it in its Greek phrase; the head's Hebrew word is its reviewed
+link. The article is then rendered by that word's article part (`status` primary); else, where Hebrew marks definiteness
+another way, by the part that carries it (`implied`): the word's pronoun suffix (ὁ πατήρ μου = אָבִי, the suffix), or in a
+construct chain the next word's article or suffix (τὸ ὄνομα τοῦ κυρίου = שֵׁם הָאָדוֹן, the article of הָאָדוֹן); else by no part
+(`not_rendered`). Where the head has no Hebrew word the aligner's link stays, a whole word resolved to its article part
+(`by` aligner).
+
+| | Salkinson-Ginsburg | Delitzsch |
+|---|---|---|
+| articles | @SCG_ART@ | @MOD_ART@ |
+| by rule | @SCG_ART_RULE@ (primary @SCG_ART_PRIMARY@, implied @SCG_ART_IMPLIED@, not rendered @SCG_ART_NONE@) | @MOD_ART_RULE@ (primary @MOD_ART_PRIMARY@, implied @MOD_ART_IMPLIED@, not rendered @MOD_ART_NONE@) |
+| by the aligner | @SCG_ART_ALIGNER@ | @MOD_ART_ALIGNER@ |
+
+Checked on a sealed sample of 200 articles per edition, judged blind: the rule (else the aligner) is right in 0.805
+(Salkinson) and 0.835 (Delitzsch) of them; the aligner's own article links in 0.440 and 0.455. The figure is optimistic: the
+rule's last change (link the part that carries the definiteness) was made after reading the misses on that same sample.
+
+## Prepositions, pronouns and conjunctions (from v0.3)
+
+`function_words/<edition>.parquet`: one row per Greek preposition, pronoun or conjunction and Hebrew part (`greek_class`
+prep / pron / conj; a word with no Hebrew part has one row with `i` and `part` empty; `part` empty with `i` given = a whole
+Hebrew word the rule could not narrow). For these words, read this file in place of `links`.
+
+- **Prepositions**: the aligner's link narrowed to the preposition: a whole-word link to its prefixed preposition (or object
+  marker) part, a compound kept whole (מֵ|אֵת, לִ|פְנֵי, עַל יְדֵי, עַל פִּי). With no link: the preposition prefixed to the Hebrew
+  word of the Greek word it governs (`by` rule), else none.
+- **Pronouns**: the pronoun suffix of the Hebrew word of the Greek word the pronoun belongs to (ὁ πατὴρ αὐτοῦ = אָבִיו, the
+  suffix; else its clause's verb) (`by` rule); else the aligner's link narrowed to its suffix or pronoun part.
+- **Conjunctions**: the conjunction part leading the Hebrew word of the next Greek content word (καὶ εἶπεν = וַ|יֹּאמֶר, the וַ),
+  or the conjunction word just before it (`by` rule); else the aligner's link narrowed to its conjunction part.
+
+| | Salkinson-Ginsburg | Delitzsch |
+|---|---|---|
+| prepositions | @SCG_PREP@ (aligner, narrowed @SCG_PREP_ALIGNER@; rule @SCG_PREP_RULE@; none @SCG_PREP_NONE@) | @MOD_PREP@ (@MOD_PREP_ALIGNER@; @MOD_PREP_RULE@; @MOD_PREP_NONE@) |
+| pronouns | @SCG_PRON@ (rule @SCG_PRON_RULE@; aligner @SCG_PRON_ALIGNER@; none @SCG_PRON_NONE@) | @MOD_PRON@ (@MOD_PRON_RULE@; @MOD_PRON_ALIGNER@; @MOD_PRON_NONE@) |
+| conjunctions | @SCG_CONJ@ (rule @SCG_CONJ_RULE@; aligner @SCG_CONJ_ALIGNER@; none @SCG_CONJ_NONE@) | @MOD_CONJ@ (@MOD_CONJ_RULE@; @MOD_CONJ_ALIGNER@; @MOD_CONJ_NONE@) |
+
+Checked on a sealed sample of about 200 words per class and edition, judged blind (exact match of the Hebrew parts; the rules
+were fixed before the sample was scored, and scored once):
+
+| | Salkinson-Ginsburg | Delitzsch | the aligner's own links |
+|---|---|---|---|
+| prepositions | 0.720 | 0.835 | 0.505 / 0.550 |
+| pronouns | 0.693 | 0.704 | 0.588 / 0.588 |
+| conjunctions | 0.709 | 0.725 | 0.497 / 0.450 |
+
+Most of the gain is narrowing a whole-word link to the right part; for pronouns that is nearly all of it.
 
 ## Verses that follow the Tanakh
 
@@ -231,3 +286,6 @@ the word, and what you expected.
 - v0.1 (2026-11-16): both translations; `heb_mod` from the compact form.
 - v0.2: `heb_mod` by Greek word id, with classes, word parts and function words (handed over by make-tanakh-research);
   `heb_scg` read from alignments-by-id v1.1 (its files are the same as v1.0's); the function-word check.
+- v0.3: `articles/`: the Greek article linked by rule (the head's Hebrew word; the part that carries definiteness), with
+  `status` primary / implied / not_rendered and `by` rule / aligner; `function_words/`: prepositions, pronouns and
+  conjunctions linked by rule (`by` rule / aligner / none). Pairs, links and quotes are as in v0.2.

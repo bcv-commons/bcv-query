@@ -20,7 +20,9 @@ through Claude Code's headless mode, 2026-11-18). **No human has checked them.**
 ## What was read
 
 @UNITS@ openings: each of six commentators (Radak, Meiri, Ibn Ezra, Rashi, Metzudat David, Malbim) on each psalm, its
-comments on the first two verses in Hebrew. The model listed what the commentator states about the psalm: `kind`, `voice`,
+comments on the first two verses in Hebrew; from v0.2 also Midrash Tehillim, its first two sections on each of the 143
+psalms it has (register derash). In the midrash a `voice` may be a speaker inside its story ("הצדיקים אומרים")
+rather than the psalm's own speaker; read it with its `quote`. The model listed what the commentator states about the psalm: `kind`, `voice`,
 `occasion`, `turn` (where the psalm turns, on that verse). It had to copy the commentator's words: `term` (1-4 words) inside
 `quote` inside the text, and a verse `citation` exactly as printed. Statements failing that check, or with a
 longer term, were dropped (@DROPPED@ of @GIVEN@ given). No English was given to the model or is stored.
@@ -41,5 +43,6 @@ row); word keys MACULA Hebrew (CC BY 4.0). Model output: Anthropic, `@MODEL@`.
 
 ## Provenance
 
-Code @CODE@: `shoresh/macula/commentary_model.py` (prepare, cli, collect), `release_commentary_terms.py --model`. Run sha256
-@RUN_SHA@…; the run reported USD @USD@ at API prices (it ran on a subscription).
+Code @CODE@: `shoresh/macula/commentary_model.py` (prepare, cli, collect), `release_commentary_terms.py --model`. Runs
+(raw.jsonl sha256) @RUN_SHA@; together they reported USD @USD@ at API prices (they ran on a subscription): the
+commentators 2026-11-18, Midrash Tehillim 2026-11-19.
