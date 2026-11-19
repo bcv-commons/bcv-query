@@ -20,25 +20,27 @@ CACHE = Path(__file__).resolve().parent / ".cache" / "tyndale"
 SOURCE = {"file": "tyndale_open-studynotes.zip", "url": "https://tyndaleopenresources.com/wp-content/themes/tyndale-openresources/files/tyndale_open-studynotes.zip",
           "sha256": "7b4d5ae088449d5a6925170c4b89b978acee2f78f73dc6b8a278fa948a7e8498"}
 
-# code -> patterns (lower case, on the note's plain text). Order matters only for display.
+# code -> patterns (lower case, on the note's plain text). Order matters only for display. The codes are Hebrew terms (from
+# passage-facts v0.3.3; were lament, praise …); the English patterns only select them and are never stored.
+HEAD = {'qinah': 'קִינָה', 'qinat_tsibbur': 'קִינַת צִבּוּר', 'tehillah': 'תְּהִלָּה', 'todah': 'תּוֹדָה', 'mivtach': 'מִבְטָח', 'chokhmah': 'חָכְמָה', 'melekh': 'מֶלֶךְ', 'viduy': 'וִדּוּי', 'tsiyyon': 'צִיּוֹן', 'malkhut': 'מַלְכוּת', 'tefillah': 'תְּפִלָּה', 'qelalah': 'קְלָלָה', 'aliyah': 'עֲלִיָּה לָרֶגֶל'}
 RULES = {
-    "lament_communal": [r"\b(?:community|communal|national) lament\b", r"\bcommunal and individual expressions of lament\b"],
-    "lament": [r"\b(?:this|a|an|individual|untitled) (?:individual )?lament\b", r"\bthe lament(?= \()", r"\bpsalm of lament\b", r"\bin lament\b",
+    "qinat_tsibbur": [r"\b(?:community|communal|national) lament\b", r"\bcommunal and individual expressions of lament\b"],
+    "qinah": [r"\b(?:this|a|an|individual|untitled) (?:individual )?lament\b", r"\bthe lament(?= \()", r"\bpsalm of lament\b", r"\bin lament\b",
                r"\bthe psalmist laments\b", r"\bexpressions of lament\b", r"\bin this (?:individual )?lament\b",
                r"\belements of [^.]*\blament\b", r"\bpsalm is a lament\b"],
-    "praise": [r"\bhymn of praise\b", r"\bpsalm of praise\b", r"\b(?:this|the|a|nature|creation|concluding) hymn\b(?! of thanksgiving)",
+    "tehillah": [r"\bhymn of praise\b", r"\bpsalm of praise\b", r"\b(?:this|the|a|nature|creation|concluding) hymn\b(?! of thanksgiving)",
                r"\bhymn of creation\b", r"\bhymns? (?:\( [^)]*\) )?that praise\b", r"\belements of [^.]*\bpraise\b", r"\) and praise for\b"],
-    "thanksgiving": [r"\bthanksgiving (?:psalm|song|hymn)\b", r"\bhymn of thanksgiving\b", r"\bpsalm of [^.]*\bthanksgiving\b",
+    "todah": [r"\bthanksgiving (?:psalm|song|hymn)\b", r"\bhymn of thanksgiving\b", r"\bpsalm of [^.]*\bthanksgiving\b",
                      r"\belements of [^.]*\bthanksgiving\b"],
-    "trust": [r"\bpsalm of (?:trust|confidence)\b", r"\bpsalm of trust and confidence\b"],
-    "wisdom": [r"\bwisdom psalm\b", r"\belements of wisdom\b", r"\bthemes of wisdom\b"],
-    "royal": [r"\broyal (?:psalm|prayers?|drama|wedding)\b"],
-    "penitential": [r"\bpsalms? of penitence\b", r"\bpsalm of confession\b", r"\belements of [^.]*\bconfession\b"],
-    "zion": [r"\b(?:psalm|song) of zion\b"],
-    "kingship": [r"\bcelebrates (?:god’s|the lord’s) kingship\b", r"\bestablishes the lord’s universal kingship\b"],
-    "prayer": [r"\b(?:this|morning|anonymous) prayer\b", r"\bprayer for (?:rescue|god’s|healing)\b"],
-    "imprecation": [r"\bimprecation\b"],
-    "pilgrimage": [r"\bpilgrims’ songs\b", r"\bon a pilgrimage\b"],
+    "mivtach": [r"\bpsalm of (?:trust|confidence)\b", r"\bpsalm of trust and confidence\b"],
+    "chokhmah": [r"\bwisdom psalm\b", r"\belements of wisdom\b", r"\bthemes of wisdom\b"],
+    "melekh": [r"\broyal (?:psalm|prayers?|drama|wedding)\b"],
+    "viduy": [r"\bpsalms? of penitence\b", r"\bpsalm of confession\b", r"\belements of [^.]*\bconfession\b"],
+    "tsiyyon": [r"\b(?:psalm|song) of zion\b"],
+    "malkhut": [r"\bcelebrates (?:god’s|the lord’s) kingship\b", r"\bestablishes the lord’s universal kingship\b"],
+    "tefillah": [r"\b(?:this|morning|anonymous) prayer\b", r"\bprayer for (?:rescue|god’s|healing)\b"],
+    "qelalah": [r"\bimprecation\b"],
+    "aliyah": [r"\bpilgrims’ songs\b", r"\bon a pilgrimage\b"],
 }
 RANGE = r"\s*(?:[a-z’]+\s+){0,2}?\(\s*{n}:(\d+)(?:-(\d+))?((?:\s*,\s*\d+(?:-\d+)?)*)\s*\)"
 

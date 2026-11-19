@@ -578,10 +578,28 @@ class Builder:
         if not hits:
             return None
         whys = sorted({w for _, w in hits})
+        coded = sorted({self._mark_code(w) or "" for w in whys} - {""})
         srcs = list(src) + (["ubs"] if any(w.startswith(("sdbh:", "ln:")) for w in whys) else []) + (
-            ["macula"] if any(w.startswith(("strong:", "lemma:", "rg.")) for w in whys) and "macula" not in src else [])
+            ["macula"] if any(w.startswith(("strong:", "lemma:", "rg.")) for w in whys) and "macula" not in src else []) + (
+            ["metzudat_zion"] if any(w.startswith("mz:") for w in whys) else [])
         return self.add("mood", fam, first, last, "b.rule", srcs, "p.word", head=mood_families.head(fam, bk.hebrew),
-                        marked_by=list(dict.fromkeys(k for k, _ in hits)), marks=whys, **extra)
+                        marked_by=list(dict.fromkeys(k for k, _ in hits)), marks=coded, **extra)
+
+    _ln_names: dict[str, str] | None = None
+
+    def _mark_code(self, why: str) -> str | None:
+        """A mood mark as a code (from v0.3.3; v0.3.1-2 printed the UBS domain's English name): an SDBH domain as its sd.*
+        code and a Louw-Nida subdomain as its ln.* code (the same open groups as the `domain` facts); a Strong's number as
+        `strong:<number>`, a Greek lemma as `lemma:<lemma>` and a cue as its rg.* code, unchanged (original-language)."""
+        if why.startswith("sdbh:"):
+            return self.codes.of("sdbh", why[5:], "SDBH lexical domain")
+        if why.startswith("ln:"):
+            code = why[3:]
+            if Builder._ln_names is None:
+                Builder._ln_names = {c: n for n, c in ubs.greek().values()}
+            name = Builder._ln_names.get(code)
+            return self.codes.of("louw_nida", name, f"Louw-Nida subdomain {code}") if name else None
+        return why
 
     def speech_moods(self):
         """A speech whose Glyssen delivery names a feeling gets that feeling's family where the text marks it (b.rule, from
@@ -823,7 +841,7 @@ class Builder:
             if not spans:
                 continue
             self.add("form", f"fm.gn.{t['code']}", spans[0][0], spans[-1][1], "b.source", ["tyndale"], "p.verse",
-                     pieces=spans if len(spans) > 1 else None, note=t["note"],
+                     pieces=spans if len(spans) > 1 else None, note=t["note"], head=tyndale.HEAD[t["code"]],
                      part=bool(t["ranges"]) or None)
 
     def psalm_scriptura(self):

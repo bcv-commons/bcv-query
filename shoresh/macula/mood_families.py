@@ -6,7 +6,8 @@
     mf.source_family(label)        # a source's mood word (Scriptura, or a Glyssen delivery mapped by the builder) -> family id or None
 
 A family is defined in the original languages only: its SDBH domains (Hebrew, UBS, the meaning a word has in its place) less
-some lemmas, plus lemmas by Strong's number; its Louw-Nida subdomains (Greek, UBS) less some lemmas, plus lemma overrides. Function words (pronouns,
+some lemmas, plus lemmas by Strong's number; its Louw-Nida subdomains (Greek, UBS) less some lemmas, plus lemma overrides; and (Hebrew, from v0.3.3) the words Metzudat Zion explains with one of the family's
+commentary terms (ענין כעס, ענין שמחה …: mood_families.tsv commentary_terms). Function words (pronouns,
 articles, prepositions, conjunctions, particles, numerals) never mark a family. A
 negator up to three words before a word drops it ("he refused to be comforted"). The id is the transliterated Hebrew head word
 (md.samach = שָׂמַח); English stands only in the note, as documentation. The source words map a source's English mood words to a
@@ -41,11 +42,32 @@ def _load() -> dict[str, dict]:
 
 
 FAMILIES = _load()
+COMMENTARY_TERM: dict[str, str] = {}      # a commentator's sense term (Hebrew, as written) -> family; filled by _maps()
+
+
+@functools.lru_cache(maxsize=1)
+def commentary_marks() -> dict[str, list[tuple[str, str]]]:
+    """MACULA part key -> [(family, "mz:<term>")]: the words Metzudat Zion explains with a family's feeling term (sense,
+    expression, from_word or gloss; anchored by rule only), from macula/build_commentary_terms.py over the cached text."""
+    from macula import build_commentary_terms as ct
+    _maps()
+    rows, _ = ct.metzudat_zion()
+    sp = sqlite3.connect(pf.SPINE)
+    out: dict[str, list[tuple[str, str]]] = collections.defaultdict(list)
+    for r in rows:
+        f = COMMENTARY_TERM.get(r["term"])
+        if not f or r["anchor"] != "rule":
+            continue
+        for (k,) in sp.execute("SELECT key FROM macula_words WHERE key BETWEEN ? AND ?", (r["subject_first"], r["subject_last"])):
+            if (f, "mz:" + r["term"]) not in out[k]:
+                out[k].append((f, "mz:" + r["term"]))
+    return out
 
 
 @functools.lru_cache(maxsize=1)
 def _maps():
     sdbh, minus, strong, ln, gminus, glemma, words = {}, collections.defaultdict(set), {}, {}, collections.defaultdict(set), {}, {}
+    cterm = COMMENTARY_TERM
     for fid, r in FAMILIES.items():
         for d in _split(r["sdbh"]):
             sdbh[d] = fid
@@ -60,6 +82,8 @@ def _maps():
         for x in _split(r["grc_lemma"]):
             l, f = x.split(":")
             glemma[l] = f
+        for t in _split(r.get("commentary_terms", "")):
+            cterm[t] = fid
         for w in _split(r["source_words"]):
             words[w.replace("-", "_").replace(" ", "_")] = fid
     return sdbh, minus, strong, ln, gminus, glemma, words
@@ -112,6 +136,14 @@ def word_marks(book: str, bk=None, cues: dict[int, str] | None = None) -> dict[i
             f = ln.get(code)
             if f and lemma not in gminus[f]:
                 out[i].append((f, f"ln:{code}"))
+    if bk.hebrew:
+        cm = commentary_marks()
+        for i, k in enumerate(keys):
+            if i in negated or k in function or k not in cm:
+                continue
+            for f, why in cm[k]:
+                if all(f != g for g, _ in out.get(i, [])):
+                    out[i].append((f, why))
     for i, c in (cues or {}).items():
         if c in CUE_FAMILY and i not in negated:
             out[i].append((CUE_FAMILY[c], c))

@@ -86,6 +86,13 @@ shape. It goes up only when a field is renamed, dropped or changes meaning; a ne
 never renumbered. Anchors (`first`, `last`, `pieces`, `lines`, `at`, `after`) are a first version and may follow a link-type
 specification later; that would be a schema change, listed here.
 
+- v0.3.3: no English meaning words left in the values. The psalm types are named by Hebrew terms with `head`
+  (`fm.gn.qinah` קִינָה, `qinat_tsibbur` קִינַת צִבּוּר, `tehillah` תְּהִלָּה, `todah` תּוֹדָה, `mivtach` מִבְטָח, `chokhmah` חָכְמָה,
+  `melekh` מֶלֶךְ, `viduy` וִדּוּי, `tsiyyon` צִיּוֹן, `malkhut` מַלְכוּת, `tefillah` תְּפִלָּה, `qelalah` קְלָלָה, `aliyah` עֲלִיָּה לָרֶגֶל;
+  were lament, communal lament, praise, thanksgiving, trust, wisdom, royal, penitential, zion, kingship, prayer, imprecation,
+  pilgrimage); same facts. A mood fact's `marks` give a UBS domain as its `sd.*` / `ln.*` code (v0.3.1-2 printed the domain's
+  English name). The mood families gain a third, Public Domain kind of mark: the words Metzudat Zion explains with one of a
+  family's feeling terms (`mz:כעס`, `mz:יללה` …; `mood_families.tsv` column `commentary_terms`; source `metzudat_zion`).
 - v0.3.2: the psalm purposes are named by Hebrew terms with `head`: `fm.pu.qinah` קִינָה (was lament), `fm.pu.tefillah`
   תְּפִלָּה (petition), `fm.pu.tehillah` תְּהִלָּה (praise), `fm.pu.todah` תּוֹדָה (thanks), `fm.pu.mivtach` מִבְטָח (confidence),
   `fm.pu.musar` מוּסָר (instruct). Same facts, new codes.

@@ -1,0 +1,7 @@
+# The sages' own lists of words (hand-keyed from the edition named in witnesses.tsv, with locus). members as written there.
+list_id	witness	locus	formula	members
+simchah_10	avot_drn	Avot DeRabbi Natan 34	עשרה שמות נקרא שמחה	ששון|שמחה|גילה|רינה|דיצה|צהלה|עליזה|חדוה|תפארת|עליצה
+tefillah_10	sifrei_devarim	Sifrei Devarim 26	י׳ לשונות נקראת תפלה	זעקה|שועה|נאקה|צרה|רנה|פגיעה|נפול|פלול|עתירה|עמידה|חילול|חנון
+shevach_tehillim_10	bavli	Pesachim 117a	בעשרה מאמרות של שבח נאמר ספר תהלים	ניצוח|נגון|משכיל|מזמור|שיר|אשרי|תהלה|תפלה|הודאה|הללויה
+navi_10	avot_drn	Avot DeRabbi Natan 34	עשרה שמות נקרא נביא	ציר|נאמן|עבד|שליח|חוזה|צופה|רואה|חולם|נביא|איש האלהים
+ruach_hakodesh_10	avot_drn	Avot DeRabbi Natan 34	עשרה שמות נקרא רוח הקדש	משל|מליצה|חידה|דיבור|אמירה|תפארת|ציווי|משא|נבואה|חזיון
