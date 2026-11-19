@@ -42,6 +42,7 @@ All keyed by the clause keys of the two layouts; all built by rule from MACULA a
 | [reference-status](https://huggingface.co/datasets/bcv-commons/reference-status) | v0.2 | CC BY-SA 4.0 | For every noun-phrase head: its referent and its status in the episode (new, given, restaged, known), the basis of "a" / "the" / "this" / a pronoun |
 | [noun-relations](https://huggingface.co/datasets/bcv-commons/noun-relations) | v0.1 | CC BY-SA 4.0 | The relation of each noun joined to a noun (construct, suffix, genitive): kin, part, member, ruler, material, origin, possessor … with the dependent's animacy |
 | [inclusive-we](https://huggingface.co/datasets/bcv-commons/inclusive-we) | v0.1 | CC BY-SA 4.0 | Whether each "we" includes the person spoken to |
+| [entity-mentions](https://huggingface.co/datasets/bcv-commons/entity-mentions) | v0.1 | CC BY-SA 4.0 | Which person, place, group, deity, object, plant or animal each Tanakh and Greek NT word refers to (names, pronouns, implied subjects), from ACAI and MACULA's reference chain side by side; 5,243 entities with kinship |
 | [addressees](https://huggingface.co/datasets/bcv-commons/addressees) | v0.1 | CC BY-SA 4.0 | Who each quotation is spoken to where the text shows it, how that was found, and the speaker-to-hearer relation |
 
 ## 3. Words and meanings
@@ -49,6 +50,8 @@ All keyed by the clause keys of the two layouts; all built by rule from MACULA a
 | Dataset | Latest | Licence | What it is |
 |---|---|---|---|
 | [word-senses](https://huggingface.co/datasets/bcv-commons/word-senses) | v0.1 | CC BY-SA 4.0 | The UBS dictionaries' sense and domains on 366,562 Hebrew, Aramaic and Greek words |
+| [lexical-domains](https://huggingface.co/datasets/bcv-commons/lexical-domains) | v0.1 | CC BY-SA 4.0 | The UBS domain trees (SDBH for Hebrew, Louw-Nida for Greek) as codes, with each MACULA word's domains and the lemmas in each domain |
+| [source-ontology](https://huggingface.co/datasets/bcv-commons/source-ontology) | v0.1 | CC BY-SA 4.0 | One id space for lexemes, senses, domains, concepts, entities and propositions (one per clause), joining the bcv-commons datasets; model rows marked by `method` |
 | [hebrew-word-senses](https://huggingface.co/datasets/bcv-commons/hebrew-word-senses) | untagged | CC BY 4.0 | Hebrew lexemes split into senses by how translations render them |
 | [hebrew-lexical-references](https://huggingface.co/datasets/bcv-commons/hebrew-lexical-references) | untagged | CC0 | Strong's-linked transcriptions of outside references: BDB roots, Hebrew WordNet synsets, T'OMIM parallelism, the Septuagint bridge |
 | [semantic-neighbors](https://huggingface.co/datasets/bcv-commons/semantic-neighbors) | untagged | CC0 | 6,671 Hebrew word pairs judged close in meaning. Note: two of its signals are English gloss overlap and LLM verdicts, so it serves as a measurement; a gloss- and LLM-free rebuild was tried twice (2026-11-18) and did not reach its precision |
@@ -63,7 +66,7 @@ All keyed by the clause keys of the two layouts; all built by rule from MACULA a
 |---|---|---|---|
 | [hebrew-greek-bridge](https://huggingface.co/datasets/bcv-commons/hebrew-greek-bridge) | v0.1 | CC BY-SA 4.0 | Which Greek lexemes render a Hebrew lexeme in the Septuagint, and which Greek tense, voice and mood a Hebrew verb form corresponds to |
 | [hebrew-nt-analysis](https://huggingface.co/datasets/bcv-commons/hebrew-nt-analysis) | v0.2 | CC BY 4.0 | The Hebrew NTs of Salkinson–Ginsburg and Delitzsch analysed word by word as MACULA analyses the Tanakh |
-| [hebrew-nt-bridge](https://huggingface.co/datasets/bcv-commons/hebrew-nt-bridge) | v0.2 | CC BY 4.0 | Which Hebrew word renders which Greek NT word, in those two Hebrew NTs |
+| [hebrew-nt-bridge](https://huggingface.co/datasets/bcv-commons/hebrew-nt-bridge) | v0.3 | CC BY 4.0 | Which Hebrew word renders which Greek NT word, in those two Hebrew NTs; from v0.3 also the Hebrew article, preposition, pronoun or conjunction (word part) that renders each Greek one, by rule |
 | [aramaic-hebrew-equivalents](https://huggingface.co/datasets/bcv-commons/aramaic-hebrew-equivalents) | v0.1.1 | CC BY-SA 4.0 | The Hebrew equivalent of each Aramaic lexeme, so Hebrew data reaches the Aramaic parts |
 
 ## 5. Model-made layers (`-model`: no human check)
@@ -77,8 +80,9 @@ All keyed by the clause keys of the two layouts; all built by rule from MACULA a
 | [hebrew-phrase-types-model](https://huggingface.co/datasets/bcv-commons/hebrew-phrase-types-model) | v0.1 | CC BY 4.0 | Semantic types for the 50,829 clause-level prepositional phrases of the Hebrew Bible |
 | [clause-subjects-model](https://huggingface.co/datasets/bcv-commons/clause-subjects-model) | v0.1 | CC BY 4.0 | Who or what the subject is, for clauses the rule layers leave without one |
 | [passage-moods-model](https://huggingface.co/datasets/bcv-commons/passage-moods-model) | v0.1 | CC BY-SA 4.0 | Which feelings the Hebrew or Greek of a passage marks, and by which words, for 598 passages the mood rules leave open; read by a model, no human check |
-| [hebrew-commentary-terms](https://huggingface.co/datasets/bcv-commons/hebrew-commentary-terms) | v0.1 | CC BY-SA 4.0 | What the classical Hebrew commentators say about words and psalms, in their own Hebrew terms, on MACULA word keys: 15,095 statements from fixed formulas (Metzudat Zion, Radak, Meiri, Ibn Ezra, Rashi, Malbim), with the sages' word lists |
-| [hebrew-commentary-terms-model](https://huggingface.co/datasets/bcv-commons/hebrew-commentary-terms-model) | v0.1 | CC BY-SA 4.0 | The same commentators' openings on all 150 psalms read by a model (kind, voice, occasion, turn), terms copied from the text; no human check |
+| [entity-mentions-model](https://huggingface.co/datasets/bcv-commons/entity-mentions-model) | v0.1 | CC BY-SA 4.0 | For 1,612 pronouns that entity-mentions leaves unresolved, the entity a model reads them as referring to (238), or why none (a statement or event, an entity not listed, unclear); no human check |
+| [hebrew-commentary-terms](https://huggingface.co/datasets/bcv-commons/hebrew-commentary-terms) | v0.2 | CC BY-SA 4.0 | What the classical Hebrew commentators say about words and psalms, in their own Hebrew terms, on MACULA word keys: 24,761 statements from fixed formulas (Metzudat Zion, Radak, Meiri, Ibn Ezra, Rashi, Malbim), including 9,666 citations of other verses, with the sages' word lists |
+| [hebrew-commentary-terms-model](https://huggingface.co/datasets/bcv-commons/hebrew-commentary-terms-model) | v0.2 | CC BY-SA 4.0 | The same commentators' openings on all 150 psalms (with Midrash Tehillim from v0.2) read by a model (kind, voice, occasion, turn), terms copied from the text; no human check |
 
 ## 6. Vector tables (`-similar`)
 
