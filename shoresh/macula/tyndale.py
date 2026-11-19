@@ -22,10 +22,10 @@ SOURCE = {"file": "tyndale_open-studynotes.zip", "url": "https://tyndaleopenreso
 
 # code -> patterns (lower case, on the note's plain text). Order matters only for display. The codes are Hebrew terms (from
 # passage-facts v0.3.3; were lament, praise …); the English patterns only select them and are never stored.
-HEAD = {'qinah': 'קִינָה', 'qinat_tsibbur': 'קִינַת צִבּוּר', 'tehillah': 'תְּהִלָּה', 'todah': 'תּוֹדָה', 'mivtach': 'מִבְטָח', 'chokhmah': 'חָכְמָה', 'melekh': 'מֶלֶךְ', 'viduy': 'וִדּוּי', 'tsiyyon': 'צִיּוֹן', 'malkhut': 'מַלְכוּת', 'tefillah': 'תְּפִלָּה', 'qelalah': 'קְלָלָה', 'aliyah': 'עֲלִיָּה לָרֶגֶל'}
+HEAD = {'tefillah_tsarah': 'תְּפִלָּה בְּצָרָה', 'tefillat_tsibbur': 'תְּפִלַּת צִבּוּר', 'tehillah': 'תְּהִלָּה', 'todah': 'תּוֹדָה', 'mivtach': 'מִבְטָח', 'chokhmah': 'חָכְמָה', 'melekh': 'מֶלֶךְ', 'viduy': 'וִדּוּי', 'tsiyyon': 'צִיּוֹן', 'malkhut': 'מַלְכוּת', 'tefillah': 'תְּפִלָּה', 'qelalah': 'קְלָלָה', 'aliyah': 'עֲלִיָּה לָרֶגֶל'}
 RULES = {
-    "qinat_tsibbur": [r"\b(?:community|communal|national) lament\b", r"\bcommunal and individual expressions of lament\b"],
-    "qinah": [r"\b(?:this|a|an|individual|untitled) (?:individual )?lament\b", r"\bthe lament(?= \()", r"\bpsalm of lament\b", r"\bin lament\b",
+    "tefillat_tsibbur": [r"\b(?:community|communal|national) lament\b", r"\bcommunal and individual expressions of lament\b"],
+    "tefillah_tsarah": [r"\b(?:this|a|an|individual|untitled) (?:individual )?lament\b", r"\bthe lament(?= \()", r"\bpsalm of lament\b", r"\bin lament\b",
                r"\bthe psalmist laments\b", r"\bexpressions of lament\b", r"\bin this (?:individual )?lament\b",
                r"\belements of [^.]*\blament\b", r"\bpsalm is a lament\b"],
     "tehillah": [r"\bhymn of praise\b", r"\bpsalm of praise\b", r"\b(?:this|the|a|nature|creation|concluding) hymn\b(?! of thanksgiving)",
