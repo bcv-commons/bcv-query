@@ -254,6 +254,7 @@ shoresh/macula/data/word-senses-ubs/
 shoresh/macula/data/translation-notes/
 shoresh/macula/data/clause-args/
 shoresh/macula/data/entities/
+shoresh/macula/data/clause-keys/
 shoresh/macula/data/clause-columns/
 shoresh/macula/data/arg-roles/
 shoresh/macula/data/we-votes/
