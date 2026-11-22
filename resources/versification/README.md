@@ -23,7 +23,15 @@ Schemes built now (the ones our corpora + consumers need):
 | scheme | tradition | our corpus | diffs |
 |---|---|---|---|
 | `hebrew` | Masoretic / WLC | BHSA spine | 2,031 |
-| `lxx` | Septuagint / Rahlfs | `lxx.db` | 5,386 |
+| `lxx` | Septuagint / Rahlfs | `lxx.db` | 4,607 (76 by hand) |
+
+The `lxx` scheme carries 76 rows written by hand (2026-11-22, action `Renumber verse (manual)`, `_manual_lxx` in
+`shoresh/versification/build.py`), checked against Brenton (helloAO `grc_bre`) and GLAUx's Old Greek Daniel:
+- Daniel 3:91-97 -> 3:24-30 (3:24-90, the Prayer of Azariah and the Song of the Three, have no KJV verse);
+- Daniel 6:1 -> 5:31 and 6:n -> 6:n-1 (chapter 6 numbered as the Hebrew; chapters 4 and 5 as KJV);
+- Nehemiah 10:1 -> 9:38 and 10:n -> 10:n-1. The Septuagint's 2 Esdras 11-23 is read as NEH 1-13 through a book map,
+  which is the caller's.
+Esther is left out: the Greek additions are numbered inside Hebrew verses.
 
 ## Resolver (shoresh `data.py`)
 `to_standard(scheme, ref)` / `from_standard(scheme, ref)` — identity for `kjv`/unlisted; endpoint

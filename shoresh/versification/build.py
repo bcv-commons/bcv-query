@@ -69,6 +69,24 @@ _OT_BOOKS = {"GEN", "EXO", "LEV", "NUM", "DEU", "JOS", "JDG", "RUT", "1SA", "2SA
 _BOOKS = {"hebrew": _OT_BOOKS | {"EST", "DAN"}, "lxx": _OT_BOOKS}
 
 
+def _manual_lxx():
+    """Rows written by hand for the lxx scheme (2026-11-22), checked verse by verse against Brenton (helloAO grc_bre) and
+    GLAUx (Old Greek Daniel), whose numbering agrees here with Rahlfs. Action `Renumber verse (manual)`.
+
+    Daniel, Old Greek and Theodotion alike: 3:24-90 is the Prayer of Azariah and the Song of the Three (no Hebrew, no KJV
+    verse; no row), so Greek 3:91-97 = Hebrew and KJV 3:24-30. Chapter 4 is numbered as KJV (4:1-3 = Hebrew 3:31-33, 4:4 =
+    Hebrew 4:1). Chapter 5 ends at 5:30 and 6:1 = KJV 5:31: chapter 6 is numbered as the Hebrew (6:n = KJV 6:n-1).
+    Esther stays out: the Greek additions are numbered inside Hebrew verses, so no verse-level row can be right.
+
+    Nehemiah (the Septuagint's 2 Esdras 11-23, read as NEH 1-13 through a book map): chapters 3-4 come from TVTMS already;
+    chapter 7 is numbered as KJV (7:68 absent); 10:1 = KJV 9:38 and 10:n = KJV 10:n-1, as in the Hebrew.
+    """
+    rows = [(f"DAN 3:{v}", f"DAN 3:{v - 67}") for v in range(91, 98)]
+    rows += [("DAN 6:1", "DAN 5:31")] + [(f"DAN 6:{v}", f"DAN 6:{v - 1}") for v in range(2, 30)]
+    rows += [("NEH 10:1", "NEH 9:38")] + [(f"NEH 10:{v}", f"NEH 10:{v - 1}") for v in range(2, 41)]
+    return [(s, d, "Renumber verse (manual)") for s, d in rows]
+
+
 def fetch(src: Path | None) -> Path:
     if src:
         return src
@@ -141,6 +159,12 @@ def build(src: Path | None = None):
             if match and (s, d) not in seen[name]:
                 seen[name].add((s, d))
                 rows[name].append((s, d, action))
+
+    have = {r[0] for r in rows["lxx"]}
+    clash = [r for r in _manual_lxx() if r[0] in have]
+    if clash:
+        raise SystemExit(f"manual lxx rows clash with TVTMS rows: {clash[:5]}")
+    rows["lxx"] += _manual_lxx()
 
     (OUT_DIR / "schemes").mkdir(parents=True, exist_ok=True)
     reg = []
