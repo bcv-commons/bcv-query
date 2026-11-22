@@ -255,6 +255,11 @@ shoresh/macula/data/translation-notes/
 shoresh/macula/data/clause-args/
 shoresh/macula/data/entities/
 shoresh/macula/data/clause-keys/
+shoresh/macula/data/hebrew-nt-morph/
+shoresh/macula/data/hebrew-nt-facts/
+shoresh/macula/data/hebrew-nt-part-links/
+shoresh/macula/data/workbench/
+shoresh/macula/data/arg-roles-candidates/
 shoresh/macula/data/clause-columns/
 shoresh/macula/data/arg-roles/
 shoresh/macula/data/we-votes/
@@ -282,3 +287,14 @@ shoresh/macula/data/vector-store/
 shoresh/macula/data/source-ontology/
 shoresh/macula/data/clauses-similar/
 shoresh/macula/data/vector-store-build.log
+
+# The target-language workbench: experimental, not part of the service; it gets a repository of its own (decided 2026-11-19)
+shoresh/workbench/
+shoresh/wb
+shoresh/requirements-workbench.txt
+shoresh/ds
+
+# MACULA node-format trees (heads per group) and the source-examples builds: fetched or built, not tracked
+shoresh/macula/data/macula-nodes/
+shoresh/macula/data/source-examples/
+shoresh/macula/data/hebrew-levels/

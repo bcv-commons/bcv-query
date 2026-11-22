@@ -123,8 +123,8 @@
    ]
   },
   "hebrew-nt-bridge": {
-   "tag": "v0.1",
-   "revision": "525db08f",
+   "tag": "v0.3",
+   "revision": "a1a3d5ed",
    "licence": "cc-by-4.0",
    "files": [
     "links/*.parquet",

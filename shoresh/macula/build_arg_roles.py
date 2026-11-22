@@ -21,7 +21,8 @@ One row per constituent: the words of a layout clause grouped under their neares
   prep_lxx             Hebrew: the Septuagint's form MACULA Hebrew aligns to the preposition (its `greek` column), for a later rule
   prep_lxx_lemma       Hebrew (S4, from v0.3): that Septuagint word's GLAUx lemma when it is a preposition the Greek NT uses (the same values
                        as Greek `prep_lemma`, so the two sides compare); '' when the aligned word is no preposition (an article, καί ...)
-  role                 actor | undergoer | A2 (core, from the frame and voice) or, for a Greek preposition phrase, the role its
+  role                 actor | undergoer | A2 (core, from the frame and voice; the object of a Hebrew causative verb that the frame
+                       calls A0 is the undergoer of the clause, basis frame_causative) or, for a Greek preposition phrase, the role its
                        Louw-Nida subdomain names: agent, instrument, source_event, responsibility, viewpoint, content, guarantor,
                        opposition, beneficiary, reason_participant, experiencer (LN 90), source, goal, path (LN 84), location (LN 83),
                        time (LN 67), reason, result, purpose, condition, concession, means, circumstance, manner, accompaniment,
@@ -33,7 +34,9 @@ One row per constituent: the words of a layout clause grouped under their neares
                        Hebrew preposition phrases: lxx_nt_domain = the Septuagint's preposition + case + the LN domain its noun's lemma
                        has in the NT, read through the NT's Greek rows (8+ rows, 60%); lxx_nt = the same without the domain (20+, 60%);
                        hebrew_domain = Hebrew preposition + head noun's SDBH domain, learned from the Hebrew rows the first two labelled;
-                       lxx_dative = לְ the Septuagint gives as a bare dative -> recipient; hebrew_prep = כְּ -> standard;
+                       לְ the Septuagint gives as a bare dative, by the kind of verb: lxx_dative_speech = a verb of speaking ->
+                       addressee, lxx_dative_transfer = a verb of giving -> recipient, lxx_dative_other = another verb -> beneficiary,
+                       lxx_dative_verbless = a verbless clause or הָיָה (often possession) -> no role; hebrew_prep = כְּ -> standard;
                        a `+speech` suffix: a goal turned addressee because the verb is one of speaking
 
 Codes only; no English content values. Licence of the output: CC BY-SA 4.0 (the Hebrew layout's keys; the UBS senses).
@@ -67,6 +70,9 @@ COLS = ["corpus", "clause_key", "words", "head", "relation", "verb", "voice", "m
         "prep_lxx", "prep_lxx_lemma", "lxx_case", "role", "role_basis"]
 LXX = HERE.parent / "lxx" / "data" / "lxx-glaux.db"
 SPEAK_HBO = {"0559", "1696", "7121", "6680", "6030", "7592", "5046", "2199", "6817", "6419", "0560", "4449"}
+SDBH_UTTER = "002004001009"                                  # SDBH domain of the verb's sense here: speaking, singing, praising, vowing ...
+GIVE_LN = {"057008", "057012"}                               # Louw-Nida 57.H give, 57.L pay
+CAUSATIVE = {"hiphil", "haphel", "aphel", "shaphel"}
 CASE = {"N": "nominative", "G": "genitive", "D": "dative", "A": "accusative", "V": "vocative"}
 LN = {"090001": "agent", "090002": "instrument", "090003": "source_event", "090004": "responsibility", "090005": "viewpoint",
       "090006": "content", "090007": "guarantor", "090008": "opposition", "090009": "beneficiary", "090010": "reason_participant",
@@ -136,9 +142,9 @@ def _lxx_lookup():
 def main() -> int:
     t = _ro(TREES)
     m = _ro(MSPINE)
-    cls_of, lemma_of = {}, {}
-    for k, cl, lem in m.execute("select key, class, lemma from macula_words"):
-        cls_of[k], lemma_of[k] = cl or "", lem or ""
+    cls_of, lemma_of, stem_of = {}, {}, {}
+    for k, cl, lem, stem in m.execute("select key, class, lemma, stem from macula_words"):
+        cls_of[k], lemma_of[k], stem_of[k] = cl or "", lem or "", stem or ""
     case = {k: c or "" for k, c in _ro(LSPINE).execute("select key, case_ from spine_words where length(key)=11")}
     lxx, hpos = {}, {}
     for k, g, b, c, v in _ro(LOWFAT).execute("select key, greek, book, chapter, verse from lowfat_words where is_inserted=0"):
@@ -170,6 +176,10 @@ def main() -> int:
     for k, d in dom.items():
         lemma_dom_c[lemma_of.get(k, "")][d[:3]] += 1
     lemma_dom = {l: c.most_common(1)[0][0] for l, c in lemma_dom_c.items() if l}
+    lemma_sub_c = collections.defaultdict(collections.Counter)  # Greek lemma -> its LN subdomains in the NT
+    for k, d in prep_ln.items():
+        lemma_sub_c[lemma_of.get(k, "")][d] += 1
+    lemma_sub = {l: c.most_common(1)[0][0] for l, c in lemma_sub_c.items() if l}
     cc = {}
     for name, corpus in (("hebrew", "hbo"), ("greek-nt", "grc")):
         for r in pq.read_table(DATA / "clause-columns" / f"{name}.parquet", columns=["clause_key", "verb", "voice"]).to_pylist():
@@ -194,7 +204,15 @@ def main() -> int:
                 ln = prep_ln.get(prep, "") if corpus == "grc" and prep else ""
                 role, basis = "", ""
                 if mr == "A0":
-                    role, basis = "actor", "frame"
+                    # MACULA's frame gives the object of a causative verb the base verb's A0 (the causer is AA), for הֵבִיא as for
+                    # הִכָּה and הִצִּיל. In the clause as it stands that object is acted upon: undergoer, with the basis saying why.
+                    # Today only hiphil has such rows; the Aramaic causatives' objects are A1 / A2
+                    if corpus == "hbo" and rel in ("o", "o2") and stem_of.get(verb) in CAUSATIVE:
+                        role, basis = "undergoer", "frame_causative"
+                    else:
+                        role, basis = "actor", "frame"
+                elif mr == "AA" and corpus == "hbo" and rel == "s" and stem_of.get(verb) in CAUSATIVE:
+                    role, basis = "actor", "frame_causative"                    # the causer: the one who acts in this clause
                 elif mr == "A1":
                     role, basis = "undergoer", ("frame_passive" if voice == "passive" and rel == "s" else "frame")
                 elif mr == "A2":
@@ -240,14 +258,34 @@ def main() -> int:
                     st[(corpus, "prep_with_role" if basis in ("ln", "ln_speech", "lxx_nt", "lxx_nt_domain") else
                                 "prep_core" if mr else "prep_no_role")] += 1
     # Hebrew rules for what the Septuagint route cannot see: לְ that the Septuagint gives as a bare dative (no preposition: the
-    # aligned form is an article or nothing, the noun dative) -> recipient; כְּ -> standard (a comparison)
+    # aligned form is an article or nothing, the noun dative) -> by the kind of verb: addressee with a verb of speaking (the
+    # SPEAK_HBO lexemes, or the verb's SDBH sense here is one of uttering), recipient with a verb of giving, else beneficiary;
+    # כְּ -> standard (a comparison)
+    # A verb of giving, read through the Septuagint like the phrases above: the Septuagint verb aligned to this verb, or to at
+    # least 60% of the aligned tokens (8+) of this Hebrew lexeme in this stem, has LN 57.H give / 57.L pay as its commonest NT sense
+    strong_of = dict(m.execute("select key, strong from macula_words where lang='hbo'"))
+    give_c = collections.defaultdict(collections.Counter)
+    for k, s_ in strong_of.items():
+        if cls_of.get(k) == "verb" and lxx_word(k)[0] in lemma_sub:
+            give_c[(s_, stem_of.get(k))][lemma_sub[lxx_word(k)[0]] in GIVE_LN] += 1
+    give_lex = {k for k, c in give_c.items() if sum(c.values()) >= 8 and c[True] / sum(c.values()) >= 0.6}
     I = {c: i for i, c in enumerate(COLS)}
     for r in rows:
         if r[0] != "hbo" or not r[I["prep"]] or r[I["role"]] or r[I["macrorole"]]:
             continue
         new = ""
         if r[I["prep_lemma"]] == "לְ" and r[I["lxx_case"]] == "dative" and lxx_word(r[I["prep"]])[0] in ("", "ὁ"):
-            new, b_ = "recipient", "lxx_dative"
+            v = r[I["verb"]]
+            if v and ((strong_of.get(v) or "").zfill(4)[:4] in SPEAK_HBO or dom.get(v, "").startswith(SDBH_UTTER)):
+                new, b_ = "addressee", "lxx_dative_speech"
+            elif v and (lemma_sub.get(lxx_word(v)[0]) in GIVE_LN or (strong_of.get(v), stem_of.get(v)) in give_lex):
+                new, b_ = "recipient", "lxx_dative_transfer"
+            elif v and (strong_of.get(v) or "").zfill(4)[:4] != "1961":
+                new, b_ = "beneficiary", "lxx_dative_other"
+            else:                                  # verbless or הָיָה: possession, belonging or benefit. The sources do not tell which
+                # (sealed sample 2026-11-19, 30 rows: possessor 15, beneficiary 12), so the basis is kept and the role left open
+                r[I["role_basis"]] = "lxx_dative_verbless"
+                st[("hbo", "basis:lxx_dative_verbless")] += 1
         elif unicodedata.normalize("NFC", r[I["prep_lemma"]]) == unicodedata.normalize("NFC", "כְּ"):   # MACULA orders dagesh / vowel otherwise
             new, b_ = "standard", "hebrew_prep"
         if new:
@@ -271,7 +309,7 @@ def main() -> int:
         if r[0] == "hbo" and r[I["role_basis"]] in ("lxx_nt", "lxx_nt_domain") and hkey(r):
             learn[hkey(r)][r[I["role"]]] += 1
     for r in rows:
-        if r[0] == "hbo" and r[I["prep"]] and not r[I["role"]] and not r[I["macrorole"]] and hkey(r):
+        if r[0] == "hbo" and r[I["prep"]] and not r[I["role"]] and not r[I["role_basis"]] and not r[I["macrorole"]] and hkey(r):
             dist = learn.get(hkey(r))
             if dist and sum(dist.values()) >= 8:
                 top, n = dist.most_common(1)[0]
@@ -284,7 +322,6 @@ def main() -> int:
                     st[("hbo", "basis:hebrew_domain")] += 1
     # goal -> addressee with a verb of speaking (research 2026-11-13: Tagalog kay / sa): Hebrew אֶל / לְ / עַל / Aramaic לְ with
     # אָמַר, דָּבַר, קָרָא, צָוָה, עָנָה, שָׁאַל, נָגַד, זָעַק, צָעַק, פָּלַל, Aramaic אֲמַר, מָלַל; Greek: a goal with a verb whose sense is speaking (LN 33)
-    strong_of = dict(m.execute("select key, strong from macula_words where lang='hbo'"))
     for r in rows:
         if r[I["role"]] != "goal":
             continue

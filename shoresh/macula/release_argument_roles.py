@@ -29,7 +29,7 @@ from macula.release_clause_columns import LAYOUTS, layout_keys
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
-VERSION = "v0.2"
+VERSION = "v0.3"
 REPO = "bcv-commons/argument-roles"
 
 
@@ -126,6 +126,15 @@ Join a row to its clause by `clause_key`: the Hebrew layout's `clause_key`, the 
 
 ## Changes
 
+- v0.3: two rules corrected, Hebrew only. (1) The object of a causative verb that MACULA's frame calls A0 was `actor`; it is
+  now `undergoer`, basis `frame_causative` (6,052 rows), and the causer, which had no role, is `actor` (1,483 rows). (2) לְ that
+  the Septuagint gives as a bare dative was always `recipient` (5,265 rows); it is now split by the verb: `addressee` after a
+  verb of speaking (1,011), `recipient` after a verb of giving (871), `beneficiary` after another verb (2,029), and no role in
+  a verbless clause or with הָיָה (1,354; the basis `lxx_dative_verbless` is kept). A sample of 180 changed rows, drawn and
+  sealed before judging and read by blind model judges from the Hebrew alone (2026-11-19; agreement with a model, not a human
+  check): causative object 40 of 40, causer 20 of 20, giving 30 of 30, speaking 25 of 30, another verb 26 of 30 (16 as
+  first choice; 8 judged recipient), verbless 17 of 30 as beneficiary (15 judged possessor), which is why that group has no
+  role. The values of v0.2 would have agreed in 0, 0, 30, 2, 10 and 0 of those rows.
 - v0.2: the Septuagint word is now looked up in its own verse through the verse map (`macula/lxx_verses.py`). GLAUx numbers the
   Septuagint's way (Psalms one off, Jeremiah 25-51 reordered, Daniel 3-4 with the Greek additions), so the lookup found its verse
   for 0.785 of Hebrew words before (Psalms 0.13, Jeremiah 0.45) and 0.867 now; the rest fall back to the form's commonest parse,
@@ -153,6 +162,10 @@ Join a row to its clause by `clause_key`: the Hebrew layout's `clause_key`, the 
 ## How the roles are assigned
 
 - **frame / frame_passive:** the verb frame's A0 is the actor, A1 the undergoer (frame_passive: the passive subject), A2 kept as A2.
+- **frame_causative (Hebrew, from v0.3):** MACULA's frame gives the object of a causative verb (hiphil) the base verb's A0,
+  for הֵבִיא as for הִכָּה and הִצִּיל. In the clause as it stands that object is acted upon, so it is the `undergoer` (v0.2 called
+  it actor), and the subject the frame calls AA is the `actor` (v0.2 gave it no role). The basis tells the two apart from
+  ordinary frame rows.
 - **ln (Greek):** the Louw-Nida subdomain of the preposition's sense names the role. For example, 90.A agent, 90.B instrument,
   84.A source, 84.B goal, 83 location, 67 time, 89.H purpose, 34 accompaniment. With a verb of speaking (Louw-Nida 33), an
   experiencer or goal is the addressee (`ln_speech`, `+speech`).
@@ -161,7 +174,12 @@ Join a row to its clause by `clause_key`: the Hebrew layout's `clause_key`, the 
     New Testament. These are read through the New Testament's own (preposition, case, domain) → role table, with at least 8
     examples and 60% agreement.
   - `lxx_nt`: the same without the domain (at least 20 examples, 60%).
-  - `lxx_dative`: לְ that the Septuagint gives as a bare dative is the recipient.
+  - לְ that the Septuagint gives as a bare dative, by the kind of verb. `lxx_dative_speech`: a verb of speaking (the `+speech`
+    verbs, or the verb's SDBH sense here is one of uttering) → addressee. `lxx_dative_transfer`: a verb of giving (its Septuagint
+    verb's commonest New Testament sense is Louw-Nida 57.H give or 57.L pay, for this word or for 60% of the Hebrew verb's
+    words) → recipient. `lxx_dative_other`: another verb → beneficiary. `lxx_dative_verbless`: a verbless clause or הָיָה, where
+    the phrase is a possessor about as often as a beneficiary: the basis is given and the role left empty. (v0.2 called all of
+    these recipient.)
   - `hebrew_prep`: כְּ is a comparison (`standard`).
   - `hebrew_domain`: the Hebrew preposition with its noun's SDBH domain, learned from the rows above.
   - `+speech`: a goal with אֶל, לְ or עַל after a verb of speaking (אָמַר, דָּבַר, קָרָא, צָוָה, עָנָה ...) is the addressee.
