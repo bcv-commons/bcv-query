@@ -64,6 +64,11 @@ VOWELS = set("αεηιουωᾳῃῳ")
 LONG = {"α": ["η"], "ε": ["η", "ει"], "ο": ["ω"], "αι": ["ῃ"], "ει": ["ῃ"], "οι": ["ῳ"], "αυ": ["ηυ"], "ευ": ["ηυ"],
         "ι": ["ι"], "υ": ["υ"]}
 DEASP = {"φ": "π", "θ": "τ", "χ": "κ"}
+# the Greek parts standard (build_greek_parts) sets this. (1) A diphthong lengthened by the augment (αι -> ῃ, παρῃτησάμην)
+# also shows that the lemma begins with a preverb. (2) A form takes the preverb's variant the lemma has, when it begins with
+# it when the form goes on with the base's vowel (παρ|αιτεῖσθαι, not
+# παρα|ιτεῖσθαι; but ἀνα|στάς). Off by default, so that word-parts v0.1 rebuilds as published.
+STANDARD_RULES = False
 
 PREVERB = {"αμφι": ["αμφι", "αμφ"], "ανα": ["ανα", "αν"], "αντι": ["αντι", "αντ", "ανθ"], "απο": ["απο", "απ", "αφ"],
            "δια": ["δια", "δι"], "εισ": ["εισ"], "εκ": ["εκ", "εξ"], "εν": ["εν", "εμ", "εγ", "ελ"],
@@ -259,8 +264,14 @@ def read_route_b(md):
 
 
 # ---------------------------------------------------------------------------------------------------------- the cut
+NOT_COMPOUND = {"διακονεω"}   # STANDARD_RULES: verbs made from a noun (διάκονος), whose augmented forms (διηκόνει) look
+                             # like a preverb's
+
+
 def lemma_preverbs(lp, verb_lemmas, aug_forms, comp_b):
     """the preverbs of a verb lemma (plain): [(preverb, variant in the lemma)], the base"""
+    if STANDARD_RULES and lp in NOT_COMPOUND:
+        return [], lp
     if comp_b is not None and lp in comp_b:
         parts = comp_b[lp]
         out, rest = [], lp
@@ -292,7 +303,8 @@ def lemma_preverbs(lp, verb_lemmas, aug_forms, comp_b):
                         if f.startswith("".join(x[1] for x in out) + v2) if out else f.startswith(v2):
                             after = f[len("".join(x[1] for x in out)) + len(v2):] if out else f[len(v2):]
                             if after[:1] == "ε" and r[:1] != "ε" or any(after.startswith(L) for L in LONG.get(r[:1], [])
-                                                                        if r[:1] in VOWELS and L != r[:1]):
+                                                                        if r[:1] in VOWELS and L != r[:1]) or \
+                                    STANDARD_RULES and any(after.startswith(L) for L in LONG.get(r[:2], []) if len(r) > 2):
                                 ok = True
                                 break
                     if ok:
@@ -328,12 +340,20 @@ def take_chars(pl, pos, nchars):
     return k - pos if acc == nchars else None
 
 
+def base_follows(after, base):
+    """the form goes on with the (vowel-initial) base's own beginning, or the augment's lengthening of it"""
+    if not base or base[0] not in VOWELS:
+        return False
+    return after.startswith(base[:1]) or any(after.startswith(L) for k in (base[:2], base[:1]) for L in LONG.get(k, []))
+
+
 def preverb_cut(r, info):
     """the preverbs at the head of a verb form: r['head'], r['pos'], r['rest'] (plain, after them)"""
     pl = [gplain(g) for g in r["gs"]]
     rest = "".join(pl)
-    for p, _ in info["preverbs"]:
-        v = next((v for v in sorted(PREVERB[p], key=len, reverse=True) if rest.startswith(v)
+    for p, lv in info["preverbs"]:
+        v = lv if STANDARD_RULES and rest.startswith(lv) and base_follows(rest[len(lv):], info.get("base") or "") else \
+            next((v for v in sorted(PREVERB[p], key=len, reverse=True) if rest.startswith(v)
                   and (v == p or variant_fits(v, rest[len(v):]))), None)
         if v is None:
             r["flags"].append("preverb_not_in_form"); break

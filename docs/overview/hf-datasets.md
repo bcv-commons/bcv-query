@@ -35,7 +35,7 @@ All keyed by the clause keys of the two layouts; all built by rule from MACULA a
 | Dataset | Latest | Licence | What it is |
 |---|---|---|---|
 | [clause-columns](https://huggingface.co/datasets/bcv-commons/clause-columns) | v1.2 | CC BY-SA 4.0 | Main verb and its form, voice, stem, person; negation and scope; force; quotation and speaker; narrative line; subject and subject switch |
-| [argument-roles](https://huggingface.co/datasets/bcv-commons/argument-roles) | v0.2 | CC BY-SA 4.0 | Every constituent with its relation, the verb frame's macrorole and a semantic role (actor, recipient, goal, source, location …) |
+| [argument-roles](https://huggingface.co/datasets/bcv-commons/argument-roles) | v0.3 | CC BY-SA 4.0 | Every constituent with its relation, the verb frame's macrorole and a semantic role (actor, recipient, goal, source, location …) |
 | [clause-connectives](https://huggingface.co/datasets/bcv-commons/clause-connectives) | v0.1 | CC BY-SA 4.0 | The connective that opens each clause and the kind of link it makes |
 | [clause-extras](https://huggingface.co/datasets/bcv-commons/clause-extras) | v0.1 | CC BY-SA 4.0 | Polarity, mood, reflexivity and degree per clause |
 | [time-aspect](https://huggingface.co/datasets/bcv-commons/time-aspect) | v0.2 | CC BY-SA 4.0 | Time, aspect and salience band per clause |

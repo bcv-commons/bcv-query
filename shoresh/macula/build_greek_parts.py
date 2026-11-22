@@ -13,14 +13,15 @@ Stem sources, by word (column `basis`):
   dodson-rule      adjectives: Dodson's citation form, the nominative ending (-ος, -ης) taken off
   rule             everything else, and where a source stem does not fit the form: the route-a cut of build_word_parts.py
                    (the stem every form of the lexeme shares), unchanged
-  closed           πᾶς, εἷς, μηδείς, οὐδείς, τις, τίς: grammar-book stems written out here (CLOSED)
+  closed           πᾶς, εἷς, μηδείς, οὐδείς, τις, τίς, πολύς, μέγας, τρεῖς, οὖς: grammar-book stems written out here
+                   (CLOSED, STEMS)
   irregular        Ἰησοῦς and the like (IRREGULAR): route a, on purpose
   whole            article, relative, elided, crasis, indeclinable, function words: one part (as route a)
 
   cd shoresh && .venv/bin/python -m macula.build_greek_parts [--src DIR] [--out DIR]
 
 --src holds the pinned sources (morphgnt_lexicon.yaml, dodson.csv, pins.json; default ../internal-docs/greek-parts/sources);
---out defaults to ../internal-docs/greek-parts/v1. Writes parts.tsv (part_id, word_id, n, text, kind, features),
+--out defaults to ../internal-docs/greek-parts/v1. Writes parts.tsv (part_id, word_id, n, start, end, text, kind, features),
 words.tsv (word_id, lead, surface, trail, lemma, morph, basis, cut, flags), checks.md, sample_200.tsv, build.json, SHA256SUMS.
 Punctuation around a word is not a part: it sits in the word's lead / trail columns; lead + parts + trail = the surface."""
 import argparse, collections, hashlib, json, random, re, unicodedata as ud
@@ -35,6 +36,9 @@ IRREGULAR = {"Ἰησοῦς"}
 CLOSED = {"πασ": ("παντ", "πασ"), "απασ": ("απαντ", "απασ"), "εισ": ("εν", "μι"), "μηδεισ": ("μηδεν", "μηδεμι"),
           "ουδεισ": ("ουδεν", "ουδεμι"), "τισ": ("τιν", "τιν")}   # grammar-book stems (masc./neuter, feminine) of a few
                                                                    # closed-class words, keyed by the plain lemma
+STEMS = {"πολυσ": ["πολλ", "πολ"], "μεγασ": ["μεγαλ", "μειζ", "μεγιστ", "μεγ"], "τρεισ": ["τρι", "τρ"],
+         "ουσ": ["ωτ", "ω"]}   # grammar-book stems with more than one shape (πολλ|οί, μεγάλ|η, τρι|ῶν, ὦτ|α): the longest the
+                               # form begins with, keyed by the plain lemma
 ROUTE_A_ONLY = {"ending_unlisted", "suppletive_stem", "suppletive_alone", "stem_differs", "no_cut", "stem_not_in_form"}
 MARKERS = re.compile(r"\{[^}]*\}")
 
@@ -176,6 +180,7 @@ def recut(r, a_parts, stem_plain):
 
 
 def build(words, lex, dod):
+    wp.STANDARD_RULES = True
     a_out_parts, a_out_words, rows, stems, allowed = wp.build_grc(words, "a", None)
     a_by_key = collections.defaultdict(list)
     for key, n, text, kind, feat in a_out_parts:
@@ -220,6 +225,13 @@ def build(words, lex, dod):
             if got is not None:
                 basis, parts = "closed", got
                 if why: flags.append(why)
+        elif w["cls"] in ("adj", "noun", "num") and wp.plain(w["lemma"]) in STEMS:
+            form = "".join(wp.gplain(g) for g in r["gs"])
+            fit = [x for x in STEMS[wp.plain(w["lemma"])] if form.startswith(x)]
+            got, why = recut(r, a_parts, fit[0]) if fit else (None, "")
+            if got is not None:
+                basis, parts = "closed", got
+                if why: flags.append(why)
         elif w["cls"] == "verb":
             pt = inflexion_part(w)
             cands = []
@@ -256,14 +268,20 @@ def build(words, lex, dod):
                     if why: flags.append(why)
         if basis in ("greek-inflexion", "dodson", "dodson-rule", "closed"):
             flags = [f for f in flags if f not in ROUTE_A_ONLY]
+            # the source's stem begins before the preverb's seam (ἤνοιξεν, ἀνέῳξεν: the augment on the preverb itself;
+            # ἤφιεν): the preverb is part of the stem, as the source writes it
+            flags = ["preverb_in_stem" if f == "preverb_not_in_form" else f for f in flags]
         texts = [wp.nfc(p[1]) for p in parts]
         lead, trail = wp.nfc(r["lead"]), wp.nfc(r["trail"])
         if lead + "".join(texts) + trail != ud.normalize("NFC", w["surface"]):
             flags.append("rebuild_failed")
         if len(parts) > 9:
             flags.append("more_than_9_parts")
+        at = 0
         for n, (p, t) in enumerate(zip(parts, texts), 1):
-            out_parts.append((f"{key}{n}", key, n, t, p[0], p[2]))
+            ln = len(wp.graphemes(t))          # start / end: letters (base letter + its marks) within the word, from 0, end
+            out_parts.append((f"{key}{n}", key, n, at, at + ln, t, p[0], p[2]))   # not included; lead and trail not counted
+            at += ln
         out_words.append((key, lead, w["surface"], trail, w["lemma"], w["morph"], basis, "|".join(texts),
                           ",".join(f for f in flags if f)))
         stat[f"basis={basis}"] += 1
@@ -281,7 +299,7 @@ def checks(out_parts, out_words, stat, words):
           f"Duplicate part ids: {len(ids) - len(set(ids))}. Part ids not 12 digits: {sum(1 for i in ids if not re.fullmatch(r'\d{12}', i))}.", ""]
     L += ["## Basis (which source cut the word)", ""] + [f"- {k[6:]}: {v:,}" for k, v in sorted(stat.items()) if k.startswith("basis=")]
     L += ["", "## Source stems not used", ""] + [f"- {k}: {v:,}" for k, v in sorted(stat.items()) if not k.startswith("basis=")]
-    kinds = collections.Counter(p[4] for p in out_parts)
+    kinds = collections.Counter(p[6] for p in out_parts)
     L += ["", "## Parts by kind", ""] + [f"- {k}: {v:,}" for k, v in kinds.most_common()]
     cls = {w["key"]: w["cls"] for w in words}
     fused = collections.Counter(cls[w[0]] for w in out_words if "fused" in w[8].split(","))
@@ -302,7 +320,7 @@ def main():
     dod = read_dodson(a.src / "dodson.csv")
     out_parts, out_words, stat = build(words, lex, dod)
     with open(a.out / "parts.tsv", "w", encoding="utf-8") as f:
-        f.write("part_id\tword_id\tn\ttext\tkind\tfeatures\n")
+        f.write("part_id\tword_id\tn\tstart\tend\ttext\tkind\tfeatures\n")
         f.writelines("\t".join(map(str, p)) + "\n" for p in out_parts)
     with open(a.out / "words.tsv", "w", encoding="utf-8") as f:
         f.write("word_id\tlead\tsurface\ttrail\tlemma\tmorph\tbasis\tcut\tflags\n")
