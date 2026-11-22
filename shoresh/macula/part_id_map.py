@@ -50,7 +50,7 @@ def read(path):
         for row in rd:
             if row.get("kind") == "mark":
                 continue
-            wid = row.get("word_id") or row["key"]
+            wid = row.get("macula_id") or row.get("word_id") or row["key"]   # Hebrew level 2: spans within MACULA's part
             pid = row.get("part_id") or f"{row['key']}{row['n']}"
             words[wid].append([pid, int(row["n"]), row.get("start"), row.get("end"), row["text"]])
     out = {}
