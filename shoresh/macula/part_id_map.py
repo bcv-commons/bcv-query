@@ -8,7 +8,7 @@ kind `mark`, are dropped; their part ids are the key followed by n). Where `star
 the texts: letters (a base letter with its marks) within the word, from 0, end not included.
 
 An old part goes to the new parts that share at least one letter with it. The kind of change:
-  same       one new part, same letters, same id
+  same       one new part, same letters, same id (with --extends: or the old id followed by 1)
   renumbered one new part, same letters, another id (a boundary moved earlier in the word)
   split      several new parts, together exactly its letters
   merged     one new part that covers it and other whole old parts (several old parts went into one)
@@ -70,7 +70,7 @@ def word_letters(rows):
     return [ud.normalize("NFC", g) for _, _, _, t in rows for g in letters(t)]
 
 
-def compare(old, new):
+def compare(old, new, extends=False):
     id_map, changed, cnt = [], [], collections.Counter()
     for wid in sorted(set(old) | set(new)):
         o, n = old.get(wid, []), new.get(wid, [])
@@ -89,7 +89,8 @@ def compare(old, new):
         for pid, s, e, _ in o:
             hit = [q for q in n if q[1] < e and s < q[2]]
             if len(hit) == 1 and (hit[0][1], hit[0][2]) == (s, e):
-                k = "same" if hit[0][0] == pid else "renumbered"
+                same_id = hit[0][0] == pid or extends and hit[0][0] == pid + "1"
+                k = "same" if same_id else "renumbered"
             elif len(hit) > 1 and hit[0][1] == s and hit[-1][2] == e:
                 k = "split"
             elif len(hit) == 1 and hit[0][1] <= s and e <= hit[0][2] and {hit[0][1], hit[0][2]} <= bounds:
@@ -110,10 +111,14 @@ def main():
     ap.add_argument("--old", type=Path, required=True)
     ap.add_argument("--new", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--extends", action="store_true",
+                    help="the new ids extend the old by one digit (Hebrew level 2 over MACULA's parts): old id + 1 with the same letters is `same`")
+    ap.add_argument("--unit", default="Words", help="what a unit is, for churn.md (Hebrew level 2: MACULA parts)")
+    ap.add_argument("--title", default=None, help="the two releases' names for churn.md (default: the two paths)")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     old, new = read(a.old), read(a.new)
-    id_map, changed, cnt = compare(old, new)
+    id_map, changed, cnt = compare(old, new, a.extends)
     with open(a.out / "id_map.tsv", "w", encoding="utf-8") as f:
         f.write("old_id\tnew_ids\tchange\n")
         f.writelines("\t".join(r) + "\n" for r in id_map)
@@ -122,8 +127,8 @@ def main():
         f.writelines("\t".join(r) + "\n" for r in changed)
     nw = sum(v for k, v in cnt.items() if k.startswith("words: ") and k != "words: text_differs") + cnt["words: text_differs"]
     npart = sum(v for k, v in cnt.items() if k.startswith("parts: "))
-    L = [f"# Part id churn: {a.old} -> {a.new}", "",
-         f"Words compared: {nw:,}. Words whose cut changed: {cnt['words: changed']:,} ({cnt['words: changed'] / max(nw, 1):.1%}). "
+    L = [f"# Part id churn: {a.title or f'{a.old} -> {a.new}'}", "",
+         f"{a.unit} compared: {nw:,}. {a.unit} whose cut changed: {cnt['words: changed']:,} ({cnt['words: changed'] / max(nw, 1):.1%}). "
          f"Old part ids whose meaning changed (anything but `same`): {npart - cnt['parts: same']:,} of {npart:,} "
          f"({(npart - cnt['parts: same']) / max(npart, 1):.1%}).", "", "| count | what |", "|---|---|"]
     L += [f"| {v:,} | {k} |" for k, v in sorted(cnt.items())]

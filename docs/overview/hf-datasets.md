@@ -25,7 +25,7 @@ Conventions across the set:
 | [tanakh-hebrew-clauses](https://huggingface.co/datasets/bcv-commons/tanakh-hebrew-clauses) | untagged | CC BY 4.0 | The Hebrew words of every clause segment, one JSON file per chapter, for showing Hebrew beside each clause |
 | [hebrew-speaker-layer](https://huggingface.co/datasets/bcv-commons/hebrew-speaker-layer) | v0.16 | CC BY 4.0 | Every quotation of the Hebrew Bible: its speaker (named in Hebrew, with a person id), its edges on the words, nested quotations |
 | [passage-facts](https://huggingface.co/datasets/bcv-commons/passage-facts) | v0.3.3 | CC BY-SA 4.0 (CC BY subset included) | Who is heard, what kind of speech, how the text is set (song, poetic lines and verse halves, prose, acrostics, refrains, psalm headings and selah), psalm types, sections and purpose, moods and register cues for the whole Bible, Greek paragraphs; each fact on exact words with its source |
-| [word-parts](https://huggingface.co/datasets/bcv-commons/word-parts) / [word-parts-sa](https://huggingface.co/datasets/bcv-commons/word-parts-sa) | v0.1 | CC BY 4.0 / CC BY-SA 4.0 | Every Greek word cut into preverb, augment, reduplication, stem, ending; every Hebrew word into MACULA's morphemes |
+| [word-parts](https://huggingface.co/datasets/bcv-commons/word-parts) | v1.0 | CC BY 4.0 | One part id standard keyed to MACULA: every Greek word cut by grammar-book stems (preverb, augment, reduplication, stem, ending); every MACULA Hebrew part cut once more (yiqtol prefix, verb and noun endings); id maps from v0.1. [word-parts-sa](https://huggingface.co/datasets/bcv-commons/word-parts-sa) (v0.1, CC BY-SA 4.0) is retired |
 | [hebrew-greek-cf](https://huggingface.co/datasets/bcv-commons/hebrew-greek-cf) | v0.2 | CC BY-SA 4.0 | One searchable Context Fabric corpus: Tanakh, Greek NT, Septuagint and two Hebrew NTs on shared keys, linked both ways, with the layers below as features |
 
 ## 2. Clause and phrase grammar (one row per clause or constituent)
@@ -118,5 +118,5 @@ These connect the Hebrew and Greek keys above to translations. They carry no run
 
 CC0 and CC BY 4.0 need attribution at most; CC BY-SA 4.0 (most of the grammar layers, because of share-alike sources such as GLAUx
 and unfoldingWord) passes share-alike on to what is built from it; CC BY-NC-SA appears only on the retired `senses-attested-bhsa`.
-Where a dataset has a CC BY part beside a CC BY-SA one (passage-facts `data-cc-by/`, word-parts, full-alignments-manual), the card
+Where a dataset has a CC BY part beside a CC BY-SA one (passage-facts `data-cc-by/`, full-alignments-manual), the card
 says which files are which.
