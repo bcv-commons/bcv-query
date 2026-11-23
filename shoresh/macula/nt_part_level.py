@@ -41,7 +41,7 @@ import pyarrow.parquet as pq
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-WP = ROOT / "internal-docs" / "word-parts-release" / "v1.0" / "greek"
+WORD_PARTS = ("bcv-commons/word-parts", "v1.0", "9733875e")   # the Greek parts: repo, tag, commit (pinned)
 BRIDGE = HERE / "data" / "hebrew-nt-bridge"
 ANALYSIS = HERE / "data" / "bridge-corpus" / "inputs" / "hebrew-nt-analysis@v0.2"
 EFLOMAL = HERE / "data" / "hebrew-nt-part-links" / "2026-11-22-wp1"
@@ -52,12 +52,26 @@ csv.field_size_limit(sys.maxsize)
 BOOKS = {n: b for n, b in zip(range(40, 67), "MAT MRK LUK JHN ACT ROM 1CO 2CO GAL EPH PHP COL 1TH 2TH 1TI 2TI TIT PHM HEB JAS 1PE 2PE 1JN 2JN 3JN JUD REV".split())}
 
 
+def word_parts() -> Path:
+    """the folder of word-parts v1.0's Greek files, downloaded from Hugging Face at the pinned tag (cached by huggingface_hub);
+    the tag must still be the pinned commit"""
+    from huggingface_hub import HfApi, hf_hub_download
+    repo, tag, commit = WORD_PARTS
+    sha = HfApi().dataset_info(repo, revision=tag).sha
+    if not sha.startswith(commit):
+        raise SystemExit(f"{repo} tag {tag} is {sha[:8]}, the pin says {commit}")
+    for n in ("greek/parts.tsv", "greek/words.tsv"):
+        got = Path(hf_hub_download(repo, n, repo_type="dataset", revision=sha))
+    return got.parent
+
+
 def tsv(p):
     with open(p, encoding="utf-8", newline="") as f:
         yield from csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_NONE)
 
 
 def load(ed, books):
+    WP = word_parts()
     gparts = collections.defaultdict(list)
     for r in tsv(WP / "parts.tsv"):
         if BOOKS[int(r["word_id"][:2])] in books:
@@ -191,6 +205,7 @@ def grammar(m, gparts, hclass, choice):
 
 
 def cmd_finish(ed, out, rows, items, jev_first=False):
+    WP = word_parts()
     by = {it["id"]: it for it in items}
     ans = {}
     for l in (out / "jev_answers.jsonl").read_text(encoding="utf-8").splitlines():
