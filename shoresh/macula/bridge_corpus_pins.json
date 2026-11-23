@@ -57,8 +57,8 @@
    ]
   },
   "argument-roles": {
-   "tag": "v0.2",
-   "revision": "5065acab",
+   "tag": "v0.3",
+   "revision": "5dbec412",
    "licence": "cc-by-sa-4.0",
    "files": [
     "data/*.parquet"

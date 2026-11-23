@@ -7,7 +7,7 @@ Level 1 is MACULA's own cut and id (12 digits: the word's 11 digits + MACULA's p
 pronominal suffixes. Level 2 cuts a MACULA part once more where the grammar books do, and numbers the pieces from the left
 after MACULA's id (13 digits). A MACULA part that is not cut further is sub-part 1, so MACULA's id stays the join key.
 
-What is cut (Hebrew only; the Aramaic parts are not cut in this release, flag `aramaic`):
+What is cut (Hebrew; and since v1.1 the Aramaic parts by their own tables, cut_aramaic; --no-aramaic gives v1.0):
   prefix   the person prefix of the yiqtol forms (yiqtol, wayyiqtol, cohortative, jussive): א ת י נ
   ending   the person / number ending of the verb (qatal -תָּ -תְּ -תִּי -ה -וּ -תֶּם -תֶּן -נוּ; yiqtol and imperative -י -וּ -נָה,
            cohortative and lengthened imperative -ָה, with a following paragogic ן) and the noun's gender / number / state
@@ -42,7 +42,7 @@ from macula import build_word_parts as wp
 
 HERE = Path(__file__).resolve().parent
 LOWFAT = HERE / ".lowfat-src" / "WLC" / "lowfat"
-OUT = HERE.parent.parent / "internal-docs" / "word-parts-v1" / "hebrew"
+OUT = HERE.parent.parent / "internal-docs" / "word-parts-v1.1" / "hebrew"
 XID = "{http://www.w3.org/XML/1998/namespace}id"
 FINAL = str.maketrans("ךםןףץ", "כמנפצ")
 
@@ -206,6 +206,93 @@ def cut(text, morph, lemma, root_t=None):
     return pieces
 
 
+# Biblical Aramaic (word-parts v1.1; the grammar books' tables: Rosenthal, A Grammar of Biblical Aramaic, sections 40-46,
+# 102-174). MACULA already splits the determined state's א as a part of its own (morph Td), so it is level 1, not here.
+A_PERF = {"3fs": ["ת"], "2ms": ["ת", "תה"], "2fs": ["תי"], "1cs": ["ת"], "3mp": ["ו"], "3fp": ["ה"], "2mp": ["תונ"],
+          "1cp": ["נא"]}
+A_IMPF = {"2fs": ["ינ"], "3mp": ["ונ"], "2mp": ["ונ"], "3fp": ["נ"], "2fp": ["נ"]}
+A_IMPV = {"2fs": ["י"], "2mp": ["ו"], "2fp": ["ה"]}
+A_PREFIX = {"3m": "יל", "3f": "ת", "2m": "ת", "2f": "ת", "1c": "אנ", "3c": "יל", "2c": "ת"}   # ל: לֶהֱוֵא (הוה)
+
+
+def aramaic_nominal_tail(g, n, s, cs, lemma_cs, gs, root_t):
+    """the gender / number / state ending (consonants) of an Aramaic noun, adjective or participle, as written once
+    MACULA has split off the determined state's א"""
+    before = gs[-2] if len(gs) > 1 else ""
+    if n == "p":
+        if g == "f" or g == "b" and cs.endswith(("נ", "ת")):
+            return ends(cs, ["נ"] if s == "a" else ["ת"])               # מְדִנָן; -ָת -ָתָא
+        if s == "a":
+            return ends(cs, ["ינ"] + (["ימ"] if not lemma_cs.endswith("מ") else []))   # מַלְכִין (מַלְכִים written so)
+        tails = ["י"] + (["ת"] if not lemma_cs.endswith("ת") and root_t is not True else [])   # -ֵי; -ַיָּא; אֲבָהָת
+        return ends(cs, tails)
+    if g not in ("f", "b") or n != "s":
+        return ""
+    if s == "a":
+        return cs[-1] if cs[-1:] in ("ה", "א") and QAMETS in before and len(cs) > 1 else ""   # אִגְּרָה, מָרָדָא
+    return "ת" if cs.endswith("ת") and root_t is not True and not lemma_cs.endswith("ת") else ""   # עַרְוַת; אִגַּרְתָּ(א)
+
+
+def cut_aramaic(text, morph, lemma, root_t=None):
+    """[(kind, text, feature)] for one Aramaic MACULA part, or None when it is not cut. The stem formatives (haphel ה-,
+    aphel א-, hithpeel הִתְ-, the infinitive's מ-) stay in the stem, as in Hebrew; numerals and proper nouns are not cut."""
+    gs = letters(text)
+    cs = "".join(cons(g) for g in gs)
+    if len([c for c in cs if c]) != len([g for g in gs if cons(g)]):
+        return None
+    lemma_cs = skel(lemma)
+    head = tail = ""
+    keep_y = False
+    m = re.match(r"V(.)(.)(.*)$", morph)
+    if m:
+        t, rest = m.group(2), m.group(3)
+        if t in "piv" and len(rest) >= 3:
+            pgn = rest[:3]
+            if t == "p":
+                tail = ends(cs, A_PERF.get(pgn, []))
+            elif t == "v":
+                tail = ends(cs, A_IMPV.get(pgn, []))
+            else:
+                tail = ends(cs, A_IMPF.get(pgn, []))
+                want = A_PREFIX.get(pgn[:2], "")
+                if cs[:1] and cs[0] in want and len(cs) > 1:
+                    head = cs[0]
+        elif t in "rs" and len(rest) >= 3:
+            tail = aramaic_nominal_tail(rest[0], rest[1], rest[2], cs, lemma_cs, gs, None)
+            keep_y = rest[1] == "p" and rest[2] == "d"
+        elif t == "c" and m.group(1) != "q":
+            if cs.endswith("ה") and len(gs) > 1 and QAMETS in gs[-2]:
+                tail = "ה"                                  # הַשְׁנָיָה, הֵיבָלָה
+            elif cs.endswith("ות"):
+                tail = "ות"                                 # הוֹדָעוּתָ(נִי): the construct -וּת before a suffix
+    elif re.match(r"N[cg]|A[ao]", morph) and len(morph) >= 5:
+        tail = aramaic_nominal_tail(morph[2], morph[3], morph[4], cs, lemma_cs, gs, root_t)
+        keep_y = morph[3] == "p" and morph[4] == "d"
+    elif morph[:2] == "Ac" and len(gs) > 1 and cs[-1:] in ("ה", "א") and QAMETS in gs[-2]:
+        tail = cs[-1]                                       # numerals as in Hebrew: חֲדָה, תְּלָתָה, תְּלָתָא
+    # an ending that begins with ו or י needs it to be a vowel letter (בָּנַיִן: the root's yod carries the hireq, the ending
+    # is -ן; לֶהֱוֺן: the waw is the root's, the ending -ן); the determined plural's yod (-ַיָּא) is the ending's consonant
+    while tail and tail[0] in "וי" and not mater(gs[len(gs) - len(tail)]) and not (keep_y and tail == "י"):
+        tail = tail[1:]
+    if not head and not tail:
+        return None
+    hn, tn = len(head), len(tail)
+    if hn + tn >= len(gs):
+        return None
+    pieces = []
+    if hn:
+        pieces.append(("prefix", "".join(gs[:hn]), morph))
+    stem = gs[hn:len(gs) - tn]
+    fused = tn and lemma_cs[-1:] == tail[0] and (cs[len(cs) - tn - 1:len(cs) - tn] != tail[0]) and m and m.group(2) == "p"
+    if fused:
+        pieces.append(("fused", "".join(stem + gs[len(gs) - tn:]), morph))
+    else:
+        pieces.append(("stem", "".join(stem), ""))
+        if tn:
+            pieces.append(("ending", "".join(gs[len(gs) - tn:]), morph))
+    return pieces
+
+
 def read_roots(groups, strong_lemma):
     """{noun Strong's: True / False}: whether the BDB root (the verb in the word's root group) ends in ת; missing when
     the group has no verb. groups: resources/bdb_roots/root_groups.tsv (BDB, public domain, via OpenScriptures)"""
@@ -259,6 +346,7 @@ def main():
     ap.add_argument("--trees", type=Path, default=HERE / "trees-macula.db")
     ap.add_argument("--roots", type=Path, default=HERE.parent.parent / "resources" / "bdb_roots" / "root_groups.tsv")
     ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--no-aramaic", action="store_true", help="leave the Aramaic parts uncut, as word-parts v1.0 does")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     mac = read_lowfat(a.lowfat)
@@ -273,8 +361,11 @@ def main():
         pieces = None
         if kind == "stem" and lang == "H":
             pieces = cut(surf, morph, lemma, roots.get(strongs.get(mid, "")))
-        elif kind == "stem" and lang == "A":
+        elif kind == "stem" and lang == "A" and a.no_aramaic:
             flags["aramaic (not cut)"] += 1
+        elif kind == "stem" and lang == "A":
+            pieces = cut_aramaic(surf, morph, lemma, roots.get(strongs.get(mid, "")))
+            flags["aramaic parts cut"] += bool(pieces)
         if not pieces:
             pieces = [(kind, surf, "")]
         if "".join(p[1] for p in pieces) != surf:
@@ -302,7 +393,7 @@ def main():
     (a.out / "checks.md").write_text("\n".join(L) + "\n", encoding="utf-8")
     commit = subprocess.run(["git", "-C", str(a.lowfat), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     (a.out / "build.json").write_text(json.dumps({
-        "release": "word-parts v1.0, Hebrew level 2 (local, unpublished)", "licence": "CC BY 4.0",
+        "release": "word-parts v1.0, Hebrew level 2" if a.no_aramaic else "word-parts v1.1, Hebrew level 2 with Aramaic (local, unpublished)", "licence": "CC BY 4.0",
         "macula_hebrew": {"repository": "https://github.com/Clear-Bible/macula-hebrew", "path": "WLC/lowfat", "commit": commit},
         "macula_parts": len(rows), "parts": len(out)}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     sums = [f"{hashlib.sha256((a.out / n).read_bytes()).hexdigest()}  {n}" for n in ("parts.tsv", "checks.md", "build.json")]

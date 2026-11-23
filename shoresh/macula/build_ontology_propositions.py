@@ -6,7 +6,7 @@ One proposition per clause of the Hebrew and the Greek NT clause layouts, `prop:
 the key every clause dataset shares). From the published clause datasets (local copies; versions in build.json):
   clause-columns v1.2     predicate (the verb word), voice, negation and its scope, force, kind, speech level and speaker,
                           narrative line, genre, front and focus, subject switch
-  argument-roles v0.2     arguments: the head word, the grammatical relation (s, o, o2, pp, adv, p) and the role
+  argument-roles v0.3     arguments: the head word, the grammatical relation (s, o, o2, pp, adv, p) and the role
                           (actor, undergoer, location, recipient …) with the role's basis
   time-aspect v0.2        time and aspect, with basis
   clause-connectives v0.1 the connective word, its link type and relation (to the clause before, in text order)
@@ -34,7 +34,7 @@ HERE = Path(__file__).resolve().parent
 DOCS = HERE.parents[1] / "internal-docs"
 INPUTS = {
     "clause-columns": ("v1.2", "32beff0b", DOCS / "clause-columns-release" / "v1.2" / "data"),
-    "argument-roles": ("v0.2", "5065acab", DOCS / "argument-roles-release" / "v0.2" / "data"),
+    "argument-roles": ("v0.3", "5dbec412", DOCS / "argument-roles-release" / "v0.3" / "data"),
     "time-aspect": ("v0.2", "5d30d2c2", DOCS / "time-aspect-release" / "v0.2" / "data"),
     "clause-connectives": ("v0.1", "c26a84be", DOCS / "clause-connectives-release" / "v0.1" / "data"),
 }
@@ -123,7 +123,7 @@ def main() -> None:
                 continue
             rel.append({"subject": f"prop:{r['clause_key']}", "relation": "has_argument", "object": mention(r["head"]),
                         "tier": r.get("role") or r.get("relation") or "", "gram": r.get("relation") or "", "word": "",
-                        "source": "argument-roles@v0.2", "target_basis": ""})
+                        "source": "argument-roles@v0.3", "target_basis": ""})
             st[lang, "has_argument"] += 1
     ids = {p["prop"] for p in props}
     dangling = sum(1 for r in rel if r["subject"] not in ids or (r["relation"] == "linked_to" and r["object"] not in ids))

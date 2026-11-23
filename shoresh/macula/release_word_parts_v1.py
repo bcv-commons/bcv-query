@@ -73,7 +73,7 @@ def main() -> int:
     scratch.mkdir(parents=True, exist_ok=True)
 
     run("macula.build_greek_parts", "--out", str(gr))
-    run("macula.build_hebrew_parts", "--out", str(he))
+    run("macula.build_hebrew_parts", "--out", str(he), "--no-aramaic")   # v1.0: Aramaic uncut
     for lang, d, frozen in (("Greek", gr, GREEK_FROZEN), ("Hebrew", he, HEBREW_FROZEN)):
         if sha256(d / "parts.tsv") != sha256(frozen / "parts.tsv"):
             raise SystemExit(f"{lang} parts.tsv differs from the reviewed build in {frozen}")
