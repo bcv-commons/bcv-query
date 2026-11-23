@@ -57,10 +57,11 @@ def main() -> None:
     ap.add_argument("--greek-parts", type=Path)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--pairs", type=Path, help="instead: fill tanakh_pairs, lxx_with_greek_lemma and support of a chosen pair "
-                    "list (greek_lemma greek_strong hebrew_pair hebrew_strongs [note]) in the fixed-pairs format, to --out")
+                    "list (greek_lemma greek_strong hebrew_pair hebrew_strongs) in the fixed-pairs format, to --out; with --tables, --join and --greek-parts also nt_strongs: the NT "
+                    "analyses' commonest numbers for the pair where they differ from MACULA's")
     a = ap.parse_args()
     if a.pairs:
-        return fill_pairs(a.pairs, a.out)
+        return fill_pairs(a.pairs, a.out, a.tables, a.join, a.greek_parts)
 
     part_word = {}
     with open(a.greek_parts, encoding="utf-8", newline="") as f:
@@ -169,18 +170,69 @@ def write_candidates(out: Path, cand: dict, tan: collections.Counter) -> None:
     print(f"{len(cand)} candidate pairs, {len(rows)} kept (2+ cases or Tanakh support) -> {out}")
 
 
-def fill_pairs(src: Path, out: Path) -> None:
+def cons(t: str) -> str:
+    import unicodedata as ud
+    c = "".join(x for x in ud.normalize("NFD", t) if "\u05d0" <= x <= "\u05ea")
+    return c.translate(str.maketrans("ךםןףץ", "כמנפצ"))
+
+
+def nt_numbers(tables: Path, join: Path, greek_parts: Path, rows: list[dict]) -> dict:
+    """pair index -> the NT analyses' commonest Strong's numbers for its two words, read where the aligner links the pair's
+    Greek word to a word with the first word's consonants and the second word (by consonants) is within two words after it.
+    Words, not pieces: the number is the word's content part's."""
+    part_word = {}
+    with open(greek_parts, encoding="utf-8", newline="") as f:
+        for r in csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_NONE):
+            part_word[r["part_id"]] = r["word_id"]
+    db = sqlite3.connect(f"file:{HERE / 'trees-macula.db'}?mode=ro", uri=True)
+    glem = dict(db.execute("select key, lemma from words where lemma is not null"))
+    want = collections.defaultdict(list)                         # greek lemma -> pair indexes
+    for i, r in enumerate(rows):
+        for l in r["greek_lemma"].split(" / "):
+            want[l.strip()].append(i)
+    bare = lambda t: t[1:] if len(t) > 3 and t[0] in "והבלמכש" else t
+    seen = collections.defaultdict(lambda: (collections.Counter(), collections.Counter()))
+    for ed in ("heb_scg", "heb_mod"):
+        tok, piece = tokens(tables, ed)
+        for l in pq.read_table(join / "by" / "part_links.parquet", filters=[("edition", "=", ed)],
+                               columns=["greek_part_id", "hebrew_piece_id"]).to_pylist():
+            k = piece.get(l["hebrew_piece_id"])
+            lm = glem.get(part_word.get(l["greek_part_id"], ""), "")
+            if not k or lm not in want:
+                continue
+            for i in want[lm]:
+                w1, w2 = (cons(w) for w in rows[i]["hebrew_pair"].split())
+                t1 = cons(tok[k]["text"])
+                if not (bare(bare(t1)).startswith(w1.rstrip("יתה")[:3]) or t1.startswith(w1.rstrip("יתה")[:3])):
+                    continue
+                for d in (1, 2):
+                    k2 = (*k[:3], k[3] + d)
+                    if k2 in tok and bare(bare(cons(tok[k2]["text"]))).startswith(bare(w2)[:3]):
+                        seen[i][0][tok[k]["strong"]] += 1
+                        seen[i][1][tok[k2]["strong"]] += 1
+                        break
+    return {i: tuple(c.most_common(1)[0][0] for c in v) for i, v in seen.items()}
+
+
+def fill_pairs(src: Path, out: Path, tables: Path | None = None, join: Path | None = None, greek_parts: Path | None = None) -> None:
     with open(src, encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_NONE))
     key = lambda r: tuple(int(x.lstrip("H")) for x in r["hebrew_strongs"].split())
     tan = tanakh_counts({key(r) for r in rows}, {key(r): r["greek_strong"] for r in rows})
+    nt = nt_numbers(tables, join, greek_parts, rows) if tables else {}
     with open(out, "w", encoding="utf-8") as f:
-        f.write("greek_lemma\tgreek_strong\thebrew_pair\thebrew_strongs\ttanakh_pairs\tlxx_with_greek_lemma\tsupport\n")
-        for r in rows:
+        f.write("greek_lemma\tgreek_strong\thebrew_pair\thebrew_strongs\ttanakh_pairs\tlxx_with_greek_lemma\tsupport"
+                + ("\tnt_strongs" if tables else "") + "\n")
+        for i, r in enumerate(rows):
             k = key(r)
             t = tan[k]
-            f.write("\t".join((r["greek_lemma"], r["greek_strong"], r["hebrew_pair"], " ".join(f"H{x}" for x in k), str(t),
-                               str(tan[(*k, "lxx")]), "tanakh" if t >= 2 else "nt_only")) + "\n")
+            cells = [r["greek_lemma"], r["greek_strong"], r["hebrew_pair"], " ".join(f"H{x}" for x in k), str(t),
+                     str(tan[(*k, "lxx")]), "tanakh" if t >= 2 else "nt_only"]
+            if tables:
+                n = nt.get(i)
+                m = tuple(x or y for x, y in zip(n, k)) if n else k        # no NT number (a function word): MACULA's
+                cells.append("" if m == k else " ".join(f"H{x}" for x in m))
+            f.write("\t".join(cells) + "\n")
     print(f"{len(rows)} pairs -> {out}")
 
 

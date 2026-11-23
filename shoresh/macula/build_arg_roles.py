@@ -63,6 +63,7 @@ OUT = DATA / "arg-roles"
 TREES = HERE / "trees-macula.db"
 LSPINE = HERE / "lexeme-spine-macula.db"
 MSPINE = HERE / "macula-spine.db"
+from macula import text_faults  # noqa: E402  (F0016)
 LOWFAT = HERE / "lowfat-hbo.db"
 ROLES = ("s", "o", "o2", "io", "p", "adv", "pp")
 NOMINAL = {"noun", "pron", "adj", "num"}
@@ -148,7 +149,7 @@ def main() -> int:
     case = {k: c or "" for k, c in _ro(LSPINE).execute("select key, case_ from spine_words where length(key)=11")}
     lxx, hpos = {}, {}
     for k, g, b, c, v in _ro(LOWFAT).execute("select key, greek, book, chapter, verse from lowfat_words where is_inserted=0"):
-        lxx[k], hpos[k] = (g or "").strip('"'), (b, c, v)
+        lxx[k], hpos[k] = text_faults.macula_greek((g or "").strip('"')), (b, c, v)    # F0016: ξ and χ swapped
     plain, lxx_verse, lxx_glob = _lxx_lookup()
     from macula.lxx_verses import hebrew_keys
 

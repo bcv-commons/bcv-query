@@ -94,3 +94,4 @@ F0015	source_text	grc_bre	bre:150170380001	EZR	17	38	0	γἱοὶ	stray_letter	r
 F0015	source_text	grc_bre	bre:150170420001	EZR	17	42	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
 F0015	source_text	grc_bre	bre:150170570001	EZR	17	57	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
 F0015	source_text	grc_bre	bre:150170620001	EZR	17	62	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0016	source_data:macula-hebrew	macula_hebrew	*					ξ / χ	letter_swap	replace	χ / ξ	the greek attribute (the Septuagint form each Hebrew word is aligned to) swaps ξ and χ in every form: ξαριν for χάριν, ηρχατο for ἤρξατο, εχ for ἐξ; swapped back, the form is in its Septuagint verse 15,172 times against 2 as written; readers call macula.text_faults.macula_greek()	2026-11-23	open

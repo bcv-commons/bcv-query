@@ -10,7 +10,8 @@ Greek NT, the NT's lemma and number; otherwise GLAUx's lemma, and its number if 
 part of speech). GLAUx's own values under glx_ (lemma, strong, pos, morph, id).
 
 `lxx` edges: MACULA Hebrew gives each Hebrew word part the Greek form it was aligned to (lexeme-spine-macula-2026-10-27, `greek` and
-`greekstrong`), not its position. The Septuagint verse comes from lxx_verses (the two numbering schemes through the English one). In the
+`greekstrong`), not its position; its forms swap ξ and χ (fault F0016), which macula.text_faults.macula_greek()
+undoes before placing. The Septuagint verse comes from lxx_verses (the two numbering schemes through the English one). In the
 verse the form is placed, and the edge's value says how:
   sure        the form occurs once in the verse
   order       several occurrences and as many Hebrew parts claim the form: in order
@@ -30,6 +31,8 @@ import re
 import sqlite3
 import unicodedata
 from pathlib import Path
+
+from macula import text_faults   # F0016: MACULA's greek attribute swaps ξ and χ
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -220,7 +223,7 @@ def add_septuagint(c, stores: dict) -> None:
     hverse = collections.defaultdict(list)
     for key, b, ch, v, form, gs in spine.execute("select key, book, chapter, verse, greek, greekstrong from spine_words where key < '40' order by key"):
         if key in c.slot:
-            hverse[(b, ch, v)].append((key, plain(form), [to_nt.get(x, x) for x in numbers(gs)]))
+            hverse[(b, ch, v)].append((key, plain(text_faults.macula_greek(form)), [to_nt.get(x, x) for x in numbers(gs)]))
     how = collections.Counter()
     for (b, ch, v), hw in hverse.items():
         n_form = sum(1 for w in hw if w[1])

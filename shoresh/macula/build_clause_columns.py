@@ -80,6 +80,7 @@ import unicodedata
 from pathlib import Path
 
 from macula.lxx_verses import greek_keys, hebrew_keys  # noqa: E402
+from macula import text_faults  # noqa: E402  (F0016)
 
 GREEK_NULL = "00000000000"                                # MACULA Greek frames: an unexpressed (null) argument
 HERE = Path(__file__).resolve().parent
@@ -185,6 +186,7 @@ class Stores:
             g = greek or ""
             if len(g) > 1 and g[0] == g[-1] == '"':
                 g = g[1:-1]
+            g = text_faults.macula_greek(g)                    # F0016: MACULA's greek attribute swaps ξ and χ
             self.H[k] = [cls or "", typ or "", mstrong.get(k) or strong or "", lemma or "", prole.get(k) or "",
                          " ".join(r.get("subjref", [])), " ".join(r.get("participantref", [])), morph or "", g, self.wlang.get(k, "H")]
         # Greek word -> [class, strong, lemma, role (tree), plain surface, tense, voice, mood, person, number, gender, own role]
