@@ -37,6 +37,8 @@ import bcv_tokenize  # noqa: E402
 from macula import text_faults  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
+VERSION = "v0.1"
+TOKENIZERS_SAME = [2, 3]   # checked 2026-11-23: v2 and v3 give the same tokens and book fingerprints on grc_bre, heb_scg, heb_mod
 ANALYSIS = HERE / "data" / "bridge-corpus" / "inputs" / "hebrew-nt-analysis@v0.2"
 TEXT = {"heb_scg": "scg", "heb_mod": "del"}
 SLOT2 = {"prefix": "prefix", "stem": "stem", "ending": "suffix", "fused": "stem", "whole": "stem"}
@@ -69,12 +71,29 @@ def brenton(ids, out, manifest):
             n += 1
     (d / "_table.json").write_text(json.dumps({
         "table": "bcv-query position -> bre word id (id standard 2026-11-23)", "edition": "grc_bre",
-        "tokenizer_version": manifest["texts"]["bre"]["tokenizer_version"], "text_fp_version": 1,
-        "text_fp": fp8(manifest, "bre"), "rows": n, "sha256": hashlib.sha256((d / "positions.tsv").read_bytes()).hexdigest(),
+        "table_version": VERSION, "tokenizer_version": 3, "tokens_identical_for_tokenizer_versions": TOKENIZERS_SAME,
+        "text_fp_version": 1, "text_fp": fp8(manifest, "bre"), "text_fp_as_numbered": as_numbered_fp(), "rows": n, "sha256": hashlib.sha256((d / "positions.tsv").read_bytes()).hexdigest(),
         "licence": "public domain (Brenton's text; our ids carry no third-party data)", "date": datetime.date.today().isoformat(),
         "note": "all 52 source books; EZR 11-23 as NEH 1-13, the second EZR 13:6 as NEH 3:7 (source_* gives the verse the id was minted on)",
     }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return n
+
+
+def as_numbered_fp():
+    """Brenton's EZR and NEH fingerprints as the aligner numbers them (EZR 1-10; EZR 11-23 as NEH 1-13, the source's doubled
+    13:6 split before "Καὶ ἐπὶ χεῖρα αὐτῶν ἐκράτησαν Μαλτίας" as NEH 3:6 and 3:7)"""
+    from macula import build_text_ids as bt
+    import helloao_to_usj
+    import verse_text
+    chs = sorted((json.loads(f.read_text()) for f in (bt.HELLOAO / "grc_bre").glob("EZR_*.json")), key=lambda d: d["chapter"]["number"])
+    vt = verse_text.extract_usj(helloao_to_usj.merge_book_usj("EZR", chs))
+    vs = {(int(c), int(x["verse"])): x["text"] for c, xs in vt.items() for x in xs}
+    neh = {(c - 10, v): t for (c, v), t in vs.items() if c >= 11}
+    t = neh[(3, 6)]
+    cut = t.index("Καὶ ἐπὶ χεῖρα αὐτῶν ἐκράτησαν Μαλτίας")
+    neh[(3, 6)], neh[(3, 7)] = t[:cut], t[cut:]
+    return {"EZR": bcv_tokenize.fingerprints({k: v for k, v in vs.items() if k[0] <= 10})[0][:8],
+            "NEH": bcv_tokenize.fingerprints(neh)[0][:8]}
 
 
 def basis_of(src, b2):
@@ -135,7 +154,8 @@ def split_file(ed, ids, out, manifest):
     d.mkdir(parents=True)
     pq.write_table(pa.Table.from_pylist(rows), d / "words.parquet")
     (d / "_split.json").write_text(json.dumps({
-        "spec": "bcv-split/0.1", "edition": ed, "tokenizer_version": manifest["texts"][text]["tokenizer_version"],
+        "spec": "bcv-split/0.1", "edition": ed, "table_version": VERSION, "tokenizer_version": 3,
+        "tokens_identical_for_tokenizer_versions": TOKENIZERS_SAME,
         "source": f"bcv-query Hebrew NT level 2 (hebrew-nt-analysis v0.2 parts; Tanakh cut from word-parts v1.1; Jev jev-1.14.0 "
                   f"for gender/number/state), {datetime.date.today().isoformat()}",
         "basis": "derived", "sha256": hashlib.sha256((d / "words.parquet").read_bytes()).hexdigest(),
@@ -162,6 +182,9 @@ def main():
     print("grc_bre rows", brenton(a.ids, a.out, manifest))
     for ed in TEXT:
         print(ed, "rows", split_file(ed, a.ids, a.out, manifest))
+    files = sorted(p for p in a.out.rglob("*") if p.is_file() and p.name != "SHA256SUMS")
+    (a.out / "SHA256SUMS").write_text("".join(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(a.out)}\n"
+                                              for p in files), encoding="utf-8")
 
 
 if __name__ == "__main__":
