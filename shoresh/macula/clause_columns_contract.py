@@ -42,6 +42,11 @@ VERDICT.update({
     ("hebrew", "lxx_tense"): SPLIT + "; plus differs by design: the parse of the form in its own GLAUx verse first (lxx_basis verse)",
     ("hebrew", "lxx_mood"): SPLIT + "; plus differs by design: the parse of the form in its own GLAUx verse first (lxx_basis verse)",
 })
+# From v1.3 (2026-11-23): MACULA's greek attribute swaps ξ and χ (text fault F0016); ours swaps them back, research's table has the
+# forms as MACULA writes them (ἤρχατο for ἤρξατο), so a form with ξ or χ differs, and its tense and mood, now found, with it.
+F0016 = "; plus differs by error (MACULA's, fault F0016): research's table keeps MACULA's swapped ξ / χ (ἤρχατο for ἤρξατο)"
+for _c in ("lxx_form", "lxx_tense", "lxx_mood"):
+    VERDICT[("hebrew", _c)] += F0016
 VERDICT.update({("hebrew", f"layout.{c}"): "equal (same layout, v0.37)" for c in LAYOUT_HEB})
 VERDICT.update({("greek-nt", c): "equal" for c in GRC})
 VERDICT.update({("greek-nt", f"layout.{c}"): "equal" for c in LAYOUT_GRC})

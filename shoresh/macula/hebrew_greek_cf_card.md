@@ -125,3 +125,8 @@ The whole is CC BY-SA 4.0. Each feature's metadata names its source and licence,
 - v0.1: the first release (2026-11-17).
 - v0.2: `hnb_tanakh` on the Hebrew NT word parts and `tanakh` in `bridges/hebrew_nt`; the Septuagint tiers count both numbers
   of a compound Greek link (`1722|1698`, `1909|848`).
+- v0.3: MACULA Hebrew's Septuagint-form attribute swaps ξ and χ in every form (ἤρχατο for ἤρξατο, ἐχ for ἐξ; text fault F0016
+  of bcv-query). The `lxx` edges now place the form with the two letters swapped back: `sure` 227,628 -> 243,800, `number`
+  20,916 -> 9,627, not placed 19,758 -> 13,528; 255 more carried lines. The layers clause-columns (v1.3, up from v1.1, so
+  also v1.2's Greek `subj` fix) and argument-roles (v0.4) carry the same fix in their Septuagint columns (cc_lxx_*, ar_prep_lxx,
+  ar_lxx_case).

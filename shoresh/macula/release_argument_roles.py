@@ -29,7 +29,7 @@ from macula.release_clause_columns import LAYOUTS, layout_keys
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
-VERSION = "v0.3"
+VERSION = "v0.4"
 REPO = "bcv-commons/argument-roles"
 
 
@@ -126,6 +126,10 @@ Join a row to its clause by `clause_key`: the Hebrew layout's `clause_key`, the 
 
 ## Changes
 
+- v0.4: MACULA Hebrew's Septuagint-form attribute swaps ξ and χ in every form (ἐχ for ἐξ, ἤρχατο for ἤρξατο; our text fault
+  F0016). The form is now read with the two letters swapped back, so it is found in its GLAUx verse. Hebrew only: `prep_lxx`
+  changes on 559 rows (rows with a `prep_lxx_lemma` go from 27,600 to 28,075) and `lxx_case` on 2,245. Through those,
+  `role` changes on 402 rows (216 get a role they lacked, 41 lose one) and `role_basis` on 608. Greek is identical.
 - v0.3: two rules corrected, Hebrew only. (1) The object of a causative verb that MACULA's frame calls A0 was `actor`; it is
   now `undergoer`, basis `frame_causative` (6,052 rows), and the causer, which had no role, is `actor` (1,483 rows). (2) לְ that
   the Septuagint gives as a bare dative was always `recipient` (5,265 rows); it is now split by the verb: `addressee` after a

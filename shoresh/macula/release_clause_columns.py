@@ -25,7 +25,7 @@ from macula import release_guard  # refuses TBTA and private inputs
 ROOT = Path(__file__).resolve().parents[2]
 SRC = Path(__file__).resolve().parent / "data" / "clause-columns"
 SCHEMA = 1
-VERSION = "v1.2"
+VERSION = "v1.3"
 REPO = "bcv-commons/clause-columns"
 RESEARCH_REV = "8a132e44224c83cdaa92fadd93cf440c58552354"
 LAYOUTS = {
@@ -178,6 +178,12 @@ Join a row to its layout by `clause_key` (Hebrew `clause_key`; Greek `first`). E
 layouts' own columns (rule, relation, parent, depth and so on) are not copied here: read them from the layout.
 
 ## What changed from the previous version
+
+**v1.3:** MACULA Hebrew's Septuagint-form attribute swaps ξ and χ in every form (ἤρχατο for ἤρξατο, ἐχ for ἐξ; our text fault
+F0016). The form is now read with the two letters swapped back, so it is found in its GLAUx verse. Hebrew `lxx_form` changes on
+6,974 clauses, and `lxx_tense`, `lxx_mood` and `lxx_basis` on about 6,500, most of them a tense and mood found where v1.2 had
+none (clauses with a tense: 50,856 in v1.2, 57,186 now). Nothing else changes; Greek is identical. Research's table (8a132e44) keeps the swapped forms, so checks.md notes the
+difference under F0016.
 
 **v1.2:** two Greek `subj` defects, found by a blind audit of 100 clauses per language (2026-11-17), are fixed; nothing else
 changes and Hebrew is identical. (1) MACULA Greek marks an unexpressed argument with the id `00000000000`; where a verb has no
