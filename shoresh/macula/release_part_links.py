@@ -5,15 +5,16 @@
     cd shoresh && .venv/bin/python3 -m macula.release_part_links tree-sa  --out DIR [--allow-dirty]
     cd shoresh && .venv/bin/python3 -m macula.release_part_links lxx      --out DIR [--allow-dirty]
 
-pieces   bcv-commons/hebrew-nt-pieces-model: the aligner tables v0.3 of both Hebrew NTs (level-1 parts, level-2 pieces), the piece
-         rule v0.2 and the fixed pairs v0.1; the files the lexeme-aligner's part-alignments pin, byte for byte (CC BY 4.0)
+pieces   bcv-commons/hebrew-nt-pieces-model: the aligner tables of both Hebrew NTs (level-1 parts, level-2 pieces), the piece
+         rule and the fixed pairs; the files the lexeme-aligner's part-alignments pin, byte for byte (CC BY 4.0)
 tree     bcv-commons/nt-tree-join: MACULA Greek NT trees joined to both Hebrew NTs through the aligner's part links (CC BY 4.0)
 tree-sa  bcv-commons/nt-tree-join-sa: the same for the GLAUx NT dependency trees (CC BY-SA 4.0)
 lxx      bcv-commons/tanakh-lxx-part-links: Hebrew part -> Septuagint (GLAUx) part through Brenton, with the GLAUx parts, the
          Brenton -> GLAUx join and the Brenton word ids (CC BY-SA 4.0)
 
 Copies the local builds from internal-docs/ (paths below), checks the pinned shas, writes README.md (the card), build.json and
-SHA256SUMS. The inputs are the aligner's pre-release of bcv-commons/part-alignments at revision ALIGNER_REV.
+SHA256SUMS. The inputs are the aligner's pre-release of bcv-commons/part-alignments at the revision in RELEASE.
+RELEASE holds each dataset's current version; lxx stays v0.1 (the Brenton layer did not change in part-alignments v0.4).
 """
 from __future__ import annotations
 
@@ -28,23 +29,26 @@ from macula import release_guard  # refuses TBTA and private inputs
 
 ROOT = Path(__file__).resolve().parents[2]
 D = ROOT / "internal-docs"
-VERSION = "v0.1"
-ALIGNER_REV = "9a3adbb96468469ce1f5c5955dd2924316732ca3"     # bcv-commons/part-alignments, heb v0.3 layers (2026-11-23)
-PINNED = {"piece_rule.parquet": "0e50c44b", "fixed_pairs.tsv": "58e373f1"}   # as the aligner's manifest names them
+REV_V03 = "9a3adbb96468469ce1f5c5955dd2924316732ca3"     # part-alignments: heb v0.3 layers (2026-11-23)
+REV_V04 = "2dfd37d067cc630862c5b9b6a2cf103d09f58300"     # part-alignments: heb v0.4 layers + the aligner's fix pass (2026-11-23)
+RELEASE = {"pieces": ("v0.2", REV_V04), "tree": ("v0.2", REV_V04), "tree-sa": ("v0.2", REV_V04), "lxx": ("v0.1", REV_V03)}
+PINNED = {"piece_rule.parquet": "e80618f4", "fixed_pairs.tsv": "56fec4d9",          # as the aligner's manifest names them
+          "tables/heb_mod/words.parquet": "82e34d23", "tables/heb_scg/words.parquet": "31886dd8"}
+VERSION, ALIGNER_REV = RELEASE["pieces"]      # set per dataset in main()
 
 FILES = {
     "pieces": {
-        "tables/heb_scg/words.parquet": "aligner-tables/v0.3/heb_scg/words.parquet",
-        "tables/heb_scg/_split.json": "aligner-tables/v0.3/heb_scg/_split.json",
-        "tables/heb_mod/words.parquet": "aligner-tables/v0.3/heb_mod/words.parquet",
-        "tables/heb_mod/_split.json": "aligner-tables/v0.3/heb_mod/_split.json",
-        "piece_rule.parquet": "aligner-piece-rule/v0.2/piece_rule.parquet",
-        "piece_rule_report.json": "aligner-piece-rule/v0.2/report.json",
-        "fixed_pairs.tsv": "aligner-fixed-pairs/v0.1/pairs.tsv",
+        "tables/heb_scg/words.parquet": "aligner-tables/v0.4/heb_scg/words.parquet",
+        "tables/heb_scg/_split.json": "aligner-tables/v0.4/heb_scg/_split.json",
+        "tables/heb_mod/words.parquet": "aligner-tables/v0.4/heb_mod/words.parquet",
+        "tables/heb_mod/_split.json": "aligner-tables/v0.4/heb_mod/_split.json",
+        "piece_rule.parquet": "aligner-piece-rule/v0.3/piece_rule.parquet",
+        "piece_rule_report.json": "aligner-piece-rule/v0.3/report.json",
+        "fixed_pairs.tsv": "aligner-fixed-pairs/v0.2/pairs.tsv",
     },
-    "tree": {f"data/{n}.parquet": f"nt-tree-join/v0.2/by/{n}.parquet" for n in ("parts", "part_links", "nodes", "node_links")}
-            | {"report.json": "nt-tree-join/v0.2/report.json"},
-    "tree-sa": {f"data/{n}.parquet": f"nt-tree-join/v0.2/by-sa/{n}.parquet"
+    "tree": {f"data/{n}.parquet": f"nt-tree-join/v0.3/by/{n}.parquet" for n in ("parts", "part_links", "nodes", "node_links")}
+            | {"report.json": "nt-tree-join/v0.3/report.json"},
+    "tree-sa": {f"data/{n}.parquet": f"nt-tree-join/v0.3/by-sa/{n}.parquet"
                 for n in ("crosswalk", "glaux_words", "glaux_node_links")},
     "lxx": {
         "data/part_links.parquet": "brenton-part-links/jev-v4/part_links.parquet",
@@ -58,18 +62,22 @@ FILES = {
 REPO = {"pieces": "hebrew-nt-pieces-model", "tree": "nt-tree-join", "tree-sa": "nt-tree-join-sa", "lxx": "tanakh-lxx-part-links"}
 LICENCE = {"pieces": "cc-by-4.0", "tree": "cc-by-4.0", "tree-sa": "cc-by-sa-4.0", "lxx": "cc-by-sa-4.0"}
 
-PRE = f"""**Pre-release ({VERSION}, 2026-11-23).** Built on the lexeme-aligner's pre-release of
+def pre() -> str:
+    return f"""**Pre-release ({VERSION}, 2026-11-23).** Built on the lexeme-aligner's pre-release of
 [bcv-commons/part-alignments](https://huggingface.co/datasets/bcv-commons/part-alignments) at revision `{ALIGNER_REV[:8]}`.
 When the aligner's full release comes, this dataset is rebuilt on it; column names may still change before v1.0."""
+
 
 QUALITY = """## Link quality (read this before use)
 
 The links are the lexeme-aligner's, graded by sample in the hub session by the model (Claude Opus); no person checked them.
-- **Delitzsch (`heb_mod`) is below our bar of 90% right.** Five samples of 25 random links on 2026-11-23, one per layer
-  update: 16, 19, 22, 23 and 20 right (100 of 125, 80%). The misses are mostly a pronoun suffix taken for the stem, a
-  Greek word that two Hebrew words render linked to only one of them, and a few wrong words.
-- **Salkinson (`heb_scg`)** was graded once on an earlier layer: 23 of 25. It is not graded on this layer.
-- The piece choice inside a word pair (the piece rule) is by rule: 30 of 30 and 14 of 15 right in two samples."""
+- **Delitzsch (`heb_mod`) is below our bar of 90% right**, but close: 87 of 100 random links right on these layers
+  (2026-11-23, seed 71; 3 borderline, 2 incomplete, 8 wrong). Seven of the 8 misses are a wrong word (ὑποζύγιον -> the
+  word for ἄφωνον); pronoun and ending errors are nearly gone (1 of 100). Before the fixes of 2026-11-23 it was 80%
+  (100 of 125 over five samples).
+- **Salkinson (`heb_scg`)**: 25 of 25 random links right on these layers (seed 73).
+- The piece choice inside a word pair (the piece rule) is by rule: 30 of 30 and 14 of 15 right in two samples; the fixed
+  pairs added by the aligner: 15 of 15."""
 
 
 def sha256(p: Path) -> str:
@@ -97,12 +105,12 @@ configs:
 
 # Hebrew NT parts and pieces ({VERSION})
 
-{PRE}
+{pre()}
 
 The units the lexeme-aligner links in its Hebrew layers: every word of two Hebrew translations of the New Testament,
 Salkinson-Ginsburg (`heb_scg`, pointed) and Delitzsch (`heb_mod`, unpointed), cut into level-1 parts (prefixes, the word,
 suffixes) and level-2 pieces (stem, person/number/state endings, prefixed person letters). These are the files the aligner's
-manifest pins, byte for byte: tables v0.3, `piece_rule.parquet` (sha `{PINNED['piece_rule.parquet']}`) and `fixed_pairs.tsv`
+manifest pins, byte for byte: tables v0.4 (`words.parquet` sha `{PINNED['tables/heb_scg/words.parquet']}` Salkinson, `{PINNED['tables/heb_mod/words.parquet']}` Delitzsch), `piece_rule.parquet` (sha `{PINNED['piece_rule.parquet']}`) and `fixed_pairs.tsv`
 (sha `{PINNED['fixed_pairs.tsv']}`).
 
 **Model data.** Part of the cut was made with model help, and those rows say so:
@@ -110,7 +118,10 @@ manifest pins, byte for byte: tables v0.3, `piece_rule.parquet` (sha `{PINNED['p
   tagger of [hebrew-nt-analysis](https://huggingface.co/datasets/bcv-commons/hebrew-nt-analysis), a model trained on MACULA Hebrew.
 - `level2_basis` starting with `jev`: {n['l2_jev_scg']:,} / {n['l2_jev_mod']:,} rows, where the Jev model gave the analysis
   that the cut follows.
-- The fixed pairs and the sample grades are the hub model's (Claude Opus) work.
+- `level1_source` = `rule`: 19 Delitzsch אתם words whose cut follows the linked Greek (the pronoun "you" or את + ם);
+  `shoresh/macula/hebrew_nt_level1_fixes.py` in bcv-commons/bcv-query.
+- The fixed pairs (mined by rule from the aligner's links, then read one by one) and the sample grades are the hub
+  model's (Claude Opus) work.
 No person checked the model rows. Rows with `level2_basis` `tanakh` follow MACULA's own cut of the same word in the Tanakh.
 
 ## Files
@@ -119,9 +130,9 @@ No person checked the model rows. Rows with `level2_basis` `tanakh` follow MACUL
 |---|---|
 | `tables/<ed>/words.parquet` | one row per level-2 piece: `book chapter verse i token word part slot text class lemma lexeme strong basis p_split`, `part_id` (level 1: `scg:`/`del:` + word id + part digit), `part2_id` (+ piece digit), `level1_part level1_source level2_kind level2_features level2_basis`, `fault_fix fault_fixed` (our text faults) |
 | `tables/<ed>/_split.json` | format header (bcv-split/0.1, tokenizer 3) |
-| `piece_rule.parquet` | `edition greek_part_id` ([word-parts](https://huggingface.co/datasets/bcv-commons/word-parts) v1.1) `hebrew_part_id hebrew_piece_id basis table_version`: which piece(s) of a Hebrew part a single Greek part takes ({n['rule_rows']:,} rows) |
+| `piece_rule.parquet` | `edition greek_part_id` ([word-parts](https://huggingface.co/datasets/bcv-commons/word-parts) v1.1) `hebrew_part_id hebrew_piece_id basis table_version`: which piece(s) of a Hebrew part a single Greek part takes ({n['rule_rows']:,} rows: only the links that still differ after the aligner folded in the earlier rule versions; the full table of 63,849 rows is in v0.1 of this dataset) |
 | `piece_rule_report.json` | counts per basis |
-| `fixed_pairs.tsv` | 15 Greek words rendered by two Hebrew words (`greek_lemma greek_strong hebrew_pair hebrew_strongs tanakh_pairs lxx_with_greek_lemma support`) |
+| `fixed_pairs.tsv` | 52 Greek words rendered by two Hebrew words (`greek_lemma greek_strong hebrew_pair hebrew_strongs tanakh_pairs lxx_with_greek_lemma support`) |
 
 Piece rule bases: `rule:piece_stem` (a Greek stem takes the Hebrew stem), `rule:piece_person` (a Greek person ending takes the
 Hebrew piece(s) of the same person), `rule:piece_number` (a plural/dual case ending takes a plural/dual Hebrew ending, else the
@@ -130,8 +141,9 @@ number (`Vqi3ms`); nouns N/A + type + gender + number + state (`Ncmpa`).
 
 {QUALITY}
 
-Known faults: Delitzsch's level-1 cut splits אתם as את+ם in 202 of 485 places (some are the pronoun "you"); fixed at the next
-hebrew-nt-analysis export.
+Known faults: Delitzsch is unpointed, so אתם can be the pronoun or את + ם. Where the Greek decides, hebrew-nt-analysis was
+right for 326 of 345; the 19 others are fixed here. 140 have no Greek link and keep its cut (about 8 may be wrong). v0.1 of
+this card overstated the fault ("202 of 485": that was the number of splits, not of errors).
 
 ## Licence
 
@@ -156,7 +168,7 @@ configs:
 
 # Greek NT trees joined to two Hebrew NTs ({VERSION})
 
-{PRE}
+{pre()}
 
 Every node of the MACULA Greek NT syntax trees (Nestle 1904) with the Hebrew words it maps to in Salkinson-Ginsburg (`heb_scg`)
 and Delitzsch (`heb_mod`), through the lexeme-aligner's part links; and every Hebrew clause segment with the Greek it maps to.
@@ -198,7 +210,7 @@ configs:
 
 # GLAUx NT trees joined to two Hebrew NTs ({VERSION})
 
-{PRE}
+{pre()}
 
 The [GLAUx](https://github.com/alekkeersmaekers/glaux) dependency trees of the Greek NT (commit `b077d8f6`), word by word
 against MACULA, and every GLAUx subtree with the Hebrew words it maps to in Salkinson-Ginsburg and Delitzsch, through the
@@ -230,7 +242,7 @@ configs:
 
 # Tanakh parts linked to Septuagint parts ({VERSION})
 
-{PRE}
+{pre()}
 
 Every Hebrew part of the Tanakh (MACULA Hebrew, [word-parts](https://huggingface.co/datasets/bcv-commons/word-parts) v1.1) with the
 Septuagint parts it is rendered by, in the GLAUx Septuagint cut into parts (stem, ending, preverb, augment, ...). The link goes
@@ -289,6 +301,8 @@ def main() -> int:
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
     release_guard.check(a)
+    global VERSION, ALIGNER_REV
+    VERSION, ALIGNER_REV = RELEASE[a.kind]
     dirty = subprocess.check_output(["git", "status", "--porcelain", "--", "shoresh/macula"], cwd=ROOT, text=True).strip()
     if dirty and not a.allow_dirty:
         raise SystemExit(f"shoresh/macula has uncommitted changes; commit first (or --allow-dirty for a dry run):\n{dirty}")
