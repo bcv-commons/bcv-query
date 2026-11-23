@@ -240,7 +240,7 @@ def cmd_finish(ed, out, ids):
                         # the Tanakh has this form but cuts it more than one way (so it came to Jev): if most of its
                         # occurrences keep the last ה/ת in the stem (אוֹת, רָעָה), so does this one
                         cut_end = sum(n for pat, n in c.items() if pat != "whole" and pat[-1][1] == "ending" and pat[-1][0] == 1)
-                        if cut_end < 0.5 * sum(c.values()):
+                        if cut_end <= 0.5 * sum(c.values()):     # a tie keeps it whole (MACULA cuts אוֹת in 40 of 80)
                             pieces = None
                     if pieces and pieces[-1][0] == "ending" and hp.skel(pieces[-1][1]) in ("ם", "מ") and pieces[-1][2][4:5] == "p":
                         # a bare ם after a noun is the pronoun "them" (כֻּלָּם, כֹּחָם), not a plural ending (that is ים)

@@ -42,8 +42,14 @@ def main():
     ap.add_argument("--usj", type=Path, required=True)
     ap.add_argument("--positions", type=Path, required=True)
     ap.add_argument("--spine", type=Path, default=Path("pipeline/lexeme-spine-macula-parts-v1.1.db"))
+    ap.add_argument("--refine", type=Path, help="the aligner's final Jev layer (cells *_<BOOK>.jsonl): read as method `jev`, "
+                    "instead of the run's statistical methods")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()
+    if a.refine:
+        files = {"jev": lambda: sorted(a.refine.glob("align_llm_*.jsonl"))}
+    else:
+        files = {m: (lambda m=m: sorted(a.run.glob(f"align_{m}_grc_bre_*.jsonl"))) for m in METHODS}
     a.out.mkdir(parents=True, exist_ok=False)
     pos = collections.defaultdict(list)                      # (book, chapter, verse) -> [(token, bre id)] in position order
     with open(a.positions, encoding="utf-8", newline="") as f:
@@ -54,14 +60,14 @@ def main():
     db = sqlite3.connect(f"file:{a.spine.resolve()}?mode=ro", uri=True)
     part_of = dict(db.execute("select key, part_id from spine_words where part_id is not null"))
     usj = a.usj.resolve()
-    books = [b for b in ALL_BOOKS[:39] if any(a.run.glob(f"align_*_grc_bre_{b}.jsonl"))]
+    books = [b for b in ALL_BOOKS[:39] if any(f.stem.endswith("_" + b) for fs in files.values() for f in fs())]
     rec = {}
     for r in build_corpus(books, usj, HebrewSource(), remap=remapper("grc_bre", str(usj))):
         rec[encode(r.book, r.ch, r.v)] = r
     st = collections.Counter()
     rows = []
-    for m in METHODS:
-        for f in sorted(a.run.glob(f"align_{m}_grc_bre_*.jsonl")):
+    for m, fs in files.items():
+        for f in fs():
             for line in open(f, encoding="utf-8"):
                 j = json.loads(line)
                 r = rec.get(j["ref"])
@@ -88,7 +94,7 @@ def main():
                                      "ref": f"{r.book} {r.ch}:{r.v}"})
                         st[f"links {m}"] += 1
     pq.write_table(pa.Table.from_pylist(rows), a.out / "links.parquet")
-    (a.out / "report.json").write_text(json.dumps({"run": str(a.run), "books": books, **dict(st)}, indent=1, ensure_ascii=False) + "\n")
+    (a.out / "report.json").write_text(json.dumps({"run": str(a.run), "refine": str(a.refine or ""), "books": books, **dict(st)}, indent=1, ensure_ascii=False) + "\n")
     print(json.dumps(dict(st), ensure_ascii=False))
 
 
