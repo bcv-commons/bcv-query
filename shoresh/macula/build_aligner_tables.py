@@ -37,7 +37,7 @@ import bcv_tokenize  # noqa: E402
 from macula import text_faults  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-VERSION = "v0.1"
+VERSION = "v0.2"   # v0.2: level-2 cuts with the common-gender, state and Tanakh-majority fixes (v0.1 stays as the aligner pinned it)
 TOKENIZERS_SAME = [2, 3]   # checked 2026-11-23: v2 and v3 give the same tokens and book fingerprints on grc_bre, heb_scg, heb_mod
 ANALYSIS = HERE / "data" / "bridge-corpus" / "inputs" / "hebrew-nt-analysis@v0.2"
 TEXT = {"heb_scg": "scg", "heb_mod": "del"}

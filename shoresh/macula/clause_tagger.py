@@ -501,6 +501,8 @@ def apply_lookup(pred: list[dict], table: dict[str, list[dict]]) -> int:
             same = [len(x["text"]) for x in w["parts"]] == [x[0] for x in a]
             parts, at = [], 0
             for i, (ln, cls, lem, strong, lexeme) in enumerate(a[:SLOTS]):
+                if i == SLOTS - 1:
+                    ln = sum(x[0] for x in a[i:])   # MACULA has more parts than the slots (וּמִלְמַעְלָה: ו מִן לְ מַעַל ה): the rest stays in the last
                 parts.append({"text": w["text"][at:at + ln], "class": cls, "role": w["parts"][i]["role"] if same else "-", "lemma": lem,
                               "strong": strong, "lexeme": lexeme})
                 at += ln

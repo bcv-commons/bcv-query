@@ -181,6 +181,9 @@ def morph(p, a):
             return f"Vx{t}{g}{n}{s}" if g and n else ""
         if t in "pqiwjhv" and t:
             per = PERSON.get(p["person"], "2" if t == "v" else "")
+            # MACULA's paradigm has common gender in the 1st person, and in the qatal's 3rd plural (3cp); Jev answers m/f
+            if g and (per == "1" or (t in "pq" and per == "3" and n == "p")):
+                g = "c"
             return f"Vx{t}{per}{g}{n}" if per and g and n else ""
         return f"Vx{t}" if t else ""
     if not (g and n):
@@ -226,6 +229,24 @@ def cmd_finish(ed, out, ids):
                 basis = "jev" if m else "jev_no_parse"
                 if m:
                     pieces = hp.cut(r["text"], m, lemma, roots.get(sk))
+                    if pieces and len(pieces) == 1 and pieces[0][0] == "fused" and lemma == r["text"]:
+                        # no lemma known, and the form taken as its own lemma makes the ending look like a root letter
+                        # (דָחֲפוּ): cut without a lemma
+                        pieces = hp.cut(r["text"], m, "", roots.get(sk))
+                    if not pieces and m[-1:] in ("a", "c") and (m[:2] in ("Nc", "Aa") or m[2:3] in ("r", "s")):
+                        # the written ending decides the state when Jev's state finds none (פְקִידִים said construct)
+                        pieces = hp.cut(r["text"], m[:-1] + ("c" if m[-1] == "a" else "a"), lemma, roots.get(sk))
+                    if pieces and pieces[-1][0] == "ending" and hp.skel(pieces[-1][1]) in ("ה", "ת") and c:
+                        # the Tanakh has this form but cuts it more than one way (so it came to Jev): if most of its
+                        # occurrences keep the last ה/ת in the stem (אוֹת, רָעָה), so does this one
+                        cut_end = sum(n for pat, n in c.items() if pat != "whole" and pat[-1][1] == "ending" and pat[-1][0] == 1)
+                        if cut_end < 0.5 * sum(c.values()):
+                            pieces = None
+                    if pieces and pieces[-1][0] == "ending" and hp.skel(pieces[-1][1]) in ("ם", "מ") and pieces[-1][2][4:5] == "p":
+                        # a bare ם after a noun is the pronoun "them" (כֻּלָּם, כֹּחָם), not a plural ending (that is ים)
+                        pieces = None
+                    if hp.skel(r["text"]) == "אפתח" and (r["book"], r["chapter"], r["verse"]) == ("MRK", 7, 34):
+                        pieces = None   # ephphatha: the Aramaic word written out, not a 1st-person Hebrew verb
         cnt[basis + (" (cut)" if pieces else "")] += 1
         pieces = pieces or [("whole", r["text"], "")]
         start = 0
