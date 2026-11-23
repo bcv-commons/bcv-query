@@ -3,8 +3,8 @@
     cd shoresh && .venv/bin/python -m macula.piece_map --old internal-docs/aligner-tables/v0.2 \
         --new internal-docs/aligner-tables/v0.3 [--editions heb_scg,heb_mod]
 
-Writes <new>/<edition>/piece_map_<old version>.parquet: for every level-1 part whose pieces differ, each old piece -> new
-piece pair that shares letters (old_part2_id, old_text, new_part2_id, new_text, shared_chars); parts whose pieces are the
+Writes <new>/<edition>/piece_map_<old version>.parquet: for every word whose pieces differ (level 1 or level 2), each old
+piece -> new piece pair that shares letters (old_part2_id, old_text, new_part2_id, new_text, shared_chars); words whose pieces are the
 same keep their ids and are not listed. A piece without an id on one side (a drop fault) is skipped. Prints the counts
 and appends the files' sha256 to <new>/SHA256SUMS.
 """
@@ -21,9 +21,10 @@ import pyarrow.parquet as pq
 
 
 def spans(p: Path) -> dict:
+    """word id -> its pieces as (part2_id, start, end, text), by letter offset in the word (so a level-1 change is mapped too)."""
     d = collections.defaultdict(list)
     for r in pq.read_table(p, columns=["part_id", "part2_id", "text"]).to_pylist():
-        d[r["part_id"]].append(r)
+        d[r["part_id"][:-1]].append(r)
     out = {}
     for pid, rs in d.items():
         o, out[pid] = 0, []
@@ -44,13 +45,13 @@ def main() -> None:
     for ed in a.editions.split(","):
         A, B = spans(a.old / ed / "words.parquet"), spans(a.new / ed / "words.parquet")
         if A.keys() != B.keys():
-            raise SystemExit(f"{ed}: the level-1 parts differ between {a.old} and {a.new}; a piece map is not enough")
+            raise SystemExit(f"{ed}: the words differ between {a.old} and {a.new}; a piece map is not enough")
         rows, st = [], collections.Counter()
         for pid in A:
             if [(x[0], x[3]) for x in A[pid]] == [(x[0], x[3]) for x in B[pid]]:
-                st["level-1 parts unchanged"] += 1
+                st["words unchanged"] += 1
                 continue
-            st["level-1 parts changed"] += 1
+            st["words changed"] += 1
             for i, s, e, t in A[pid]:
                 for j, s2, e2, t2 in B[pid]:
                     ov = min(e, e2) - max(s, s2)

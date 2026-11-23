@@ -88,7 +88,8 @@ def main():
         fetch = json.loads((HELLOAO / ed / "fetch.json").read_text())
         st = collections.Counter()
         if text in ("scg", "del"):
-            t = pq.read_table(ANALYSIS / ed / "words.parquet").to_pylist()
+            from macula import hebrew_nt_level1_fixes
+            t = hebrew_nt_level1_fixes.apply(ed, pq.read_table(ANALYSIS / ed / "words.parquet").to_pylist())
             words, parts = {}, []
             for r in sorted(t, key=lambda r: (NUMBER[r["book"]], r["chapter"], r["verse"], r["i"], r["part"])):
                 w = wid(text, r["book"], r["chapter"], r["verse"], r["i"])

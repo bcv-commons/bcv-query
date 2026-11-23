@@ -1,0 +1,20 @@
+word_id	ref	position	from_cut	to_cut	rule	greek
+del:46003004012	1CO 3:4	11	split	whole	greek2	εἰμί
+del:46010015007	1CO 10:15	6	split	whole	greek2	σύ
+del:46012027004	1CO 12:27	3	split	whole	greek2	εἰμί σύ
+del:47012011004	2CO 12:11	3	split	whole	greek2	σύ
+del:44004011005	ACT 4:11	4	split	whole	greek2	σύ ὑπό
+del:44010046003	ACT 10:46	2	whole	split_om	greek3	αὐτός λαλέω
+del:44027031018	ACT 27:31	17	split	whole	greek2	σύ
+del:48004006004	GAL 4:6	3	split	whole	greek2	εἰμί
+del:43007008002	JHN 7:8	1	split	whole	greek2	εἰς σύ
+del:43009019002	JHN 9:19	1	whole	split_om	greek3	αὐτός
+del:43019006015	JHN 19:6	14	split	whole	greek2	αὐτός σύ
+del:42009013004	LUK 9:13	3	split	whole	greek2	σύ
+del:42009044002	LUK 9:44	1	split	whole	greek2	σύ
+del:42012024019	LUK 12:24	18	split	whole	greek2	σύ
+del:42013004012	LUK 13:4	11	split	whole	greek2	αὐτός
+del:42024033012	LUK 24:33	11	whole	split_prep	greek3	αὐτός
+del:40014016007	MAT 14:16	6	split	whole	greek2	σύ
+del:40028020002	MAT 28:20	1	whole	split_om	greek3	αὐτός
+del:41006037005	MRK 6:37	4	split	whole	greek2	σύ

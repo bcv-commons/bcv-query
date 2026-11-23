@@ -37,7 +37,7 @@ import bcv_tokenize  # noqa: E402
 from macula import text_faults  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-VERSION = "v0.3"   # v0.3: fault rows of real words get a part2_id; a Tanakh tie keeps ה/ת in the stem (אוֹת); v0.1 and v0.2 stay as pinned
+VERSION = "v0.4"   # v0.4: Delitzsch אתם level-1 fixes (text_faults/level1_fixes.tsv); v0.1-v0.3 stay as pinned
 TOKENIZERS_SAME = [2, 3]   # checked 2026-11-23: v2 and v3 give the same tokens and book fingerprints on grc_bre, heb_scg, heb_mod
 ANALYSIS = HERE / "data" / "bridge-corpus" / "inputs" / "hebrew-nt-analysis@v0.2"
 TEXT = {"heb_scg": "scg", "heb_mod": "del"}
@@ -109,7 +109,8 @@ def split_file(ed, ids, out, manifest):
     for r in read_tsv(ids / text / "parts2.tsv"):
         p2[r["part_id"]].append(r)
     toks = collections.defaultdict(list)
-    for r in pq.read_table(ANALYSIS / ed / "words.parquet").to_pylist():
+    from macula import hebrew_nt_level1_fixes
+    for r in hebrew_nt_level1_fixes.apply(ed, pq.read_table(ANALYSIS / ed / "words.parquet").to_pylist()):
         toks[(r["book"], r["chapter"], r["verse"], r["i"])].append(r)
     rows = []
     for k in sorted(toks, key=lambda k: (NUMBER[k[0]], k[1], k[2], k[3])):
@@ -166,7 +167,7 @@ def split_file(ed, ids, out, manifest):
         "text_licence": "public domain", "books": sorted({r["book"] for r in rows}, key=lambda b: NUMBER[b]),
         "text_fp": fp8(manifest, text), "text_fp_version": 1, "date": datetime.date.today().isoformat(),
         "extra_columns": {"part_id": "our level-1 part id", "part2_id": "our level-2 piece id", "level1_part": "the part in hebrew-nt-analysis",
-                          "level1_source": "macula / model (hebrew-nt-analysis)", "level2_kind": "prefix / stem / ending / whole",
+                          "level1_source": "macula / model (hebrew-nt-analysis) / rule (text_faults/level1_fixes.tsv)", "level2_kind": "prefix / stem / ending / whole",
                           "level2_features": "MACULA-style code of the piece (Vx...: verb stem not known)",
                           "level2_basis": "tanakh / jev / jev_name / jev_no_parse / whole / verse_number / fault:<id> (text_faults.tsv)",
                           "fault_fix": "drop / replace, where the token has a listed fault", "fault_fixed": "the reading for replace"},
