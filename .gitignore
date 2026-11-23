@@ -298,3 +298,6 @@ shoresh/ds
 shoresh/macula/data/macula-nodes/
 shoresh/macula/data/source-examples/
 shoresh/macula/data/hebrew-levels/
+
+# all of shoresh/macula/data is build output and downloads; nothing in it is tracked (the per-folder lines above stay as history)
+shoresh/macula/data/
