@@ -76,7 +76,7 @@ QUERIES = (                                              # fixed queries with th
     ("Tanakh words of הלך placed on a Septuagint word of πορεύομαι", "h:word strong=1980\ng:word lemma=πορεύομαι\nh -lxx> g\n", 777),
     ("the same, placed only by the Greek number", "h:word strong=1980\ng:word lemma=πορεύομαι\nh -lxx=number> g\n", 20),
     ("carried Septuagint lines of Ruth whose Hebrew line is imperative speech",
-     "book sec=LXX.RUT\n  g:line\nh:line\nc:clause cc_force=imperative\n  h\ng -carried> h\n", 18),
+     "book sec=LXX.RUT\n  g:line\nh:line\nc:clause cc_force=imperative\n  h\ng -carried> h\n", 19),   # 18 before F0016 (v0.3)
     ("Theodotion's verses of Daniel 7", "book sec=LXX.DAN-TH\n  chapter chapter=7\n    verse\n", 28),
     ("Greek lexemes that MACULA's Septuagint numbers pair with הלך", "h:lexeme lex_key=hbo:1980\ng:lexeme\nh -tier_macula> g\n", 17),
     ("Hebrew lexemes paired with a Greek lexeme by both Salkinson and Delitzsch", "h:lexeme\ng:lexeme\nh -tier_heb_scg> g\nh -tier_heb_mod> g\n", 2117),
