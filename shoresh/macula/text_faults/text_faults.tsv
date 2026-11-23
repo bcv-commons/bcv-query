@@ -1,0 +1,12 @@
+fault_id	layer	edition	word_id	book	chapter	verse	position	found	fault	fix	fixed	note	found_on	status
+F0001	source_text	heb_mod	del:40018010005	MAT	18	10	4	wקטנים	stray_letter	replace	קטנים	a Latin w before the Hebrew word	2026-11-23	open
+F0002	source_text	heb_mod	del:42017002016	LUK	17	2	15	wאלה	stray_letter	replace	אלה	a Latin w before the Hebrew word	2026-11-23	open
+F0003	source_text	heb_mod	del:45007025006	ROM	7	25	5	Romans	stray_label	drop		the book's Latin end label inside the last verse	2026-11-23	open
+F0004	source_text	heb_mod	del:50003021012	PHP	3	21	11	Philippians	stray_label	drop		the book's Latin end label inside the verse	2026-11-23	open
+F0005	source_text	heb_mod	del:53003018013	2TH	3	18	12	II	stray_label	drop		the book's Latin end label (II Thessalonians)	2026-11-23	open
+F0006	source_text	heb_mod	del:53003018014	2TH	3	18	13	Thessalonians	stray_label	drop		the book's Latin end label (II Thessalonians)	2026-11-23	open
+F0007	source_text	heb_mod	del:54006021008	1TI	6	21	7	I	stray_label	drop		the book's Latin end label (I Timothy)	2026-11-23	open
+F0008	source_text	heb_mod	del:54006021009	1TI	6	21	8	Timothy	stray_label	drop		the book's Latin end label (I Timothy)	2026-11-23	open
+F0009	source_text	heb_mod	del:64001014009	3JN	1	14	8	III	stray_label	drop		the book's Latin end label (III John)	2026-11-23	open
+F0010	source_text	heb_mod	del:64001014010	3JN	1	14	9	John	stray_label	drop		the book's Latin end label (III John)	2026-11-23	open
+F0011	ours:hebrew-nt-analysis@v0.2	heb_scg	scg:58009005002	HEB	9	5	1	מַעְלָ	lost_letters	replace	מַעְלָה	the adverb part lost its final ה (word וּמִלְמַעְלָה); fix in the next hebrew-nt-analysis	2026-11-23	open

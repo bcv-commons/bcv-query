@@ -34,6 +34,8 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent / "vendor_bibles"))
 import bcv_tokenize  # noqa: E402
 
+from macula import text_faults  # noqa: E402
+
 HERE = Path(__file__).resolve().parent
 ANALYSIS = HERE / "data" / "bridge-corpus" / "inputs" / "hebrew-nt-analysis@v0.2"
 TEXT = {"heb_scg": "scg", "heb_mod": "del"}
@@ -83,6 +85,7 @@ def basis_of(src, b2):
 
 def split_file(ed, ids, out, manifest):
     text = TEXT[ed]
+    faults = text_faults.load(ed)
     p2 = collections.defaultdict(list)
     for r in read_tsv(ids / text / "parts2.tsv"):
         p2[r["part_id"]].append(r)
@@ -101,18 +104,24 @@ def split_file(ed, ids, out, manifest):
                 pieces.append((r, pid, q, slot))
         r0 = ps[0]
         word = r0["word"]
-        if bcv_tokenize.tokenize(word) != [r0["token"]]:
-            # the edition's text has a token the analysis did not keep as written (Delitzsch: "Romans", "wקטנים"):
-            # the bibles token is the word, one whole piece, flagged
+        wid = f"{text}:{NUMBER[r0['book']]:02d}{r0['chapter']:03d}{r0['verse']:03d}{r0['i'] + 1:03d}"
+        fault = faults.get(wid)
+        if fault and fault["layer"] == "source_text":
+            # a fault of the edition's text (text_faults.tsv): the token as written, one whole piece, with the fault's id
+            # and fix (drop: not a word of the text; replace: read as `fixed`)
             word = r0["token"]
-            q = {"text": word, "part2_id": "", "kind": "whole", "features": "", "basis": "source_text_noise"}
+            q = {"text": word, "part2_id": "", "kind": "whole", "features": "", "basis": f"fault:{fault['fault_id']}"}
             pieces = [(r0, pieces[0][1] if pieces else "", q, "whole")]
         joined = "".join(q["text"] for _, _, q, _ in pieces)
-        if joined != word and word.startswith(joined):
-            # hebrew-nt-analysis lost the word's last letters (scg HEB 9:5 מַעְלָ|ה): the rest as a suffix, flagged
+        if fault and fault["layer"].startswith("ours:") and fault["fault"] == "lost_letters" and word.startswith(joined):
+            # one of our datasets lost the word's last letters: the rest as a suffix piece, with the fault's id
             r, pid = pieces[-1][0], pieces[-1][1]
             pieces.append((r, pid, {"text": word[len(joined):], "part2_id": "", "kind": "ending", "features": "",
-                                    "basis": "restored_from_word"}, "suffix"))
+                                    "basis": f"fault:{fault['fault_id']}"}, "suffix"))
+            joined = word
+        if joined != word or bcv_tokenize.tokenize(word) != [r0["token"]]:
+            raise SystemExit(f"{wid} {r0['token']!r}: the parts do not rebuild the word and no fault is listed; "
+                             f"add it to text_faults/text_faults.tsv")
         one = len(pieces) == 1
         for n, (r, pid, q, slot) in enumerate(pieces):
             rows.append({"book": r["book"], "chapter": int(r["chapter"]), "verse": int(r["verse"]), "i": int(r["i"]),
@@ -120,7 +129,8 @@ def split_file(ed, ids, out, manifest):
                          "class": r["class"], "lemma": r["lemma"], "lexeme": r["lexeme"], "strong": r["strong"],
                          "basis": basis_of(r["source"], q["basis"]), "p_split": r["p_split"] if n == 0 else None,
                          "part_id": pid, "part2_id": q["part2_id"], "level1_part": int(r["part"]), "level1_source": r["source"],
-                         "level2_kind": q["kind"], "level2_features": q["features"], "level2_basis": q["basis"]})
+                         "level2_kind": q["kind"], "level2_features": q["features"], "level2_basis": q["basis"],
+                         "fault_fix": fault["fix"] if fault else None, "fault_fixed": (fault["fixed"] or None) if fault else None})
     d = out / ed
     d.mkdir(parents=True)
     pq.write_table(pa.Table.from_pylist(rows), d / "words.parquet")
@@ -134,7 +144,8 @@ def split_file(ed, ids, out, manifest):
         "extra_columns": {"part_id": "our level-1 part id", "part2_id": "our level-2 piece id", "level1_part": "the part in hebrew-nt-analysis",
                           "level1_source": "macula / model (hebrew-nt-analysis)", "level2_kind": "prefix / stem / ending / whole",
                           "level2_features": "MACULA-style code of the piece (Vx...: verb stem not known)",
-                          "level2_basis": "tanakh / jev / jev_name / jev_no_parse / whole / verse_number"},
+                          "level2_basis": "tanakh / jev / jev_name / jev_no_parse / whole / verse_number / fault:<id> (text_faults.tsv)",
+                          "fault_fix": "drop / replace, where the token has a listed fault", "fault_fixed": "the reading for replace"},
     }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return len(rows)
 
