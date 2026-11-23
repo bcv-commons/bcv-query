@@ -129,13 +129,17 @@ def split_file(ed, ids, out, manifest):
             # a fault of the edition's text (text_faults.tsv): the token as written, one whole piece, with the fault's id
             # and fix (drop: not a word of the text; replace: read as `fixed`)
             word = r0["token"]
-            q = {"text": word, "part2_id": "", "kind": "whole", "features": "", "basis": f"fault:{fault['fault_id']}"}
-            pieces = [(r0, pieces[0][1] if pieces else "", q, "whole")]
+            pid0 = pieces[0][1] if pieces else ""
+            # replace: a real word read as `fixed`, so it gets a piece id (part id + 1); drop: not a word, no piece id
+            q = {"text": word, "part2_id": pid0 + "1" if pid0 and fault["fix"] == "replace" else "", "kind": "whole",
+                 "features": "", "basis": f"fault:{fault['fault_id']}"}
+            pieces = [(r0, pid0, q, "whole")]
         joined = "".join(q["text"] for _, _, q, _ in pieces)
         if fault and fault["layer"].startswith("ours:") and fault["fault"] == "lost_letters" and word.startswith(joined):
             # one of our datasets lost the word's last letters: the rest as a suffix piece, with the fault's id
             r, pid = pieces[-1][0], pieces[-1][1]
-            pieces.append((r, pid, {"text": word[len(joined):], "part2_id": "", "kind": "ending", "features": "",
+            n_pid = sum(1 for x in pieces if x[1] == pid)     # the restored letters: the next piece of that part
+            pieces.append((r, pid, {"text": word[len(joined):], "part2_id": f"{pid}{n_pid + 1}", "kind": "ending", "features": "",
                                     "basis": f"fault:{fault['fault_id']}"}, "suffix"))
             joined = word
         if joined != word or bcv_tokenize.tokenize(word) != [r0["token"]]:
