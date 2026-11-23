@@ -5,11 +5,11 @@ through bcv-commons/bibles' catalog from their sources; bibles does not edit the
 
 | column | meaning |
 |---|---|
-| `fault_id` | F0001, ... never reused |
+| `fault_id` | F0001, ... never reused; a fault over several words has one row per word, with the same id |
 | `layer` | `source_text` (the edition's text as fetched) or `ours:<dataset>@<version>` (a fault in one of our own datasets) |
 | `edition`, `word_id`, `book`, `chapter`, `verse`, `position` | where: our frozen word id, and the tokenizer position |
 | `found` | the token (or part) as found |
-| `fault` | `stray_label` (a label such as a book's end line, not text), `stray_letter`, `lost_letters`, ... |
+| `fault` | `stray_label` (a label such as a book's end line, not text), `stray_letter`, `lost_letters`, `doubled_verse` (a copy of a neighbouring verse), ... |
 | `fix` | `drop` (not a word of the text: no parts, not to be aligned) or `replace` (read as `fixed`) |
 | `fixed` | the reading for `replace` |
 | `note`, `found_on`, `status` | `open`; `fixed_upstream` once the source or our dataset carries the fix |

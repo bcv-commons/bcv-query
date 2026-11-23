@@ -1,12 +1,96 @@
 fault_id	layer	edition	word_id	book	chapter	verse	position	found	fault	fix	fixed	note	found_on	status
 F0001	source_text	heb_mod	del:40018010005	MAT	18	10	4	wקטנים	stray_letter	replace	קטנים	a Latin w before the Hebrew word	2026-11-23	open
 F0002	source_text	heb_mod	del:42017002016	LUK	17	2	15	wאלה	stray_letter	replace	אלה	a Latin w before the Hebrew word	2026-11-23	open
-F0003	source_text	heb_mod	del:45007025006	ROM	7	25	5	Romans	stray_label	drop		the book's Latin end label inside the last verse	2026-11-23	open
-F0004	source_text	heb_mod	del:50003021012	PHP	3	21	11	Philippians	stray_label	drop		the book's Latin end label inside the verse	2026-11-23	open
-F0005	source_text	heb_mod	del:53003018013	2TH	3	18	12	II	stray_label	drop		the book's Latin end label (II Thessalonians)	2026-11-23	open
-F0006	source_text	heb_mod	del:53003018014	2TH	3	18	13	Thessalonians	stray_label	drop		the book's Latin end label (II Thessalonians)	2026-11-23	open
-F0007	source_text	heb_mod	del:54006021008	1TI	6	21	7	I	stray_label	drop		the book's Latin end label (I Timothy)	2026-11-23	open
-F0008	source_text	heb_mod	del:54006021009	1TI	6	21	8	Timothy	stray_label	drop		the book's Latin end label (I Timothy)	2026-11-23	open
-F0009	source_text	heb_mod	del:64001014009	3JN	1	14	8	III	stray_label	drop		the book's Latin end label (III John)	2026-11-23	open
-F0010	source_text	heb_mod	del:64001014010	3JN	1	14	9	John	stray_label	drop		the book's Latin end label (III John)	2026-11-23	open
+F0003	source_text	heb_mod	del:45007025006	ROM	7	25	5	Romans	stray_label	drop		the Latin name in the source's marker "[ (Book c:v) ... ]" (a further verse put in brackets after the verse); only the name is a token; the bracketed words are real text	2026-11-23	open
+F0004	source_text	heb_mod	del:50003021012	PHP	3	21	11	Philippians	stray_label	drop		the Latin name in the source's marker "[ (Book c:v) ... ]" (a further verse put in brackets after the verse); only the name is a token; the bracketed words are real text	2026-11-23	open
+F0005	source_text	heb_mod	del:53003018013	2TH	3	18	12	II	stray_label	drop		the Latin name in the source's marker "[ (Book c:v) ... ]" (a further verse put in brackets after the verse); only the name is a token; the bracketed words are real text	2026-11-23	open
+F0006	source_text	heb_mod	del:53003018014	2TH	3	18	13	Thessalonians	stray_label	drop		the Latin name in the source's marker "[ (Book c:v) ... ]" (a further verse put in brackets after the verse); only the name is a token; the bracketed words are real text	2026-11-23	open
+F0007	source_text	heb_mod	del:54006021008	1TI	6	21	7	I	stray_label	drop		the Latin name in the source's marker "[ (Book c:v) ... ]" (a further verse put in brackets after the verse); only the name is a token; the bracketed words are real text	2026-11-23	open
+F0008	source_text	heb_mod	del:54006021009	1TI	6	21	8	Timothy	stray_label	drop		the Latin name in the source's marker "[ (Book c:v) ... ]" (a further verse put in brackets after the verse); only the name is a token; the bracketed words are real text	2026-11-23	open
+F0009	source_text	heb_mod	del:64001014009	3JN	1	14	8	III	stray_label	drop		the Latin name in the source's marker "[ (Book c:v) ... ]" (a further verse put in brackets after the verse); only the name is a token; the bracketed words are real text	2026-11-23	open
+F0010	source_text	heb_mod	del:64001014010	3JN	1	14	9	John	stray_label	drop		the Latin name in the source's marker "[ (Book c:v) ... ]" (a further verse put in brackets after the verse); only the name is a token; the bracketed words are real text	2026-11-23	open
 F0011	ours:hebrew-nt-analysis@v0.2	heb_scg	scg:58009005002	HEB	9	5	1	מַעְלָ	lost_letters	replace	מַעְלָה	the adverb part lost its final ה (word וּמִלְמַעְלָה); fix in the next hebrew-nt-analysis	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580001	1KI	8	58	0	Γένοιτο	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580002	1KI	8	58	1	Κύριος	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580003	1KI	8	58	2	ὁ	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580004	1KI	8	58	3	Θεὸς	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580005	1KI	8	58	4	ἡμῶν	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580006	1KI	8	58	5	μεθʼ	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580007	1KI	8	58	6	ἡμῶν	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580008	1KI	8	58	7	καθὼς	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580009	1KI	8	58	8	ἦν	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580010	1KI	8	58	9	μετὰ	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580011	1KI	8	58	10	τῶν	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580012	1KI	8	58	11	πατέρων	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580013	1KI	8	58	12	ἡμῶν	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580014	1KI	8	58	13	μὴ	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580015	1KI	8	58	14	ἐγκαταλοίποιτο	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580016	1KI	8	58	15	ἡμᾶς	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580017	1KI	8	58	16	μηδὲ	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580018	1KI	8	58	17	ἀποστρέψοιτο	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0012	source_text	grc_bre	bre:110080580019	1KI	8	58	18	ἡμᾶς	doubled_verse	drop		a copy of 1KI 8:57 (positions 0-18); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240014	1CH	11	24	13	Ὑπὲρ	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240015	1CH	11	24	14	τοὺς	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240016	1CH	11	24	15	τριάκοντα	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240017	1CH	11	24	16	ἦν	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240018	1CH	11	24	17	ἔνδοξος	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240019	1CH	11	24	18	οὗτος	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240020	1CH	11	24	19	καὶ	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240021	1CH	11	24	20	πρὸς	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240022	1CH	11	24	21	τοὺς	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240023	1CH	11	24	22	τρεῖς	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240024	1CH	11	24	23	οὐκ	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240025	1CH	11	24	24	ἤρχετο	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240026	1CH	11	24	25	καὶ	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240027	1CH	11	24	26	κατέστησεν	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240028	1CH	11	24	27	αὐτὸν	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240029	1CH	11	24	28	Δαυὶδ	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240030	1CH	11	24	29	ἐπὶ	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240031	1CH	11	24	30	τὴν	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240032	1CH	11	24	31	πατριὰν	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0013	source_text	grc_bre	bre:130110240033	1CH	11	24	32	αὐτοῦ	doubled_verse	drop		a copy of 1CH 11:25 (positions 13-32); GLAUx has the text once	2026-11-23	open
+F0014	source_text	grc_bre	bre:180030140001	JOB	3	14	0	Νῦν	doubled_verse	drop		a copy of JOB 3:13 (positions 0-6); GLAUx has the text once	2026-11-23	open
+F0014	source_text	grc_bre	bre:180030140002	JOB	3	14	1	ἂν	doubled_verse	drop		a copy of JOB 3:13 (positions 0-6); GLAUx has the text once	2026-11-23	open
+F0014	source_text	grc_bre	bre:180030140003	JOB	3	14	2	κοιμηθεὶς	doubled_verse	drop		a copy of JOB 3:13 (positions 0-6); GLAUx has the text once	2026-11-23	open
+F0014	source_text	grc_bre	bre:180030140004	JOB	3	14	3	ἡσύχασα	doubled_verse	drop		a copy of JOB 3:13 (positions 0-6); GLAUx has the text once	2026-11-23	open
+F0014	source_text	grc_bre	bre:180030140005	JOB	3	14	4	ὑπνώσας	doubled_verse	drop		a copy of JOB 3:13 (positions 0-6); GLAUx has the text once	2026-11-23	open
+F0014	source_text	grc_bre	bre:180030140006	JOB	3	14	5	δὲ	doubled_verse	drop		a copy of JOB 3:13 (positions 0-6); GLAUx has the text once	2026-11-23	open
+F0014	source_text	grc_bre	bre:180030140007	JOB	3	14	6	ἀνεπαυσάμην	doubled_verse	drop		a copy of JOB 3:13 (positions 0-6); GLAUx has the text once	2026-11-23	open
+F0015	source_text	grc_bre	bre:010460090001	GEN	46	9	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230080001	1CH	23	8	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230090001	1CH	23	9	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230120001	1CH	23	12	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230130001	1CH	23	13	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230150001	1CH	23	15	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230160001	1CH	23	16	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230180001	1CH	23	18	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230190001	1CH	23	19	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230200001	1CH	23	20	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:130230210001	1CH	23	21	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170080001	EZR	17	8	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170090001	EZR	17	9	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170100001	EZR	17	10	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170110001	EZR	17	11	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170120001	EZR	17	12	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170130001	EZR	17	13	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170140001	EZR	17	14	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170150001	EZR	17	15	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170160001	EZR	17	16	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170170001	EZR	17	17	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170180001	EZR	17	18	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170190001	EZR	17	19	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170200001	EZR	17	20	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170210001	EZR	17	21	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170220001	EZR	17	22	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170230001	EZR	17	23	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170240001	EZR	17	24	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170250001	EZR	17	25	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170260001	EZR	17	26	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170270001	EZR	17	27	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170350001	EZR	17	35	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170360001	EZR	17	36	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170370001	EZR	17	37	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170380001	EZR	17	38	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170420001	EZR	17	42	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170570001	EZR	17	57	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
+F0015	source_text	grc_bre	bre:150170620001	EZR	17	62	0	γἱοὶ	stray_letter	replace	υἱοὶ	γ for υ (υἱοὶ)	2026-11-23	open
