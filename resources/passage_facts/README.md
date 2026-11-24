@@ -45,6 +45,7 @@ repository (`b.review`).
 | `speaker`, `speaker_ref` | for `quote`: who speaks, as the Hebrew or Greek lemmas of the words that name them, and those words' keys |
 | `speaker_by` | how the speaker was named (`sb.*`) |
 | `speaker_id`, `speaker_name`, `speaker_name_ref`, `members` | one person across speeches; that person's proper name in the text; for a group, its members' ids |
+| `speaker_number`, `speaker_gender`, `speaker_name_number`, `speaker_name_gender` | for `quote` (from v0.3.4): MACULA's number (`s`, `p`, `d`) and gender (`m`, `f`, `n`, `c`) of the head word of `speaker_ref` / `speaker_name_ref`; null where MACULA gives none (Hebrew proper names). Grammar, not meaning: אֱלֹהִים is plural, עַם singular |
 | `divine` | the source marks the speaker as God (Jesus, the Spirit) |
 | `fit` | for a `note`: `partial` where the note quotes a text (UGNT, UHB) that differs a little from ours and at least 80% of its words were found in order; otherwise the match is exact |
 | `tn_id` | for a `note`: the note's ID in unfoldingWord's Translation Notes, to look the note up there |

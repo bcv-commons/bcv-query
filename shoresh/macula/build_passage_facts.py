@@ -254,6 +254,12 @@ class Book:
 
 # ---------------------------------------------------------------------------------------------------------------------- quotes
 
+def _speaker_grammar(speaker_ref, speaker_name_ref) -> dict:
+    """number and gender of the speaker's head word (macula.segment_columns.speaker_grammar; imported here to avoid a cycle)."""
+    from macula.segment_columns import speaker_grammar
+    return speaker_grammar(speaker_ref, speaker_name_ref)
+
+
 def hebrew_quotes(bk: Book, segs: list[dict], spans: list[dict]) -> list[dict]:
     """The speaker layer's quotations of the book, with their pieces where words of another voice interrupt them."""
     rows = [r for r in _tsv(LAYER / "quotations.tsv") if r["first"][:2] == bk.num]
@@ -387,6 +393,7 @@ class Builder:
             f = self.add("quote", qt, q["first"], q["last"], basis, src, level=q["level"], parent=parent["id"] if parent else None,
                          quote=q["src_id"], found=qf, speaker=q["speaker"], speaker_ref=q["speaker_ref"], speaker_by=sb,
                          speaker_id=q["speaker_id"], speaker_name=q["speaker_name"], speaker_name_ref=q["speaker_name_ref"],
+                         **_speaker_grammar(q["speaker_ref"], q["speaker_name_ref"]),
                          members=q["members"], divine=True if q["divine"] else None, pieces=q["pieces"], note=q["note"])
             q["fact"] = f
             by_src[q["src_id"]] = f

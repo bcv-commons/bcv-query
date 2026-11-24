@@ -72,6 +72,11 @@ their keys and the text-level hierarchy are those of the layout; only the cut is
 Pin a tag. `schema` in `build.json` goes up only when a field is renamed, dropped or changes meaning. A new layout release, or new
 releases of MAM or unfoldingWord, give a new tag.
 
+- v0.3: adds `speaker_number`, `speaker_gender`, `speaker_name_number`, `speaker_name_gender` (asked by bible-song-builder):
+  MACULA's grammatical number (`s`, `p`, `d`) and gender (`m`, `f`, `n`, `c`) of the head word of `speaker_ref` /
+  `speaker_name_ref`, the first noun, adjective or pronoun of the reference that MACULA gives a number; null where it gives
+  none (Hebrew proper names). Grammar, not meaning: אֱלֹהִים is plural and names one God, a collective (עַם) is singular.
+  The Hebrew `notes` keep unfoldingWord's notes only, as before. Every other value is built as in v0.2.
 - v0.2: built on hebrew-clause-layout v0.37.2 / greek-nt-clause-layout v0.7.1 and speaker layer v0.16. Adds the MACULA clause
   columns of those layouts (`neg`, `person`, `number`, `gender`, `voice`, and Hebrew `stem`); the Greek lines drop `alt_eng`, the
   speaker data's English label (331 lines in v0.1), so the Greek `schema` is 2. Every other value is the same as v0.1, row for row.

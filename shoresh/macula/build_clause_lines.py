@@ -77,7 +77,7 @@ def book_lines(lang: str, book: str, spans: list[dict], surf: dict) -> tuple[lis
     # share-alike facts per word
     notes, domain, mam_end = collections.defaultdict(list), {}, {}
     for f in facts:
-        if f["kind"] == "note":
+        if f["kind"] == "note" and "at" in f:      # unfoldingWord notes; Scriptura's key-term notes (passage-facts v0.3) have no `at`
             notes[f["at"][0]].append(f["value"])
         elif f["kind"] == "domain":
             domain[f["first"]] = f["value"]

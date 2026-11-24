@@ -25,6 +25,11 @@ Both, from the passage facts of non-share-alike sources (macula.build_passage_fa
                    Proposed and first listed by make-tanakh-research (2026-11-12); read from the MACULA Greek tree.
   shape            both: the roles of the clause's constituents in one vocabulary for both layouts (S O V P A N I + ~), from the
                    rule string or the tree (macula.greek_relation.shapes)
+  speaker_number, speaker_gender, speaker_name_number, speaker_name_gender
+                   both, from 2026-11-24 (asked by bible-song-builder): MACULA's grammatical number (s, p, d) and gender (m, f, n,
+                   c) of the head word of `speaker_ref` / `speaker_name_ref`: the first noun, adjective or pronoun of the reference
+                   that MACULA gives a number. Null where it gives none (Hebrew proper names). Grammar, not meaning: אֱלֹהִים is
+                   plural and names one God; a collective (עַם) is singular and names many
   neg, person, number, gender, voice, stem
                    both (stem Hebrew only), from v0.37.2 / v0.7.1: the clause's negator class and its main verb's person, number,
                    gender, voice and stem, as in bcv-commons/clause-columns (macula.build_clause_columns, built locally in
@@ -60,6 +65,37 @@ def clause_values(hebrew: bool) -> dict[str, dict]:
     if not f.exists():
         raise SystemExit(f"{f} missing: run python -m macula.build_clause_columns first")
     return {r["clause_key"]: {c: r[c] for c in cols} for r in pq.read_table(f, columns=["clause_key", *cols]).to_pylist()}
+
+
+SPEAKER_GRAMMAR = ["speaker_number", "speaker_gender", "speaker_name_number", "speaker_name_gender"]
+_NUM = {"singular": "s", "plural": "p", "dual": "d"}
+_GEN = {"masculine": "m", "feminine": "f", "neuter": "n", "common": "c", "both": "c"}
+
+
+@functools.lru_cache(maxsize=1)
+def _word_grammar() -> dict[str, tuple[str | None, str | None]]:
+    """MACULA word key -> (number, gender) for nouns, adjectives and pronouns that carry a number (macula-spine.db)."""
+    db = sqlite3.connect(f"file:{pf.SPINE}?mode=ro", uri=True)
+    return {k: (_NUM.get(n), _GEN.get(g)) for k, n, g in db.execute(
+        "SELECT key, number, gender FROM macula_words WHERE class IN ('noun', 'adjective', 'pronoun') AND number IN ('singular', 'plural', 'dual')")}
+
+
+def head_grammar(refs) -> tuple[str | None, str | None]:
+    """(number, gender) of the first word of a reference that MACULA gives a number, else (None, None)."""
+    if isinstance(refs, str):
+        refs = refs.split()
+    g = _word_grammar()
+    for k in refs or []:
+        k = str(k).lstrip("n")
+        if k in g:
+            return g[k]
+    return None, None
+
+
+def speaker_grammar(speaker_ref, speaker_name_ref) -> dict:
+    n, g = head_grammar(speaker_ref)
+    nn, ng = head_grammar(speaker_name_ref)
+    return {"speaker_number": n, "speaker_gender": g, "speaker_name_number": nn, "speaker_name_gender": ng}
 
 
 def _hebrew_speakers(book: str) -> dict[tuple[int, int], dict]:
@@ -191,6 +227,8 @@ def columns(book: str, rows: list[dict], spans: list[dict] | None = None) -> lis
         if hebrew:
             c.update(spk.get((r["chapter"], r["seg"])) or {k: ([] if k in ("speaker_ref", "speaker_name_ref", "speaker_members") else
                                                                0 if k == "quote_level" else None) for k in HEB_SPEAKER})
+        src = c if hebrew else r
+        c.update(speaker_grammar(src.get("speaker_ref"), src.get("speaker_name_ref")))
         c["shape"] = shape.get(r.get("clause_key") if hebrew else r.get("clause")) or None
         if not hebrew:
             x = rel.get(r.get("clause"), (None, None, None))
