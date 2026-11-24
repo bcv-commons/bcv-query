@@ -104,6 +104,20 @@ HELD18 = (
     ("strict view: lexemes.tsv strict columns", "MEND M3 (stage 52: m3, lexicon)"),
 )
 HELD18_LINES = []
+# SPEC 1.9 (k builds, stage 55; N7): the held checks by full name, compared whole (held19.tsv beside this file: name, reason)
+HELD19_ON = False
+HELD19 = {}
+
+
+def load_held19():
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "validate_examples_held19.tsv")
+    out = {}
+    with open(p, encoding="utf-8") as fh:
+        for ln in fh.read().split("\n")[1:]:
+            if ln.strip():
+                name, why = ln.split("\t")
+                out[name] = why
+    return out
 
 
 class Report:
@@ -121,7 +135,10 @@ class Report:
     def check(self, name, ok, count="", restates=False):
         """`restates`: the check restates a decision of the builder (SPEC 10), marked `(restates)`."""
         name = name + ("  (restates)" if restates else "")
-        why = next((w for t, w in HELD18 if t in name), None) if (HELD18_ON and not ok and self.stage < "52") else None
+        if HELD19_ON:
+            why = HELD19.get(name) if (not ok and self.stage < "55") else None
+        else:
+            why = next((w for t, w in HELD18 if t in name), None) if (HELD18_ON and not ok and self.stage < "52") else None
         if why:
             line = f"HELD  {name}  [{count}]  ({why})"
             self._out(line[:600])
@@ -3042,7 +3059,8 @@ def stage10(R, build, src, compare=None):
             continue
         with open(p, encoding="utf-8") as fh:
             doc = json.load(fh)
-        nfiles, bad, missing = 0, [], []
+        from validate_examples_s20 import committed_sha   # stage 56: a working copy changed outside the run
+        nfiles, bad, missing, drifted = 0, [], [], []
         for key, s in sorted(doc["sources"].items()):
             for rel, meta in s["files"].items():
                 nfiles += 1
@@ -3050,9 +3068,12 @@ def stage10(R, build, src, compare=None):
                 if not os.path.exists(path):
                     missing.append(rel)
                 elif _s10_sha(path) != meta["sha256"]:
-                    bad.append(rel)
+                    (drifted if committed_sha(path) == meta["sha256"] else bad).append(rel)
         R.check(f"{lang} sources.json: every file listed exists and has the sha256 listed", not bad and not missing,
-                f"{nfiles} files, {len(missing)} missing, {len(bad)} differ")
+                f"{nfiles} files, {len(missing)} missing, {len(bad)} differ, "
+                f"{len(drifted)} changed in a working copy but held unchanged at its repository's HEAD")
+        for rel in drifted:
+            R.info(f"{lang} sources.json: working copy differs from the listed sha256, HEAD's copy matches", rel)
         R.check(f"{lang} sources.json: every source has repository, pin, licence and at least one file",
                 all(s.get("repository") and s.get("pin") and s.get("licence") and s["files"] for s in doc["sources"].values()),
                 len(doc["sources"]))
@@ -3802,7 +3823,16 @@ def stage52(R, build, src, compare=None):
     validate_examples_s52.run(R, build, compare=compare)
 
 
-STAGES_18 = dict(STAGES_17, **{"52": stage52})   # SPEC 1.8: every check up to 49 on j1, then the new
+STAGES_18 = dict(STAGES_17, **{"52": stage52})
+
+
+def stage55(R, build, src, compare=None):
+    sys.path.append(HERE)
+    import validate_examples_s55
+    validate_examples_s55.run(R, build, compare=compare, held_names=sorted(HELD19))
+
+
+STAGES_19 = dict(STAGES_18, **{"55": stage55})   # SPEC 1.9: every check up to 52 on k1, then the new   # SPEC 1.8: every check up to 49 on j1, then the new
 #   # SPEC 1.7: every check up to 38 on the copied folders, then the new
 
 
@@ -3854,6 +3884,9 @@ def main():
     kind = os.path.basename(os.path.normpath(build))[:1]
     V12 = kind == "d"
     global V13, V14, SCRATCH, V15, V16
+    V19 = kind == "k"     # SPEC 1.9: a k build is checked as a j build (every check up to 52), then by stage 55
+    if V19:
+        kind = "j"
     V18 = kind == "j"     # SPEC 1.8: a j build is checked as an i build (every check up to 49), then by stage 52
     V17 = kind in ("i", "j")     # SPEC 1.7: an i build is checked as an h build (its five folders are h1's), then by stage 49
     if V17:
@@ -3875,8 +3908,13 @@ def main():
     if V18:
         import validate_examples_s29
         validate_examples_s29.V18 = True
-    global HELD18_ON
+    global HELD18_ON, HELD19_ON, HELD19
     HELD18_ON = V18
+    if V19:
+        HELD19_ON = True
+        HELD19 = load_held19()
+        validate_examples_s29.V19 = True
+        validate_examples_s20.V19 = True
     if V18:
         import validate_examples_s32
         validate_examples_s32.V18 = True
@@ -3915,23 +3953,29 @@ def main():
     if V13:
         V12 = True
         SCRATCH = os.path.join("/tmp/claude-1000/source-examples", f"s27-validate-{a.build}")
-    stages = STAGES_18 if V18 else STAGES_17 if V17 else STAGES_16 if V16 else STAGES_15 if V15 else STAGES_14 if V14 else STAGES_13 if V13 else STAGES_12 if V12 else STAGES_11 if kind == "c" else STAGES
+    stages = STAGES_19 if V19 else STAGES_18 if V18 else STAGES_17 if V17 else STAGES_16 if V16 else STAGES_15 if V15 else STAGES_14 if V14 else STAGES_13 if V13 else STAGES_12 if V12 else STAGES_11 if kind == "c" else STAGES
     run = [st for st in sorted(stages) if st <= a.upto and (not a.only or st in a.only)]
     src = read_sources() if NEEDS_SRC & set(run) else None
     for st in sorted(stages):
         if st <= a.upto and (not a.only or st in a.only):
             print(f"== stage {st}")
             R.stage = st
-            if st in ("10", "20", "24", "29", "32", "35", "38", "49", "52"):
-                # SPEC 1.7: on an i build the rebuild is stage 49's (every folder of i1 against i2); 1.8: and 52's
-                stages[st](R, build, src, compare=a.compare if (not V17 or st in ("49", "52")) else None)
+            if st in ("10", "20", "24", "29", "32", "35", "38", "49", "52", "55"):
+                # SPEC 1.7: on an i build the rebuild is stage 49's (every folder of i1 against i2); 1.8: and 52's;
+                # 1.9: only 55's (k1 against k2)
+                want = ("55",) if V19 else ("49", "52")
+                stages[st](R, build, src, compare=a.compare if (not V17 or st in want) else None)
             else:
                 stages[st](R, build, src)
-    print(f"== {R.passes} PASS, {R.skips} SKIP, {R.fails} FAIL" + (f", {R.held} HELD (1.8: see HELD18)" if HELD18_ON else ""))
+    print(f"== {R.passes} PASS, {R.skips} SKIP, {R.fails} FAIL" + (f", {R.held} HELD (1.9: see validate_examples_held19.tsv)"
+          if HELD19_ON else f", {R.held} HELD (1.8: see HELD18)" if HELD18_ON else ""))
     print(f"== {R.fails} condition(s) failed")
     if a.write_md and V18:
         write_validation_md_17(build, a.upto)
         validate_examples_s52.write_md(build, S10_STAGE_LINES, a.upto)
+        if V19:
+            import validate_examples_s55
+            validate_examples_s55.write_md(build, S10_STAGE_LINES, a.upto, HELD18_LINES, HELD19)
         print("VALIDATION.md written for hbo, arc, grc (i1's, with the block new in 1.8) and heb_mod, heb_scg")
     elif a.write_md and V17:
         write_validation_md_17(build, a.upto)

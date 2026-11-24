@@ -242,8 +242,8 @@ def se5_rows(Ps, added):
         stem.update({t: n for t, n, k in zip(P["t"], P["n"], P["kind"]) if k == "stem"})
     rows = []
     for a in added:
-        if a.get("who_reason") != "disagree":
-            continue
+        if a.get("who_reason") not in ("disagree",) + (("antecedent_not_verb",) if getattr(X, "V19", False) else ()):
+            continue        # SPEC 1.9 SE5 (N4): the rows of antecedent_not_verb too (the two readings still disagree)
         n = stem[a["verb"]]
         at, an = map(int, a["antecedent"].split("."))
         rows.append((a["verb"], n, a["clause"], f"{who[(a['verb'], n)]} | {who[(at, an)]}"))

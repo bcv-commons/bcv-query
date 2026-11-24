@@ -138,7 +138,14 @@ def lxx_place12(outdir, ex, st):
             if rule == "form_near":
                 if len(f) >= 5:
                     gw = [s for g in own[hv] for s in verse_words[g]]
-                    cands = [s for s in gw if s not in held and (EL.lev1(plain[s], f) or (v18 and plain[s] == f))]
+                    if getattr(EL.X, "V19", False):
+                        # SPEC 1.9 D13a (N2): the one equal free word; only where none is equal, the one word one edit
+                        # away; two or more equal words: none
+                        free = [s for s in gw if s not in held]
+                        eq = [s for s in free if plain[s] == f]
+                        cands = eq if len(eq) == 1 else [] if eq else [s for s in free if EL.lev1(plain[s], f)]
+                    else:
+                        cands = [s for s in gw if s not in held and (EL.lev1(plain[s], f) or (v18 and plain[s] == f))]
                     ns = {to_nt.get(x, x) for x in BL.numbers(gs)}
                     if len(cands) == 1:
                         got = cands[0]

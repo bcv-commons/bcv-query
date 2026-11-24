@@ -119,6 +119,9 @@ def hook35(gl, greek, T, V, terms, whos, added, lemma_of, cnt, ex, counts):
         v18 = getattr(X, "V18", False)      # SPEC 1.8: M1 (passive subjects), M2 (the larger set's members)
         if v18:
             import examples_v18 as V18M
+        v19 = getattr(X, "V19", False)      # SPEC 1.9: N3 (places beside a kept member), N4 (`N` kept on an M1 row)
+        if v19:
+            coord = V18M.coordinated_places(X.BASE19, lg)
         aa_row = {(a["clause"], a["verb"]) for a in rows if a["role"] == "AA"}     # SPEC 1.6 4.11: the frame's AA
         a0aa_verb = {a["verb"] for a in rows if a["role"] in ("A0", "AA")}         # SPEC 1.8 4.11 (M1)
         for a in rows:
@@ -129,9 +132,10 @@ def hook35(gl, greek, T, V, terms, whos, added, lemma_of, cnt, ex, counts):
                 subj = a["role"] == (("AA" if has_aa else "A0") if caus else "A0")
             else:
                 subj = (a["role"] == "AA" and caus) or (a["role"] == "A0" and not caus)
+            m1 = False
             if (v18 and not subj and a["role"] == "A1" and m.get("person") and V18M.is_passive(lg, m)
                     and a["verb"] not in a0aa_verb and not ({"A0", "AA"} & fr[a["clause"]])):
-                subj = True     # SPEC 1.8 4.11 (M1): the A1 row of a finite passive verb with no A0/AA is its subject
+                subj = m1 = True     # SPEC 1.8 4.11 (M1): the A1 row of a finite passive verb with no A0/AA is its subject
                 k18 = (m.get("voice") if lg == "grc" else m.get("stem")) or ""
                 cnt[f"{lg} 1.8 M1 passive subject rows, {k18}"] += 1
                 ex[f"{lg} 1.8 M1 passive subject rows (clause verb role)"].append(f"{a['clause']} {a['verb']} A1 {k18}")
@@ -172,6 +176,18 @@ def hook35(gl, greek, T, V, terms, whos, added, lemma_of, cnt, ex, counts):
                     if v18 and m.get("number") != "sg" and large != small:
                         # SPEC 1.8 D18 step W (M2): the larger set adds only types of the smaller, or person, group
                         large, out18 = V18M.larger_set(small, large)
+                        if v19 and out18:
+                            # SPEC 1.9 D18 step W (N3): a place named in the verse coordinated with a kept member stays
+                            back = {e for e in out18 if V18M.etype(e) == "place" and coord(a["verb"], e, large)}
+                            for e in sorted(back):
+                                cnt[f"{lg} 1.9 N3 places kept beside a kept member"] += 1
+                                ex[f"{lg} 1.9 N3 places kept (clause verb role entity)"].append(
+                                    f"{a['clause']} {a['verb']} {a['role']} {e}")
+                            for e in sorted(e for e in out18 - back if V18M.etype(e) == "place"):
+                                cnt[f"{lg} 1.9 N3 places still left out"] += 1
+                                ex[f"{lg} 1.9 N3 places still left out (clause verb role entity)"].append(
+                                    f"{a['clause']} {a['verb']} {a['role']} {e}")
+                            large, out18 = large | back, out18 - back
                         for e in sorted(out18):
                             cnt[f"{lg} 1.8 M2 entities left out, type {V18M.etype(e)}"] += 1
                             ex[f"{lg} 1.8 M2 entities left out (clause verb role entity)"].append(
@@ -186,6 +202,11 @@ def hook35(gl, greek, T, V, terms, whos, added, lemma_of, cnt, ex, counts):
                 elif vs & ns:
                     who, why = " ".join(sorted(vs & ns)), "verb_and_antecedent"
                     cnt[f"{lg} 1.6 D18 step W partial overlap"] += 1
+                elif v19 and m1:
+                    # SPEC 1.9 D18 step W (N4): on an M1 subject row whose V and N share no member, `who` is N
+                    who, why = " ".join(sorted(ns)), "antecedent_not_verb"
+                    ex[f"{lg} 1.9 N4 rows antecedent_not_verb (clause verb role)"].append(
+                        f"{a['clause']} {a['verb']} {a['role']}")
                 else:
                     who, why = "", "disagree"
             elif vs and ns:

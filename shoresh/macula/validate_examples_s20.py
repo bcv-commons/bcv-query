@@ -92,11 +92,12 @@ V12 = False          # set by validate_examples.py for a d build (SPEC 1.2)
 UPTO = "20"          # set by validate_examples.py
 
 
+V19 = False   # SPEC 1.9 (k builds, stage 55): the declarations name 1.9 (set by validate_examples.py)
 V18 = False   # SPEC 1.8 (j builds, stage 52): the declarations name 1.8 and SPEC.md (set by validate_examples.py)
 
 
 def ver():
-    return "1.8" if V18 else "1.6" if V16 else "1.5" if V15 else "1.3" if V13 else "1.2" if V12 else "1.1"
+    return "1.9" if V19 else "1.8" if V18 else "1.6" if V16 else "1.5" if V15 else "1.3" if V13 else "1.2" if V12 else "1.1"
 
 
 def spec_cols():
@@ -144,6 +145,29 @@ def sha(path):
         for b in iter(lambda: fh.read(1 << 22), b""):
             h.update(b)
     return h.hexdigest()
+
+
+def committed_sha(path):
+    """sha256 of the file as committed at HEAD of the git repository that holds it, or None.
+
+    Stage 56 (try 2): a source pinned as "the local publish folder" of a sibling repository can be changed in that
+    repository's working copy by work outside this run (lexeme-aligner, 2026-11-24 08:53, after k1 was built). The
+    content the build read is then still held, unchanged, in that repository's last commit. The checks below accept
+    such a file only when its committed copy has exactly the listed sha256, and name every such file on an INFO line.
+    Read-only: `git show`, nothing written."""
+    import subprocess
+    d = os.path.dirname(os.path.abspath(path))
+    top = d
+    while top != os.path.dirname(top) and not os.path.exists(os.path.join(top, ".git")):
+        top = os.path.dirname(top)
+    if not os.path.exists(os.path.join(top, ".git")):
+        return None
+    rel = os.path.relpath(os.path.abspath(path), top)
+    try:
+        blob = subprocess.run(["git", "-C", top, "show", f"HEAD:{rel}"], capture_output=True, check=True).stdout
+    except (subprocess.CalledProcessError, OSError):
+        return None
+    return hashlib.sha256(blob).hexdigest()
 
 
 def table(path):
@@ -445,7 +469,7 @@ def check_sources(R, build, lang):
     d = os.path.join(build, lang)
     with open(os.path.join(d, "sources.json"), encoding="utf-8") as fh:
         doc = json.load(fh)
-    nfiles, bad, missing = 0, [], []
+    nfiles, bad, missing, drifted = 0, [], [], []
     for key, s in sorted(doc["sources"].items()):
         for rel, meta in s["files"].items():
             nfiles += 1
@@ -453,9 +477,12 @@ def check_sources(R, build, lang):
             if not os.path.exists(path):
                 missing.append(rel)
             elif sha(path) != meta["sha256"]:
-                bad.append(rel)
+                (drifted if committed_sha(path) == meta["sha256"] else bad).append(rel)
     R.check(f"{lang} sources.json: every file listed exists and has the sha256 listed", not bad and not missing,
-            f"{len(doc['sources'])} sources, {nfiles} files, {len(missing)} missing, {len(bad)} differ")
+            f"{len(doc['sources'])} sources, {nfiles} files, {len(missing)} missing, {len(bad)} differ, "
+            f"{len(drifted)} changed in a working copy but held unchanged at its repository's HEAD")
+    for rel in drifted:
+        R.info(f"{lang} sources.json: working copy differs from the listed sha256, HEAD's copy matches", rel)
     R.check(f"{lang} sources.json: every source has repository, pin, licence and at least one file",
             all(s.get("repository") and s.get("pin") and s.get("licence") and s["files"] for s in doc["sources"].values()))
     need = {"compact-alignments", "helloao"} if lang == "grc" else {"hebrew-greek-cf", "glaux-lxx"}

@@ -124,6 +124,7 @@ class Greek:
 
     def __init__(self, outdir):
         d = os.path.join(outdir, "grc")
+        self.outdir19 = outdir
         self.words = rd(os.path.join(d, "words.parquet"))
         self.pieces = rd(os.path.join(d, "pieces.parquet"), ["t", "class", "lexeme", "who", "who_basis"])
         self.clauses = rd(os.path.join(d, "clauses.parquet"))
@@ -936,6 +937,7 @@ def build_edition(outdir, ed, G, to_code, to_hbo, catch, cnt, ex):
     A = {f.name: [] for f in as_}
     seen = set()
     E.added_rows = []
+    E.n1_rows = set()       # SPEC 1.9 D39 (N1): the rows made form none (carry_account reason ending_not_greek)
     for r in G.added:
         v = E.lfirst(r["verb"], verb_first=True)
         if v is None:
@@ -960,7 +962,20 @@ def build_edition(outdir, ed, G, to_code, to_hbo, catch, cnt, ex):
         subj = r["role"] == "A0" or (V18() and r["role"] == "A1" and r["form"] == "ending")
         if subj and V18() and r["role"] == "A1":
             c["D39 1.8 M1 rows carried (A1 subject rows of the Greek)"] += 1
-        if subj and "person" in sp["marks"]:
+        n1 = False
+        if subj and "person" in sp["marks"] and V19() and r["role"] == "A1":
+            # SPEC 1.9 D39 (N1): on the subject rows D39 (1.8) adds (the Greek's M1 rows, role A1: CHANGES-1.9 counts
+            # these, report 55), form `ending` only where the Hebrew ending agrees with the Greek verb, wherever both
+            # give person and number (a Hebrew person `x` is not given); else form `none`
+            gm = greek_stem_marks(G).get(r["verb"], {})
+            hp, hn = sp["marks"].get("person", ""), sp["marks"].get("number", "")
+            hp = "" if hp == "x" else hp
+            if hp and hn and gm.get("person") and gm.get("number") and (hp, hn) != (gm["person"], gm["number"]):
+                n1 = True
+                c["D39 1.9 N1 rows made form none (ending_not_greek)"] += 1
+                E.n1_rows.add((E.key[k], v, r["role"]))
+                ex.setdefault("D39 1.9 N1 rows made form none (clause verb role)", []).append(f"{E.key[k]} {v} {r['role']}")
+        if subj and "person" in sp["marks"] and not n1:
             kind, form = "in_verb", "ending"
             pe, nu, ge = sp["marks"].get("person", ""), sp["marks"].get("number", ""), sp["marks"].get("gender", "")
         else:
@@ -1146,6 +1161,18 @@ SHARED_FN = None     # set by examples_v17doc (the hbo map.tsv)
 
 def V18():
     return getattr(X, "V18", False)
+
+
+def V19():
+    return getattr(X, "V19", False)
+
+
+def greek_stem_marks(G):
+    """SPEC 1.9 D39 (N1): {Greek word t: the marks of its stem piece}, read once from the build's grc pieces."""
+    if getattr(G, "stem_marks19", None) is None:
+        G.stem_marks19 = {r["t"]: json.loads(r["marks"] or "{}") for r in
+                          rd(os.path.join(G.outdir19, "grc", "pieces.parquet"), ["t", "kind", "marks"]) if r["kind"] == "stem"}
+    return G.stem_marks19
 
 
 def own_shas(outdir, cnt):

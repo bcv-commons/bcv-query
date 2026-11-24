@@ -405,6 +405,8 @@ def acc_row(table, col, r, E):
             return ("carried", "derived", "")
         return ("carried", "linked", "")
     if table == "added":
+        if col == "form" and (r["clause"], r["verb"], r["role"]) in getattr(E, "n1_rows", ()):
+            return ("own", "derived", "ending_not_greek")      # SPEC 1.9 D39 (N1)
         if col in ("kind", "form") or (col in ("person", "number", "gender") and r["form"] == "ending"):
             return ("own", r["own_basis"], "")
         if col == "clause":

@@ -30,6 +30,11 @@ V18 = False
 # mends reach are replayed on a sha-checked copy of i1 (build_examples.replay18), and a guard of a lost input counts
 REPLAY18 = False
 REPLAY18_DRIFT = []
+# SPEC 1.9 (k builds, stage 55): the mends N1 to N6 (CHANGES-1.9.md): N1 in examples_v17 (D39), N2 in examples_links12
+# (form_near), N3 and N4 in examples_v15 (D18 step W), N5 by the pin of examples_v18, N6 by build_examples.replay19.
+# Off by default (k0 = the run with them off, equal to j1). BASE19: the build replayed (j1; N3 reads its pieces, words).
+V19 = False
+BASE19 = None
 
 # SPEC 4.10: closed categories, source value -> code
 CLOSED = {

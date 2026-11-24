@@ -259,9 +259,133 @@ def replay18(outdir, base, mends, langs):
     print(f"stage 52 (mends {'on' if mends else 'off'}) built in {time.time() - t0:.0f} s -> {outdir}")
 
 
+# ---- SPEC 1.9, stage 55: the replay on a copy of j1 (report 55) ------------------------------------------------------
+# k1 is built on j1 as j1 was built on i1 (replay18): a sha-checked copy of j1, the sub-stages the mends reach run again
+# with V18 on and the 1.9 switch (examples_common.V19: N1 to N5) on or off. After each sub-stage a file outside the reach
+# is put back from j1. N6 (section 13, 1.9): with the mends on, hbo and arc facts.parquet, the three source_errors.tsv
+# and the three map.tsv are in the reach from the sub-stage that writes them whole (as stage 52's log shows: the
+# source_errors at 28.16, facts at 28.19, map at 28.13); an earlier partial write is put back from j1. k0 (--mends off)
+# reads the 1.8 Strong's table (585a53c3…, from the repository's history into k0/cache/) and must give j1 back.
+N6_FROM = {"28.16": ("hbo/source_errors.tsv", "arc/source_errors.tsv", "grc/source_errors.tsv"),
+           "28.19": ("hbo/facts.parquet", "arc/facts.parquet"),
+           "28.13": ("hbo/map.tsv", "arc/map.tsv", "grc/map.tsv")}
+STRONG18_SHA = "585a53c3"
+
+
+def strong18(cdir):
+    """The 1.8 Strong's table from the repository's history (read only) into the build's cache; its sha checked."""
+    import hashlib
+    import subprocess
+    rel = "shoresh/macula/text_faults/strong_fixes.tsv"
+    root = os.path.dirname(os.path.dirname(HERE))
+    cmd = ["git"]
+    for c in subprocess.run(cmd + ["log", "--format=%H", "--", rel], cwd=root, capture_output=True, text=True,
+                            check=True).stdout.split():
+        b = subprocess.run(cmd + ["show", f"{c}:{rel}"], cwd=root, capture_output=True, check=True).stdout
+        if hashlib.sha256(b).hexdigest().startswith(STRONG18_SHA):
+            q = os.path.join(cdir, "strong_fixes-1.8.tsv")
+            with open(q, "wb") as fh:
+                fh.write(b)
+            return q, c
+    raise SystemExit(f"strong_fixes.tsv {STRONG18_SHA}… not found in the history")
+
+
+def replay19(outdir, base, mends, langs):
+    import shutil
+    from pathlib import Path
+    import examples_v14
+    import examples_v17
+    import hebrew_nt_strong_fixes as SF
+    if os.path.exists(outdir):
+        raise SystemExit(f"{outdir} exists: stage 55 builds into a new folder (no rm; move the old one to trash-<date>/)")
+    t0 = time.time()
+    examples_common.REPLAY18 = True
+    examples_common.V18 = True
+    examples_common.V19 = mends
+    examples_common.BASE19 = base
+    examples_common.V14 = examples_common.V15 = examples_common.V16 = True
+    examples_v14.STATES = ("member", "nt_only", "function", "name", "no_number", "few_places", "spread",
+                           "kept_out", "alone")
+    examples_v14.setup()
+    bf = _files(base)
+    jsh = {}
+    for rel, p in sorted(bf.items()):
+        if rel.split("/")[0] in ("heb_mod", "heb_scg"):
+            continue
+        q = os.path.join(outdir, rel)
+        os.makedirs(os.path.dirname(q), exist_ok=True)
+        shutil.copyfile(p, q)
+        jsh[rel] = _sha(p)
+        if _sha(q) != jsh[rel]:
+            raise SystemExit(f"copy of {rel}: sha256 differs")
+    for rel in bf:
+        if rel.split("/")[0] in ("heb_mod", "heb_scg"):
+            jsh[rel] = _sha(bf[rel])
+    cdir = os.path.join(outdir, "cache")
+    os.makedirs(cdir, exist_ok=True)
+    for name in sorted(os.listdir(os.path.join(base, "cache"))):
+        if name in examples_v17.CACHE_COPIED:
+            p = os.path.join(base, "cache", name)
+            (shutil.copytree if os.path.isdir(p) else shutil.copyfile)(p, os.path.join(cdir, name))
+    log = {"base": os.path.basename(os.path.normpath(base)), "mends": mends, "copied": len(jsh), "steps": []}
+    if not mends:
+        q, c = strong18(cdir)
+        SF.FIXES = Path(q)
+        log["strong_fixes.tsv (1.8)"] = {"commit": c, "sha256": _sha(q)}
+    log["strong_fixes.tsv read"] = {"file": os.path.relpath(str(SF.FIXES), os.path.dirname(os.path.dirname(HERE))),
+                                    "sha256": _sha(str(SF.FIXES))}
+    print(f"stage 55: copied {len(jsh)} files of {log['base']} in {time.time() - t0:.0f} s; strong_fixes "
+          f"{log['strong_fixes.tsv read']['sha256'][:8]}", flush=True)
+    n6 = set()
+
+    def after(step):
+        if mends:
+            n6.update(N6_FROM.get(step, ()))
+        now = _files(outdir)
+        wrote, back = {}, []
+        for rel, p in sorted(now.items()):
+            reach = in_reach18(rel) or rel in n6
+            if rel not in jsh:
+                wrote[rel] = {"j1": None, "built": _sha(p), "reach": reach}
+                continue
+            sh = _sha(p)
+            if sh != jsh[rel]:
+                wrote[rel] = {"j1": jsh[rel], "built": sh, "reach": reach}
+                if not reach:
+                    keep = os.path.join(cdir, "stage55-outside", step.split()[0], rel)
+                    os.makedirs(os.path.dirname(keep), exist_ok=True)
+                    shutil.copyfile(p, keep)
+                    shutil.copyfile(bf[rel], p)
+                    back.append(rel)
+        log["steps"].append({"step": step, "differ_from_j1": wrote, "put_back_from_j1": back,
+                             "n6_in_reach": sorted(n6)})
+        print(f"stage 55 after {step}: {len(wrote)} files differ from {log['base']} "
+              f"({sum(1 for v in wrote.values() if v['reach'])} in the reach); {len(back)} put back", flush=True)
+
+    for st in REPLAY_SUBS:
+        run13(outdir, st, langs)
+        after(f"28.{st}")
+    run13(outdir, "29", langs)
+    after("29")
+    counts = {}
+    ex = examples_v14.build(outdir, counts)
+    write_counts(outdir, "55.38", langs, counts, ex)
+    after("38 (lexicon)")
+    counts = {}
+    ex = examples_v17.build(outdir, None, counts)
+    write_counts(outdir, "55.49", LANGS + examples_v17.EDS, counts, ex)
+    after("49 (editions)")
+    log["nt guard: republished aligner files read in place of the pinned ones (links not kept)"] = sorted(
+        set(examples_common.REPLAY18_DRIFT))
+    with open(os.path.join(cdir, "stage55-replay.json"), "w", encoding="utf-8") as fh:
+        json.dump(log, fh, ensure_ascii=False, indent=1, sort_keys=True)
+        fh.write("\n")
+    print(f"stage 55 (1.9 mends {'on' if mends else 'off'}) built in {time.time() - t0:.0f} s -> {outdir}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", required=True, choices=sorted(STAGES) + ["23", "24", "27", "28", "29", "13", "32", "32.new", "35", "38", "49", "52"])
+    ap.add_argument("--stage", required=True, choices=sorted(STAGES) + ["23", "24", "27", "28", "29", "13", "32", "32.new", "35", "38", "49", "52", "55"])
     ap.add_argument("--lang", choices=LANGS, action="append")
     ap.add_argument("--build", default="b1")
     ap.add_argument("--root", default=os.path.join(HERE, "data/source-examples"))
@@ -286,7 +410,21 @@ def main():
         write_counts(outdir, "49", LANGS + examples_v17.EDS, counts, ex)
         print(f"stage 49 built in {time.time() - t0:.0f} s, {len(counts)} counts, {len(ex)} exception lists -> {outdir}")
         return
-    jb = os.path.basename(os.path.normpath(a.build)).startswith("j")
+    kb = os.path.basename(os.path.normpath(a.build)).startswith("k")
+    if kb and a.stage == "55":
+        # SPEC 1.9 section 15: stage 55 = the replay of stage 52 on j1 with the 1.9 switch (replay19)
+        if set(langs) != set(LANGS):
+            raise SystemExit("a k build (SPEC 1.9) takes --stage 55, the three languages together")
+        replay19(os.path.join(a.root, a.build), a.base or os.path.join(HERE, "data/source-examples", "j1"),
+                 a.mends == "on", langs)
+        return
+    if kb:
+        # one sub-stage of 28 for a check (the strict view of stage 17): the 1.8 and 1.9 switches on, N3 reads j1
+        if a.stage not in SUB13:
+            raise SystemExit(f"a k build (SPEC 1.9) takes --stage 55 (or one sub-stage of 28 for a check), not {a.stage}")
+        examples_common.V19 = True
+        examples_common.BASE19 = a.base or os.path.join(HERE, "data/source-examples", "j1")
+    jb = os.path.basename(os.path.normpath(a.build)).startswith(("j", "k"))
     if jb and a.stage == "52":
         if set(langs) != set(LANGS):
             raise SystemExit("stage 52 builds the three languages together")
@@ -299,7 +437,7 @@ def main():
         if a.stage not in ("52",) and a.stage not in SUB13:
             raise SystemExit(f"a j build (SPEC 1.8) takes --stage 52 (or one sub-stage of 28 for a check), not {a.stage}")
         examples_common.V18 = True
-    hb = os.path.basename(os.path.normpath(a.build)).startswith(("h", "i", "j"))     # an i build's 1.6 part is h1's
+    hb = os.path.basename(os.path.normpath(a.build)).startswith(("h", "i", "j", "k"))     # an i build's 1.6 part is h1's
     if hb:
         # SPEC 1.6 section 14: stage 38 = every builder of 1.5 (stage 28, then 29, then examples_v14) with the 1.5 and
         # the 1.6 switch on (examples_v15 D18, examples_people11 SE5, examples_v15b D25 step 2b, examples_v14 D27)
