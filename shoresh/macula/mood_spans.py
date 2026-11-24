@@ -1,4 +1,4 @@
-"""Mood spans per chapter, read by a model against the twelve moods of resources/passage_moods/moods_he.toml (asked by
+"""Mood spans per chapter, read by a model against the moods of resources/passage_moods/moods_he.toml (asked by
 bible-song-builder, 2026-11-24). The reader sees only the Hebrew or Greek clause lines and the Hebrew definitions.
 
     python -I macula/mood_spans.py prepare --out DIR [--chapters GEN.22 EXO.15 ...]
