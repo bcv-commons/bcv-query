@@ -210,6 +210,8 @@ def spec_section(start, stop):
 
 def docs(E, d, outdir, shas, drows, lexicon, counts):
     import pyarrow
+    import examples_v18 as V18M
+    V18 = getattr(X, "V18", False)     # SPEC 1.8 (stage 52)
     gs = json.load(open(os.path.join(outdir, "grc", "sources.json"), encoding="utf-8"))
     ls = json.load(open(os.path.join(outdir, "lexicon", "sources.json"), encoding="utf-8"))
     read = {}
@@ -218,10 +220,14 @@ def docs(E, d, outdir, shas, drows, lexicon, counts):
                 "grc/facts.parquet", "grc/participants.tsv", "grc/relmap.tsv", f"other/{E.ed}/words.parquet",
                 f"other/{E.ed}/parts.parquet", "lexicon/lexemes.tsv", "hbo/words.parquet", "hbo/pieces.parquet",
                 "arc/words.parquet", "arc/pieces.parquet", "hbo/map.tsv", "hbo/terms.tsv", "hbo/terms-notes.md"]:
-        read[rel] = {"sha256": shas[rel], "h1_path": f"shoresh/macula/data/source-examples/h1/{rel}"}
+        if V18:     # SPEC 1.8 section 13: built anew in this build, not copied
+            read[rel] = {"sha256": shas[rel], "path": f"shoresh/macula/data/source-examples/<build>/{rel}"}
+        else:
+            read[rel] = {"sha256": shas[rel], "h1_path": f"shoresh/macula/data/source-examples/h1/{rel}"}
     ana = os.path.join(D.ROOT, "internal-docs/hebrew-nt-analysis-release/v0.2", E.ed, "words.parquet")
     builders = {}
-    for f in ("build_examples.py", "examples_v17.py", "examples_v17doc.py", "examples_v17doc2.py", "examples_shared11.py"):
+    for f in ("build_examples.py", "examples_v17.py", "examples_v17doc.py", "examples_v17doc2.py", "examples_shared11.py") + (
+            ("examples_v18.py", "hebrew_nt_level1_fixes.py", "hebrew_nt_strong_fixes.py") if V18 else ()):
         builders[f"shoresh/macula/{f}"] = {"sha256": D.sha(os.path.join(HERE, f)), "committed": False}
     model = {"hebrew-nt-analysis": dict(ls["model"]["hebrew-nt-analysis"], basis="model (M6)",
                                         columns=["pieces rows of basis model (kind, lexeme, class, marks, shared)",
@@ -238,7 +244,7 @@ def docs(E, d, outdir, shas, drows, lexicon, counts):
             if "bridge" in k:
                 model[k] = dict(v, columns=["links rows of basis model", "link_account.state_model"])
     doc = {"language": E.ed,
-           "specification": {"version": "1.7", "sha256": D.sha(D.SPEC)},
+           "specification": {"version": "1.8" if V18 else "1.7", "sha256": D.sha(D.SPEC)},
            "description": "a description of a translation (SPEC 4.15): the edition's own words and analysis, the grc "
                           "description carried through the strict word links (linked), rules D29 to D44",
            "read": read,
@@ -249,12 +255,16 @@ def docs(E, d, outdir, shas, drows, lexicon, counts):
                                     "sha256": D.sha(os.path.join(HERE, "data/entities/entities.tsv")),
                                     "columns": ["entity (the catch-all ids, 4.5)"]},
                        "lexeme-aligner": {"through": "grc/links.parquet rows of basis linked (compact alignments, as grc/sources.json names them)"},
-                       "acai": {"through": "grc/pieces.who, grc/facts.parquet kin rows"}},
+                       "acai": {"through": "grc/pieces.who, grc/facts.parquet kin rows"},
+                       **({"fix tables (1.8, M3)": {"files": V18M.fix_pins(), "applied": "hebrew_nt_level1_fixes.apply, "
+                           "then hebrew_nt_strong_fixes.apply, on every read of hebrew-nt-analysis words (D14 in 1.8)"}}
+                          if V18 else {})},
            "model": model,
            "not_read": ["hebrew-nt-analysis role and clauses.parquet (the tagger's parse)", "data/hebrew-nt-morph/",
                         "hebrew-nt-part-links", "hebrew-nt-bridge as a carrier"],
            "licence": "as each source of grc states (MACULA CC BY 4.0; ACAI, our datasets CC BY-SA 4.0); the editions' texts public domain (helloao)",
-           "builder": {"entry": "shoresh/.venv/bin/python -I shoresh/macula/build_examples.py --build <build> --stage 49",
+           "builder": {"entry": "shoresh/.venv/bin/python -I shoresh/macula/build_examples.py --build <build> --stage "
+                                + ("52" if V18 else "49"),
                        "files": builders,
                        "commit": gs["builder"].get("commit", ""), "note": "the stage 49 modules are not committed; their sha256 names them"},
            "pyarrow": pyarrow.__version__, "python": sys.version.split()[0]}
@@ -262,7 +272,8 @@ def docs(E, d, outdir, shas, drows, lexicon, counts):
         json.dump(doc, fh, ensure_ascii=False, indent=1, sort_keys=True)
         fh.write("\n")
     # COLUMNS.md
-    L = [f"# COLUMNS: `{E.ed}`", "", "Written by `examples_v17doc2.py` (stage 49). The text of SPEC 1.7 section 4.15, then the "
+    L = [f"# COLUMNS: `{E.ed}`", "", "Written by `examples_v17doc2.py` (stage " + ("52" if V18 else "49") + "). The text of SPEC "
+         + ("1.8" if V18 else "1.7") + " section 4.15, then the "
          "columns of every file as read from the file. The Greek lexeme keys stand only as the objects of `renders` "
          "rows of `facts.parquet` (`AGENT-FORMAT.md` 5); `from_*` columns and `links.s` name Greek places by key.", ""]
     L.append(spec_section("### 4.15 `heb_mod/`", "## 5. Sources"))
@@ -286,7 +297,7 @@ def docs(E, d, outdir, shas, drows, lexicon, counts):
             b = " ".join(lexicon.get(x, {}).get("lemma", x) for x in json.loads(r["other_lexemes"]))
             dis[(a, b)] += 1
     pb = C.Counter(p["basis"] for t in E.ts for p in E.parts[t])
-    L = [f"# READ FIRST: `{E.ed}`, a description of a translation (SPEC 1.7)", "",
+    L = [f"# READ FIRST: `{E.ed}`, a description of a translation (SPEC {'1.8' if V18 else '1.7'})", "",
          "## 1. What this folder is", "",
          f"The Hebrew of {'Delitzsch' if E.ed == 'heb_mod' else 'Salkinson and Ginsburg'}'s New Testament in the tables of a "
          "language folder. Every value comes from the edition itself (its tokens and `hebrew-nt-analysis` v0.2), from "

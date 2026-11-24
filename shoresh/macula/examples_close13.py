@@ -247,7 +247,7 @@ def sheet13(outdir, lang, counts):
                 "(`internal-docs/source-examples-work/glossed-e1/`, the chapters of build `e1`; a rebuild writes "
                 "the same chapters into its `cache/glossed/`).")
     if getattr(X, "V15", False):     # SPEC 1.5: the build g1 and its chapters (SPEC 1.6: h1)
-        b_, s_ = ("h1", "38") if getattr(X, "V16", False) else ("g1", "35")
+        b_, s_ = ("j1", "52") if getattr(X, "V18", False) else ("h1", "38") if getattr(X, "V16", False) else ("g1", "35")
         new_head = (f"Written by `build_examples.py --build {b_} --stage {s_}` (`examples_read_sheet.py`, `examples_close13.py`) "
                     "from this folder's tables.",
                     f"(`internal-docs/source-examples-work/glossed-{b_}/`, the chapters of build `{b_}`; a rebuild writes "

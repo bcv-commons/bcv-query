@@ -694,8 +694,16 @@ def moves(R, build, f1, ctx):
         W = pq.read_table(os.path.join(build, "other", ed, "words.parquet"), columns=["s", "book", "chapter", "verse", "text"]).to_pydict()
         wd = {s: (b, c_, v, x) for s, b, c_, v, x in zip(W["s"], W["book"], W["chapter"], W["verse"], W["text"])}
         c, ch, bad = C.Counter(), [], 0
-        for j in range(len(A["s"])):
-            a = (A["lexeme"][j], A["key_rule"][j], A["basis"][j])
+        # SPEC 1.8 (j builds): M3's level-1 fixes change the parts of 19 words, so rows are paired by (s, p), not by
+        # position; a part on one side only counts as bad here (stage 52 checks those parts)
+        bpos = {(s_, p_): j for j, (s_, p_) in enumerate(zip(B["s"], B["p"]))}
+        apos = {(s_, p_) for s_, p_ in zip(A["s"], A["p"])}
+        bad += sum(1 for k in apos if k not in bpos) + sum(1 for k in bpos if k not in apos)
+        for i in range(len(A["s"])):
+            j = bpos.get((A["s"][i], A["p"][i]))
+            if j is None:
+                continue
+            a = (A["lexeme"][i], A["key_rule"][i], A["basis"][i])
             b = (B["lexeme"][j], B["key_rule"][j], B["basis"][j])
             if a != b:
                 rule = b[1]

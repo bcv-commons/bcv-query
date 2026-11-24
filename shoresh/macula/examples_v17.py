@@ -284,7 +284,9 @@ class Edition:
         ow = rd(os.path.join(o, "words.parquet"))
         op = rd(os.path.join(o, "parts.parquet"))
         ana = {}
-        for r in rd(os.path.join(ANA, ed, "words.parquet"), ["book", "chapter", "verse", "i", "part", "form", "person"]):
+        import examples_v18      # SPEC 1.8 D14 (M3): through the two fix tables when V18 is set
+        for r in examples_v18.analysis_words(os.path.join(ANA, ed, "words.parquet"), ed,
+                                             ["book", "chapter", "verse", "i", "part", "form", "person"]):
             ana[(r["book"], r["chapter"], r["verse"], r["i"], r["part"])] = (r["form"], r["person"])
         # D29 words
         self.words = []
@@ -953,7 +955,12 @@ def build_edition(outdir, ed, G, to_code, to_hbo, catch, cnt, ex):
             continue
         seen.add(key)
         sp = E.stem[v]
-        if r["role"] == "A0" and "person" in sp["marks"]:
+        # SPEC 1.8 D39 (M1): the Greek's subject row of 4.11 (1.8): A0, or an A1 row that M1 made a subject row on the
+        # Greek verb (the Greek voice decides; on grc such a row, and only such an A1 row, has form `ending`)
+        subj = r["role"] == "A0" or (V18() and r["role"] == "A1" and r["form"] == "ending")
+        if subj and V18() and r["role"] == "A1":
+            c["D39 1.8 M1 rows carried (A1 subject rows of the Greek)"] += 1
+        if subj and "person" in sp["marks"]:
             kind, form = "in_verb", "ending"
             pe, nu, ge = sp["marks"].get("person", ""), sp["marks"].get("number", ""), sp["marks"].get("gender", "")
         else:
@@ -988,7 +995,7 @@ def build_edition(outdir, ed, G, to_code, to_hbo, catch, cnt, ex):
     vz = {}
     keyrev = {v: k for k, v in E.key.items()}
     for row in E.added_rows:
-        if row["form"] == "ending" and row["role"] == "A0":
+        if row["form"] == "ending" and (row["role"] == "A0" or V18()):     # SPEC 1.8 D39: every subject row of form ending
             gk = keyrev[row["clause"]]
             pr = E.pred.get(gk)
             if pr:
@@ -1137,11 +1144,26 @@ def shared_piece(p):
 SHARED_FN = None     # set by examples_v17doc (the hbo map.tsv)
 
 
+def V18():
+    return getattr(X, "V18", False)
+
+
+def own_shas(outdir, cnt):
+    """SPEC 1.8 section 13: j1 copies nothing; the sha256 of the five folders as this build made them."""
+    shas = {}
+    for sub in COPIED:
+        a = os.path.join(outdir, sub)
+        for rel in files_under(a):
+            shas[f"{sub}/{rel}"] = sha(os.path.join(a, rel))
+    cnt["section 13 (1.8): files of the five folders built anew (not copied)"] = len(shas)
+    return shas
+
+
 def build(outdir, src, counts):
     import examples_v17doc as DOC
     ex = C.defaultdict(list)
     tick("copy")
-    shas = copy_folders(outdir, src, counts)
+    shas = own_shas(outdir, counts) if src is None else copy_folders(outdir, src, counts)
     tick("copied")
     G = Greek(outdir)
     to_code, to_hbo = read_terms()

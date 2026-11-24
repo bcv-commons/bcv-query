@@ -114,7 +114,11 @@ class World:
         self.ana = {}
         for ed in EDS:
             by = C.defaultdict(list)
-            for r in rows_of(ANA[ed]):
+            arows = rows_of(ANA[ed])
+            if V18:     # SPEC 1.8 D14, D23 (M3): through the two fix tables (validate_examples_s52's own code)
+                import validate_examples_s52 as S52
+                arows = S52.apply_fixes(ed, arows)[0]
+            for r in arows:
                 by[(r["book"], r["chapter"], r["verse"], r["i"])].append(r)
             self.ana[ed] = by
         self.other = {ed: rows_of(os.path.join(build, "other", ed, "words.parquet"),
@@ -281,7 +285,8 @@ def ubs(a, b, dom):
     return best
 
 
-V16 = False   # an h build (SPEC 1.6): step 2b, kept_out (validate_examples_s38)
+V16 = False
+V18 = False      # SPEC 1.8 (j builds): set by validate_examples.py   # an h build (SPEC 1.6): step 2b, kept_out (validate_examples_s38)
 V15 = False   # a g build (SPEC 1.5): D23, D25, D26 of 1.5 (validate_examples_s35), set by validate_examples.py
 
 

@@ -116,7 +116,11 @@ def hook35(gl, greek, T, V, terms, whos, added, lemma_of, cnt, ex, counts):
             rows.append(rs[0])
         # step 2: kind and form; step W: who
         v16 = getattr(X, "V16", False)
+        v18 = getattr(X, "V18", False)      # SPEC 1.8: M1 (passive subjects), M2 (the larger set's members)
+        if v18:
+            import examples_v18 as V18M
         aa_row = {(a["clause"], a["verb"]) for a in rows if a["role"] == "AA"}     # SPEC 1.6 4.11: the frame's AA
+        a0aa_verb = {a["verb"] for a in rows if a["role"] in ("A0", "AA")}         # SPEC 1.8 4.11 (M1)
         for a in rows:
             m = smarks.get(a["verb"], {})
             caus = m.get("stem") in CAUS
@@ -125,6 +129,12 @@ def hook35(gl, greek, T, V, terms, whos, added, lemma_of, cnt, ex, counts):
                 subj = a["role"] == (("AA" if has_aa else "A0") if caus else "A0")
             else:
                 subj = (a["role"] == "AA" and caus) or (a["role"] == "A0" and not caus)
+            if (v18 and not subj and a["role"] == "A1" and m.get("person") and V18M.is_passive(lg, m)
+                    and a["verb"] not in a0aa_verb and not ({"A0", "AA"} & fr[a["clause"]])):
+                subj = True     # SPEC 1.8 4.11 (M1): the A1 row of a finite passive verb with no A0/AA is its subject
+                k18 = (m.get("voice") if lg == "grc" else m.get("stem")) or ""
+                cnt[f"{lg} 1.8 M1 passive subject rows, {k18}"] += 1
+                ex[f"{lg} 1.8 M1 passive subject rows (clause verb role)"].append(f"{a['clause']} {a['verb']} A1 {k18}")
             old = code_of[a["kind"]]
             if a["role"] == "poss":
                 kind, form = old, "none"
@@ -159,6 +169,15 @@ def hook35(gl, greek, T, V, terms, whos, added, lemma_of, cnt, ex, counts):
             elif vs and ns and v16:     # SPEC 1.6 D18 step W: agreement on a set
                 if vs <= ns or ns <= vs:
                     small, large = (vs, ns) if vs <= ns else (ns, vs)
+                    if v18 and m.get("number") != "sg" and large != small:
+                        # SPEC 1.8 D18 step W (M2): the larger set adds only types of the smaller, or person, group
+                        large, out18 = V18M.larger_set(small, large)
+                        for e in sorted(out18):
+                            cnt[f"{lg} 1.8 M2 entities left out, type {V18M.etype(e)}"] += 1
+                            ex[f"{lg} 1.8 M2 entities left out (clause verb role entity)"].append(
+                                f"{a['clause']} {a['verb']} {a['role']} {e}")
+                        if out18:
+                            cnt[f"{lg} 1.8 M2 rows that lose members"] += 1
                     who = " ".join(sorted(small if m.get("number") == "sg" else large))
                     why = "verb_and_antecedent"
                     if vs != ns:

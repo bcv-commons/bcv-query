@@ -203,9 +203,10 @@ def build_lxx(outdir, counts, ex, cnt):
 
 def analysis_rows(ed, cnt):
     folder = os.path.join(DOCS, ANA["folder"])
-    rows = pq.read_table(os.path.join(folder, ed, "words.parquet"),
-                         columns=["book", "chapter", "verse", "i", "part", "token", "text", "class", "lemma",
-                                  "source"]).to_pylist()
+    import examples_v18      # SPEC 1.8 D14 (M3): through the two fix tables when V18 is set
+    rows = examples_v18.analysis_words(os.path.join(folder, ed, "words.parquet"), ed,
+                                       ["book", "chapter", "verse", "i", "part", "token", "text", "class", "lemma",
+                                        "source"])
     by = C.defaultdict(list)
     for r in rows:
         by[(r["book"], r["chapter"], r["verse"], r["i"])].append(r)

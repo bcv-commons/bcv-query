@@ -42,6 +42,7 @@ KIN = {"father", "mother", "offspring", "sibling", "partner", "tribe", "group_or
 HEB_DROP = set(range(0x0591, 0x05B0)) | {0x05BD, 0x05C4, 0x05C5}
 
 
+V18 = False          # set by validate_examples.py for a j build (SPEC 1.8, M4)
 V12 = False          # set by validate_examples.py for a d build (SPEC 1.2): the Septuagint checks of 1.2 are in
                      # validate_examples_s23.py; the 1.1 ones that compare with b1 or the number guard are left out
 
@@ -96,8 +97,11 @@ def stage19(R, build, src, STASH):
         R.check(f"other/{ed}: the columns of b1 equal b1's (row by row)",
                 [{k: r[k] for k in OTHER_COLS} for r in O[ed]] == old, f"{len(old):,} rows")
         by = C.defaultdict(list)
-        for r in rows(os.path.join(ANA, ed, "words.parquet"), ["book", "chapter", "verse", "i", "part", "token", "text",
-                                                               "class", "lemma", "source"]):
+        arows = rows(os.path.join(ANA, ed, "words.parquet"))
+        if V18:     # SPEC 1.8 D14 (M3): through the two fix tables (validate_examples_s52's own code)
+            import validate_examples_s52 as S52
+            arows = S52.apply_fixes(ed, arows)[0]
+        for r in arows:
             by[(r["book"], r["chapter"], r["verse"], r["i"])].append(r)
         bad, none_tok, basis = 0, 0, C.Counter()
         for r in O[ed]:
@@ -168,6 +172,9 @@ def stage19(R, build, src, STASH):
     with mp.get_context("fork").Pool(7) as pool:
         named = dict(x for f in pool.map(_greek_file, sorted(glob.glob(os.path.join(HEB_LOWFAT, "*-lowfat.xml"))),
                                          chunksize=8) for x in f)
+    if V18:     # SPEC 1.8 D13a (M4, fault F0016): the named form read with ξ and χ swapped back (code of its own)
+        sw = str.maketrans("ξχΞΧ", "χξΧΞ")
+        named = {k: (g.translate(sw) if g else g) for k, g in named.items()}
     pieces = sorted((p["t"], p["n"], p["pid"], p["class"], lg) for lg in ("hbo", "arc") for p in T[lg]["P"])
     hv_of = {}
     for lg in ("hbo", "arc"):

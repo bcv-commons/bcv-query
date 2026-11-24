@@ -92,8 +92,11 @@ V12 = False          # set by validate_examples.py for a d build (SPEC 1.2)
 UPTO = "20"          # set by validate_examples.py
 
 
+V18 = False   # SPEC 1.8 (j builds, stage 52): the declarations name 1.8 and SPEC.md (set by validate_examples.py)
+
+
 def ver():
-    return "1.6" if V16 else "1.5" if V15 else "1.3" if V13 else "1.2" if V12 else "1.1"
+    return "1.8" if V18 else "1.6" if V16 else "1.5" if V15 else "1.3" if V13 else "1.2" if V12 else "1.1"
 
 
 def spec_cols():

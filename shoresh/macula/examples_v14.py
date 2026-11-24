@@ -192,7 +192,8 @@ def build_parts(outdir, lex, cnt, ex):
         path = os.path.join(ANA_DIR, ed, "words.parquet")
         pinned(path, ANA_SHA[ed])
         ana = C.defaultdict(list)
-        for r in pq.read_table(path).to_pylist():
+        import examples_v18      # SPEC 1.8 D14 (M3): through the two fix tables when V18 is set
+        for r in examples_v18.analysis_words(path, ed):
             ana[(r["book"], r["chapter"], r["verse"], r["i"])].append(r)
         W = pq.read_table(os.path.join(outdir, "other", ed, "words.parquet"),
                           columns=["s", "book", "chapter", "verse", "w", "text", "analysis", "analysis_basis"]).to_pylist()
@@ -211,6 +212,10 @@ def build_parts(outdir, lex, cnt, ex):
             joined.add(k)
             src = {r["source"] for r in ana[k]}
             want = {"macula": "derived", "model": "model"}
+            if getattr(X, "V18", False) and "rule" in src:
+                # SPEC 1.8 D14 (M3): a `rule` part counts as not `macula`; a fixed part lies in a model word
+                c["words with a fixed part (source rule)"] += 1
+                src = {"model"} if src <= {"rule", "model"} else src
             if len(src) != 1 or want.get(src.pop()) != w["analysis_basis"]:
                 raise SystemExit(f"{ed}: word s={w['s']}: the analysis's source is not its analysis_basis")
             c["words joined"] += 1

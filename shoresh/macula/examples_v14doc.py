@@ -71,7 +71,7 @@ def V16():
 
 def BNAME():
     """The build these documents name: h1 (SPEC 1.6, stage 38), g1 (1.5, stage 35), f1 (1.4, stage 32)."""
-    return ("h1", "38", "1.6") if V16() else ("g1", "35", "1.5") if V15() else ("f1", "32", "1.4")
+    return ("j1", "52", "1.8") if getattr(X, "V18", False) else ("h1", "38", "1.6") if V16() else ("g1", "35", "1.5") if V15() else ("f1", "32", "1.4")
 
 
 def sample16(lex):

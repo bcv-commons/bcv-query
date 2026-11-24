@@ -22,6 +22,14 @@ V15 = False
 # SPEC 1.6 (h builds, stage 38): D18 steps 2 and W of 1.6, SE5, D25 step 2b, D27 kept_out, D28 (examples_v15,
 # examples_people11, examples_v15b, examples_v14, examples_v14doc)
 V16 = False
+# SPEC 1.8 (j builds, stage 52): the mends M1 to M5 (CHANGES-1.8.md): M1, M2 in examples_v15 (D18) and examples_v17
+# (D39, D40); M3 through examples_v18.analysis_words (examples_links11, examples_v14, examples_v17); M4 in
+# examples_links.lowfat_greek and examples_links12 (form_near). Off by default, so that i1 still rebuilds as it is.
+V18 = False
+# SPEC 1.8, stage 52 (report 52): j1 is i1 with the mends; two inputs of i1 are gone from the disk, so the sub-stages the
+# mends reach are replayed on a sha-checked copy of i1 (build_examples.replay18), and a guard of a lost input counts
+REPLAY18 = False
+REPLAY18_DRIFT = []
 
 # SPEC 4.10: closed categories, source value -> code
 CLOSED = {

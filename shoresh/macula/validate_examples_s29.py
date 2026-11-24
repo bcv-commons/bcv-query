@@ -46,6 +46,7 @@ TERM_CAT = {"time_abs": "time"}
 V14 = False   # an f build (SPEC 1.4): set by validate_examples.py
 V15 = False   # a g build (SPEC 1.5): set by validate_examples.py
 V16 = False   # an h build (SPEC 1.6): set by validate_examples.py
+V18 = False   # a j build (SPEC 1.8, stage 52): set by validate_examples.py
 
 
 def _cells(ln):
@@ -84,7 +85,10 @@ def check_sources13(R, build, lang):
     m7 = doc.get("model", {}).get("time-aspect-lxx-parse", {})
     R.check(f"{lang} sources.json: the model part names M7's D9m values (models, version, no human check)",
             bool(m7.get("models")) and bool(m7.get("version")) and m7.get("human_check") == "no human check", sorted(m7))
-    if V16:
+    if V18:
+        R.check(f"{lang} sources.json: the builder entry names stage 52 of build j1 (SPEC 1.8)",
+                "--build j1 --stage 52" in doc["builder"]["entry"], doc["builder"]["entry"])
+    elif V16:
         R.check(f"{lang} sources.json: the builder entry names stage 38 of build h1 (SPEC 1.6)",
                 "--build h1 --stage 38" in doc["builder"]["entry"], doc["builder"]["entry"])
     elif V15:
@@ -122,7 +126,7 @@ def check_read_first13(R, build, lang):
     text = open(p, encoding="utf-8").read() if os.path.exists(p) else ""
     R.check(f"{lang} READ-FIRST.md: exists with sections 1 to 5 (5: what is model, and how much)",
             all(f"## {i}." in text for i in (1, 2, 3, 4, 5)) and "## 5. What is model" in text)
-    gname, sname = ("glossed-h1", "--stage 38") if V16 else ("glossed-g1", "--stage 35") if V15 else ("glossed-e1", "--stage 29")
+    gname, sname = ("glossed-j1", "--stage 52") if V18 else ("glossed-h1", "--stage 38") if V16 else ("glossed-g1", "--stage 35") if V15 else ("glossed-e1", "--stage 29")
     R.check(f"{lang} READ-FIRST.md: names the chapters ({gname}/) and {sname[2:]}, no older chapters or stage",
             f"source-examples-work/{gname}/" in text and sname in text
             and not any(x in text for x in ("glossed-d1/", "glossed-c1/", "source-examples-work/glossed/", "--stage 24",

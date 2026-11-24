@@ -63,7 +63,7 @@ GLOSSED_H1 = os.path.join(ROOT, "internal-docs/source-examples-work/glossed-h1")
 
 def _ver():
     """The specification version of the build being written: 1.2 for a d build (examples_common.V12), else 1.1."""
-    return "1.6" if getattr(X, "V16", False) else "1.5" if getattr(X, "V15", False) else "1.3" if X.V13 else "1.2" if X.V12 else "1.1"
+    return "1.8" if getattr(X, "V18", False) else "1.6" if getattr(X, "V16", False) else "1.5" if getattr(X, "V15", False) else "1.3" if X.V13 else "1.2" if X.V12 else "1.1"
 
 
 def _doc_stage():
@@ -488,7 +488,9 @@ def sources_doc11(lang, d, counts):
         "builder": {"repository": "bcv-commons/bcv-query", "commit": RD._git("rev-parse", "HEAD"),
                     "note": "the builder files below are those of this build; `committed` = tracked and unchanged against "
                             "`commit` when the build ran", "files": bfiles,
-                    "entry": ("shoresh/.venv/bin/python -I shoresh/macula/build_examples.py --build h1 --stage 38"
+                    "entry": ("shoresh/.venv/bin/python -I shoresh/macula/build_examples.py --build j1 --stage 52"
+                              if getattr(X, "V18", False) else
+                              "shoresh/.venv/bin/python -I shoresh/macula/build_examples.py --build h1 --stage 38"
                               if getattr(X, "V16", False) else
                               "shoresh/.venv/bin/python -I shoresh/macula/build_examples.py --build g1 --stage 35"
                               if getattr(X, "V15", False) else

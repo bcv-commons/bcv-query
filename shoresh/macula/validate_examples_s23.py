@@ -30,6 +30,7 @@ REF_RE = re.compile(r"^ref:[a-z0-9]+(_[a-z0-9]+)*$")
 
 
 V13 = False   # SPEC 1.3 (e builds): set by validate_examples.py
+V18 = False   # SPEC 1.8 (j builds): set by validate_examples.py (D13a form_near, M4)
 
 
 def tsv(path):
@@ -365,7 +366,8 @@ def lxx12(R, build, T, O, links, named, pl, verse_words, vid, hv_of, pid_tn, s_o
         f = plain(g)
         if len(f) < 5:
             continue
-        free = [s for k in sorted(own[hv_of[t]]) for s in verse_words[k] if s not in held and one_edit(pl[s], f)]
+        free = [s for k in sorted(own[hv_of[t]]) for s in verse_words[k] if s not in held and
+                (one_edit(pl[s], f) or (V18 and pl[s] == f))]     # SPEC 1.8 D13a (M4): an equal form or one edit
         if len(free) == 1:
             exp_fn[(t, n)] = free[0]
             held.add(free[0])

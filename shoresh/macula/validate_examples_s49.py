@@ -26,6 +26,8 @@ ANA = os.path.join(ROOT, "internal-docs/hebrew-nt-analysis-release/v0.2")
 ENT = os.path.join(HERE, "data/entities/entities.tsv")
 GLOSSED = os.path.join(ROOT, "internal-docs/source-examples-work/glossed-i1")
 EDS = ("heb_mod", "heb_scg")
+V18 = False      # SPEC 1.8 (j builds): set by validate_examples.py; M1 in D39, D40; the analysis through the fix tables
+M1KEYS = set()   # SPEC 1.8: (clause, verb) of the grc rows M1 makes subject rows (recomputed by validate_examples_s52)
 FOLDERS = ("hbo", "arc", "grc", "other", "lexicon")
 FILES = {"words.parquet", "pieces.parquet", "clauses.parquet", "constituents.parquet", "added.parquet",
          "who_account.parquet", "passages.parquet", "links.parquet", "link_account.parquet", "lexemes.tsv",
@@ -566,7 +568,11 @@ def marks_check(R, E, b, about):
             v.sort(key=lambda x: x[0])
             word[(_norm(ed, tx[t]), tuple(x[1] for x in v))].append([x[2] for x in v])
     ana = {}
-    for r in T(os.path.join(ANA, ed, "words.parquet")):
+    rows = T(os.path.join(ANA, ed, "words.parquet"))
+    if V18:     # SPEC 1.8 D14 (M3): through the two fix tables (validate_examples_s52's own code)
+        import validate_examples_s52 as S52
+        rows = S52.apply_fixes(ed, rows)[0]
+    for r in rows:
         ana[(r["book"], r["chapter"], r["verse"], r["i"], r["part"])] = (r["form"], r["person"])
     memo = {}
 
@@ -813,7 +819,8 @@ def added_check(R, E, c2h, pk, about):
         seen.add(key)
         st = E.Pd[(verb, kinds_stem(E, verb))]
         m = json.loads(st["marks"])
-        if r["role"] == "A0" and "person" in m:
+        subj = r["role"] == "A0" or (V18 and r["role"] == "A1" and (r["clause"], r["verb"]) in M1KEYS)   # D39 (1.8)
+        if subj and "person" in m:
             kind, form, pe, nu, ge = "in_verb", "ending", m["person"], m.get("number", ""), m.get("gender", "")
         else:
             kind = "possessor" if r["role"] == "poss" else ("unsaid" if r["where"] == "unexpressed" else "elsewhere")
@@ -844,7 +851,7 @@ def added_check(R, E, c2h, pk, about):
     kr = {v: k for k, v in E.keys.items()}
     cp = {r["clause"]: r["pred"] for r in E.c}
     for r in E.a:
-        if r["form"] == "ending" and r["role"] == "A0" and cp[r["clause"]]:
+        if r["form"] == "ending" and (r["role"] == "A0" or V18) and cp[r["clause"]]:     # D39 (1.8)
             pr = cp[r["clause"]]
             vz[(pr, kinds_stem(E, pr))] = G.C[kr[r["clause"]]]["pred"]
     pheads = {r["head"] for r in E.k if r["role"] == "p" and r["head"]}
@@ -1483,7 +1490,12 @@ def run(R, build, compare=None):
     global CA
     R.section("the copied folders (1.7)")
     bad, n = [], 0
-    for sub in FOLDERS:
+    if V18:     # SPEC 1.8 section 13: j1 copies nothing; the check is "against i1 (1.8)" of stage 52
+        import validate_examples_s52 as S52
+        M1KEYS.update(S52.m1_keys(build))
+        R.info("tan the copied folders (1.7): in 1.8 replaced by 'against i1 (1.8)' (stage 52)",
+               f"grc rows M1 makes subject rows: {len(M1KEYS):,}")
+    for sub in (() if V18 else FOLDERS):
         for rel in walk(os.path.join(build, sub)):
             if rel.endswith("VALIDATION.md"):
                 continue
@@ -1493,8 +1505,9 @@ def run(R, build, compare=None):
                 bad.append(f"{sub}/{rel}")
         miss = [rel for rel in walk(os.path.join(H1, sub)) if not os.path.exists(os.path.join(build, sub, rel))]
         bad += [f"{sub}/{x} (missing)" for x in miss]
-    R.check("tan the copied folders (1.7): every file of hbo, arc, grc, other, lexicon has the sha256 of h1's "
-            "(VALIDATION.md aside)", not bad, f"{n} files; {bad[:5]}")
+    if not V18:
+        R.check("tan the copied folders (1.7): every file of hbo, arc, grc, other, lexicon has the sha256 of h1's "
+                "(VALIDATION.md aside)", not bad, f"{n} files; {bad[:5]}")
     G = G_(build)
     g2c, c2h, h2c = terms()
     CA = catch()
@@ -1525,4 +1538,5 @@ def run(R, build, compare=None):
         gb = os.path.join(other, "cache", "glossed")
         fs = sorted(os.listdir(GLOSSED)) if os.path.isdir(GLOSSED) else []
         diff = [f for f in fs if not os.path.exists(os.path.join(gb, f)) or H(os.path.join(GLOSSED, f)) != H(os.path.join(gb, f))]
-        R.check(f"tan rebuild (1.7): the {len(fs)} sheets of glossed-i1/ equal {compare}/cache/glossed/", fs and not diff, diff)
+        R.check(f"tan rebuild (1.7): the {len(fs)} sheets of {'cache/glossed' if V18 else 'glossed-i1'}/ equal "
+                f"{compare}/cache/glossed/", fs and not diff, diff)

@@ -35,6 +35,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(HERE)  # our own modules; appended so nothing shadows the standard library
+sys.path.append(os.path.dirname(HERE))  # the `macula` package (bridge_corpus_lxx imports macula.text_faults since F0016)
 
 import examples_words  # noqa: E402
 import examples_heads  # noqa: E402
@@ -127,13 +128,146 @@ def run13(outdir, stage, langs):
               flush=True)
 
 
+# ---- SPEC 1.8, stage 52: the replay on a copy of i1 (report 52) ------------------------------------------------------
+# Two inputs that i1 read are gone from the disk since i1 was built (data/arg-roles/roles.tsv 4c494ac9…, rebuilt for
+# argument-roles v0.3 and v0.4; the aligner's republished heb_scg alignments and sidecars). So j1 is not built from
+# nothing: it is a sha-checked copy of i1, on which the sub-stages the mends reach run again with the 1.8 switch, in
+# the order of stage 38 and 49. After each sub-stage, every file it wrote outside the reach of section 13 (1.8) is put
+# back from i1 (what the builder wrote is recorded by sha256 in cache/stage52-replay.json). `--mends off` runs the same
+# replay with the switch off: it must give i1 back byte for byte (the proof that the lost inputs reach no file of the
+# reach).
+REPLAY_SUBS = ("16", "17", "18", "19", "20", "13")
+FIVE = ("hbo", "arc", "grc", "other", "lexicon")
+STMT = ("forms", "paradigms", "markers", "constructions", "orders", "agreement", "frames", "pairs", "clause_links",
+        "exceptions")
+DECL = ("sources.json", "categories.toml", "COLUMNS.md", "READ-FIRST.md", "VALIDATION.md")
+
+
+def in_reach18(rel):
+    """SPEC 1.8 section 13: the files of j1 that may differ from i1's."""
+    parts = rel.split("/")
+    if parts[0] in ("heb_mod", "heb_scg", "cache", "lexicon"):
+        return True
+    f = parts[-1]
+    if f in DECL:
+        return True
+    if parts[0] == "other":
+        return len(parts) == 3 and parts[1] in ("heb_mod", "heb_scg") and f in ("words.parquet", "parts.parquet")
+    if parts[0] in ("hbo", "arc", "grc") and len(parts) == 2:
+        if f == "added.parquet" or f == "profile.tsv" or f[:-8] in STMT:
+            return True
+        if parts[0] in ("hbo", "arc") and f in ("links.parquet", "link_account.parquet"):
+            return True
+    return False
+
+
+def _sha(path):
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for b in iter(lambda: fh.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
+def _files(d):
+    out = {}
+    for sub in FIVE + ("heb_mod", "heb_scg"):
+        for root, _ds, fs in os.walk(os.path.join(d, sub)):
+            for f in fs:
+                p = os.path.join(root, f)
+                out[os.path.relpath(p, d)] = p
+    return out
+
+
+def replay18(outdir, base, mends, langs):
+    import shutil
+    import examples_v14
+    import examples_v17
+    if os.path.exists(outdir):
+        raise SystemExit(f"{outdir} exists: stage 52 builds into a new folder (no rm; move the old one to trash-<date>/)")
+    t0 = time.time()
+    examples_common.REPLAY18 = True
+    examples_common.V18 = mends
+    examples_common.V14 = examples_common.V15 = examples_common.V16 = True
+    examples_v14.STATES = ("member", "nt_only", "function", "name", "no_number", "few_places", "spread",
+                           "kept_out", "alone")
+    examples_v14.setup()
+    # 1. the copy of i1's five folders and the cache items the 1.6 builders and stage 49 read
+    bf = _files(base)
+    ish = {}
+    for rel, p in sorted(bf.items()):
+        if rel.split("/")[0] in ("heb_mod", "heb_scg"):
+            continue
+        q = os.path.join(outdir, rel)
+        os.makedirs(os.path.dirname(q), exist_ok=True)
+        shutil.copyfile(p, q)
+        ish[rel] = _sha(p)
+        if _sha(q) != ish[rel]:
+            raise SystemExit(f"copy of {rel}: sha256 differs")
+    for rel in bf:
+        if rel.split("/")[0] in ("heb_mod", "heb_scg"):
+            ish[rel] = _sha(bf[rel])
+    cdir = os.path.join(outdir, "cache")
+    os.makedirs(cdir, exist_ok=True)
+    for name in sorted(os.listdir(os.path.join(base, "cache"))):
+        if name in examples_v17.CACHE_COPIED:
+            p = os.path.join(base, "cache", name)
+            (shutil.copytree if os.path.isdir(p) else shutil.copyfile)(p, os.path.join(cdir, name))
+    print(f"stage 52: copied {len(ish)} files of i1 in {time.time() - t0:.0f} s", flush=True)
+    log = {"base": "i1", "mends": mends, "copied": len(ish), "steps": []}
+
+    def after(step):
+        now = _files(outdir)
+        wrote, back = {}, []
+        for rel, p in sorted(now.items()):
+            if rel not in ish:
+                wrote[rel] = {"i1": None, "built": _sha(p), "reach": in_reach18(rel)}
+                continue
+            s = _sha(p)
+            if s != ish[rel]:
+                wrote[rel] = {"i1": ish[rel], "built": s, "reach": in_reach18(rel)}
+                if not in_reach18(rel):
+                    keep = os.path.join(cdir, "stage52-outside", step.split()[0], rel)
+                    os.makedirs(os.path.dirname(keep), exist_ok=True)
+                    shutil.copyfile(p, keep)        # what the builder wrote, for the report (section 13: not widened)
+                    shutil.copyfile(bf[rel], p)
+                    back.append(rel)
+        log["steps"].append({"step": step, "differ_from_i1": wrote, "put_back_from_i1": back})
+        print(f"stage 52 after {step}: {len(wrote)} files differ from i1 ({sum(1 for v in wrote.values() if v['reach'])} "
+              f"in the reach); {len(back)} put back from i1", flush=True)
+        return wrote
+
+    for st in REPLAY_SUBS:
+        run13(outdir, st, langs)
+        after(f"28.{st}")
+    run13(outdir, "29", langs)
+    after("29")
+    counts = {}
+    ex = examples_v14.build(outdir, counts)
+    write_counts(outdir, "52.38", langs, counts, ex)
+    after("38 (lexicon)")
+    counts = {}
+    ex = examples_v17.build(outdir, None, counts)
+    write_counts(outdir, "52.49", LANGS + examples_v17.EDS, counts, ex)
+    after("49 (editions)")
+    log["nt guard: republished aligner files read in place of the pinned ones (links not kept)"] = sorted(
+        set(examples_common.REPLAY18_DRIFT))
+    with open(os.path.join(cdir, "stage52-replay.json"), "w", encoding="utf-8") as fh:
+        json.dump(log, fh, ensure_ascii=False, indent=1, sort_keys=True)
+        fh.write("\n")
+    print(f"stage 52 (mends {'on' if mends else 'off'}) built in {time.time() - t0:.0f} s -> {outdir}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", required=True, choices=sorted(STAGES) + ["23", "24", "27", "28", "29", "13", "32", "32.new", "35", "38", "49"])
+    ap.add_argument("--stage", required=True, choices=sorted(STAGES) + ["23", "24", "27", "28", "29", "13", "32", "32.new", "35", "38", "49", "52"])
     ap.add_argument("--lang", choices=LANGS, action="append")
     ap.add_argument("--build", default="b1")
     ap.add_argument("--root", default=os.path.join(HERE, "data/source-examples"))
     ap.add_argument("--cache", help="folder for the source parse cache (default: examples_src.CACHE)")
+    ap.add_argument("--mends", choices=("on", "off"), default="on", help="stage 52: the 1.8 switch (off: the proof run)")
+    ap.add_argument("--base", help="stage 52: the build replayed (default: i1 beside the build)")
     a = ap.parse_args()
     if a.cache:
         import examples_src
@@ -152,11 +286,24 @@ def main():
         write_counts(outdir, "49", LANGS + examples_v17.EDS, counts, ex)
         print(f"stage 49 built in {time.time() - t0:.0f} s, {len(counts)} counts, {len(ex)} exception lists -> {outdir}")
         return
-    hb = os.path.basename(os.path.normpath(a.build)).startswith(("h", "i"))     # an i build's 1.6 part is h1's
+    jb = os.path.basename(os.path.normpath(a.build)).startswith("j")
+    if jb and a.stage == "52":
+        if set(langs) != set(LANGS):
+            raise SystemExit("stage 52 builds the three languages together")
+        replay18(os.path.join(a.root, a.build), a.base or os.path.join(HERE, "data/source-examples", "i1"),
+                 a.mends == "on", langs)
+        return
+    if jb:
+        # SPEC 1.8 section 13, 14: stage 52 = every builder of h1 (stage 38: 28, 29, the lexicon) and then the 1.7 entry
+        # of i1's editions (examples_v17, no copy), all with the 1.8 switch on (examples_common.V18: M1 to M5)
+        if a.stage not in ("52",) and a.stage not in SUB13:
+            raise SystemExit(f"a j build (SPEC 1.8) takes --stage 52 (or one sub-stage of 28 for a check), not {a.stage}")
+        examples_common.V18 = True
+    hb = os.path.basename(os.path.normpath(a.build)).startswith(("h", "i", "j"))     # an i build's 1.6 part is h1's
     if hb:
         # SPEC 1.6 section 14: stage 38 = every builder of 1.5 (stage 28, then 29, then examples_v14) with the 1.5 and
         # the 1.6 switch on (examples_v15 D18, examples_people11 SE5, examples_v15b D25 step 2b, examples_v14 D27)
-        if a.stage != "38" and a.stage not in SUB13:
+        if a.stage not in ("38", "52") and a.stage not in SUB13:
             raise SystemExit(f"an h build (SPEC 1.6) takes --stage 38 (or one sub-stage of 28 for a check), not {a.stage}")
         examples_common.V16 = True
         import examples_v14
@@ -167,7 +314,7 @@ def main():
         # on, so that each applies the rules 1.5 changes where it writes the column (examples_v15, examples_v15b)
         if not hb and a.stage != "35" and a.stage not in SUB13:
             raise SystemExit(f"a g build (SPEC 1.5) takes --stage 35 (or one sub-stage of 28 for a check), not {a.stage}")
-        if set(langs) != set(LANGS) and a.stage in ("35", "38"):
+        if set(langs) != set(LANGS) and a.stage in ("35", "38", "52"):
             raise SystemExit("stage 35 builds the three languages together")
         import examples_v14
         outdir = os.path.join(a.root, a.build)
@@ -175,7 +322,7 @@ def main():
         examples_common.V14 = True
         examples_common.V15 = True
         examples_v14.setup()
-        if a.stage not in ("35", "38"):      # one sub-stage (the validator's strict view runs stage 16 so)
+        if a.stage not in ("35", "38", "52"):      # one sub-stage (the validator's strict view runs stage 16 so)
             run13(outdir, a.stage, langs)
             print(f"stage {a.stage} built in {time.time() - t0:.0f} s -> {outdir}")
             return
@@ -186,6 +333,13 @@ def main():
         ex = examples_v14.build(outdir, counts)
         write_counts(outdir, a.stage, langs, counts, ex)
         print(f"stage {a.stage} (lexicon): built in {time.time() - t1:.0f} s, {len(counts)} counts, {len(ex)} exception lists")
+        if jb:      # SPEC 1.8: then the editions, by the 1.7 builders over this build's own folders (nothing copied)
+            import examples_v17
+            t2 = time.time()
+            counts = {}
+            ex = examples_v17.build(outdir, None, counts)
+            write_counts(outdir, "52.49", LANGS + examples_v17.EDS, counts, ex)
+            print(f"stage 52.49 (editions): built in {time.time() - t2:.0f} s, {len(counts)} counts, {len(ex)} exception lists")
         print(f"stage {a.stage} built in {time.time() - t0:.0f} s -> {outdir}")
         return
     if os.path.basename(os.path.normpath(a.build)).startswith("f"):

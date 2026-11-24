@@ -127,6 +127,7 @@ def lxx_place12(outdir, ex, st):
     todo = [p for p in pieces if p[2] not in strict and want(p)]
     st["strict pass: named, no strict bridge link"] = len(todo)
     guard_refused, guard_alone = [], 0
+    v18 = getattr(EL.X, "V18", False)     # SPEC 1.8 D13a (M4): form_near takes an equal form or one edit
     for rule in ("form_near", "verse_form"):
         left = []
         for p in todo:
@@ -137,7 +138,7 @@ def lxx_place12(outdir, ex, st):
             if rule == "form_near":
                 if len(f) >= 5:
                     gw = [s for g in own[hv] for s in verse_words[g]]
-                    cands = [s for s in gw if s not in held and EL.lev1(plain[s], f)]
+                    cands = [s for s in gw if s not in held and (EL.lev1(plain[s], f) or (v18 and plain[s] == f))]
                     ns = {to_nt.get(x, x) for x in BL.numbers(gs)}
                     if len(cands) == 1:
                         got = cands[0]

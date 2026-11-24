@@ -64,9 +64,52 @@ MARK_CATS = {"hbo": {"type", "stem", "person", "gender", "number", "state"},
 S10_STAGE_LINES = []  # (stage, line) of this run, for VALIDATION.md
 
 
+# SPEC 1.8 (j builds, stage 52): checks of older stages that cannot hold on j1, each with its reason. A failed check
+# whose name holds one of these texts is printed HELD (not PASS, not FAIL) and counted apart; report 52 lists them.
+# INPUT: an input i1 read is gone from the disk (data/arg-roles/roles.tsv 4c494ac9, the lexeme-aligner's old heb_scg
+#   sidecars, clause-columns bc2e8159 as the live file); the table equals i1 (stage 52, outside the mends).
+# MEND: the older rule or the older build (d1, g1) is what a 1.8 mend changes; stage 52 recomputes the mend.
+# SPEC: the file lies outside section 13's reach, so it is i1's, but its recount reads mended tables (report 52).
+HELD18_ON = False
+HELD18 = (
+    ("terms.tsv: every text term and every sem_role source is rule T", "INPUT roles.tsv"),
+    ("constituents: sem_role, sem_role_basis equal D12 recomputed", "INPUT roles.tsv"),
+    ("categories.toml constituents.sem_role", "INPUT roles.tsv"),
+    ("strict view: constituents.parquet equals stage 16", "INPUT roles.tsv"),
+    ("grc categories.toml links.how, links.basis, link_account.state", "INPUT heb_scg sidecars (counts of the republished pair)"),
+    ("strict view: source_errors.tsv equals stage 16", "SPEC source_errors.tsv (SE5 reads the mended links)"),
+    ("facts: rendered_by equals the recount from the linked rows", "SPEC facts.parquet (M4 links)"),
+    ("map.tsv: every count equals the recount", "SPEC map.tsv (M1 form/kind counts)"),
+    ("analysis and analysis_basis equal hebrew-nt-analysis v0.2 recomputed (D14)", "MEND M3 (stage 52: m3)"),
+    ("added.parquet: every row recomputed by D18, in order", "MEND M1, M2 (stage 52: m1m2)"),
+    ("added (1.5): every row recomputed by D18's three steps", "MEND M1, M2 (stage 52: m1m2)"),
+    ("unchanged: links.parquet equals d1", "MEND M4 (stage 52: m4)"),
+    ("unchanged: link_account.parquet equals d1", "MEND M4 (stage 52: m4)"),
+    ("words.parquet: equals d1", "MEND M3 (stage 52: m3)"),
+    ("tables and files byte-equal to g1", "MEND M1, M4 (stage 52: against i1)"),
+    ("every file but parts.parquet byte-equal to g1", "MEND M3 words.parquet (stage 52: m3)"),
+    ("parts unchanged: s, p, text, class, lemma, strong equal", "MEND M3 (stage 52: m3)"),
+    ("parts (1.5): lexeme, key_rule, basis differ from", "MEND M3 (stage 52: m3)"),
+    ("files byte-equal to g1 (all but", "MEND M3, M4 (stage 52: against i1, m3, m4)"),
+    ("lexicon/groups.parquet unchanged: the rows of the members that stay", "MEND M3 (stage 52: m3, lexicon)"),
+    ("added (1.6): every row's kind, form, person, number, gender, who", "MEND M1, M2 (stage 52: m1m2)"),
+    ("added (1.6): form ending exactly on the subject rows", "MEND M1 (stage 52: m1m2)"),
+    ("source_errors (1.6): the SE5 rows are exactly the added rows", "SPEC source_errors.tsv (SE5 reads the mended added rows)"),
+    ("lexemes (1.6): states move only member", "MEND M3 (stage 52: m3, lexicon)"),
+    ("parts.parquet: one row per part of every joined word", "MEND M3 (stage 52: m3)"),
+    ("lexicon/lexemes.tsv", "MEND M3 (stage 52: m3, lexicon)"),
+    ("pairs.parquet: every row recomputed by D24", "MEND M3 (stage 52: m3, lexicon)"),
+    ("groups.parquet: every group recomputed by D25", "MEND M3 (stage 52: m3, lexicon)"),
+    ("strict view: groups.parquet without its model rows", "MEND M3 (stage 52: m3, lexicon)"),
+    ("strict view: lexemes.tsv strict columns", "MEND M3 (stage 52: m3, lexicon)"),
+)
+HELD18_LINES = []
+
+
 class Report:
     def __init__(self):
         self.fails = 0
+        self.held = 0
         self.passes = 0
         self.skips = 0
         self.stage = ""
@@ -78,6 +121,13 @@ class Report:
     def check(self, name, ok, count="", restates=False):
         """`restates`: the check restates a decision of the builder (SPEC 10), marked `(restates)`."""
         name = name + ("  (restates)" if restates else "")
+        why = next((w for t, w in HELD18 if t in name), None) if (HELD18_ON and not ok and self.stage < "52") else None
+        if why:
+            line = f"HELD  {name}  [{count}]  ({why})"
+            self._out(line[:600])
+            HELD18_LINES.append((self.stage, line[:600]))
+            self.held += 1
+            return
         self._out(f"{'PASS' if ok else 'FAIL'}  {name}" + (f"  [{count}]" if count != "" else ""))
         if not ok:
             self.fails += 1
@@ -3745,7 +3795,15 @@ def stage49(R, build, src, compare=None):
     validate_examples_s49.run(R, build, compare=compare)
 
 
-STAGES_17 = dict(STAGES_16, **{"49": stage49})   # SPEC 1.7: every check up to 38 on the copied folders, then the new
+STAGES_17 = dict(STAGES_16, **{"49": stage49})
+def stage52(R, build, src, compare=None):
+    sys.path.append(HERE)
+    import validate_examples_s52
+    validate_examples_s52.run(R, build, compare=compare)
+
+
+STAGES_18 = dict(STAGES_17, **{"52": stage52})   # SPEC 1.8: every check up to 49 on j1, then the new
+#   # SPEC 1.7: every check up to 38 on the copied folders, then the new
 
 
 def write_validation_md_17(build, upto):
@@ -3796,13 +3854,32 @@ def main():
     kind = os.path.basename(os.path.normpath(build))[:1]
     V12 = kind == "d"
     global V13, V14, SCRATCH, V15, V16
-    V17 = kind == "i"     # SPEC 1.7: an i build is checked as an h build (its five folders are h1's), then by stage 49
+    V18 = kind == "j"     # SPEC 1.8: a j build is checked as an i build (every check up to 49), then by stage 52
+    V17 = kind in ("i", "j")     # SPEC 1.7: an i build is checked as an h build (its five folders are h1's), then by stage 49
     if V17:
         kind = "h"
+    if V18:
+        sys.path.append(HERE)
+        import validate_examples_s49
+        import validate_examples_s52
+        validate_examples_s49.V18 = True
+        validate_examples_s49.GLOSSED = os.path.join(build, "cache", "glossed")
+        import validate_examples_s19
+        import validate_examples_s23
+        validate_examples_s19.V18 = validate_examples_s23.V18 = True
     if HERE not in sys.path:
         sys.path.append(HERE)
     import validate_examples_s20
-    validate_examples_s20.COPIED = V17
+    validate_examples_s20.COPIED = V17 and not V18   # a j build writes its own declarations (SPEC 1.8, stage 52)
+    validate_examples_s20.V18 = V18
+    if V18:
+        import validate_examples_s29
+        validate_examples_s29.V18 = True
+    global HELD18_ON
+    HELD18_ON = V18
+    if V18:
+        import validate_examples_s32
+        validate_examples_s32.V18 = True
     V16 = kind == "h"     # SPEC 1.6: an h build is checked as a g build (stage 35 read against g1), then by stage 38
     V15 = kind in ("g", "h")     # SPEC 1.5: a g build is checked as an f build with the 1.5 rules, then by stage 35
     V14 = kind in ("f", "g", "h")     # SPEC 1.4: an f build is checked as an e build (1.3, up to 29), then by stage 32
@@ -3838,21 +3915,25 @@ def main():
     if V13:
         V12 = True
         SCRATCH = os.path.join("/tmp/claude-1000/source-examples", f"s27-validate-{a.build}")
-    stages = STAGES_17 if V17 else STAGES_16 if V16 else STAGES_15 if V15 else STAGES_14 if V14 else STAGES_13 if V13 else STAGES_12 if V12 else STAGES_11 if kind == "c" else STAGES
+    stages = STAGES_18 if V18 else STAGES_17 if V17 else STAGES_16 if V16 else STAGES_15 if V15 else STAGES_14 if V14 else STAGES_13 if V13 else STAGES_12 if V12 else STAGES_11 if kind == "c" else STAGES
     run = [st for st in sorted(stages) if st <= a.upto and (not a.only or st in a.only)]
     src = read_sources() if NEEDS_SRC & set(run) else None
     for st in sorted(stages):
         if st <= a.upto and (not a.only or st in a.only):
             print(f"== stage {st}")
             R.stage = st
-            if st in ("10", "20", "24", "29", "32", "35", "38", "49"):
-                # SPEC 1.7: on an i build the rebuild is stage 49's (every folder of i1 against i2)
-                stages[st](R, build, src, compare=a.compare if (not V17 or st == "49") else None)
+            if st in ("10", "20", "24", "29", "32", "35", "38", "49", "52"):
+                # SPEC 1.7: on an i build the rebuild is stage 49's (every folder of i1 against i2); 1.8: and 52's
+                stages[st](R, build, src, compare=a.compare if (not V17 or st in ("49", "52")) else None)
             else:
                 stages[st](R, build, src)
-    print(f"== {R.passes} PASS, {R.skips} SKIP, {R.fails} FAIL")
+    print(f"== {R.passes} PASS, {R.skips} SKIP, {R.fails} FAIL" + (f", {R.held} HELD (1.8: see HELD18)" if HELD18_ON else ""))
     print(f"== {R.fails} condition(s) failed")
-    if a.write_md and V17:
+    if a.write_md and V18:
+        write_validation_md_17(build, a.upto)
+        validate_examples_s52.write_md(build, S10_STAGE_LINES, a.upto)
+        print("VALIDATION.md written for hbo, arc, grc (i1's, with the block new in 1.8) and heb_mod, heb_scg")
+    elif a.write_md and V17:
         write_validation_md_17(build, a.upto)
         print("VALIDATION.md written for heb_mod, heb_scg (the copied folders keep h1's)")
     elif a.write_md:

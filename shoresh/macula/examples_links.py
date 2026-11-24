@@ -135,6 +135,16 @@ def _greek_file(path):
 
 
 def lowfat_greek(outdir):
+    """{xml:id: (greek, greekstrong)} of every lowfat word. SPEC 1.8 D13a (M4, fault F0016): with V18 set, every form is
+    read through text_faults.macula_greek() (after the cache, so that no pickle brings the swapped forms back)."""
+    out = _lowfat_greek_raw(outdir)
+    if getattr(X, "V18", False):
+        import text_faults
+        out = {k: (text_faults.macula_greek(g) if g else g, s) for k, (g, s) in out.items()}
+    return out
+
+
+def _lowfat_greek_raw(outdir):
     files = sorted(glob.glob(os.path.join(HEB_LOWFAT, "*-lowfat.xml")))
     h = hashlib.sha256()
     for f in files:
@@ -511,6 +521,14 @@ def nt_compute(outdir, ex, st, counts):
             for a, bb in ((fa, os.path.join(PUBLISH, "h", "heb", ed, os.path.basename(fa))),
                           (fl, os.path.join(PUBLISH, "_index", os.path.basename(fl)))):
                 if not same_file(a, bb):
+                    if getattr(X, "REPLAY18", False):
+                        # SPEC 1.8 replay (stage 52, report 52): the aligner republished this file after i1, and its
+                        # sidecar of i1's day is gone; the NT links of this run are not kept (j1 holds i1's), so the
+                        # republished pair is read only to let the stage run; counted
+                        X.REPLAY18_DRIFT.append(os.path.relpath(bb, os.path.dirname(PUBLISH)))
+                        if a == fa:
+                            fa = bb
+                        continue
                     raise SystemExit(f"{bb}: not byte-identical to the pinned {a}")
             with open(fa, encoding="utf-8") as fh:
                 arr = json.load(fh)
