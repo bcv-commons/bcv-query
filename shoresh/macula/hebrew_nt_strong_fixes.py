@@ -14,6 +14,8 @@ when all of these hold (the "likely wrong" rule of the check of 2026-11-24, inte
     final ה dropped).
 The fix takes the Tanakh's commonest lexeme for the surface (lemma, lexeme id, number) and gives the row source `rule`.
 Everything else stays as the analysis has it: a wrong word whose letters still fit is not caught (a lower bound).
+Surfaces in EXCLUDE are never fixed: the reading of examples 1.8 (OPEN-1.8 Y5) found the Tanakh's commonest lexeme
+wrong for them in the New Testament, and they keep the analysis's value.
 Writes one row per fixed part: edition book chapter verse i part text from_strong from_lemma to_strong to_lemma to_lexeme.
 """
 from __future__ import annotations
@@ -35,6 +37,11 @@ CONTENT = {"noun", "verb", "adj", "adv", "num"}
 COLS = ["edition", "book", "chapter", "verse", "i", "part", "text", "from_strong", "from_lemma", "to_strong", "to_lemma",
         "to_lexeme"]
 FIN = str.maketrans("ךםןףץ", "כמנפצ")
+EXCLUDE = {
+    "מגרש": "a participle of גָּרַשׁ 'drives out', not the noun מִגְרָשׁ",
+    "צידה": "in the New Testament the second part of Bethsaida, a name with no Tanakh number",
+    "יחי": "a split fault of יְחִידוֹ (יָחִיד), not חָיָה",
+}
 
 
 def cons(t: str | None) -> str:
@@ -72,7 +79,7 @@ def build() -> list[dict]:
             if r["class"] not in CONTENT or not r["strong"] or r["source"] != "model":
                 continue
             c = cons(r["text"])
-            if len(c) < 3:                        # one- and two-letter parts: mostly a split fault, not a number fault
+            if len(c) < 3 or c in EXCLUDE:        # one- and two-letter parts: mostly a split fault, not a number fault
                 continue
             t = tan.get(c)
             if not t:
