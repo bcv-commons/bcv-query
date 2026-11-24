@@ -1,0 +1,112 @@
+# The twelve moods of bible-song-builder's mood list (revision 4, 2026-11-24), as the reader of the Hebrew and Greek
+# sees them. The ids, head nouns, Strong's numbers, Greek nouns and families are theirs. The `is` and `not` lines are
+# our Hebrew wording of their two sentences (the user, 2026-11-24: the reader is given no English definitions).
+# The id names the mood; its Hebrew noun need not occur in the passage.
+
+[moods.simchah]
+hebrew = "שִׂמְחָה"
+strong = "H8057"
+greek = "χαρά"
+also = ["תּוֹדָה", "שָׂשׂוֹן"]
+family = "md.samach"
+is = "שמחה על טוב שבא: מתנה, הצלה, חג, הודיה."
+not = "רִנָּה: השמחה עליזה; הרנה קולנית ושל ניצחון."
+
+[moods.rinnah]
+hebrew = "רִנָּה"
+strong = "H7440"
+greek = "ἀγαλλίασις"
+also = ["תְּהִלָּה", "תְּרוּעָה", "עֹז"]
+family = "md.samach"
+is = "שבח בקול רם או ניצחון: תרועה, שירת ניצחון, קריאה לכל להלל."
+not = "שִׂמְחָה: הרנה פומבית ובקול מלא."
+
+[moods.shalom]
+hebrew = "שָׁלוֹם"
+strong = "H7965"
+greek = "εἰρήνη"
+also = ["נֶחָמָה", "מְנוּחָה"]
+family = "md.batach"
+is = "מנוחה ושלמות: אין מאיים; ברכה, נחמה אחרי צרה."
+not = "מִבְטָח: בשלום אין סכנה לפניו; הבטחון עומד איתן בעוד הסכנה קיימת."
+
+[moods.mivtach]
+hebrew = "מִבְטָח"
+strong = "H4009"
+greek = "πεποίθησις"
+also = ["בֶּטַח"]
+family = "md.batach"
+is = "הישענות איתנה על ה׳ או על אדם בעוד הסכנה או המחסור קיימים."
+not = "תִּקְוָה: הבטחון נח עכשיו; התקוה מחכה למה שעוד לא בא."
+
+[moods.tiqvah]
+hebrew = "תִּקְוָה"
+strong = "H8615"
+greek = "ἐλπίς"
+also = ["תּוֹחֶלֶת"]
+family = "md.batach"
+is = "ציפייה לטוב שעוד לא בא: הבטחה, שיבה שמשתוקקים אליה."
+not = "מִבְטָח: התקוה נושאת עיניה קדימה ואינה במנוחה."
+
+[moods.ahavah]
+hebrew = "אַהֲבָה"
+strong = "H160"
+greek = "ἀγάπη"
+also = ["רַחֲמִים", "חֶסֶד"]
+family = "md.ahav"
+is = "אהבה, חיבה או רחמים כלפי מישהו: אוהבים, הורה וילד, רחמי ה׳."
+not = "שִׂמְחָה: האהבה פונה אל אדם, והיא רכה ולא חגיגית."
+
+[moods.yirah]
+hebrew = "יִרְאָה"
+strong = "H3374"
+greek = "εὐλάβεια"
+also = ["פֶּלֶא", "הָדָר"]
+family = "md.yare"
+is = "עמידה לפני הקדוש או הגדול מאוד: ה׳ נגלה, פלא, ציווי חגיגי."
+not = "פַּחַד: היראה מתקרבת בכבוד; הפחד רוצה לברוח."
+
+[moods.pachad]
+hebrew = "פַּחַד"
+strong = "H6343"
+greek = "φόβος"
+also = ["אֵימָה", "חֲרָדָה"]
+family = "md.yare"
+is = "פחד מרעה: איום, אויב, משפט העומד ליפול."
+not = "צָרָה: הפחד הוא ממה שבא; הצרה היא במה שישנו כאן."
+
+[moods.evel]
+hebrew = "אֵבֶל"
+strong = "H60"
+greek = "πένθος"
+also = ["בְּכִי", "קִינָה", "יָגוֹן"]
+family = "md.bakah"
+is = "צער על אבדה שכבר קרתה: מוות, חורבן, גלות; בכי, קינה."
+not = "צָרָה: האבל מביט לאחור אל האבדה; הצרה זועקת לעזרה בצרה של עכשיו."
+
+[moods.tsarah]
+hebrew = "צָרָה"
+strong = "H6869"
+greek = "θλῖψις"
+also = ["זְעָקָה", "צְעָקָה"]
+family = "md.tsarah"
+is = "צרה של עכשיו והזעקה לעזרה ממנה: לחץ אויבים, חולי, בור."
+not = "אֵבֶל: הצרה עוד מתחננת להצלה; לאבל אין עוד מה לבקש."
+
+[moods.af]
+hebrew = "אַף"
+strong = "H639"
+greek = "ὀργή"
+also = ["חֵמָה", "קֶצֶף"]
+family = "md.aph"
+is = "כעס, תוכחה או זעם: של ה׳ או של אדם, האשמה, הוי."
+not = "פַּחַד: הכעס הוא של המאיים; הפחד הוא של המאוים."
+
+[moods.boshet]
+hebrew = "בֹּשֶׁת"
+strong = "H1322"
+greek = "αἰσχύνη"
+also = ["כְּלִמָּה", "חֶרְפָּה"]
+family = "md.bosh"
+is = "בושה, אשמה או השפלה: וידוי, תפילת תשובה, חרפה שנושאים."
+not = "אֵבֶל: הבושה היא על חטא או על קלון של עצמו, לא על אבדה."
