@@ -86,6 +86,10 @@ shape. It goes up only when a field is renamed, dropped or changes meaning; a ne
 never renumbered. Anchors (`first`, `last`, `pieces`, `lines`, `at`, `after`) are a first version and may follow a link-type
 specification later; that would be a schema change, listed here.
 
+- v0.3.4: `quote` facts add `speaker_number`, `speaker_gender`, `speaker_name_number`, `speaker_name_gender` (asked by
+  bible-song-builder): MACULA's number (`s`, `p`, `d`) and gender (`m`, `f`, `n`, `c`) of the head word of `speaker_ref` /
+  `speaker_name_ref`, null where MACULA gives none (Hebrew proper names). Grammar, not meaning: אֱלֹהִים is plural and names
+  one God; a collective (עַם) is singular. Nothing else changed.
 - v0.3.3: no English meaning words left in the values. The psalm types are named by Hebrew terms with `head`
   (`fm.gn.tefillah_tsarah` תְּפִלָּה בְּצָרָה, `tefillat_tsibbur` תְּפִלַּת צִבּוּר, `tehillah` תְּהִלָּה, `todah` תּוֹדָה, `mivtach` מִבְטָח, `chokhmah` חָכְמָה,
   `melekh` מֶלֶךְ, `viduy` וִדּוּי, `tsiyyon` צִיּוֹן, `malkhut` מַלְכוּת, `tefillah` תְּפִלָּה, `qelalah` קְלָלָה, `aliyah` עֲלִיָּה לָרֶגֶל;
