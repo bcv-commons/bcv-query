@@ -138,9 +138,12 @@ class Check62:
              not hb, f"{len(src_of)} texts compared; differ {len(hb)} {hb[:3]}")
         if OLD.is_file():
             old = {(r["key"], r["step"]): r["hebrew_sha"] for r in pq.read_table(OLD).to_pylist()}
-            ob = [(k, s, o) for (k, s), o in src_of.items() if old.get((k, o)) != hashlib.sha256(S[s][k].encode("utf-8")).hexdigest()]
-            cond("against the five-step build (trash-2026-11-24/pilot-1-five-steps): every kept text's hebrew_sha there equals this step's line",
-                 not ob, f"{len(src_of)} texts compared; differ {len(ob)} {ob[:3]}")
+            rf = d / "english" / "raw" / "refills.json"            # texts of a later refill session are not in the old build
+            refilled = {(k, s) for r in (json.loads(rf.read_text(encoding="utf-8")) if rf.is_file() else []) for k, s in r["rows"]}
+            ob = [(k, s, o) for (k, s), o in src_of.items() if (k, s) not in refilled
+                  and old.get((k, o)) != hashlib.sha256(S[s][k].encode("utf-8")).hexdigest()]
+            cond("against the five-step build (trash-2026-11-24/pilot-1-five-steps): every kept text's hebrew_sha there equals this step's line (texts of english/raw/refills.json apart)",
+                 not ob, f"{len(src_of) - len(refilled)} texts compared, {len(refilled)} refilled apart; differ {len(ob)} {ob[:3]}")
         else:
             cond("against the five-step build (trash-2026-11-24/pilot-1-five-steps)", None, f"skipped: {OLD} absent")
         heb = [x for x, t in Rraw.items() if HEB.search(t)]

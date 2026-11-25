@@ -20,6 +20,8 @@ english/english_model.parquet and the credit:
     cd shoresh && .venv/bin/python -I macula/build_ladder.py --build pilot-1 --stage 62 --prepare
     cd shoresh && .venv/bin/python -I macula/build_ladder.py --build pilot-1 --stage 62 --ingest FILE...
     cd shoresh && .venv/bin/python -I macula/build_ladder.py --build pilot-1 --stage 62 --check --spend USD [--out DIR]
+EN-STALE refill (the (verse, step) whose Hebrew changed after the session): --refill-prepare DIR writes only those;
+--refill-ingest FILE... --model M --session S --date D --spend USD merges them (english/raw/refills.json records it).
 """
 import argparse, hashlib, json, sys
 from pathlib import Path
@@ -128,6 +130,8 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--prepare", action="store_true"); ap.add_argument("--check", action="store_true")
     ap.add_argument("--batch", type=int, default=150); ap.add_argument("--ingest", nargs="+"); ap.add_argument("--spend", type=float)
+    ap.add_argument("--refill-prepare"); ap.add_argument("--refill-ingest", nargs="+")
+    ap.add_argument("--model"); ap.add_argument("--session"); ap.add_argument("--date")
     a = ap.parse_args()
     out = Path(a.out) if a.out else ROOT / a.build
     if a.stage == "59":
@@ -161,6 +165,13 @@ def main():
         src = ROOT / a.build
         if a.prepare:
             print(json.dumps(L62.prepare(src), ensure_ascii=False)); return
+        if a.refill_prepare:
+            print(json.dumps(L62.refill_prepare(src, Path(a.refill_prepare)), ensure_ascii=False)); return
+        if a.refill_ingest:
+            if not (a.model and a.session and a.date and a.spend is not None):
+                sys.exit("stage 62 --refill-ingest: give --model, --session, --date and --spend USD")
+            r = L62.refill_ingest(src, a.refill_ingest, a.model, a.session, a.date, a.spend)
+            print(json.dumps(r, ensure_ascii=False)); sys.exit(1 if any("rows" not in x for x in r) else 0)
         if a.ingest:
             r = L62.ingest(src, a.ingest)
             print(json.dumps(r, ensure_ascii=False)); sys.exit(1 if any("rows" not in x for x in r) else 0)

@@ -191,6 +191,88 @@ def renumber(R, W, H, S):
     return T, used, dict(why), orphan
 
 
+def missing(src):
+    """EN-STALE refill: the wanted (key, step) with no usable English, in text order"""
+    S, order = lines(src)
+    W = wanted(S, order)
+    Rraw = {}
+    for po in PORTIONS:
+        Rraw.update(read_raw(src / "english" / "raw" / f"{po}.tsv"))
+    T = renumber(Rraw, W, session_hebrew(src), S)[0]
+    return S, order, [x for x in W if x not in T]
+
+
+def refill_prepare(src, dest):
+    """write the refill session's input to DEST/<BOOK>-<ch>.txt, only the (verse, step) EN-STALE left untranslated;
+    cache/english/input (the first session's Hebrew) is not touched"""
+    S, order, M = missing(src)
+    files = {}
+    for k, s in M:
+        b, c = chap(k)
+        txt = files.setdefault(dest / f"{b}-{c}.txt", [f"# {b} {c}"])
+        txt.append(f"@{k.split(':')[1]}")
+        txt.append(f"{s} {S[s][k]}")
+    dest.mkdir(parents=True, exist_ok=True)
+    for f, txt in files.items():
+        f.write_text("\n".join(txt) + "\n", encoding="utf-8")
+    return {"chapters": len(files), "texts_wanted": len(M)}
+
+
+def refill_ingest(src, files, model, session, date, spend):
+    """merge a refill session's answers (as --ingest) for the missing (verse, step) only; each chapter whole or not at
+    all; the Hebrew translated is appended to cache/english/input/<portion>/<BOOK>-<ch>.txt under the raw step, so
+    EN-STALE sees it; english/raw/refills.json records who translated what"""
+    S, order, M = missing(src)
+    Mset = set(M)
+    res, secs, done = [], [], []
+    for fn in files:
+        for l in Path(fn).read_text(encoding="utf-8").split("\n"):
+            if not l.strip(): continue
+            if l.startswith("# "): secs.append((f"{Path(fn).name} {l[2:]}", [l]))
+            else: secs[-1][1].append(l)
+    for fn, L in secs:
+        b, c = L[0].lstrip("# ").split(); c = int(c)
+        want = {(k, s) for (k, s) in Mset if chap(k) == (b, c)}
+        got, bad = {}, []
+        for l in L[1:]:
+            x = l.split("\t")
+            if len(x) != 3: bad.append(("fields", l[:30])); continue
+            k = f"{b} {c}:{x[0].strip()}"
+            try: s = int(x[1])
+            except ValueError: bad.append(("step", l[:30])); continue
+            t = " ".join(x[2].split())
+            if (k, s) not in want: bad.append(("unwanted", k, s)); continue
+            if (k, s) in got: bad.append(("twice", k, s)); continue
+            if not t or HEB.search(t): bad.append(("text", k, s)); continue
+            got[(k, s)] = t
+        miss = sorted(want - set(got))
+        if bad or miss or not want:
+            res.append({"file": fn, "bad": bad[:10], "missing": miss[:10], "n_bad": len(bad), "n_missing": len(miss)})
+            continue
+        po = por(next(iter(got))[0])
+        p = src / "english" / "raw" / f"{po}.tsv"
+        R = read_raw(p)
+        inp = src / "cache" / "english" / "input" / po / f"{b}-{c}.txt"
+        extra = []
+        for (k, s), t in got.items():
+            R[(k, RAW_WRITE[s])] = t
+            if s == 3: R.pop((k, 4), None)
+            extra += [f"@{k.split(':')[1]}", f"{RAW_WRITE[s]} {S[s][k]}"]
+            done.append([k, s])
+        write_raw(p, R, order)
+        with inp.open("a", encoding="utf-8") as fh:
+            fh.write(f"# {b} {c}\n" + "\n".join(extra) + "\n")
+        res.append({"file": fn, "rows": len(got)})
+    if done:
+        rp = src / "english" / "raw" / "refills.json"
+        log = json.loads(rp.read_text(encoding="utf-8")) if rp.is_file() else []
+        log.append({"model": model, "session": session, "date": date, "spend_usd": spend, "human_check": "none",
+                    "rule": "EN-STALE refill: (verse, step) whose Hebrew changed with the rule mends of 2026-11-25",
+                    "rows": sorted(done)})
+        rp.write_text(json.dumps(log, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return res
+
+
 def check(src, out):
     S, order = lines(src)
     W = wanted(S, order)
@@ -255,6 +337,9 @@ What it is not: a translation of record, a reviewed text, or evidence for any He
   translated again. Since the rule mends of 2026-11-25 (rule EN-STALE) a raw text is used only where the Hebrew the
   session translated (`cache/english/input`) equals the step's line now; a step whose Hebrew changed has `aid` false
   and no English until a later session translates it.
+- `raw/refills.json` (where present): later sessions that translated the (verse, step) EN-STALE left untranslated,
+  with model, date, spend and the rows; their texts are in `raw/<portion>.tsv` like the first session's, and the
+  Hebrew they translated is appended to `cache/english/input`.
 - `english_model.parquet`: one row per verse and step the verse has, built by
   `build_ladder.py --build pilot-1 --stage 62 --check`.
 
@@ -293,6 +378,11 @@ def finish(src, out, sha, rel, repo, spend):
         files[r] = sha(out / r)
     for po in PORTIONS:
         files[f"english/raw/{po}.tsv"] = sha(src / "english" / "raw" / f"{po}.tsv")
+    refills = src / "english" / "raw" / "refills.json"
+    if refills.is_file():
+        files["english/raw/refills.json"] = sha(refills)
+        bj["stage62_refills"] = [{k: v for k, v in r.items() if k != "rows"} | {"rows": len(r["rows"])}
+                                 for r in json.loads(refills.read_text(encoding="utf-8"))]
     bj["files"] = dict(sorted(files.items()))
     bj["code"] = {c: sha(repo / c) for c in sorted(set(bj["code"]) | set(CODE62))}     # every pinned code file, refreshed
     bj["stage62"] = {"entry": "shoresh/.venv/bin/python -I shoresh/macula/build_ladder.py --build pilot-1 --stage 62 --check --spend USD",
