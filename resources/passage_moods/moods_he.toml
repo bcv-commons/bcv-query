@@ -1,13 +1,14 @@
 # The thirteen moods of bible-song-builder's mood list (revision 5, 2026-11-24), as the reader of the Hebrew and Greek
 # sees them. The ids, head nouns, Strong's numbers, Greek nouns and families are theirs. The `is` and `not` lines are
 # our Hebrew wording of their two sentences (the user, 2026-11-24: the reader is given no English definitions).
-# The id names the mood; its Hebrew noun need not occur in the passage. [rules] are the two reading rules of their revised
-# request (who feels the mood; awe against dread), in our Hebrew wording.
+# The id names the mood; its Hebrew noun need not occur in the passage. [rules] are the reading rules of their revised
+# request (who feels the mood; awe against dread) and of their reply to sample 2 (strength), in our Hebrew wording.
 
 [rules]
-who = "המצב הוא של הקטע ולא של מילותיו: מי מרגיש מה. מילים של שנאה, פחד או שמחה מסמנות מצב רק כשמישהו בקטע מרגיש אותו."
-sinah = "שִׂנְאָה רק כשמישהו בקטע שונא או בוזה לאחר (האחים כנגד יוסף). כשהמדבר או השר הוא השנוא או הבזוי (יוחנן 15; תהלים 22:7), המצב צָרָה או בֹּשֶׁת."
-fear = "פחד מפני ה׳, או לפני ה׳, מלאך או פלא, הוא יִרְאָה (מרקוס 4:41; מתי 27:54). פחד מרעה הוא פַּחַד, גם בקטע שה׳ מדבר בו (שמות 14:10)."
+who = "מצב הרוח הוא של הקטע ולא של מילותיו: מי מרגיש מה. מילים של שנאה, פחד או שמחה מסמנות מצב רוח רק כשמישהו בקטע מרגיש אותו."
+sinah = "שִׂנְאָה רק כשמישהו בקטע שונא או בוזה לאחר (האחים כנגד יוסף). כשהמדבר או השר הוא השנוא או הבזוי (יוחנן 15; תהלים 22:7), מצב הרוח צָרָה או בֹּשֶׁת."
+fear = "פחד מפני ה׳, או לפני ה׳, מלאך או פלא, הוא יִרְאָה (מרקוס 4:41; מתי 27:54). פחד מֵרָעָה הוא פַּחַד, גם בקטע שה׳ מדבר בו (שמות 14:10)."
+strength = "החוזק נדיר: 3 רק למצב הרוח העיקרי של הפרק ולתפניות חדות, מעטים בכל פרק; 2 למצב רוח ברור; 1 לגוון בלבד. רוב הקטעים הם 2 או 1."
 
 [moods.simchah]
 hebrew = "שִׂמְחָה"
@@ -124,4 +125,4 @@ greek = "μισέω"
 also = ["שָׂנֵא", "שָׂטַם", "מַשְׂטֵמָה"]
 family = "md.sane"
 is = "איבה קבועה: מישהו בקטע שונא או בוזה לאחר; האחים כנגד יוסף, שנאת האויבים, קללה על הרשעים."
-not = "אַף: הכעס מתלקח וחולף; השנאה קרה ונשארת. כשהמדבר או השר הוא השנוא או הבזוי, המצב צָרָה או בֹּשֶׁת, לא שִׂנְאָה."
+not = "אַף: הכעס מתלקח וחולף; השנאה קרה ונשארת. כשהמדבר או השר הוא השנוא או הבזוי, מצב הרוח צָרָה או בֹּשֶׁת, לא שִׂנְאָה."

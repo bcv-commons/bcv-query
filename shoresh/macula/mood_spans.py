@@ -1,16 +1,18 @@
 """Mood spans per chapter, read by a model against the moods of resources/passage_moods/moods_he.toml (asked by
 bible-song-builder, 2026-11-24). The reader sees only the Hebrew or Greek clause lines and the Hebrew definitions.
 
-    python -I macula/mood_spans.py prepare --out DIR [--chapters GEN.22 EXO.15 ...]
-    python -I macula/mood_spans.py check   --out DIR --pass a --model claude-opus-5-5
+    python -I macula/mood_spans.py prepare --out DIR [--chapters GEN.22 EXO.15 ... | all] [--batch-lines 3000]
+    python -I macula/mood_spans.py check   --out DIR --pass a --model claude-opus-5-5 [--batch b01] [--max-share3 0.3]
     python -I macula/mood_spans.py compare --out DIR
 
 prepare  writes DIR/input/<BOOK>.<ch>.txt (one numbered clause line per row: n, verse, quotation id, speaker, text) and
          DIR/input/<BOOK>.<ch>.keys.json (n -> first and last word key of the row, as in hebrew-clause-lines /
-         greek-nt-clause-lines v0.3).
+         greek-nt-clause-lines v0.3). With --batch-lines, also DIR/batches.json: the chapters in batches of about that many
+         lines, in Bible order, the sample chapters first (batch b01), so the first batch tests the rules on known chapters.
 check    reads the reader's answers DIR/answers/<pass>/<BOOK>.<ch>.json and writes DIR/<pass>.jsonl, refusing what breaks a rule:
          an unknown mood id, a span outside the chapter, a strength not 1-3, a `because` whose words are not in the span's text,
-         a `unit` that is not a quotation of the span.
+         a `unit` that is not a quotation of the span. With --batch, only that batch's chapters, written to
+         DIR/checked/<pass>/<batch>.jsonl; --max-share3 also fails the check where more than that share of spans has strength 3.
 compare  joins two passes: a span of pass a agrees where pass b has a span with the same mood (as mood or second) over at
          least half of its lines; writes DIR/spans.jsonl with `agree`, and the notes of sources that already name a mood
          (passage-facts mood, cue, delivery, psalm heading forms) by rule.
@@ -21,6 +23,7 @@ Answer file: {"chapter_mood": id | "none", "chapter_strength": 1-3, "chapter_bec
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import re
 import sys
@@ -50,12 +53,27 @@ def norm(s: str) -> list[str]:
     return re.findall(r"[א-ת]+|[α-ωϲ]+", s)
 
 
-def rows(book: str, ch: int) -> list[dict]:
+@functools.lru_cache(maxsize=4)
+def book_rows(book: str) -> list[dict]:
     import pyarrow.parquet as pq
     lang = "grc" if book in NT else "hbo"
-    t = pq.read_table(LINES[lang] / f"lines-{book}.parquet",
-                      columns=["chapter", "verse", "seg", "line", "first", "last", "text", "quotation", "speaker"])
-    out = [r for r in t.to_pylist() if r["chapter"] == ch]
+    return pq.read_table(LINES[lang] / f"lines-{book}.parquet",
+                         columns=["chapter", "verse", "seg", "line", "first", "last", "text", "quotation", "speaker"]).to_pylist()
+
+
+def all_chapters() -> list[str]:
+    out = []
+    for lang in ("hbo", "grc"):
+        for f in LINES[lang].glob("lines-*.parquet"):
+            book = f.stem[len("lines-"):]
+            rs = book_rows(book)
+            first = min(r["first"] for r in rs)
+            out += [(first[:2], ch, f"{book}.{ch}") for ch in sorted({r["chapter"] for r in rs})]
+    return [c for _, _, c in sorted(out)]
+
+
+def rows(book: str, ch: int) -> list[dict]:
+    out = [r for r in book_rows(book) if r["chapter"] == ch]
     out.sort(key=lambda r: (r["seg"], r["line"]))
     return out
 
@@ -63,6 +81,9 @@ def rows(book: str, ch: int) -> list[dict]:
 def prepare(a) -> None:
     inp = a.out / "input"
     inp.mkdir(parents=True, exist_ok=True)
+    if a.chapters == ["all"]:
+        a.chapters = all_chapters()
+    size = {}
     for c in a.chapters:
         book, ch = c.split(".")
         rs = rows(book, int(ch))
@@ -73,13 +94,33 @@ def prepare(a) -> None:
                 fh.write(f"{n}\t{r['verse']}\t{r['quotation'] or '-'}\t{r['speaker'] or '-'}\t{r['text']}\n")
         keys = {n: {"first": r["first"], "last": r["last"], "verse": r["verse"], "quotation": r["quotation"]} for n, r in enumerate(rs, 1)}
         (inp / f"{c}.keys.json").write_text(json.dumps(keys, ensure_ascii=False) + "\n", encoding="utf-8")
-        print(c, len(rs), "lines")
+        size[c] = len(rs)
+    print(len(size), "chapters,", sum(size.values()), "lines")
+    if a.batch_lines:
+        order = [c for c in SAMPLE if c in size] + [c for c in a.chapters if c not in SAMPLE]
+        batches, cur, n = [], [], 0
+        for c in order:
+            if cur and n + size[c] > a.batch_lines:
+                batches.append({"chapters": cur, "lines": n})
+                cur, n = [], 0
+            cur.append(c)
+            n += size[c]
+        if cur:
+            batches.append({"chapters": cur, "lines": n})
+        out = {f"b{i:02d}": b for i, b in enumerate(batches, 1)}
+        (a.out / "batches.json").write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        print(len(out), "batches")
 
 
 def check(a) -> int:
     ids, refused, out = mood_ids(), [], []
+    want = None
+    if a.batch:
+        want = set(json.loads((a.out / "batches.json").read_text(encoding="utf-8"))[a.batch]["chapters"])
     for f in sorted((a.out / "input").glob("*.keys.json")):
         c = f.name[: -len(".keys.json")]
+        if want is not None and c not in want:
+            continue
         keys = {int(k): v for k, v in json.loads(f.read_text(encoding="utf-8")).items()}
         text = {int(l.split("\t")[0]): l.rstrip("\n").split("\t")[4]
                 for l in list(open(a.out / "input" / f"{c}.txt", encoding="utf-8"))[1:]}
@@ -120,16 +161,31 @@ def check(a) -> int:
             out.append({"chapter": c, "kind": "span", "from": lo, "to": hi, "first": keys[lo]["first"], "last": keys[hi]["last"],
                         "verses": [keys[lo]["verse"], keys[hi]["verse"]], "mood": s["mood"], "second": s.get("second"),
                         "strength": s["strength"], "because": s["because"], "unit": s.get("unit"), "pass": a.pass_, "model": a.model})
-    with open(a.out / f"{a.pass_}.jsonl", "w", encoding="utf-8") as fh:
+    if a.batch:
+        (a.out / "checked" / a.pass_).mkdir(parents=True, exist_ok=True)
+        dest, rdest = a.out / "checked" / a.pass_ / f"{a.batch}.jsonl", a.out / "checked" / a.pass_ / f"{a.batch}.refused.tsv"
+    else:
+        dest, rdest = a.out / f"{a.pass_}.jsonl", a.out / f"{a.pass_}.refused.tsv"
+    import hashlib
+    sha = hashlib.sha256(MOODS.read_bytes()).hexdigest()[:12]
+    for r in out:
+        r["moods_sha"] = sha
+    with open(dest, "w", encoding="utf-8") as fh:
         for r in out:
             fh.write(json.dumps(r, ensure_ascii=False) + "\n")
-    with open(a.out / f"{a.pass_}.refused.tsv", "w", encoding="utf-8") as fh:
+    with open(rdest, "w", encoding="utf-8") as fh:
         for r in refused:
             fh.write("\t".join(map(str, r)) + "\n")
     n = sum(r["kind"] == "span" for r in out)
     print(f"pass {a.pass_}: {n} spans, {sum(r['kind'] == 'chapter' for r in out)} chapter readings, {len(refused)} refused")
     for r in refused:
         print("  refused", *r)
+    spans = [r for r in out if r["kind"] == "span"]
+    share3 = sum(r["strength"] == 3 for r in spans) / max(1, len(spans))
+    print(f"strength 3: {share3:.0%} of spans")
+    if a.max_share3 is not None and share3 > a.max_share3:
+        print(f"strength 3 above {a.max_share3:.0%}: the strength rule is not followed")
+        return 1
     return 1 if refused else 0
 
 
@@ -147,8 +203,11 @@ def source_notes(c: str, lo_key: str, hi_key: str) -> list[dict]:
 
 
 def compare(a) -> None:
-    A = [json.loads(l) for l in open(a.out / "a.jsonl", encoding="utf-8")]
-    B = [json.loads(l) for l in open(a.out / "b.jsonl", encoding="utf-8")]
+    def load(p):
+        if (a.out / "checked" / p).is_dir():
+            return [json.loads(l) for f in sorted((a.out / "checked" / p).glob("b*.jsonl")) for l in open(f, encoding="utf-8")]
+        return [json.loads(l) for l in open(a.out / f"{p}.jsonl", encoding="utf-8")]
+    A, B = load("a"), load("b")
     out, stat = [], {"a spans": 0, "a agreed": 0, "b spans": 0, "b agreed": 0, "chapters": 0, "chapter agreed": 0}
 
     def agrees(s, others):
@@ -191,6 +250,9 @@ def main() -> int:
     ap.add_argument("--chapters", nargs="+", default=SAMPLE)
     ap.add_argument("--pass", dest="pass_", choices=["a", "b"])
     ap.add_argument("--model")
+    ap.add_argument("--batch")
+    ap.add_argument("--batch-lines", type=int)
+    ap.add_argument("--max-share3", type=float)
     a = ap.parse_args()
     if a.step == "prepare":
         prepare(a)
