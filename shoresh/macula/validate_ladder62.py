@@ -102,29 +102,40 @@ class Check62:
                 R[x] = r["text"]
             say(f"      {po}: {len(rows)} rows")
         cond("raw files: header key, step, text; each row in its portion's file; no (verse, step) twice", not bad, f"{bad[:4]}")
-        # rule RN, recomputed: a step's text from the first raw step of RAW_OF that has a row
+        # the Hebrew the session translated (its input, kept in cache/english/input)
+        H = {}
+        for p in sorted((d / "cache" / "english" / "input").glob("*/*.txt")):
+            bk = None
+            for l in p.read_text(encoding="utf-8").split("\n"):
+                if l.startswith("# "): bk = l[2:]
+                elif l.startswith("@"): vv = l[1:]
+                elif l.strip():
+                    a, line = l.split(" ", 1); H[(f"{bk}:{vv}", int(a))] = line
+        noh = [x for x in Rraw if x not in H]
+        cond("every raw row has the Hebrew line the session translated (cache/english/input)", not noh, f"{len(H)} input lines; raw rows without {len(noh)} {noh[:3]}")
+        # rule RN with EN-STALE (2026-11-25), recomputed: a step's text from the first raw step of RAW_OF that has a row
+        # whose session Hebrew equals the step's line now; else the step is untranslated (aid false)
         R, src_of = {}, {}
         for k, s in want:
-            o = next((o for o in RAW_OF[s] if (k, o) in Rraw), None)
+            o = next((o for o in RAW_OF[s] if (k, o) in Rraw and H.get((k, o)) == S[s][k]), None)
             if o is not None: R[(k, s)] = Rraw[(k, o)]; src_of[(k, s)] = o
         used = {(k, o) for (k, s), o in src_of.items()}
         rest = [x for x in Rraw if x not in used]
-        dropped = [x for x in rest if x[1] == 4]; extra = [x for x in rest if x[1] != 4]
+        dropped = [x for x in rest if x[1] == 4]
         miss = [x for x in want if x not in R]
-        cond("rule RN: every wanted (verse, step) takes exactly one raw text; no raw row is left over except of old step 4 (dropped)",
-             not miss and not extra and all(1 <= x[1] <= 5 for x in Rraw),
-             f"{len(Rraw)} raw rows -> {len(R)} texts for {len(W)} wanted; missing {len(miss)} {miss[:3]}, other rows left over {len(extra)} {extra[:3]}")
+        stale = [x for x in rest if x[1] != 4]
+        cond("rule RN with EN-STALE: every wanted (verse, step) takes at most one raw text, translated from the Hebrew that stands there now",
+             all(H.get((k, o)) == S[s][k] for (k, s), o in src_of.items()) and all(1 <= x[1] <= 5 for x in Rraw),
+             f"{len(Rraw)} raw rows -> {len(R)} texts for {len(W)} wanted; untranslated (the Hebrew changed after the session) {len(miss)} {miss[:3]}; "
+             f"raw rows of steps 1-3, 5 not used {len(stale)} {stale[:3]}")
         tk = collections.Counter((s, o) for (k, s), o in src_of.items())
         say(f"      taken (step <- raw step): " + ", ".join(f"{s}<-{o} {n}" for (s, o), n in sorted(tk.items()))
-            + f"; raw rows of old step 4 dropped: {len(dropped)} (of {sum(1 for x in Rraw if x[1] == 4)})")
-        self.rn = {"raw": len(Rraw), "taken": dict(tk), "dropped": len(dropped)}
-        # the Hebrew each kept text was translated from is this step's Hebrew
-        lv = {}
-        for o, l in RAW_LEVEL.items():
-            _, rs = tsv(L2 / "lines" / l / "hbo.point.tsv"); lv[o] = {r["key"]: r["line"] for r in rs}
-        hb = [(k, s, o) for (k, s), o in src_of.items() if o >= 2 and lv[o].get(k) != S[s][k]]
-        cond("every kept text stands on the Hebrew it was translated from: the old step's pilot-2 level line (raw 2 z_r_a, 3 zr_r, 4 r, 5 l0) equals this step's line",
-             not hb, f"{sum(1 for o in src_of.values() if o >= 2)} texts of raw 2-5 compared; differ {len(hb)} {hb[:3]}; raw 1: step 1, checked below")
+            + f"; raw rows of old step 4 not used: {len(dropped)} (of {sum(1 for x in Rraw if x[1] == 4)})")
+        say(f"      untranslated by step: " + ", ".join(f"{s} {n}" for s, n in sorted(collections.Counter(s for _, s in miss).items())))
+        self.rn = {"raw": len(Rraw), "taken": dict(tk), "dropped": len(dropped), "untranslated": len(miss)}
+        hb = [(k, s, o) for (k, s), o in src_of.items() if H.get((k, o)) != S[s][k]]
+        cond("every kept text stands on the Hebrew it was translated from: the session's input line equals this step's line",
+             not hb, f"{len(src_of)} texts compared; differ {len(hb)} {hb[:3]}")
         if OLD.is_file():
             old = {(r["key"], r["step"]): r["hebrew_sha"] for r in pq.read_table(OLD).to_pylist()}
             ob = [(k, s, o) for (k, s), o in src_of.items() if old.get((k, o)) != hashlib.sha256(S[s][k].encode("utf-8")).hexdigest()]
@@ -150,16 +161,18 @@ class Check62:
         byk = {(r["key"], r["step"]): r for r in rows}
         b1 = b2 = b3 = b4 = 0
         for (k, s), r in byk.items():
-            if r["portion"] != por(k) or r["aid"] is not True: b1 += 1
+            up0 = s if (k, s) in W else next((u for u in range(s + 1, LAST + 1) if (k, u) in W), None)
+            if r["portion"] != por(k) or r["aid"] is not ((k, up0) in R): b1 += 1
             if r["hebrew_sha"] != hashlib.sha256(S[s][k].encode("utf-8")).hexdigest(): b2 += 1
             if (k, s) in W:
-                if r["text_model"] != R.get((k, s)) or r["same_as"] is not None: b3 += 1
+                if r["text_model"] != R.get((k, s), "") or r["same_as"] is not None: b3 += 1
             else:
                 up = next((u for u in range(s + 1, LAST + 1) if (k, u) in W), None)
                 if r["text_model"] != "" or r["same_as"] != up: b4 += 1
-        cond("portion recomputed; aid true on every row", b1 == 0, f"{b1} differ")
+        cond("portion recomputed; aid true where an English text stands for the row (own or same_as), false where untranslated (EN-STALE)", b1 == 0,
+             f"{b1} differ; aid false on {sum(1 for r in rows if r['aid'] is not True)} rows")
         cond("hebrew_sha recomputed: sha256 of the step's `point` line", b2 == 0, f"{b2} differ")
-        cond("text_model equals the raw text rule RN names where the Hebrew differs from the step above (and step 4), same_as null there",
+        cond("text_model equals the raw text rule RN names where the Hebrew differs from the step above (and step 4), '' where untranslated; same_as null there",
              b3 == 0, f"{b3} differ")
         cond("elsewhere text_model empty and same_as the nearest step above with a text", b4 == 0, f"{b4} differ")
 
@@ -179,16 +192,19 @@ class Check62:
         cond("where two neighbouring steps have equal Hebrew, the English is equal", eq_bad == 0, f"{pairs} neighbour pairs; {eq_bad} differ")
         cond("where they differ, the lower step has its own text", ne_own == 0, f"{ne_own} without; "
              f"{same_text} own texts happen to equal the English of the step above (allowed; listed in the report)")
-        ab = 0; apairs = 0
+        ab = 0; apairs = 0; untr = []
         for k in keys:
             st = steps(k)
             for i, a in enumerate(st):
                 for b in st[i + 1:]:
                     if S[a][k] == S[b][k]:
                         apairs += 1
+                        if byk[(k, a)]["aid"] is not True or byk[(k, b)]["aid"] is not True:
+                            untr.append((k, a, b)); continue     # EN-STALE: an untranslated step has no English
                         if eng(k, a) != eng(k, b): ab += 1
-        cond("the English of equal Hebrew is equal: any two steps of a verse whose `point` lines are equal have the same English",
-             ab == 0, f"{apairs} pairs of steps with equal Hebrew (any distance); {ab} differ")
+        cond("the English of equal Hebrew is equal: any two steps of a verse whose `point` lines are equal have the same English (both translated)",
+             ab == 0, f"{apairs} pairs of steps with equal Hebrew (any distance); {ab} differ; "
+             f"{len(untr)} pairs with an untranslated step (EN-STALE) not compared {untr[:4]}")
         say("      portion x step: texts / same_as")
         cnt = collections.Counter((r["portion"], r["step"], r["same_as"] is None) for r in rows)
         for po in PORTIONS:

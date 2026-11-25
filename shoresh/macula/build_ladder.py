@@ -29,7 +29,7 @@ if __package__ in (None, ""):
 from macula import ladder_banks as LB
 
 ROOT = LB.DATA / "hebrew-ladder"
-SPEC = "Ladder specification, version 0.2"
+SPEC = "Ladder specification, version 0.3"
 CODE = ["shoresh/macula/build_ladder.py", "shoresh/macula/ladder_banks.py", "shoresh/macula/ladder_abbrev.py"]
 REPO = LB.HERE.parent.parent
 
@@ -76,9 +76,11 @@ Rules: 4.1 parse, MA anchor (4.2), FIG markers (4.3), AB abbreviations (4.4), ZC
 | rare | derived | RARE (`src_count` < 20) |
 | in_pilot | derived | as above |
 
-## banks/abbrev.tsv, banks/unknown_abbrev.tsv, sealed/chooser_sample.tsv
+## banks/abbrev.tsv, banks/abbrev_context.tsv, banks/unknown_abbrev.tsv, sealed/chooser_sample.tsv
 
-`abbrev` given; `written`, `kind` derived (the fixed table of `ladder_abbrev.py`). `unknown_abbrev.tsv`: `abbrev`,
+`abbrev` given; `written`, `kind` derived (the fixed table of `ladder_abbrev.py`). `abbrev_context.tsv` (rule AB-CTX,
+2026-11-25): `abbrev`, `context`, `written`: the row's abbreviation is written so in that context (`after_makom`,
+`after_negation`, `to_idol_possessive`; `ladder_abbrev.py` defines them). `unknown_abbrev.tsv`: `abbrev`,
 `count`, `example` (a comment id), derived. `chooser_sample.tsv`: `portion`, `comment`, derived (5.5).
 """
 

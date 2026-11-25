@@ -23,6 +23,7 @@ PARTS = ("hbo", "heb_mod", "heb_scg")
 LAST = 4                    # the real text (SPEC-ladder 0.2: old step 4, R only, dropped 2026-11-24; old step 5 is 4)
 PAIRS = tuple((a, a + 1) for a in range(1, LAST))
 SEED = "ladder-2026-11-24-steps"
+STRIP1 = ":,."               # PUNCT-1: trailing punctuation taken off commentator words at step 1
 CODE61 = ["shoresh/macula/build_ladder.py", "shoresh/macula/ladder_stage61.py", "shoresh/macula/ladder_card.py"]
 GUIDE_SRC = LB.HERE.parent.parent / "internal-docs" / "source-examples-work" / "ladder" / "GUIDE.md"
 I, S = pa.int64(), pa.string()
@@ -32,7 +33,7 @@ CHANGES = pa.schema([("change", S), ("step", I), ("part", S), ("key", S), ("kind
 STEP_FILES = ("profiles.toml", "changes.parquet", "differ.tsv", "thin.tsv", "sealed/step_sample.tsv", "GUIDE.md", "README.md")
 
 PROFILES = '''[meta]
-spec = "Ladder specification, version 0.2"
+spec = "Ladder specification, version 0.3"
 levels_build = "hebrew-levels/pilot-2"
 
 [[step]]
@@ -151,8 +152,9 @@ def step1(src, W2, P2, K2, portions):
             while j < len(ws) and sp["v_from_model"] <= sw[ws[j]["t"]] <= sp["v_to_model"]:
                 gone.append(ws[j]); j += 1
             spans.remove(sp)
-            cw = [(x, tk["i"]) for tk in toks[sp["choice"]] if sp["c_from_model"] <= tk["i"] <= sp["c_to_model"]
-                  for x in tk["written"].split()]
+            # PUNCT-1 (OPEN-ladder 14, 2026-11-25): a commentator word loses its trailing `:` `,` `.` (the bank keeps them)
+            cw = [(x.rstrip(STRIP1), tk["i"]) for tk in toks[sp["choice"]] if sp["c_from_model"] <= tk["i"] <= sp["c_to_model"]
+                  for x in tk["written"].split() if x.rstrip(STRIP1)]
             srcp = sorted({(k["other"], k["s"], k["s_n"]) for g in gone for k in links[g["t"]]}, key=lambda x: (x[1], x[2], x[0]))
             here = []
             for m, (x, i) in enumerate(cw):
@@ -393,7 +395,7 @@ every accepted splice of `chooser/choices_model.parquet` applied (SPEC-ladder 7.
 order, `w` the position in the step's verse.
 
 - `words.parquet`: t, book, chapter, verse, w, text, after, sentence, clause (linked), op. A commentator word: `text`
-  as the bank writes it (unpointed), `after` `" "` (the last of a splice: the replaced span's last word's), `sentence`
+  as the bank writes it (unpointed) without a trailing `:` `,` `.` (rule PUNCT-1, 2026-11-25; the bank keeps them), `after` `" "` (the last of a splice: the replaced span's last word's), `sentence`
   and `clause` the span's first word's, `op` the choice id (= the comment id).
 - `pieces.parquet`: t, n, text, kind, lexeme, class, marks, who, who_basis, basis, op. A commentator word has one
   piece: `kind` `comment`, `lexeme` `class` `who` `who_basis` `""`, `marks` `{}`, `basis` `model`, `op` the choice id.

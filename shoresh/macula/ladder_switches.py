@@ -6,6 +6,9 @@ assembly) rebuilt on build k1 over the ladder scope, with the mends of SPEC-ladd
   V   from the gloss bank (banks/gloss.parquet of hebrew-ladder/pilot-1), rule FIT and RARE (6.4)
   A   SPEC-levels 6.4 for hbo with FIN, NF2, DEF, NUM, KIND (6.5)
 Levels: l0, r (all parts), zr_r and z_r_a (hbo). Every function is deterministic.
+
+The rule mends of 2026-11-25 (OPEN-ladder F.1, items 1-8): REL, REL-ASYN, A-OBJ, NUM both ways, NF2-CHAIN, FIN-ART,
+NIC-FORM, A-HAYAH, V-COUNT, V-FIX; each is named at its code below.
 """
 import json
 import random
@@ -43,13 +46,14 @@ PORTIONS = ("JON", "PSA1-41", "ISA40-55", "RUT", "GEN22-25", "MRK")
 NAME_KINDS = ("person:", "group:", "deity:", "fauna:")
 R_REASONS = ("model_input", "several_referents", "catch_all", "ent_kind", "demonstrative", "named_in_clause",
              "not_ambiguous", "greek_unlinked", "greek_who", "greek_person_number", "host_infinitive",
-             "host_participle", "host_other", "form_ambiguous", "no_earlier_name", "indefinite", "number_mismatch",
-             "form_unattested")
+             "host_participle", "host_other", "relative_head", "name_just_before", "form_ambiguous", "no_earlier_name", "indefinite",
+             "number_mismatch", "form_unattested", "name_chain_bound")
 A_REASONS = ("model_input", "no_who", "several_referents", "person_1_2", "ent_kind", "said_in_clause", "taken_by_r",
-             "role_other", "host_infinitive", "host_participle", "host_other", "no_earlier_name", "indefinite",
+             "role_other", "host_infinitive", "host_participle", "host_other", "relative_head", "name_just_before", "measure_hayah",
+             "in_relative", "passive_stem", "object_is_subject", "speech_person", "no_earlier_name", "indefinite",
              "number_mismatch", "form_unattested")
 V_REASONS = ("model_input", "lemma_phrase", "kind_other", "core_phrase", "no_change", "unattested", "form_other",
-             "fused_article", "not_rare")
+             "fused_article", "common", "fixed_phrase", "not_rare")
 ATNACH = "֑"
 S, I, B = pa.string(), pa.int64(), pa.bool_()
 WORDS = L43.WORDS
@@ -87,6 +91,145 @@ def cons(text):
     return "".join(c for c in ud.normalize("NFD", text or "") if "א" <= c <= "ת").translate(str.maketrans("ךםןףץ", "כמנפצ"))
 
 
+# ------------------------------------------------------------------ the rule mends of 2026-11-25 (OPEN-ladder F.1)
+# Each mend is a named rule; the comment cites the item of internal-docs/source-examples-work/ladder/OPEN-ladder.md.
+
+REL_VERB = ("NpRelp", "Relp", "NpCL")    # k1 word rel of a verb that heads a relative clause (NpCL: asyndetic)
+PASSIVE_STEMS = {"niphal", "pual", "hophal", "qal_passive", "hithpael", "hithpolel", "hithpalpel", "nithpael",
+                 "pulal", "polal", "poal", "polpal"}          # A-OBJ: not an active stem (OPEN 2)
+MAJESTY = {"0430", "0136", "0113", "1167"}   # NUM-SG: plural-stem names a singular verb takes (אֱלֹהִים, אֲדֹנָי, אֲדֹנִים, בְּעָלִים)
+HAYAH = "1961"
+DIVINE = {"3068", "0430", "0410"}          # V-FIX: a word right before one of these is inside a formula (בָּרוּךְ יְהוָה)
+V_COMMON = 100                           # V-COUNT: V at step 2 (level z_r_a) only below 100 Tanakh occurrences (OPEN 8)
+
+
+def strong(lexeme):
+    return (lexeme or "").rsplit(":", 1)[-1]
+
+
+class Syntax:
+    """k1 words' head and rel (levels_drafts reads neither), and the verse order of each part."""
+
+    def __init__(self, parts):
+        self.head, self.rel, self.verse = {}, {}, {}
+        for pn, part in parts.items():
+            h, r = {}, {}
+            for x in pq.read_table(K1 / pn / "words.parquet", columns=["t", "head", "rel"]).to_pylist():
+                h[x["t"]], r[x["t"]] = x["head"], (x["rel"] or "").split(":")[0]
+            self.head[pn], self.rel[pn] = h, r
+            v = defaultdict(list)
+            for t in sorted(part.words):
+                w = part.words[t]
+                v[(w["book"], w["chapter"], w["verse"])].append(t)
+            self.verse[pn] = v
+
+    def antecedent(self, pn, part, t):
+        """REL: the antecedent word of the relative clause whose verb is t (coordinated relatives followed back), or
+        None when t heads no relative clause."""
+        if not self.rel[pn].get(t, "").startswith(REL_VERB):
+            return None
+        seen, h = set(), self.head[pn].get(t)
+        while h and h not in seen and h in part.words:
+            seen.add(h)
+            st = part.stem(h)
+            if st is not None and st["class"] == "verb" and self.rel[pn].get(h, "").startswith(REL_VERB):
+                h = self.head[pn].get(h)
+                continue
+            return h
+        return None
+
+    def ents_of(self, pn, part, h):
+        """the ents of the stem pieces of word h and of the words in apposition with it (Np-Appos either way)"""
+        ws = {h}
+        if self.rel[pn].get(h) == "Np-Appos" and self.head[pn].get(h):
+            ws.add(self.head[pn][h])
+        w = part.words[h]
+        for x in self.verse[pn][(w["book"], w["chapter"], w["verse"])]:
+            if self.rel[pn].get(x) == "Np-Appos" and self.head[pn].get(x) in ws:
+                ws.add(x)
+        out = set()
+        for x in ws:
+            for q in part.pieces.get(x, ()):
+                if q["kind"] == "stem":
+                    out |= set(L.ents(q["who"]))
+        return out
+
+    def rel_same(self, pn, part, t, ent):
+        """REL (OPEN 1): t heads a relative clause whose antecedent (or a word in apposition with it) carries ent."""
+        h = self.antecedent(pn, part, t)
+        return h is not None and ent in self.ents_of(pn, part, h)
+
+    def before_same(self, pn, part, t, ent):
+        """REL-ASYN (OPEN 1, the asyndetic case): the word right before t stands in another clause and is a noun whose
+        stem carries ent."""
+        w = part.words[t]
+        vs = self.verse[pn][(w["book"], w["chapter"], w["verse"])]
+        i = vs.index(t)
+        if i == 0:
+            return False
+        p = vs[i - 1]
+        if part.words[p]["clause"] == w["clause"]:
+            return False
+        st = part.stem(p)
+        return st is not None and st["class"] == "noun" and ent in L.ents(st["who"])
+
+    def speech_person(self, pn, part, t, ent):
+        """A-OBJ (OPEN 2): the ent is spoken of in the first or second person in t's verse (the speaker or the
+        addressee): a piece of the verse carries the ent with person 1 or 2."""
+        w = part.words[t]
+        for x in self.verse[pn][(w["book"], w["chapter"], w["verse"])]:
+            for q in part.pieces.get(x, ()):
+                if q["m"].get("person") in ("1", "2") and ent in L.ents(q["who"]):
+                    return True
+        return False
+
+
+def host_kind_art(st, ps):
+    """FIN-ART (OPEN 5): a verb with an article prefix is a participle (הַשָּׁבָה), whatever its type says."""
+    if st is not None and st["class"] == "verb" and any(p["kind"] == "prefix" and p["class"] == "art" for p in ps):
+        return "host_participle"
+    return host_kind(st)
+
+
+def named_before(part, t, nf):
+    """NIC-FORM (OPEN 6): a word before the host in the host's clause has a noun stem written as the name NF2 found
+    (by consonants; the editions' names often carry no `who`)."""
+    cl = part.words[t]["clause"]
+    if not cl:
+        return False
+    want = cons(nf["head_text"])
+    for wt in part.words_by_clause.get(cl, ()):
+        if wt >= t:
+            break
+        for q in part.pieces[wt]:
+            if q["kind"] == "stem" and q["class"] == "noun" and cons(q["text"]) == want:
+                return True
+    return False
+
+
+def num_mismatch(num, nf, ent):
+    """NUM both ways (OPEN 3, 4): a plural host and a person's name that is not plural (proper names carry no
+    number); a singular host and a name whose stem is plural, unless an אֱלֹהִים-like lexeme."""
+    if num == "pl" and ent.startswith("person:") and nf["number"] != "pl":
+        return True
+    if num == "sg" and nf["number"] == "pl" and strong(nf["head_lexeme"]) not in MAJESTY:
+        return True
+    return False
+
+
+def hayah_measure(part, t, clause):
+    """A-HAYAH (OPEN 7): a form of הָיָה whose clause holds a noun with the preposition כְּ (a measure: כְּאֵיפָה)."""
+    st = part.stem(t)
+    if st is None or strong(st["lexeme"]) != HAYAH:
+        return False
+    for wt in part.words_by_clause.get(clause, ()):
+        ps = part.pieces[wt]
+        if any(q["kind"] == "prefix" and q["class"] == "prep" and cons(q["text"]) == "כ" for q in ps) and \
+                any(q["kind"] == "stem" and q["class"] == "noun" for q in ps):
+            return True
+    return False
+
+
 # ------------------------------------------------------------------ the texts of the ladder scope
 
 class Text2(L.Text):
@@ -108,43 +251,71 @@ class Text2(L.Text):
 
 class Names2:
     """Per part and ent: the mentions in text order (t), with the word test of SPEC-levels 6.6, verse-final and
-    atnach words skipped."""
+    atnach words skipped. NF2-CHAIN (OPEN-ladder 4): also the construct chains `noun (cstr) + proper name` whose
+    head carries the ent (מַלְאַךְ יְהוָה), in `chains`."""
 
     def __init__(self, parts, name_lexemes):
-        self.idx = {}
+        self.idx, self.chains = {}, {}
         for name, part in parts.items():
             last_w = {}
             for t, w in part.words.items():
                 k = (w["book"], w["chapter"], w["verse"])
                 last_w[k] = max(last_w.get(k, 0), w["w"])
-            idx = defaultdict(list)
-            for t in sorted(part.words):
+
+            def pausal(w):
+                return w["w"] == last_w[(w["book"], w["chapter"], w["verse"])] or ATNACH in w["text"]
+
+            def proper_of(s):
+                # a proper noun: marks.type proper; where the piece has no type mark (the editions carry none on
+                # nouns), the lexeme's k1/lexicon state `name` (DEF, SPEC-ladder 6.2; see the stage 59 report)
+                if s["m"].get("type") == "proper":
+                    return "type"
+                if not s["m"].get("type") and s["lexeme"] in name_lexemes:
+                    return "lexicon"
+                return ""
+
+            idx, chains = defaultdict(list), defaultdict(list)
+            ts = sorted(part.words)
+            for i, t in enumerate(ts):
                 w = part.words[t]
                 ps = part.pieces[t]
                 st = [p for p in ps if p["kind"] == "stem"]
                 if len(st) != 1 or st[0]["class"] != "noun" or not L.strict_who(st[0]):
                     continue
                 s = st[0]
-                if s["m"].get("state", "abs") not in ("abs", ""):
-                    continue
                 if any(p["kind"] == "suffix" for p in ps) or any(p["fused"] for p in ps):
                     continue
-                if w["w"] == last_w[(w["book"], w["chapter"], w["verse"])] or ATNACH in w["text"]:
+                if s["m"].get("state", "abs") not in ("abs", ""):
+                    # NF2-CHAIN: a construct head with no prefix, then a proper name of one stem, no prefix or suffix,
+                    # in the same verse; the rectum may not be verse-final or carry the atnach
+                    if s["m"].get("state") != "cstr" or any(p["kind"] == "prefix" for p in ps) or i + 1 >= len(ts):
+                        continue
+                    t2 = ts[i + 1]
+                    w2, ps2 = part.words[t2], part.pieces[t2]
+                    if (w2["book"], w2["chapter"], w2["verse"]) != (w["book"], w["chapter"], w["verse"]) or pausal(w2):
+                        continue
+                    if len(ps2) != 1 or ps2[0]["kind"] != "stem" or ps2[0]["class"] != "noun" or ps2[0]["fused"]:
+                        continue
+                    if ps2[0]["m"].get("state", "abs") not in ("abs", "") or not proper_of(ps2[0]):
+                        continue
+                    for e in L.ents(s["who"]):
+                        chains[e].append((t, w["book"], w["chapter"], [[s], [ps2[0]]], w["after"]))
+                    continue
+                if pausal(w):
                     continue
                 art = [p for p in ps if p["kind"] == "prefix" and p["class"] == "art"]
                 pcs = art[-1:] + [s]
                 ntext = "".join(p["text"] for p in pcs)
-                # a proper noun: marks.type proper; where the piece has no type mark (the editions carry none on
-                # nouns), the lexeme's k1/lexicon state `name` (DEF, SPEC-ladder 6.2; see the stage 59 report)
-                if s["m"].get("type") == "proper":
-                    proper = "type"
-                elif not s["m"].get("type") and s["lexeme"] in name_lexemes:
-                    proper = "lexicon"
-                else:
-                    proper = ""
+                proper = proper_of(s)
                 for e in L.ents(s["who"]):
                     idx[e].append((t, w["book"], w["chapter"], ntext, pcs, proper))
             self.idx[name] = idx
+            self.chains[name] = chains
+
+    @staticmethod
+    def _pcs(ps):
+        return [{"text": p["text"], "kind": p["kind"], "lexeme": p["lexeme"], "class": p["class"],
+                 "marks": p["marks"], "m": p["m"]} for p in ps]
 
     def nf2(self, part_name, ent, head_t, book, chapter):
         rows = self.idx.get(part_name, {}).get(ent, ())
@@ -158,13 +329,43 @@ class Names2:
                 best_c = r
             elif book != "PSA":
                 best_b = r
+        if best_c is None:
+            # NF2-CHAIN (OPEN 4): the nearest construct chain of the chapter before a name of another chapter
+            ch = None
+            for r in self.chains.get(part_name, {}).get(ent, ()):
+                if r[0] >= head_t:
+                    break
+                if r[1] == book and r[2] == chapter:
+                    ch = r
+            if ch is not None:
+                words = [self._pcs(ws) for ws in ch[3]]
+                head = words[0][-1]
+                return {"text": " ".join("".join(p["text"] for p in ws) for ws in words), "words": words,
+                        "pieces": words[0] + words[1], "first_after": ch[4], "definite": True, "proper": True,
+                        "proper_by": "chain", "tier": "nf_chain", "at": ch[0], "number": head["m"].get("number", ""),
+                        "head_text": head["text"], "head_lexeme": head["lexeme"]}
         r, tier = (best_c, "nf_chapter") if best_c else (best_b, "nf_book")
         if r is None:
             return None
-        pcs = [{"text": p["text"], "kind": p["kind"], "lexeme": p["lexeme"], "class": p["class"],
-                "marks": p["marks"], "m": p["m"]} for p in r[4]]
-        return {"text": r[3], "pieces": pcs, "definite": bool(r[5]) or len(pcs) > 1, "proper": bool(r[5]),
-                "proper_by": r[5], "tier": tier, "at": r[0]}
+        pcs = self._pcs(r[4])
+        return {"text": r[3], "words": [pcs], "pieces": pcs, "first_after": None, "definite": bool(r[5]) or len(pcs) > 1,
+                "proper": bool(r[5]), "proper_by": r[5], "tier": tier, "at": r[0], "number": pcs[-1]["m"].get("number", ""),
+                "head_text": pcs[-1]["text"], "head_lexeme": pcs[-1]["lexeme"]}
+
+
+def name_words(T, nf, ent, links, tmp, pre=()):
+    """the word(s) of a written name: one word, or the two words of a construct chain (NF2-CHAIN); `pre` (copied
+    prefix pieces) go on the first word"""
+    out = []
+    for i, ws in enumerate(nf["words"]):
+        pcs = [L.new_piece(p, ent, "inserted", list(links)) for p in ws]
+        if i == 0 and pre:
+            pcs = [dict(q) for q in pre] + pcs
+        after = None
+        if i == 0 and len(nf["words"]) > 1 and T.code == "hbo" and nf["first_after"] == "־":
+            after = "־"
+        out.append({"pieces": pcs, "op": tmp, "after": after})
+    return out
 
 
 # ------------------------------------------------------------------ the Greek check (6.3)
@@ -237,7 +438,7 @@ def named_in_clause2(part, t, n, ent):
 
 
 def name_number(nf):
-    return nf["pieces"][-1]["m"].get("number", "")
+    return nf["number"]
 
 
 def switch_r2(ctx, D, ops, level, om_lx, X):
@@ -279,8 +480,12 @@ def switch_r2(ctx, D, ops, level, om_lx, X):
             reason = g
         if not reason:
             if hk == "verb_zero":
-                reason = host_kind(D.cur_stem.get(t) or stp)
+                reason = host_kind_art(D.cur_stem.get(t) or stp, part.pieces[t])
                 rule = "r_subject"
+                if not reason and X["syn"].rel_same(pn, part, t, es[0]):
+                    reason = "relative_head"            # REL (OPEN 1)
+                elif not reason and X["syn"].before_same(pn, part, t, es[0]):
+                    reason = "name_just_before"         # REL-ASYN (OPEN 1)
             elif hk == "pronoun":
                 rule = "r_pronoun"
             else:
@@ -295,10 +500,12 @@ def switch_r2(ctx, D, ops, level, om_lx, X):
             nf = X["names"].nf2(pn, es[0], t, w["book"], w["chapter"])
             if nf is None:
                 reason = "no_earlier_name"
+            elif named_before(part, t, nf):
+                reason = "named_in_clause"              # NIC-FORM (OPEN 6)
             elif not nf["definite"]:
                 reason = "indefinite"
-            elif head_m.get("number") == "pl" and name_number(nf) == "sg" and es[0].startswith("person:"):
-                reason = "number_mismatch"
+            elif num_mismatch(head_m.get("number", ""), nf, es[0]):
+                reason = "number_mismatch"              # NUM both ways (OPEN 3, 4)
         op["detail"] = detail
         if reason:
             op["reason"] = reason
@@ -309,8 +516,8 @@ def switch_r2(ctx, D, ops, level, om_lx, X):
             if nf["proper_by"] == "lexicon" and len(nf["pieces"]) == 1:
                 X["info"]["definite_by_lexicon/" + T.code + "/r"] += 1
         ok = write_r(ctx, D, ops, op, pn, r, rule, nf, es[0], om_lx)
-        if not ok:
-            op["reason"] = "form_unattested"
+        if ok is not True:
+            op["reason"] = ok or "form_unattested"
             op["_words"] = []
         ops.append(op)
 
@@ -328,15 +535,13 @@ def write_r(ctx, D, ops, op, pn, r, rule, nf, ent, om_lx):
     head_link = (pn, r["t"], r["n"])
     form_rule = nf["tier"]
     if rule == "r_subject":
-        nw = {"pieces": L.name_pieces(nf, ent, [head_link + ("insert",)]), "op": tmp, "after": None}
-        D.insert(t, 0, nw)
-        written = [nw]
+        written = name_words(T, nf, ent, [head_link + ("insert",)], tmp)
+        for nw in written:
+            D.insert(t, 0, nw)
     elif rule == "r_pronoun":
-        new = [dict(q) for q in pre] + L.name_pieces(nf, ent, [head_link + ("replace",)])
-        nw = {"pieces": new, "op": tmp, "after": None}
-        D.body[t] = [nw]
+        written = name_words(T, nf, ent, [head_link + ("replace",)], tmp, pre)
+        D.body[t] = list(written)
         D.writer[t] = ("r", tmp)
-        written = [nw]
     elif rule == "r_prep":
         st = D.cur_stem.get(t) or part.stem(t)
         spre = [q for q in ps if q["kind"] == "prefix"]
@@ -347,12 +552,14 @@ def write_r(ctx, D, ops, op, pn, r, rule, nf, ent, om_lx):
             fw_pieces = [q for q in L.build_word_from_af(pn, ps, ff[1], st["who"], st["who_basis"]) if q["kind"] != "suffix"]
             fw = {"pieces": fw_pieces, "op": tmp,
                   "after": T.code == "hbo" and ctx.forms.free_after(T.code, st["lexeme"], L.word_text(ff[1])) or None}
-            nw = {"pieces": L.name_pieces(nf, ent, [head_link + ("replace",)]), "op": tmp, "after": None}
-            D.body[t] = [fw, nw]
+            nws = name_words(T, nf, ent, [head_link + ("replace",)], tmp)
+            D.body[t] = [fw] + nws
             D.writer[t] = ("r", tmp)
-            written = [fw, nw]
+            written = [fw] + nws
         elif st["class"] == "prep":
             rule = "r_prep_bound"
+            if len(nf["words"]) > 1:
+                return "name_chain_bound"       # NF2-CHAIN (OPEN 4): a chain is not bound to a preposition
             got = L.bound_form(ctx, pn, ps, st, nf, ent, head_link, tmp)
             if got is None:
                 return False
@@ -377,10 +584,10 @@ def write_r(ctx, D, ops, op, pn, r, rule, nf, ent, om_lx):
         if t in D.body:
             op["_over_v"] = True
         w1 = {"pieces": cw, "op": tmp, "after": None}
-        nw = {"pieces": L.name_pieces(nf, ent, [head_link + ("replace",)]), "op": tmp, "after": None}
-        D.body[t] = [w1, nw]
+        nws = name_words(T, nf, ent, [head_link + ("replace",)], tmp)
+        D.body[t] = [w1] + nws
         D.writer[t] = ("r", tmp)
-        written = [w1, nw]
+        written = [w1] + nws
     elif rule == "r_object":
         # OBJ: the verb without its object suffix (AF), then the object marker joined by maqaf to the name
         st = D.cur_stem.get(t) or part.stem(t)
@@ -399,10 +606,11 @@ def write_r(ctx, D, ops, op, pn, r, rule, nf, ent, om_lx):
         D.writer[t] = ("r", tmp)
         omp = [L.new_piece(q, "", "", [head_link + ("insert",)]) for q in ff[1] if q["role"] == "stem"]
         ow = {"pieces": omp, "op": tmp, "after": "־" if T.code == "hbo" else None}
-        nw = {"pieces": L.name_pieces(nf, ent, [head_link + ("insert",)]), "op": tmp, "after": None}
+        nws = name_words(T, nf, ent, [head_link + ("insert",)], tmp)
         D.insert(t, 1, ow)
-        D.insert(t, 1, nw)
-        written = [vw, ow, nw]
+        for nw in nws:
+            D.insert(t, 1, nw)
+        written = [vw, ow] + nws
     else:
         return False
     op.update(state="applied", rule=rule, form_rule=form_rule)
@@ -457,6 +665,23 @@ class GlossV:
         return None
 
 
+def fixed_phrase(syn, pn, part, t, p):
+    """V-FIX (OPEN 8): the glossed word stands in a fixed formula with a divine name: it is not a finite verb (a noun,
+    an adjective, a participle) and the next word of the verse is יהוה, אֱלֹהִים or אֵל with no prefix (בָּרוּךְ יְהוָה,
+    עֶבֶד יְהוָה). A finite verb before the name (נִאֵץ יְהוָה) and other construct chains keep their gloss."""
+    if p["class"] == "verb" and p["m"].get("type", "") not in L.PARTICIPLE:
+        return False
+    w = part.words[t]
+    vs = syn.verse[pn][(w["book"], w["chapter"], w["verse"])]
+    i = vs.index(t)
+    if i + 1 < len(vs):
+        nxt = part.pieces[vs[i + 1]]
+        st = [q for q in nxt if q["kind"] == "stem"]
+        if st and strong(st[0]["lexeme"]) in DIVINE and not any(q["kind"] == "prefix" for q in nxt):
+            return True
+    return False
+
+
 def lemma_words(lemma):
     return [x for x in (lemma or "").replace("־", " ").split() if x]
 
@@ -500,6 +725,10 @@ def switch_v2(ctx, D, ops, level, setting, X):
             reason = "form_other"
         elif any(q["fused"] for q in ps):
             reason = "fused_article"
+        elif setting == "all" and (r["src_count"] or 0) >= V_COMMON:
+            reason = "common"                   # V-COUNT (OPEN 8)
+        elif setting == "all" and fixed_phrase(X["syn"], pn, part, t, p):
+            reason = "fixed_phrase"             # V-FIX (OPEN 8)
         elif setting == "rare" and not r["rare"]:
             reason = "not_rare"
         elif r["fit"] != "fits":
@@ -531,6 +760,34 @@ def switch_v2(ctx, D, ops, level, setting, X):
 
 # ------------------------------------------------------------------ switch A (6.5)
 
+def a_mends(syn, pn, part, r, st, ent, subj):
+    """the A rules of 2026-11-25, in this order -> reason or ''.
+    subject: REL (OPEN 1) `relative_head`, REL-ASYN (OPEN 1) `name_just_before`; A-HAYAH (OPEN 7) `measure_hayah`.
+    object (A-OBJ, OPEN 2, the narrowed `a_object`): `in_relative` (the verb heads a relative clause),
+    `passive_stem` (not an active stem), `object_is_subject` (the name is the clause's subject: the verb's own ent or
+    the subject row of `added`), `speech_person` (the ent is the speaker or the addressee in the verse)."""
+    v = r["verb"]
+    if subj:
+        if syn.rel_same(pn, part, v, ent):
+            return "relative_head"
+        if syn.before_same(pn, part, v, ent):
+            return "name_just_before"
+        if hayah_measure(part, v, r["clause"]):
+            return "measure_hayah"
+        return ""
+    if syn.antecedent(pn, part, v) is not None:
+        return "in_relative"
+    if st["m"].get("stem", "") in PASSIVE_STEMS:
+        return "passive_stem"
+    sr = part._subj_role[(v, r["clause"])]
+    if ent in L.ents(st["who"]) or any(x["verb"] == v and x["clause"] == r["clause"] and x["role"] == sr
+                                       and ent in L.ents(x["who"]) for x in part.added):
+        return "object_is_subject"
+    if syn.speech_person(pn, part, v, ent):
+        return "speech_person"
+    return ""
+
+
 def switch_a2(ctx, D, ops, level, kind_code, om_lx, r_subjects, X):
     T = ctx.T
     for pn, _, r in L.a_places(ctx, kind_code):
@@ -561,7 +818,9 @@ def switch_a2(ctx, D, ops, level, kind_code, om_lx, r_subjects, X):
         elif not subj and r["role"] != "A1":
             reason = "role_other"
         if not reason:
-            reason = host_kind(D.cur_stem.get(r["verb"]) or st)
+            reason = host_kind_art(D.cur_stem.get(r["verb"]) or st, part.pieces[r["verb"]])     # FIN, FIN-ART (OPEN 5)
+        if not reason:
+            reason = a_mends(X["syn"], pn, part, r, st, es[0], subj)
         if not reason:
             nf = X["names"].nf2(pn, es[0], r["verb"], w["book"], w["chapter"])
             if nf is None:
@@ -570,8 +829,8 @@ def switch_a2(ctx, D, ops, level, kind_code, om_lx, r_subjects, X):
                 reason = "indefinite"
             else:
                 num = (D.cur_stem.get(r["verb"]) or st)["m"].get("number", "") if subj else r["number"]
-                if num == "pl" and name_number(nf) == "sg" and es[0].startswith("person:"):
-                    reason = "number_mismatch"
+                if num_mismatch(num, nf, es[0]):
+                    reason = "number_mismatch"          # NUM both ways (OPEN 3, 4)
         ff = None
         if not reason and not subj:
             ff = ctx.forms.af(T.code, om_lx, {}, (), [], False)
@@ -586,16 +845,18 @@ def switch_a2(ctx, D, ops, level, kind_code, om_lx, r_subjects, X):
             X["info"]["definite_by_lexicon/" + T.code + "/a"] += 1
         tmp = len(ops)
         link = (pn, st["t"], st["n"], "insert")
-        nw = {"pieces": L.name_pieces(nf, es[0], [link]), "op": tmp, "after": None}
+        nws = name_words(T, nf, es[0], [link], tmp)
         if subj:
-            D.insert(r["verb"], 0, nw)
-            written, rule = [nw], "a_subject"
+            for nw in nws:
+                D.insert(r["verb"], 0, nw)
+            written, rule = nws, "a_subject"
         else:
             omp = [L.new_piece(q, "", "", [link]) for q in ff[1] if q["role"] == "stem"]
             ow = {"pieces": omp, "op": tmp, "after": "־" if T.code == "hbo" else None}
             D.insert(r["verb"], 1, ow)
-            D.insert(r["verb"], 1, nw)
-            written, rule = [ow, nw], "a_object"
+            for nw in nws:
+                D.insert(r["verb"], 1, nw)
+            written, rule = [ow] + nws, "a_object"
         op.update(state="applied", rule=rule, form_rule=nf["tier"])
         op["_words"] = written
         ops.append(op)
@@ -745,7 +1006,7 @@ def run(out):
     lex0854 = sorted(lx for lx, r in lexicon.items() if r["strong"] == "0854" and r["class"] == "prep")
     name_lexemes = {lx for lx, r in lexicon.items() if r["state"] == "name"}
     X = {"names": Names2(parts, name_lexemes), "greek": Greek(), "gloss": GlossV(parts, lexicon), "lex0854": set(lex0854),
-         "info": Counter()}
+         "info": Counter(), "syn": Syntax(parts)}
     src_basis = {}
     for pn, part in parts.items():
         for t, ps in part.pieces.items():

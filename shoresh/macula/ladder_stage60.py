@@ -188,6 +188,9 @@ def check(src, out, spend=SPEND):
             objs += [json.loads(l) for l in f]
     dec = read_decisions(src)
     bank = {r["comment"]: r for r in pq.read_table(src / "banks" / "paraphrase.parquet").to_pylist() if r["in_pilot"]}
+    btok = collections.defaultdict(list)            # FIG-SPAN (OPEN-ladder 12): the figure markers' token positions
+    for t in pq.read_table(src / "banks" / "paraphrase_tokens.parquet", columns=["comment", "i", "text", "part"]).to_pylist():
+        if t["comment"] in bank: btok[t["comment"]].append(t)
     accepted = collections.defaultdict(list)          # key -> [(v_from, v_to, c_from, c_to, comment)]
     rows, missing = [], []
     for o in objs:
@@ -219,7 +222,8 @@ def check(src, out, spend=SPEND):
                      "kind_model": kind, "c_from_model": cf if isinstance(cf, int) else None, "c_to_model": ct if isinstance(ct, int) else None,
                      "v_from_model": vf if isinstance(vf, int) else None, "v_to_model": vt if isinstance(vt, int) else None,
                      "check": check_, "refusal": ref, "figure": bool(b["figure"]),
-                     "splice_kind": ("F" if b["figure"] else "P") if acc_ else ""})
+                     # FIG-SPAN: F only where a figure marker stands inside the chosen span or its lead-in; else P
+                     "splice_kind": ("F" if LB.figure_in_span(LB.figure_spans(btok[c]), cf, ct) else "P") if acc_ else ""})
     extra = sorted(set(dec) - {o["comment"] for o in objs})
     lint = lint_splices(objs, accepted)
     if missing or extra:
@@ -275,8 +279,8 @@ comments: `comment`, `w_from`, `w_to`). All derived or given from the bank and t
 | c_from_model, c_to_model, v_from_model, v_to_model | model | the comment span (`i`, inclusive) and the verse span (`w`, inclusive); null for `explains` |
 | check | derived | rule SP: `accepted`, `refused`, `no_splice` |
 | refusal | derived | the first reason of SP that holds; `""` otherwise |
-| figure | derived | the bank's `figure` |
-| splice_kind | derived | `F` (accepted, figure), `P` (accepted otherwise), `""` |
+| figure | derived | the bank's `figure` (a figure marker anywhere in the comment) |
+| splice_kind | derived | `F` (accepted, and a figure marker of rule FIG stands inside the chosen comment span or in its lead-in, the 4 tokens just before it: rule FIG-SPAN, 2026-11-25), `P` (accepted otherwise), `""` |
 
 Credit: %s
 """

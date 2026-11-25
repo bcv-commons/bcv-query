@@ -3,7 +3,7 @@
 Imports nothing from the builders: the chooser input, rule SP, the step-1 splice and the counts are recomputed here
 from the bank, k1 and the step-2 text. It hashes sealed/chooser_sample.tsv (bytes only) and prints nothing of it.
 """
-import collections, hashlib, json, subprocess, sys, tomllib, unicodedata as ud
+import collections, hashlib, json, re, subprocess, sys, tomllib, unicodedata as ud
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -39,6 +39,22 @@ def cons(s):
 def portion(book, ch):
     return {"JON": "JON"}.get(book) or ("PSA1-41" if book == "PSA" and ch <= 41 else
                                         "ISA40-55" if book == "ISA" and 40 <= ch <= 55 else "")
+
+
+FIGURE = [x.split() for x in ("מליצה", "משל", "דרך השאלה", "לשון השאלה")]     # rule FIG's `figure` phrases (SPEC-ladder 4.3)
+
+
+def fig_in_span(body, cf, ct, lead=4):
+    """FIG-SPAN (OPEN-ladder 12) recomputed: a figure phrase overlaps the span [cf, ct] or the 4 tokens before it.
+    body: [(i, text without trailing punctuation)] of the comment's body tokens in order. A phrase's first word may
+    carry one prefix letter of ובהכלש."""
+    body = sorted(body)
+    def is_(tok, w, first): return tok == w or (first and len(tok) > 1 and tok[0] in "ובהכלש" and tok[1:] == w)
+    for ph in FIGURE:
+        for k in range(len(body) - len(ph) + 1):
+            if all(is_(body[k + j][1], ph[j], j == 0) for j in range(len(ph))):
+                if body[k][0] <= ct and body[k + len(ph) - 1][0] >= cf - lead: return True
+    return False
 
 
 def ival(s):
@@ -154,6 +170,9 @@ class Check60:
              [(f.name, str(f.type)) for f in t.schema] == COLS, ", ".join(f.name for f in t.schema))
         rows = t.to_pylist(); byc = {r["choice"]: r for r in rows}
         sp, acc = self.rule_sp(objs, dec)
+        self.fig_toks = collections.defaultdict(list)
+        for x in pq.read_table(d / "banks" / "paraphrase_tokens.parquet", columns=["comment", "i", "text", "part"]).to_pylist():
+            if x["part"] == "body": self.fig_toks[x["comment"]].append((x["i"], re.sub(r"[.:,;]+$", "", x["text"])))
         bank = {r["comment"]: r for r in P}
         bad_row = bad_sp = 0; bad_list = []
         for o in objs:
@@ -165,7 +184,8 @@ class Check60:
             b = bank[c]
             if (r["key"], r["portion"], r["figure"]) != (o["key"], portion(b["book"], b["chapter"]), bool(b["figure"])): bad_row += 1
             if (r["check"], r["refusal"]) != sp[c]: bad_sp += 1; bad_list.append(c)
-            skind = ("F" if b["figure"] else "P") if sp[c][0] == "accepted" else ""
+            skind = ("F" if fig_in_span(self.fig_toks.get(c, []), r["c_from_model"], r["c_to_model"]) else "P") \
+                if sp[c][0] == "accepted" else ""                     # FIG-SPAN (OPEN-ladder 12)
             if r["splice_kind"] != skind: bad_row += 1
         cond("decisions and choices_model.parquet agree row for row; key, portion, figure, splice_kind recomputed",
              bad_row == 0 and len(rows) == len(objs) and [r["choice"] for r in rows] == ids, f"{len(rows)} rows, {bad_row} differ")

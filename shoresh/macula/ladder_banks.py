@@ -136,10 +136,30 @@ def lookup(tok):
     return None
 
 
+CONTEXT = {(a, c): w for a, c, w in ladder_abbrev.context_rows()}
+
+
+def context_of(ab, pre, toks, i):
+    """AB-CTX (OPEN-ladder 13): the context code of ladder_abbrev.CONTEXT that holds for the abbreviation `ab` (with the
+    prefixes `pre`) at token i of the body's tokens, or ''"""
+    core = lambda x: x.rstrip(PUNCT)
+    if ab == "ב״ה" and i > 0 and cons(core(toks[i - 1])).endswith("מקומ"):
+        return "after_makom"
+    if ab == "כ״א":
+        for j in range(i - 1, max(-1, i - 7), -1):
+            if toks[j].endswith((":", ".")): break
+            if core(toks[j]) in ladder_abbrev.NEGATIONS: return "after_negation"
+    if ab == "עכו״ם" and i + 1 < len(toks) and core(toks[i + 1]).startswith("של") and \
+            ("ל" in pre or (i > 0 and core(toks[i - 1]) in ("אל", "ואל"))):
+        return "to_idol_possessive"
+    return ""
+
+
 def tokens(body):
     """4.4: [(text, part, abbrev, written, words)]"""
     out = []; depth = 0
-    for tok in body.split():
+    raw = body.split()
+    for i, tok in enumerate(raw):
         cite = depth > 0 or "(" in tok
         depth = max(0, depth + tok.count("(") - tok.count(")"))
         if cite:
@@ -151,7 +171,10 @@ def tokens(body):
             else:
                 ab = hit[0]
                 if hit[3] in ("word", "divine_name"):
-                    w = hit[2].split(); w[0] = hit[1] + w[0]; written = " ".join(w)
+                    cx = context_of(ab, hit[1], raw, i)
+                    full = CONTEXT.get((ab, cx), hit[2])                                 # AB-CTX
+                    pre = hit[1].replace("ה", "") if cx == "to_idol_possessive" else hit[1]   # a construct takes no article
+                    w = full.split(); w[0] = pre + w[0]; written = " ".join(w)
         out.append((tok, "body", ab, written, len(written.split())))
     return out
 
@@ -260,6 +283,26 @@ def markers(toks):
             x = t[0].strip("().:,;")
             if x in BOOKS or (len(x) > 1 and x[0] in "ובהכלש" and x[1:] in BOOKS): found.add("cite")
     return sorted(found)
+
+
+LEAD_IN = 4             # FIG-SPAN: the tokens just before a chosen span that count as its lead-in
+
+
+def figure_spans(rows):
+    """FIG-SPAN (OPEN-ladder 12, 2026-11-25): the token spans (i_from, i_to) where a `figure` marker phrase of rule FIG
+    stands, read over the body tokens in order (rows: paraphrase_tokens rows of one comment, with i, text, part)."""
+    body = [(r["i"], r["text"].rstrip(PUNCT)) for r in sorted(rows, key=lambda r: r["i"]) if r["part"] == "body"]
+    out = []
+    for ph in MARKERS["figure"]:
+        for k in range(len(body) - len(ph) + 1):
+            if all(word_is(body[k + j][1], ph[j], j == 0) for j in range(len(ph))):
+                out.append((body[k][0], body[k + len(ph) - 1][0]))
+    return sorted(out)
+
+
+def figure_in_span(spans, c_from, c_to):
+    """FIG-SPAN: a figure marker overlaps the chosen comment span or its lead-in (the LEAD_IN tokens just before it)"""
+    return any(a <= c_to and b >= c_from - LEAD_IN for a, b in spans)
 
 
 # ---------------------------------------------------------------- rule ZC and FIT
@@ -378,6 +421,9 @@ def build(out_dir):
     with open(banks / "abbrev.tsv", "w", encoding="utf-8", newline="\n") as f:
         f.write("abbrev\twritten\tkind\n")
         for r in ladder_abbrev.rows(): f.write("\t".join(r) + "\n")
+    with open(banks / "abbrev_context.tsv", "w", encoding="utf-8", newline="\n") as f:      # AB-CTX (OPEN-ladder 13)
+        f.write("abbrev\tcontext\twritten\n")
+        for r in ladder_abbrev.context_rows(): f.write("\t".join(r) + "\n")
     with open(banks / "unknown_abbrev.tsv", "w", encoding="utf-8", newline="\n") as f:
         f.write("abbrev\tcount\texample\n")
         for k, c in sorted(unknown.items(), key=lambda kv: (-kv[1], kv[0])): f.write(f"{k}\t{c}\t{unknown_ex[k]}\n")

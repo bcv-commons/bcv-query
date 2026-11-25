@@ -30,6 +30,13 @@ PART = {"participle_active", "participle_passive"}
 KINDS4 = ("person:", "group:", "deity:", "fauna:")
 CAUS = {"hiphil", "haphel", "aphel", "shaphel"}
 PASSIVE = {"niphal", "pual", "hophal"}
+# the rule mends of 2026-11-25 (OPEN-ladder F.1), recomputed here with the validator's own code
+REL_VERB = ("NpRelp", "Relp", "NpCL")
+NOT_ACTIVE = {"niphal", "pual", "hophal", "qal_passive", "hithpael", "hithpolel", "hithpalpel", "nithpael", "pulal",
+              "polal", "poal", "polpal"}
+MAJESTY = {"0430", "0136", "0113", "1167"}
+DIVINE = {"3068", "0430", "0410"}
+V_COMMON = 100
 EXPECT = {"hbo": (1248, 13537), "heb_mod": (677, 8892), "heb_scg": (678, 9397)}
 KEEP = set(range(0x05B0, 0x05BD)) | {0x05C1, 0x05C2, 0x05C7}
 LATIN = re.compile(r"[A-Za-z]")
@@ -94,7 +101,12 @@ class Src:
     def __init__(self, name):
         self.name = name
         self.w = {r["t"]: r for r in pq.read_table(K1 / name / "words.parquet", columns=[
-            "t", "id", "book", "chapter", "verse", "w", "text", "after", "clause"]).to_pylist()}
+            "t", "id", "book", "chapter", "verse", "w", "text", "after", "clause", "head", "rel"]).to_pylist()}
+        for r in self.w.values():
+            r["rel0"] = (r["rel"] or "").split(":")[0]
+        self.vw = defaultdict(list)
+        for t in sorted(self.w):
+            r = self.w[t]; self.vw[(r["book"], r["chapter"], r["verse"])].append(t)
         have = pq.ParquetFile(K1 / name / "pieces.parquet").schema_arrow.names
         cols = [c for c in ("t", "n", "text", "kind", "lexeme", "class", "marks", "fused", "who", "who_basis", "basis") if c in have]
         self.p = defaultdict(list)
@@ -132,21 +144,39 @@ def strict(q):
 
 
 class Mentions:
+    """records (t, book, chapter, text, definite, number, head lexeme, head text, words)"""
+
     def __init__(self, S, name_lex):
         self.by = defaultdict(list)
-        for t in sorted(S.w):
+        self.chain = defaultdict(list)          # NF2-CHAIN (OPEN-ladder 4): construct head + proper name
+        ts = sorted(S.w)
+        pausal = lambda w: w["w"] == S.lastw[(w["book"], w["chapter"], w["verse"])] or "֑" in w["text"]
+        prop = lambda s: s["m"].get("type") == "proper" or (not s["m"].get("type") and s["lexeme"] in name_lex)
+        for i, t in enumerate(ts):
             w = S.w[t]; ps = S.p[t]
             st = [q for q in ps if q["kind"] == "stem"]
             if len(st) != 1: continue
             s = st[0]
-            if s["class"] != "noun" or not strict(s) or s["m"].get("state", "") not in ("", "abs"): continue
+            if s["class"] != "noun" or not strict(s): continue
             if any(q["kind"] == "suffix" for q in ps) or any(q["fused"] for q in ps): continue
-            if w["w"] == S.lastw[(w["book"], w["chapter"], w["verse"])] or "֑" in w["text"]: continue
+            if s["m"].get("state", "") == "cstr":
+                if any(q["kind"] == "prefix" for q in ps) or i + 1 >= len(ts): continue
+                w2 = S.w[ts[i + 1]]; ps2 = S.p[ts[i + 1]]
+                if (w2["book"], w2["chapter"], w2["verse"]) != (w["book"], w["chapter"], w["verse"]) or pausal(w2): continue
+                if len(ps2) != 1 or ps2[0]["kind"] != "stem" or ps2[0]["class"] != "noun" or ps2[0]["fused"]: continue
+                if ps2[0]["m"].get("state", "") not in ("", "abs") or not prop(ps2[0]): continue
+                for e in ents(s["who"]):
+                    self.chain[e].append((t, w["book"], w["chapter"], s["text"] + ps2[0]["text"], True,
+                                          s["m"].get("number", ""), s["lexeme"], s["text"], 2))
+                continue
+            if s["m"].get("state", "") not in ("", "abs"): continue
+            if pausal(w): continue
             art = [q for q in ps if q["kind"] == "prefix" and q["class"] == "art"][-1:]
             text = "".join(q["text"] for q in art + [s])
-            proper = s["m"].get("type") == "proper" or (not s["m"].get("type") and s["lexeme"] in name_lex)
+            proper = prop(s)
             for e in ents(s["who"]):
-                self.by[e].append((t, w["book"], w["chapter"], text, proper or bool(art), s["m"].get("number", "")))
+                self.by[e].append((t, w["book"], w["chapter"], text, proper or bool(art), s["m"].get("number", ""),
+                                   s["lexeme"], s["text"], 1))
 
     def nearest(self, ent, t, book, ch):
         same = other = None
@@ -155,7 +185,53 @@ class Mentions:
             if r[1] == book:
                 if r[2] == ch: same = r
                 elif book != "PSA": other = r
+        if same is None:
+            c = None
+            for r in self.chain.get(ent, ()):
+                if r[0] >= t: break
+                if r[1] == book and r[2] == ch: c = r
+            if c is not None: return c, "nf_chain"
         return (same, "nf_chapter") if same else (other, "nf_book") if other else (None, "")
+
+
+def strong_of(lexeme):
+    return (lexeme or "").rsplit(":", 1)[-1]
+
+
+def num_bad(num, m, e):
+    """NUM both ways (OPEN-ladder 3, 4)"""
+    if num == "pl" and e.startswith("person:") and m[5] != "pl": return True
+    return num == "sg" and m[5] == "pl" and strong_of(m[6]) not in MAJESTY
+
+
+def antecedent(S, t):
+    """REL: the antecedent word of the relative clause verb t (coordinated relatives followed back)"""
+    if not S.w[t]["rel0"].startswith(REL_VERB): return None
+    seen, h = set(), S.w[t]["head"]
+    while h and h not in seen and h in S.w:
+        seen.add(h); st = S.stem(h)
+        if st is not None and st["class"] == "verb" and S.w[h]["rel0"].startswith(REL_VERB):
+            h = S.w[h]["head"]; continue
+        return h
+    return None
+
+
+def rel_same(S, t, e):
+    h = antecedent(S, t)
+    if h is None: return False
+    ws = {h}
+    if S.w[h]["rel0"] == "Np-Appos" and S.w[h]["head"]: ws.add(S.w[h]["head"])
+    w = S.w[h]
+    for x in S.vw[(w["book"], w["chapter"], w["verse"])]:
+        if S.w[x]["rel0"] == "Np-Appos" and S.w[x]["head"] in ws: ws.add(x)
+    return any(e in ents(q["who"]) for x in ws for q in S.p[x] if q["kind"] == "stem")
+
+
+def just_before(S, t, e):
+    w = S.w[t]; vs = S.vw[(w["book"], w["chapter"], w["verse"])]; i = vs.index(t)
+    if i == 0 or S.w[vs[i - 1]]["clause"] == w["clause"]: return False
+    st = S.stem(vs[i - 1])
+    return st is not None and st["class"] == "noun" and e in ents(st["who"])
 
 
 class Check59:
@@ -342,8 +418,9 @@ class Check59:
                 if head["m"].get(k) and gm.get(k) and head["m"][k] != gm[k]: return "greek_person_number"
         return ""
 
-    def verb_reason(self, st):
+    def verb_reason(self, st, ps=()):
         if st is None or st["class"] != "verb": return "host_other"
+        if any(q["kind"] == "prefix" and q["class"] == "art" for q in ps): return "host_participle"   # FIN-ART (OPEN 5)
         ty = st["m"].get("type", "")
         return "" if ty in FINITE else "host_infinitive" if ty in INF else "host_participle" if ty in PART else "host_other"
 
@@ -375,8 +452,10 @@ class Check59:
             g = self.greek_reason(tx, t, e, p)
             if g: return g, None
         if hk == "verb_zero":
-            x = self.verb_reason(st)
+            x = self.verb_reason(st, S.p[t])
             if x: return x, None
+            if rel_same(S, t, e): return "relative_head", None          # REL (OPEN 1)
+            if just_before(S, t, e): return "name_just_before", None    # REL-ASYN (OPEN 1)
         elif hk == "suffix":
             c = st["class"] if st else ""
             if c in ("prep", "om"):
@@ -391,8 +470,12 @@ class Check59:
         w = S.w[t]
         m, _ = self.M[tx].nearest(e, t, w["book"], w["chapter"])
         if m is None: return "no_earlier_name", None
+        cl = S.w[t]["clause"]                                            # NIC-FORM (OPEN 6)
+        if cl and any(q["kind"] == "stem" and q["class"] == "noun" and fin(q["text"]) == fin(m[7])
+                      for wt in S.byclause[cl] if wt < t for q in S.p[wt]):
+            return "named_in_clause", m
         if not m[4]: return "indefinite", m
-        if p["m"].get("number") == "pl" and m[5] == "sg" and e.startswith("person:"): return "number_mismatch", m
+        if num_bad(p["m"].get("number", ""), m, e): return "number_mismatch", m
         return "", m
 
     def subj_roles(self, S):
@@ -419,14 +502,34 @@ class Check59:
             if wt != r["verb"] and any(set(ents(q["who"])) & set(es) for q in S.p[wt]): return "said_in_clause", None
         if subj and r["verb"] in r_subj: return "taken_by_r", None
         if not subj and r["role"] != "A1": return "role_other", None
-        x = self.verb_reason(S.stem(r["verb"]))
+        v, e = r["verb"], es[0]
+        st = S.stem(v)
+        x = self.verb_reason(st, S.p[v])
         if x: return x, None
-        w = S.w[r["verb"]]
-        m, _ = self.M["hbo"].nearest(es[0], r["verb"], w["book"], w["chapter"])
+        if subj:
+            if rel_same(S, v, e): return "relative_head", None                  # REL (OPEN 1)
+            if just_before(S, v, e): return "name_just_before", None            # REL-ASYN (OPEN 1)
+            if strong_of(st["lexeme"]) == "1961" and any(                       # A-HAYAH (OPEN 7)
+                    any(q["kind"] == "prefix" and q["class"] == "prep" and fin(q["text"]) == "כ" for q in S.p[wt])
+                    and any(q["kind"] == "stem" and q["class"] == "noun" for q in S.p[wt]) for wt in S.byclause.get(r["clause"], ())):
+                return "measure_hayah", None
+        else:                                                                   # A-OBJ (OPEN 2)
+            if antecedent(S, v) is not None: return "in_relative", None
+            if st["m"].get("stem", "") in NOT_ACTIVE: return "passive_stem", None
+            sr = self.sr[(v, r["clause"])]
+            if e in ents(st["who"]) or any(x["verb"] == v and x["clause"] == r["clause"] and x["role"] == sr and e in ents(x["who"])
+                                           for x in S.added):
+                return "object_is_subject", None
+            w = S.w[v]
+            if any(q["m"].get("person") in ("1", "2") and e in ents(q["who"]) for x in S.vw[(w["book"], w["chapter"], w["verse"])]
+                   for q in S.p[x]):
+                return "speech_person", None
+        w = S.w[v]
+        m, _ = self.M["hbo"].nearest(e, v, w["book"], w["chapter"])
         if m is None: return "no_earlier_name", None
         if not m[4]: return "indefinite", m
-        num = S.stem(r["verb"])["m"].get("number", "") if subj else r["number"]
-        if num == "pl" and m[5] == "sg" and es[0].startswith("person:"): return "number_mismatch", m
+        num = st["m"].get("number", "") if subj else r["number"]
+        if num_bad(num, m, e): return "number_mismatch", m
         return "", m
 
     def v_reason(self, g, setting, S):
@@ -444,6 +547,12 @@ class Check59:
             if g["fit_lexeme"] == g["src_lexeme"] or (a and a == b): return "no_change"
         if g["fit"] in ("unattested", "form_other"): return g["fit"]
         if any(q["fused"] for q in S.p[t]): return "fused_article"
+        if setting == "all" and (g["src_count"] or 0) >= V_COMMON: return "common"          # V-COUNT (OPEN 8)
+        if setting == "all" and not (p["class"] == "verb" and p["m"].get("type", "") not in PART):  # V-FIX (OPEN 8)
+            w = S.w[t]; vs = S.vw[(w["book"], w["chapter"], w["verse"])]; i = vs.index(t)
+            if i + 1 < len(vs):
+                nx = S.p[vs[i + 1]]; st2 = [q for q in nx if q["kind"] == "stem"]
+                if st2 and strong_of(st2[0]["lexeme"]) in DIVINE and not any(q["kind"] == "prefix" for q in nx): return "fixed_phrase"
         if setting == "rare" and not g["rare"]: return "not_rare"
         return ""
 
@@ -493,12 +602,13 @@ class Check59:
                         if o is None: continue
                         mine, m = self.r_reason(tx, lv, r, v_lex)
                         if o["setting"] != "amb" or (mine and o["reason"] != mine) or \
-                                (not mine and not (o["state"] == "applied" or o["reason"] == "form_unattested")):
+                                (not mine and not (o["state"] == "applied" or o["reason"] == "form_unattested"
+                                                   or (o["reason"] == "name_chain_bound" and m is not None and m[8] == 2))):
                             reason_bad.append((o["op"], o["reason"], mine))
                         if o["state"] == "applied": self.names[o["op"]] = m
                 # A
                 if "a" in SW[lv]:
-                    sr = self.subj_roles(S)
+                    sr = self.subj_roles(S); self.sr = sr
                     rows = sorted((r["verb"], r["role"], r["clause"], i, r) for i, r in enumerate(S.added) if r["verb"] in sc
                                   and self.added_kind.get(r["kind"]) in ("in_verb", "elsewhere"))
                     ao = ops[(lv, tx, "a")]
@@ -562,10 +672,11 @@ class Check59:
                 else:
                     num = S.stem(o["src_t"])["m"].get("number", "") if o["rule"] == "a_subject" else \
                         next(r["number"] for r in S.added if r["verb"] == o["src_t"] and r["role"] == o["added_role"] and r["clause"] == o["added_clause"])
-                if num == "pl" and nst == "sg" and e.startswith("person:"): bad["NUM"].append(o["op"])
+                if m is not None and num_bad(num, m, e): bad["NUM"].append(o["op"])
                 if o["rule"] in ("r_subject", "a_subject", "a_object", "r_object"):
                     st = S.stem(o["src_t"])
-                    if not (st and st["class"] == "verb" and st["m"].get("type") in FINITE): bad["FIN"].append(o["op"])
+                    if not (st and st["class"] == "verb" and st["m"].get("type") in FINITE) or \
+                            any(q["kind"] == "prefix" and q["class"] == "art" for q in S.p[o["src_t"]]): bad["FIN"].append(o["op"])
                 if o["rule"] in ("r_subject", "a_subject") and not e.startswith(KINDS4): bad["KIND"].append(o["op"])
                 if o["rule"] == "r_pronoun" and any((q["kind"] == "prefix" and q["class"] == "art") or q["fused"] for q in S.p[o["src_t"]]):
                     bad["DEM"].append(o["op"])
@@ -574,7 +685,7 @@ class Check59:
                 if o["rule"] == "r_object":
                     v = dp[(lv, tx, dts[0])]
                     if any(p["kind"] == "suffix" for p in v) or not any(p["kind"] == "stem" and p["class"] == "verb" for p in v) \
-                            or len(dts) != 3 or not any(p["class"] == "om" for p in dp[(lv, tx, dts[1])]):
+                            or len(dts) not in (3, 4) or not any(p["class"] == "om" for p in dp[(lv, tx, dts[1])]):
                         bad["OBJ"].append(o["op"])
                 if o["rule"] == "r_construct":
                     if json.loads(dp[(lv, tx, dts[0])][-1]["marks"] or "{}").get("state") != "cstr" and \
@@ -606,8 +717,8 @@ class Check59:
                     bad["V_after"].append(o["op"])
         names = {"name": "every applied R/A op wrote a name word", "ent": "every written name piece carries exactly the op's ent",
                  "NF2": "NF2: 0 written names other than the nearest earlier mention in the window (chapter, then book; Psalms the psalm)",
-                 "DEF": "DEF: 0 indefinite names applied", "NUM": "NUM: 0 applied with a plural verb or pronoun, a singular name and a person",
-                 "FIN": "FIN: 0 subjects or objects applied after a non-finite host", "KIND": "KIND: 0 subjects applied for other kinds than person/group/deity/fauna",
+                 "DEF": "DEF: 0 indefinite names applied", "NUM": "NUM: 0 applied with a plural host and a person's name that is not plural, or a singular host and a plural name (not אֱלֹהִים-like)",
+                 "FIN": "FIN: 0 subjects or objects applied after a non-finite host (a verb with the article counts as a participle)", "KIND": "KIND: 0 subjects applied for other kinds than person/group/deity/fauna",
                  "DEM": "DEM: 0 applied on a pronoun with the article", "0854": "0854: 0 applied on the preposition אֵת 'with'",
                  "OBJ": "OBJ: 0 applied r_object whose host keeps its suffix (verb, object marker, name follow)",
                  "cstr": "r_construct: the host's new form has state cstr", "GK": "GK: every applied edition R op passes 6.3",

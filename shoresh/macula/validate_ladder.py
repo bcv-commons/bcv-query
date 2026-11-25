@@ -105,6 +105,10 @@ class Abbrev:
         self.head = lines[0].split("\t")
         self.rows = [l.split("\t") for l in lines[1:]]
         self.t = {r[0]: (r[1], r[2]) for r in self.rows}
+        cp = Path(path).parent / "abbrev_context.tsv"          # AB-CTX (OPEN-ladder 13, 2026-11-25)
+        cl = cp.read_text(encoding="utf-8").splitlines() if cp.is_file() else ["abbrev\tcontext\twritten"]
+        self.ctx_head = cl[0].split("\t")
+        self.ctx = {(r[0], r[1]): r[2] for r in (l.split("\t") for l in cl[1:])}
 
     def find(self, tok):
         k = re.sub(r"[.:,;]+$", "", tok)
@@ -113,13 +117,33 @@ class Abbrev:
             if len(k) > n and re.fullmatch("[ובלמשכה]{%d}" % n, k[:n]) and k[n:] in self.t: return k[n:], k[:n]
         return None
 
-    def out(self, tok):
+    def out(self, tok, ctx=""):
         """-> (abbrev column, written column) for a body token judged an abbreviation token"""
         f = self.find(tok)
         if not f: return "unknown", tok
         w, kind = self.t[f[0]]
-        if kind in ("word", "divine_name"): return f[0], f[1] + w
+        if kind in ("word", "divine_name"):
+            pre = f[1].replace("ה", "") if ctx == "to_idol_possessive" else f[1]
+            return f[0], pre + self.ctx.get((f[0], ctx), w)
         return f[0], tok
+
+
+NEG = {"לא", "ולא", "שלא", "אין", "ואין", "שאין", "אינו", "אינה", "אינם", "אינן", "אינך", "אינני", "איננו", "בל", "בלי", "בלתי"}
+
+
+def own_context(AB, toks, i):
+    """AB-CTX recomputed: the context code at body token i (see ladder_abbrev.CONTEXT)"""
+    f = AB.find(toks[i])
+    if not f: return ""
+    k = lambda x: re.sub(r"[.:,;]+$", "", x)
+    if f[0] == "ב״ה" and i > 0 and letters(k(toks[i - 1])).endswith("מקומ"): return "after_makom"
+    if f[0] == "כ״א":
+        for j in range(i - 1, max(-1, i - 7), -1):
+            if toks[j][-1:] in (":", "."): break
+            if k(toks[j]) in NEG: return "after_negation"
+    if f[0] == "עכו״ם" and i + 1 < len(toks) and k(toks[i + 1])[:2] == "של" and ("ל" in f[1] or (i > 0 and k(toks[i - 1]) in ("אל", "ואל"))):
+        return "to_idol_possessive"
+    return ""
 
 
 def abbrev_token(tok):
@@ -128,12 +152,13 @@ def abbrev_token(tok):
 
 def body_tokens(body, AB):
     res, open_ = [], 0
-    for tok in body.split():
+    raw = body.split()
+    for i, tok in enumerate(raw):
         in_p = open_ > 0 or "(" in tok
         open_ = max(0, open_ + tok.count("(") - tok.count(")"))
         if in_p: res.append((tok, "cite", "", tok)); continue
         if abbrev_token(tok):
-            a, w = AB.out(tok); res.append((tok, "body", a, w))
+            a, w = AB.out(tok, own_context(AB, raw, i)); res.append((tok, "body", a, w))
         else: res.append((tok, "body", "", tok))
     return res
 
@@ -266,6 +291,11 @@ def check58(d, AB):
     cond("the specification's head rows stand as written", headok, f"{len(SPEC_HEAD)} head rows")
     cond("at least 100 rows", len(AB.rows) >= 100, f"{len(AB.rows)} rows; kinds " +
          str(dict(collections.Counter(r[2] for r in AB.rows))))
+    cond("abbrev_context.tsv: header, and the three context rows of OPEN-ladder 13 (AB-CTX)",
+         AB.ctx_head == ["abbrev", "context", "written"] and AB.ctx == {("ב״ה", "after_makom"): "ברוך הוא",
+                                                                         ("כ״א", "after_negation"): "כי אם",
+                                                                         ("עכו״ם", "to_idol_possessive"): "עבודת כוכבים"},
+         f"{len(AB.ctx)} rows")
     nums = [r for r in AB.rows if r[2] == "number"]
     cond("number rows keep the form as written", all(r[0] == r[1] for r in nums), f"{len(nums)} number rows")
 

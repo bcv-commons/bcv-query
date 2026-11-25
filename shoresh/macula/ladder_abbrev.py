@@ -101,6 +101,27 @@ ADDED = [
     ("למ״ד", "למד", "word"),
 ]
 
+# AB-CTX (OPEN-ladder 13, the rule mends of 2026-11-25; stage 58's table): rows that write an abbreviation otherwise
+# in one context. (abbrev, context, written). The contexts, as ladder_banks.context_of() reads them:
+#   after_makom        the token before ends in מקום (המקום, למקום, שהמקום): ב״ה is ברוך הוא, not בית המקדש
+#   after_negation     a negation (לא, אין, אינו, בל, ...) among the six tokens before, in the same sentence (no
+#                      token ending in `:` or `.` between): כ״א is כי אם, not כל אחד
+#   to_idol_possessive the token has the prefix ל (or the token before is אל / ואל) and the next token is a possessive
+#                      (של...): עכו״ם is עבודת כוכבים (an idol), not עובדי כוכבים ומזלות (idolaters); the article
+#                      prefix ה is dropped there (a construct form: אל העכו״ם שלו -> אל עבודת כוכבים שלו)
+CONTEXT = [
+    ("ב״ה", "after_makom", "ברוך הוא"),
+    ("כ״א", "after_negation", "כי אם"),
+    ("עכו״ם", "to_idol_possessive", "עבודת כוכבים"),
+]
+NEGATIONS = ("לא", "ולא", "שלא", "אין", "ואין", "שאין", "אינו", "אינה", "אינם", "אינן", "אינך", "אינני", "איננו",
+             "בל", "בלי", "בלתי")                 # not אל: in these comments mostly the preposition
+
+
+def context_rows():
+    return list(CONTEXT)
+
+
 UNITS = "אבגדהוזחט"
 TENS = "יכלמנסעפצ"
 LETTERS = "אבגדהוזחטיכלמנסעפצקרשת"

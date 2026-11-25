@@ -11,6 +11,11 @@ Four steps since SPEC-ladder 0.2 (2026-11-24). The raw files keep the numbering 
 steps of SPEC-ladder 0.1 (`raw_step`). Rule RN (SPEC-ladder 10.2) maps them: step 1 <- raw 1, 2 <- raw 2, 3 <- raw 3,
 else raw 4 (old step 4 had the same Hebrew where old step 3 pointed to it), 4 <- raw 5. A raw row of old step 4 that no
 step takes is dropped (counted). `--ingest` writes new answers in the raw numbering (step 4 as raw 5).
+
+Rule EN-STALE (2026-11-25, after the rule mends of OPEN-ladder F.1): a raw text is used only where the Hebrew the
+session translated (its line in cache/english/input) equals the step's `point` line now. A wanted (verse, step) with no
+such text gets a row with `text_model` "" and `aid` false (untranslated: a later session fills it through `--prepare`,
+`--ingest`); raw rows no step uses are kept in the raw files and counted (old step 4, Hebrew changed, no longer wanted).
 """
 import collections, hashlib, json, re
 from pathlib import Path
@@ -152,15 +157,38 @@ def ingest(src, files):
     return res
 
 
-def renumber(R, W):
-    """rule RN: {(key, step): text} for the wanted (key, step) from the raw rows {(key, raw step): text}; the raw rows
-    used; the raw rows of old step 4 no step takes (dropped); the raw rows of other steps no step takes (an error)"""
+def session_hebrew(src):
+    """EN-STALE: {(key, raw step): the `point` line the stage 62 session translated} from cache/english/input"""
+    H = {}
+    for p in sorted((src / "cache" / "english" / "input").glob("*/*.txt")):
+        b = c = v = None
+        for l in p.read_text(encoding="utf-8").split("\n"):
+            if l.startswith("# "): b, c = l[2:].split()
+            elif l.startswith("@"): v = l[1:]
+            elif l.strip():
+                s, line = l.split(" ", 1)
+                H[(f"{b} {c}:{v}", int(s))] = line
+    return H
+
+
+def renumber(R, W, H, S):
+    """rule RN with EN-STALE: {(key, step): text} for the wanted (key, step) from the raw rows {(key, raw step): text}
+    whose session Hebrew H equals the step's line in S; the raw rows used; the raw rows no step takes, by why
+    (old_step4, hebrew_changed, not_wanted); the raw rows without session Hebrew (an error)"""
     T, used = {}, set()
     for k, s in W:
-        o = next((o for o in RAW_OF[s] if (k, o) in R), None)
+        o = next((o for o in RAW_OF[s] if (k, o) in R and H.get((k, o)) == S[s][k]), None)
         if o is not None: T[(k, s)] = R[(k, o)]; used.add((k, o))
-    rest = [x for x in R if x not in used]
-    return T, used, [x for x in rest if x[1] == 4], [x for x in rest if x[1] != 4]
+    Wk = set(W); why = collections.defaultdict(list); orphan = []
+    step_of = {o: s for s, os in RAW_OF.items() for o in os}
+    for x in R:
+        if x in used: continue
+        if x not in H: orphan.append(x); continue
+        s = step_of[x[1]]
+        if x[1] == 4 and (x[0], 3) in T: why["old_step4"].append(x)
+        elif (x[0], s) not in Wk: why["not_wanted"].append(x)
+        else: why["hebrew_changed"].append(x)
+    return T, used, dict(why), orphan
 
 
 def check(src, out):
@@ -169,31 +197,37 @@ def check(src, out):
     Rraw = {}
     for po in PORTIONS:
         Rraw.update(read_raw(src / "english" / "raw" / f"{po}.tsv"))
-    R, used, dropped, extra = renumber(Rraw, W)
-    miss = [x for x in W if x not in R]
-    if miss or extra:
-        return {"missing": len(miss), "first_missing": miss[:5], "extra": len(extra), "first_extra": extra[:5]}
+    R, used, why, orphan = renumber(Rraw, W, session_hebrew(src), S)
+    if orphan:
+        return {"raw_rows_without_session_hebrew": len(orphan), "first": orphan[:5]}
+    Wk = set(W)
     rows = []
     for k in order:
         po = por(k)
         if not po: continue
         for s in steps_of(k):
             line = S[s][k]
-            if (k, s) in R:
-                t, same = R[(k, s)], None
+            if (k, s) in Wk:
+                t, same = R.get((k, s), ""), None
+                aid = (k, s) in R                 # EN-STALE: false where the Hebrew changed after the session
             else:
-                t, same = "", next(u for u in range(s + 1, LAST + 1) if (k, u) in R)
+                same = next(u for u in range(s + 1, LAST + 1) if (k, u) in Wk)
+                t, aid = "", (k, same) in R
             rows.append({"key": k, "portion": po, "step": s, "text_model": t, "same_as": same,
-                         "hebrew_sha": hashlib.sha256(line.encode("utf-8")).hexdigest(), "aid": True})
+                         "hebrew_sha": hashlib.sha256(line.encode("utf-8")).hexdigest(), "aid": aid})
     (out / "english").mkdir(parents=True, exist_ok=True)
     pq.write_table(pa.Table.from_pylist(rows, schema=SCHEMA), out / "english" / "english_model.parquet",
                    compression="zstd", use_dictionary=False, write_statistics=False)
     by = {}
     for r in rows:
         x = by.setdefault(f"{r['portion']} step {r['step']}", [0, 0]); x[0 if r["text_model"] else 1] += 1
-    taken = collections.Counter(f"{s}<-raw {o}" for k, s in W for o in [next(o for o in RAW_OF[s] if (k, o) in Rraw)])
-    return {"rows": len(rows), "texts": len(R), "same_as": len(rows) - len(R), "by_portion_step_text_same": by,
-            "raw_rows": len(Rraw), "rule_rn": dict(sorted(taken.items())), "raw_step4_dropped": len(dropped)}
+    taken = collections.Counter(f"{s}<-raw {o}" for (k, s), o in
+                                ((x, next(o for o in RAW_OF[x[1]] if (x[0], o) in used)) for x in R))
+    untr = sorted(x for x in W if x not in R)
+    return {"rows": len(rows), "texts": len(R), "same_as": sum(1 for r in rows if r["same_as"] is not None),
+            "untranslated": len(untr), "untranslated_by_step": dict(sorted(collections.Counter(str(s) for _, s in untr).items())),
+            "by_portion_step_text_same": by, "raw_rows": len(Rraw), "rule_rn": dict(sorted(taken.items())),
+            "raw_unused": {k: len(v) for k, v in sorted(why.items())}}
 
 
 README = """# English aid (stage 62 of the Hebrew ladder pilot 1)
@@ -218,7 +252,9 @@ What it is not: a translation of record, a reviewed text, or evidence for any He
   0.1 (raw 5 = the real text). The ladder has four steps since SPEC-ladder 0.2 (2026-11-24; old step 4, R only, was
   dropped). Rule RN maps the raw rows: step 1 <- raw 1, step 2 <- raw 2, step 3 <- raw 3, else raw 4 (the same
   Hebrew: old step 3 pointed to old step 4 there), step 4 <- raw 5. A raw-4 row no step takes is not used. Nothing was
-  translated again.
+  translated again. Since the rule mends of 2026-11-25 (rule EN-STALE) a raw text is used only where the Hebrew the
+  session translated (`cache/english/input`) equals the step's line now; a step whose Hebrew changed has `aid` false
+  and no English until a later session translates it.
 - `english_model.parquet`: one row per verse and step the verse has, built by
   `build_ladder.py --build pilot-1 --stage 62 --check`.
 
@@ -229,10 +265,10 @@ What it is not: a translation of record, a reviewed text, or evidence for any He
 | key | string | derived | the verse, `BOOK ch:v` |
 | portion | string | derived | JON, PSA1-41, ISA40-55, RUT, GEN22-25 |
 | step | int | derived | 1-4 (1 only in JON, PSA1-41, ISA40-55; 4 the real text) |
-| text_model | string | model | the English of this step's Hebrew (the raw row rule RN names); `""` where `same_as` is set |
-| same_as | int | derived | the nearest step above whose row has a text, where this step's `point` line equals that step's (the lines of all steps between are equal); null where `text_model` is set |
-| hebrew_sha | string | derived | sha256 (UTF-8) of this step's `point` line in `lines/step<N>/hbo.point.tsv` (a changed Hebrew shows a stale English) |
-| aid | bool | derived | true on every row |
+| text_model | string | model | the English of this step's Hebrew (the raw row rule RN names, where the Hebrew the session translated equals this step's line: rule EN-STALE); `""` where `same_as` is set or the step is untranslated |
+| same_as | int | derived | the nearest step above whose Hebrew differs from the step above it (or step 4), where this step's `point` line equals that step's (the lines of all steps between are equal); null otherwise |
+| hebrew_sha | string | derived | sha256 (UTF-8) of this step's `point` line in `lines/step<N>/hbo.point.tsv` |
+| aid | bool | derived | true where an English text stands for the row (its own, or through `same_as`); false where the step's Hebrew changed after the session (the rule mends of 2026-11-25) and no session has translated it yet |
 """
 
 

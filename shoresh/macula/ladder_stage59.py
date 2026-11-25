@@ -5,7 +5,7 @@ from pathlib import Path
 
 from macula import ladder_switches as LS
 
-SPEC = "Ladder specification, version 0.2"
+SPEC = "Ladder specification, version 0.3"
 CODE = ["shoresh/macula/build_ladder.py", "shoresh/macula/ladder_stage59.py", "shoresh/macula/ladder_switches.py",
         "shoresh/macula/levels_drafts.py", "shoresh/macula/levels_stage43.py", "shoresh/macula/levels_common.py"]
 
@@ -30,7 +30,7 @@ Bases as SPEC-ladder 2.3: `given`, `derived`, `linked`, `model`.
 | ent | given | R, A |
 | tier, chosen_by | derived | V: `gloss`, `["mz"]` |
 | routes_all, grade | derived | not used in pilot-2 (`[]`, `""`) |
-| form_rule | derived | R, A: `nf_chapter` / `nf_book` (NF2) or AF's `whole`, `joined`, `whole_tanakh`, `joined_tanakh` for a host form; V: `whole` |
+| form_rule | derived | R, A: `nf_chapter` / `nf_book` / `nf_chain` (NF2, NF2-CHAIN) or AF's `whole`, `joined`, `whole_tanakh`, `joined_tanakh` for a host form; V: `whole` |
 | draft_t | derived | the draft words the op wrote |
 
 ## texts/<level>/<text>/ (SPEC-levels 7.2)
@@ -66,7 +66,7 @@ CATEGORIES = """# Coded values of hebrew-levels/pilot-2 (SPEC-ladder 6)
 "ops.reason.a" = %s
 "ops.reason.v" = %s
 "ops.rule" = ["a_object", "a_subject", "r_construct", "r_object", "r_prep_bound", "r_prep_free", "r_pronoun", "r_subject", "v_gloss"]
-"ops.form_rule" = ["", "joined", "joined_tanakh", "nf_book", "nf_chapter", "whole", "whole_tanakh"]
+"ops.form_rule" = ["", "joined", "joined_tanakh", "nf_book", "nf_chain", "nf_chapter", "whole", "whole_tanakh"]
 "ops.tier" = ["", "gloss"]
 "ops.chosen_by" = ["mz"]
 "pieces.basis" = ["derived", "given", "model"]
@@ -76,14 +76,21 @@ CATEGORIES = """# Coded values of hebrew-levels/pilot-2 (SPEC-ladder 6)
 
 [method]
 NF2 = "the name text of the referent's nearest earlier mention: chapter, then book (Psalms: the psalm); verse-final and atnach words skipped; no fallback"
+NF2-CHAIN = "where the chapter has no one-word mention, the nearest construct chain of the chapter (a construct head carrying the referent + a proper name: מַלְאַךְ יְהוָה) before a mention of another chapter; not bound to a preposition (name_chain_bound)"
 FIN = "subjects and suffix hosts only on finite verbs"
-NUM = "plural verb or pronoun, singular name, person: not applied"
+FIN-ART = "a verb with an article prefix is a participle (no subject written)"
+NUM = "a plural verb or pronoun and a person's name that is not plural (proper names carry no number); a singular host and a plural-stem name unless אֱלֹהִים-like (Strong 0430, 0136, 0113, 1167): not applied"
+REL = "no subject written for the verb of a relative clause (k1 word rel NpRelp, Relp..., NpCL) whose antecedent, or a word in apposition with it, carries the same ent (relative_head)"
+REL-ASYN = "no subject written where the word right before the verb, in another clause, is a noun carrying the same ent (name_just_before)"
+NIC-FORM = "R: no write where a noun before the host in the host's clause is written as the name NF2 found (named_in_clause)"
+A-OBJ = "a_object only outside relative clauses (in_relative), on active stems (passive_stem), where the name is not the clause's subject (object_is_subject) and not spoken of in the first or second person in the verse (speech_person)"
+A-HAYAH = "no A subject on a form of הָיָה whose clause holds a noun with the preposition כְּ (measure_hayah)"
 OBJ = "r_object writes the verb without its object suffix (AF), then the object marker and the name"
 DEF = "every R and A write needs a definite name; lexeme 0854 (with) form_ambiguous"
 DEM = "a pronoun with the article is a demonstrative; named_in_clause counts noun and pronoun stems"
 KIND = "a written subject only for person:, group:, deity:, fauna:"
 GK = "editions: a strict link to a Greek word carrying the same ent, same person and number"
-V = "Metzudat Zion's gloss where FIT says fits; at zr_r only rare words (Tanakh count below 20)"
+V = "Metzudat Zion's gloss where FIT says fits; at zr_r only rare words (Tanakh count below 20); at z_r_a only words below 100 Tanakh occurrences (V-COUNT, common) and not in a formula with a divine name (V-FIX, fixed_phrase: a noun, adjective or participle right before יהוה, אֱלֹהִים or אֵל with no prefix)"
 """
 
 

@@ -166,7 +166,8 @@ class Check61:
                 while i < len(ws) and c["v_from_model"] <= vmin[i] <= c["v_to_model"]: gone.append(ws[i]); i += 1
                 spans.remove(c); spans_done += 1
                 srcs = sorted({(k["s"], k["s_n"], k["other"]) for g in gone for k in lk[g["t"]]})
-                words = [(x, j) for j in range(c["c_from_model"], c["c_to_model"] + 1) for x in toks[c["choice"]].get(j, "").split()]
+                words = [(x.rstrip(":,."), j) for j in range(c["c_from_model"], c["c_to_model"] + 1)      # PUNCT-1 (OPEN-ladder 14)
+                         for x in toks[c["choice"]].get(j, "").split() if x.rstrip(":,.")]
                 for m, (x, j) in enumerate(words):
                     t += 1; pos += 1
                     W.append({"t": t, "book": gone[0]["book"], "chapter": gone[0]["chapter"], "verse": gone[0]["verse"], "w": pos, "text": x,
