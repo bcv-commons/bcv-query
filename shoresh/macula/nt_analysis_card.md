@@ -106,6 +106,7 @@ each pronoun, pronoun suffix and finite verb has its referent (an id shared alon
 | New in v0.4 | `stem` in `features.parquet` (its other columns unchanged, value for value); `speech.parquet`, `entities.parquet` per edition |
 | New in v0.5 | `referents.parquet` per edition; every other file unchanged |
 | New in v0.6 | `speech.parquet` from the mended addressees layer (bcv-commons/addressees v0.2); `referents.parquet` rebuilt on it; every other file unchanged |
+| New in v0.7 | `referents.parquet` only: a verb takes a carried entity only from a Greek verb's subject; the ranker also reads DictaBERT word vectors (Tanakh test 87.4% → 90.4%); new columns `referent_p_calibrated`, `other_edition_referent`, `editions_agree` |
 
 **Most of this is model output.** The New Testament has no MACULA analysis. Words whose form occurs in MACULA's Tanakh with
 one near-unanimous analysis take MACULA's own (`source = "macula"`: @SCG_MACULA_WORDS@ words of `heb_scg`, @SCG_MACULA_SHARE@;
@@ -286,7 +287,7 @@ Matthew 5), and 22 still differ (Matthew 5-7, Acts 2 and 7). Read `addressee_num
 `entities.parquet` (`ent`, `kind`, `type`, `name`, `name_basis`, `ent_basis`): the entities of k1 for the edition, with the Hebrew
 type word (אָדָם, עַם, אֱלֹוהַּ, …) and name where k1 has one; `ent_basis` `model` marks an entity that only a model's mentions found, `layer` (v0.6) one that only the addressees layer names (no name given).
 
-## Referents (v0.5, `referents.parquet`)
+## Referents (v0.5, revised in v0.7; `referents.parquet`)
 
 One row per target part (`heb_scg` @SCG_REFERENT_ROWS@, `heb_mod` @MOD_REFERENT_ROWS@): every pronoun, pronoun suffix and verb with
 a person (the referent of a verb is its subject, said or not). Keys `book, chapter, verse, i, part`.
@@ -296,23 +297,31 @@ a person (the referent of a verb is its subject, said or not). Keys `book, chapt
 | `target` | `pron`, `sfx` (a pronoun suffix), `verb` |
 | `person` | `1`, `2`, `3` (from `features.parquet`), empty where it has none |
 | `referent` | an entity id of `entities.parquet` (`person:…`, `deity:…`, `group:…`, …), or a chain id `x:<edition>:<book>.<chapter>.<verse>.<i>.<part>` (the chain's first part) where no entity reaches the chain |
-| `referent_basis` | `linked` (the entity carried from the Greek to this part through lexeme-aligner's links, as in source examples k1), `speech` (a first person inside a quotation is its `speaker`, a second person its `addressee`, from `speech.parquet`, where the number fits: a plural only a group, a singular never one; on the Tanakh 91.8% and 96.7% right), `model` (the ranker's antecedent, below), `model_new` (the ranker found no antecedent: a new chain starts here) |
+| `referent_basis` | `linked` (the entity carried from the Greek to this part through lexeme-aligner's links, as in source examples k1; for a verb only where the Greek word is a verb whose subject is that entity, from v0.7: a Hebrew verb linked to a Greek noun, or to a Greek verb that names a thing, no longer takes what it evokes), `speech` (a first person inside a quotation is its `speaker`, a second person its `addressee`, from `speech.parquet`, where the number fits: a plural only a group, a singular never one; on the Tanakh 91.8% and 96.7% right), `model` (the ranker's antecedent, below), `model_new` (the ranker found no antecedent: a new chain starts here) |
 | `referent_p` | for `model` and `model_new`: the ranker's probability |
+| `referent_p_calibrated` | for `model` and `model_new`: how often the ranker is right at that probability, measured on the Tanakh's dev and test chapters (bins of 0.1, pooled where the share would fall; v0.7) |
+| `other_edition_referent`, `editions_agree` | the other edition's referent on the part the strict word links tie to the same Greek word, and whether the two are the same (both entity ids; null where not); v0.7 |
 | `antecedent_i`, `antecedent_part`, `antecedent_verse` | the part that last names the referent before this one: the ranker's choice (`model`), or the last earlier part with the same referent (`linked`, `speech`); null where none within the window |
 | `model_antecedent_p`, `model_referent`, `model_agree` | the ranker's own choice on every row, and where the row is `linked`, whether the ranker reaches the same entity |
 
 **The ranker** (`python -m macula.hebrew_nt_referents`) is a small network over forms, not words: for each target it scores the
 previous 40 nouns, names, pronouns and verbs within six verses, or `new`, from their class, person, number and gender
 (`features.parquet`), relation and head (`pieces.parquet`), distance, clause, quotation, and how often the candidate's lexeme
-occurs in the window. It was trained on the MACULA Hebrew Tanakh's referents as source examples k1 gives them (MACULA's subject and
-participant references and bcv-commons' entities). No language model, no BHSA, no TBTA. A model value has not been checked by hand.
+occurs in the window; from v0.7 also each word's vector from [dicta-il/dictabert](https://huggingface.co/dicta-il/dictabert) (CC BY 4.0;
+frozen, the unpointed words of one verse at a time), for the target and each candidate. A noun or name without number or gender
+whose carried entity is one person or deity is read as singular and as the entity's sex (input only; `features.parquet` is unchanged).
+It was trained on the MACULA Hebrew Tanakh's referents as source examples k1 gives them (MACULA's subject and participant
+references and bcv-commons' entities). No generative language model, no BHSA, no TBTA. A model value has not been checked by hand.
 
-On the Tanakh test chapters (2,797 targets with a known referent) it picks a right antecedent (or `new` rightly) for 87.4%:
-third-person suffixes 76.6%, pronouns 76.4%, verbs 79.6%; first and second persons 90-97%. The nearest earlier candidate that
-agrees in person, number and gender gets 63.0% (third persons 39-49%). By probability: 96.0% at 0.9 or more (20% of the targets),
-90.9% at 0.7-0.9, 83.2% below. On the New Testament, where a part also has a carried entity and the ranker reaches an entity, the two
-agree in 76.8% (`heb_scg`) and 75.0% (`heb_mod`); 85.3% and 83.6% at a probability of 0.9 or more. About 64% of the targets end
-with an entity id; the rest have a chain id.
+On the Tanakh test chapters (2,797 targets with a known referent) it picks a right antecedent (or `new` rightly) for 90.4%
+(v0.5: 87.4%): third-person suffixes 85.7%, pronouns 80.0%, verbs 85.3%; first and second persons 91-100%. The nearest earlier
+candidate that agrees in person, number and gender gets 63.0% (third persons 39-49%). By probability: 95.5% at 0.9 or more (45% of
+the targets), 90.7% at 0.7-0.9, 83.1% below. On the New Testament, where a part also has a carried entity and the ranker reaches an
+entity, the two agree in 79.0% (`heb_scg`) and 77.0% (`heb_mod`); 83.9% and 83.0% at a probability of 0.9 or more. About 70% of the
+targets end with an entity id (v0.5: 64%); the rest have a chain id.
+
+The two editions check each other (`editions_agree`): where both have an entity on parts tied to the same Greek word, `linked`
+rows agree in 99.8%, `speech` rows in 93-94%, `model` rows in 72%. A `model` row whose `editions_agree` is false is the first to doubt.
 
 ## How it was made
 
