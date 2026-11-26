@@ -5,8 +5,8 @@ part that last names it (the antecedent). Three bases, strongest first:
   - `linked`: the entity k1 (source examples, format 1.9) carries to the part from the Greek through lexeme-aligner's links
     (`who`);
   - `speech`: a first-person part inside a quotation is its speaker, a second-person part its addressee
-    (hebrew-nt-analysis `speech.parquet`). On the Tanakh (k1/hbo) the rule holds for 0.907 of first and 0.951 of
-    second persons;
+    (hebrew-nt-analysis `speech.parquet`), where the number fits (a plural only a group, a singular never one). On the
+    Tanakh (k1/hbo) the rule holds for 0.918 of first and 0.967 of second persons (without the number check 0.907, 0.951);
   - `model`: a mention ranker trained on the MACULA Hebrew Tanakh's referents (k1/hbo `who`: MACULA's subject and
     participant references and the entity layer) picks the antecedent among the previous nouns, pronouns and verbs, or
     `new`. Its inputs are forms, not words: class, person, number, gender, relation, distance, clause, quotation, the
@@ -324,6 +324,15 @@ def score(model, data, device):
 
 # ---------------------------------------------------------------- export
 
+def fits(t, ent):
+    """may the speaker or addressee `ent` be the referent of target t? a plural (we, you all) only a group, a singular never a
+    group (2026-11-26: "we" is not the speaker alone, "you" plural not the one person the inquit names)"""
+    if not ent:
+        return False
+    group = ent.split(":")[0] == "group"
+    return not ((t["num"] == "p" and not group) or (t["num"] == "s" and group))
+
+
 def export(release: Path, out: Path):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     ck = torch.load(WORK / "ranker.pt", map_location=device)
@@ -347,7 +356,7 @@ def export(release: Path, out: Path):
                         ref[j] = mref                       # the chain's first part keeps the minted id
                 if t["who"]:
                     val, basis, prob = t["who"], "linked", None
-                elif t["per"] in ("1", "2") and t["quote"] and (t["speaker"] if t["per"] == "1" else t["addressee"]):
+                elif t["per"] in ("1", "2") and t["quote"] and fits(t, t["speaker"] if t["per"] == "1" else t["addressee"]):
                     val, basis, prob = (t["speaker"] if t["per"] == "1" else t["addressee"]), "speech", None
                 elif j is not None:
                     val, basis, prob = mref, "model", round(p, 4)

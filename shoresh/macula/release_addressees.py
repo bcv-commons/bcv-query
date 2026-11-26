@@ -27,9 +27,9 @@ from macula.release_reference_status import code, sha256
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
-VERSION = "v0.1"
+VERSION = "v0.2"
 REPO = "bcv-commons/addressees"
-ENTITY_COLS = {"speaker", "addressee", "second_person"}
+ENTITY_COLS = {"speaker", "addressee", "second_person", "member_of_plural"}
 INTS = {"spoke", "addressed", "father", "mother", "partners", "children"}
 
 
@@ -69,7 +69,8 @@ def main() -> int:
         counts[corpus] = {"quotations": len(sub), **{b: sum(r["basis"] == b for r in sub) for b in ("inquit", "second_person", "turn")},
                           "none": sum(not r["basis"] for r in sub),
                           "agree": f"{sum(r['agree'] == '1' for r in sub) / max(1, sum(r['agree'] != '' for r in sub)):.2f}",
-                          "relation": sum(bool(r["relation"]) for r in sub)}
+                          "relation": sum(bool(r["relation"]) for r in sub),
+                          "number": sum(bool(r["number"]) for r in sub), "member_dropped": sum(bool(r["member_of_plural"]) for r in sub)}
     (a.out / "checks.md").write_text((B.OUT / "checks.md").read_text(encoding="utf-8"), encoding="utf-8")
     (a.out / "README.md").write_text(card(counts, len(p)), encoding="utf-8")
     files = sorted(x for x in a.out.rglob("*") if x.is_file())
@@ -121,8 +122,24 @@ person to a crowd. This dataset gives each quotation of the Hebrew Bible ({h['qu
 | `addressee_words` | the inquit word naming the hearer (MACULA id) |
 | `second_person` | the second-person check on its own, where it gives an entity |
 | `agree` | 1 / 0: whether the inquit and the second-person check agree, where both give an entity |
-| `plural` | 1 when the hearer is a group or the inquit word is plural |
+| `plural` | 1 when the hearer is a group, the inquit word is plural, or `number` is plural |
+| `number`, `number_basis` | the hearer's number (v0.2), strongest first: `second_person` (most of the quotation's second-person words, at least two of them and 2/3), `inquit_word` (the word that names the hearer), `entity` (a group plural, a person or deity singular); empty where none says |
+| `member_of_plural` | v0.2: where the inquit's hearer is plural ("to them") but its entity lookup gave one person, that person; the hearer is then a group the second-person words point to, or the inquit word's lemma |
 | `relation` | `parent_to_child`, `child_to_parent`, `spouse`, `sibling` (from ACAI's kinship), `divine_to_human`, `human_to_divine`, `to_group`, or empty |
+
+## Changes in v0.2 (2026-11-26)
+
+A check against the Swahili New Testament (make-tanakh-research) found the addressee's number wrong where the speech is to many.
+Two rules made it: a plural hearer ("he said to them") was resolved to one of them (Andrew, James, Peter), and the second-person
+rule counted words of every number, so a few singular "you"s linked to the Lord outvoted many plural ones linked to nothing
+(Matthew 5, Acts 2, Acts 7). Now a plural hearer is never a single person or deity (`member_of_plural` keeps the lookup's
+answer), the second-person rule counts only words of the quotation's own number, takes a group only for a plural, and names an
+entity only where it has at least a third of the quotation's second-person words, and every quotation with a known hearer has a
+`number`. Changed hearers: {g['member_dropped']:,} Greek and {h['member_dropped']:,} Hebrew plural hearers; the second-person rule
+now names {g['second_person']:,} (Greek) and {h['second_person']:,} (Hebrew) hearers (v0.1: 144 and 825). Where the inquit also
+names the hearer, the second-person rule agrees {g['agree']} (Greek) and {h['agree']} (Hebrew), against 0.96 and 0.92 in v0.1.
+On the Hebrew New Testaments (bcv-commons/hebrew-nt-analysis v0.6) the hearer's number now agrees with the Hebrew's own
+second-person forms in 0.90 of the segments where both are known, against 0.75.
 
 ## `persons` ({n_persons:,} entities who speak or are spoken to)
 

@@ -9,12 +9,16 @@ Output macula/data/addressees/ (git-ignored):
     corpus, quote, first (its first clause key), speaker_id, speaker (ACAI entity of the speaker's character), addressee (entity, or lemma:<lemma> where none
     resolves), addressee_id (character id where the addressee speaks elsewhere), basis, addressee_words (the words that name the
     addressee), second_person (entity most second-person words inside the quotation point to), agree (1 / 0 where inquit and
-    second_person both give an entity), plural (1 when the addressee is a group or plural), relation (see below)
+    second_person both give an entity), plural (1 when the addressee is a group or plural), relation (see below),
+    number (singular / plural / ''), number_basis, strongest first (second_person: most of the quotation's second-person words,
+    at least 2 of them and 2/3; inquit_word: the number of the word that names the hearer; entity: the entity's type), member_of_plural (the person
+    an entity lookup gave a plural hearer, kept here, not as the addressee)
   basis:
     inquit         the inquit's addressee: Hebrew אֶל / לְ / עַל phrase, or object of צִוָּה; Greek dative, πρός + accusative, or the
                    accusative of a verb of asking or urging; resolved through reference-status referents, then ACAI word links
-    second_person  no addressee in the inquit; the person, deity or group most of the quotation's second-person words are linked
-                   to by ACAI
+    second_person  no addressee in the inquit; the person, deity or group most of the quotation's second-person words of the
+                   quotation's own number are linked to by ACAI (a plural majority takes a group only); the entity must have at least a
+                   third of the quotation's second-person words
     turn           neither; the quotation answers the one before it (same or previous verse, another speaker, said to this
                    speaker): that one's speaker is the addressee
     ''             unknown
@@ -48,7 +52,8 @@ KIN = {"father", "mother", "offspring", "partner", "sibling"}
 SPK_TO = {"father": "child_to_parent", "mother": "child_to_parent", "offspring": "parent_to_child", "partner": "spouse", "sibling": "sibling"}
 SPK_FROM = {"father": "parent_to_child", "mother": "parent_to_child", "offspring": "child_to_parent", "partner": "spouse", "sibling": "sibling"}
 COLS = ["corpus", "quote", "first", "speaker_id", "speaker", "addressee", "addressee_id", "basis", "addressee_words", "second_person",
-        "agree", "plural", "relation"]
+        "agree", "plural", "relation", "number", "number_basis", "member_of_plural"]
+SINGLE = ("person", "deity")                          # entity kinds that cannot be a plural hearer
 
 
 def tsv(p: Path):
@@ -155,11 +160,33 @@ def main() -> int:
                     return (e or f"lemma:{hw[3]}"), head, hw[5]
         return "", "", ""
 
-    def from_second(qws: list) -> str:
-        c = collections.Counter(acai.get(x, "") for x in qws if w.get(x, ("",) * 5)[4] == "second"
-                                and acai.get(x, "").split(":")[0] in ("person", "deity", "group"))
-        c.pop("", None)
-        return c.most_common(1)[0][0] if c else ""
+    def second_number(qws: list) -> str:
+        """the number most of the quotation's second-person words have: at least 2 such words and 2/3 of them"""
+        c = collections.Counter(w.get(x, ("",) * 6)[5] for x in qws if w.get(x, ("",) * 6)[4] == "second")
+        tot = c["singular"] + c["plural"]
+        for n in ("singular", "plural"):
+            if tot >= 2 and c[n] / tot >= 2 / 3:
+                return n
+        return ""
+
+    def from_second(qws: list, number: str) -> str:
+        """the entity most second-person words of that number point to; plural: a group only (2026-11-26: a few singular
+        words linked to the deity outvoted many plural ones linked to nothing, as in Acts 2 and Matthew 5)"""
+        c = collections.Counter()
+        total = sum(1 for x in qws if w.get(x, ("",) * 6)[4] == "second")
+        for x in qws:
+            e = acai.get(x, "")
+            if w.get(x, ("",) * 6)[4] != "second" or e.split(":")[0] not in ("person", "deity", "group"):
+                continue
+            if number and w[x][5] != number:
+                continue
+            if number == "plural" and e.split(":")[0] in SINGLE:
+                continue
+            c[e] += 1
+        if not c:
+            return ""
+        e, k = c.most_common(1)[0]
+        return e if k >= total / 3 else ""                         # at least a third of all its second-person words
 
     rows, st = [], collections.Counter()
     last_by_corpus = {}
@@ -171,9 +198,18 @@ def main() -> int:
         add, aw, num = from_inquit(corpus, ik) if ik else ("", "", "")
         if add and add == spk:
             add, aw, num = "", "", ""                                 # "the angel who spoke with me" names the speaker, not the hearer
-        sec = from_second(q_words[(corpus, q)])
+        snum = second_number(q_words[(corpus, q)])
+        sec = from_second(q_words[(corpus, q)], snum)
         if sec == spk:
             sec = ""
+        member = ""
+        if add and num == "plural" and add.split(":")[0] in SINGLE:
+            # "said to them" resolved to one of them (Andrew, James): not the hearer (2026-11-26, research's Swahili check)
+            member = add
+            group = sec if sec.split(":")[0] == "group" else ""
+            hw = w.get(aw, ("",) * 6)
+            add = group or (f"lemma:{hw[3]}" if hw[3] else "")
+            st[(corpus, "plural_member_dropped")] += 1
         basis = "inquit" if add else ""
         if not add and sec:
             add, basis = sec, "second_person"
@@ -187,7 +223,17 @@ def main() -> int:
         if basis == "inquit" and not add.startswith("lemma:") and sec:
             agree = "1" if sec == add else "0"
         et = ents.get(add, {}).get("type", "")
-        plural = "1" if et == "group" or num == "plural" else "0"
+        if snum:                                     # the speech's own "you" first: John 14:23 is said to Judas, its "you" plural
+            number, nbasis = snum, "second_person"
+        elif basis == "inquit" and et == "group" and num != "plural":   # "to the crowd" (ὄχλῳ): a collective, heard as many
+            number, nbasis = "plural", "entity"
+        elif basis == "inquit" and num in ("singular", "plural"):
+            number, nbasis = num, "inquit_word"
+        elif et:
+            number, nbasis = ("plural" if et == "group" else "singular"), "entity"
+        else:
+            number, nbasis = "", ""
+        plural = "1" if et == "group" or num == "plural" or number == "plural" else "0"
         stype = ents.get(spk, {}).get("type", "")
         rel = ""
         if spk and add and not add.startswith("lemma:"):
@@ -202,7 +248,8 @@ def main() -> int:
             elif et == "group":
                 rel = "to_group"
         aid = ",".join(sorted(ent_chars.get(add, set())))
-        rows.append([corpus, q, q_first[(corpus, q)], sid, spk, add, aid, basis, aw, sec, agree, plural, rel])
+        rows.append([corpus, q, q_first[(corpus, q)], sid, spk, add, aid, basis, aw, sec, agree, plural, rel, number, nbasis, member])
+        st[(corpus, "number:" + (number or "none") + ":" + (nbasis or "-"))] += 1
         st[(corpus, "quotations")] += 1
         st[(corpus, "basis:" + (basis or "unknown"))] += 1
         if agree:

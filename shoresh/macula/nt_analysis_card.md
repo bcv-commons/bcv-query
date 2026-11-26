@@ -105,6 +105,7 @@ each pronoun, pronoun suffix and finite verb has its referent (an id shared alon
 | New in v0.3 | `features.parquet`, `pieces.parquet`, `clause_marks.parquet` per edition; the v0.2 files are unchanged, file for file |
 | New in v0.4 | `stem` in `features.parquet` (its other columns unchanged, value for value); `speech.parquet`, `entities.parquet` per edition |
 | New in v0.5 | `referents.parquet` per edition; every other file unchanged |
+| New in v0.6 | `speech.parquet` from the mended addressees layer (bcv-commons/addressees v0.2); `referents.parquet` rebuilt on it; every other file unchanged |
 
 **Most of this is model output.** The New Testament has no MACULA analysis. Words whose form occurs in MACULA's Tanakh with
 one near-unanimous analysis take MACULA's own (`source = "macula"`: @SCG_MACULA_WORDS@ words of `heb_scg`, @SCG_MACULA_SHARE@;
@@ -254,11 +255,12 @@ model's head is the adjacent noun). A noun subject (`rel` = `s`) agrees with its
 both at least 0.95: **read `rel` = `s` with both probabilities at 0.95 or more.** The model's `time` mostly restates the verb form;
 keep `time_carried` beside it.
 
-## Speakers and addressees (v0.4, `speech.parquet`, `entities.parquet`)
+## Speakers and addressees (v0.4, mended in v0.6; `speech.parquet`, `entities.parquet`)
 
-**Carried from the Greek, not made here.** bcv-commons' source examples (build k1) give each Hebrew word the quotation, speaker and
-addressee of the Greek clause it is linked to (lexeme-aligner's word links; the Greek values are bcv-commons' speaker and
-addressees layers on MACULA Greek). Each clause segment takes the value most of its linked words have. One row per segment with a
+**Carried from the Greek, not made here.** bcv-commons' source examples (build k1) give each Hebrew word the quotation and speaker
+of the Greek clause it is linked to (lexeme-aligner's word links; the Greek values are bcv-commons' speaker layers on MACULA
+Greek). Each clause segment takes the value most of its linked words have. From v0.6 the addressee comes from
+[bcv-commons/addressees](https://huggingface.co/datasets/bcv-commons/addressees) v0.2 by the quotation's id. One row per segment with a
 quotation (`heb_scg` @SCG_SPEECH_ROWS@, `heb_mod` @MOD_SPEECH_ROWS@), keys `book, chapter, verse, seg` as in `clauses.parquet`:
 
 | Column | |
@@ -267,20 +269,22 @@ quotation (`heb_scg` @SCG_SPEECH_ROWS@, `heb_mod` @MOD_SPEECH_ROWS@), keys `book
 | `speaker`, `addressee` | entity ids (`person:…`, `deity:…`, `group:…`; the ids of `entities.parquet`) |
 | `speech_basis` | `linked` (the strict values) |
 | `speech_share` | the share of the segment's linked words whose clause has this quotation |
-| `addressee_basis` | how the addressees layer found the addressee on the Greek: `inquit` (named in the frame of the speech verb), `second_person` (from the speech's second-person forms), `turn` (the other side of a dialogue), empty (not said) |
-| `addressee_number`, `addressee_number_basis` | from the entity: `person` and `deity` singular, `group` plural (basis `entity`) |
+| `addressee_basis` | how the addressees layer found the addressee on the Greek: `inquit` (named in the frame of the speech verb), `second_person` (from the speech's second-person forms), `turn` (the other side of a dialogue: the quotation answers one said to this speaker), empty (not said). A hearer named only by a word, a key term or a place has no entity here |
+| `addressee_member` | v0.6: where the Greek hearer is plural ("he said to them") and the entity lookup gave one of them, that person; not the addressee |
 | `addressee_number_form` | from the Hebrew of the segment: the number of its second-person verbs and pronouns (`features.parquet`) where they all agree; `mixed`; empty where it has none |
-| `addressee_number_agree` | where both numbers are given |
+| `addressee_number_layer`, `addressee_number_layer_basis` | v0.6: the layer's number for the whole quotation, strongest first `second_person` (most of the Greek quotation's second-person words), `inquit_word` (the word naming the hearer), `entity` (a group plural, a person or deity singular) |
+| `addressee_number`, `addressee_number_basis` | v0.6: the segment's form where it is singular or plural (basis `form`), else the layer's (its basis). In v0.4 and v0.5 this was the entity's number |
+| `addressee_number_agree` | the layer's number against the form, where both are given |
 | `quote_model`, `speaker_model`, `addressee_model` | the values a language model chose in the reviewed speaker layer of the Greek NT clause layout (Claude Opus 5.5, review rows `nt_review.tsv`; no human check), carried the same way; null where none. Basis `model`: keep them apart from the strict columns |
 
-**The two addressee numbers agree in only 75% of the segments that have both** (`heb_scg` 1,406 of 1,862; `heb_mod` 1,363 of
-1,815), whatever the addressee's basis. Part of this is the addressees layer: it has known faults, such as Peter's speech in Acts 2
-given to the Lord (basis `second_person`), and the men of Judea taken as the one person יְהוּדָה. Part is the speech itself (a
-speaker turning from one hearer to many). Read `addressee_number_form` as the Hebrew's own witness, and do not take the entity's
-number alone where the two differ.
+**The layer's number and the Hebrew form agree in 90%** of the segments that have both (`heb_scg` 2,865 of 3,181; `heb_mod`
+2,756 of 3,070). In v0.4 the entity's number agreed in 75% (1,406 of 1,862): the addressees layer gave a group's speech to one
+person or to the Lord (Peter's speech in Acts 2; "he said to them" as Andrew or James). make-tanakh-research's Swahili check found
+these; of the 126 segments it named, the layer now has the right number in 72 and none in 32 (the speech's "you" is mixed, as in
+Matthew 5), and 22 still differ (Matthew 5-7, Acts 2 and 7). Read `addressee_number` (the form first) for a pronoun choice.
 
 `entities.parquet` (`ent`, `kind`, `type`, `name`, `name_basis`, `ent_basis`): the entities of k1 for the edition, with the Hebrew
-type word (אָדָם, עַם, אֱלֹוהַּ, …) and name where k1 has one; `ent_basis` `model` marks an entity that only a model's mentions found.
+type word (אָדָם, עַם, אֱלֹוהַּ, …) and name where k1 has one; `ent_basis` `model` marks an entity that only a model's mentions found, `layer` (v0.6) one that only the addressees layer names (no name given).
 
 ## Referents (v0.5, `referents.parquet`)
 
@@ -292,7 +296,7 @@ a person (the referent of a verb is its subject, said or not). Keys `book, chapt
 | `target` | `pron`, `sfx` (a pronoun suffix), `verb` |
 | `person` | `1`, `2`, `3` (from `features.parquet`), empty where it has none |
 | `referent` | an entity id of `entities.parquet` (`person:…`, `deity:…`, `group:…`, …), or a chain id `x:<edition>:<book>.<chapter>.<verse>.<i>.<part>` (the chain's first part) where no entity reaches the chain |
-| `referent_basis` | `linked` (the entity carried from the Greek to this part through lexeme-aligner's links, as in source examples k1), `speech` (a first person inside a quotation is its `speaker`, a second person its `addressee`, from `speech.parquet`), `model` (the ranker's antecedent, below), `model_new` (the ranker found no antecedent: a new chain starts here) |
+| `referent_basis` | `linked` (the entity carried from the Greek to this part through lexeme-aligner's links, as in source examples k1), `speech` (a first person inside a quotation is its `speaker`, a second person its `addressee`, from `speech.parquet`, where the number fits: a plural only a group, a singular never one; on the Tanakh 91.8% and 96.7% right), `model` (the ranker's antecedent, below), `model_new` (the ranker found no antecedent: a new chain starts here) |
 | `referent_p` | for `model` and `model_new`: the ranker's probability |
 | `antecedent_i`, `antecedent_part`, `antecedent_verse` | the part that last names the referent before this one: the ranker's choice (`model`), or the last earlier part with the same referent (`linked`, `speech`); null where none within the window |
 | `model_antecedent_p`, `model_referent`, `model_agree` | the ranker's own choice on every row, and where the row is `linked`, whether the ranker reaches the same entity |
@@ -307,7 +311,7 @@ On the Tanakh test chapters (2,797 targets with a known referent) it picks a rig
 third-person suffixes 76.6%, pronouns 76.4%, verbs 79.6%; first and second persons 90-97%. The nearest earlier candidate that
 agrees in person, number and gender gets 63.0% (third persons 39-49%). By probability: 96.0% at 0.9 or more (20% of the targets),
 90.9% at 0.7-0.9, 83.2% below. On the New Testament, where a part also has a carried entity and the ranker reaches an entity, the two
-agree in 76.6% (`heb_scg`) and 75.0% (`heb_mod`); 85.5% and 83.8% at a probability of 0.9 or more. About 65% of the targets end
+agree in 76.8% (`heb_scg`) and 75.0% (`heb_mod`); 85.3% and 83.6% at a probability of 0.9 or more. About 64% of the targets end
 with an entity id; the rest have a chain id.
 
 ## How it was made
