@@ -106,6 +106,7 @@ each pronoun, pronoun suffix and finite verb has its referent (an id shared alon
 | New in v0.4 | `stem` in `features.parquet` (its other columns unchanged, value for value); `speech.parquet`, `entities.parquet` per edition |
 | New in v0.5 | `referents.parquet` per edition; every other file unchanged |
 | New in v0.6 | `speech.parquet` from the mended addressees layer (bcv-commons/addressees v0.2); `referents.parquet` rebuilt on it; every other file unchanged |
+| New in v0.8 | `features.parquet` only, its `stem` column only: fewer, surer stems (hold-out 97.3% → 99.5%); every other file and column unchanged |
 | New in v0.7 | `referents.parquet` only: a verb takes a carried entity only from a Greek verb's subject; the ranker also reads DictaBERT word vectors (Tanakh test 87.4% → 90.4%); new columns `referent_p_calibrated`, `other_edition_referent`, `editions_agree` |
 
 **Most of this is model output.** The New Testament has no MACULA analysis. Words whose form occurs in MACULA's Tanakh with
@@ -180,7 +181,7 @@ part (its class and lemma).
 
 | Column | |
 |---|---|
-| `stem` | verbs (v0.4): the stem as MACULA Hebrew names it (qal, niphal, piel, pual, hiphil, hophal, hithpael, polel, …; MACULA's own `unknown: v` kept where it has it). Its tables add keys on the verb's lexeme (Strong's number) with its form, written beginning and ending, before the other verb keys |
+| `stem` | verbs (v0.4): the stem as MACULA Hebrew names it (qal, niphal, piel, pual, hiphil, hophal, hithpael, polel, …; MACULA's own `unknown: v` kept where it has it). Its tables add keys on the verb's lexeme (Strong's number) with its form, written beginning and ending, before the other verb keys; from v0.8 only a key with the written beginning, or the lexeme alone, gives a stem (the lexeme with its form alone was right in 73-85% on the hold-out and filled mostly qal where research's Swahili check found passive and causative verbs), and the person keys give none |
 | `person`, `number`, `gender`, `state` | MACULA Hebrew's strings: first/second/third; singular/plural/dual; masculine/feminine/common/both; absolute/construct. Empty: no value (infinitives have no person, number, gender; participles no person; names and demonstratives no state, as in MACULA) |
 | `definite` | `article` (an article part before it in the word, also the article hidden after a preposition), `suffix` (a pronoun suffix follows), `name` (a Tanakh proper noun's Strong's number), or empty |
 | `<column>_basis` | strongest first: `form` / `form_model` (the whole word is a Tanakh form with this analysis, and MACULA gives it this value in at least 90% of its occurrences), `part` / `part_model` (the same for the single part), `affix` / `affix_model` (a table counted on the MACULA Tanakh: the part's ending, a verb's prefix letter and form, a suffix's host, the article and suffix in the word, the next word's first part, a noun's lexeme; the most specific key with at least 20 Tanakh cases decides if at least 90% of them agree), `rule` (`definite`) |
@@ -197,14 +198,15 @@ Coverage where a value is expected:
 
 | | `heb_scg` | `heb_mod` |
 |---|---|---|
-| verb stem | 83.8% (72.1% by the Tanakh form or part alone) | 76.3% (55.9%) |
+| verb stem | 77.3% (72.1% by the Tanakh form or part alone; v0.4-v0.7: 83.8%) | 71.8% (55.9%; v0.4-v0.7: 76.3%) |
 | verb person / number / gender | 96 / 96 / 96% | 96 / 93 / 94% |
 | noun number / gender / state | 90 / 91 / 88% | 85 / 90 / 85% |
 | adjective number / gender / state | 99 / 99 / 95% | 97 / 98 / 91% |
 | pronoun person / number / gender | 98 / 99 / 98% | 100 / 100 / 91% |
 
 Hold-out: the affix tables applied to the parts the Tanakh form lookup did fill agree with the lookup in 97-100% (`heb_scg`; verb
-person 98.1%, verb stem 97.3%, noun state 98.3%) and 96-100% (`heb_mod`; verb person 96.9%, verb stem 97.4%). What is left: names the Tanakh lacks, nouns whose state
+person 98.1%, verb stem 99.5% (v0.4-v0.7: 97.3%), noun state 98.3%) and 96-100% (`heb_mod`; verb person 96.9%, verb stem 99.3%
+(v0.4-v0.7: 97.4%)). What is left: names the Tanakh lacks, nouns whose state
 neither the form nor the next word decides, and in `heb_mod` unpointed הוא.
 
 ## Phrases, roles and clause marks (v0.3, `pieces.parquet`, `clause_marks.parquet`)

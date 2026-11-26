@@ -12,7 +12,8 @@ consonants (the tables are then counted on consonants too).
 
 `stem` (the binyan, MACULA's strings: qal, niphal, piel, ...) is decided for verbs the same way; before the other verb
 keys come keys on the verb's lexeme (Strong's number) with its form, its written beginning and ending, since the stem is
-mostly the lexeme's and is marked at the start of the word (request 40, row 2).
+mostly the lexeme's and is marked at the start of the word (request 40, row 2). Only these keys decide a stem, and not
+the lexeme with its form alone (see `stem_key`, from 2026-11-26).
 
 `definite` is a rule over the word's parts, not a table: `article` (an article part stands before the noun or adjective in
 its word, also the article hidden after a preposition, which the analysis keeps as an empty part), `suffix` (a pronoun
@@ -156,6 +157,14 @@ def tanakh_tables(plain):
     return tables
 
 
+def stem_key(k):
+    """keys that may give a stem: the lexeme with the written beginning, the lexeme alone (one stem in 90% of the
+    Tanakh), the form with the beginning; not the lexeme with its form only (hold-out 0.73-0.85, and most of the qal
+    fills research's Swahili check found passive or causative, 2026-11-26): it is still read, so that where it has
+    enough cases the lexeme alone does not decide; the person keys are not read for the stem (no stem in them)"""
+    return (k[0] == "vsl" and len(k) != 3) or k[0] == "vsb"
+
+
 def decide(tables, f, ks, share, mn):
     for k in ks:
         c = tables[f].get(k)
@@ -255,10 +264,14 @@ def run(analysis, morph_dir, out, share, mn):
                         n[f"{cls}_{f}_{'has' if val else 'none'}"] += 1
                         continue
                     if cls in TARGET and f in TARGET[cls]:
-                        fk = [k for k in ks if ONLY.get(k[0], f) == f]
+                        fk = [k for k in ks if ONLY.get(k[0], f) == f and (f != "stem" or k[0] in ("vsl", "vsb"))]
                         d = decide(tables, f, fk, share, mn) if fk else None
+                        if f == "stem" and d is not None and not stem_key(d[1]):
+                            d = None                            # the lexeme with its form only: it may stop a value, not give one
                         if val and d is not None:                       # hold-out: the tables against the lookup
                             check[(cls, f)]["agree" if d[0] == val else "differ"] += 1
+                            if f == "stem":
+                                check[(cls, "stem@" + d[1][0] + str(len(d[1])))]["agree" if d[0] == val else "differ"] += 1
                         if not val and d is not None and d[0]:
                             val, basis = d[0], "affix" if r["source"] == "macula" else "affix_model"
                             row["rule_key"] = (row["rule_key"] + " " if row["rule_key"] else "") + f + ":" + "|".join(map(str, d[1]))
