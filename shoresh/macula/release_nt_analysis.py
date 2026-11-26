@@ -1,9 +1,9 @@
 """Package exported Hebrew NT analyses as a release of the dataset bcv-commons/hebrew-nt-analysis. Nothing is uploaded: the files are
 written to a folder for review, and published by hand.
 
-    python -m macula.release_nt_analysis --tag v0.4 --out DIR [--editions heb_scg,heb_mod] [--src macula/data/clause-tagger/export]
+    python -m macula.release_nt_analysis --tag v0.5 --out DIR [--editions heb_scg,heb_mod] [--src macula/data/clause-tagger/export]
         [--features macula/data/hebrew-nt-features/2026-11-26b] [--layers macula/data/hebrew-nt-layers/2026-11-26]
-        [--speech macula/data/hebrew-nt-speech/2026-11-26] [--allow-dirty]
+        [--speech macula/data/hebrew-nt-speech/2026-11-26] [--referents macula/data/hebrew-nt-referents/2026-11-26] [--allow-dirty]
 
 DIR gets:
   README.md                  the dataset card (macula/nt_analysis_card.md with the version fields filled in)
@@ -14,12 +14,13 @@ DIR gets:
   <edition>/pieces.parquet   head, relation, semantic role, reference status, referent kind per word part (`hebrew_nt_layers.py`; v0.3)
   <edition>/clause_marks.parquet  the clause marks per clause segment (`hebrew_nt_layers.py`, its clauses.parquet; v0.3)
   <edition>/speech.parquet   speaker, addressee and the addressee's number per quotation segment (`hebrew_nt_speech.py`; v0.4)
+  <edition>/referents.parquet referent and antecedent per pronoun, suffix and finite verb (`hebrew_nt_referents.py`; v0.5)
   <edition>/entities.parquet the entity ids of speech.parquet (and of k1's `who`): kind, Hebrew type word, name (v0.4)
   SHA256SUMS                 SHA-256 of every file
 
 The export must come from committed code (`git status` clean for macula/clause_tagger.py, macula/fetch_hebrew_nt.py,
 macula/vendor_bibles/, macula/hebrew_nt_morph.py, macula/hebrew_nt_features.py, macula/hebrew_nt_layers.py,
-macula/hebrew_nt_speech.py, this script and the card), unless --allow-dirty. DIR must not exist yet. The v0.3 files must stand on the keys of the words and clauses released with
+macula/hebrew_nt_speech.py, macula/hebrew_nt_referents.py, this script and the card), unless --allow-dirty. DIR must not exist yet. The v0.3 files must stand on the keys of the words and clauses released with
 them: every key of features.parquet and pieces.parquet a word part of words.parquet, the keys of clause_marks.parquet those of
 clauses.parquet, and those of speech.parquet clause segments.
 
@@ -42,10 +43,11 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 CARD = HERE / "nt_analysis_card.md"
 CODE = [HERE / "clause_tagger.py", HERE / "fetch_hebrew_nt.py", HERE / "vendor_bibles", HERE / "hebrew_nt_morph.py",
-        HERE / "hebrew_nt_features.py", HERE / "hebrew_nt_layers.py", HERE / "hebrew_nt_speech.py", Path(__file__).resolve(), CARD]
+        HERE / "hebrew_nt_features.py", HERE / "hebrew_nt_layers.py", HERE / "hebrew_nt_speech.py",
+        HERE / "hebrew_nt_referents.py", Path(__file__).resolve(), CARD]
 ADDED = {"features.parquet": ("features", "features.parquet"), "pieces.parquet": ("layers", "pieces.parquet"),
          "clause_marks.parquet": ("layers", "clauses.parquet"), "speech.parquet": ("speech", "speech.parquet"),
-         "entities.parquet": ("speech", "entities.parquet")}    # released name -> (source folder, file there)
+         "entities.parquet": ("speech", "entities.parquet"), "referents.parquet": ("referents", "referents.parquet")}    # released name -> (source folder, file there)
 KEYS = ("book", "chapter", "verse", "i", "part")
 EDITIONS = {"heb_scg": "Salkinson–Ginsburg Hebrew New Testament (1885/86), public domain; text from bible.helloao.org (from eBible.org, hebsg)",
             "heb_mod": "Delitzsch's Hebrew New Testament as eBible's \"Modern Hebrew Bible\" has it, without vowel points, public domain; text from "
@@ -62,6 +64,7 @@ def main() -> None:
     ap.add_argument("--src", default=str(HERE / "data" / "clause-tagger" / "export"))
     ap.add_argument("--features", default=str(HERE / "data" / "hebrew-nt-features" / "2026-11-26b"))
     ap.add_argument("--speech", default=str(HERE / "data" / "hebrew-nt-speech" / "2026-11-26"))
+    ap.add_argument("--referents", default=str(HERE / "data" / "hebrew-nt-referents" / "2026-11-26"))
     ap.add_argument("--layers", default=str(HERE / "data" / "hebrew-nt-layers" / "2026-11-26"))
     ap.add_argument("--allow-dirty", action="store_true")
     ap.add_argument("--allow-heb-scg-change", action="store_true")
@@ -96,6 +99,7 @@ def main() -> None:
         seg_keys = {tuple(r.values()) for r in pq.read_table(out / ed / "clauses.parquet", columns=["book", "chapter", "verse", "seg"]).to_pylist()}
         added = {}
         for name, want_keys, cols in (("features.parquet", part_keys, KEYS), ("pieces.parquet", part_keys, KEYS),
+                                      ("referents.parquet", part_keys, KEYS),
                                       ("clause_marks.parquet", seg_keys, ("book", "chapter", "verse", "seg")),
                                       ("speech.parquet", seg_keys, ("book", "chapter", "verse", "seg"))):
             got = [tuple(r.values()) for r in pq.read_table(out / ed / name, columns=list(cols)).to_pylist()]
@@ -123,7 +127,8 @@ def main() -> None:
                        f"@{f}_MACULA_WORDS@": f"{e['macula']:,}", f"@{f}_MACULA_SHARE@": f"{e['macula'] / e['words']:.1%}",
                        f"@{f}_MODEL_WORDS@": f"{e['words'] - e['macula']:,}", f"@{f}_MODEL_SHA@": e["manifest"]["model"]["sha256"],
                        f"@{f}_FEATURE_ROWS@": f"{e['added']['features.parquet']:,}", f"@{f}_PIECE_ROWS@": f"{e['added']['pieces.parquet']:,}",
-                       f"@{f}_WORD_PARTS@": f"{e['word_parts']:,}", f"@{f}_SPEECH_ROWS@": f"{e['added']['speech.parquet']:,}"})
+                       f"@{f}_WORD_PARTS@": f"{e['word_parts']:,}", f"@{f}_SPEECH_ROWS@": f"{e['added']['speech.parquet']:,}",
+                       f"@{f}_REFERENT_ROWS@": f"{e['added']['referents.parquet']:,}"})
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         card = card.replace(k, v)

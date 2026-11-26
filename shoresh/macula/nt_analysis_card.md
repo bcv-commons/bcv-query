@@ -74,6 +74,14 @@ configs:
     data_files:
       - split: train
         path: heb_mod/entities.parquet
+  - config_name: heb_scg-referents
+    data_files:
+      - split: train
+        path: heb_scg/referents.parquet
+  - config_name: heb_mod-referents
+    data_files:
+      - split: train
+        path: heb_mod/referents.parquet
 ---
 
 # Hebrew New Testament Analysis
@@ -85,7 +93,8 @@ Hebrew New Testament with the Greek, for lexical study across the two Testaments
 clause structure. From v0.3 each part also has its person, number, gender, state and definiteness, its head and relation in
 the phrase, and, on the head of a constituent, its semantic role, reference status and kind of referent; each clause segment
 has its clause marks (force, polarity, mood, time, aspect, relation, voice, negator, connective). From v0.4 each verb part
-also has its stem (binyan), and each quotation segment its speaker and addressee, with the addressee's number.
+also has its stem (binyan), and each quotation segment its speaker and addressee, with the addressee's number. From v0.5
+each pronoun, pronoun suffix and finite verb has its referent (an id shared along the chain) and the part that last names it.
 
 | | |
 |---|---|
@@ -95,6 +104,7 @@ also has its stem (binyan), and each quotation segment its speaker and addressee
 | Size, `heb_mod` | @MOD_WORDS@ words, @MOD_PARTS@ word parts, @MOD_SEGMENTS@ clause segments |
 | New in v0.3 | `features.parquet`, `pieces.parquet`, `clause_marks.parquet` per edition; the v0.2 files are unchanged, file for file |
 | New in v0.4 | `stem` in `features.parquet` (its other columns unchanged, value for value); `speech.parquet`, `entities.parquet` per edition |
+| New in v0.5 | `referents.parquet` per edition; every other file unchanged |
 
 **Most of this is model output.** The New Testament has no MACULA analysis. Words whose form occurs in MACULA's Tanakh with
 one near-unanimous analysis take MACULA's own (`source = "macula"`: @SCG_MACULA_WORDS@ words of `heb_scg`, @SCG_MACULA_SHARE@;
@@ -116,6 +126,7 @@ their form alone, and the tagger is less sure of lemmas (see *Quality*). Its tex
 | `<edition>/pieces.parquet` | one per word part with letters: head, relation, semantic role, reference status, kind of referent (v0.3; **CC BY-SA 4.0**) |
 | `<edition>/clause_marks.parquet` | one per clause segment: the clause marks (v0.3; **CC BY-SA 4.0**) |
 | `<edition>/speech.parquet` | one per clause segment with a quotation: speaker, addressee, the addressee's number (v0.4; **CC BY-SA 4.0**) |
+| `<edition>/referents.parquet` | one per pronoun, pronoun suffix and finite verb: referent, basis, antecedent (v0.5; **CC BY-SA 4.0**) |
 | `<edition>/entities.parquet` | one per entity id: its kind, Hebrew type word and name (v0.4; **CC BY-SA 4.0**) |
 | `SHA256SUMS` | SHA-256 of every file |
 
@@ -271,6 +282,34 @@ number alone where the two differ.
 `entities.parquet` (`ent`, `kind`, `type`, `name`, `name_basis`, `ent_basis`): the entities of k1 for the edition, with the Hebrew
 type word (אָדָם, עַם, אֱלֹוהַּ, …) and name where k1 has one; `ent_basis` `model` marks an entity that only a model's mentions found.
 
+## Referents (v0.5, `referents.parquet`)
+
+One row per target part (`heb_scg` @SCG_REFERENT_ROWS@, `heb_mod` @MOD_REFERENT_ROWS@): every pronoun, pronoun suffix and verb with
+a person (the referent of a verb is its subject, said or not). Keys `book, chapter, verse, i, part`.
+
+| Column | |
+|---|---|
+| `target` | `pron`, `sfx` (a pronoun suffix), `verb` |
+| `person` | `1`, `2`, `3` (from `features.parquet`), empty where it has none |
+| `referent` | an entity id of `entities.parquet` (`person:…`, `deity:…`, `group:…`, …), or a chain id `x:<edition>:<book>.<chapter>.<verse>.<i>.<part>` (the chain's first part) where no entity reaches the chain |
+| `referent_basis` | `linked` (the entity carried from the Greek to this part through lexeme-aligner's links, as in source examples k1), `speech` (a first person inside a quotation is its `speaker`, a second person its `addressee`, from `speech.parquet`), `model` (the ranker's antecedent, below), `model_new` (the ranker found no antecedent: a new chain starts here) |
+| `referent_p` | for `model` and `model_new`: the ranker's probability |
+| `antecedent_i`, `antecedent_part`, `antecedent_verse` | the part that last names the referent before this one: the ranker's choice (`model`), or the last earlier part with the same referent (`linked`, `speech`); null where none within the window |
+| `model_antecedent_p`, `model_referent`, `model_agree` | the ranker's own choice on every row, and where the row is `linked`, whether the ranker reaches the same entity |
+
+**The ranker** (`python -m macula.hebrew_nt_referents`) is a small network over forms, not words: for each target it scores the
+previous 40 nouns, names, pronouns and verbs within six verses, or `new`, from their class, person, number and gender
+(`features.parquet`), relation and head (`pieces.parquet`), distance, clause, quotation, and how often the candidate's lexeme
+occurs in the window. It was trained on the MACULA Hebrew Tanakh's referents as source examples k1 gives them (MACULA's subject and
+participant references and bcv-commons' entities). No language model, no BHSA, no TBTA. A model value has not been checked by hand.
+
+On the Tanakh test chapters (2,797 targets with a known referent) it picks a right antecedent (or `new` rightly) for 87.4%:
+third-person suffixes 76.6%, pronouns 76.4%, verbs 79.6%; first and second persons 90-97%. The nearest earlier candidate that
+agrees in person, number and gender gets 63.0% (third persons 39-49%). By probability: 96.0% at 0.9 or more (20% of the targets),
+90.9% at 0.7-0.9, 83.2% below. On the New Testament, where a part also has a carried entity and the ranker reaches an entity, the two
+agree in 76.6% (`heb_scg`) and 75.0% (`heb_mod`); 85.5% and 83.8% at a probability of 0.9 or more. About 65% of the targets end
+with an entity id; the rest have a chain id.
+
 ## How it was made
 
 The tagger (`python -m macula.clause_tagger` in [bcv-query](https://github.com/bcv-commons/bcv-query)) reads a verse with a Hebrew
@@ -342,16 +381,16 @@ verses the clause segments, which never cross a verse, are affected. The source 
 | Word parts, classes, lemmas, lexemes, verb forms, clauses (training data and the forms looked up) | MACULA Hebrew (Clear Bible / Biblica), `WLC/lowfat`, commit `@MACULA_COMMIT@` | CC BY 4.0 |
 | Base model | dicta-il/dictabert | CC BY 4.0 |
 | Verse text and words | bcv-commons/bibles verse-text @VERSE_TEXT@ | CC0 1.0 |
-| Argument roles, reference status, entities, clause columns, time-aspect, clause connectives, addressees, speaker layer (the training values of `pieces.parquet` and `clause_marks.parquet`, their `_carried` columns, and `speech`, `entities`) | bcv-commons' own layers on MACULA Hebrew (their sources on their dataset cards) | CC BY-SA 4.0 |
+| Argument roles, reference status, entities, clause columns, time-aspect, clause connectives, addressees, speaker layer (the training values of `pieces.parquet`, `clause_marks.parquet` and `referents.parquet`, their carried values, and `speech`, `entities`) | bcv-commons' own layers on MACULA Hebrew (their sources on their dataset cards) | CC BY-SA 4.0 |
 | MACULA Greek (the `_carried` values) | Clear Bible / Biblica | CC BY 4.0 |
 | Word links of the `_carried` values | bcv-commons/lexeme-aligner | CC0 1.0 |
 | This analysis: `words`, `clauses`, `features` | bcv-commons | **CC BY 4.0** |
-| This analysis: `pieces`, `clause_marks`, `speech`, `entities` | bcv-commons | **CC BY-SA 4.0** (ShareAlike, from the training and carried values) |
+| This analysis: `pieces`, `clause_marks`, `speech`, `entities`, `referents` | bcv-commons | **CC BY-SA 4.0** (ShareAlike, from the training and carried values) |
 | The code (bcv-query) | bcv-commons | MIT |
 
 **Attribution** when you use this dataset:
 
-> Hebrew New Testament Analysis (@TAG@), bcv-commons, CC BY 4.0 (`pieces`, `clause_marks`, `speech`, `entities`: CC BY-SA 4.0). Analysis trained on
+> Hebrew New Testament Analysis (@TAG@), bcv-commons, CC BY 4.0 (`pieces`, `clause_marks`, `speech`, `entities`, `referents`: CC BY-SA 4.0). Analysis trained on
 > MACULA Hebrew, Clear Bible / Biblica (CC BY 4.0).
 > Texts: Salkinson–Ginsburg Hebrew New Testament; Delitzsch's Hebrew New Testament (public domain).
 
