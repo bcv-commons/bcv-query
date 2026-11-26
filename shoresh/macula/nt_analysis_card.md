@@ -1,7 +1,7 @@
 ---
 license: other
 license_name: cc-by-4.0-and-cc-by-sa-4.0
-license_link: README.md
+license_link: https://huggingface.co/datasets/bcv-commons/hebrew-nt-analysis/blob/main/README.md#sources-and-licence
 language:
   - he
 pretty_name: Hebrew New Testament Analysis
