@@ -1,4 +1,5 @@
-"""Person, number, gender, state and definiteness for every word part of the Hebrew New Testaments (request 39, rows 1-2).
+"""Person, number, gender, state, definiteness and verb stem for every word part of the Hebrew New Testaments (request 39,
+rows 1-2; request 40, row 2).
 
 `hebrew_nt_morph.py` takes the morphology MACULA Hebrew gives a whole Tanakh form (or one Tanakh part). Where a Hebrew NT
 form is not a Tanakh form, or is ambiguous there, it leaves the part empty. This step fills those parts by rule from the
@@ -8,6 +9,10 @@ as the analysis gives them), and a value is taken from the most specific key tha
 which at least `--share` agree. Each feature is decided on its own, so a verb may get its number when its gender is not
 sure. Salkinson's text is pointed and is matched with its points; Delitzsch's edition here is unpointed and is matched on
 consonants (the tables are then counted on consonants too).
+
+`stem` (the binyan, MACULA's strings: qal, niphal, piel, ...) is decided for verbs the same way; before the other verb
+keys come keys on the verb's lexeme (Strong's number) with its form, its written beginning and ending, since the stem is
+mostly the lexeme's and is marked at the start of the word (request 40, row 2).
 
 `definite` is a rule over the word's parts, not a table: `article` (an article part stands before the noun or adjective in
 its word, also the article hidden after a preposition, which the analysis keeps as an empty part), `suffix` (a pronoun
@@ -44,11 +49,11 @@ import pyarrow.parquet as pq
 from macula.clause_tagger import pointed, unpointed
 
 HERE = Path(__file__).resolve().parent
-FEATS = ("person", "number", "gender", "state")
-TARGET = {"verb": ("person", "number", "gender"), "noun": ("number", "gender", "state"),
+FEATS = ("person", "number", "gender", "state", "stem")
+TARGET = {"verb": ("person", "number", "gender", "stem"), "noun": ("number", "gender", "state"),
           "adj": ("number", "gender", "state"), "num": ("number", "gender", "state"),
           "pron": ("person", "number", "gender")}
-ONLY = {"nlex": "gender", "nc": "state", "nf": "state"}                  # keys that decide one feature only
+ONLY = {"nlex": "gender", "nc": "state", "nf": "state", "vsl": "stem", "vsb": "stem"}                  # keys that decide one feature only
 HOSTS = {"noun", "verb", "prep", "om", "adj", "num", "adv", "ptcl", "ij", "cj", "rel"}
 
 
@@ -74,6 +79,15 @@ def keys(cls, form, person, text, host, sfx_after, art_before, plain, strong="",
         return [("pron", text)]
     if cls == "verb":
         pre = text[:1]
+        beg = text[:2] if plain else text[:4]                  # the first letters (with their points where read)
+        if strong:                                             # stem keys: the lexeme, its form, beginning and ending
+            for L in (2, 1):
+                out.append(("vsl", strong, form or "", beg, text[-L:]))
+            out.append(("vsl", strong, form or "", beg))
+            out.append(("vsl", strong, form or ""))
+            out.append(("vsl", strong))
+        for L in (2, 1):                                       # without the lexeme
+            out.append(("vsb", form or "", beg, text[-L:]))
         for p in ([person, "*"] if person else ["*"]):        # "*": any person (a verb the analysis gives none)
             for L in (4, 3, 2, 1):
                 out.append(("vpe", form or "", p, pre, text[-L:]))   # prefix letter and ending
@@ -113,7 +127,7 @@ def tanakh_tables(plain):
     norm = unpointed if plain else pointed
     spine = sqlite3.connect(HERE / "macula-spine.db")
     morph = {k: dict(zip(FEATS, (v or "" for v in rest))) for k, *rest in
-             spine.execute("select key, person, number, gender, state from macula_words where lang = 'hbo'")}
+             spine.execute("select key, person, number, gender, state, stem from macula_words where lang = 'hbo'")}
     tables = {f: collections.defaultdict(collections.Counter) for f in FEATS}
     both = collections.defaultdict(collections.Counter)
     words = collections.OrderedDict()

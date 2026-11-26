@@ -58,6 +58,22 @@ configs:
     data_files:
       - split: train
         path: heb_mod/clause_marks.parquet
+  - config_name: heb_scg-speech
+    data_files:
+      - split: train
+        path: heb_scg/speech.parquet
+  - config_name: heb_scg-entities
+    data_files:
+      - split: train
+        path: heb_scg/entities.parquet
+  - config_name: heb_mod-speech
+    data_files:
+      - split: train
+        path: heb_mod/speech.parquet
+  - config_name: heb_mod-entities
+    data_files:
+      - split: train
+        path: heb_mod/entities.parquet
 ---
 
 # Hebrew New Testament Analysis
@@ -68,7 +84,8 @@ number. Each verse is also divided into clause segments, with their depth and pa
 Hebrew New Testament with the Greek, for lexical study across the two Testaments, and as a Hebrew reading of the New Testament's
 clause structure. From v0.3 each part also has its person, number, gender, state and definiteness, its head and relation in
 the phrase, and, on the head of a constituent, its semantic role, reference status and kind of referent; each clause segment
-has its clause marks (force, polarity, mood, time, aspect, relation, voice, negator, connective).
+has its clause marks (force, polarity, mood, time, aspect, relation, voice, negator, connective). From v0.4 each verb part
+also has its stem (binyan), and each quotation segment its speaker and addressee, with the addressee's number.
 
 | | |
 |---|---|
@@ -77,6 +94,7 @@ has its clause marks (force, polarity, mood, time, aspect, relation, voice, nega
 | Size, `heb_scg` | @SCG_WORDS@ words, @SCG_PARTS@ word parts, @SCG_SEGMENTS@ clause segments |
 | Size, `heb_mod` | @MOD_WORDS@ words, @MOD_PARTS@ word parts, @MOD_SEGMENTS@ clause segments |
 | New in v0.3 | `features.parquet`, `pieces.parquet`, `clause_marks.parquet` per edition; the v0.2 files are unchanged, file for file |
+| New in v0.4 | `stem` in `features.parquet` (its other columns unchanged, value for value); `speech.parquet`, `entities.parquet` per edition |
 
 **Most of this is model output.** The New Testament has no MACULA analysis. Words whose form occurs in MACULA's Tanakh with
 one near-unanimous analysis take MACULA's own (`source = "macula"`: @SCG_MACULA_WORDS@ words of `heb_scg`, @SCG_MACULA_SHARE@;
@@ -94,9 +112,11 @@ their form alone, and the tagger is less sure of lemmas (see *Quality*). Its tex
 | `<edition>/words.parquet` | one per word part |
 | `<edition>/clauses.parquet` | one per clause segment |
 | `<edition>/manifest.json` | per book: the text fingerprint, verse and word counts; the model's SHA-256 and whether it read vowel points; tokenizer and verse-text versions |
-| `<edition>/features.parquet` | one per word part (the verse-number rows left out): person, number, gender, state, definiteness (v0.3; CC BY 4.0) |
+| `<edition>/features.parquet` | one per word part (the verse-number rows left out): person, number, gender, state, definiteness (v0.3), stem (v0.4); CC BY 4.0 |
 | `<edition>/pieces.parquet` | one per word part with letters: head, relation, semantic role, reference status, kind of referent (v0.3; **CC BY-SA 4.0**) |
 | `<edition>/clause_marks.parquet` | one per clause segment: the clause marks (v0.3; **CC BY-SA 4.0**) |
+| `<edition>/speech.parquet` | one per clause segment with a quotation: speaker, addressee, the addressee's number (v0.4; **CC BY-SA 4.0**) |
+| `<edition>/entities.parquet` | one per entity id: its kind, Hebrew type word and name (v0.4; **CC BY-SA 4.0**) |
 | `SHA256SUMS` | SHA-256 of every file |
 
 ## The words
@@ -147,6 +167,7 @@ part (its class and lemma).
 
 | Column | |
 |---|---|
+| `stem` | verbs (v0.4): the stem as MACULA Hebrew names it (qal, niphal, piel, pual, hiphil, hophal, hithpael, polel, …; MACULA's own `unknown: v` kept where it has it). Its tables add keys on the verb's lexeme (Strong's number) with its form, written beginning and ending, before the other verb keys |
 | `person`, `number`, `gender`, `state` | MACULA Hebrew's strings: first/second/third; singular/plural/dual; masculine/feminine/common/both; absolute/construct. Empty: no value (infinitives have no person, number, gender; participles no person; names and demonstratives no state, as in MACULA) |
 | `definite` | `article` (an article part before it in the word, also the article hidden after a preposition), `suffix` (a pronoun suffix follows), `name` (a Tanakh proper noun's Strong's number), or empty |
 | `<column>_basis` | strongest first: `form` / `form_model` (the whole word is a Tanakh form with this analysis, and MACULA gives it this value in at least 90% of its occurrences), `part` / `part_model` (the same for the single part), `affix` / `affix_model` (a table counted on the MACULA Tanakh: the part's ending, a verb's prefix letter and form, a suffix's host, the article and suffix in the word, the next word's first part, a noun's lexeme; the most specific key with at least 20 Tanakh cases decides if at least 90% of them agree), `rule` (`definite`) |
@@ -163,13 +184,14 @@ Coverage where a value is expected:
 
 | | `heb_scg` | `heb_mod` |
 |---|---|---|
+| verb stem | 83.8% (72.1% by the Tanakh form or part alone) | 76.3% (55.9%) |
 | verb person / number / gender | 96 / 96 / 96% | 96 / 93 / 94% |
 | noun number / gender / state | 90 / 91 / 88% | 85 / 90 / 85% |
 | adjective number / gender / state | 99 / 99 / 95% | 97 / 98 / 91% |
 | pronoun person / number / gender | 98 / 99 / 98% | 100 / 100 / 91% |
 
 Hold-out: the affix tables applied to the parts the Tanakh form lookup did fill agree with the lookup in 97-100% (`heb_scg`; verb
-person 97.1%, noun state 98.3%) and 95-100% (`heb_mod`; verb person 94.9%). What is left: names the Tanakh lacks, nouns whose state
+person 98.1%, verb stem 97.3%, noun state 98.3%) and 96-100% (`heb_mod`; verb person 96.9%, verb stem 97.4%). What is left: names the Tanakh lacks, nouns whose state
 neither the form nor the next word decides, and in `heb_mod` unpointed הוא.
 
 ## Phrases, roles and clause marks (v0.3, `pieces.parquet`, `clause_marks.parquet`)
@@ -220,6 +242,34 @@ demonstrative agrees with the model's head noun in 90%; the second noun of a con
 model's head is the adjacent noun). A noun subject (`rel` = `s`) agrees with its verb in 82%, and 87% where `rel_p` and `head_p` are
 both at least 0.95: **read `rel` = `s` with both probabilities at 0.95 or more.** The model's `time` mostly restates the verb form;
 keep `time_carried` beside it.
+
+## Speakers and addressees (v0.4, `speech.parquet`, `entities.parquet`)
+
+**Carried from the Greek, not made here.** bcv-commons' source examples (build k1) give each Hebrew word the quotation, speaker and
+addressee of the Greek clause it is linked to (lexeme-aligner's word links; the Greek values are bcv-commons' speaker and
+addressees layers on MACULA Greek). Each clause segment takes the value most of its linked words have. One row per segment with a
+quotation (`heb_scg` @SCG_SPEECH_ROWS@, `heb_mod` @MOD_SPEECH_ROWS@), keys `book, chapter, verse, seg` as in `clauses.parquet`:
+
+| Column | |
+|---|---|
+| `quote` | the Greek quotation's id (`q:` + MACULA Greek's id of its first word) |
+| `speaker`, `addressee` | entity ids (`person:…`, `deity:…`, `group:…`; the ids of `entities.parquet`) |
+| `speech_basis` | `linked` (the strict values) |
+| `speech_share` | the share of the segment's linked words whose clause has this quotation |
+| `addressee_basis` | how the addressees layer found the addressee on the Greek: `inquit` (named in the frame of the speech verb), `second_person` (from the speech's second-person forms), `turn` (the other side of a dialogue), empty (not said) |
+| `addressee_number`, `addressee_number_basis` | from the entity: `person` and `deity` singular, `group` plural (basis `entity`) |
+| `addressee_number_form` | from the Hebrew of the segment: the number of its second-person verbs and pronouns (`features.parquet`) where they all agree; `mixed`; empty where it has none |
+| `addressee_number_agree` | where both numbers are given |
+| `quote_model`, `speaker_model`, `addressee_model` | the values a language model chose in the reviewed speaker layer of the Greek NT clause layout (Claude Opus 5.5, review rows `nt_review.tsv`; no human check), carried the same way; null where none. Basis `model`: keep them apart from the strict columns |
+
+**The two addressee numbers agree in only 75% of the segments that have both** (`heb_scg` 1,406 of 1,862; `heb_mod` 1,363 of
+1,815), whatever the addressee's basis. Part of this is the addressees layer: it has known faults, such as Peter's speech in Acts 2
+given to the Lord (basis `second_person`), and the men of Judea taken as the one person יְהוּדָה. Part is the speech itself (a
+speaker turning from one hearer to many). Read `addressee_number_form` as the Hebrew's own witness, and do not take the entity's
+number alone where the two differ.
+
+`entities.parquet` (`ent`, `kind`, `type`, `name`, `name_basis`, `ent_basis`): the entities of k1 for the edition, with the Hebrew
+type word (אָדָם, עַם, אֱלֹוהַּ, …) and name where k1 has one; `ent_basis` `model` marks an entity that only a model's mentions found.
 
 ## How it was made
 
@@ -292,16 +342,16 @@ verses the clause segments, which never cross a verse, are affected. The source 
 | Word parts, classes, lemmas, lexemes, verb forms, clauses (training data and the forms looked up) | MACULA Hebrew (Clear Bible / Biblica), `WLC/lowfat`, commit `@MACULA_COMMIT@` | CC BY 4.0 |
 | Base model | dicta-il/dictabert | CC BY 4.0 |
 | Verse text and words | bcv-commons/bibles verse-text @VERSE_TEXT@ | CC0 1.0 |
-| Argument roles, reference status, entities, clause columns, time-aspect, clause connectives (the training values of `pieces.parquet` and `clause_marks.parquet`, and their `_carried` columns) | bcv-commons' own layers on MACULA Hebrew (their sources on their dataset cards) | CC BY-SA 4.0 |
+| Argument roles, reference status, entities, clause columns, time-aspect, clause connectives, addressees, speaker layer (the training values of `pieces.parquet` and `clause_marks.parquet`, their `_carried` columns, and `speech`, `entities`) | bcv-commons' own layers on MACULA Hebrew (their sources on their dataset cards) | CC BY-SA 4.0 |
 | MACULA Greek (the `_carried` values) | Clear Bible / Biblica | CC BY 4.0 |
 | Word links of the `_carried` values | bcv-commons/lexeme-aligner | CC0 1.0 |
 | This analysis: `words`, `clauses`, `features` | bcv-commons | **CC BY 4.0** |
-| This analysis: `pieces`, `clause_marks` | bcv-commons | **CC BY-SA 4.0** (ShareAlike, from the training values) |
+| This analysis: `pieces`, `clause_marks`, `speech`, `entities` | bcv-commons | **CC BY-SA 4.0** (ShareAlike, from the training and carried values) |
 | The code (bcv-query) | bcv-commons | MIT |
 
 **Attribution** when you use this dataset:
 
-> Hebrew New Testament Analysis (@TAG@), bcv-commons, CC BY 4.0 (`pieces` and `clause_marks`: CC BY-SA 4.0). Analysis trained on
+> Hebrew New Testament Analysis (@TAG@), bcv-commons, CC BY 4.0 (`pieces`, `clause_marks`, `speech`, `entities`: CC BY-SA 4.0). Analysis trained on
 > MACULA Hebrew, Clear Bible / Biblica (CC BY 4.0).
 > Texts: Salkinson–Ginsburg Hebrew New Testament; Delitzsch's Hebrew New Testament (public domain).
 
