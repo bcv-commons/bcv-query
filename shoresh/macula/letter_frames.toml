@@ -1,0 +1,154 @@
+# letter_frames.toml: who writes and who is written to, per book that names them in its opening. Read from the Greek
+# opening itself (the verses given); names are the Greek lexemes as MACULA has them. macula/probe_labels.py turns each
+# name into the entity id of that word in those verses and stops if a name is not found there.
+#
+#   verses     the opening's verses in chapter 1 (first, last)
+#   from       the writers named there (nominative); empty where the opening names none
+#   to         the persons written to by name (dative or vocative); empty where a church or group is written to
+#   to_number  singular | plural: the number the opening gives the readers
+#
+# A book without an entry has no frame of this kind (Matthew, Mark, John).
+
+[ROM]
+verses = [1, 7]
+from = ["Παῦλος"]
+to = []
+to_number = "plural"
+
+[1CO]
+verses = [1, 2]
+from = ["Παῦλος", "Σωσθένης"]
+to = []
+to_number = "plural"
+
+[2CO]
+verses = [1, 1]
+from = ["Παῦλος", "Τιμόθεος"]
+to = []
+to_number = "plural"
+
+[GAL]
+verses = [1, 2]
+from = ["Παῦλος"]            # "and all the brothers with me" are not named
+to = []
+to_number = "plural"
+
+[EPH]
+verses = [1, 1]
+from = ["Παῦλος"]
+to = []
+to_number = "plural"
+
+[PHP]
+verses = [1, 1]
+from = ["Παῦλος", "Τιμόθεος"]
+to = []
+to_number = "plural"
+
+[COL]
+verses = [1, 2]
+from = ["Παῦλος", "Τιμόθεος"]
+to = []
+to_number = "plural"
+
+[1TH]
+verses = [1, 1]
+from = ["Παῦλος", "Σιλουανός", "Τιμόθεος"]
+to = []
+to_number = "plural"
+
+[2TH]
+verses = [1, 1]
+from = ["Παῦλος", "Σιλουανός", "Τιμόθεος"]
+to = []
+to_number = "plural"
+
+[1TI]
+verses = [1, 2]
+from = ["Παῦλος"]
+to = ["Τιμόθεος"]
+to_number = "singular"
+
+[2TI]
+verses = [1, 2]
+from = ["Παῦλος"]
+to = ["Τιμόθεος"]
+to_number = "singular"
+
+[TIT]
+verses = [1, 4]
+from = ["Παῦλος"]
+to = ["Τίτος"]
+to_number = "singular"
+
+[PHM]
+verses = [1, 2]
+from = ["Παῦλος", "Τιμόθεος"]
+to = ["Φιλήμων", "Ἀπφία", "Ἄρχιππος"]   # and the church in his house
+to_number = "plural"
+
+[HEB]
+verses = [1, 1]
+from = []
+to = []
+to_number = "plural"
+
+[JAS]
+verses = [1, 1]
+from = ["Ἰάκωβος"]
+to = []
+to_number = "plural"
+
+[1PE]
+verses = [1, 1]
+from = ["Πέτρος"]
+to = []
+to_number = "plural"
+
+[2PE]
+verses = [1, 1]
+from = ["Πέτρος"]
+to = []
+to_number = "plural"
+
+[1JN]
+verses = [1, 4]
+from = []
+to = []
+to_number = "plural"
+
+[2JN]
+verses = [1, 1]
+from = []                    # "the elder", not named
+to = []                      # "the chosen lady and her children"
+to_number = "plural"
+
+[3JN]
+verses = [1, 1]
+from = []
+to = ["Γάϊος"]
+to_number = "singular"
+
+[JUD]
+verses = [1, 1]
+from = ["Ἰούδας"]
+to = []
+to_number = "plural"
+
+[REV]
+verses = [4, 4]
+from = ["Ἰωάννης"]
+to = []                      # the seven churches in Asia
+to_number = "plural"
+
+[LUK]
+verses = [1, 4]
+from = []
+to = ["Θεόφιλος"]
+to_number = "singular"
+
+[ACT]
+verses = [1, 1]
+from = []
+to = ["Θεόφιλος"]
+to_number = "singular"

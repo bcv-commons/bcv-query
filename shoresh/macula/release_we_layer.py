@@ -4,7 +4,7 @@
     cd shoresh && .venv/bin/python3 -m macula.release_we_layer --out DIR [--allow-dirty]
 
 Rebuilds the votes and the layer, then writes DIR/data/words.parquet, DIR/data/verses.parquet (per verse: vote counts per
-edition as codes), checks.md (the votes' checks), README.md, build.json and SHA256SUMS. No translation text is stored or shipped.
+edition as codes), DIR/data/without.parquet (per word and voting edition: the value counted without that edition), checks.md (the votes' checks), README.md, build.json and SHA256SUMS. No translation text is stored or shipped.
 Nothing is uploaded.
 """
 from __future__ import annotations
@@ -28,7 +28,7 @@ from macula import release_guard  # refuses TBTA and private inputs
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
-VERSION = "v0.1"
+VERSION = "v0.2"
 REPO = "bcv-commons/inclusive-we"
 
 
@@ -65,16 +65,19 @@ def main() -> int:
     pq.write_table(words, a.out / "data/words.parquet")
     verses, vrows = table(V.OUT / "verses.tsv")
     pq.write_table(verses, a.out / "data/verses.parquet")
+    without, orows = table(L.OUT / "without.tsv")
+    pq.write_table(without, a.out / "data/without.parquet")
+    changed = {e: sum(1 for r in orows if r["without"] == e and r["changed"] == "1") for e in L.VOTERS}
     checks = (V.OUT / "checks.md").read_text(encoding="utf-8")
     (a.out / "checks.md").write_text(checks + "\n" + (L.OUT / "checks.md").read_text(encoding="utf-8"), encoding="utf-8")
     nt = lambda r: r["book"] in V.NT  # noqa: E731
     cnt = {side: {v: sum(1 for r in wrows if (nt(r) == (side == "nt")) and r["value"] == v) for v in ("i", "e", "split", "unknown")}
            for side in ("nt", "tanakh")}
-    (a.out / "README.md").write_text(card(len(wrows), len(vrows), cnt), encoding="utf-8")
+    (a.out / "README.md").write_text(card(len(wrows), len(vrows), cnt, len(orows), changed), encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file())
     meta = {"schema": SCHEMA, "version": VERSION, "built": datetime.date.today().isoformat(), "code": code, "licence": "CC BY-SA 4.0",
             "editions": {e: {"licence": v[0], "family": v[1], "voting": e not in V.NON_VOTING} for e, v in V.EDITIONS.items()},
-            "stores_translation_text": False, "not_read": ["BHSA", "TBTA", "English text"], "counts": cnt,
+            "stores_translation_text": False, "not_read": ["BHSA", "TBTA", "English text"], "counts": cnt, "value_changes_without": changed,
             "files": {str(p.relative_to(a.out)): sha256(p) for p in files}}
     (a.out / "build.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     files = sorted(p for p in a.out.rglob("*") if p.is_file())
@@ -83,8 +86,9 @@ def main() -> int:
     return 0
 
 
-def card(n_words: int, n_verses: int, c: dict) -> str:
+def card(n_words: int, n_verses: int, c: dict, n_without: int, changed: dict) -> str:
     eds = "\n".join(f"| `{e}` | {v[1]} | {v[0]} | {'no (counted only)' if e in V.NON_VOTING else 'yes'} |" for e, v in V.EDITIONS.items())
+    chg = "\n".join(f"| `{e}` | {n:,} | {n / n_words:.1%} |" for e, n in changed.items())
     return f"""---
 license: cc-by-sa-4.0
 language: [hbo, arc, grc]
@@ -95,6 +99,8 @@ configs:
   data_files: data/words.parquet
 - config_name: verses
   data_files: data/verses.parquet
+- config_name: without
+  data_files: data/without.parquet
 ---
 
 # Inclusive and exclusive "we" ({VERSION})
@@ -155,6 +161,29 @@ the `alternative`.
 The value is per verse: several "we" words in one verse share it (about 5% of edition votes show both forms in one verse).
 `verses` has the per-edition votes (i, e, m for both, - for none) behind each value.
 
+## A language that voted must not be tested on its own vote (`without`, new in v0.2)
+
+The value of a word rests on the editions above. If one of those languages is the one a translation system is being tested on,
+the value is partly read off the text under test. For that case `without` gives, per word and voting edition whose vote counted
+in the word's verse ({n_without:,} rows), the value counted without that edition.
+
+| column | description |
+|---|---|
+| `key`, `lang`, `book`, `chapter`, `verse` | the word, as in `words` |
+| `without` | the edition left out |
+| `value`, `alternative`, `basis`, `n_i`, `n_e`, `agree` | as in `words`, counted without it |
+| `changed` | 1 when this value differs from the word's value in `words` |
+
+How to use it: when testing on a language, take the row with `without` = that language's edition; a word with no such row
+keeps its value from `words` (the edition gave no decisive vote there). The values in `words` are the same as in v0.1.
+
+| left out | words whose value changes | of all words |
+|---|---|---|
+{chg}
+
+Related languages still vote (Cebuano and Hiligaynon when Tagalog is left out); leave them out as well where that matters,
+from the votes in `verses`.
+
 ## Measured use
 
 A rule-based drafting engine choosing the target form from `value`, tested on the Tanakh in six rotating test groups (each drafted
@@ -164,6 +193,9 @@ by an engine that had not seen it), on the 1,117 verses where the value changed 
 |---|---|---|
 | Indonesian kita / kami right | 0.614 | 0.912 |
 | Tagalog inclusive / exclusive right | 0.529 | 0.788 |
+
+The Tagalog figure was measured with v0.1, where the Tagalog edition's own vote is among the voters; it is not a clean figure and
+is to be measured again with the value from `without`. Indonesian is not among the voters.
 
 No value was checked by hand; a human review of samples is planned and will be reported here.
 

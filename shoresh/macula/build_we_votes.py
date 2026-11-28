@@ -198,6 +198,13 @@ def rules(src: dict[tuple, list[str]]) -> dict[tuple, tuple[str, str]]:
     return out
 
 
+def verse_value(n_i: int, n_e: int) -> str:
+    """A verse's value from its decisive votes: 75% of 3 or more (the stable part of the threshold curve, research
+    2026-11-13); fewer votes give unknown."""
+    dec = n_i + n_e
+    return "unknown" if dec < 3 else ("i" if n_i / dec >= 0.75 else "e" if n_e / dec >= 0.75 else "split")
+
+
 def count(toks: list[str], forms: set[str]) -> collections.Counter:
     got = collections.Counter()
     for i, t in enumerate(toks):
@@ -251,8 +258,7 @@ def main() -> int:
         n_e = sum(1 for e in voters if vv.get(e) == "e")
         n_m = sum(1 for e in voters if vv.get(e) == "m")
         dec = n_i + n_e
-        # 75% of 3+ decisive votes: the stable part of the threshold curve (research, 2026-11-13); fewer votes -> unknown
-        value = "unknown" if dec < 3 else ("i" if n_i / dec >= 0.75 else "e" if n_e / dec >= 0.75 else "split")
+        value = verse_value(n_i, n_e)
         rows.append([vkey[0], str(vkey[1]), str(vkey[2]), str(len(src[vkey])), " ".join(src[vkey])] +
                     [vv.get(e, "-") for e in eds] + [str(n_i), str(n_e), str(n_m), value,
                                                      f"{max(n_i, n_e) / dec:.2f}" if dec else ""] + list(rule[vkey]))

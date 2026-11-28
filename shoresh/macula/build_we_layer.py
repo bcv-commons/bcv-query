@@ -14,6 +14,10 @@ Per word (macula/data/we-layer/words.tsv):
                  | rule:<name>,votes_split (the rule settles a split verse)
   n_i, n_e       the verse's decisive inclusive / exclusive votes (9 voting editions)
   agree          the majority's share among them
+Per word and voting edition whose vote counted in the verse (macula/data/we-layer/without.tsv): the same value, alternative,
+basis, n_i, n_e and agree counted without that edition, and changed (1 when the value differs from the word's value). A
+language under test must not sit among its own voters: read the value without its edition; a word with no row for an edition
+keeps its value (that edition gave no decisive vote there).
 The value is per verse: several "we" words in one verse share it (research 2026-11-13: about 5% of edition votes are mixed;
 word-level resolution later, only where several editions say "mixed").
 Codes only; no translation text. Not read: BHSA, TBTA, English text.
@@ -28,12 +32,40 @@ import sqlite3
 import subprocess
 from pathlib import Path
 
+from macula import build_we_votes as V
+
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "data"
 VOTES = DATA / "we-votes" / "verses.tsv"
 OUT = DATA / "we-layer"
 MSPINE = HERE / "macula-spine.db"
 COLS = ["key", "lang", "book", "chapter", "verse", "clause_key", "form", "value", "alternative", "basis", "n_i", "n_e", "agree"]
+WCOLS = ["key", "lang", "book", "chapter", "verse", "without", "value", "alternative", "basis", "n_i", "n_e", "agree", "changed"]
+VOTERS = [e for e in V.EDITIONS if e not in V.NON_VOTING]
+
+
+def word_value(v: str, rule: str, rb: str, n_i: int, n_e: int) -> tuple[str, str, str]:
+    """(value, alternative, basis) of a verse's words from the verse's vote value, its rule and its decisive votes."""
+    alt = ""
+    if v in ("i", "e"):
+        value = v
+        minority = "e" if v == "i" else "i"
+        if rule and rule != v:
+            basis, alt = "votes", rule
+        elif rule:
+            basis = f"votes+rule:{rb}"
+        else:
+            basis = "votes"
+        if not alt and (n_e if v == "i" else n_i):
+            alt = minority
+    elif v == "split":
+        if rule:
+            value, basis, alt = rule, f"rule:{rb},votes_split", ("e" if rule == "i" else "i")
+        else:
+            value, basis, alt = "split", "votes", "i e"
+    else:
+        value, basis = (rule, f"rule:{rb}") if rule else ("unknown", "")
+    return value, alt, basis
 
 
 def word_clause() -> dict[str, str]:
@@ -52,28 +84,20 @@ def main() -> int:
     info = {k: (lang, cls or "", lem or "") for k, lang, cls, lem in m.execute("select key, lang, class, lemma from macula_words")}
     wc = word_clause()
     rows, st = [], collections.Counter()
+    wrows, ch, chn = [], collections.Counter(), collections.Counter()
     for r in csv.DictReader(open(VOTES, encoding="utf-8"), delimiter="\t"):
         v, rule, rb = r["value"], r["rule"], r["rule_basis"]
         n_i, n_e = int(r["n_i"]), int(r["n_e"])
-        alt = ""
-        if v in ("i", "e"):
-            value = v
-            minority = "e" if v == "i" else "i"
-            if rule and rule != v:
-                basis, alt = "votes", rule
-            elif rule:
-                basis = f"votes+rule:{rb}"
-            else:
-                basis = "votes"
-            if not alt and (n_e if v == "i" else n_i):
-                alt = minority
-        elif v == "split":
-            if rule:
-                value, basis, alt = rule, f"rule:{rb},votes_split", ("e" if rule == "i" else "i")
-            else:
-                value, basis, alt = "split", "votes", "i e"
-        else:
-            value, basis = (rule, f"rule:{rb}") if rule else ("unknown", "")
+        value, alt, basis = word_value(v, rule, rb, n_i, n_e)
+        # the same without each edition whose vote counted here: the value a language under test must be given
+        loo = []
+        for ed in VOTERS:
+            if r[ed] not in ("i", "e"):
+                continue
+            li, le = n_i - (r[ed] == "i"), n_e - (r[ed] == "e")
+            lv, lalt, lbasis = word_value(V.verse_value(li, le), rule, rb, li, le)
+            loo.append([ed, lv, lalt, lbasis, str(li), str(le), f"{max(li, le) / (li + le):.2f}" if li + le else "",
+                        "1" if lv != value else "0"])
         for k in r["src_keys"].split():
             lang, cls, lem = info.get(k, ("", "", ""))
             form = ("possessive" if lem == "ἡμέτερος" else "verb" if cls == "verb" else
@@ -81,14 +105,28 @@ def main() -> int:
             rows.append([k, lang or ("hbo" if len(k) == 12 else "grc"), r["book"], r["chapter"], r["verse"], wc.get(k, ""), form,
                          value, alt, basis, str(n_i), str(n_e), r["agree"]])
             st[(rows[-1][1], value)] += 1
+            for x in loo:
+                wrows.append(rows[-1][:5] + x)
+                if x[-1] == "1":
+                    ch[(x[0], value, x[1])] += 1
+                    chn[x[0]] += 1
             st[(rows[-1][1], "basis:" + basis.split(",")[0].split("+")[0])] += 1
     OUT.mkdir(parents=True, exist_ok=True)
     with open(OUT / "words.tsv", "w", encoding="utf-8") as f:
         f.write("\t".join(COLS) + "\n")
         f.writelines("\t".join(r) + "\n" for r in rows)
+    with open(OUT / "without.tsv", "w", encoding="utf-8") as f:
+        f.write("\t".join(WCOLS) + "\n")
+        f.writelines("\t".join(r) + "\n" for r in wrows)
     lines = ["# Inclusive / exclusive \"we\" per word: checks", "", f"Words: {len(rows):,}.", "", "| lang | value or basis | words |",
              "|---|---|---|"]
     lines += [f"| {l} | {k} | {n:,} |" for (l, k), n in sorted(st.items())]
+    lines += ["", "## Without one voter", "",
+              f"Rows of `without`: {len(wrows):,} (a word and an edition whose vote counted in its verse).", "",
+              "| left out | words whose value changes | of all words |", "|---|---|---|"]
+    lines += [f"| {e} | {chn[e]:,} | {chn[e] / max(len(rows), 1):.1%} |" for e in VOTERS]
+    lines += ["", "| left out | value | without it | words |", "|---|---|---|---|"]
+    lines += [f"| {e} | {a} | {b} | {n:,} |" for (e, a, b), n in sorted(ch.items())]
     (OUT / "checks.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     code = subprocess.run(["git", "log", "-1", "--format=%h"], cwd=HERE, capture_output=True, text=True).stdout.strip()
     (OUT / "build.json").write_text(json.dumps({"schema": 1, "built": datetime.date.today().isoformat(), "code": code,
