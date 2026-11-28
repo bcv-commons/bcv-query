@@ -1,6 +1,7 @@
 # Hand review of NT speeches, applied by shoresh/macula/greek_speakers.py (clause layout v0.6). Only where the Greek text settles it;
 # the reason says how. field speaker: the speech's label (who it is: sets speaker_id; the label stays internal, in English).
 # field name: the word ids naming the speaker, people separated by "," (two or more: a group); "-": the inquit found names no one.
+# field addressee (read by shoresh/macula/build_addressees.py): the word ids that name the hearer in the text; "-": no hearer named.
 word_start	field	value	reason	source
 40001023001	speaker	God	τὸ ῥηθὲν ὑπὸ Κυρίου διὰ τοῦ προφήτου: the Lord speaks, through the prophet	agent:claude-opus-5-5:nt-characters-v1
 40001023019	speaker	narrator-MAT	ὅ ἐστιν μεθερμηνευόμενον: the narrator translates Ἐμμανουήλ	agent:claude-opus-5-5:nt-characters-v1
@@ -130,3 +131,4 @@ word_start	field	value	reason	source
 66006007014	name	66006007012	ἤκουσα φωνὴν τοῦ τετάρτου ζῴου λέγοντος	agent:claude-opus-5-5:nt-characters-v1
 66007014004	speaker	John (seer of Revelation)	καὶ εἴρηκα αὐτῷ Κύριέ μου: the seer answers the elder	agent:claude-opus-5-5:nt-characters-v1
 41006024012	speaker	Herodias	ἡ δὲ εἶπεν Τὴν κεφαλὴν Ἰωάνου: the mother answers her daughter (the speaker data swaps the two)	agent:claude-opus-5-5:nt-characters-v1
+44002014015	addressee	44002014016	Ἄνδρες Ἰουδαῖοι καὶ οἱ κατοικοῦντες Ἱερουσαλὴμ πάντες: Peter speaks to the crowd; the singular "you" stands inside the psalm he cites (2:27-28), and outvoted the plural	agent:claude-fable-5-2:probe-labels-2026-11-28

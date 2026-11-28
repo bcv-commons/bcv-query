@@ -1,0 +1,218 @@
+# probe_changes.toml: the default changes a probe set makes in a real clause (grammar probes, piece 4; read by
+# macula/probe_sets.py). A change is made with real words only: the word at the place is replaced by another word of
+# the same edition that has the wanted form (a donor), or a word is added, dropped or moved. No Hebrew is written here
+# except the lexeme numbers and the scheme's own values.
+#
+# Per family:
+#   dimension  the name the difference function gives the change (probe_dimensions.toml)
+#   how        form: the part's feature takes another value (every ordered pair of `values`)
+#              swap: the noun is replaced by a noun of another kind (`to_kinds`, the kinds of probe_labels.py)
+#              drop_negator | add_negator | drop_subject | add_pronoun | move_subject: done by the code
+#   slot       what the part bears in its clause (verb, subject, object, pp, possessor); part: stem | suffix
+#   feature, values   the feature changed and the values it moves between
+#   free       features of the same part that may come out differently (a form that has no gender, a participle that
+#              has no person)
+#   agree      bearers whose word must take the same new value (their donors are found the same way)
+#   place      clause marks the place must have (mark = the values allowed)
+#   needs      one_word: the constituent is one word with nothing agreeing inside it; finite: the clause's verb is finite
+#   must       marks the layer model has to read differently in the changed clause (the read-back)
+#   may        marks it may read differently
+#   moves      make-tanakh-research's target features (reply 44) the change can move
+# What is left out on purpose: a change of stem (a made niphal or hiphil often asks for another clause; the real
+# pairs carry it), object noun against suffix, questions, and anything that needs a form the edition never writes.
+
+[family.subject_person]
+dimension = "subject_person"
+how = "form"
+slot = "verb"
+part = "stem"
+feature = "person"
+values = ["1", "2", "3"]
+free = ["gender"]
+place = { subject_form = ["zero"] }
+needs = ["finite"]
+moves = [1, 12]
+
+[family.subject_number]
+dimension = "subject_number"
+how = "form"
+slot = "verb"
+part = "stem"
+feature = "number"
+values = ["sg", "pl"]
+free = ["gender"]
+place = { subject_form = ["zero"] }
+needs = ["finite"]
+moves = [1, 12, 17]
+
+[family.subject_gender]
+dimension = "subject_gender"
+how = "form"
+slot = "verb"
+part = "stem"
+feature = "gender"
+values = ["m", "f"]
+place = { subject_form = ["zero"] }
+needs = ["finite"]
+moves = [1, 2]
+
+[family.subject_noun_number]
+dimension = "subject_number"
+how = "form"
+slot = "subject"
+part = "stem"
+classes = ["noun"]
+feature = "number"
+values = ["sg", "pl"]
+agree = ["verb"]
+place = { subject_form = ["noun"], pred_kind = ["v"] }
+needs = ["one_word", "finite"]
+moves = [1, 2, 17]
+
+[family.tense]
+dimension = "time"
+how = "form"
+slot = "verb"
+part = "stem"
+feature = "type"
+values = ["qatal", "yiqtol", "participle_active", "imperative", "wayyiqtol", "weqatal"]
+free = ["gender", "state"]
+may = ["time", "time_abs", "aspect", "mood", "force", "kind", "pred_kind", "pattern", "fronted", "subject_form", "connective"]
+moves = [6]
+
+[family.object_number]
+dimension = "object_number"
+how = "form"
+slot = "object"
+part = "stem"
+classes = ["noun"]
+feature = "number"
+values = ["sg", "pl"]
+needs = ["one_word"]
+moves = [2, 3, 17]
+
+[family.pp_number]
+dimension = "pp_number"
+how = "form"
+slot = "pp"
+part = "stem"
+classes = ["noun"]
+feature = "number"
+values = ["sg", "pl"]
+needs = ["one_word"]
+moves = [2, 17]
+
+[family.definiteness]
+dimension = "definiteness"
+how = "form"
+slot = ["subject", "pp"]
+part = "stem"
+classes = ["noun"]
+feature = "definite"
+values = ["", "article"]
+needs = ["one_word"]
+moves = [3, 10]
+
+[family.possessor_person]
+dimension = "possessor_person"
+how = "form"
+slot = "possessor"
+part = "suffix"
+feature = "person"
+values = ["1", "2", "3"]
+free = ["gender"]
+moves = [11]
+
+[family.possessor_number]
+dimension = "possessor_number"
+how = "form"
+slot = "possessor"
+part = "suffix"
+feature = "number"
+values = ["sg", "pl"]
+free = ["gender"]
+moves = [11]
+
+[family.object_suffix_person]
+dimension = "object_person"
+how = "form"
+slot = "object"
+part = "suffix"
+feature = "person"
+values = ["1", "2", "3"]
+free = ["gender"]
+moves = [3]
+
+[family.object_suffix_number]
+dimension = "object_number"
+how = "form"
+slot = "object"
+part = "suffix"
+feature = "number"
+values = ["sg", "pl"]
+free = ["gender"]
+moves = [3]
+
+[family.swap_object_noun]
+dimension = "swap_noun"
+how = "swap"
+slot = "object"
+to_kinds = ["אָדָם", "חַיָּה", "כְּלִי", "מָקוֹם", "צֶמַח", "מַאֲכָל", "גּוּף", "בִּנְיָן", "חֹמֶר", "עִנְיָן"]
+needs = ["one_word"]
+moves = [2, 3, 10]
+
+[family.swap_subject_noun]
+dimension = "swap_noun"
+how = "swap"
+slot = "subject"
+to_kinds = ["אָדָם", "חַיָּה", "כְּלִי", "מָקוֹם", "צֶמַח", "מַאֲכָל", "גּוּף", "בִּנְיָן", "חֹמֶר", "עִנְיָן"]
+keep_gender = true
+needs = ["one_word"]
+moves = [1, 2, 10]
+
+[family.swap_pp_noun]
+dimension = "swap_noun"
+how = "swap"
+slot = "pp"
+to_kinds = ["אָדָם", "חַיָּה", "כְּלִי", "מָקוֹם", "צֶמַח", "מַאֲכָל", "גּוּף", "בִּנְיָן", "חֹמֶר", "עִנְיָן"]
+needs = ["one_word"]
+moves = [2, 13]
+
+[family.drop_negator]
+dimension = "polarity"
+how = "drop_negator"
+place = { polarity = ["negative"] }
+needs = ["finite"]
+must = ["polarity"]
+moves = [7]
+
+[family.add_negator]
+dimension = "polarity"
+how = "add_negator"
+place = { polarity = ["affirmative"], force = ["declarative"] }
+needs = ["finite"]
+must = ["polarity"]
+moves = [7]
+
+[family.drop_subject]
+dimension = "subject_form"
+how = "drop_subject"
+place = { subject_form = ["noun", "pronoun"], pred_kind = ["v"] }
+needs = ["finite"]
+may = ["subject_form", "pattern", "fronted"]
+moves = [1, 12]
+
+[family.add_pronoun]
+dimension = "subject_form"
+how = "add_pronoun"
+place = { subject_form = ["zero"], pred_kind = ["v"] }
+needs = ["finite"]
+may = ["subject_form", "pattern", "fronted"]
+moves = [1, 12]
+
+[family.move_subject]
+dimension = "order"
+how = "move_subject"
+place = { subject_form = ["noun", "pronoun"], pred_kind = ["v"] }
+may = ["fronted", "pattern"]
+moves = [9]

@@ -18,6 +18,12 @@ quiet_marks = ["relation", "transitivity"]
 order = ["polarity", "force", "time", "stem", "connective", "definiteness", "possession", "subject_form",
          "object_form", "added_pp", "added_adv", "preposition", "kind", "order"]
 
+# made by the code, not by a mark: the verb's form is finite in one clause and not in the other (a purpose said with an
+# infinitive or with a finite verb); `also` is what goes with it
+[dimensions.finiteness]
+also = ["time", "time_abs", "aspect", "mood", "kind", "pred_kind", "pattern", "fronted", "subject_form", "connective",
+        "relation", "transitivity", "voice", "force"]
+
 [dimensions.polarity]
 marks = ["polarity"]
 slots = ["negator"]
@@ -77,3 +83,33 @@ also = ["pattern", "fronted", "subject_form", "transitivity", "voice", "time", "
 
 [dimensions.order]
 marks = ["fronted", "pattern"]
+
+# Which of make-tanakh-research's seventeen target features (reply 44) a change in this dimension can move in a target
+# language. Read by macula/probe_sets.py into the column `moves`. 4, 5, 14 and 15 are not here: they need more than one
+# clause (the context dimensions of probe_sets.py name them).
+[moves]
+subject_person = [1, 12]
+subject_number = [1, 2, 12, 17]
+subject_gender = [1, 2]
+subject_form = [1, 12]
+swap_noun = [2, 10]
+object_form = [3]
+object_person = [3]
+object_number = [2, 3, 17]
+object_gender = [2, 3]
+definiteness = [3, 10]
+time = [6]
+polarity = [7]
+swap_negator = [7]
+force = [7, 9]
+stem = [8]
+order = [9]
+kind = [9, 13]
+possession = [11]
+possessor_person = [11]
+possessor_number = [11]
+possessor_gender = [11]
+preposition = [13]
+connective = [16]
+finiteness = [16]
+pp_number = [2, 17]

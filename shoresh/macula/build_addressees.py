@@ -19,6 +19,8 @@ Output macula/data/addressees/ (git-ignored):
     second_person  no addressee in the inquit; the person, deity or group most of the quotation's second-person words of the
                    quotation's own number are linked to by ACAI (a plural majority takes a group only); the entity must have at least a
                    third of the quotation's second-person words
+    review         a row of resources/speaker_quotations/nt_review.tsv (field addressee: the Greek word ids that name the
+                   hearer in the text, "-" for none), where the rules below go wrong; the number is that word's own
     turn           neither; the quotation answers the one before it (same or previous verse, another speaker, said to this
                    speaker): that one's speaker is the addressee
     ''             unknown
@@ -54,6 +56,9 @@ SPK_FROM = {"father": "parent_to_child", "mother": "parent_to_child", "offspring
 COLS = ["corpus", "quote", "first", "speaker_id", "speaker", "addressee", "addressee_id", "basis", "addressee_words", "second_person",
         "agree", "plural", "relation", "number", "number_basis", "member_of_plural"]
 SINGLE = ("person", "deity")                          # entity kinds that cannot be a plural hearer
+
+
+REVIEW = HERE.parents[1] / "resources" / "speaker_quotations" / "nt_review.tsv"
 
 
 def tsv(p: Path):
@@ -188,6 +193,11 @@ def main() -> int:
         e, k = c.most_common(1)[0]
         return e if k >= total / 3 else ""                         # at least a third of all its second-person words
 
+    reviewed = {}                                                  # Greek quotation -> the word ids that name its hearer
+    if REVIEW.exists():
+        for r in tsv(REVIEW):
+            if r["field"] == "addressee":
+                reviewed[r["word_start"]] = [] if r["value"] == "-" else r["value"].split(",")
     rows, st = [], collections.Counter()
     last_by_corpus = {}
     spoke, heard = collections.Counter(), collections.Counter()
@@ -211,19 +221,30 @@ def main() -> int:
             add = group or (f"lemma:{hw[3]}" if hw[3] else "")
             st[(corpus, "plural_member_dropped")] += 1
         basis = "inquit" if add else ""
+        if corpus == "grc" and q in reviewed:
+            named = [(entity(x), x) for x in reviewed[q]]
+            if any(x not in w for _, x in named):
+                raise SystemExit(f"nt_review.tsv: quotation {q}: an addressee word is not a Greek word: {reviewed[q]}")
+            add, aw = next(((e, x) for e, x in named if e), ("", ",".join(reviewed[q])))
+            if not add and reviewed[q]:
+                add = f"lemma:{w[reviewed[q][0]][3]}"
+            num = w[aw.split(",")[0]][5] if aw else ""
+            basis, member, sec = ("review" if reviewed[q] else ""), "", ""
         if not add and sec:
             add, basis = sec, "second_person"
         prev = last_by_corpus.get(corpus)
         # a reply: the one before (same or previous verse, another speaker) was said to this speaker. Where the inquit names the
         # addressee, this holds 0.85 (Hebrew) and 0.75 (Greek); without "said to this speaker" only 0.5 to 0.65, so not used
-        if not add and prev and prev[1] and prev[1] != spk and prev[2] == spk and int(q_first[(corpus, q)][:8]) - int(prev[0][:8]) <= 1:
+        if not add and basis != "review" and q not in reviewed and prev and prev[1] and prev[1] != spk and prev[2] == spk and int(q_first[(corpus, q)][:8]) - int(prev[0][:8]) <= 1:
             add, basis = prev[1], "turn"
         last_by_corpus[corpus] = (q_first[(corpus, q)], spk, add)
         agree = ""
         if basis == "inquit" and not add.startswith("lemma:") and sec:
             agree = "1" if sec == add else "0"
         et = ents.get(add, {}).get("type", "")
-        if snum:                                     # the speech's own "you" first: John 14:23 is said to Judas, its "you" plural
+        if basis == "review" and num in ("singular", "plural"):
+            number, nbasis = num, "review"
+        elif snum:                                   # the speech's own "you" first: John 14:23 is said to Judas, its "you" plural
             number, nbasis = snum, "second_person"
         elif basis == "inquit" and et == "group" and num != "plural":   # "to the crowd" (ὄχλῳ): a collective, heard as many
             number, nbasis = "plural", "entity"

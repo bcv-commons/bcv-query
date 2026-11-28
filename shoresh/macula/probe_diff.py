@@ -9,7 +9,8 @@ rest: raw differences that no dimension explains. A pair differs in one thing wh
   cd shoresh && .venv/bin/python -I macula/probe_diff.py tanakh-check          # the checks on the Tanakh
   cd shoresh && .venv/bin/python -I macula/probe_diff.py show <clause> <clause>
 
-Records are built from the clause scheme's tables (macula/clause_scheme.py); today the Tanakh's.
+Records are built from the clause scheme's tables (macula/clause_scheme.py): the Tanakh's (class Tanakh) and the
+Hebrew New Testaments' (class NT, on hebrew-nt-analysis's words, features and tree; its values in the Tanakh's codes).
 """
 from __future__ import annotations
 
@@ -25,7 +26,7 @@ if __package__ in (None, ""):
 
 import pyarrow.parquet as pq
 
-from macula.clause_scheme import K1, NEGATORS, SCHEME_OUT, strong
+from macula.clause_scheme import FINITE, K1, NEGATORS, SCHEME_OUT, part_kinds, strong
 
 HERE = Path(__file__).resolve().parent
 FEATURES = ("lexeme", "type", "stem", "person", "number", "gender", "state")
@@ -148,6 +149,101 @@ def small_kind(s):
     return b if b in ("subject", "object", "pp", "adv") else ("object" if b == "object2" else "other")
 
 
+# the New Testament tables' feature values in the Tanakh's codes
+CODES = {"person": {"first": "1", "second": "2", "third": "3", "unknown: x": "x"},
+         "number": {"singular": "sg", "plural": "pl", "dual": "du"},
+         "gender": {"masculine": "m", "feminine": "f", "common": "c", "both": "b"},
+         "state": {"absolute": "abs", "construct": "cstr", "determined": "det"}}
+
+
+class NT:
+    """a Hebrew New Testament's clauses as records, from the scheme's tables and hebrew-nt-analysis's word parts.
+    A word has a running number `t` (the edition's order) and the id of the text standard (`scg:…`, `del:…`)."""
+
+    def __init__(self, ed, folder=None):
+        from macula import hebrew_nt_clauses as N
+        self.ed = ed
+        folder = folder or SCHEME_OUT / "nt" / ed
+        self.clauses = {c["clause"]: c for c in pq.read_table(folder / "clauses.parquet").to_pylist()}
+        self.segs = collections.defaultdict(list)
+        for s in pq.read_table(folder / "segments.parquet").to_pylist():
+            self.segs[s["clause"]].append(s)
+        self.cons = collections.defaultdict(list)
+        for c in pq.read_table(folder / "constituents.parquet").to_pylist():
+            self.cons[c["clause"]].append(c)
+        kinds = collections.defaultdict(collections.Counter)        # (class, Strong) -> the Tanakh's part types
+        for p in pq.read_table(K1 / "hbo" / "pieces.parquet", columns=["class", "lexeme", "marks"]).to_pylist():
+            t = json.loads(p["marks"] or "{}").get("type", "")
+            if t and p["class"] != "verb":
+                kinds[(p["class"], strong(p["lexeme"]))][t] += 1
+        key = lambda r: (r["book"], r["chapter"], r["verse"], r["i"], r["part"])  # noqa: E731
+        feat = {key(r): r for r in pq.read_table(N.FEATURES / ed / "features.parquet").to_pylist()}
+        tree = {key(r): r for r in pq.read_table(N.LAYERS / ed / "pieces.parquet",
+                                                 columns=["book", "chapter", "verse", "i", "part", "head_i", "head_part",
+                                                          "rel"]).to_pylist()}
+        by_word = collections.OrderedDict()
+        for r in pq.read_table(N.ANALYSIS / ed / "words.parquet").to_pylist():
+            if r["class"] != "verse-number" and (r["text"] or r["class"] == "art"):   # an article may be written in the preposition
+                by_word.setdefault((r["book"], r["chapter"], r["verse"], r["i"]), []).append(r)
+        self.at, self.t_of, self.word, self.parts = {}, {}, {}, {}
+        for t, (wk, parts) in enumerate(by_word.items(), 1):
+            self.at[wk] = t
+            wid = f"{N.TEXTS[ed]}:{N.CS_BOOK[wk[0]]:02d}{wk[1]:03d}{wk[2]:03d}{wk[3] + 1:03d}"
+            self.t_of[wid] = t
+            self.word[t] = {"id": wid, "book": wk[0], "chapter": wk[1], "verse": wk[2], "i": wk[3], "text": parts[0]["word"]}
+        for wk, parts in by_word.items():
+            t = self.at[wk]
+            parts.sort(key=lambda r: r["part"])
+            out = []
+            for p, kind in zip(parts, part_kinds([p["class"] or "" for p in parts])):
+                f, tr = feat.get(key(p), {}), tree.get(key(p), {})
+                cls = p["class"] or ""
+                ty = (p["form"] or "").replace(" ", "_") if cls == "verb" else \
+                    "proper" if f.get("definite") == "name" else \
+                    (kinds[(cls, p["strong"] or "")].most_common(1) or [("common" if cls == "noun" else "", 0)])[0][0]
+                head = self.at.get(wk[:3] + (tr.get("head_i"),)) if tr.get("head_i") is not None else None
+                # a suffix is one word in many shapes: its person, number and gender tell them apart, not a lexeme
+                lex = "hbo:suffix" if cls == "pron" and kind == "suffix" else p["lexeme"] or ""
+                out.append({"key": (t, p["part"]), "text": p["text"], "cls": cls, "kind": kind, "lexeme": lex,
+                            "rel": (tr.get("rel") or "").split(":")[0], "head": (head, tr.get("head_part")) if head else None,
+                            "type": ty, "stem": f.get("stem") or "", "definite": f.get("definite") or "",
+                            "known": p["source"] == "macula",        # the form stands in the Tanakh: its analysis is that form's
+
+                            **{k: CODES[k].get(f.get(k) or "", "") for k in CODES}})
+            self.parts[t] = out
+
+    def words_of(self, cid):
+        ts = []
+        for s in sorted(self.segs[cid], key=lambda s: (s["chapter"], s["verse"], s["first_w"])):
+            ts += [self.at[k] for k in ((s["book"], s["chapter"], s["verse"], w - 1) for w in range(s["first_w"], s["last_w"] + 1))
+                   if k in self.at]
+        return ts
+
+    def record(self, cid, words=None, text=None):
+        """the clause's record; `words` gives other parts for some of its words ({t: [parts]}, a changed clause)"""
+        c = self.clauses[cid]
+        ts = self.words_of(cid)
+        cons = [(BEARER.get(k["role"], k["role"]), self.t_of[k["head"]], self.t_of[k["first"]], self.t_of[k["last"]])
+                for k in self.cons[cid] if k["head"] in self.t_of]
+        pred = self.t_of.get(c["pred"])
+        slots, pos = [], {}
+        for t in ts:
+            for p in (words or {}).get(t, self.parts[t]):
+                pos[p["key"]] = len(slots)
+                slots.append(dict(p))
+        for s in slots:
+            s["head"] = pos.get(s["head"])
+            s["bearer"] = Tanakh._bearer(s, slots, cons, pred)
+            s["small"] = small_kind(s)
+        skip = ("clause", "edition", "book", "chapter", "verse", "segments", "parent", "depth", "rule", "pred", "source_clause")
+        marks = {k: (c[k] if not isinstance(c[k], list) else "+".join(c[k])) or "" for k in c
+                 if not k.endswith(("_basis", "_p")) and k not in skip}
+        mark_p = {k[:-2]: c[k] for k in c if k.endswith("_p") and c[k] is not None}
+        sure = min([k["role_p"] for k in self.cons[cid] if k["role_p"] is not None] or [1.0])
+        return {"clause": cid, "marks": marks, "mark_p": mark_p, "slots": slots, "unknown": ("stem",) + PNG + ("state",),
+                "text": text or " ".join(self.word[t]["text"] for t in ts), "words": len(ts), "ts": ts, "sure": sure}
+
+
 # ---------------------------------------------------------------- the difference
 def line_up(a, b):
     """the cheapest line-up of two lists of parts: a part meets a part of its class (free with the same lexeme, 1
@@ -189,6 +285,7 @@ def diff(a, b, D=None):
      "quiet": [differences of quiet marks that no dimension took], "same_parts": bool, "one": bool, "sure": float}"""
     D = D or dimensions()
     spec = D["dimensions"]
+    unknown = a.get("unknown") or b.get("unknown")                   # features whose empty value means "not known"
     raw = []                                                         # dicts: what (mark / feature / slot), name, from, to, i, j
     for k in sorted(set(a["marks"]) | set(b["marks"])):
         if k in D["context_marks"]:
@@ -205,6 +302,8 @@ def diff(a, b, D=None):
         p, q = a["slots"][i], b["slots"][j]
         for f in FEATURES:
             if p[f] != q[f]:
+                if unknown and f in unknown and not (p[f] and q[f]) and p["type"] == q["type"]:
+                    continue                                         # not given on one side: unknown, not another value
                 raw.append({"what": "feature", "name": f, "from": p[f], "to": q[f], "i": i, "j": j, "cls": p["cls"],
                             "bearer": p["bearer"] if p["bearer"] == q["bearer"] else
                             "/".join(sorted({p["bearer"], q["bearer"]} - {""})), "small": p["small"]})
@@ -231,8 +330,18 @@ def diff(a, b, D=None):
         if neg:
             d["with"] += take(lambda x: x["name"] in ("negator", "force", "mood", "type", "time", "time_abs", "aspect"))
         d["bearer"] = r["bearer"]
+    # 1b. a verb that is finite in one clause and not in the other: what a finite verb alone has goes with it
+    for r in take(lambda r: r["what"] == "feature" and r["name"] == "type" and r["cls"] == "verb"
+                  and (r["from"] in FINITE) != (r["to"] in FINITE)):
+        d = add("finiteness", [r])
+        d["with"] += take(lambda x: x["what"] == "feature" and (x["i"], x["j"]) == (r["i"], r["j"]) and x["name"] in PNG + ("state",))
+        d["with"] += take(lambda x: x["what"] == "mark" and x["name"] in spec["finiteness"]["also"])
     # 2. person, number and gender: one dimension per bearer and feature; what agrees is folded in
     for f in PNG:
+        if f == "gender":                                            # `אָמַר` -> `אָמְרוּ`, `אָמַרְתִּי`: the form has no gender to keep
+            for r in take(lambda r: r["what"] == "feature" and r["name"] == "gender" and {r["from"], r["to"]} & {"c", "b", ""}
+                          and any((r["i"], r["j"]) in d["slots"] and d["dimension"].endswith(("_person", "_number")) for d in dims)):
+                next(d for d in dims if (r["i"], r["j"]) in d["slots"] and d["dimension"].endswith(("_person", "_number")))["with"].append(r)
         own = [r for r in left if r["what"] == "feature" and r["name"] == f and r["cls"] not in D["agreeing_classes"]]
         groups = collections.OrderedDict()
         for r in own:

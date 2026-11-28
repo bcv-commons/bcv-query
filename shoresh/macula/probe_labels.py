@@ -12,22 +12,24 @@ kinds        one row per noun or verb part that stands for a Greek word with a U
              `kind` is a Hebrew head word: for nouns אָדָם, מִשְׁפָּחָה, עַם, אֱלֹוהַּ, גּוּף, חַיָּה, צֶמַח, מַאֲכָל, כְּלִי,
              בִּנְיָן, מָקוֹם, חֹמֶר, and עִנְיָן for a noun of an event or abstract domain; for verbs אֲמִירָה, תְּנוּעָה, הֲוָיָה.
              The kind is the Greek word's at this very place (its UBS domain, through lexeme-aligner's links kept in
-             the build): a reading of the place, not of the lexeme. `kind_basis`: greek_domain | entity (the entity
+             the build): a reading of the place, not of the lexeme. `kind_basis`: linked (the Greek word's domain, through the link) | entity (the entity
              kind of hebrew-nt-analysis at this place, used where the Greek gives no kind, and for beings the Greek
              files under an event: a teacher, a king) | entity_lexeme (no entity here, but the lexeme names a being
-             in four of five places where one is known, at least five). `domain`, `greek`, `greek_class`, `link_basis`, `entity_kind` say where
-             it came from.
+             in four of five places where one is known, at least five). The table holds Hebrew-side values only;
+             where a kind came from (the Greek word's id, its domain and class, the link's basis) stands in
+             `kinds_source`, a table for this side's checking, not for a drafter.
 frames       one row per clause: `frame` quotation | letter | none; speakers and hearers as entity ids, the hearers'
              kind and number, `basis` (the speech layer's, or `opening` for a letter: letter_frames.toml).
 plural_size  one row per plural pronoun, suffix or verb whose number of referents the text states: `size` 2 | 3 |
              more; `basis` numeral_own (the numeral in the same word, שְׁנֵיהֶם), numeral (in one phrase with the
              antecedent), names (the antecedent is one of several names joined by וְ, and nothing more is joined to
-             them). Third person only, and only an antecedent in the same verse or the one before, linked or of
+             them). Third person only, the antecedent not of another gender and not beside the verb's own subject, and only an antecedent in the same verse or the one before, linked or of
              calibrated sureness 0.9 and more. Few rows: the text seldom says it.
 we           one row per first person plural part: the inclusive-we layer's value for the Greek word it stands for
              (`carried_by` linked) or, without a link, for its verse when the verse has one value (`verse`).
-             `source_key` is the Greek word's key: with it the value without a voting edition is read from the
-             layer's `without` table (a language under test must not sit among its own voters).
+             A language under test must not sit among its own voters: `we_without` has one row per part and
+             voting edition without which the value comes out differently (`without`, `value`, `alternative`);
+             for an edition with no row there the value stays as it is. The Greek word's key is in `we_source`.
 """
 from __future__ import annotations
 
@@ -51,7 +53,7 @@ from macula import hebrew_nt_clauses as N
 
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "data"
-SPEECH = DATA / "hebrew-nt-speech" / "2026-11-26b"
+SPEECH = DATA / "hebrew-nt-speech" / "2026-11-28"
 WE = DATA / "we-layer" / "words.tsv"
 OUT = DATA / "probe-labels"
 EDITIONS = ("heb_scg", "heb_mod")
@@ -65,10 +67,10 @@ VERB_KIND = {"013": "הֲוָיָה", "015": "תְּנוּעָה", "016": "תְ�
 ENTITY_KIND = {"person": "אָדָם", "realia": "כְּלִי", "place": "מָקוֹם", "group": "עַם", "fauna": "חַיָּה",
                "flora": "צֶמַח", "deity": "אֱלֹוהַּ"}
 BEINGS = ("אָדָם", "אֱלֹוהַּ", "עַם")
-TWO, THREE = ("8147",), ("7969", "7969a", "7970")
+TWO, THREE = ("8147",), ("7969", "7969a")
 TWO_OF = ("שני", "שתי")
 MORE = ("0702", "0705", "2568", "2572", "8337", "8346", "7651", "7657", "8083", "8084", "8672", "8673", "6235", "6240",
-        "6242", "3967", "0505", "7239")                              # the numbers from four up
+        "6242", "7970", "3967", "0505", "7239")                              # the numbers from four up
 ORDINAL = ("י", "ית")                                                # שְׁלִישִׁי, שְׁלִישִׁית: no count
 MIN_REFERENT = 0.9                                                   # a model's antecedent counts from this calibrated sureness
 
@@ -157,9 +159,9 @@ def kinds(E, G, n):
         if g is not None:
             n[f"{cls}s with a Greek domain"] += 1
             if cls == "noun" and g["class"] == "noun":
-                kind, basis = NOUN_KIND.get(g["domain"][:3], OTHER_NOUN), "greek_domain"
+                kind, basis = NOUN_KIND.get(g["domain"][:3], OTHER_NOUN), "linked"
             elif cls == "verb" and g["class"] == "verb":
-                kind, basis = VERB_KIND.get(g["domain"][:3], ""), "greek_domain"
+                kind, basis = VERB_KIND.get(g["domain"][:3], ""), "linked"
         if cls == "noun" and ek:
             e = ENTITY_KIND[ek]
             if kind and kind != OTHER_NOUN:
@@ -284,13 +286,27 @@ def plural_size(E, n):
                 if x["class"] != "num":
                     continue
                 hx = (E.piece.get(E.key(x)) or {}).get("head_i")
-                if hx == ai + 1 or (j + 1) in heads.values():        # head_i counts words from 1
+                if hx == ai or j in heads.values():                  # head_i is the head word's `i`
                     return numeral([x])
         # the antecedent is the numeral itself, said of a group: שְׁנַיִם מֵהֶם
         nxt = E.by_word.get((book, ch, vs, ai + 1), ())
         if nxt and nxt[0]["class"] == "prep" and nxt[0]["strong"] == "4480":
             return numeral([x for x in E.by_word.get((book, ch, vs, ai), ()) if x["class"] == "num"])
         return None
+
+    own_subject = collections.defaultdict(set)                       # a verb's word -> the words the tree gives it as subject
+    for k, r in E.piece.items():
+        if r["rel"] == "s" and r["head_i"] is not None:
+            own_subject[k[:3] + (r["head_i"],)].add(k[3])
+
+    def fits(w, book, ch, vs, ai):
+        """the antecedent may be this plural's: not another gender, and not beside the verb's own subject"""
+        g = E.F(w, "gender")
+        ga = {E.F(x, "gender") for x in E.by_word.get((book, ch, vs, ai), ()) if x["class"] in ("noun", "num")} - {"", "both", "common"}
+        if g in ("masculine", "feminine") and ga and g not in ga:
+            return False
+        subj = own_subject.get((w["book"], w["chapter"], w["verse"], w["i"]), ())
+        return w["class"] != "verb" or not subj or ((ch, vs) == (w["chapter"], w["verse"]) and ai in subj)
 
     out = []
     for w in E.words:
@@ -308,8 +324,8 @@ def plural_size(E, n):
             ch, vs = (int(x) for x in r["antecedent_verse"].split(":"))
             sure_ref = r["referent_basis"] == "linked" or (r["referent_p_calibrated"] or 0) >= MIN_REFERENT
             near = ch == w["chapter"] and 0 <= w["verse"] - vs <= 1
-            if not sure_ref or not near:
-                n["antecedent unsure or further than one verse back (no size)"] += 1
+            if not sure_ref or not near or not fits(w, w["book"], ch, vs, r["antecedent_i"]):
+                n["antecedent unsure, of another gender, beside the verb's own subject, or further back (no size)"] += 1
             else:
                 ai = r["antecedent_i"]
                 num = numeral_of(w["book"], ch, vs, ai)
@@ -364,16 +380,31 @@ def build(editions):
         E, checks = Edition(ed), {}
         for name, fn, cols in (
                 ("kinds", lambda n: kinds(E, G, n), ["book", "chapter", "verse", "i", "part", "class", "kind", "kind_basis",
-                                                     "domain", "greek", "greek_class", "link_basis", "entity_kind"]),
+                                                     "entity_kind"]),
                 ("frames", lambda n: frames(E, G, n), ["clause", "frame", "quote", "speakers", "hearers", "hearer_kind",
                                                        "hearer_number", "basis"]),
                 ("plural_size", lambda n: plural_size(E, n), ["book", "chapter", "verse", "i", "part", "class", "size",
                                                               "basis", "referent"]),
                 ("we", lambda n: we(E, G, n), ["book", "chapter", "verse", "i", "part", "value", "alternative", "basis",
-                                               "n_i", "n_e", "agree", "source_key", "carried_by"])):
+                                               "n_i", "n_e", "agree", "carried_by"])):
             n = collections.Counter()
             table = fn(n)
             write(OUT / ed / f"{name}.parquet", table, cols)
+            source = {"kinds": ["domain", "greek", "greek_class", "link_basis"], "we": ["source_key"]}.get(name)
+            if source:                                               # the Greek side of a label, kept apart
+                write(OUT / ed / f"{name}_source.parquet", table, ["book", "chapter", "verse", "i", "part"] + source)
+            if name == "we":
+                other = collections.defaultdict(list)
+                for r in csv.DictReader(open(WE.parent / "without.tsv", encoding="utf-8"), delimiter="\t"):
+                    if r["lang"] == "grc" and r["changed"] == "1":
+                        other[r["key"]].append(r)
+                rows_ = [{**{k: t[k] for k in ("book", "chapter", "verse", "i", "part")}, "without": r["without"],
+                          "value": r["value"], "alternative": r["alternative"] or None}
+                         for t in table for r in other.get(t["source_key"], ())]
+                write(OUT / ed / "we_without.parquet", rows_, ["book", "chapter", "verse", "i", "part", "without", "value",
+                                                               "alternative"])
+                checks["we_without"] = {"rows": len(rows_), **{"without " + k: v for k, v in sorted(
+                    collections.Counter(r["without"] for r in rows_).items())}}
             checks[name] = {"rows": len(table), **{k: v for k, v in sorted(n.items())}}
         (OUT / ed / "CHECKS.json").write_text(json.dumps(checks, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         print(ed, json.dumps(checks, ensure_ascii=False, indent=1))
