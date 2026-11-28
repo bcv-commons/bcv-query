@@ -1,0 +1,79 @@
+# probe_dimensions.toml: which raw differences between two Hebrew clauses count as one change (grammar probes,
+# piece 1; read by macula/probe_diff.py). Mark names are the clause scheme's (clause-scheme.toml); the code refuses
+# a mark that the scheme does not name.
+#
+# Per dimension:
+#   marks     clause marks whose difference alone makes the dimension
+#   slots     kinds of word part whose presence in one clause only makes the dimension
+#   features  features of a lined-up word part whose difference makes the dimension
+#   also      marks and features that go with the dimension once it is there (they do not make it)
+# The dimensions of person, number, gender and state are named by the code from the part that bears the feature
+# (`subject_number`, `object_gender`, `possessor_person`, ...); a word swap is `swap_<class>`.
+
+context_marks = ["line_kind", "subject_switch"]   # where the clause stands, not what it is: not compared
+agreeing_classes = ["verb", "adj"]                # these take person, number and gender from a noun or pronoun
+# marks that rest on more than the clause's own words (how it hangs on its neighbour, the verb's frame at this place):
+# a dimension that explains them takes them; alone they make neither a dimension nor a rest, and are listed apart
+quiet_marks = ["relation", "transitivity"]
+order = ["polarity", "force", "time", "stem", "connective", "definiteness", "possession", "subject_form",
+         "object_form", "added_pp", "added_adv", "preposition", "kind", "order"]
+
+[dimensions.polarity]
+marks = ["polarity"]
+slots = ["negator"]
+also = ["negator", "neg_scope", "force", "mood", "type", "time", "time_abs", "aspect", "pattern", "fronted"]
+
+[dimensions.force]
+marks = ["force"]
+slots = ["question"]
+also = ["mood", "type", "time", "time_abs", "aspect", "pattern", "fronted"]
+
+[dimensions.time]
+marks = ["time", "time_abs", "aspect", "mood"]
+features = ["type"]
+also = ["connective", "relation", "fronted"]
+
+[dimensions.stem]
+features = ["stem"]
+also = ["voice", "transitivity", "time", "time_abs", "aspect"]
+
+[dimensions.connective]
+marks = ["connective", "relation"]
+slots = ["connective"]
+also = ["fronted", "pattern"]
+
+[dimensions.definiteness]
+slots = ["article"]
+also = ["state", "object_marker"]
+
+[dimensions.possession]
+slots = ["possessor"]
+also = ["state", "article", "object_marker"]
+
+[dimensions.subject_form]
+marks = ["subject_form"]
+slots = ["subject"]
+also = ["pattern", "fronted"]
+
+[dimensions.object_form]
+slots = ["object", "object_marker"]
+also = ["transitivity", "pattern", "fronted"]
+
+[dimensions.added_pp]
+slots = ["pp"]
+also = ["pattern", "fronted", "preposition"]
+
+[dimensions.added_adv]
+slots = ["adv"]
+also = ["pattern", "fronted"]
+
+[dimensions.preposition]
+slots = ["preposition"]
+also = ["pattern", "fronted", "state"]
+
+[dimensions.kind]
+marks = ["kind", "pred_kind"]
+also = ["pattern", "fronted", "subject_form", "transitivity", "voice", "time", "time_abs", "aspect", "mood"]
+
+[dimensions.order]
+marks = ["fronted", "pattern"]
