@@ -1195,12 +1195,14 @@ def tanakh_export():
     out_a = []
     IN_VERB = next(v["term"] for v in cats["added"]["kind"]["values"] if v["code"] == "in_verb")
     POSS = next(v["term"] for v in cats["added"]["kind"]["values"] if v["code"] == "possessor")
+    aramaic = {r["t"]: r["id"] for r in pq.read_table(K1 / "arc" / "words.parquet", columns=["t", "id"]).to_pylist()}
+    part_id = lambda x: f"{wd[int(x.split('.')[0])]['id'] if int(x.split('.')[0]) in wd else aramaic[int(x.split('.')[0])]}.{x.split('.')[1]}"
     for r in pq.read_table(K1 / "hbo" / "added.parquet").to_pylist():
         if r["verb"] not in wd:
             n["added rows with a verb outside the table"] += 1
             continue
-        ant = " ".join(f"{wd[int(x.split('.')[0])]['id']}.{x.split('.')[1]}" if "." in x and int(x.split(".")[0]) in wd else x
-                       for x in (r["antecedent"] or "").split()) or None
+        ant = " ".join(part_id(x) for x in (r["antecedent"] or "").split()) or None     # an Aramaic word (Genesis 31:47, Ezra 7) is not in this table
+        n["antecedents that are an Aramaic word"] += sum(int(x.split(".")[0]) not in wd for x in (r["antecedent"] or "").split())
         o = {"clause": word_clause.get(r["verb"]), "verb": wd[r["verb"]]["id"],
              "role": "s" if r["kind"] == IN_VERB else "poss" if r["kind"] == POSS else None,
              "frame_role": r["role"] if r["role"] != "poss" else None, "kind": r["kind"], "where": r["where"] or None,

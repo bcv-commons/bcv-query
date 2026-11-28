@@ -106,6 +106,7 @@ each pronoun, pronoun suffix and finite verb has its referent (an id shared alon
 | New in v0.4 | `stem` in `features.parquet` (its other columns unchanged, value for value); `speech.parquet`, `entities.parquet` per edition |
 | New in v0.5 | `referents.parquet` per edition; every other file unchanged |
 | New in v0.6 | `speech.parquet` from the mended addressees layer (bcv-commons/addressees v0.2); `referents.parquet` rebuilt on it; every other file unchanged |
+| New in v0.9 | The **clause scheme**: `<edition>/scheme/` (clauses, their constituents, unsaid subjects, order statements), `clause-scheme.toml`, `validate_scheme.py`. `speech.parquet`: one quotation mended (Acts 2:14-36 is said to the crowd, bcv-commons/addressees v0.3); `referents.parquet` rebuilt on it. Every other file unchanged, `words.parquet` byte for byte |
 | New in v0.8 | `features.parquet` only, its `stem` column only: fewer, surer stems (hold-out 97.3% → 99.5%); every other file and column unchanged |
 | New in v0.7 | `referents.parquet` only: a verb takes a carried entity only from a Greek verb's subject; the ranker also reads DictaBERT word vectors (Tanakh test 87.4% → 90.4%); new columns `referent_p_calibrated`, `other_edition_referent`, `editions_agree` |
 
@@ -131,6 +132,14 @@ their form alone, and the tagger is less sure of lemmas (see *Quality*). Its tex
 | `<edition>/speech.parquet` | one per clause segment with a quotation: speaker, addressee, the addressee's number (v0.4; **CC BY-SA 4.0**) |
 | `<edition>/referents.parquet` | one per pronoun, pronoun suffix and finite verb: referent, basis, antecedent (v0.5; **CC BY-SA 4.0**) |
 | `<edition>/entities.parquet` | one per entity id: its kind, Hebrew type word and name (v0.4; **CC BY-SA 4.0**) |
+| `<edition>/scheme/clauses.parquet` | one per clause (segments joined): parent, rule, pattern, predicate, 17 marks (v0.9; **CC BY-SA 4.0**, as all of `scheme/`) |
+| `<edition>/scheme/segments.parquet` | one per clause segment: the clause it belongs to, its words, `continues` |
+| `<edition>/scheme/constituents.parquet` | one per constituent of a clause: role, head, first and last word, class, preposition, semantic role, reference status |
+| `<edition>/scheme/added.parquet` | one per unsaid subject: the verb, person, number, gender, the antecedent, who it is |
+| `<edition>/scheme/orders.parquet` | one per order statement: a relation between two word classes, how often the dependent stands before and after, places |
+| `<edition>/scheme/clause_join.parquet` | one per pair of a clause here and a clause carried from the Greek that share words (see below) |
+| `<edition>/scheme/BUILD.json` | the build's counts |
+| `clause-scheme.toml`, `validate_scheme.py` | the scheme: every table, column, value set and join; and the check that reads only that file |
 | `SHA256SUMS` | SHA-256 of every file |
 
 ## The words
@@ -272,7 +281,7 @@ quotation (`heb_scg` @SCG_SPEECH_ROWS@, `heb_mod` @MOD_SPEECH_ROWS@), keys `book
 | `speaker`, `addressee` | entity ids (`person:…`, `deity:…`, `group:…`; the ids of `entities.parquet`) |
 | `speech_basis` | `linked` (the strict values) |
 | `speech_share` | the share of the segment's linked words whose clause has this quotation |
-| `addressee_basis` | how the addressees layer found the addressee on the Greek: `inquit` (named in the frame of the speech verb), `second_person` (from the speech's second-person forms), `turn` (the other side of a dialogue: the quotation answers one said to this speaker), empty (not said). A hearer named only by a word, a key term or a place has no entity here |
+| `addressee_basis` | how the addressees layer found the addressee on the Greek: `inquit` (named in the frame of the speech verb), `second_person` (from the speech's second-person forms), `turn` (the other side of a dialogue: the quotation answers one said to this speaker), `review` (v0.9: a review row of the layer names the Greek words that name the hearer), empty (not said). A hearer named only by a word, a key term or a place has no entity here |
 | `addressee_member` | v0.6: where the Greek hearer is plural ("he said to them") and the entity lookup gave one of them, that person; not the addressee |
 | `addressee_number_form` | from the Hebrew of the segment: the number of its second-person verbs and pronouns (`features.parquet`) where they all agree; `mixed`; empty where it has none |
 | `addressee_number_layer`, `addressee_number_layer_basis` | v0.6: the layer's number for the whole quotation, strongest first `second_person` (most of the Greek quotation's second-person words), `inquit_word` (the word naming the hearer), `entity` (a group plural, a person or deity singular) |
@@ -285,6 +294,12 @@ quotation (`heb_scg` @SCG_SPEECH_ROWS@, `heb_mod` @MOD_SPEECH_ROWS@), keys `book
 person or to the Lord (Peter's speech in Acts 2; "he said to them" as Andrew or James). make-tanakh-research's Swahili check found
 these; of the 126 segments it named, the layer now has the right number in 72 and none in 32 (the speech's "you" is mixed, as in
 Matthew 5), and 22 still differ (Matthew 5-7, Acts 2 and 7). Read `addressee_number` (the form first) for a pronoun choice.
+
+**v0.9: Peter's speech in Acts 2:14-36 is said to the crowd.** It was still marked as said to the Lord (the singular "you" of
+the psalm he cites outvoted the plural "you" of his hearers, which links to nothing). A review row of bcv-commons/addressees
+v0.3 names the hearers from the speech's own opening words; the row is a language model's reading of the Greek text, not checked
+by a person. 86 segments of `heb_scg` and 87 of `heb_mod` change (addressee, its basis, its number); `referents.parquet` is
+rebuilt on it, and 21 referents in Acts 2 change in each edition. No other quotation changes; the figures above are v0.6's.
 
 `entities.parquet` (`ent`, `kind`, `type`, `name`, `name_basis`, `ent_basis`): the entities of k1 for the edition, with the Hebrew
 type word (אָדָם, עַם, אֱלֹוהַּ, …) and name where k1 has one; `ent_basis` `model` marks an entity that only a model's mentions found, `layer` (v0.6) one that only the addressees layer names (no name given).
@@ -324,6 +339,75 @@ targets end with an entity id (v0.5: 64%); the rest have a chain id.
 
 The two editions check each other (`editions_agree`): where both have an entity on parts tied to the same Greek word, `linked`
 rows agree in 99.8%, `speech` rows in 93-94%, `model` rows in 72%. A `model` row whose `editions_agree` is false is the first to doubt.
+
+## The clause scheme (v0.9, `scheme/`)
+
+One form for the clause level, the same for the Tanakh
+([bcv-commons/tanakh-clause-scheme](https://huggingface.co/datasets/bcv-commons/tanakh-clause-scheme)) and for each Hebrew New
+Testament here. `clause-scheme.toml` (version @SCHEME_VERSION@) is the whole definition: tables, columns, kinds, value sets, joins.
+`python validate_scheme.py clause-scheme.toml heb_scg/scheme` checks a folder against it (needs pyarrow only).
+
+| | `heb_scg` | `heb_mod` |
+|---|---|---|
+| clauses (segments joined to another) | @SCG_SCHEME_CLAUSES@ (@SCG_SCHEME_JOINED@) | @MOD_SCHEME_CLAUSES@ (@MOD_SCHEME_JOINED@) |
+| constituents (per clause) | @SCG_SCHEME_CONSTITUENTS@ (@SCG_SCHEME_PER_CLAUSE@) | @MOD_SCHEME_CONSTITUENTS@ (@MOD_SCHEME_PER_CLAUSE@) |
+| clauses without a constituent | @SCG_SCHEME_NO_CONSTITUENT@ | @MOD_SCHEME_NO_CONSTITUENT@ |
+| unsaid subjects (with `who`) | @SCG_SCHEME_ADDED@ (@SCG_SCHEME_WHO@) | @MOD_SCHEME_ADDED@ (@MOD_SCHEME_WHO@) |
+| order statements | @SCG_SCHEME_ORDERS@ | @MOD_SCHEME_ORDERS@ |
+| rows of `clause_join` | @SCG_SCHEME_JOIN@ | @MOD_SCHEME_JOIN@ |
+
+**Ids.** A clause is `cl:<edition>:<BOOK>.<chapter>.<verse>.<seg>`, `seg` being the number of its first segment in
+`clauses.parquet`. A word is `scg:` (`heb_scg`) or `del:` (`heb_mod`) and eleven digits: book number (40 to 66), chapter, verse,
+and the word's position `i` in `words.parquet` plus one. A part is the word id, a dot, and `part` plus one. An entity (`who`) is
+an id of `entities.parquet`.
+
+**The clause.** `clauses.parquet` of this dataset has one row per segment: a clause broken by an inserted clause is two
+segments. The scheme joins them (`segments.continues` names the segment a later piece continues), so a row of
+`scheme/clauses.parquet` is a whole clause. A clause begins with the word that opens it (a conjunction, a relative word). A
+segment with no written word is in no clause (@SCG_SCHEME_EMPTY@ in `heb_scg`, @MOD_SCHEME_EMPTY@ in `heb_mod`: a stray Latin label of the
+source text, an empty token in `words.parquet`).
+
+**Every value has its basis** in `<column>_basis`: `derived` (by a rule from other columns of this dataset), `model` (a tagger,
+with its probability in `<column>_p`), `linked` (through word links to the Greek, for `who` only). No value comes from the Greek
+text except `who` where its basis says `linked`. `frame_role` is empty here (it is MACULA's frame label, filled on the Tanakh).
+
+- `clauses`: `parent` and `depth`; `rule` (the clause's roles in order, as MACULA names clause rules) and `pattern`; `pred`, the
+  predicate's word, and `pred_kind` (`v` verb, `p` nominal predicate, `none`); the marks `kind`, `force`, `polarity`, `mood`,
+  `time`, `time_abs`, `aspect`, `relation`, `voice`, `negator`, `connective`, `line_kind`, `fronted`, `subject_form`,
+  `transitivity`, `neg_scope`, `subject_switch`. Meaning categories are Hebrew terms; the scheme file lists each value set.
+  Ten marks are those of `clause_marks.parquet`, taken from the clause's first segment; `kind`, `pattern`, `fronted`,
+  `subject_form`, `neg_scope` are derived from the constituents; `transitivity`, `line_kind`, `subject_switch` are a tagger's.
+- `constituents`: the clause's own parts of speech in order (`ord`): `role` (`v`, `s`, `o`, `o2`, `p`, `pp`, `adv`), `head`,
+  `first`, `last`, `class`, `prep` (the preposition's lexeme), `sem_role`, `ref_status`, `ref_form`. Derived from the tree of
+  `pieces.parquet` (head and relation per part), which is model output.
+- `added`: a finite verb with no subject said in its clause: `verb`, `person`, `number`, `gender`, `antecedent` (the part that
+  names the subject earlier, from `referents.parquet`), `who` with `who_basis` and `who_reason` (`linked`, `speech`, `model`,
+  `model_new`). Unsaid objects and possessors are not made.
+- `orders`: for each tree relation between two word classes, how often the dependent stands before and after its head in this
+  edition, with up to three places.
+- `clause_join`: which clause here shares words with which clause of the tables carried over from the Greek New Testament
+  (`same`, `split`, `merged`, `partial`). Those carried tables are a local build of bcv-commons and are not published; the table
+  is of use only beside them.
+
+**How right it is.** Nothing of the scheme was checked by a person on the New Testament. Measured on the Tanakh's test
+chapters, read as the New Testament is read (the taggers' own segments, parts and tree), with and without vowel points:
+
+| | pointed (`heb_scg`'s model) | without points (`heb_mod`'s) |
+|---|---|---|
+| constituents found / right when given / with the right span | 90.2% / 93.3% / 87.0% | 89.8% / 92.6% / 86.5% |
+| found, by role | `v` 96.4, `pp` 91.4, `s` 87.1, `adv` 85.9, `o` 85.0, `p` 71.5 | |
+| segments joined to the right clause (88 joins) | 69, 87% of the joins made right | 67, 84% |
+| `kind`, `fronted`, `subject_form`, `neg_scope` (rule) | 99.4%, 97.0%, 95.2%, 99.9% | |
+| `pattern` (rule: every role in order right) | 80.4% | |
+| `transitivity`, `line_kind`, `subject_switch` (tagger) | 91.7%, 91.9%, 80.8% | 91.3%, 91.7%, 80.7% |
+
+The two editions are two translations of one Greek text. Where a word of each stands for the same Greek word (53,006 pairs):
+a word that heads a constituent in one edition does so in both in 80.3%, and then in the same role in 84.4% (`v` 91.6%, `pp`
+82.6%, `s` 82.3%, `o` 77.2%, `p` 62.0%, `adv` 54.2%). This is not a score: the translations differ in truth.
+
+Known faults, from 13 verses read by the building agent (not a human check): a word read as a verb that is none gives a clause
+a wrong predicate; some clauses have a verb and no other constituent although the words are there (the tree gives them no role);
+a constituent may stand in the neighbouring clause. About 1.8% of the clauses have three words or more and no constituent.
 
 ## How it was made
 
@@ -380,6 +464,11 @@ favour precision, filter on `source`, `p_split` and an empty `lexeme`.
 Known fault: where a part has only one strong consonant, the lemma chosen by its consonants can be a wrong word (אַהֲבָה read as
 נָבִיא in a few verses of both editions).
 
+Known faults of the word table found since, not mended in v0.9 (the table is unchanged, since other datasets are keyed to its
+parts): a numeral the tagger read on its own can have a wrong lexeme (`שְׁנֵי` "two of" filed under `שָׁנָה` or `שָׁנִי`: about
+30 words of `heb_scg`, about 50 of `heb_mod`; read `class` = `num` with the written form there); and on a few tens of verbs that the
+Tanakh does not have, the verb's own ending is cut off as a pronoun suffix (`שידענו`, `הבינותם`).
+
 ## The `heb_mod` text
 
 The text is used as the source gives it. Ten verses have no words, and their words stand in the verse before: Matthew 5:37,
@@ -400,12 +489,13 @@ verses the clause segments, which never cross a verse, are affected. The source 
 | MACULA Greek (the `_carried` values) | Clear Bible / Biblica | CC BY 4.0 |
 | Word links of the `_carried` values | bcv-commons/lexeme-aligner | CC0 1.0 |
 | This analysis: `words`, `clauses`, `features` | bcv-commons | **CC BY 4.0** |
-| This analysis: `pieces`, `clause_marks`, `speech`, `entities`, `referents` | bcv-commons | **CC BY-SA 4.0** (ShareAlike, from the training and carried values) |
+| This analysis: `pieces`, `clause_marks`, `speech`, `entities`, `referents`, everything in `scheme/` | bcv-commons | **CC BY-SA 4.0** (ShareAlike, from the training and carried values) |
+| `clause-scheme.toml`, `validate_scheme.py` | bcv-commons | MIT |
 | The code (bcv-query) | bcv-commons | MIT |
 
 **Attribution** when you use this dataset:
 
-> Hebrew New Testament Analysis (@TAG@), bcv-commons, CC BY 4.0 (`pieces`, `clause_marks`, `speech`, `entities`, `referents`: CC BY-SA 4.0). Analysis trained on
+> Hebrew New Testament Analysis (@TAG@), bcv-commons, CC BY 4.0 (`pieces`, `clause_marks`, `speech`, `entities`, `referents`, `scheme/`: CC BY-SA 4.0). Analysis trained on
 > MACULA Hebrew, Clear Bible / Biblica (CC BY 4.0).
 > Texts: Salkinson–Ginsburg Hebrew New Testament; Delitzsch's Hebrew New Testament (public domain).
 

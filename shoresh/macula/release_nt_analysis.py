@@ -1,9 +1,10 @@
 """Package exported Hebrew NT analyses as a release of the dataset bcv-commons/hebrew-nt-analysis. Nothing is uploaded: the files are
 written to a folder for review, and published by hand.
 
-    python -m macula.release_nt_analysis --tag v0.8 --out DIR [--editions heb_scg,heb_mod] [--src macula/data/clause-tagger/export]
+    python -m macula.release_nt_analysis --tag v0.9 --out DIR [--editions heb_scg,heb_mod] [--src macula/data/clause-tagger/export]
         [--features macula/data/hebrew-nt-features/2026-11-26c] [--layers macula/data/hebrew-nt-layers/2026-11-26]
-        [--speech macula/data/hebrew-nt-speech/2026-11-28] [--referents macula/data/hebrew-nt-referents/2026-11-26c] [--allow-dirty]
+        [--speech macula/data/hebrew-nt-speech/2026-11-28] [--referents macula/data/hebrew-nt-referents/2026-11-28]
+        [--scheme macula/data/clause-scheme/nt] [--allow-dirty]
 
 DIR gets:
   README.md                  the dataset card (macula/nt_analysis_card.md with the version fields filled in)
@@ -16,13 +17,17 @@ DIR gets:
   <edition>/speech.parquet   speaker, addressee and the addressee's number per quotation segment (`hebrew_nt_speech.py`; v0.4)
   <edition>/referents.parquet referent and antecedent per pronoun, suffix and finite verb (`hebrew_nt_referents.py`; v0.5)
   <edition>/entities.parquet the entity ids of speech.parquet (and of k1's `who`): kind, Hebrew type word, name (v0.4)
+  <edition>/scheme/{clauses,segments,constituents,added,orders,clause_join}.parquet, BUILD.json
+                             the clause scheme's tables (`hebrew_nt_clauses.py build`; v0.9)
+  clause-scheme.toml, validate_scheme.py   the scheme file and the check that reads only it (v0.9)
   SHA256SUMS                 SHA-256 of every file
 
 The export must come from committed code (`git status` clean for macula/clause_tagger.py, macula/fetch_hebrew_nt.py,
 macula/vendor_bibles/, macula/hebrew_nt_morph.py, macula/hebrew_nt_features.py, macula/hebrew_nt_layers.py,
 macula/hebrew_nt_speech.py, macula/hebrew_nt_referents.py, this script and the card), unless --allow-dirty. DIR must not exist yet. The v0.3 files must stand on the keys of the words and clauses released with
 them: every key of features.parquet and pieces.parquet a word part of words.parquet, the keys of clause_marks.parquet those of
-clauses.parquet, and those of speech.parquet clause segments.
+clauses.parquet, and those of speech.parquet clause segments. The scheme's tables must pass validate_scheme.py as packaged, their
+segments must be the clause segments of clauses.parquet one for one, and every word id in them a word of words.parquet.
 
 `heb_scg/words.parquet` is pinned by sha256 in lexeme-aligner (the part numbers of bcv-commons/alignments-by-id are its). The release
 refuses another file than the pinned one, unless --allow-heb-scg-change (then tell lexeme-aligner before publishing).
@@ -44,7 +49,10 @@ ROOT = HERE.parents[1]
 CARD = HERE / "nt_analysis_card.md"
 CODE = [HERE / "clause_tagger.py", HERE / "fetch_hebrew_nt.py", HERE / "vendor_bibles", HERE / "hebrew_nt_morph.py",
         HERE / "hebrew_nt_features.py", HERE / "hebrew_nt_layers.py", HERE / "hebrew_nt_speech.py",
-        HERE / "hebrew_nt_referents.py", Path(__file__).resolve(), CARD]
+        HERE / "hebrew_nt_referents.py", HERE / "clause_scheme.py", HERE / "validate_scheme.py", HERE / "hebrew_nt_clauses.py",
+        HERE / "build_text_ids.py", Path(__file__).resolve(), CARD]
+SCHEME_TABLES = ("clauses", "segments", "constituents", "added", "orders", "clause_join")
+SCHEME_FILE = HERE / "data" / "clause-scheme" / "clause-scheme.toml"
 ADDED = {"features.parquet": ("features", "features.parquet"), "pieces.parquet": ("layers", "pieces.parquet"),
          "clause_marks.parquet": ("layers", "clauses.parquet"), "speech.parquet": ("speech", "speech.parquet"),
          "entities.parquet": ("speech", "entities.parquet"), "referents.parquet": ("referents", "referents.parquet")}    # released name -> (source folder, file there)
@@ -64,7 +72,8 @@ def main() -> None:
     ap.add_argument("--src", default=str(HERE / "data" / "clause-tagger" / "export"))
     ap.add_argument("--features", default=str(HERE / "data" / "hebrew-nt-features" / "2026-11-26c"))
     ap.add_argument("--speech", default=str(HERE / "data" / "hebrew-nt-speech" / "2026-11-28"))
-    ap.add_argument("--referents", default=str(HERE / "data" / "hebrew-nt-referents" / "2026-11-26c"))
+    ap.add_argument("--referents", default=str(HERE / "data" / "hebrew-nt-referents" / "2026-11-28"))
+    ap.add_argument("--scheme", default=str(HERE / "data" / "clause-scheme" / "nt"))
     ap.add_argument("--layers", default=str(HERE / "data" / "hebrew-nt-layers" / "2026-11-26"))
     ap.add_argument("--allow-dirty", action="store_true")
     ap.add_argument("--allow-heb-scg-change", action="store_true")
@@ -80,11 +89,18 @@ def main() -> None:
         raise SystemExit(f"{out} exists; give a folder that does not exist yet")
     files = []
     stats = {}
+    import sys
     import pyarrow.parquet as pq
+    from macula.build_text_ids import TEXTS, wid
+    out.mkdir(parents=True)
+    scheme = tomllib.loads(SCHEME_FILE.read_text(encoding="utf-8"))
+    shutil.copy(SCHEME_FILE, out / "clause-scheme.toml")
+    shutil.copy(HERE / "validate_scheme.py", out / "validate_scheme.py")
+    files += [out / "clause-scheme.toml", out / "validate_scheme.py"]
     for ed in a.editions.split(","):
         if ed not in EDITIONS:
             raise SystemExit(f"{ed}: not an edition this card describes")
-        (out / ed).mkdir(parents=True)
+        (out / ed / "scheme").mkdir(parents=True)
         for name in ("words.parquet", "clauses.parquet", "manifest.json"):
             shutil.copy(src / ed / name, out / ed / name)
             files.append(out / ed / name)
@@ -94,7 +110,7 @@ def main() -> None:
         for name, (folder, from_name) in ADDED.items():
             shutil.copy(Path(getattr(a, folder)) / ed / from_name, out / ed / name)
             files.append(out / ed / name)
-        words = pq.read_table(out / ed / "words.parquet", columns=["book", "chapter", "verse", "i", "part", "class", "source"]).to_pylist()
+        words = pq.read_table(out / ed / "words.parquet", columns=["book", "chapter", "verse", "i", "part", "class", "source", "word", "seg"]).to_pylist()
         part_keys = {tuple(r[k] for k in KEYS) for r in words if r["class"] != "verse-number"}
         seg_keys = {tuple(r.values()) for r in pq.read_table(out / ed / "clauses.parquet", columns=["book", "chapter", "verse", "seg"]).to_pylist()}
         added = {}
@@ -109,16 +125,48 @@ def main() -> None:
                 raise SystemExit(f"{ed}/{name}: not one row per clause segment")
             added[name] = len(got)
         tokens = {(r["book"], r["chapter"], r["verse"], r["i"]): r for r in words if r["class"] != "verse-number"}
+        # the clause scheme: its tables as built, checked as packaged, standing on this release's words and segments
+        sch = {}
+        for t in SCHEME_TABLES:
+            shutil.copy(Path(a.scheme) / ed / f"{t}.parquet", out / ed / "scheme" / f"{t}.parquet")
+            files.append(out / ed / "scheme" / f"{t}.parquet")
+            sch[t] = pq.read_table(out / ed / "scheme" / f"{t}.parquet").to_pylist()
+        build = json.loads((Path(a.scheme) / ed / "BUILD.json").read_text(encoding="utf-8"))
+        if build["scheme"] != scheme["version"] or build["edition"] != ed:
+            raise SystemExit(f"{ed}: the scheme tables were built for scheme {build['scheme']} / {build['edition']}, the scheme file is {scheme['version']}")
+        (out / ed / "scheme" / "BUILD.json").write_text(json.dumps(build, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        files.append(out / ed / "scheme" / "BUILD.json")
+        check = subprocess.run([sys.executable, "-I", str(out / "validate_scheme.py"), str(out / "clause-scheme.toml"), str(out / ed / "scheme")],
+                               capture_output=True, text=True)
+        if check.returncode:
+            raise SystemExit(f"{ed}: the scheme's tables do not pass validate_scheme.py:\n{check.stdout[-2000:]}{check.stderr[-2000:]}")
+        written = {(r["book"], r["chapter"], r["verse"], r["seg"]) for r in words if r["class"] != "verse-number" and (r["word"] or "").strip()}
+        got_segs = [(r["book"], r["chapter"], r["verse"], r["seg"]) for r in sch["segments"]]
+        if set(got_segs) != seg_keys & written or len(got_segs) != len(set(got_segs)):     # a segment of empty tokens only (a stray Latin label in the text) is no clause
+            raise SystemExit(f"{ed}: the scheme's segments are not the clause segments of clauses.parquet that have a written word")
+        word_ids = {wid(TEXTS[ed], k[0], k[1], k[2], k[3]) for k in tokens}
+        part_ids = {f"{wid(TEXTS[ed], k[0], k[1], k[2], k[3])}.{k[4] + 1}" for k in part_keys}
+        for t, cols in scheme["tables"].items():
+            for col, spec in cols["columns"].items():
+                if t in sch and spec.get("kind") in ("word", "part"):
+                    known = word_ids if spec["kind"] == "word" else part_ids
+                    vals = [x for r in sch[t] for x in (r[col] if isinstance(r[col], list) else [r[col]]) if x]
+                    if not set(vals) <= known:
+                        raise SystemExit(f"{ed}: scheme/{t}.{col} names {len(set(vals) - known):,} ids that are no {spec['kind']} of words.parquet")
+        no_const = len({r["clause"] for r in sch["clauses"]} - {r["clause"] for r in sch["constituents"]})
         stats[ed] = {"parts": len(words), "words": len(tokens), "macula": sum(r["source"] == "macula" for r in tokens.values()),
                      "segments": pq.read_metadata(out / ed / "clauses.parquet").num_rows, "added": added,
                      "word_parts": len(part_keys),
+                     "scheme": {**{t: len(sch[t]) for t in SCHEME_TABLES}, "no_constituent": no_const, "empty": len(seg_keys - written),
+                                "joined": len(sch["segments"]) - len(sch["clauses"]),
+                                "who": sum(1 for r in sch["added"] if r["who"])},
                      "manifest": json.loads((out / ed / "manifest.json").read_text())}
     missing = [e for e in FIELD if e not in stats]
     if missing:
         raise SystemExit(f"the card describes {', '.join(FIELD)}; not exported: {', '.join(missing)}")
     s = stats["heb_scg"]
     pin = tomllib.loads((HERE / "clause_layout.toml").read_text())["sources"]["macula_hebrew"]
-    fields = {"@TAG@": a.tag, "@BUILT@": datetime.date.today().isoformat(), "@COMMIT@": commit,
+    fields = {"@TAG@": a.tag, "@BUILT@": datetime.date.today().isoformat(), "@COMMIT@": commit, "@SCHEME_VERSION@": scheme["version"],
               "@VERSE_TEXT@": s["manifest"]["bibles_verse_text"], "@TOKENIZER@": str(s["manifest"]["tokenizer_version"]),
               "@MACULA_COMMIT@": pin["commit"][:7]}
     for ed, f in FIELD.items():
@@ -128,7 +176,14 @@ def main() -> None:
                        f"@{f}_MODEL_WORDS@": f"{e['words'] - e['macula']:,}", f"@{f}_MODEL_SHA@": e["manifest"]["model"]["sha256"],
                        f"@{f}_FEATURE_ROWS@": f"{e['added']['features.parquet']:,}", f"@{f}_PIECE_ROWS@": f"{e['added']['pieces.parquet']:,}",
                        f"@{f}_WORD_PARTS@": f"{e['word_parts']:,}", f"@{f}_SPEECH_ROWS@": f"{e['added']['speech.parquet']:,}",
-                       f"@{f}_REFERENT_ROWS@": f"{e['added']['referents.parquet']:,}"})
+                       f"@{f}_REFERENT_ROWS@": f"{e['added']['referents.parquet']:,}",
+                       f"@{f}_SCHEME_CLAUSES@": f"{e['scheme']['clauses']:,}", f"@{f}_SCHEME_JOINED@": f"{e['scheme']['joined']:,}",
+                       f"@{f}_SCHEME_CONSTITUENTS@": f"{e['scheme']['constituents']:,}",
+                       f"@{f}_SCHEME_PER_CLAUSE@": f"{e['scheme']['constituents'] / e['scheme']['clauses']:.2f}",
+                       f"@{f}_SCHEME_NO_CONSTITUENT@": f"{e['scheme']['no_constituent'] / e['scheme']['clauses']:.1%}",
+                       f"@{f}_SCHEME_ADDED@": f"{e['scheme']['added']:,}", f"@{f}_SCHEME_WHO@": f"{e['scheme']['who']:,}",
+                       f"@{f}_SCHEME_ORDERS@": f"{e['scheme']['orders']:,}", f"@{f}_SCHEME_JOIN@": f"{e['scheme']['clause_join']:,}",
+                       f"@{f}_SCHEME_EMPTY@": f"{e['scheme']['empty']:,}"})
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         card = card.replace(k, v)

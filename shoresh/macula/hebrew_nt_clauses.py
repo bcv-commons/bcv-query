@@ -4,7 +4,7 @@
   cd shoresh && .venv/bin/python -I macula/hebrew_nt_clauses.py compare                # the editions with each other
   cd shoresh && .venv/bin/python -I macula/hebrew_nt_clauses.py read --every 400 --dest FILE.md
 
-What is read (all of hebrew-nt-analysis as released, v0.8; nothing of it is changed):
+What is read (hebrew-nt-analysis as released in v0.8, with the referents rebuilt on the speech table of 2026-11-28; nothing of it is changed):
   words and segments   clause_tagger export (words.parquet, clauses.parquet): parts, classes, lexemes, verb forms,
                        segments with depth and parent
   the tree             hebrew_nt_layers export (pieces.parquet): head and relation per part, semantic role and
@@ -48,7 +48,7 @@ DATA = HERE / "data"
 ANALYSIS = DATA / "clause-tagger" / "export"
 LAYERS = DATA / "hebrew-nt-layers" / "2026-11-26"
 FEATURES = DATA / "hebrew-nt-features" / "2026-11-26c"
-REFERENTS = DATA / "hebrew-nt-referents" / "2026-11-26c"
+REFERENTS = DATA / "hebrew-nt-referents" / "2026-11-28"
 K1 = CS.K1
 OUT = CS.SCHEME_OUT / "nt"
 OLD_MARKS = ("force", "polarity", "mood", "time", "time_abs", "aspect", "relation", "voice", "negator", "connective")

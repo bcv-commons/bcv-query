@@ -27,7 +27,7 @@ from macula.release_reference_status import code, sha256
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
-VERSION = "v0.2"
+VERSION = "v0.3"
 REPO = "bcv-commons/addressees"
 ENTITY_COLS = {"speaker", "addressee", "second_person", "member_of_plural"}
 INTS = {"spoke", "addressed", "father", "mother", "partners", "children"}
@@ -66,7 +66,7 @@ def main() -> int:
     counts = {}
     for corpus in ("hbo", "grc"):
         sub = [r for r in q if r["corpus"] == corpus]
-        counts[corpus] = {"quotations": len(sub), **{b: sum(r["basis"] == b for r in sub) for b in ("inquit", "second_person", "turn")},
+        counts[corpus] = {"quotations": len(sub), **{b: sum(r["basis"] == b for r in sub) for b in ("inquit", "second_person", "turn", "review")},
                           "none": sum(not r["basis"] for r in sub),
                           "agree": f"{sum(r['agree'] == '1' for r in sub) / max(1, sum(r['agree'] != '' for r in sub)):.2f}",
                           "relation": sum(bool(r["relation"]) for r in sub),
@@ -118,14 +118,24 @@ person to a crowd. This dataset gives each quotation of the Hebrew Bible ({h['qu
 | `speaker_id`, `speaker` | the speaker-layer character id, and the speaker's entity code |
 | `addressee` | the hearer: an entity code (`e…`, as in bcv-commons/reference-status), or `lemma:<Strong's or lemma>` where the inquit names a hearer no entity covers ("the people", "the vessels") |
 | `addressee_id` | the hearer's speaker-layer character ids, where the hearer also speaks |
-| `basis` | `inquit`: the speech clause names the hearer (Hebrew אֶל / לְ / עַל or the object of צִוָּה; Greek a dative, πρός, or the object of asking verbs); `second_person`: the commonest entity the quotation's second-person words refer to; `turn`: a reply to the quotation before, which was said to this speaker; empty: not found |
+| `basis` | `inquit`: the speech clause names the hearer (Hebrew אֶל / לְ / עַל or the object of צִוָּה; Greek a dative, πρός, or the object of asking verbs); `second_person`: the commonest entity the quotation's second-person words refer to; `turn`: a reply to the quotation before, which was said to this speaker; `review` (v0.3): a review row names the words of the text that name the hearer, where the rules went wrong; empty: not found |
 | `addressee_words` | the inquit word naming the hearer (MACULA id) |
 | `second_person` | the second-person check on its own, where it gives an entity |
 | `agree` | 1 / 0: whether the inquit and the second-person check agree, where both give an entity |
 | `plural` | 1 when the hearer is a group, the inquit word is plural, or `number` is plural |
-| `number`, `number_basis` | the hearer's number (v0.2), strongest first: `second_person` (most of the quotation's second-person words, at least two of them and 2/3), `inquit_word` (the word that names the hearer), `entity` (a group plural, a person or deity singular); empty where none says |
+| `number`, `number_basis` | the hearer's number (v0.2), strongest first: `second_person` (most of the quotation's second-person words, at least two of them and 2/3), `inquit_word` (the word that names the hearer), `entity` (a group plural, a person or deity singular); `review` (v0.3) with a review row; empty where none says |
 | `member_of_plural` | v0.2: where the inquit's hearer is plural ("to them") but its entity lookup gave one person, that person; the hearer is then a group the second-person words point to, or the inquit word's lemma |
 | `relation` | `parent_to_child`, `child_to_parent`, `spouse`, `sibling` (from ACAI's kinship), `divine_to_human`, `human_to_divine`, `to_group`, or empty |
+
+## Changes in v0.3 (2026-11-28)
+
+One quotation mended, by a review row (`basis` and `number_basis` = `review`; quotations with it: {g['review']:,}): Peter's speech in Acts 2:14-36 was
+marked as said to God, since the singular "you" of the psalm he cites (2:27-28) is linked to the Lord and the plural "you" of
+his hearers to nothing. The Greek text names the hearers at its opening (Ἄνδρες Ἰουδαῖοι καὶ οἱ κατοικοῦντες Ἱερουσαλὴμ
+πάντες); the row names those words, and the hearer is the group, in the plural. It was the only quotation of the 33 said to God
+that the Hebrew New Testaments' own second-person forms contradict throughout (21 plural forms). Review rows are made by a
+language model reading the Greek text and are not checked by a person; each names its words, so it can be checked.
+Every other row is as in v0.2.
 
 ## Changes in v0.2 (2026-11-26)
 

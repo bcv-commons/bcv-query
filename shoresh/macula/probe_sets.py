@@ -714,7 +714,6 @@ def read_back(E, rows, n):
     S, fam = E.S, families()
     L = CS.layers()
     pl = N.plain_of(E.ed)
-    model, bat, device, _ = L.load_model(pl)
     verses = {v["key"]: v for v in L.nt_verses(E.ed, pl)}
     where = {}                                                       # word -> (verse key, its place among the verse's words)
     for vk, v in verses.items():
@@ -751,22 +750,44 @@ def read_back(E, rows, n):
                      len(v["words"][wi]["pieces"]), len(words[wi]["pieces"]))
         jobs.append((r, vk, ci, piece, len(todo)))
         todo.append({"key": vk, "words": words, "clauses": cls})
-    keys = sorted({j[1] for j in jobs})
-    base = dict(zip(keys, L.predict(model, bat, [verses[k] for k in keys], device)))
-    res = L.predict(model, bat, todo, device)
+    # what the model read is kept between builds: the same model on the same changed verse reads the same
+    model_id = hashlib.sha256(L.model_path(pl).read_bytes()).hexdigest()[:16]
+    kept_path = OUT / E.ed / "read-back-kept.json"
+    kept = json.loads(kept_path.read_text(encoding="utf-8")) if kept_path.exists() else {}
+    if kept.get("model") != model_id:
+        kept = {"model": model_id, "read": {}}
+    sig = [hashlib.sha256(json.dumps([list(vk), ci, piece, todo[k]["words"], todo[k]["clauses"]], ensure_ascii=False,
+                                     sort_keys=True).encode()).hexdigest()[:24] for _, vk, ci, piece, k in jobs]
+    new = [j for j, g in zip(jobs, sig) if g not in kept["read"]]
+    n["read-back: kept from an earlier build"] = len(jobs) - len(new)
+    if new:
+        model, bat, device, _ = L.load_model(pl)
+        keys = sorted({j[1] for j in new})
+        base = dict(zip(keys, L.predict(model, bat, [verses[k] for k in keys], device)))
+        res = L.predict(model, bat, [todo[j[4]] for j in new], device)
+        got = {}
+        for x, (r, vk, ci, piece, k) in enumerate(new):
+            a, b = base[vk]["clauses"][ci], res[x]["clauses"][ci] if ci < len(res[x]["clauses"]) else None
+            if a is None or b is None:
+                got[k] = None
+                continue
+            role = None
+            if piece and piece[2] == piece[3]:                       # the replaced word's parts keep their relations
+                role = all(base[vk]["pieces"][piece[0] + q]["rel"] == res[x]["pieces"][piece[1] + q]["rel"] for q in range(piece[2]))
+            got[k] = {"moved": [m for m in a if m not in NOT_READ and a[m][0] != b[m][0]], "role": role}
+        for (r, vk, ci, piece, k), g in zip(jobs, sig):
+            if k in got:
+                kept["read"][g] = got[k]
+        kept_path.write_text(json.dumps(kept, ensure_ascii=False) + "\n", encoding="utf-8")
     spec = E.D["dimensions"]
-    for r, vk, ci, piece, k in jobs:
-        a, b = base[vk]["clauses"][ci], res[k]["clauses"][ci] if ci < len(res[k]["clauses"]) else None
-        if a is None or b is None:
+    for (r, vk, ci, piece, k), g in zip(jobs, sig):
+        if kept["read"][g] is None:
             n["read-back: clause not read"] += 1
             continue
         f = fam[r["family"]]
-        moved = [m for m in a if m not in NOT_READ and a[m][0] != b[m][0]]
+        moved, role = kept["read"][g]["moved"], kept["read"][g]["role"]
         allowed = set(f.get("may", ())) | set(f.get("must", ())) | set(spec.get(f["dimension"], {}).get("marks", ())) | \
             set(spec.get(f["dimension"], {}).get("also", ()))
-        role = None
-        if piece and piece[2] == piece[3]:                           # the replaced word's parts keep their relations
-            role = all(base[vk]["pieces"][piece[0] + q]["rel"] == res[k]["pieces"][piece[1] + q]["rel"] for q in range(piece[2]))
         r["read_moved"], r["read_role"] = moved, role
         r["read_ok"] = set(moved) <= allowed and set(f.get("must", ())) <= set(moved) and role is not False
         n["read-back: read"] += 1
