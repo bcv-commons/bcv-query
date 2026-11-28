@@ -106,6 +106,7 @@ each pronoun, pronoun suffix and finite verb has its referent (an id shared alon
 | New in v0.4 | `stem` in `features.parquet` (its other columns unchanged, value for value); `speech.parquet`, `entities.parquet` per edition |
 | New in v0.5 | `referents.parquet` per edition; every other file unchanged |
 | New in v0.6 | `speech.parquet` from the mended addressees layer (bcv-commons/addressees v0.2); `referents.parquet` rebuilt on it; every other file unchanged |
+| New in v0.10 | **Speech inside speech.** The Greek speaker layer had one level only, so a parable's people, a cited psalm and an angel whose words Paul reports carried the outer quotation, its speaker and its hearers. `speech.parquet` now takes the quotations inside quotations of the Greek clause layout v0.8 and their hearers from bcv-commons/addressees v0.4 (new columns `quote_level`, `quote_around`; `quote`, `speaker`, `addressee` and the addressee's number change on the segments inside them, and the layer's number on many others, since the Greek "you" now counts pronouns too); `referents.parquet` and the scheme's `added` table are rebuilt on it; `scheme/clause_join.parquet` has the same rows in a fixed order. Every other file unchanged, `words.parquet` byte for byte |
 | New in v0.9 | The **clause scheme**: `<edition>/scheme/` (clauses, their constituents, unsaid subjects, order statements), `clause-scheme.toml`, `validate_scheme.py`. `speech.parquet`: one quotation mended (Acts 2:14-36 is said to the crowd, bcv-commons/addressees v0.3); `referents.parquet` rebuilt on it. Every other file unchanged, `words.parquet` byte for byte |
 | New in v0.8 | `features.parquet` only, its `stem` column only: fewer, surer stems (hold-out 97.3% → 99.5%); every other file and column unchanged |
 | New in v0.7 | `referents.parquet` only: a verb takes a carried entity only from a Greek verb's subject; the ranker also reads DictaBERT word vectors (Tanakh test 87.4% → 90.4%); new columns `referent_p_calibrated`, `other_edition_referent`, `editions_agree` |
@@ -277,7 +278,8 @@ quotation (`heb_scg` @SCG_SPEECH_ROWS@, `heb_mod` @MOD_SPEECH_ROWS@), keys `book
 
 | Column | |
 |---|---|
-| `quote` | the Greek quotation's id (`q:` + MACULA Greek's id of its first word) |
+| `quote` | the Greek quotation's id (`q:` + MACULA Greek's id of its first word); from v0.10 the innermost one, where the Greek has a quotation inside a quotation |
+| `quote_level`, `quote_around` | v0.10: 1 for a quotation of the speaker data, 2 or 3 for one inside another, and the `quote` of the quotation around it (empty at level 1) |
 | `speaker`, `addressee` | entity ids (`person:…`, `deity:…`, `group:…`; the ids of `entities.parquet`) |
 | `speech_basis` | `linked` (the strict values) |
 | `speech_share` | the share of the segment's linked words whose clause has this quotation |
@@ -300,6 +302,29 @@ the psalm he cites outvoted the plural "you" of his hearers, which links to noth
 v0.3 names the hearers from the speech's own opening words; the row is a language model's reading of the Greek text, not checked
 by a person. 86 segments of `heb_scg` and 87 of `heb_mod` change (addressee, its basis, its number); `referents.parquet` is
 rebuilt on it, and 21 referents in Acts 2 change in each edition. No other quotation changes; the figures above are v0.6's.
+
+**v0.10: speech inside speech.** The Greek clause layout v0.8 finds the quotations inside a quotation (331 in the New
+Testament: from the Greek text, a verb of saying inside a quotation and the clause MACULA hangs on it, with the quotation depth
+of eight translations as the second witness; its card gives the rule and how the two agree). A Hebrew clause linked to a Greek
+clause inside one takes that quotation: 1,136 segments of `heb_scg` and 1,120 of `heb_mod` (`quote_level` 2 or 3). Their
+`speaker` is the entity of the inner speaker's character where it has one, else empty: the master of a parable is no longer
+Jesus, and 1,003 segments of `heb_scg` (995 of `heb_mod`) that carried the outer speaker now carry none. Their addressee and
+its number are the inner quotation's own (bcv-commons/addressees v0.4), where its inquit or its own "you" shows one. The outer
+quotation's number no longer counts the inner words, and the Greek "you" now counts the pronoun as well as the verb.
+**The layer's number and the Hebrew form now agree in 95%** of the segments that have both (`heb_scg` 3,297 of 3,477;
+`heb_mod` 3,177 of 3,355), against 90% before. Of the 180 segments of `heb_scg` still against, 106 follow a Greek "you" of
+that number in the same verse of the same quotation: the text's own change of number (a generic singular in a speech to many,
+an apostrophe, a turn to one hearer); in others the Hebrew form is the edition's own (a third person feminine that is written
+like a second person masculine; an imperative where the Greek has none), or the Hebrew clause has no link to the Greek clause
+of the inner quotation and stays with the outer one. That reading of what is left is a language model's, of the worst cases
+only, not a person's. `referents.parquet` is rebuilt on the table: 795 referents of `heb_scg` and 695 of `heb_mod` change
+(first and second persons inside the inner quotations, and third persons the ranker now reads with other quotation borders);
+where a part has a linked referent, the ranker's own choice is the same in 69.4% and 68.6%, against 69.1% and 68.2%. Fewer
+referents rest on the speech table (the speaker and hearer of an inner quotation are often not named as an entity; the outer
+ones were given before, rightly or not), and on those the two editions agree less: 92.1% of 343 parts and 91.4% of 349, against
+93.7% of 397 and 93.3% of 405. In the scheme's `added` table 348 rows of `heb_scg` and 338 of `heb_mod` change (`who` and its
+basis; 80 and 85 unsaid subjects that had the outer speaker have none now). `scheme/clause_join.parquet` has the same rows in
+a fixed order (the text's): the order within a carried clause used to differ from build to build.
 
 `entities.parquet` (`ent`, `kind`, `type`, `name`, `name_basis`, `ent_basis`): the entities of k1 for the edition, with the Hebrew
 type word (אָדָם, עַם, אֱלֹוהַּ, …) and name where k1 has one; `ent_basis` `model` marks an entity that only a model's mentions found, `layer` (v0.6) one that only the addressees layer names (no name given).
@@ -338,7 +363,7 @@ entity, the two agree in 79.0% (`heb_scg`) and 77.0% (`heb_mod`); 83.9% and 83.0
 targets end with an entity id (v0.5: 64%); the rest have a chain id.
 
 The two editions check each other (`editions_agree`): where both have an entity on parts tied to the same Greek word, `linked`
-rows agree in 99.8%, `speech` rows in 93-94%, `model` rows in 72%. A `model` row whose `editions_agree` is false is the first to doubt.
+rows agree in 99.8%, `speech` rows in 91-92% (v0.10; 93-94% before), `model` rows in 73%. A `model` row whose `editions_agree` is false is the first to doubt.
 
 ## The clause scheme (v0.9, `scheme/`)
 

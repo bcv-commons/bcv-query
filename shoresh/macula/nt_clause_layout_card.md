@@ -34,7 +34,7 @@ structure of a sentence at a glance, and as a base for comparing the clause stru
 | Text | Nestle 1904, as MACULA Greek has it (@WORDS@ words, @BOOKS@ books) |
 | Size | @LINES@ lines (clause segments) of @CLAUSES@ clauses; @IN_QUOTE@ lines inside a speech |
 | Characters | @CHARACTERS@ people and @GROUPS@ groups (`speaker_id`) over @WITH_ID@ speeches (@GROUP_QUOTES@ spoken by a group, @WITH_MEMBERS@ of them with members in `speaker_members`); @CHAR_NAMED@ people with a proper name (`speaker_name`, on @NAME_QUOTES@ speeches) |
-| Changes | v0.7.1: `alt_eng` (the speaker data's English label where no Greek name is found) is dropped: the dataset carries no English; a speech with no Greek name has an empty `speaker`, and its `speaker_id` still tells who speaks where the data names someone. Five columns from MACULA alone, nothing else changed: `neg`, `person`, `number`, `gender`, `voice` (the clause's negator and its main verb's person, number, gender and voice, as in bcv-commons/clause-columns). v0.7: nine columns, nothing else changed: `shape`, `relation` and `relation_basis` (a relation per clause in the Hebrew layout's vocabulary); `connective` and `connective_of` (the sentence connective printed on an indented line, and the clause it belongs to); `force` (read from MACULA Greek's grammar, on every line) and `you` (inside speech), `printed` and `printed_line` (where Nestle 1904 prints poetic lines, quoted lines or a hymn block). v0.6: `speaker_id` agrees with the inquit: a review of @REVIEWED@ speeches (by Claude, an AI model, from the Greek text; each row gives its reason) where the speaker data's label or the inquit found was wrong (Pilate's questions labelled as Jesus', "Ναί" of Matt 17:25 as Jesus', Rom 10:19 "Μωϋσῆς λέγει" as David's); a speech that two or more speak (Ἰάκωβος καὶ Ἰωάνης, οἱ ἀρχιερεῖς καὶ οἱ πρεσβύτεροι) is a group's, with its own id and the ids of its members in the new column `speaker_members`. v0.5: who the speaker is across speeches, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text: Κλεοπᾶς where the inquit says εἷς, Luke 24:18); `speaker` unchanged. v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
+| Changes | v0.8: speech inside speech. The speaker data has no quotation inside another, so until v0.7.1 a parable's people, a cited psalm and an angel whose words Paul reports were all the outer speaker's words. @INNER@ such quotations are now quotations of their own (@INNER_L2@ at level 2, @INNER_DEEPER@ deeper; @INNER_LINES@ lines), found from the Greek text with the translations' quotation depth as the second witness (see "Speech inside speech"): `quotation` is the innermost one, and three columns are new, `quotation_level`, `quotation_parent`, `quotation_basis`. On those lines `quotation`, `speaker` and the other speaker columns change; their first main clause has the `relation` `speech`, and the clauses after it are read inside a speech (`relation` or `relation_basis` changes on 440 lines); 277 lines stand at another level (`text_depth`); 20 lines are cut in two where such a quotation starts inside a line (so `seg` moves in those chapters, and 20 lines have a new first word). Nothing else changes. v0.7.1: `alt_eng` (the speaker data's English label where no Greek name is found) is dropped: the dataset carries no English; a speech with no Greek name has an empty `speaker`, and its `speaker_id` still tells who speaks where the data names someone. Five columns from MACULA alone, nothing else changed: `neg`, `person`, `number`, `gender`, `voice` (the clause's negator and its main verb's person, number, gender and voice, as in bcv-commons/clause-columns). v0.7: nine columns, nothing else changed: `shape`, `relation` and `relation_basis` (a relation per clause in the Hebrew layout's vocabulary); `connective` and `connective_of` (the sentence connective printed on an indented line, and the clause it belongs to); `force` (read from MACULA Greek's grammar, on every line) and `you` (inside speech), `printed` and `printed_line` (where Nestle 1904 prints poetic lines, quoted lines or a hymn block). v0.6: `speaker_id` agrees with the inquit: a review of @REVIEWED@ speeches (by Claude, an AI model, from the Greek text; each row gives its reason) where the speaker data's label or the inquit found was wrong (Pilate's questions labelled as Jesus', "Ναί" of Matt 17:25 as Jesus', Rom 10:19 "Μωϋσῆς λέγει" as David's); a speech that two or more speak (Ἰάκωβος καὶ Ἰωάνης, οἱ ἀρχιερεῖς καὶ οἱ πρεσβύτεροι) is a group's, with its own id and the ids of its members in the new column `speaker_members`. v0.5: who the speaker is across speeches, as keys: `speaker_id` (one person, one id) and `speaker_name` / `speaker_name_ref` (that person's proper name in the text: Κλεοπᾶς where the inquit says εἷς, Luke 24:18); `speaker` unchanged. v0.4: a speech whose inquit names no one takes its speaker's Greek name from the same speaker's other speeches (`speaker_basis`); `alt_eng` keeps the speaker data's English label only where no Greek name is found. v0.3: speakers named in Greek from the text itself, no English labels. v0.2: the cross-check below, and its one fix (no line ends in a conjunction or question particle) |
 | Companion | [Hebrew Bible Clause Layout](https://huggingface.co/datasets/bcv-commons/hebrew-clause-layout), the same idea for the Hebrew Bible |
 | Clause columns | [bcv-commons/clause-columns](https://huggingface.co/datasets/bcv-commons/clause-columns) (make-tanakh-grammar, CC BY-SA 4.0): force, negation, voice, juncture, speech, actor and undergoer, subject switch and more for each clause, keyed by this dataset's clause keys (pinned to v0.5); its card gives each column's source and checks |
 
@@ -81,7 +81,10 @@ Matthew 5:1–4 in `layout/MAT.txt`:
 | `via` | the rules of the wrapper and coordination nodes between the clause and its parent (`Conj-CL`, `sub-CL`, `CLaCL`, …) |
 | `junction` | MACULA's junction of the clause, where given |
 | `sentence` | the MACULA sentence: the word id of its first word. A sentence can run over several verses |
-| `quotation` | the innermost speech the line stands in: the word id where it starts in the speaker data; empty in narrative |
+| `quotation` | the innermost speech the line stands in: the word id where it starts (in the speaker data, or, for a speech inside a speech, where it was found to start); empty in narrative |
+| `quotation_level` | (v0.8) 1 for a speech of the speaker data, 2 for a speech inside it, 3 for one inside that; empty in narrative |
+| `quotation_parent` | (v0.8) for a speech inside a speech, the `quotation` of the speech around it; else empty |
+| `quotation_basis` | (v0.8) how the speech was found: `speaker data`; `text+translations` (a verb of saying inside a speech with the clause MACULA hangs on it, and the translations nest it); `text` (the same, where the translations do not have its words); `translations` (most translations nest it and a verb of saying stands just before it, or it opens where a clause opens) |
 | `speaker` | who speaks it, named from the Greek text: the subject of the verb that introduces the speech (Ἰησοῦς, Πέτρος, Στέφανος, μαθητής, ἡγεμών, φωνή), as a lemma; several subjects separated by commas. Empty where the text names no one (a passive γέγραπται, an unnamed "they", a participle) |
 | `speaker_ref` | the word ids of the words that name the speaker; a pronoun or an article used as one (ὁ δὲ ἔφη) is followed to the word it refers to |
 | `speaker_basis` | where `speaker` comes from: `inquit` (the speech's own inquit), `review` (the review gives the words, where the inquit found is wrong), `same speaker in book` / `same speaker in NT` (the same speaker's usual name from their other speeches, see below; `speaker_ref` then points there); empty where there is no name |
@@ -147,7 +150,34 @@ across many books, have one id each. The name (`speaker_name`) is the proper nam
 speeches named by a proper name, and at least a third of those named at all, are named by in their own inquit, and that no other
 person is named by more than three times as often; where no inquit names a person the text names elsewhere in the book, the table
 gives the word that does (@HAND@ people: Κλεοπᾶς, Γαβριήλ, Στέφανος, θεός for God, whose inquits are mostly φωνή or γραφή).
-Narrators get no name. **Review and groups:** where the label or the inquit found is wrong, a row in
+Narrators get no name. **Speech inside speech (v0.8):** the speaker data has no quotation inside another. They are found in two
+steps, the Greek text first. (1) Inside a speech, a verb of saying (not a first person of the present, future or perfect: λέγω
+ὑμῖν is the speaker's own word to the same hearers; a first person of a past tense is kept, since κἀγὼ εἶπον reports an
+earlier speech) and the clause, or group of clauses,
+that MACULA's tree hangs on it after it: its object, or a clause with another role or none. (2) The quotation depth that
+@VOTERS@ translations give each Greek word in Clear's alignments (macula-greek `alignment-quotations`, commit `@VOTES_COMMIT@`;
+only the word id and the depth are read, no word of English): a translation nests a word when it stands deeper there than the
+three words before the stretch. An object that is direct in form (a finite verb or no verb, no ὅτι, ἵνα, relative or question
+word in front) is a speech when at least a third of the translations nest its opening words; an object opened by ὅτι or a
+question word, or a clause that only hangs on the verb, when most do (at least 0.6: ὅτι before direct speech, a direct
+question; a reported one they leave unmarked). It ends where the translations stop nesting, so a speech of several sentences
+runs on past its verb's sentence. Outside these, a stretch of three words or more that most translations nest is a speech too
+(`translations`) when a verb of saying stands in the eight words before it (the tree gives what is said as a phrase: ὁ δὲ εἶπεν
+· Ἑκατὸν κόρους σίτου; a citation after γέγραπται) or when it opens where a clause opens (a citation after καὶ πάλιν, a cry).
+Of the @INNER@, @INNER_TEXT@ rest on the text and the translations together and @INNER_TRANS@ on the translations alone. How the two
+witnesses agree, over all speeches of the speaker data: of 237 objects direct in form, at least a third of the translations nest
+the opening of 220 (most translations: 217) and 17 they leave unmarked. Those 17 were read by the builder's author, a language
+model, not by a person: one is speech (Matt 26:18, the Teacher's message inside the message the disciples carry), the others
+are not speech of their own (the speaker's own next words after "tell me", "you answered" or "why do you call me", a reported
+command, two citations that are the quotation already). The Lord's Prayer after λέγετε (Luke 11:2) is
+nested by three of the eight, the others setting it as a block without marks: hence a third, not a half. Of 60 objects opened
+by ὅτι most translations nest 23, some 12 and hardly any 25; of 38 opened by a question word, 23 and 15: the text alone cannot
+tell these apart. The translations alone nest 316 stretches of three words or more, 216 of them where the text has a candidate,
+52 inside one and 48 where it has none. The speaker of such a speech is the subject of
+its own verb of saying (of the verb above it for λέγων with no subject of its own), basis `inquit`; a first person there is the
+speaker of the speech around it (`outer speaker`); a word of the speech itself is no speaker (the cited words after a passive
+γέγραπται). It has a `speaker_id` only where that name is a proper name or θεός of a character who speaks in the same book.
+@INNER_NAMED@ of the @INNER@ have a speaker named. **Review and groups:** where the label or the inquit found is wrong, a row in
 `resources/speaker_quotations/nt_review.tsv` sets the speech's label or the words that name its speaker, with the reason in the
 Greek text (@REVIEWED@ speeches). The inquit decides who speaks: a quotation of scripture is the speaker its inquit names (Ἠσαΐας
 λέγει; τὸ ῥηθὲν ὑπὸ Κυρίου διὰ τοῦ προφήτου is God's), and a speech whose inquit names two or more is a group's: its id stands for
@@ -161,10 +191,15 @@ Lines per level: @DEPTHS@.
 ## What it does not do (yet)
 
 - No text-level hierarchy between sentences beyond the speeches: a paragraph's sentences all start at the margin of their speech.
-- Where MACULA's tree or the speaker data differs from a reading you'd expect, the layout follows them (the speaker data has no
-  quotations inside a parable's speakers, so in Matt 13:27 the servants' second question stands at the parable's level): Rev 4:8 "ὁ ἦν" stands one
+- Where MACULA's tree or the speaker data differs from a reading you'd expect, the layout follows them: Rev 4:8 "ὁ ἦν" stands one
   level deeper than "καὶ ὁ ὢν καὶ ὁ ἐρχόμενος"; John 4:9 "οὐ γὰρ συνχρῶνται Ἰουδαῖοι Σαμαρείταις" is inside the woman's words; Acts
   7:7 "ὁ Θεὸς εἶπεν" is inside Stephen's quotation of God. @NO_CLAUSE@ lines have no clause in MACULA (titles such as Matt 1:1).
+- Speech inside speech is found by rule and not checked by a person. Known gaps: the letters to the seven churches (Revelation
+  2-3) stay John's hearing of one speech, since half the translations nest them and half do not; a speech the speaker data cuts
+  out of a longer one as a quotation of its own (Ananias's words inside Paul's speech, Acts 22:14-16) keeps that shape, and a
+  first person inside it is taken as its speaker; a quotation inside one whose own speech is a single word (Luke 4:12 Εἴρηται)
+  leaves that outer speech without a line of its own; a few stretches found on the translations alone start a word late or end
+  a word late, as the alignments do.
 - Not checked by hand beyond reading passages from each kind of book; the cross-check below compares it with an independent
   reading.
 
@@ -201,6 +236,7 @@ disagreements found one fault of the layout, fixed in v0.2: a conjunction or que
 | Greek text, clauses, sentence trees | MACULA Greek (Clear Bible / Biblica), `Nestle1904/lowfat`, through trees-macula.db (SHA-256 `@TREES_SHA@…`) | CC BY 4.0 |
 | Where speeches run | MACULA Quotation and Speaker Data (Clear Bible), as `resources/speaker_quotations` in bcv-query (SHA-256 `@SPEAKERS_SHA@…`); used for its word spans, and to tell whether two speeches next to each other have one speaker (to join them over a gap); its names are not used | CC BY 4.0 |
 | Who speaks | MACULA Greek's subject and referent links (`Nestle1904/lowfat`, SHA-256 `@LOWFAT_SHA@…`) | CC BY 4.0 |
+| Speech inside speech | MACULA Greek's trees (above), and as a second witness the quotation depth per Greek word in Clear's `alignment-quotations` of @VOTERS@ translations (macula-greek, commit `@VOTES_COMMIT@`): the word id and the depth only, no text of a translation | CC BY 4.0 (the depths are used as a vote; none is in the data) |
 | `force`, `you`, `shape`, `relation` | bcv-commons, read from MACULA Greek's grammar and trees, and from MACULA Greek's adjunct types (`sources/Clear/adjunct-types`, commit 27bf6257) | CC BY 4.0 |
 | `neg`, `person`, `number`, `gender`, `voice` | bcv-commons (`clause-columns`), read from MACULA Greek's morphology and negators | CC BY 4.0 |
 | `printed`, `printed_line` | E. Nestle, Η ΚΑΙΝΗ ΔΙΑΘΗΚΗ, BFBS 1904: passages from the page images (archive.org/details/biblentgreektext00nestuoft), lines from github.com/biblicalhumanities/Nestle1904 | Public Domain |

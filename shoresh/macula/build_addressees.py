@@ -2,7 +2,7 @@
 """Addressee per quotation, and a person table (wave 3, development-phase plan: "addressee per quotation and a person table,
 then listener, speaker's role and age relation"). By rule, from the source text only.
 
-    cd shoresh && .venv/bin/python3 -m macula.build_addressees
+    cd shoresh && .venv/bin/python3 -m macula.build_addressees [--nt-layout DIR] [--quote-frames DIR] [--out DIR]
 
 Output macula/data/addressees/ (git-ignored):
   quotations.tsv  one row per quotation (Hebrew speaker layer ids, Greek layout quotation ids):
@@ -11,8 +11,9 @@ Output macula/data/addressees/ (git-ignored):
     addressee), second_person (entity most second-person words inside the quotation point to), agree (1 / 0 where inquit and
     second_person both give an entity), plural (1 when the addressee is a group or plural), relation (see below),
     number (singular / plural / ''), number_basis, strongest first (second_person: most of the quotation's second-person words,
-    at least 2 of them and 2/3; inquit_word: the number of the word that names the hearer; entity: the entity's type), member_of_plural (the person
-    an entity lookup gave a plural hearer, kept here, not as the addressee)
+    verbs and, in Greek, the pronoun σύ / ὑμεῖς; at least 2 of them and 2/3; inquit_word: the number of the word that names the hearer; entity: the entity's type), member_of_plural (the person
+    an entity lookup gave a plural hearer, kept here, not as the addressee), level (1 a quotation in the narrative, 2 and deeper
+    one inside another), around (the quotation it stands in, '' where none)
   basis:
     inquit         the inquit's addressee: Hebrew אֶל / לְ / עַל phrase, or object of צִוָּה; Greek dative, πρός + accusative, or the
                    accusative of a verb of asking or urging; resolved through reference-status referents, then ACAI word links
@@ -22,17 +23,21 @@ Output macula/data/addressees/ (git-ignored):
     review         a row of resources/speaker_quotations/nt_review.tsv (field addressee: the Greek word ids that name the
                    hearer in the text, "-" for none), where the rules below go wrong; the number is that word's own
     turn           neither; the quotation answers the one before it (same or previous verse, another speaker, said to this
-                   speaker): that one's speaker is the addressee
+                   speaker): that one's speaker is the addressee. A Greek quotation inside another answers the one before it
+                   inside the same quotation (the people of a parable), and only where its own speaker is known
     ''             unknown
   relation (speaker to addressee): parent_to_child, child_to_parent, spouse, sibling, divine_to_human, human_to_divine,
     to_group, '' otherwise. From ACAI's kinship and entity types; no social rank is guessed.
   persons.tsv     one row per entity that speaks or is addressed: entity, type, gender, character ids, quotations spoken,
                   quotations addressed, father, mother, partners, children (counts from ACAI kinship)
   checks.md, build.json
+A Greek quotation inside another (layout `quotation_level` 2 and deeper) is a row of its own, with its own speaker and hearer;
+its words are not counted with the quotation around it (so the "you" of a cited psalm no longer speaks for Peter's hearers).
 Not read: BHSA, TBTA, English text (ACAI ids are English names: the release codes them).
 """
 from __future__ import annotations
 
+import argparse
 import collections
 import csv
 import datetime
@@ -49,12 +54,13 @@ NFC = lambda s: unicodedata.normalize("NFC", s)   # noqa: E731
 PREP_HBO = {NFC(p) for p in ("אֶל", "לְ", "עַל")}
 OBJ_HBO = {"6680"}                                    # צִוָּה: the one commanded is the object
 PREP_GRC = {"πρός"}
+YOU_GRC = NFC("σύ")
 OBJ_GRC = {"ἐρωτάω", "ἐπερωτάω", "παρακαλέω", "παραγγέλλω", "ἐπιτιμάω"}
 KIN = {"father", "mother", "offspring", "partner", "sibling"}
 SPK_TO = {"father": "child_to_parent", "mother": "child_to_parent", "offspring": "parent_to_child", "partner": "spouse", "sibling": "sibling"}
 SPK_FROM = {"father": "parent_to_child", "mother": "parent_to_child", "offspring": "child_to_parent", "partner": "spouse", "sibling": "sibling"}
 COLS = ["corpus", "quote", "first", "speaker_id", "speaker", "addressee", "addressee_id", "basis", "addressee_words", "second_person",
-        "agree", "plural", "relation", "number", "number_basis", "member_of_plural"]
+        "agree", "plural", "relation", "number", "number_basis", "member_of_plural", "level", "around"]
 SINGLE = ("person", "deity")                          # entity kinds that cannot be a plural hearer
 
 
@@ -65,7 +71,13 @@ def tsv(p: Path):
     return csv.DictReader((l for l in open(p, encoding="utf-8") if not l.startswith("#")), delimiter="\t")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--nt-layout", type=Path, default=DATA / "nt-clause-layout", help="the Greek clause layout to read")
+    ap.add_argument("--quote-frames", type=Path, default=DATA / "quote-frames")
+    ap.add_argument("--out", type=Path, default=OUT)
+    args = ap.parse_args(argv)
+    out_dir = args.out
     m = sqlite3.connect(f"file:{HERE / 'macula-spine.db'}?mode=ro", uri=True)
     w = {k: (lang, cls or "", (st or "").zfill(4)[:4] if lang == "hbo" else "", NFC(lem or ""), pers or "", num or "")
          for k, lang, cls, st, lem, pers, num in m.execute("select key, lang, class, strong, lemma, person, number from macula_words")}
@@ -99,8 +111,8 @@ def main() -> int:
 
     # clause order, quotation per clause, words per clause
     words, order = {}, []
-    for corpus, sub, field in (("hbo", "clause-layout", "clause_key"), ("grc", "nt-clause-layout", "first")):
-        for f in sorted((DATA / sub / "clauses").glob("*/*.jsonl")):
+    for corpus, sub, field in (("hbo", DATA / "clause-layout", "clause_key"), ("grc", args.nt_layout, "first")):
+        for f in sorted((sub / "clauses").glob("*/*.jsonl")):
             for line in open(f, encoding="utf-8"):
                 r = json.loads(line)
                 k = r[field]
@@ -108,25 +120,30 @@ def main() -> int:
                     words[k] = []
                     order.append((corpus, k))
                 words[k].extend(r["words"])
-    frame = {r["clause_key"]: r for r in tsv(DATA / "quote-frames/clauses.tsv")}
+    frame = {r["clause_key"]: r for r in tsv(args.quote_frames / "clauses.tsv")}
     roles = collections.defaultdict(list)
     for r in tsv(DATA / "arg-roles/roles.tsv"):
         roles[r["clause_key"]].append(r)
     # quotations: speaker id, words, opening clause, inquit clause
     q_speaker, q_words, q_first, q_inquit, q_order = {}, collections.defaultdict(list), {}, {}, []
+    q_around = {}                                                  # a quotation inside another -> the one around it
     for r in tsv(DATA / "speaker-layer/quotations.tsv"):
         q_speaker[r["id"]] = r["speaker_id"]
-    for f in sorted((DATA / "nt-clause-layout/clauses").glob("*/*.jsonl")):
+        if r.get("parent"):
+            q_around[("hbo", r["id"])] = r["parent"]
+    for f in sorted((args.nt_layout / "clauses").glob("*/*.jsonl")):
         for line in open(f, encoding="utf-8"):
             r = json.loads(line)
             if r["quotation"]:
                 q_speaker.setdefault(r["quotation"], r["speaker_id"] or "")
+                if r.get("quotation_parent"):
+                    q_around[("grc", r["quotation"])] = r["quotation_parent"]
     pending = {}
     for corpus, k in order:
         fr = frame.get(k)
         if fr is None:
             continue
-        if fr["inquit"] == "1":
+        if fr["inquit"] == "1" and corpus != "grc":
             pending[corpus] = k
         q = fr["quote"]
         if q:
@@ -136,10 +153,15 @@ def main() -> int:
                 q_order.append((corpus, q))
                 if pending.get(corpus) and pending[corpus][:5] == k[:5]:
                     q_inquit[(corpus, q)] = pending.pop(corpus)
+        if fr["inquit"] == "1" and corpus == "grc":         # Greek: a quotation's first clause can introduce the one inside it
+            pending[corpus] = k                             # (λέγει δὲ αὐτός · Εἶπεν Κύριος τῷ Κυρίῳ μου · Κάθου …), so it is
+                                                            # noted after the quotation it opens has taken its own inquit
 
-    def from_inquit(corpus: str, ck: str):
+    def from_inquit(corpus: str, ck: str, inside: set = frozenset()):
         for r in roles.get(ck, []):
             head = r["head"]
+            if corpus == "grc" and head in inside:                    # a word of the quotation itself is not its inquit's hearer
+                continue                                              # (γέγραπται ὅτι · τοῖς ἀγγέλοις αὐτοῦ ἐντελεῖται, one clause)
             hw = w.get(head, ("", "", "", "", "", ""))
             if not head and corpus == "hbo":                          # אֵלָיו "to him": the hearer is the preposition's suffix,
                 for x in [y for y in r["words"].split() if y != r["prep"]] + ([r["prep"]] if r["prep"] else []):
@@ -165,9 +187,15 @@ def main() -> int:
                     return (e or f"lemma:{hw[3]}"), head, hw[5]
         return "", "", ""
 
+    def second(x: str) -> bool:
+        """a second-person word: a verb form, or the Greek pronoun σύ / ὑμεῖς (the spine gives a pronoun no person, so until
+        2026-11-28 the Greek count was of verbs alone and missed σου, ὑμῖν, ὑμᾶς)"""
+        i = w.get(x, ("",) * 6)
+        return i[4] == "second" or (i[0] == "grc" and i[3] == YOU_GRC)
+
     def second_number(qws: list) -> str:
         """the number most of the quotation's second-person words have: at least 2 such words and 2/3 of them"""
-        c = collections.Counter(w.get(x, ("",) * 6)[5] for x in qws if w.get(x, ("",) * 6)[4] == "second")
+        c = collections.Counter(w.get(x, ("",) * 6)[5] for x in qws if second(x))
         tot = c["singular"] + c["plural"]
         for n in ("singular", "plural"):
             if tot >= 2 and c[n] / tot >= 2 / 3:
@@ -178,10 +206,10 @@ def main() -> int:
         """the entity most second-person words of that number point to; plural: a group only (2026-11-26: a few singular
         words linked to the deity outvoted many plural ones linked to nothing, as in Acts 2 and Matthew 5)"""
         c = collections.Counter()
-        total = sum(1 for x in qws if w.get(x, ("",) * 6)[4] == "second")
+        total = sum(1 for x in qws if second(x))
         for x in qws:
             e = acai.get(x, "")
-            if w.get(x, ("",) * 6)[4] != "second" or e.split(":")[0] not in ("person", "deity", "group"):
+            if not second(x) or e.split(":")[0] not in ("person", "deity", "group"):
                 continue
             if number and w[x][5] != number:
                 continue
@@ -205,7 +233,7 @@ def main() -> int:
         sid = q_speaker.get(q, "")
         spk = char_ent.get(sid, "")
         ik = q_inquit.get((corpus, q))
-        add, aw, num = from_inquit(corpus, ik) if ik else ("", "", "")
+        add, aw, num = from_inquit(corpus, ik, set(q_words[(corpus, q)])) if ik else ("", "", "")
         if add and add == spk:
             add, aw, num = "", "", ""                                 # "the angel who spoke with me" names the speaker, not the hearer
         snum = second_number(q_words[(corpus, q)])
@@ -232,12 +260,14 @@ def main() -> int:
             basis, member, sec = ("review" if reviewed[q] else ""), "", ""
         if not add and sec:
             add, basis = sec, "second_person"
-        prev = last_by_corpus.get(corpus)
+        turns = (corpus, q_around.get((corpus, q), "")) if corpus == "grc" else corpus      # Greek: among the quotations of one level
+        prev = last_by_corpus.get(turns)
         # a reply: the one before (same or previous verse, another speaker) was said to this speaker. Where the inquit names the
         # addressee, this holds 0.85 (Hebrew) and 0.75 (Greek); without "said to this speaker" only 0.5 to 0.65, so not used
-        if not add and basis != "review" and q not in reviewed and prev and prev[1] and prev[1] != spk and prev[2] == spk and int(q_first[(corpus, q)][:8]) - int(prev[0][:8]) <= 1:
+        if not add and basis != "review" and q not in reviewed and prev and prev[1] and prev[1] != spk and prev[2] == spk and int(q_first[(corpus, q)][:8]) - int(prev[0][:8]) <= 1 \
+                and (spk or corpus != "grc" or (corpus, q) not in q_around):
             add, basis = prev[1], "turn"
-        last_by_corpus[corpus] = (q_first[(corpus, q)], spk, add)
+        last_by_corpus[turns] = (q_first[(corpus, q)], spk, add)
         agree = ""
         if basis == "inquit" and not add.startswith("lemma:") and sec:
             agree = "1" if sec == add else "0"
@@ -269,7 +299,8 @@ def main() -> int:
             elif et == "group":
                 rel = "to_group"
         aid = ",".join(sorted(ent_chars.get(add, set())))
-        rows.append([corpus, q, q_first[(corpus, q)], sid, spk, add, aid, basis, aw, sec, agree, plural, rel, number, nbasis, member])
+        rows.append([corpus, q, q_first[(corpus, q)], sid, spk, add, aid, basis, aw, sec, agree, plural, rel, number, nbasis, member,
+                     frame[q_first[(corpus, q)]]["level"], q_around.get((corpus, q), "")])
         st[(corpus, "number:" + (number or "none") + ":" + (nbasis or "-"))] += 1
         st[(corpus, "quotations")] += 1
         st[(corpus, "basis:" + (basis or "unknown"))] += 1
@@ -281,11 +312,11 @@ def main() -> int:
             spoke[spk] += 1
         if add and not add.startswith("lemma:"):
             heard[add] += 1
-    OUT.mkdir(parents=True, exist_ok=True)
-    with open(OUT / "quotations.tsv", "w", encoding="utf-8") as f:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with open(out_dir / "quotations.tsv", "w", encoding="utf-8") as f:
         f.write("\t".join(COLS) + "\n")
         f.writelines("\t".join(r) + "\n" for r in rows)
-    with open(OUT / "persons.tsv", "w", encoding="utf-8") as f:
+    with open(out_dir / "persons.tsv", "w", encoding="utf-8") as f:
         f.write("entity\ttype\tgender\tcharacters\tspoke\taddressed\tfather\tmother\tpartners\tchildren\n")
         for e in sorted(set(spoke) | set(heard)):
             r, k = ents.get(e, {}), kcount.get(e, collections.Counter())
@@ -293,9 +324,9 @@ def main() -> int:
                     f"{heard[e]}\t{k['father']}\t{k['mother']}\t{k['partner']}\t{k['offspring']}\n")
     lines = ["# Addressees: checks", "", "| corpus | value | count |", "|---|---|---|"]
     lines += [f"| {c} | {v} | {n:,} |" for (c, v), n in sorted(st.items())]
-    (OUT / "checks.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (out_dir / "checks.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     code = subprocess.run(["git", "log", "-1", "--format=%h"], cwd=HERE, capture_output=True, text=True).stdout.strip()
-    (OUT / "build.json").write_text(json.dumps({"schema": 1, "built": datetime.date.today().isoformat(), "code": code,
+    (out_dir / "build.json").write_text(json.dumps({"schema": 1, "built": datetime.date.today().isoformat(), "code": code,
                                                 "not_read": ["BHSA", "TBTA", "English text"]}, indent=1) + "\n")
     print("\n".join(lines))
     return 0

@@ -21,6 +21,13 @@ Groups: a speech whose inquit (or review row) names two or more is a group's: it
 proper names, else per book), it has no `speaker_name`, and `speaker_members` lists the ids of the members who speak on their own in
 the same book.
 
+Quotations inside a quotation (macula/greek_inner_speech; `level` 2 and deeper) have no label in the speaker data. Their speaker is
+the subject of their own verb of saying (where that is a participle or an infinitive with no subject of its own, the subject of the
+verb it hangs on: παρέστη … ἄγγελος λέγων); basis `inquit`. A first person there (κἀγὼ εἶπον) is the speaker of the quotation
+around it, basis `outer speaker`, with that one's name and character. A word of the quotation itself is no speaker (the cited
+words after a passive γέγραπται). Such a speaker is given a character only where the name is a proper name or θεός that names a
+character who speaks in the same book (the nearest one); nothing is carried over from other speeches.
+
 Review (resources/speaker_quotations/nt_review.tsv): where the speaker data's label or the inquit found is wrong, a row sets the
 speech's label (field speaker) or the words naming its speaker (field name: word ids, people separated by ","; "-" for none).
 """
@@ -42,6 +49,8 @@ REVIEW = HERE.parents[1] / "resources" / "speaker_quotations" / "nt_review.tsv"
 NO_CHARACTER = ("", "(the one addressed)", "(he/she)", "(they)")     # labels that name no one person
 DIVINE = {"θεός"}                                  # God's name, carried over like a proper name
 SAYING = {"λέγω", "εἶπον", "φημί", "ἀποκρίνομαι", "λαλέω", "κράζω", "γράφω", "ἐρωτάω", "ἐπερωτάω", "βοάω", "φωνέω"}
+SAYING_INNER = SAYING | {"ἐρῶ", "κελεύω", "παραγγέλλω", "ἀνακράζω", "κραυγάζω", "προσεύχομαι", "ἐντέλλω", "ὀμνύω", "προφητεύω",
+                         "μαρτυρέω", "προσφωνέω"}             # for a quotation inside a quotation that has no verb of its own given
 
 
 def lowfat_words() -> tuple[dict[str, dict], str]:
@@ -71,7 +80,9 @@ def review() -> dict[tuple[str, str], str]:
 def find(quotes: dict[str, list[dict]], con: sqlite3.Connection) -> tuple[dict[str, dict], str]:
     W, sha = lowfat_words()
     fix = review()
-    quotes = {b: [dict(q, speaker=fix.get((q["id"], "speaker"), q["speaker"])) for q in qs] for b, qs in quotes.items()}
+    inner = [q for qs in quotes.values() for q in qs if q.get("level", 1) > 1]
+    quotes = {b: [dict(q, speaker=fix.get((q["id"], "speaker"), q["speaker"])) for q in qs if q.get("level", 1) == 1]
+              for b, qs in quotes.items()}
     parent = {r[0]: r[1] for r in con.execute("SELECT id, parent FROM nodes WHERE corpus='grc'")}
     info = {r[0]: (r[1], r[2]) for r in con.execute("SELECT id, role, cls FROM nodes WHERE corpus='grc'")}
     kids: dict[int, list[int]] = collections.defaultdict(list)
@@ -155,6 +166,55 @@ def find(quotes: dict[str, list[dict]], con: sqlite3.Connection) -> tuple[dict[s
                 v["refs"], v["basis"] = [k for p in parts for k in p], "review"
     carry_over(quotes, out, W)
     characters(quotes, out, W)
+    first = {r[0] for r in con.execute("SELECT key FROM sp.spine_words WHERE person='first'")}
+    nonfinite = {r[0] for r in con.execute("SELECT key FROM sp.spine_words WHERE mood IN ('participle', 'infinitive')")}
+    named = collections.defaultdict(list)          # (book, proper name) -> the speeches of the character so named
+    for k, v in out.items():
+        if v["speaker_id"] and v["speaker_name"] and not v["group"]:
+            named[(k[:2], v["speaker_name"])].append(k)
+    carried = ("names", "refs", "alt_eng", "speaker_id", "speaker_name", "speaker_name_ref", "speaker_members", "group")
+    for q in sorted(inner, key=lambda q: (q["level"], q["id"])):          # the quotation around first
+        verb, how = q.get("verb"), "tree"
+        if verb is None:
+            verb, how = inquit(q)
+            if verb is None or how != "tree" or W[verb]["lemma"] not in SAYING_INNER:     # no "nearest verb before": too loose here
+                verb, how = None, None
+        v = out[q["id"]] = {"names": [], "refs": [], "inquit": verb, "how": how, "basis": "", "alt_eng": "", "speaker_id": "",
+                            "speaker_name": "", "speaker_name_ref": "", "speaker_members": [], "group": False,
+                            "reviewed": (q["id"], "name") in fix}
+        given = fix.get((q["id"], "name"))
+        if given and given != "-":
+            parts = [p.split() for p in given.split(",")]
+            if any(k not in W for p in parts for k in p):
+                raise SystemExit(f"{REVIEW.name}: {q['id']}: a word id not in MACULA Greek: {given}")
+            v["names"], v["refs"], v["basis"] = list(dict.fromkeys(W[p[0]]["lemma"] for p in parts)), [k for p in parts for k in p], "review"
+        elif given == "-" or verb is None:
+            continue
+        elif verb in first:
+            v.update({f: (list(out[q["parent"]][f]) if isinstance(out[q["parent"]][f], list) else out[q["parent"]][f]) for f in carried})
+            v["basis"] = "outer speaker"
+            continue
+        else:
+            subj, c = subject(verb), parent.get(cl_of.get(verb))
+            while not subj and verb in nonfinite and c is not None:      # λέγων: the subject of the verb it hangs on
+                above = [k for k in by_cl.get(c, []) if (W[k]["role"] == "v" or W[k]["class"] == "verb") and k not in nonfinite]
+                if above:
+                    subj = [] if above[0] in first else subject(above[0])
+                    if above[0] in first:
+                        v.update({f: (list(out[q["parent"]][f]) if isinstance(out[q["parent"]][f], list) else out[q["parent"]][f])
+                                  for f in carried})
+                        v["basis"] = "outer speaker"
+                    break
+                c = parent.get(c)
+            if v["basis"]:
+                continue
+            subj = [(n, k) for n, k in subj if not (q["start"] <= k <= q["end"])]
+            v["names"], v["refs"] = list(dict.fromkeys(n for n, _ in subj)), [k for _, k in subj]
+            v["basis"] = "inquit" if v["names"] else ""
+        head = W.get(v["refs"][0]) if len(v["names"]) == 1 and v["refs"] else None
+        if head is not None and (head["type"] == "proper" or head["lemma"] in DIVINE) and named.get((q["id"][:2], v["names"][0])):
+            near = min(named[(q["id"][:2], v["names"][0])], key=lambda k: abs(int(k) - int(q["id"])))
+            v["speaker_id"], v["speaker_name"], v["speaker_name_ref"] = out[near]["speaker_id"], v["names"][0], v["refs"][0]
     return out, sha
 
 

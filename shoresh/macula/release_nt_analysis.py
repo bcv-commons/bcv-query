@@ -1,9 +1,9 @@
 """Package exported Hebrew NT analyses as a release of the dataset bcv-commons/hebrew-nt-analysis. Nothing is uploaded: the files are
 written to a folder for review, and published by hand.
 
-    python -m macula.release_nt_analysis --tag v0.9 --out DIR [--editions heb_scg,heb_mod] [--src macula/data/clause-tagger/export]
+    python -m macula.release_nt_analysis --tag v0.10 --out DIR [--editions heb_scg,heb_mod] [--src macula/data/clause-tagger/export]
         [--features macula/data/hebrew-nt-features/2026-11-26c] [--layers macula/data/hebrew-nt-layers/2026-11-26]
-        [--speech macula/data/hebrew-nt-speech/2026-11-28] [--referents macula/data/hebrew-nt-referents/2026-11-28]
+        [--speech macula/data/hebrew-nt-speech/2026-11-28b] [--referents macula/data/hebrew-nt-referents/2026-11-28b]
         [--scheme macula/data/clause-scheme/nt] [--allow-dirty]
 
 DIR gets:
@@ -71,8 +71,8 @@ def main() -> None:
     ap.add_argument("--editions", default="heb_scg,heb_mod")
     ap.add_argument("--src", default=str(HERE / "data" / "clause-tagger" / "export"))
     ap.add_argument("--features", default=str(HERE / "data" / "hebrew-nt-features" / "2026-11-26c"))
-    ap.add_argument("--speech", default=str(HERE / "data" / "hebrew-nt-speech" / "2026-11-28"))
-    ap.add_argument("--referents", default=str(HERE / "data" / "hebrew-nt-referents" / "2026-11-28"))
+    ap.add_argument("--speech", default=str(HERE / "data" / "hebrew-nt-speech" / "2026-11-28b"))
+    ap.add_argument("--referents", default=str(HERE / "data" / "hebrew-nt-referents" / "2026-11-28b"))
     ap.add_argument("--scheme", default=str(HERE / "data" / "clause-scheme" / "nt"))
     ap.add_argument("--layers", default=str(HERE / "data" / "hebrew-nt-layers" / "2026-11-26"))
     ap.add_argument("--allow-dirty", action="store_true")

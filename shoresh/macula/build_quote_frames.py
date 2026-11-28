@@ -2,11 +2,12 @@
 """Speech framing per clause: where a quotation opens, and how the source introduces it (wave 2, development-phase plan; asked for
 by make-tanakh-research 2026-11-13 for Swahili quotation introducers such as kwamba / akisema).
 
-    cd shoresh && .venv/bin/python3 -m macula.build_quote_frames
+    cd shoresh && .venv/bin/python3 -m macula.build_quote_frames [--nt-layout DIR] [--out DIR]
 
 One row per layout clause (Hebrew clause_key, Greek first, as in bcv-commons/clause-columns):
   quote          the quotation the clause stands in ('' in narration): Hebrew speaker-layer id, Greek layout quotation id
-  level          quotation level (Hebrew speaker layer; Greek 1 inside a quotation)
+  level          quotation level (Hebrew speaker layer; Greek layout `quotation_level`: 1 a quotation of the speaker data, 2 and
+                 deeper one inside another, macula/greek_inner_speech)
   opens          1 when a quotation starts in this clause (its first clause), else 0
   inquit         1 for the clause that introduces the next opening quotation: the last clause before it in the same verse or the
                  verse before, outside that quotation, with a verb of speaking or the introducer לֵאמֹר / λέγων
@@ -17,6 +18,7 @@ Output: macula/data/quote-frames/{clauses.tsv, checks.md, build.json} (git-ignor
 """
 from __future__ import annotations
 
+import argparse
 import collections
 import csv
 import datetime
@@ -35,7 +37,12 @@ SPEAK_GRC = {"λέγω", "εἶπον", "φημί", "λαλέω", "ἀποκρί
 COLS = ["corpus", "clause_key", "quote", "level", "opens", "inquit", "inquit_form", "speech_verb"]
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--nt-layout", type=Path, default=DATA / "nt-clause-layout", help="the Greek clause layout to read")
+    ap.add_argument("--out", type=Path, default=OUT)
+    a = ap.parse_args(argv)
+    out_dir = a.out
     m = sqlite3.connect(f"file:{MSPINE}?mode=ro", uri=True)
     info = {k: (lang, cls or "", (st or "").zfill(4)[:4] if lang == "hbo" else "", lem or "", mood or "")
             for k, lang, cls, st, lem, mood in m.execute("select key, lang, class, strong, lemma, mood from macula_words")}
@@ -44,8 +51,8 @@ def main() -> int:
         for r in csv.DictReader(open(f, encoding="utf-8"), delimiter="\t"):
             seg.setdefault(r["clause_key"], (r["quotation"], r["level"] or "0"))
     clauses = []                                                   # (corpus, key, words, quote, level, verse key)
-    for corpus, sub, field in (("hbo", "clause-layout", "clause_key"), ("grc", "nt-clause-layout", "first")):
-        for f in sorted((DATA / sub / "clauses").glob("*/*.jsonl")):
+    for corpus, sub, field in (("hbo", DATA / "clause-layout", "clause_key"), ("grc", a.nt_layout, "first")):
+        for f in sorted((sub / "clauses").glob("*/*.jsonl")):
             acc = collections.OrderedDict()
             for line in open(f, encoding="utf-8"):
                 r = json.loads(line)
@@ -56,7 +63,7 @@ def main() -> int:
                 if corpus == "hbo":
                     q, lv = seg.get(k, ("", "0"))
                 else:
-                    q, lv = (r["quotation"] or ""), ("1" if r["quotation"] else "0")
+                    q, lv = (r["quotation"] or ""), (str(r.get("quotation_level") or 1) if r["quotation"] else "0")
                 acc[k] = [corpus, k, list(r["words"]), q, lv]
             clauses += list(acc.values())
 
@@ -102,15 +109,15 @@ def main() -> int:
                     break
             else:
                 st[(corpus, "no_inquit")] += 1
-    OUT.mkdir(parents=True, exist_ok=True)
-    with open(OUT / "clauses.tsv", "w", encoding="utf-8") as f:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with open(out_dir / "clauses.tsv", "w", encoding="utf-8") as f:
         f.write("\t".join(COLS) + "\n")
         f.writelines("\t".join(r) + "\n" for r in rows)
     lines = ["# Quotation frames: checks", "", f"Clauses: {len(rows):,}.", "", "| corpus | value | count |", "|---|---|---|"]
     lines += [f"| {c} | {v} | {n:,} |" for (c, v), n in sorted(st.items())]
-    (OUT / "checks.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (out_dir / "checks.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     code = subprocess.run(["git", "log", "-1", "--format=%h"], cwd=HERE, capture_output=True, text=True).stdout.strip()
-    (OUT / "build.json").write_text(json.dumps({"schema": 1, "built": datetime.date.today().isoformat(), "code": code,
+    (out_dir / "build.json").write_text(json.dumps({"schema": 1, "built": datetime.date.today().isoformat(), "code": code,
                                                 "not_read": ["BHSA", "TBTA", "English text"]}, indent=1) + "\n")
     print("\n".join(lines))
     return 0

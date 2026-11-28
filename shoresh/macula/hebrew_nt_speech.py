@@ -15,6 +15,14 @@ the person an entity lookup gave a plural hearer (kept apart). The layer's ACAI 
 (`examples_people.ent_key`: kind + a SHA-1 prefix of the ACAI id), so no English name reaches the data; an entity that k1's
 edition tables lack gets a row in `entities.parquet` with its kind's Hebrew type word and no name (`ent_basis` `layer`).
 
+Speech inside speech (from v0.10; `--layout DIR`, the Greek clause layout): k1 was built when the Greek layer had one level
+only, so a parable's people, a cited psalm, an angel whose words Paul reports all carried the outer quotation and its speaker.
+Where the layout now has a Greek clause in a quotation inside another (`quotation_level` 2 and deeper; most of the clause's
+words), the Hebrew clause linked to it (k1 `from_clause`) takes that quotation: `quote` its id, `speaker` the entity of its
+own speaker's character where it has one (else empty: the speaker is not the outer one), and the addressee and its number
+from that quotation's own row of the addressees layer. `quote_level` says how deep (1: a quotation of the speaker data),
+`quote_around` the quotation around it.
+
 The addressee's number:
   - `addressee_number_form`: the Hebrew segment's own second-person verbs and pronouns (hebrew-nt-analysis
     `features.parquet`), `singular` or `plural` where they all agree, `mixed` where not, empty where there are none;
@@ -24,7 +32,7 @@ The addressee's number:
     `addressee_number_agree`: layer against form, where both are given.
 
   cd shoresh && .venv/bin/python -I macula/hebrew_nt_speech.py --analysis DIR --features DIR --k1 DIR --addressees TSV
-      --entities TSV --out OUT
+      --entities TSV --out OUT [--layout DIR]
 
 Writes OUT/<edition>/speech.parquet (one row per clause segment that has a quotation, strict or model; keys book,
 chapter, verse, seg), OUT/<edition>/entities.parquet and OUT/build.json.
@@ -60,8 +68,38 @@ def ent_key(acai: str, kind: str) -> str:
     return f"{kind}:e{hashlib.sha1(acai.encode('utf-8')).hexdigest()[:10]}"
 
 
-def run(analysis: Path, features: Path, k1: Path, addressees: Path, acai_entities: Path, out: Path) -> None:
-    build = {"k1": str(k1.name), "addressees": str(addressees.name), "editions": {}}
+def inner_quotations(layout: Path, k1: Path) -> tuple[dict[str, str], dict[str, dict]]:
+    """Greek k1 clause -> the quotation inside another that most of its words stand in (the Greek layout); and per such
+    quotation its level, the quotation around it and its speaker's character id."""
+    word_q, info = {}, {}
+    for f in sorted((layout / "clauses").glob("*/*.jsonl")):
+        with open(f, encoding="utf-8") as fh:
+            for line in fh:
+                r = json.loads(line)
+                if (r.get("quotation_level") or 0) > 1:
+                    for w in r["words"]:
+                        word_q[w] = r["quotation"]
+                    info[r["quotation"]] = {"level": r["quotation_level"], "around": r["quotation_parent"], "speaker_id": r["speaker_id"] or ""}
+    per = collections.defaultdict(list)
+    for w in pq.read_table(k1 / "grc" / "words.parquet", columns=["id", "clause"]).to_pylist():
+        if w["clause"]:
+            per[w["clause"]].append(word_q.get(w["id"].lstrip("n")))
+    out = {}
+    for c, qs in per.items():
+        v, n = collections.Counter(qs).most_common(1)[0]
+        if v is not None and n * 2 > len(qs):
+            out[c] = v
+    return out, info
+
+
+def run(analysis: Path, features: Path, k1: Path, addressees: Path, acai_entities: Path, out: Path, layout: Path | None = None) -> None:
+    build = {"k1": str(k1.name), "addressees": str(addressees.name), "layout": str(layout.name) if layout else None, "editions": {}}
+    inner, inner_info = inner_quotations(layout, k1) if layout else ({}, {})
+    top = lambda q: top(inner_info[q]["around"]) if q in inner_info else q   # noqa: E731
+    char_ent = {}
+    if layout:
+        with open(acai_entities.parent / "characters.tsv", encoding="utf-8") as fh:
+            char_ent = {r["character"]: r["entity"] for r in csv.DictReader((l for l in fh if not l.startswith("#")), delimiter="\t")}
     with open(addressees, encoding="utf-8") as fh:
         layer = {"q:" + r["quote"]: r for r in csv.DictReader(fh, delimiter="\t") if r["corpus"] == "grc"}
     with open(acai_entities, encoding="utf-8") as fh:
@@ -70,7 +108,18 @@ def run(analysis: Path, features: Path, k1: Path, addressees: Path, acai_entitie
     for ed in ("heb_scg", "heb_mod"):
         words = pq.read_table(k1 / ed / "words.parquet", columns=["book", "chapter", "verse", "w", "clause"]).to_pylist()
         clauses = {c["clause"]: c for c in pq.read_table(k1 / ed / "clauses.parquet",
-                   columns=["clause", *FIELDS, "speech_basis", *(f + "_model" for f in FIELDS)]).to_pylist()}
+                   columns=["clause", *FIELDS, "speech_basis", "from_clause", *(f + "_model" for f in FIELDS)]).to_pylist()}
+        n = collections.Counter()
+        for c in clauses.values():                                  # speech inside speech: the layout's quotation, not k1's
+            q = inner.get(c["from_clause"] or "")
+            if q is None or not c["quote"]:
+                continue
+            if c["quote"] != "q:" + top(q):
+                n["inner_quotation_not_in_k1_quotation"] += 1
+                continue
+            e = char_ent.get(inner_info[q]["speaker_id"], "")
+            c["quote"], c["speaker"] = "q:" + q, (code(e) if e else None)
+            n["clauses_in_inner_quotation"] += 1
         per_word = {}
         for w in words:
             c = clauses.get(w["clause"]) if w["clause"] else None
@@ -80,7 +129,7 @@ def run(analysis: Path, features: Path, k1: Path, addressees: Path, acai_entitie
         for r in pq.read_table(features / ed / "features.parquet", columns=["book", "chapter", "verse", "i", "person", "number"]).to_pylist():
             if r["person"] == "second" and r["number"] in ("singular", "plural"):
                 second[(r["book"], r["chapter"], r["verse"], r["i"])].append(r["number"])
-        rows, n = [], collections.Counter()
+        rows = []
         for s in pq.read_table(analysis / ed / "clauses.parquet", columns=["book", "chapter", "verse", "seg", "first_i", "last_i"]).to_pylist():
             ws = [(s["book"], s["chapter"], s["verse"], i) for i in range(s["first_i"], s["last_i"] + 1)]
             cs = [per_word.get(w) for w in ws]
@@ -93,6 +142,10 @@ def run(analysis: Path, features: Path, k1: Path, addressees: Path, acai_entitie
             if not row["quote"] and not row["quote_model"]:
                 continue
             row["speech_basis"] = "linked" if row["quote"] else ""
+            qi = inner_info.get((row["quote"] or "")[2:])
+            row["quote_level"] = (qi["level"] if qi else 1) if row["quote"] else None
+            row["quote_around"] = ("q:" + qi["around"]) if qi else None
+            n["segments_in_inner_quotation"] += bool(qi)
             L = layer.get(row["quote"] or "", {})
             old = row["addressee"]
             a = L.get("addressee", "")
@@ -121,7 +174,8 @@ def run(analysis: Path, features: Path, k1: Path, addressees: Path, acai_entitie
             rows.append(row)
         n["segments"] = len(rows)
         cols = [("book", pa.string()), ("chapter", pa.int16()), ("verse", pa.int16()), ("seg", pa.int16()),
-                ("quote", pa.string()), ("speaker", pa.string()), ("addressee", pa.string()), ("speech_basis", pa.string()),
+                ("quote", pa.string()), ("quote_level", pa.int8()), ("quote_around", pa.string()),
+                ("speaker", pa.string()), ("addressee", pa.string()), ("speech_basis", pa.string()),
                 ("speech_share", pa.float32()), ("addressee_number", pa.string()), ("addressee_number_basis", pa.string()),
                 ("addressee_number_form", pa.string()), ("addressee_number_layer", pa.string()), ("addressee_number_layer_basis", pa.string()),
                 ("addressee_number_agree", pa.bool_()), ("addressee_basis", pa.string()), ("addressee_member", pa.string()),
@@ -161,8 +215,9 @@ def main() -> None:
     ap.add_argument("--addressees", type=Path, required=True)
     ap.add_argument("--entities", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--layout", type=Path, help="the Greek clause layout: its quotations inside quotations are taken (v0.10)")
     a = ap.parse_args()
-    run(a.analysis, a.features, a.k1, a.addressees, a.entities, a.out)
+    run(a.analysis, a.features, a.k1, a.addressees, a.entities, a.out, a.layout)
 
 
 if __name__ == "__main__":

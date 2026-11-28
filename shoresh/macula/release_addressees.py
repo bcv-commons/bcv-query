@@ -1,9 +1,9 @@
 """Package bcv-commons/addressees: who each quotation of the Hebrew Bible and the Greek NT is said to, how that was found, and the
 speaker-to-hearer relation (macula/build_addressees.py; wave 3).
 
-    cd shoresh && .venv/bin/python3 -m macula.release_addressees --out DIR [--allow-dirty]
+    cd shoresh && .venv/bin/python3 -m macula.release_addressees --out DIR [--src BUILD] [--allow-dirty]
 
-Rebuilds the table and replaces ACAI's entity ids (English names) with the same neutral codes bcv-commons/reference-status uses
+Rebuilds the table in place (or, with --src, packages a build made elsewhere with build_addressees --out) and replaces ACAI's entity ids (English names) with the same neutral codes bcv-commons/reference-status uses
 (`e` + 10 hex digits of the id's SHA-1), so the two datasets join. Writes DIR/data/{quotations,persons}.parquet, checks.md, README.md,
 build.json, SHA256SUMS. Nothing is uploaded.
 """
@@ -27,7 +27,7 @@ from macula.release_reference_status import code, sha256
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 1
-VERSION = "v0.3"
+VERSION = "v0.4"
 REPO = "bcv-commons/addressees"
 ENTITY_COLS = {"speaker", "addressee", "second_person", "member_of_plural"}
 INTS = {"spoke", "addressed", "father", "mother", "partners", "children"}
@@ -40,6 +40,7 @@ def c(v: str) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--src", type=Path, help="package this build (build_addressees --out DIR); without it the layer is built in place first")
     ap.add_argument("--allow-dirty", action="store_true")
     a = ap.parse_args()
     release_guard.check(a)
@@ -47,10 +48,12 @@ def main() -> int:
     if dirty and not a.allow_dirty:
         raise SystemExit(f"uncommitted changes in shoresh/macula:\n{dirty}")
     commit = subprocess.check_output(["git", "log", "-1", "--format=%h"], cwd=ROOT, text=True).strip() + ("+uncommitted" if dirty else "")
-    with contextlib.redirect_stdout(io.StringIO()):
-        B.main()
-    q = list(csv.DictReader(open(B.OUT / "quotations.tsv", encoding="utf-8"), delimiter="\t"))
-    p = list(csv.DictReader(open(B.OUT / "persons.tsv", encoding="utf-8"), delimiter="\t"))
+    src = a.src or B.OUT
+    if not a.src:
+        with contextlib.redirect_stdout(io.StringIO()):
+            B.main([])
+    q = list(csv.DictReader(open(src / "quotations.tsv", encoding="utf-8"), delimiter="\t"))
+    p = list(csv.DictReader(open(src / "persons.tsv", encoding="utf-8"), delimiter="\t"))
     bad = [r["quote"] for r in q if r["addressee"] == "lemma:"]
     if bad:
         raise SystemExit(f"{len(bad)} addressees with an empty lemma: {bad[:5]}")
@@ -70,8 +73,11 @@ def main() -> int:
                           "none": sum(not r["basis"] for r in sub),
                           "agree": f"{sum(r['agree'] == '1' for r in sub) / max(1, sum(r['agree'] != '' for r in sub)):.2f}",
                           "relation": sum(bool(r["relation"]) for r in sub),
-                          "number": sum(bool(r["number"]) for r in sub), "member_dropped": sum(bool(r["member_of_plural"]) for r in sub)}
-    (a.out / "checks.md").write_text((B.OUT / "checks.md").read_text(encoding="utf-8"), encoding="utf-8")
+                          "number": sum(bool(r["number"]) for r in sub), "member_dropped": sum(bool(r["member_of_plural"]) for r in sub),
+                          "inner": sum(bool(r["around"]) for r in sub), "inner_hearer": sum(bool(r["around"] and r["basis"]) for r in sub),
+                          "inner_speaker": sum(bool(r["around"] and r["speaker"]) for r in sub),
+                          "inner_number": sum(bool(r["around"] and r["number"]) for r in sub)}
+    (a.out / "checks.md").write_text((src / "checks.md").read_text(encoding="utf-8"), encoding="utf-8")
     (a.out / "README.md").write_text(card(counts, len(p)), encoding="utf-8")
     files = sorted(x for x in a.out.rglob("*") if x.is_file())
     meta = {"schema": SCHEMA, "version": VERSION, "repo": REPO, "built": datetime.date.today().isoformat(), "code": commit,
@@ -125,7 +131,37 @@ person to a crowd. This dataset gives each quotation of the Hebrew Bible ({h['qu
 | `plural` | 1 when the hearer is a group, the inquit word is plural, or `number` is plural |
 | `number`, `number_basis` | the hearer's number (v0.2), strongest first: `second_person` (most of the quotation's second-person words, at least two of them and 2/3), `inquit_word` (the word that names the hearer), `entity` (a group plural, a person or deity singular); `review` (v0.3) with a review row; empty where none says |
 | `member_of_plural` | v0.2: where the inquit's hearer is plural ("to them") but its entity lookup gave one person, that person; the hearer is then a group the second-person words point to, or the inquit word's lemma |
+| `level`, `around` | v0.4: 1 for a quotation in the narrative, 2 and deeper for one inside another, and the `quote` of the quotation it stands in (empty at level 1). A quotation's second-person words are its own: those of a quotation inside it are not counted with it |
 | `relation` | `parent_to_child`, `child_to_parent`, `spouse`, `sibling` (from ACAI's kinship), `divine_to_human`, `human_to_divine`, `to_group`, or empty |
+
+## Changes in v0.4 (2026-11-28)
+
+**Speech inside speech in the Greek New Testament.** The Greek speaker layer had one level only: a parable's people, a cited
+psalm, an angel whose words Paul reports were all words of the outer speaker, said to the outer hearers. The Greek clause
+layout (v0.8) now finds the quotations inside a quotation, from the Greek text with the translations' quotation depth as the
+second witness (its card says how). Here each is a row of its own ({g['inner']:,} rows, `level` 2 or 3, `around` the quotation
+it stands in), with its own speaker's entity where the layout names a character for it ({g['inner_speaker']:,}; the layout
+gives the speaker's Greek words for more), and its own hearer where its inquit or its second-person words show one
+({g['inner_hearer']:,}; a number for {g['inner_number']:,}). A cited scripture mostly has neither. The outer quotation's row no
+longer counts the inner one's words: Peter's speech in Acts 2:14-36 is plural by its own words now, and the review row of v0.3
+is kept only because it names the hearers. In the Hebrew Bible, where the speaker layer always had levels, no row changes;
+`level` and `around` are filled there too.
+
+**The Greek "you" counts pronouns.** The second-person rule counted verbs alone in Greek, since the word table gives a pronoun
+no person: σου, ὑμῖν, ὑμᾶς were not seen. They are counted now (the pronoun σύ / ὑμεῖς, with its number). More Greek
+quotations get a number and a hearer from their own words, and where the inquit and the second-person words both name an
+entity they agree in {g['agree']} of the cases.
+
+**Measured** against the second-person forms of two Hebrew New Testaments (bcv-commons/hebrew-nt-analysis; a form is the
+edition's own, so it is a witness, not a key): the segments whose form goes against this layer's number fell from 308 of 3,181
+to 180 of 3,477 (9.7% to 5.2%) in one edition and from 308 of 3,070 to 178 of 3,355 (10.0% to 5.3%) in the other. Of the 180
+left, 106 follow a Greek "you" of that number in the same verse of the same quotation: the text's own change of number (a
+generic singular in a speech to many, an apostrophe, a turn to one hearer). The rest were read in part only.
+
+**Smaller mends.** A hearer named inside the quotation's own words is no longer taken from the inquit's clause; where a
+quotation's first clause introduces the next one, each now takes its own inquit (Greek); five review rows (Mark 9:39, Luke
+7:40, 18:41, 18:42, Acts 25:24) name the hearer where the rule gave one person for many or a group for one. Review rows are
+made by a language model reading the Greek text and are not checked by a person; each names its words, so it can be checked.
 
 ## Changes in v0.3 (2026-11-28)
 

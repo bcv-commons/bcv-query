@@ -48,6 +48,13 @@ Greek, from the text (macula.greek_speakers: the subject of the verb that introd
 Πέτρος, μαθητής), and `speaker_ref` gives the word ids that name; the speaker data's English labels are not used. Two
 quotations of one speaker are one when what stands between them is short (at most 12 words) and has no finite verb (the speaker
 data leaves Luke 1:74 out of Zechariah's song, and Mark 7:21's list of vices out of Jesus' words); the words between belong to it.
+Speech inside speech (macula.greek_inner_speech): the speaker data has no quotation inside another, so a parable's people, a
+cited psalm, an angel whose words Paul reports were all the outer speaker's words. They are found from the Greek text (a verb of
+saying inside a quotation and the clause MACULA hangs on it) with the translations as the second witness (the quotation depth
+eight translations give each Greek word in Clear's alignments; no word of English is read). Each is a quotation of its own:
+`quotation` its first word id, `quotation_level` 2 or deeper (1: a quotation of the speaker data), `quotation_parent` the
+quotation around it, `quotation_basis` how it was found (`speaker data`, `text+translations`, `text`, `translations`), and its
+`speaker` from its own verb of saying. `--no-inner` builds without them.
 `depth` is the number of clause ancestors in the sentence, wrappers not counted. `parent` is the parent clause's id; a clause is named
 by the key of its first word. Verse numbers are Nestle 1904's.
 
@@ -72,7 +79,7 @@ SHORESH = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SHORESH))
 
 import trees_macula  # noqa: E402
-from macula import greek_speakers  # noqa: E402
+from macula import greek_inner_speech, greek_speakers, speaker_votes  # noqa: E402
 
 FORMAT_VERSION = 1
 WRAPPER_CLASSES = {"conj", "ptcl", "det"}
@@ -463,6 +470,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--books", help="comma-separated USFM codes (default: all NT books)")
     ap.add_argument("--out", default=str(SHORESH / "macula" / "data" / "nt-clause-layout"))
+    ap.add_argument("--no-inner", action="store_true", help="the speaker data's quotations only, none inside another (to measure against)")
     a = ap.parse_args()
     out = Path(a.out)
     tp = trees_macula.trees_path()
@@ -476,6 +484,14 @@ def main() -> None:
     quotes = load_quotations()
     lemma = dict(con.execute("SELECT key, lemma FROM words WHERE corpus='grc'").fetchall())
     joined = close_gaps(quotes, sorted(lemma), lemma, mood)
+    votes_text = greek_inner_speech.Text(con)
+    inner, inner_counts = ({}, {}) if a.no_inner else greek_inner_speech.find(quotes, con, votes_text)   # speech inside speech
+    for qs in quotes.values():
+        for q in qs:
+            q.update(level=1, parent=None, basis="speaker data")
+    for b, found in inner.items():
+        quotes[b] = sorted(quotes[b] + found, key=lambda q: (q["start"], -int(q["end"])))
+    q_of = {q["id"]: q for qs in quotes.values() for q in qs}
     chapters: list[tuple[str, int, list[dict]]] = []
     for book in books:
         for (ch,) in con.execute("SELECT DISTINCT chapter FROM words WHERE corpus='grc' AND book=? ORDER BY chapter", (book,)).fetchall():
@@ -509,7 +525,10 @@ def main() -> None:
             depth = tree.depth(cid) if cid is not None else 0
             text = " ".join(r["surface"] + (r["after"] or "").strip() for r in rows)
             rec = {"verse": s["verse"], "seg": s["seg"], "clause": key_of.get(cid), "parent": key_of.get(tree.parent.get(cid)),
-                   "depth": depth, "text_depth": s["_td"], "quotation": s["_q"], "speaker": ", ".join(speakers[s["_q"]]["names"]) or None if s["_q"] else None,
+                   "depth": depth, "text_depth": s["_td"], "quotation": s["_q"],
+                   "quotation_level": q_of[s["_q"]]["level"] if s["_q"] else None,
+                   "quotation_parent": q_of[s["_q"]]["parent"] if s["_q"] else None,
+                   "quotation_basis": q_of[s["_q"]]["basis"] if s["_q"] else None, "speaker": ", ".join(speakers[s["_q"]]["names"]) or None if s["_q"] else None,
                    "speaker_ref": speakers[s["_q"]]["refs"] if s["_q"] else [],
                    "speaker_basis": speakers[s["_q"]]["basis"] if s["_q"] else None,
                    "alt_eng": speakers[s["_q"]]["alt_eng"] or None if s["_q"] else None,
@@ -542,6 +561,12 @@ def main() -> None:
              "books": len(books), "chapters": len(chapters), "clauses": len(key_of), "wrappers": len(tree.wrapper),
              "coordinations": len(tree.coord), **stats,
              "text_depth": dict(sorted(depths.items())), "quotations": sum(len(q) for q in quotes.values()),
+             "quotations_by_level": dict(sorted(collections.Counter(str(q["level"]) for q in q_of.values()).items())),
+             "quotations_by_basis": dict(sorted(collections.Counter(q["basis"] for q in q_of.values()).items())),
+             "inner_quotations": dict(sorted(inner_counts.items())),
+             "inner_quotation_votes": {"source": "Clear-Bible/macula-greek alignment-quotations, commit " + speaker_votes.CLEAR_COMMIT,
+                                       "translations": list(speaker_votes.CLEAR_VOTERS), "sha256": votes_text.vote_sha,
+                                       "read": "word id and quotation depth only"},
              "quotations_joined_over_a_gap": joined,
              "quotations_with_greek_speaker": sum(bool(v["names"]) for v in speakers.values()),
              "speaker_basis": dict(collections.Counter(v["basis"] for v in speakers.values() if v["basis"])),

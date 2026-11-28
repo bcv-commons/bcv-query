@@ -11,8 +11,8 @@ DIR gets:
   crosscheck/            crosscheck.json and crosscheck-disagreements.tsv from `python -m macula.nt_layout_crosscheck` (required)
   SHA256SUMS             SHA-256 of every file
 
-The build must come from committed code (`git status` clean for macula/build_nt_clause_layout.py, macula/greek_speakers.py, the
-speaker data and its characters table), unless
+The build must come from committed code (`git status` clean for macula/build_nt_clause_layout.py, macula/greek_speakers.py,
+macula/greek_inner_speech.py, macula/speaker_votes.py, the speaker data and its characters table), unless
 --allow-dirty.
 """
 from __future__ import annotations
@@ -38,6 +38,7 @@ COLUMN_CODE = [HERE / n for n in ("segment_columns.py", "greek_relation.py", "bu
 SCHEMA = [("book", "string"), ("chapter", "int16"), ("verse", "int16"), ("seg", "int16"), ("text", "string"), ("depth", "int8"),
           ("text_depth", "int8"), ("clause", "string"), ("parent", "string"), ("kind", "string"), ("rule", "string"),
           ("role", "string"), ("via", "list<string>"), ("junction", "string"), ("sentence", "string"), ("quotation", "string"),
+          ("quotation_level", "int8"), ("quotation_parent", "string"), ("quotation_basis", "string"),
           ("speaker", "string"), ("speaker_ref", "list<string>"), ("speaker_basis", "string"), ("speaker_id", "string"), ("speaker_name", "string"), ("speaker_name_ref", "string"), ("speaker_members", "list<string>"), ("inline", "list<string>"), ("split_at_quotation", "bool_"), ("first", "string"), ("last", "string"),
           ("words", "list<string>"), ("force", "list<string>"), ("you", "string"), ("printed", "string"), ("printed_line", "bool_"),
           ("connective", "list<string>"), ("connective_of", "string"), ("shape", "string"), ("relation", "string"),
@@ -60,12 +61,14 @@ def main() -> None:
     src, out = Path(a.src), Path(a.out)
     if not a.allow_dirty:
         dirty = subprocess.run(["git", "status", "--porcelain", "--", str(BUILDER), str(SPEAKERS), str(HERE / "greek_speakers.py"),
+                                str(HERE / "greek_inner_speech.py"), str(HERE / "speaker_votes.py"),
                                 str(SPEAKERS.parent / "nt_characters.tsv"), str(SPEAKERS.parent / "nt_review.tsv"), *map(str, COLUMN_CODE)],
                                cwd=ROOT, capture_output=True,
                                text=True).stdout.strip()
         if dirty:
             raise SystemExit("uncommitted changes in the builder or the speaker data; commit first (or --allow-dirty):\n" + dirty)
-    commit = subprocess.run(["git", "log", "-1", "--format=%h", "--", str(BUILDER), *map(str, COLUMN_CODE)], cwd=ROOT, capture_output=True,
+    commit = subprocess.run(["git", "log", "-1", "--format=%h", "--", str(BUILDER), str(HERE / "greek_speakers.py"),
+                             str(HERE / "greek_inner_speech.py"), *map(str, COLUMN_CODE)], cwd=ROOT, capture_output=True,
                             text=True).stdout.strip()
     build = json.loads((src / "build.json").read_text(encoding="utf-8"))
     if out.exists():
@@ -138,6 +141,14 @@ def main() -> None:
               "@CC_P@": f"{cc['hebrew_boundary_also_greek']:.1%}", "@CC_R@": f"{cc['greek_boundary_also_hebrew']:.1%}",
               "@CC_F1@": f"{cc['boundary_f1']:.1%}", "@CC_ANALYSIS@": cc["analysis"], "@CC_BOOKS@": book_rows,
               "@CC_DISAGREE@": f"{cc['pairs'] - round(cc['agree'] * cc['pairs']):,}"}
+    lv, bs, inner = build["quotations_by_level"], build["quotations_by_basis"], [r for r in rows if (r.get("quotation_level") or 0) > 1]
+    named = {r["quotation"] for r in inner if r["speaker"]}
+    fields.update({"@OUTER@": f"{lv.get('1', 0):,}", "@INNER@": f"{sum(v for k, v in lv.items() if k != '1'):,}",
+                   "@INNER_L2@": f"{lv.get('2', 0):,}", "@INNER_DEEPER@": f"{sum(v for k, v in lv.items() if int(k) > 2):,}",
+                   "@INNER_TEXT@": f"{bs.get('text+translations', 0) + bs.get('text', 0):,}", "@INNER_TRANS@": f"{bs.get('translations', 0):,}",
+                   "@INNER_LINES@": f"{len(inner):,}", "@INNER_NAMED@": f"{len(named):,}",
+                   "@VOTES_COMMIT@": build["inner_quotation_votes"]["source"].split()[-1][:12],
+                   "@VOTERS@": str(len(build["inner_quotation_votes"]["translations"]))})
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         card = card.replace(k, v)

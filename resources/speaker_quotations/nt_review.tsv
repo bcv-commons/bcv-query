@@ -131,4 +131,9 @@ word_start	field	value	reason	source
 66006007014	name	66006007012	ἤκουσα φωνὴν τοῦ τετάρτου ζῴου λέγοντος	agent:claude-opus-5-5:nt-characters-v1
 66007014004	speaker	John (seer of Revelation)	καὶ εἴρηκα αὐτῷ Κύριέ μου: the seer answers the elder	agent:claude-opus-5-5:nt-characters-v1
 41006024012	speaker	Herodias	ἡ δὲ εἶπεν Τὴν κεφαλὴν Ἰωάνου: the mother answers her daughter (the speaker data swaps the two)	agent:claude-opus-5-5:nt-characters-v1
-44002014015	addressee	44002014016	Ἄνδρες Ἰουδαῖοι καὶ οἱ κατοικοῦντες Ἱερουσαλὴμ πάντες: Peter speaks to the crowd; the singular "you" stands inside the psalm he cites (2:27-28), and outvoted the plural	agent:claude-fable-5-2:probe-labels-2026-11-28
+44002014015	addressee	44002014016	Ἄνδρες Ἰουδαῖοι καὶ οἱ κατοικοῦντες Ἱερουσαλὴμ πάντες: Peter speaks to the crowd; the singular "you" stands inside the psalm he cites (2:27-28), and outvoted the plural. Since the psalm is a quotation of its own (speech inside speech, 2026-11-28) the number is plural by rule; the row still names the hearer	agent:claude-fable-5-2:probe-labels-2026-11-28
+41009039005	addressee	41009035008,41009035005	Μὴ κωλύετε αὐτόν ... ὑμᾶς: Jesus answers John's word but speaks to the twelve he called in 9:35 (κωλύετε, ὑμᾶς plural); the rule gave John alone	agent:claude-fable-5-2:inner-speech-2026-11-28
+44025024005	addressee	44025024012	Ἀγρίππα βασιλεῦ καὶ πάντες οἱ συνπαρόντες ἡμῖν ἄνδρες, θεωρεῖτε: Festus speaks to the king and all the men present; the rule gave Agrippa alone	agent:claude-fable-5-2:inner-speech-2026-11-28
+42018041001	addressee	42018035009	ἐπηρώτησεν αὐτόν Τί σοι θέλεις ποιήσω: Jesus asks the blind man of 18:35 (σοι, θέλεις singular); the pronoun was linked to a group	agent:claude-fable-5-2:inner-speech-2026-11-28
+42018042006	addressee	42018035009	εἶπεν αὐτῷ Ἀνάβλεψον· ἡ πίστις σου σέσωκέν σε: said to the blind man of 18:35; the pronoun was linked to a group	agent:claude-fable-5-2:inner-speech-2026-11-28
+42007040008	addressee	42007040008	εἶπεν πρὸς αὐτόν Σίμων, ἔχω σοί τι εἰπεῖν: said to Simon, one man; the pronoun was linked to the Pharisees as a group	agent:claude-fable-5-2:inner-speech-2026-11-28
