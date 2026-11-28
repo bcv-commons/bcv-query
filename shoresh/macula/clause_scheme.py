@@ -231,6 +231,8 @@ def const_class(tree, r):
         return "pron"
     if p["cls"] in ("noun", "pron"):
         return "np" if more else p["cls"]
+    if p["cls"] in ("om", "art"):                                    # the object marker as head (`אֹתוֹ`); an article
+        return "np"
     if more and len(words) > 1:
         return {"adj": "adjp", "adv": "advp", "num": "nump", "ij": "ijp"}.get(p["cls"], "np")
     return p["cls"] or ""
@@ -728,6 +730,8 @@ def scheme_eval(plain, split):
                             n[k + " either"] += a or b
                         for k in ("line_kind", "subject_switch"):
                             n[k + " tagger"] += said.get(k, ("",))[0] == gm[k]
+                        tv = said.get("transitivity", ("",))[0]       # the tagger's, but 2 where an object is found
+                        n["transitivity tagger, 2 with an object"] += ("2" if rm["transitivity"] == "2" else tv) == gm["transitivity"]
                 r = {"clauses": n["clauses"], "constituents": n["gold"],
                      "found": round(n["found"] / max(n["gold"], 1), 4), "precision": round(n["found"] / max(n["derived"], 1), 4),
                      "found with span": round(n["found with span"] / max(n["gold"], 1), 4),
@@ -740,6 +744,7 @@ def scheme_eval(plain, split):
                         r[f"{k} {w}"] = round(n[f"{k} {w}"] / max(n["marked"], 1), 4)
                 for k in ("line_kind", "subject_switch"):
                     r[k + " tagger"] = round(n[k + " tagger"] / max(n["marked"], 1), 4)
+                r["transitivity tagger, 2 with an object"] = round(n["transitivity tagger, 2 with an object"] / max(n["marked"], 1), 4)
                 if join != "layout":
                     r["continues"] = {"segments": n["continues n"], "right": round(n["continues right"] / max(n["continues n"], 1), 4),
                                       "joined in truth": n["continues gold joined"], "said joined": n["continues said joined"],
@@ -759,16 +764,39 @@ def part_kinds(classes):
     return ["prefix"] * k + ["stem"] + ["suffix"] * (len(classes) - k - 1)
 
 
-def clauses_of_verse(L, model, bat, device, verses):
+def released_trees(rows, plain):
+    """the tree of the released second tagger (hebrew-nt-analysis's pieces.parquet) for verses in its input form: per
+    verse a list of (head, rel, head_p, rel_p) per part, head counted from 1 over the verse's parts, 0 for none"""
+    import torch
+    from macula import hebrew_nt_layers as L
+    keep = L.OUT, L.MARKS
+    L.OUT, L.MARKS = L.HERE / "data" / "hebrew-nt-layers", tuple(k for k in L.MARKS if k not in NEW_MARKS)
+    try:
+        model, bat, device, ck = L.load_model(plain)
+        pred = L.predict(model, bat, rows, device)
+    finally:
+        L.OUT, L.MARKS = keep
+    del model
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    return [[(q["head"], q["rel"], q["head_p"], q["rel_p"]) for q in pr["pieces"]] for pr in pred]
+
+
+def clauses_of_verse(L, model, bat, device, verses, trees=None):
     """the scheme's clauses for verses as the New Testament has them: words with parts (text, class, lexeme), a verb
     form per word, and segments with a depth. `verses`: dicts words [{text, form, parts [{text, class, lexeme}]}],
     segments [{words [word numbers from 0], depth}]. Adds per verse `out`: a list of clauses, each a dict
-    segments, own (word numbers), head_role, rows (the constituents), marks {name: (value, sureness, basis)}."""
+    segments, own (word numbers), head_role, rows (the constituents), marks {name: (value, sureness, basis)}.
+    `trees`: per verse the parts' (head, rel, head_p, rel_p) of another tagger (the released one, whose tree
+    hebrew-nt-analysis publishes); without it the scheme model's own tree is read. `trees="released"` runs the
+    released tagger here."""
     rows = [{"words": [{"text": w["text"], "pieces": [{"text": q["text"], "class": q["class"] or "-"} for q in w["parts"]]}
                        for w in v["words"]],
              "clauses": [{"words": list(sg["words"])} for sg in v["segments"]]} for v in verses]
     pred = L.predict(model, bat, rows, device)
-    for v, pr in zip(verses, pred):
+    if isinstance(trees, str):
+        trees = released_trees(rows, PLAIN[0])
+    for vi, (v, pr) in enumerate(zip(verses, pred)):
         seg_of, parts, order = {}, [], []
         for j, sg in enumerate(v["segments"]):
             for wi in sg["words"]:
@@ -783,10 +811,11 @@ def clauses_of_verse(L, model, bat, device, verses):
                               "vtype": (w.get("form") or "").replace(" ", "_") if q["class"] == "verb" else "",
                               "depth": v["segments"][j]["depth"] if j is not None else 0})
         for i, q in enumerate(parts):
-            h = pr["pieces"][i]["head"]
+            h, rel, hp, rp = trees[vi][i] if trees is not None else (
+                pr["pieces"][i]["head"], pr["pieces"][i]["rel"], pr["pieces"][i]["head_p"], pr["pieces"][i]["rel_p"])
             q["head"] = order[h - 1] if 0 < h <= len(order) and h - 1 != i else None
-            q["rel"] = pr["pieces"][i]["rel"] if pr["pieces"][i]["rel"] not in ("-", "other") else ""
-            q["head_p"], q["rel_p"] = pr["pieces"][i]["head_p"], pr["pieces"][i]["rel_p"]
+            q["rel"] = rel if rel not in ("-", "other", None) else ""
+            q["head_p"], q["rel_p"] = hp, rp
         tree = Tree(parts)
         said = [pr["clauses"][j] or {} for j in range(len(v["segments"]))]
         cont = joined([sg["depth"] for sg in v["segments"]], [x.get("continues") for x in said])
@@ -815,9 +844,10 @@ def clauses_of_verse(L, model, bat, device, verses):
 # the marks a rule gives better than the tagger's own value on the Tanakh's test chapters (scheme-eval); the others
 # (transitivity, line_kind, subject_switch) are the tagger's
 RULE_FIRST = ("kind", "pattern", "fronted", "subject_form", "neg_scope")
+PLAIN = [False]                                                      # whether the models read text without points
 
 
-def scheme_e2e(plain):
+def scheme_e2e(plain, tree="scheme"):
     """the Tanakh's test chapters as the New Testament is read: the first tagger's own segments, depths, word parts
     and verb forms (its saved test predictions), then the tree, the joining and the constituents from them. Scored
     per verse against the Tanakh's constituents by role and head word."""
@@ -844,7 +874,8 @@ def scheme_e2e(plain):
              "parts": [{"text": q["text"], "class": q["class"], "lexeme": q.get("lexeme") or ""} for q in w["parts"]]}
             for w in v["words"]]})
     model, bat, device, ck = L.load_model(plain)
-    clauses_of_verse(L, model, bat, device, verses)
+    PLAIN[0] = plain
+    clauses_of_verse(L, model, bat, device, verses, trees="released" if tree == "released" else None)
     per = collections.defaultdict(collections.Counter)
     for v in verses:
         ws = sorted(by_ref[v["ref"]], key=lambda w: w["w"])
@@ -882,12 +913,14 @@ def scheme_e2e(plain):
     res["all"] = {"gold": tot["gold"], "derived": tot["derived"], "found": round(tot["found"] / tot["gold"], 4),
                   "precision": round(tot["found"] / tot["derived"], 4), "found with span": round(tot["span"] / tot["gold"], 4),
                   "constituents per clause": round(tot["derived"] / max(n["clauses"], 1), 2)}
-    (SCHEME_OUT / f"e2e-{'unpointed' if plain else 'pointed'}-test.json").write_text(json.dumps(res, indent=1) + "\n")
+    res["tree"] = tree
+    (SCHEME_OUT / f"e2e-{'unpointed' if plain else 'pointed'}{'' if tree == 'scheme' else '-' + tree}-test.json").write_text(
+        json.dumps(res, indent=1) + "\n")
     print(json.dumps(res, indent=1))
 
 
 # ---------------------------------------------------------------- the scheme file and the Tanakh in its shape
-SCHEME_VERSION = "0.2"
+SCHEME_VERSION = "0.3"
 SCHEME_MARKS = ("kind", "force", "polarity", "mood", "time", "time_abs", "aspect", "relation", "voice", "negator",
                 "connective", "line_kind", "fronted", "subject_form", "transitivity", "neg_scope", "subject_switch")
 LEXEME_MARKS = {"negator": "string", "connective": "list"}           # lexeme keys, no closed value set
@@ -947,7 +980,22 @@ def scheme_tables():
             ("kind", {"type": S, "kind": "value", "values": "source_groups.kind", "required": True}),
             ("rule", {"type": S, "kind": "code"}), ("parent", {"type": S, "kind": "key"}),
             ("holds", {"type": L, "kind": "key"}), ("words", {"type": L, "kind": "word"}),
-            ("in_clauses", {"type": L, "kind": "key"})])})])
+            ("in_clauses", {"type": L, "kind": "key"})])}),
+        # order statements: a relation between two words, by the classes of head and dependent, with how often the
+        # dependent stands before and after its head; `count` is the commoner side, `against` the other, `places`
+        # up to three dependents of the commoner side
+        ("orders", {"file": "orders.parquet", "key": ["rel", "head_class", "dep_class"], "columns": collections.OrderedDict([
+            ("id", {"type": S, "kind": "key", "required": True}), ("rel", {"type": S, "kind": "code"}),
+            ("head_class", {"type": S, "kind": "code"}), ("dep_class", {"type": S, "kind": "code"}),
+            ("before", {"type": I}), ("after", {"type": I}), ("count", {"type": I, "min": 1}), ("against", {"type": I}),
+            ("places", {"type": L, "kind": "word"})])}),
+        # a Hebrew New Testament only: from each clause carried from the Greek (the Tanakh build's tables of the
+        # edition) to the clauses read from the Hebrew that share its words. For whoever holds the carried ids.
+        ("clause_join", {"file": "clause_join.parquet", "key": ["carried_clause", "clause"], "editions": ["heb_scg", "heb_mod"],
+                         "columns": collections.OrderedDict([
+            ("carried_clause", {"type": S, "kind": "key"}), ("clause", {"type": S, "kind": "key"}),
+            ("kind", {"type": S, "kind": "value", "values": "clause_join.kind", "required": True}),
+            ("shared", {"type": I, "min": 1})])})])
     for t in tables.values():                                        # a key's columns are filled, but for the two
         for col in t["key"]:                                         # roles of an unsaid mention, of which one may wait
             if col not in ("role", "frame_role"):
@@ -975,7 +1023,9 @@ def scheme_file():
     tables = scheme_tables()
     FROM = {"added.frame_role": ("added", "role")}                   # the frame labels k1 holds in `added.role`
     OWN = {"added.role": ["s", "o", "poss"],                         # the grammatical role of an unsaid mention
-           "source_groups.kind": ["group", "opener", "inside"]}     # what a source clause outside the scheme is
+           "source_groups.kind": ["group", "opener", "inside"],     # what a source clause outside the scheme is
+           "clause_join.kind": ["same", "split", "merged", "partial"]}
+    MORE = {"added.who_reason": ["linked", "speech", "model", "model_new"]}   # a New Testament referent's basis
     sets = collections.OrderedDict()
     for t in tables.values():
         for col, c in t["columns"].items():
@@ -991,7 +1041,7 @@ def scheme_file():
             if any("term" in v for v in vals):
                 sets[name] = {"source": src, "terms": [{"code": v["code"], "term": v["term"]} for v in vals]}
             else:
-                sets[name] = {"source": src, "codes": [v["code"] for v in vals]}
+                sets[name] = {"source": src, "codes": [v["code"] for v in vals] + MORE.get(name, [])}
     out = ["# clause-scheme.toml: the clause level of the Tanakh and of the Hebrew New Testaments in one form.",
            "# Written by macula/clause_scheme.py scheme-file from its table list and the Tanakh build's categories.toml.",
            "# A column with `basis = true` has `<column>_basis` (one of `bases`) and `<column>_p` (0..1 or empty) beside it.",
@@ -1022,6 +1072,7 @@ def scheme_file():
     for a, b in (("segments.clause", "clauses.clause"), ("constituents.clause", "clauses.clause"),
                  ("added.clause", "clauses.clause"), ("clauses.parent", "clauses.clause"),
                  ("source_groups.holds", "clauses.clause"), ("source_groups.in_clauses", "clauses.clause"),
+                 ("clause_join.clause", "clauses.clause"),
                  ("source_groups.parent", ["clauses.source_clause", "source_groups.source_clause"])):
         out += ["[[joins]]", f'from = "{a}"', f"to = {_toml(b)}", ""]
     out += ["# no source clause is both a clause of the scheme and a row of source_groups",
@@ -1213,9 +1264,12 @@ def tanakh_export():
                "words the source puts in no clause": sum(1 for w in wd.values() if not w["clause"])}
     if account["source clauses"] != account["a scheme clause's source"] + account["in source_groups"]:
         raise SystemExit(f"the account of source clauses does not close: {account}")
+    out_o = [{**{k: r[k] for k in ("id", "rel", "head_class", "dep_class", "before", "after", "count", "against")},
+              "places": [wd[int(t)]["id"] for t in (r["places"] or "").split() if int(t) in wd] or None}
+             for r in pq.read_table(K1 / "hbo" / "orders.parquet").to_pylist()]
     folder = SCHEME_OUT / "tanakh"
     for name, rows in (("clauses", out_c), ("segments", out_s), ("constituents", out_k), ("added", out_a),
-                       ("source_groups", out_g)):
+                       ("source_groups", out_g), ("orders", out_o)):
         n[name] = write_scheme_table(folder, name, rows)
     (folder / "ACCOUNT.json").write_text(json.dumps(account, ensure_ascii=False, indent=1) + "\n")
     print(json.dumps(n, ensure_ascii=False))
@@ -1242,6 +1296,8 @@ def main():
         p.add_argument("--batch", type=int, default=16)
         p.add_argument("--seed", type=int, default=1)
         p.add_argument("--split", default="test")
+        p.add_argument("--tree", choices=("scheme", "released"), default="scheme",
+                       help="scheme-e2e: whose tree the constituents are derived from")
     a = ap.parse_args()
     if a.cmd == "tanakh-constituents":
         tanakh_constituents(a.show, a.no_rule, a.cut)
@@ -1256,7 +1312,7 @@ def main():
     elif a.cmd == "scheme-train":
         layers().train(a.epochs, a.batch, a.seed, a.unpointed)
     elif a.cmd == "scheme-e2e":
-        scheme_e2e(a.unpointed)
+        scheme_e2e(a.unpointed, a.tree)
     elif a.cmd == "scheme-eval":
         scheme_eval(a.unpointed, a.split)
     elif a.cmd == "scheme-score":
