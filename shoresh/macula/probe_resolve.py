@@ -7,7 +7,8 @@ word table of bcv-commons/hebrew-nt-analysis (`<edition>/words.parquet`, the ver
   python resolve.py WORDS_PARQUET SET_DIR --check                # every clause and made clause against its hash
   python resolve.py WORDS_PARQUET SET_DIR ID [ID ...] [--plain]   # a pair (pp:…), a probe (pr:…) or a clause (cl:…)
 
-SET_DIR is the edition's folder of the set (pairs.parquet, probes.parquet, clauses.parquet).
+SET_DIR is the edition's folder of the set (pairs.parquet, probes.parquet, clauses.parquet). A probe that names a
+`clause_above` has as its place that clause followed by its own (a noun with its relative clause).
 
 A word id is `<text>:<book number, 2><chapter, 3><verse, 3><word, 3>`; the word is the row of the word table with that
 book, chapter and verse and `i` = word - 1. The edits of a probe, in order: `put` (the donor stands where the word
@@ -56,8 +57,15 @@ class Text:
     def clause(self, cid):
         return " ".join(self.word[self.key(w)] for w in self.ids(cid))
 
+    def place_ids(self, probe):
+        """a probe's place: its clause, after the clause above where the probe names one (a relative unit)"""
+        return (self.ids(probe["clause_above"]) if probe.get("clause_above") else []) + self.ids(probe["clause"])
+
+    def place(self, probe):
+        return " ".join(self.word[self.key(w)] for w in self.place_ids(probe))
+
     def made(self, probe):
-        seq = [(w, w) for w in self.ids(probe["clause"])]            # (the place, the word standing there)
+        seq = [(w, w) for w in self.place_ids(probe)]                 # (the place, the word standing there)
         for op, at, frm in zip(probe["edit_op"], probe["edit_at"], probe["edit_from"]):
             i = next(i for i, (a, _) in enumerate(seq) if a == at)
             if op == "put":
@@ -85,7 +93,7 @@ def main():
     if a.check:
         bad = sum(1 for cid, c in T.clauses.items() if check(T.clause(cid)) != c["check"])
         probes = pq.read_table(T.dir / "probes.parquet").to_pylist()
-        bad_made = sum(1 for r in probes if check(T.made(r)) != r["made_check"])
+        bad_made = sum(1 for r in probes if check(T.made(r)) != r["made_check"] or check(T.place(r)) != r["check"])
         print(f"clauses {len(T.clauses):,}, not matching their hash {bad:,}; made clauses {len(probes):,}, not matching {bad_made:,}")
         raise SystemExit(1 if bad or bad_made else 0)
     pairs = probes = None
@@ -99,7 +107,7 @@ def main():
         elif x.startswith("pr:"):
             probes = probes or {r["probe"]: r for r in pq.read_table(T.dir / "probes.parquet").to_pylist()}
             r = probes[x]
-            print(f"{x} | {show(T.clause(r['clause']))} | {show(T.made(r))} | {r['change']}")
+            print(f"{x} | {show(T.place(r))} | {show(T.made(r))} | {r['change']}")
         else:
             raise SystemExit(f"{x}: not a clause, pair or probe id")
 

@@ -18,6 +18,11 @@
 #   must       marks the layer model has to read differently in the changed clause (the read-back)
 #   may        marks it may read differently
 #   moves      make-tanakh-research's target features (reply 44) the change can move
+#   read       false: the layer model does not read the made clause back (a clause dropped)
+# A change of tense to or from `וַיֹּאמֶר` or `וְאָמַר` takes or leaves the conjunction where no word has the form with the
+# place's own beginning: the conjunction is part of the form (the probe's column `with` says so).
+# The families `rel_*` are made on a relative unit (labels: relatives.parquet): the place is the clause above followed
+# by the relative clause (the probe's column `clause_above`), the noun alone in its constituent, both clauses short.
 # What is left out on purpose: a change of stem (a made niphal or hiphil often asks for another clause; the real
 # pairs carry it), object noun against suffix, questions, and anything that needs a form the edition never writes.
 
@@ -216,3 +221,20 @@ how = "move_subject"
 place = { subject_form = ["noun", "pronoun"], pred_kind = ["v"] }
 may = ["fronted", "pattern"]
 moves = [9]
+
+[family.rel_head_swap]
+dimension = "relative_head_kind"
+how = "unit"
+to_kinds = ["אָדָם", "חַיָּה", "כְּלִי", "מָקוֹם", "צֶמַח", "מַאֲכָל", "גּוּף", "בִּנְיָן", "חֹמֶר", "עִנְיָן"]
+moves = [2, 14]
+
+[family.rel_head_number]
+dimension = "relative_head_number"
+how = "unit"
+moves = [2, 14, 17]
+
+[family.rel_drop]
+dimension = "relative_clause"
+how = "unit"
+read = false
+moves = [14]

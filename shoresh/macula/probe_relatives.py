@@ -203,6 +203,8 @@ def role_of(V, cid, h, by_antecedent=True):
         sub = next((a for a in V.added[cid] if a["role"] == "s" and a["antecedent"]), None)
         if by_antecedent and sub is not None and not own_pronoun:
             is_s, basis = sub["antecedent"] == h["pid"], "antecedent"
+            if is_s and first("place"):                              # `הַבַּיִת אֲשֶׁר יָבֹא שָׁמָּה`: the house he comes to, too
+                return "s", basis, "place", None
             if not is_s and agree and not gap and not when and not first("o", "pp", "to", "place"):
                 is_s, basis = True, "agreement"                      # nothing else the noun could be in the clause
         else:

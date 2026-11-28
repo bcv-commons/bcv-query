@@ -4,7 +4,7 @@
     cd shoresh && .venv/bin/python3 -m macula.release_probe_sets --out DIR [--no-rebuild] [--allow-dirty]
 
 Rebuilds the labels, the pairs and the made probes (with the layer model's read-back), then writes DIR/<edition>/
-{pairs,probes,changes,clauses}.parquet and CHECKS.json, DIR/<edition>/labels/{kinds,frames,we,we_without,plural_size}.parquet,
+{pairs,probes,changes,clauses}.parquet and CHECKS.json, DIR/<edition>/labels/{kinds,frames,we,we_without,plural_size,relatives}.parquet,
 DIR/PIN.json, the two catalogue files, resolve.py, README.md, build.json and SHA256SUMS. Before it writes the hashes
 it runs resolve.py --check on what it packed. No Hebrew text and no translation is in the package. Nothing is uploaded.
 """
@@ -23,15 +23,16 @@ import pyarrow.parquet as pq
 
 from macula import hebrew_nt_clauses as N
 from macula import probe_labels as PL
+from macula import probe_relatives as PR
 from macula import probe_sets as PS
 from macula import release_guard  # refuses TBTA and private inputs
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 SCHEMA = 1
-VERSION = "v0.1"
+VERSION = "v0.2"
 REPO = "bcv-commons/hebrew-nt-probe-sets"
-LABELS = ("kinds", "frames", "we", "we_without", "plural_size")      # the Greek side (`*_source`) stays here
+LABELS = ("kinds", "frames", "we", "we_without", "plural_size", "relatives")      # the Greek side (`*_source`) stays here
 
 
 def sha256(path: Path) -> str:
@@ -52,6 +53,7 @@ def main() -> int:
     eds = list(PS.EDITIONS)
     if not a.no_rebuild:
         PL.build(eds)
+        PR.build(eds)
         PS.build_pairs(eds)
         PS.build_changes(eds, True)
     a.out.mkdir(parents=True, exist_ok=False)
@@ -62,11 +64,14 @@ def main() -> int:
             shutil.copyfile(PS.OUT / ed / f, a.out / ed / f)
         for f in LABELS:
             shutil.copyfile(PL.OUT / ed / f"{f}.parquet", a.out / ed / "labels" / f"{f}.parquet")
-        probes = pq.read_table(a.out / ed / "probes.parquet", columns=["default", "read_ok"]).to_pylist()
+        probes = pq.read_table(a.out / ed / "probes.parquet", columns=["default", "read_ok", "clause_above"]).to_pylist()
         counts[ed] = {"pairs": pq.read_metadata(a.out / ed / "pairs.parquet").num_rows, "probes": len(probes),
                       "changes": pq.read_metadata(a.out / ed / "changes.parquet").num_rows,
                       "clauses": pq.read_metadata(a.out / ed / "clauses.parquet").num_rows,
                       "default": sum(1 for r in probes if r["default"]),
+                      "unit_probes": sum(1 for r in probes if r["clause_above"]),
+                      "unit_default": sum(1 for r in probes if r["clause_above"] and r["default"]),
+                      "read": sum(1 for r in probes if r["default"] and r["read_ok"] is not None),
                       "read_as_meant": sum(1 for r in probes if r["default"] and r["read_ok"])}
     shutil.copyfile(PS.OUT / "PIN.json", a.out / "PIN.json")
     shutil.copyfile(HERE / "probe_changes.toml", a.out / "probe_changes.toml")
@@ -128,7 +133,10 @@ python resolve.py heb_scg/words.parquet heb_scg pr:heb_scg:000042 --plain
 | made probes | {s['probes']:,} | {m['probes']:,} |
 | changes of the catalogue that have probes | {s['changes']:,} | {m['changes']:,} |
 | probes marked `default` | {s['default']:,} | {m['default']:,} |
-| of these, read back as meant by the layer model | {s['read_as_meant']:,} | {m['read_as_meant']:,} |
+| of these, read back by the layer model | {s['read']:,} | {m['read']:,} |
+| read back as meant | {s['read_as_meant']:,} | {m['read_as_meant']:,} |
+| probes on a noun with its relative clause | {s['unit_probes']:,} | {m['unit_probes']:,} |
+| of these, in the default spread | {s['unit_default']:,} | {m['unit_default']:,} |
 | clauses named | {s['clauses']:,} | {m['clauses']:,} |
 
 Nothing here was made from a translation: the set is the same for every target language. What is not the same for
@@ -167,6 +175,7 @@ every language is which changes matter; see "Limits".
 | column | |
 |---|---|
 | `probe`, `clause` | the probe's id and the place |
+| `clause_above` | for a probe on a noun with its relative clause: the clause the noun stands in. The place is then that clause followed by `clause` (the relative clause); `at` is the noun |
 | `family`, `change` | the family of `probe_changes.toml` and the change (`subject_person:3>1`, `swap_object_noun:>אָדָם`, `add_negator`) |
 | `dimension`, `from`, `to`, `moves` | as in `pairs` |
 | `at` | the word part the change is about |
@@ -174,6 +183,7 @@ every language is which changes matter; see "Limits".
 | `sure`, `known_words`, `plain_differs` | as in `pairs`, of the place and the made clause |
 | `made_one` | the difference function reads the made clause against the place and names this one change (only for `put`) |
 | `read_moved`, `read_role`, `read_ok` | the read-back (default probes only): the clause marks the layer model reads differently in the changed verse, whether a replaced word keeps its relations in the tree, and whether both are as the change allows |
+| `with` | what comes with the change: `conjunction:added` or `conjunction:dropped` (a change of tense to or from `וַיֹּאמֶר`, `וְאָמַר`, forms written with the conjunction), `agrees:verb` or `agrees:pronoun` (the word of the relative clause that takes the noun's new number) |
 | `default` | in the default spread: at most 30 per change, sureness 0.9 and more, all words known, one change, different without points, one per word first |
 | `check`, `made_check` | hash of the place's text and of the made clause's |
 
@@ -191,7 +201,20 @@ place through word links, `entity`, `entity_lexeme`), `frames` (per clause: quot
 hearers as coded ids, the hearers' kind and number), `we` (the value of
 [bcv-commons/inclusive-we](https://huggingface.co/datasets/bcv-commons/inclusive-we) on the Hebrew word), `we_without`
 (the value without one voting edition, where it differs: a language must not be tested on its own vote),
-`plural_size` (how many a plural covers where the text says it: few rows).
+`plural_size` (how many a plural covers where the text says it: few rows), `relatives` (a relative clause with the
+noun it hangs on: `rel_clause`, `above_clause`, `head` and its class, number, gender, definiteness and role above;
+`rel_role`, what the noun is inside the relative clause: `s` subject, `o` object, `pp` after a preposition, `poss`
+owner, `place` taken up by `שָׁם`, `adv` a day or place with nothing taking it up, `other`; `rel_role_basis`
+nominal | antecedent | agreement | resumed | gap | none; `rel_also`, a second reading the text allows; `rel_resumed`,
+the pronoun that takes the noun up; `sure`, the tree's sureness of the link; `short`, both clauses of 6 words or fewer).
+
+## Changes from v0.1
+
+- New: probes on a noun with its relative clause (families `rel_head_swap`, `rel_head_number`, `rel_drop`; column
+  `clause_above`), and the label table `relatives`.
+- A change of tense to or from a form written with the conjunction takes or leaves the conjunction (column `with`):
+  17 changes of tense that were short of probes are now 8.
+- Pair and probe numbers are new: they hold within one version only.
 
 ## How it was made
 
@@ -200,7 +223,17 @@ one, or all but a small word or one constituent; a difference function names wha
 the words differ in one thing. Made probes: for each family of `probe_changes.toml`, every place that can take the
 change, and for the changed word a donor of the same word shape (the same prefixes and suffixes, the same lexeme
 for a change of form, another noun of a wanted kind for a swap). The changed word and the donor must be forms the
-Tanakh has. A form the edition never writes gives no probe.
+Tanakh has. A form the edition never writes gives no probe: a translation model trained on this text has not seen
+such a form, and its answer would not tell a misread word from the target language's grammar.
+
+A noun with its relative clause: units where both clauses are short, the relative clause follows the clause above in
+its verse, the tree's link has sureness 0.8 and more, the noun's role inside the clause has one reading, and the noun
+is one common noun alone in its constituent. The noun is swapped for a noun of another kind and the same gender; its
+number is changed together with the one word of the relative clause that agrees with it (the verb where the noun is
+the subject, the pronoun that takes it up otherwise; not where something in the clause above agrees with the noun);
+or the relative clause is dropped. The link to the noun is right in 97% from sureness 0.9 on the Tanakh's test
+chapters; the role inside the clause has no yardstick (a reading of samples by the building agent: about 9 in 10
+among units with one reading).
 
 The clauses, their constituents and marks, and the sureness are those of the clause scheme on
 bcv-commons/hebrew-nt-analysis: read by a tagger and a layer model trained on the Tanakh (encoder
@@ -211,15 +244,16 @@ hand.** No BHSA, no TBTA and no translation was read.
 
 - The catalogue starts from seventeen target features of a first experiment (agreement, noun class, object marking,
   tense, negation, order, definiteness, possession, purpose, number). A language that marks other things needs
-  other changes. Not covered: a noun with its relative clause, a change of stem (only among the real pairs), how
-  many a plural covers and inclusive "we" beyond the labels, repeated action.
+  other changes. Not covered: a change of stem (only among the real pairs), how many a plural covers and inclusive
+  "we" beyond the labels, repeated action. A noun with its relative clause is covered thinly: few places allow a
+  change of number.
 - A swapped noun keeps the grammar and not the sense (a thing may speak). A changed gender or person leaves a
   pronoun elsewhere in the clause as it was.
 - A noun's kind is read off the Greek word at one place and is wrong at times; a donor noun must have its kind in
   most of its places.
 - A donor comes from another context: in the pointed text a point that depends on the neighbour can be off. The
   text without points is not touched by this.
-- The layer model does not read about one default probe in six as meant (`read_ok` false): most often a swapped
+- The layer model does not read about one default probe in seven as meant (`read_ok` false): most often a swapped
   subject it no longer reads as the subject, and changes of tense. The rows stay, marked.
 - On the Tanakh's test chapters, keeping clauses of sureness 0.9 and more leaves 70% of the short clauses, with
   every constituent right in 93% of them; in the New Testaments the true figure is lower and cannot be measured.

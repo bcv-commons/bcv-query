@@ -60,7 +60,10 @@ CHANGES = HERE / "probe_changes.toml"
 FEAT = ("type", "stem", "person", "number", "gender", "state", "definite")
 SOFT = {"gender": ("", "c", "b"), "person": ("", "x"), "state": ("",)}    # values that go with any other value
 MIN_SURE, DEFAULT_SURE, PER_CHANGE = 0.8, 0.9, 30                    # a place's sureness; the default spread per change
-NEGATOR = "3808"
+NEGATOR, AND = "3808", "2050b"
+CONSECUTIVE = ("wayyiqtol", "weqatal")                               # written with the conjunction, first in their clause
+CJ_DIMS = ("connective", "swap_cj", "added_cj")
+NOT_HEADS = ("3605",)                                                # `כֹּל אֲשֶׁר`: not a noun to swap or to count
 NOUN_MIN, NOUN_SHARE = 3, 0.6                                        # a donor noun: the kind in 3 places and 6 of 10
 NOT_READ = ("line_kind", "subject_switch", "relation", "transitivity", "head_role", "continues")
 
@@ -351,13 +354,18 @@ class Donors:
         w0 = self.E.S.word[t0]
         return min(ts, key=lambda t: ((t in self.last) != (t0 in self.last), self.E.S.word[t]["book"] != w0["book"], abs(t - t0)))
 
-    def form(self, t0, k, to, free=()):
-        """a word of the same shape whose part `k` has the values `to`, all else as in word `t0`"""
-        ps0 = bare(self.E.S.parts[t0])
+    def form(self, t0, k, to, free=(), cj=0):
+        """a word of the same shape whose part `k` has the values `to`, all else as in word `t0`. `cj`: the donor
+        has the conjunction before it that the word has not (1), or has not the one the word has (-1)"""
+        ps0, sh = bare(self.E.S.parts[t0]), shape(self.E.S.parts[t0])
+        if cj == 1:
+            sh = (("cj", AND),) + sh
+        elif cj == -1:
+            ps0, sh, k = ps0[1:], sh[1:], k - 1
         fit = []
-        for sig, ts in self.forms[shape(self.E.S.parts[t0])].items():
+        for sig, ts in self.forms[sh].items():
             ok = True
-            for j, (p0, fs) in enumerate(zip(ps0, sig)):
+            for j, (p0, fs) in enumerate(zip(ps0, sig[cj == 1:])):
                 for name, b in zip(FEAT, fs):
                     a = p0[name]
                     if j == k and name in to:
@@ -377,12 +385,15 @@ class Donors:
         at times: a donor must be a noun that is of the kind as a word)"""
         return self.noun_count[(kind, lex)] >= NOUN_MIN and self.noun_count[(kind, lex)] >= NOUN_SHARE * self.noun_places[lex]
 
-    def noun(self, t0, k, kind, keep_gender, turn):
-        """a noun of that kind in the same form; among the kind's five commonest that fit, the one `turn` picks"""
+    def noun(self, t0, k, kind, keep_gender, turn, strict=False):
+        """a noun of that kind in the same form; among the kind's five commonest that fit, the one `turn` picks.
+        `strict`: the very gender of the word, masculine or feminine (where something agrees with the noun)"""
         g0 = bare(self.E.S.parts[t0])[k]["gender"]
         own = PD.strong(bare(self.E.S.parts[t0])[k]["lexeme"])
         by = collections.defaultdict(list)
         for t, kd, lex, g in self.nouns.get(self.noun_key(self.E.S.parts[t0], k), ()):
+            if strict and not (g == g0 and g in ("m", "f")):
+                continue
             if kd == kind and lex != own and self.steady(kind, lex) and (not keep_gender or g == g0 or g in SOFT["gender"] or g0 in SOFT["gender"]):
                 by[lex].append(t)
         if not by:
@@ -447,7 +458,7 @@ def probes_of(E, n):
             return sp is not None and sum(1 for x in r["slots"] if sp[1] <= x["key"][0] <= sp[2] and x["kind"] == "stem"
                                           and x["cls"] in CONTENT + ("pron",)) == 1
 
-        def give(f, change, frm, to, at, edits, check_dim=True):
+        def give(f, change, frm, to, at, edits, check_dim=True, note=""):
             sure = min([r["sure"]] + [r["mark_p"][m] for m in f.get("place", {}) if m in r["mark_p"]])
             seq = made_text(S, ts, edits)
             text = " ".join(S.word[w]["text"] for _, w in seq)
@@ -456,18 +467,26 @@ def probes_of(E, n):
                    "edit_op": [e[0] for e in edits], "edit_at": [S.word[e[1]]["id"] for e in edits],
                    "edit_from": [S.word[e[2]]["id"] if e[2] else None for e in edits], "sure": round(sure, 3),
                    "known_words": known(r), "plain_differs": plain(text) != plain(r["text"]), "check": check(r["text"]),
-                   "made_check": check(text),
+                   "made_check": check(text), "with": [note] if note else [],
                    "_edits": edits, "_text": text, "_lex": PD.strong(next((s["lexeme"] for s in r["slots"] if at and s["key"] == at), ""))}
             if check_dim and all(e[0] == "put" for e in edits):      # the difference function reads the made clause
                 words = {}
                 for _, t0, d in edits:
-                    mine, theirs = bare(S.parts[t0]), bare(S.parts[d])
+                    mine, theirs, lead = bare(S.parts[t0]), bare(S.parts[d]), []
+                    if len(theirs) == len(mine) + 1 and theirs[0]["cls"] == "cj":     # the conjunction comes with the form
+                        lead, theirs = [dict(theirs[0], key=(t0, 80), head=None)], theirs[1:]
+                    elif len(mine) == len(theirs) + 1 and mine[0]["cls"] == "cj":     # or goes with it
+                        mine = mine[1:]
                     words[t0] = [{**x, **{k: y[k] for k in ("text", "lexeme") + FEAT}} for x, y in zip(mine, theirs)]
                     arts = [dict(p, key=(t0, 90 + i), head=None) for i, p in enumerate(S.parts[d]) if p["cls"] == "art"]
                     words[t0] = arts + words[t0] if arts and words[t0] and words[t0][0]["cls"] == "noun" else \
                         words[t0][:1] + arts + words[t0][1:] if arts else words[t0]
+                    words[t0] = lead + words[t0]
                 x = PD.diff(r, S.record(cid, words=words, text=text), E.D)
-                form = [d["dimension"] for d in x["dimensions"] if d["slots"]]
+                form = [d["dimension"] for d in x["dimensions"] if d["slots"] and not (note and d["dimension"] in CJ_DIMS)]
+                if note:
+                    n[f"{f['name']}: with the conjunction, read as " + "+".join(d["dimension"] for d in x["dimensions"] if d["slots"])
+                      + (" and a rest" if x["rest"] else "")] += 1
                 if f["dimension"] == "time" and form == ["finiteness"]:     # to or from a participle: the scheme's own name
                     row["dimension"], row["moves"] = "finiteness", sorted(set(row["moves"]) | {16})
                 row["made_one"] = form == [row["dimension"]] and not x["rest"]
@@ -522,7 +541,12 @@ def probes_of(E, n):
                                     continue
                                 to["person"] = said["person"] if said["cls"] == "pron" and said["person"] else "3"
                         n[f"{f['name']}: places"] += 1
-                        d = DN.form(t, k, to, tuple(f.get("free", ())))
+                        d, note = DN.form(t, k, to, tuple(f.get("free", ()))), ""
+                        if d is None and f["feature"] == "type":     # `וַיֹּאמֶר`, `וְאָמַר`: the conjunction is part of the form
+                            if v2 in CONSECUTIVE and ps[0]["cls"] != "cj" and k == 0 and ts[0] == t:
+                                d, note = DN.form(t, k, to, tuple(f.get("free", ())), cj=1), "conjunction:added"
+                            elif v1 in CONSECUTIVE and ps[0]["cls"] == "cj" and k == 1:
+                                d, note = DN.form(t, k, to, tuple(f.get("free", ())), cj=-1), "conjunction:dropped"
                         edits = [("put", t, d)]
                         for b in f.get("agree", ()):                 # what agrees takes the new value too
                             for a in r["slots"]:
@@ -534,7 +558,7 @@ def probes_of(E, n):
                         if d is None:
                             n[f"{f['name']}: no donor"] += 1
                             continue
-                        give(f, change, v1, v2, s["key"], edits)
+                        give(f, change, v1, v2, s["key"], edits, note=note)
             elif how == "drop_negator":
                 for t in ts:
                     if shape(S.parts[t]) == (("adv", NEGATOR),) and verb is not None and t + 1 == verb["key"][0]:
@@ -566,6 +590,100 @@ def probes_of(E, n):
                 if ts2:
                     give(f, f"add_pronoun:{verb['person']}{verb['number']}", "zero", "pronoun", verb["key"],
                          [("add_after", verb["key"][0], DN.best(ts2, verb["key"][0]))])
+    return out
+
+
+def unit_probes(E, DN, n):
+    """probes on a relative unit (labels: relatives.parquet): the carrier is the clause above followed by the relative
+    clause. The noun swapped for a noun of another kind, the noun's number changed with what agrees inside the
+    relative clause, the relative clause dropped."""
+    S, fam = E.S, families()
+    path = LABELS / E.ed / "relatives.parquet"
+    out = []
+    if not path.exists() or "rel_head_swap" not in fam:
+        return out
+    for u in pq.read_table(path).to_pylist():
+        A, R = u["above_clause"], u["rel_clause"]
+        if not u["short"] or u["sure"] < MIN_SURE or u["rel_also"] or u["rel_role"] == "other":
+            continue
+        n["units: short, sure, one reading"] += 1
+        ra, rr = E.by_clause.get(A), E.by_clause.get(R)
+        if ra is None or rr is None:
+            n["units: a clause is not among the short clauses with known lexemes"] += 1
+            continue
+        ts_a, ts_r = ra["ts"], rr["ts"]
+        wa, wr = S.word[ts_a[0]], S.word[ts_r[-1]]
+        if ts_r[0] != ts_a[-1] + 1 or (wa["book"], wa["chapter"], wa["verse"]) != (wr["book"], wr["chapter"], wr["verse"]):
+            n["units: the relative clause does not follow the clause above in its verse"] += 1
+            continue
+        wid, part = u["head"].rsplit(".", 1)
+        ht = S.t_of[wid]
+        ps = bare(S.parts[ht])
+        k = next((i for i, p in enumerate(ps) if p["key"] == (ht, int(part) - 1)), None)
+        sp = span_of(S, A, ht)
+        alone = sp is not None and sum(1 for x in ra["slots"] if sp[1] <= x["key"][0] <= sp[2] and x["kind"] == "stem"
+                                       and x["cls"] in CONTENT + ("pron",)) == 1
+        if k is None or not alone or not all(p["known"] for p in ps) or ps[k]["cls"] != "noun" or ps[k]["type"] != "common" \
+                or PD.strong(ps[k]["lexeme"]).lstrip("0") in NOT_HEADS:
+            n["units: the noun is not one known common noun alone in its constituent"] += 1
+            continue
+        n["units: places"] += 1
+        ts, text = ts_a + ts_r, ra["text"] + " " + rr["text"]
+        sure, role = min(u["sure"], ra["sure"], rr["sure"]), u["rel_role"]
+
+        def give(f, change, frm, to, edits, note=""):
+            made = " ".join(S.word[w]["text"] for _, w in made_text(S, ts, edits))
+            out.append({"edition": E.ed, "family": f["name"], "change": change, "clause": R, "clause_above": A, "dimension": f["dimension"],
+                        "from": frm or "", "to": to or "", "moves": f.get("moves", []), "at": u["head"],
+                        "edit_op": [e[0] for e in edits], "edit_at": [S.word[e[1]]["id"] for e in edits],
+                        "edit_from": [S.word[e[2]]["id"] if e[2] else None for e in edits], "sure": round(sure, 3),
+                        "known_words": known(ra) and known(rr), "plain_differs": plain(made) != plain(text), "check": check(text),
+                        "made_check": check(made), "with": [note] if note else [], "made_one": None,
+                        "_edits": edits, "_text": made, "_lex": PD.strong(ps[k]["lexeme"])})
+
+        f = fam["rel_head_swap"]
+        own = E.kind.get(ps[k]["key"])
+        for kind in f["to_kinds"]:
+            if kind != own:
+                d = DN.noun(ht, k, kind, True, ht, strict=True)
+                if d is None:
+                    n["rel_head_swap: no donor"] += 1
+                else:
+                    give(f, f"rel_head_swap:{role}:>{kind}", own, kind, [("put", ht, d)])
+        f = fam["rel_head_number"]
+        v1 = ps[k]["number"]
+        v2 = {"sg": "pl", "pl": "sg"}.get(v1)
+        above_agrees = u["head_role"] in ("s", "p") or S.clauses[A]["pred_kind"] != "v"    # `הוּא הַדָּבָר`: the pronoun agrees
+        if v2 and not above_agrees:
+            edits, note = [("put", ht, DN.form(ht, k, {"number": v2}))], ""
+            inner = None                                             # the part of the relative clause that agrees with the noun
+            if role == "s":
+                verbs = [x for x in rr["slots"] if x["cls"] in ("verb", "adj") and x["kind"] == "stem"]
+                others = [x for x in rr["slots"] if x["cls"] == "pron" and x["number"] in (v1, "")]
+                if not verbs and not others:
+                    inner = False                                    # `אֲשֶׁר בַּשָּׁמַיִם`: nothing agrees
+                elif len(verbs) == 1 and verbs[0]["number"] == v1 and not others and u["rel_role_basis"] != "nominal":
+                    inner, note = verbs[0]["key"], "agrees:verb"
+            elif u["rel_resumed"]:
+                w2, p2 = u["rel_resumed"].rsplit(".", 1)
+                same = [x for x in rr["slots"] if x["cls"] == "pron" and x["person"] == "3" and x["number"] == v1]
+                if len(same) == 1:                                   # `אֲשֶׁר לִבּוֹ נָכוֹן עִמּוֹ`: which one is the noun's
+                    inner, note = (S.t_of[w2], int(p2) - 1), "agrees:pronoun"
+            else:
+                inner = False                                        # a gap: nothing takes the noun up
+            if inner:
+                ki = next((i for i, x in enumerate(bare(S.parts[inner[0]])) if x["key"] == inner), None)
+                ok = ki is not None and all(x["known"] for x in bare(S.parts[inner[0]]))
+                g0, d2 = ps[k]["gender"], None                       # what agrees keeps the noun's gender
+                for g in ((g0,) if g0 in ("m", "f") else ()) + ("c", "b", ""):
+                    d2 = d2 or (DN.form(inner[0], ki, {"number": v2, "gender": g}) if ok else None)
+                edits.append(("put", inner[0], d2 if g0 in ("m", "f") else None))
+            if inner is None or any(e[2] is None for e in edits):
+                n["rel_head_number: no donor, or what agrees could not be told"] += 1
+            else:
+                give(f, f"rel_head_number:{role}:{v1}>{v2}", v1, v2, edits, note)
+        f = fam["rel_drop"]
+        give(f, f"rel_drop:{role}", "relative", "", [("drop", t, None) for t in ts_r])
     return out
 
 
@@ -604,14 +722,14 @@ def read_back(E, rows, n):
             where[S.at.get(vk + (i,))] = (vk, j)
     todo, jobs = [], []
     for r in rows:
-        if not r["default"]:
+        if not r["default"] or fam[r["family"]].get("read") is False:
             continue
         c = S.clauses[r["clause"]]
         vk = (c["book"], c["chapter"], c["verse"])
         v = verses[vk]
         seg = S.segs[r["clause"]][0]["seg"]
         ci = next((j for j, cl in enumerate(v["clauses"]) if cl["seg"] == seg), None)
-        if ci is None or any(t not in where for e in r["_edits"] for t in e[1:] if t):
+        if ci is None or any(t not in where for e in r["_edits"] for t in e[1:] if t) or any(vk + (i,) not in S.at for i in v["word_i"]):
             n["read-back: verse not found"] += 1
             continue
         all_ts = [S.at[vk + (i,)] for i in v["word_i"]]
@@ -656,9 +774,9 @@ def read_back(E, rows, n):
         n[f"read-back {r['family']}: " + ("as meant" if r["read_ok"] else "not as meant")] += 1
 
 
-PROBES = [("probe", STR), ("edition", STR), ("family", STR), ("change", STR), ("clause", STR), ("dimension", STR), ("from", STR),
+PROBES = [("probe", STR), ("edition", STR), ("family", STR), ("change", STR), ("clause", STR), ("clause_above", STR), ("dimension", STR), ("from", STR),
           ("to", STR), ("moves", pa.list_(I32)), ("at", STR), ("edit_op", LST), ("edit_at", LST), ("edit_from", LST),
-          ("sure", F64), ("default", BOOL), ("known_words", BOOL), ("plain_differs", BOOL), ("made_one", BOOL), ("check", STR), ("made_check", STR),
+          ("sure", F64), ("default", BOOL), ("known_words", BOOL), ("plain_differs", BOOL), ("made_one", BOOL), ("check", STR), ("made_check", STR), ("with", LST),
           ("read_moved", LST), ("read_role", BOOL), ("read_ok", BOOL)]
 CHANGE_COLS = [("change", STR), ("family", STR), ("dimension", STR), ("how", STR), ("moves", pa.list_(I32)), ("probes", I32),
                ("sure_probes", I32), ("default_probes", I32), ("read_as_meant", I32), ("words", I32)]
@@ -669,6 +787,9 @@ def build_changes(editions, read):
         E = Edition(ed)
         n = collections.Counter()
         rows = probes_of(E, n)
+        rows += unit_probes(E, Donors(E), n)
+        for r in rows:
+            r.setdefault("clause_above", None)
         choose(rows)
         if read:
             read_back(E, rows, n)
@@ -686,7 +807,7 @@ def build_changes(editions, read):
                         "default_probes": sum(1 for r in rs if r["default"]),
                         "read_as_meant": sum(1 for r in rs if r.get("read_ok")), "words": len({r["_lex"] for r in rs})})
         write(OUT / ed / "changes.parquet", cat, CHANGE_COLS)
-        named = {r["clause"] for r in rows}
+        named = {r["clause"] for r in rows} | {r["clause_above"] for r in rows if r["clause_above"]}
         old = pq.read_table(OUT / ed / "pairs.parquet", columns=["a", "b"]).to_pylist() if (OUT / ed / "pairs.parquet").exists() else []
         named |= {c for r in old for c in (r["a"], r["b"])}
         write(OUT / ed / "clauses.parquet", [E.clause_row(c) for c in sorted(named)], CLAUSES)
@@ -729,9 +850,11 @@ def show(ids, form):
             r = next(r for r in pq.read_table(OUT / ed / "probes.parquet").to_pylist() if r["probe"] == x)
             S = E.S
             edits = [(op, S.t_of[at], S.t_of[frm] if frm else None) for op, at, frm in zip(r["edit_op"], r["edit_at"], r["edit_from"])]
-            made = " ".join(S.word[w]["text"] for _, w in made_text(S, S.words_of(r["clause"]), edits))
-            ok = check(resolve(E, r["clause"])) == r["check"] and check(made) == r["made_check"]
-            print(f"{x} {r['clause']} | {resolve(E, r['clause'], form)}  →  {plain(made) if form == 'plain' else made}" + ("" if ok else "   HASH DIFFERS"))
+            ts = (S.words_of(r["clause_above"]) if r.get("clause_above") else []) + S.words_of(r["clause"])
+            made = " ".join(S.word[w]["text"] for _, w in made_text(S, ts, edits))
+            place = " ".join(S.word[t]["text"] for t in ts)
+            ok = check(place) == r["check"] and check(made) == r["made_check"]
+            print(f"{x} {r['clause']} | {plain(place) if form == 'plain' else place}  →  {plain(made) if form == 'plain' else made}" + ("" if ok else "   HASH DIFFERS"))
             print(f"    {r['change']} ({r['dimension']}: {r['from'] or '∅'} → {r['to'] or '∅'}); edits {list(zip(r['edit_op'], r['edit_at'], r['edit_from']))}; "
                   f"moves {r['moves']}; sure {r['sure']}; default {r['default']}; read back {r['read_ok']} {r['read_moved']}")
         else:
@@ -749,7 +872,8 @@ def build_pairs(editions):
         write(OUT / ed / "pairs.parquet", rows, PAIRS)
         named = {c for r in rows for c in (r["a"], r["b"])}            # with the clauses the made probes name, as they stand
         if (OUT / ed / "probes.parquet").exists():
-            named |= set(pq.read_table(OUT / ed / "probes.parquet", columns=["clause"]).column("clause").to_pylist())
+            for col in set(("clause", "clause_above")) & set(pq.read_schema(OUT / ed / "probes.parquet").names):
+                named |= {c for c in pq.read_table(OUT / ed / "probes.parquet", columns=[col]).column(col).to_pylist() if c}
         write(OUT / ed / "clauses.parquet", [E.clause_row(c) for c in sorted(named)], CLAUSES)
         path = OUT / ed / "CHECKS.json"
         both = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
