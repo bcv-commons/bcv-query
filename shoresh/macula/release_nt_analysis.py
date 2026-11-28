@@ -1,7 +1,7 @@
 """Package exported Hebrew NT analyses as a release of the dataset bcv-commons/hebrew-nt-analysis. Nothing is uploaded: the files are
 written to a folder for review, and published by hand.
 
-    python -m macula.release_nt_analysis --tag v0.10 --out DIR [--editions heb_scg,heb_mod] [--src macula/data/clause-tagger/export]
+    python -m macula.release_nt_analysis --tag v0.11 --out DIR [--editions heb_scg,heb_mod] [--src macula/data/clause-tagger/export]
         [--features macula/data/hebrew-nt-features/2026-11-26c] [--layers macula/data/hebrew-nt-layers/2026-11-26]
         [--speech macula/data/hebrew-nt-speech/2026-11-28b] [--referents macula/data/hebrew-nt-referents/2026-11-28b]
         [--scheme macula/data/clause-scheme/nt] [--allow-dirty]
@@ -50,7 +50,9 @@ CARD = HERE / "nt_analysis_card.md"
 CODE = [HERE / "clause_tagger.py", HERE / "fetch_hebrew_nt.py", HERE / "vendor_bibles", HERE / "hebrew_nt_morph.py",
         HERE / "hebrew_nt_features.py", HERE / "hebrew_nt_layers.py", HERE / "hebrew_nt_speech.py",
         HERE / "hebrew_nt_referents.py", HERE / "clause_scheme.py", HERE / "validate_scheme.py", HERE / "hebrew_nt_clauses.py",
-        HERE / "build_text_ids.py", Path(__file__).resolve(), CARD]
+        HERE / "build_text_ids.py", HERE / "build_frame_labels.py", HERE / "frame_labels_lookup.py", HERE / "verb_stems_model.py",
+        Path(__file__).resolve(), CARD]
+FRAME_READ = HERE / "data" / "frame-labels"                           # as-read-<pointed|unpointed>.json (build_frame_labels --as-read)
 SCHEME_TABLES = ("clauses", "segments", "constituents", "added", "orders", "clause_join")
 SCHEME_FILE = HERE / "data" / "clause-scheme" / "clause-scheme.toml"
 ADDED = {"features.parquet": ("features", "features.parquet"), "pieces.parquet": ("layers", "pieces.parquet"),
@@ -62,6 +64,20 @@ EDITIONS = {"heb_scg": "Salkinson–Ginsburg Hebrew New Testament (1885/86), pub
                        "bible.helloao.org (from eBible.org, heb)"}
 PINNED = {"heb_scg/words.parquet": "bf6aebcc96dcb330984b9ffc2d44a12b77f24aa91c8d7b654ef4f040a62224b5"}    # lexeme-aligner config/target_parts.json
 FIELD = {"heb_scg": "SCG", "heb_mod": "MOD"}
+
+
+def frame_counts(sch) -> dict:
+    """per kind of argument (said subject, object, unsaid subject) of a clause with a verb as predicate: with a frame
+    label, all, and with a label that rests on a stem a model read"""
+    verbal = {r["clause"] for r in sch["clauses"] if r["pred_kind"] == "v"}
+    out = {}
+    for key, rows in (("s", [r for r in sch["constituents"] if r["role"] == "s"]), ("o", [r for r in sch["constituents"] if r["role"] in ("o", "o2")]),
+                      ("unsaid s", [r for r in sch["added"] if r["role"] == "s"])):
+        rows = [r for r in rows if r["clause"] in verbal]
+        if any(r["frame_role"] and r["frame_role_basis"] not in ("derived", "model") for r in rows):
+            raise SystemExit("a frame label without its basis")
+        out[key] = (sum(1 for r in rows if r["frame_role"]), len(rows), sum(1 for r in rows if r["frame_role_basis"] == "model"))
+    return out
 
 
 def main() -> None:
@@ -159,7 +175,7 @@ def main() -> None:
                      "word_parts": len(part_keys),
                      "scheme": {**{t: len(sch[t]) for t in SCHEME_TABLES}, "no_constituent": no_const, "empty": len(seg_keys - written),
                                 "joined": len(sch["segments"]) - len(sch["clauses"]),
-                                "who": sum(1 for r in sch["added"] if r["who"])},
+                                "who": sum(1 for r in sch["added"] if r["who"]), "frame": frame_counts(sch)},
                      "manifest": json.loads((out / ed / "manifest.json").read_text())}
     missing = [e for e in FIELD if e not in stats]
     if missing:
@@ -184,6 +200,13 @@ def main() -> None:
                        f"@{f}_SCHEME_ADDED@": f"{e['scheme']['added']:,}", f"@{f}_SCHEME_WHO@": f"{e['scheme']['who']:,}",
                        f"@{f}_SCHEME_ORDERS@": f"{e['scheme']['orders']:,}", f"@{f}_SCHEME_JOIN@": f"{e['scheme']['clause_join']:,}",
                        f"@{f}_SCHEME_EMPTY@": f"{e['scheme']['empty']:,}"})
+        fr = e["scheme"]["frame"]
+        read = json.loads((FRAME_READ / f"as-read-{'pointed' if ed == 'heb_scg' else 'unpointed'}.json").read_text())["figures"]
+        for k, key in (("S", "s"), ("O", "o"), ("UNSAID", "unsaid s")):
+            n, tot, model = fr[key]
+            fields.update({f"@{f}_FRAME_{k}@": f"{n:,} of {tot:,} ({n / max(tot, 1):.1%})", f"@{f}_FRAME_{k}_MODEL@": f"{model:,}",
+                           f"@{f}_FRAME_{k}_RIGHT@": f"{read[key]['right']:.1%}",
+                           f"@{f}_FRAME_{k}_RIGHT_ROLE@": f"{read[key]['right where MACULA has the argument with a label']:.1%}"})
     card = CARD.read_text(encoding="utf-8")
     for k, v in fields.items():
         card = card.replace(k, v)

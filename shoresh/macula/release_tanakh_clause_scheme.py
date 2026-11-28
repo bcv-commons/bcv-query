@@ -36,7 +36,7 @@ from macula import release_guard  # refuses TBTA and private inputs
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-VERSION = "v0.1"
+VERSION = "v0.2"
 REPO = "bcv-commons/tanakh-clause-scheme"
 SRC = CS.SCHEME_OUT / "tanakh"
 SCHEME_FILE = CS.SCHEME_OUT / "clause-scheme.toml"
@@ -214,12 +214,17 @@ word is in exactly one clause.
 Every value that is not a key has its basis beside it in `<column>_basis`: `given` (MACULA's own) or `derived` (by a rule of
 ours from MACULA and our layers). `<column>_p` is empty throughout (it holds a tagger's probability on the New Testament).
 
+**Changes in v0.2.** The scheme file is version 0.4: the frame label has a basis, so `constituents` and `added` gain
+`frame_role_basis` (`given` here: MACULA's own label) and `frame_role_p` (empty). Nothing else changed, value for value.
+The Hebrew New Testaments of bcv-commons/hebrew-nt-analysis carry a frame label from its v0.11, looked up in these labels
+([bcv-commons/hebrew-verb-frame-labels](https://huggingface.co/datasets/bcv-commons/hebrew-verb-frame-labels)); there the basis says how.
+
 - **`clauses`**: `parent`, `depth` (MACULA's tree); `rule` (MACULA's clause rule) and `pattern` (the roles in order, where the
   rule is a list of roles); `pred`, the predicate's word, and `pred_kind` (`v`, `p` a nominal predicate, `none`);
   `source_clause`; and the marks. How many clauses have each: {filled}.
 - **`constituents`**: the clause's direct parts in order (`ord`): `role` (`v`, `s`, `o`, `o2`, `p`, `pp`, `adv`: MACULA's role
   attribute), `head`, `first`, `last`, `class`, `prep`, `frame_role` (MACULA's frame label of the argument: `A0`, `A1`, `AA`,
-  `A2`), `sem_role` (a Hebrew term, from bcv-commons/argument-roles), `ref_status` and `ref_form` (first mention or mentioned
+  `A2`; `frame_role_basis` is `given` wherever there is one), `sem_role` (a Hebrew term, from bcv-commons/argument-roles), `ref_status` and `ref_form` (first mention or mentioned
   before, and by a noun, a pronoun or a suffix, from bcv-commons/reference-status).
 - **`added`**: a verb's argument that its clause does not say: `verb`, `role` (`s` where the grammatical role is known:
   {n['added_role']:,} rows), `frame_role`, `kind` (inside the verb's form, or said in another clause), `where`, `form`,

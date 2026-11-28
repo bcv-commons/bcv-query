@@ -847,10 +847,9 @@ RULE_FIRST = ("kind", "pattern", "fronted", "subject_form", "neg_scope")
 PLAIN = [False]                                                      # whether the models read text without points
 
 
-def scheme_e2e(plain, tree="scheme"):
-    """the Tanakh's test chapters as the New Testament is read: the first tagger's own segments, depths, word parts
-    and verb forms (its saved test predictions), then the tree, the joining and the constituents from them. Scored
-    per verse against the Tanakh's constituents by role and head word."""
+def e2e_verses(plain, tree="scheme"):
+    """the Tanakh's test chapters read as the New Testament is read (see scheme_e2e): the verses with their `out` and
+    `tree`, the Tanakh's words per verse, and its constituents per head word"""
     L = layers()
     wd, sent, clauses, cons = tanakh()
     by_ref = collections.defaultdict(list)
@@ -876,6 +875,15 @@ def scheme_e2e(plain, tree="scheme"):
     model, bat, device, ck = L.load_model(plain)
     PLAIN[0] = plain
     clauses_of_verse(L, model, bat, device, verses, trees="released" if tree == "released" else None)
+    return verses, by_ref, gold_of
+
+
+def scheme_e2e(plain, tree="scheme"):
+    """the Tanakh's test chapters as the New Testament is read: the first tagger's own segments, depths, word parts
+    and verb forms (its saved test predictions), then the tree, the joining and the constituents from them. Scored
+    per verse against the Tanakh's constituents by role and head word."""
+    verses, by_ref, gold_of = e2e_verses(plain, tree)
+    n = collections.Counter()
     per = collections.defaultdict(collections.Counter)
     for v in verses:
         ws = sorted(by_ref[v["ref"]], key=lambda w: w["w"])
@@ -920,7 +928,7 @@ def scheme_e2e(plain, tree="scheme"):
 
 
 # ---------------------------------------------------------------- the scheme file and the Tanakh in its shape
-SCHEME_VERSION = "0.3"
+SCHEME_VERSION = "0.4"
 SCHEME_MARKS = ("kind", "force", "polarity", "mood", "time", "time_abs", "aspect", "relation", "voice", "negator",
                 "connective", "line_kind", "fronted", "subject_form", "transitivity", "neg_scope", "subject_switch")
 LEXEME_MARKS = {"negator": "string", "connective": "list"}           # lexeme keys, no closed value set
@@ -956,14 +964,14 @@ def scheme_tables():
             ("head", {"type": S, "kind": "word", "required": True}), ("first", {"type": S, "kind": "word", "required": True}),
             ("last", {"type": S, "kind": "word", "required": True}),
             ("class", {"type": S, "kind": "value", "values": "constituents.class"}),
-            ("prep", {"type": S, "kind": "lexeme", "prefix": "lex:"}), ("frame_role", {"type": S, "kind": "code"}),
+            ("prep", {"type": S, "kind": "lexeme", "prefix": "lex:"}), ("frame_role", {"type": S, "kind": "code", "basis": True}),
             ("sem_role", {"type": S, "kind": "value", "values": "constituents.sem_role", "basis": True}),
             ("ref_status", {"type": S, "kind": "value", "values": "constituents.ref_status", "basis": True}),
             ("ref_form", {"type": S, "kind": "value", "values": "constituents.ref_form"})])}),
         ("added", {"file": "added.parquet", "key": ["verb", "role", "frame_role", "kind"], "columns": collections.OrderedDict([
             ("clause", {"type": S, "kind": "key"}), ("verb", {"type": S, "kind": "word", "required": True}),
             ("role", {"type": S, "kind": "value", "values": "added.role"}),
-            ("frame_role", {"type": S, "kind": "value", "values": "added.frame_role"}),
+            ("frame_role", {"type": S, "kind": "value", "values": "added.frame_role", "basis": True}),
             ("kind", {"type": S, "kind": "value", "values": "added.kind", "required": True}),
             ("where", {"type": S, "kind": "value", "values": "added.where"}),
             ("form", {"type": S, "kind": "value", "values": "added.form"}),
@@ -1191,6 +1199,8 @@ def tanakh_export():
                      "ref_status": r["ref_status"] or None, "ref_form": r["ref_form"] or None}
                 if o["ref_status"]:
                     o["ref_status_basis"] = basis_of("constituents", "ref_status")
+                if o["frame_role"]:
+                    o["frame_role_basis"] = "given"                  # MACULA's own label
                 out_k.append(o)
     out_a = []
     IN_VERB = next(v["term"] for v in cats["added"]["kind"]["values"] if v["code"] == "in_verb")
@@ -1210,6 +1220,8 @@ def tanakh_export():
              "gender": r["gender"] or None, "antecedent": ant, "who": r["who"] or None, "who_reason": r["who_reason"] or None}
         if o["who"]:
             o["who_basis"] = "derived"
+        if o["frame_role"]:
+            o["frame_role_basis"] = "given"
         n["added rows whose grammatical role waits"] += o["role"] is None
         out_a.append(o)
     # the bridge to MACULA's own clauses: every clause of the Tanakh build is a scheme clause's source, or a row here

@@ -61,6 +61,13 @@ def main() -> int:
     shutil.move(a.out / "data" / "ACCOUNT.json", a.out / "ACCOUNT.json")
     (a.out / "data" / "report.md").rename(a.out / "report.md")
     shutil.copy(HERE / "frame_labels_lookup.py", a.out / "lookup.py")
+    read = {}
+    for text in ("pointed", "unpointed"):                             # build_frame_labels --as-read, run beforehand
+        src = B.OUT / f"as-read-{text}.json"
+        if not src.exists():
+            raise SystemExit(f"{src} is missing: run build_frame_labels --as-read {text}")
+        shutil.copy(src, a.out / src.name)
+        read[text] = json.loads(src.read_text(encoding="utf-8"))["figures"]
     packed = pq.read_table(a.out / "data" / "frames.parquet").to_pylist()
     if any(not r["stem"] and r["step"] != "lexeme" for r in packed) or {r["label"] for r in packed} - set(B.LABELS):
         raise SystemExit("a row without a stem outside the lexeme step, or a label that is none of MACULA's")
@@ -73,9 +80,9 @@ def main() -> int:
     layout = tomllib.loads((HERE / "clause_layout.toml").read_text(encoding="utf-8"))
     pin = {"tanakh_clause_scheme": {**SCHEME_PIN, "built_from_the_published_tables_too": same},
            "macula_hebrew": layout["sources"]["macula_hebrew"]["commit"],
-           "new_testament_counted_on": "bcv-commons/hebrew-nt-analysis v0.9 (scheme tables, stems of its features table)"}
+           "new_testament_counted_on": "bcv-commons/hebrew-nt-analysis v0.10 (scheme tables, stems of its features table)"}
     (a.out / "PIN.json").write_text(json.dumps(pin, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    (a.out / "README.md").write_text(card(account, packed, pin), encoding="utf-8")
+    (a.out / "README.md").write_text(card(account, packed, pin, read), encoding="utf-8")
     files = sorted(x for x in a.out.rglob("*") if x.is_file())
     meta = {"version": VERSION, "repo": REPO, "built": datetime.date.today().isoformat(), "code": commit, "licence": "CC BY-SA 4.0",
             "rows": len(packed), "settled": sum(1 for r in packed if r["settled"]),
@@ -87,7 +94,7 @@ def main() -> int:
     return 0
 
 
-def card(acc: dict, rows: list[dict], pin: dict) -> str:
+def card(acc: dict, rows: list[dict], pin: dict, read: dict) -> str:
     cc = acc["cross_check"]["figures"]
 
     def f(key, what="right"):
@@ -160,6 +167,7 @@ What the counts show of MACULA's practice:
 | `lookup.py` | the lookup (stands alone, pyarrow only) |
 | `ACCOUNT.json` | counts, thresholds, the cross-check per step and stem, the count on the Hebrew New Testaments |
 | `report.md` | the same as text |
+| `as-read-pointed.json`, `as-read-unpointed.json` | the measure on test chapters read by taggers (below) |
 | `PIN.json` | what the table was built from |
 
 ## The table
@@ -227,13 +235,28 @@ Subjects per stem:
 {stems}
 
 "Right" means the same label as MACULA's at that place. The cross-check reads MACULA's own roles for what is a
-subject and an object. On a text whose roles come from a tagger, a wrong role gives a wrong key; that loss is not in
-these figures.
+subject and an object.
+
+**On a text whose roles come from a tagger** a wrong role gives a wrong key, or a label for something that is no such
+argument. Measured on the Tanakh's test chapters read the way the Hebrew New Testaments are read (the taggers' segments,
+tree and roles; `as-read-pointed.json`, `as-read-unpointed.json`), with a table built without those chapters and with
+MACULA's own lexeme and stem:
+
+| | Subjects | Objects | Unsaid subjects |
+|---|---|---|---|
+| a label given is MACULA's for that argument, pointed text | {read['pointed']['s']['right']:.1%} | {read['pointed']['o']['right']:.1%} | {read['pointed']['unsaid s']['right']:.1%} |
+| the same where MACULA has that argument with a label | {read['pointed']['s']['right where MACULA has the argument with a label']:.1%} | {read['pointed']['o']['right where MACULA has the argument with a label']:.1%} | {read['pointed']['unsaid s']['right where MACULA has the argument with a label']:.1%} |
+| a label given is MACULA's, text without points | {read['unpointed']['s']['right']:.1%} | {read['unpointed']['o']['right']:.1%} | {read['unpointed']['unsaid s']['right']:.1%} |
+| the same where MACULA has that argument with a label | {read['unpointed']['s']['right where MACULA has the argument with a label']:.1%} | {read['unpointed']['o']['right where MACULA has the argument with a label']:.1%} | {read['unpointed']['unsaid s']['right where MACULA has the argument with a label']:.1%} |
+
+So nearly all of the loss is the role, not the label.
 
 ## On the Hebrew New Testaments
 
-Counted on the clause scheme of hebrew-nt-analysis v0.9 (subjects said and unsaid, with the stems of its features
-table). The labels are not in that release; this is what the table would settle.
+Counted on the clause scheme of hebrew-nt-analysis v0.10 (subjects said and unsaid, with the stems of its features
+table). hebrew-nt-analysis carries the labels from v0.11, read with one more rule (a lexeme its tagger chose is not
+taken as the verb's) and, where the features table has no stem, with a stem a model read
+([bcv-commons/hebrew-nt-verb-stems-model](https://huggingface.co/datasets/bcv-commons/hebrew-nt-verb-stems-model)).
 
 | Edition | Subjects | Settled | Open: no stem read | Open: two labels in the Tanakh | Open: other |
 |---|---|---|---|---|---|

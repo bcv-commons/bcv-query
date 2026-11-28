@@ -106,6 +106,7 @@ each pronoun, pronoun suffix and finite verb has its referent (an id shared alon
 | New in v0.4 | `stem` in `features.parquet` (its other columns unchanged, value for value); `speech.parquet`, `entities.parquet` per edition |
 | New in v0.5 | `referents.parquet` per edition; every other file unchanged |
 | New in v0.6 | `speech.parquet` from the mended addressees layer (bcv-commons/addressees v0.2); `referents.parquet` rebuilt on it; every other file unchanged |
+| New in v0.11 | **Frame labels** (`frame_role`, with `frame_role_basis` and `frame_role_p`) on subjects, objects and unsaid subjects in `scheme/constituents.parquet` and `scheme/added.parquet`, looked up in the Tanakh's own labels and left empty where the Tanakh does not settle one; scheme file version 0.4 (the frame label has a basis). Every other file and column unchanged |
 | New in v0.10 | **Speech inside speech.** The Greek speaker layer had one level only, so a parable's people, a cited psalm and an angel whose words Paul reports carried the outer quotation, its speaker and its hearers. `speech.parquet` now takes the quotations inside quotations of the Greek clause layout v0.8 and their hearers from bcv-commons/addressees v0.4 (new columns `quote_level`, `quote_around`; `quote`, `speaker`, `addressee` and the addressee's number change on the segments inside them, and the layer's number on many others, since the Greek "you" now counts pronouns too); `referents.parquet` and the scheme's `added` table are rebuilt on it; `scheme/clause_join.parquet` has the same rows in a fixed order. Every other file unchanged, `words.parquet` byte for byte |
 | New in v0.9 | The **clause scheme**: `<edition>/scheme/` (clauses, their constituents, unsaid subjects, order statements), `clause-scheme.toml`, `validate_scheme.py`. `speech.parquet`: one quotation mended (Acts 2:14-36 is said to the crowd, bcv-commons/addressees v0.3); `referents.parquet` rebuilt on it. Every other file unchanged, `words.parquet` byte for byte |
 | New in v0.8 | `features.parquet` only, its `stem` column only: fewer, surer stems (hold-out 97.3% → 99.5%); every other file and column unchanged |
@@ -365,7 +366,7 @@ targets end with an entity id (v0.5: 64%); the rest have a chain id.
 The two editions check each other (`editions_agree`): where both have an entity on parts tied to the same Greek word, `linked`
 rows agree in 99.8%, `speech` rows in 91-92% (v0.10; 93-94% before), `model` rows in 73%. A `model` row whose `editions_agree` is false is the first to doubt.
 
-## The clause scheme (v0.9, `scheme/`)
+## The clause scheme (v0.9, frame labels in v0.11; `scheme/`)
 
 One form for the clause level, the same for the Tanakh
 ([bcv-commons/tanakh-clause-scheme](https://huggingface.co/datasets/bcv-commons/tanakh-clause-scheme)) and for each Hebrew New
@@ -394,7 +395,37 @@ source text, an empty token in `words.parquet`).
 
 **Every value has its basis** in `<column>_basis`: `derived` (by a rule from other columns of this dataset), `model` (a tagger,
 with its probability in `<column>_p`), `linked` (through word links to the Greek, for `who` only). No value comes from the Greek
-text except `who` where its basis says `linked`. `frame_role` is empty here (it is MACULA's frame label, filled on the Tanakh).
+text except `who` where its basis says `linked`.
+
+**The frame label** (`frame_role`, from v0.11). MACULA Hebrew labels a verb's arguments `A0`, `A1`, `AA`, `A2`; on the Tanakh
+the label is MACULA's own (basis `given`). Here it is looked up, for a subject, an object and an unsaid subject of a clause
+whose predicate is a verb, in a table that counts the Tanakh's labels per verb and per stem
+([bcv-commons/hebrew-verb-frame-labels](https://huggingface.co/datasets/bcv-commons/hebrew-verb-frame-labels)); a place the
+table does not settle has no label. The stem alone would not do: a niphal's subject is `A1` for one verb and `A0` for another.
+
+- The key is the verb's lexeme with its stem, then with whether the clause has an object, then the stem with the object alone.
+  The lexeme is read only where `words.parquet` has it from MACULA's own words (`source` = `macula`); a lexeme the tagger gave
+  is not trusted to name the verb, and such a place is read by its stem and object only.
+- The stem is that of `features.parquet` (basis `derived`). Where that is empty, the stem a model read for the word is taken
+  if the model called it sure ([bcv-commons/hebrew-nt-verb-stems-model](https://huggingface.co/datasets/bcv-commons/hebrew-nt-verb-stems-model),
+  Claude Opus 5.5, no human check); the label then has basis `model`. `features.parquet` itself is not changed.
+- `frame_role_p` is the share of the Tanakh's places under that key that carry the label.
+
+| Of the clauses with a verb as predicate | `heb_scg` | `heb_mod` |
+|---|---|---|
+| subjects with a label | @SCG_FRAME_S@ | @MOD_FRAME_S@ |
+| objects with a label | @SCG_FRAME_O@ | @MOD_FRAME_O@ |
+| unsaid subjects with a label | @SCG_FRAME_UNSAID@ | @MOD_FRAME_UNSAID@ |
+| of these on a stem a model read (subjects / objects / unsaid) | @SCG_FRAME_S_MODEL@ / @SCG_FRAME_O_MODEL@ / @SCG_FRAME_UNSAID_MODEL@ | @MOD_FRAME_S_MODEL@ / @MOD_FRAME_O_MODEL@ / @MOD_FRAME_UNSAID_MODEL@ |
+
+How right: on the Tanakh's test chapters read as the New Testament is read, with a table built without those chapters and
+with MACULA's own lexeme and stem, a label given is MACULA's label for that argument in @SCG_FRAME_S_RIGHT@ (subjects),
+@SCG_FRAME_O_RIGHT@ (objects) and @SCG_FRAME_UNSAID_RIGHT@ (unsaid subjects) of the cases with points, and @MOD_FRAME_S_RIGHT@, @MOD_FRAME_O_RIGHT@,
+@MOD_FRAME_UNSAID_RIGHT@ without. Nearly all of the loss is the role: where MACULA has that argument with a label, the label is the same
+in @SCG_FRAME_S_RIGHT_ROLE@, @SCG_FRAME_O_RIGHT_ROLE@ and @SCG_FRAME_UNSAID_RIGHT_ROLE@ (@MOD_FRAME_S_RIGHT_ROLE@, @MOD_FRAME_O_RIGHT_ROLE@, @MOD_FRAME_UNSAID_RIGHT_ROLE@). On the New Testament two more losses come on top and are
+not in these figures: a wrong stem (the model's stems agree with the stems of `features.parquet`, where both exist, in 99.0%
+of the sure readings in `heb_scg` and 93.4% in `heb_mod`) and a wrong lexeme. In MACULA's practice the hiphil's label follows
+the clause (subject `AA` and object `A0` where the clause has an object), so there it says little beyond that.
 
 - `clauses`: `parent` and `depth`; `rule` (the clause's roles in order, as MACULA names clause rules) and `pattern`; `pred`, the
   predicate's word, and `pred_kind` (`v` verb, `p` nominal predicate, `none`); the marks `kind`, `force`, `polarity`, `mood`,
@@ -403,9 +434,9 @@ text except `who` where its basis says `linked`. `frame_role` is empty here (it 
   Ten marks are those of `clause_marks.parquet`, taken from the clause's first segment; `kind`, `pattern`, `fronted`,
   `subject_form`, `neg_scope` are derived from the constituents; `transitivity`, `line_kind`, `subject_switch` are a tagger's.
 - `constituents`: the clause's own parts of speech in order (`ord`): `role` (`v`, `s`, `o`, `o2`, `p`, `pp`, `adv`), `head`,
-  `first`, `last`, `class`, `prep` (the preposition's lexeme), `sem_role`, `ref_status`, `ref_form`. Derived from the tree of
+  `first`, `last`, `class`, `prep` (the preposition's lexeme), `frame_role`, `sem_role`, `ref_status`, `ref_form`. Derived from the tree of
   `pieces.parquet` (head and relation per part), which is model output.
-- `added`: a finite verb with no subject said in its clause: `verb`, `person`, `number`, `gender`, `antecedent` (the part that
+- `added`: a finite verb with no subject said in its clause: `verb`, `frame_role`, `person`, `number`, `gender`, `antecedent` (the part that
   names the subject earlier, from `referents.parquet`), `who` with `who_basis` and `who_reason` (`linked`, `speech`, `model`,
   `model_new`). Unsaid objects and possessors are not made.
 - `orders`: for each tree relation between two word classes, how often the dependent stands before and after its head in this

@@ -15,6 +15,9 @@ What is new: the scheme model (clause_scheme.py scheme-train, a copy of the seco
 segment) gives `continues`, the role of a clause's head, and the marks `transitivity`, `line_kind`, `subject_switch`;
 the rules of clause_scheme.py give the constituents and the marks `kind`, `pattern`, `fronted`, `subject_form`,
 `neg_scope`.
+The frame label (`frame_role`) of a subject, an object and an unsaid subject is looked up in the Tanakh's own labels
+(macula/build_frame_labels.py `Labeller`: the verb's lexeme where MACULA's own words give it, its stem from the features
+or, where they have none, from the model's sure readings in data/hebrew-nt-verb-stems-model; no settled row, no label).
 
 Written per edition into data/clause-scheme/nt/<edition>/: clauses, segments, constituents, added, orders,
 clause_join (.parquet, the scheme's columns), VALIDATION.json (validate_scheme.py) and BUILD.json (counts).
@@ -41,6 +44,7 @@ import pyarrow.compute as pc
 import pyarrow.parquet as pq
 
 from macula import clause_scheme as CS
+from macula.build_frame_labels import Labeller
 from macula.build_text_ids import NUMBER as CS_BOOK, TEXTS, wid
 
 HERE = Path(__file__).resolve().parent
@@ -108,7 +112,7 @@ def load(ed, books):
             words.append({"i": i, "text": norm(parts[0]["word"]) or parts[0]["word"], "shown": parts[0]["word"],
                           "form": next((p["form"] for p in parts if p["form"]), None),
                           "parts": [{"text": norm(p["text"]) or p["text"], "class": p["class"], "lexeme": p["lexeme"] or "",
-                                     "part": p["part"], "shown": p["text"]} for p in parts]})
+                                     "part": p["part"], "shown": p["text"], "source": p["source"]} for p in parts]})
         tree = []
         for (i, part), k in flat.items():
             r = piece.get(vk + (i, part))
@@ -148,6 +152,7 @@ def build(ed, books, out):
     feat = {(r["book"], r["chapter"], r["verse"], r["i"], r["part"]): r for r in rows_of(FEATURES / ed / "features.parquet", books)}
     refs = {(r["book"], r["chapter"], r["verse"], r["i"], r["part"]): r for r in rows_of(REFERENTS / ed / "referents.parquet", books)
             if r["target"] == "verb"}
+    frames = Labeller(ed)                                            # the frame label of a subject and an object
     out_c, out_s, out_k, out_a = [], [], [], []
     with_row = set()                                                 # verbs that have their unsaid subject
     word_clause, og = {}, collections.defaultdict(lambda: ([], []))
@@ -211,6 +216,20 @@ def build(ed, books, out):
                 last = sg["seg"]
                 out_s.append(r)
             has_s = any(r["role"] == "s" for r in c["rows"])
+            has_o = any(r["role"] in ("o", "o2") for r in c["rows"])
+            vr = next((r for r in c["rows"] if r["role"] == "v" and tree.parts[r["part"]]["cls"] == "verb"), None)
+            if vr is not None:                                       # the clause's verb: its word, lexeme and stem
+                vw = v["words"][vr["part"][0]]
+                vp = vw["parts"][vr["part"][1]]
+                verb = (W(vr["head"]), vp["lexeme"], vp["source"], feat.get((b, ch, vs, vw["i"], vp["part"]), {}).get("stem"))
+
+            def frame(role):
+                """(label, basis, share) from the Tanakh's table (macula/build_frame_labels.py), or nothing"""
+                if vr is None:
+                    return None, None, None
+                got, basis, share, step = frames.label(*verb, role, has_o)
+                n[f"frame label {role}: {step if got is None else basis + ', ' + step}"] += 1
+                return got, basis, share
             for o, r in enumerate(c["rows"], 1):
                 hp = tree.parts[r["part"]]
                 hw = v["words"][r["part"][0]]
@@ -230,6 +249,8 @@ def build(ed, books, out):
                      "class": r["cls"] if r["cls"] in CLASSES else None,
                      "prep": LEX.get(strong), "frame_role": None, "sem_role": val(pr.get("sem_role")),
                      "ref_status": val(pr.get("ref_status")), "ref_form": None}
+                if r["role"] in ("s", "o", "o2"):
+                    k["frame_role"], k["frame_role_basis"], k["frame_role_p"] = frame("s" if r["role"] == "s" else "o")
                 if k["sem_role"]:
                     k["sem_role_basis"], k["sem_role_p"] = "model", pr.get("sem_role_p")
                 if k["ref_status"]:
@@ -253,6 +274,8 @@ def build(ed, books, out):
                          "where": "none", "form": "ending", "person": PERSON.get(f.get("person")),
                          "number": NUMBER.get(f.get("number")), "gender": GENDER.get(f.get("gender")),
                          "antecedent": None, "who": None, "who_reason": None}
+                    if vr is not None and r["part"] == vr["part"]:
+                        a["frame_role"], a["frame_role_basis"], a["frame_role_p"] = frame("s")
                     if rf is not None:
                         if rf["antecedent_i"] is not None and rf["antecedent_verse"]:
                             ac, av = (int(x) for x in rf["antecedent_verse"].split(":"))
