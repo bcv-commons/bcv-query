@@ -61,6 +61,7 @@ FEAT = ("type", "stem", "person", "number", "gender", "state", "definite")
 SOFT = {"gender": ("", "c", "b"), "person": ("", "x"), "state": ("",)}    # values that go with any other value
 MIN_SURE, DEFAULT_SURE, PER_CHANGE = 0.8, 0.9, 30                    # a place's sureness; the default spread per change
 NEGATOR = "3808"
+NOUN_MIN, NOUN_SHARE = 3, 0.6                                        # a donor noun: the kind in 3 places and 6 of 10
 NOT_READ = ("line_kind", "subject_switch", "relation", "transitivity", "head_role", "continues")
 
 
@@ -320,6 +321,7 @@ class Donors:
             last[(w["book"], w["chapter"], w["verse"])] = t
         self.last = set(last.values())
         self.noun_count = collections.Counter()                      # (kind, Strong) -> places
+        self.noun_places = collections.Counter()                     # Strong -> places with a kind
         for t, parts in S.parts.items():
             ps = bare(parts)
             if not ps or not all(p["known"] for p in ps):            # a donor is a form the Tanakh has
@@ -335,6 +337,7 @@ class Donors:
                 kind = E.kind.get(ps[k]["key"])
                 if kind:
                     self.noun_count[(kind, PD.strong(ps[k]["lexeme"]))] += 1
+                    self.noun_places[PD.strong(ps[k]["lexeme"])] += 1
                     self.nouns[self.noun_key(parts, k)].append((t, kind, PD.strong(ps[k]["lexeme"]), ps[k]["gender"]))
 
     @staticmethod
@@ -369,13 +372,18 @@ class Donors:
                 fit += [t for t in ts if t != t0]
         return self.best(fit, t0) if fit else None
 
+    def steady(self, kind, lex):
+        """the noun has this kind in most of its places (a kind is read off the Greek word at one place, and is wrong
+        at times: a donor must be a noun that is of the kind as a word)"""
+        return self.noun_count[(kind, lex)] >= NOUN_MIN and self.noun_count[(kind, lex)] >= NOUN_SHARE * self.noun_places[lex]
+
     def noun(self, t0, k, kind, keep_gender, turn):
         """a noun of that kind in the same form; among the kind's five commonest that fit, the one `turn` picks"""
         g0 = bare(self.E.S.parts[t0])[k]["gender"]
         own = PD.strong(bare(self.E.S.parts[t0])[k]["lexeme"])
         by = collections.defaultdict(list)
         for t, kd, lex, g in self.nouns.get(self.noun_key(self.E.S.parts[t0], k), ()):
-            if kd == kind and lex != own and (not keep_gender or g == g0 or g in SOFT["gender"] or g0 in SOFT["gender"]):
+            if kd == kind and lex != own and self.steady(kind, lex) and (not keep_gender or g == g0 or g in SOFT["gender"] or g0 in SOFT["gender"]):
                 by[lex].append(t)
         if not by:
             return None
@@ -732,14 +740,21 @@ def show(ids, form):
 
 # ---------------------------------------------------------------- commands
 def build_pairs(editions):
-    pin = {"analysis": "hebrew-nt-analysis v0.8 tables (words, features, tree)", "scheme": "clause scheme 0.3", "sha256": {}}
+    from macula.build_text_ids import NUMBER
+    pin = {"analysis": "hebrew-nt-analysis v0.8 tables (words, features, tree)", "scheme": "clause scheme 0.3",
+           "books": {b: n for b, n in NUMBER.items() if 40 <= n <= 66}, "sha256": {}}
     for ed in editions:
         E = Edition(ed)
         rows, checks = pairs(E)
         write(OUT / ed / "pairs.parquet", rows, PAIRS)
-        named = sorted({c for r in rows for c in (r["a"], r["b"])})
-        write(OUT / ed / "clauses.parquet", [E.clause_row(c) for c in named], CLAUSES)
-        (OUT / ed / "CHECKS.json").write_text(json.dumps({"pairs": checks}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        named = {c for r in rows for c in (r["a"], r["b"])}            # with the clauses the made probes name, as they stand
+        if (OUT / ed / "probes.parquet").exists():
+            named |= set(pq.read_table(OUT / ed / "probes.parquet", columns=["clause"]).column("clause").to_pylist())
+        write(OUT / ed / "clauses.parquet", [E.clause_row(c) for c in sorted(named)], CLAUSES)
+        path = OUT / ed / "CHECKS.json"
+        both = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+        both["pairs"] = checks
+        path.write_text(json.dumps(both, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         from macula import hebrew_nt_clauses as N
         pin["sha256"][ed] = {"words.parquet": hashlib.sha256((N.ANALYSIS / ed / "words.parquet").read_bytes()).hexdigest()}
         print(ed, json.dumps(checks, ensure_ascii=False, indent=1))

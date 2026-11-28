@@ -10,8 +10,8 @@
 #              drop_negator | add_negator | drop_subject | add_pronoun | move_subject: done by the code
 #   slot       what the part bears in its clause (verb, subject, object, pp, possessor); part: stem | suffix
 #   feature, values   the feature changed and the values it moves between
-#   free       features of the same part that may come out differently (a form that has no gender, a participle that
-#              has no person)
+#   free       features of the same part that may come out differently (a form of common gender or with none goes
+#              with any gender without being named here)
 #   agree      bearers whose word must take the same new value (their donors are found the same way)
 #   place      clause marks the place must have (mark = the values allowed)
 #   needs      one_word: the constituent is one word with nothing agreeing inside it; finite: the clause's verb is finite
@@ -76,7 +76,7 @@ slot = "verb"
 part = "stem"
 feature = "type"
 values = ["qatal", "yiqtol", "participle_active", "imperative", "wayyiqtol", "weqatal"]
-free = ["gender", "state"]
+free = ["state"]
 may = ["time", "time_abs", "aspect", "mood", "force", "kind", "pred_kind", "pattern", "fronted", "subject_form", "connective"]
 moves = [6]
 
